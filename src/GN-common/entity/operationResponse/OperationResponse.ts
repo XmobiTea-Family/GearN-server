@@ -33,6 +33,11 @@ export class OperationResponse {
 		return this;
 	}
 
+	public setParameters(parameters: GNHashtable): OperationResponse {
+		this.parameters = parameters;
+		return this;
+	}
+
 	public toString(): string {
 		return this.operationCode + " " + this.responseId + " " + this.parameters.toString();
 	}
@@ -82,10 +87,10 @@ export class OperationResponse {
 	}
 
 	public toSocketData(): [number, any, number] {
-		return [this.returnCode, this.returnCode == 0 ? (this.parameters == null ? null : this.parameters.toData()) : this.debugMessage, this.responseId];
+		return [this.returnCode, this.returnCode == 0 ? this.parameters.toData() : this.debugMessage, this.responseId];
 	}
 
 	public toHttpData(): [number, any] {
-		return [this.returnCode, this.returnCode == 0 ? (this.parameters == null ? null : this.parameters.toData()) : this.debugMessage];
+		return [this.returnCode, this.returnCode == 0 ? this.parameters.toData() : this.debugMessage];
 	}
 }

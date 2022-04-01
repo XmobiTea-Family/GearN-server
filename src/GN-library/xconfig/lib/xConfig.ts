@@ -5,7 +5,7 @@ export class xConfig {
 	private configDic: { [k: string]: xConfigItem } = {};
 	private configCollection: mongoDB.Collection<mongoDB.Document>;
 
-	public init(configCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setConfigCollection(configCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.configCollection = configCollection;
 	}
 

@@ -5,17 +5,35 @@ const REQUEST_CMD = "";
 const RESPONSE_CMD = "r";
 const EVENT_CMD = "e";
 
-import { Server, Socket } from "socket.io/dist";
+import { Server, Socket } from "socket.io";
 import { Request } from "./../../GN-common/entity/operationRequest/base/Request";
 import { OperationEvent } from "./../../GN-common/entity/operationEvent/OperationEvent";
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
-import { AppHandlerBase } from "./AppHandlerBase";
 
-export class SocketAppHandler extends AppHandlerBase {
+interface OnSocketDisconnect {
+	(socket: Socket, data: string): void;
+}
+
+interface OnSocketRequest {
+	(request: Request): Promise<OperationResponse>;
+}
+
+export class SocketAppHandler {
+	private _onDisconnectCb: OnSocketDisconnect;
+	private _onRequestCb: OnSocketRequest;
+
 	private server: Server;
 
 	public setServer(server: Server): void {
 		this.server = server;
+	}
+
+	public setOnSocketRequest(_onRequestCb: OnSocketRequest) {
+		this._onRequestCb = _onRequestCb;
+	}
+
+	public setOnSocketDisconnect(_onDisconnectCb: OnSocketDisconnect) {
+		this._onDisconnectCb = _onDisconnectCb;
 	}
 
 	public run(): void {
@@ -78,25 +96,40 @@ export class SocketAppHandler extends AppHandlerBase {
 		let params = data.length > 1 ? (data[1] as {}) : {};
 		let requestId = data.length > 2 ? (data[2] as number) : -1;
 
-		try {
-			let request = new Request(code);
-			request.setIP(socketAny.IPAddress);
-			request.setParameters(params);
-			request.setRequestId(requestId);
+		let request = new Request(code);
+		request.setIP(socketAny.IPAddress);
+		request.setParameters(params);
+		request.setRequestId(requestId);
 
-			if (socketAny.isAuthenticated) request.setAuthenticate(socketAny.authInfo);
+		if (socketAny.isAuthenticated) request.setAuthenticate(socketAny.authInfo);
 
-			let operationResponse = await this.gameApplication.getRequestController().handleRequest(request);
+		if (this._onRequestCb != null) {
+			let operationResponse = await this._onRequestCb(request);
+
 			if (operationResponse != null) {
 				socketAny.sendResponse(operationResponse);
 			}
-		} catch (err) {
-			let operationResponse = OperationResponse.newOperationInternalServerError(code, requestId, err.toString());
-			socketAny.sendResponse(operationResponse);
 		}
+
+		// try {
+		// 	let request = new Request(code);
+		// 	request.setIP(socketAny.IPAddress);
+		// 	request.setParameters(params);
+		// 	request.setRequestId(requestId);
+
+		// 	if (socketAny.isAuthenticated) request.setAuthenticate(socketAny.authInfo);
+
+		// 	let operationResponse = await this.gameApplication.getRequestController().handleRequest(request);
+		// 	if (operationResponse != null) {
+		// 		socketAny.sendResponse(operationResponse);
+		// 	}
+		// } catch (err) {
+		// 	let operationResponse = OperationResponse.newOperationInternalServerError(code, requestId, err.toString());
+		// 	socketAny.sendResponse(operationResponse);
+		// }
 	}
 
 	private async onSocketDisconnect(socket: Socket, data: string) {
-		this.gameApplication.handleSocketDisconnect(socket, data);
+		if (this._onDisconnectCb != null) await this._onDisconnectCb(socket, data);
 	}
 }

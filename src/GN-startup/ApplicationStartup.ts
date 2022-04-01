@@ -2,8 +2,11 @@ import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { HttpAppSettings } from "./settings/HttpAppSettings";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { ServerApplication } from "./ServerApplication";
+import { GameApplication } from "../GameApplication";
 
 export class ApplicationStartup {
+	private serverApplication: ServerApplication;
+
 	public run(): void {
 		let applicationSettings = ApplicationSettings.Builder().setPort(2202).build();
 
@@ -11,7 +14,7 @@ export class ApplicationStartup {
 
 		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).build();
 
-		let serverApplication = ServerApplication.Builder()
+		this.serverApplication = ServerApplication.Builder()
 			.setApplicationSettings(applicationSettings)
 			.setHttpAppSettings(httpAppSettings)
 			.setSocketAppSettings(socketAppSettings)
@@ -19,8 +22,12 @@ export class ApplicationStartup {
 
 		console.log("GN Server init");
 
-		serverApplication.run((port) => {
+		this.serverApplication.run((port) => {
 			console.log("GN Server is running on port " + port);
 		});
+	}
+
+	public getGameApplication(): GameApplication {
+		return this.serverApplication.getGameApplication();
 	}
 }

@@ -64,7 +64,7 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
-	public setOtherData(key: string, value: object): Builder {
+	public setOtherData(key: string, value: any): Builder {
 		this.otherDatas[key] = value;
 		return this as Builder;
 	}
@@ -74,7 +74,7 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
-	public getOtherData(key: string): object {
+	public getOtherData(key: string): any {
 		return this.otherDatas[key];
 	}
 

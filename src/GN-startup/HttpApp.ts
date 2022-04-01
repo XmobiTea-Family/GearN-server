@@ -4,16 +4,30 @@ import { HttpAppHandler } from "./routes/HttpAppHandler";
 import cors from "cors";
 import express from "express";
 import { Express } from "express";
-import { GameApplication } from "./../GameApplication";
 import { ReturnCode } from "./../GN-common/constant/ReturnCode";
 import bodyParser from "body-parser-with-msgpack";
+import { ApiMiddleware } from "./middleware/ApiMiddleware";
 
 export class HttpApp {
 	private appSettings: HttpAppSettings;
 	private app: Express;
+	private httpAppHandler: HttpAppHandler;
+	private apiMiddleware: ApiMiddleware;
 
 	public setApp(app: Express): void {
 		this.app = app;
+	}
+
+	public getApp(): Express {
+		return this.app;
+	}
+
+	public getHttpAppHandler(): HttpAppHandler {
+		return this.httpAppHandler;
+	}
+
+	public getApiMiddleware(): ApiMiddleware {
+		return this.apiMiddleware;
 	}
 
 	public setAppSettings(appSettings: HttpAppSettings): void {
@@ -34,6 +48,10 @@ export class HttpApp {
 			return res.sendStatus(200);
 		});
 
+		this.app.get("/ts", (req: express.Request, res: express.Response) => {
+			return res.json([ReturnCode.Ok, new Date().getTime()]);
+		});
+
 		this.app.get("/", (req: express.Request, res: express.Response) => {
 			return res.sendStatus(403);
 		});
@@ -51,18 +69,15 @@ export class HttpApp {
 			})
 		);
 
+		this.apiMiddleware = new ApiMiddleware();
+		this.apiMiddleware.run();
+
+		this.httpAppHandler = new HttpAppHandler();
+		this.httpAppHandler.setRouter(this.app);
+		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
+
 		if (this.appSettings.getEnable()) {
-			let gameApplication = GameApplication.getInstance();
-
-			let httpAppHandler = new HttpAppHandler();
-			httpAppHandler.setRouter(this.app);
-			httpAppHandler.setGameApplication(gameApplication);
-
-			httpAppHandler.run();
-
-			// this.app.get('/ahihi', (req, res) => {
-			//     res.send('GN Server - ahihi');
-			// });
+			this.httpAppHandler.run();
 		}
 	}
 

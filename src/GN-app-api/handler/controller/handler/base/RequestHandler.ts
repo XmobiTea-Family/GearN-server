@@ -1,17 +1,22 @@
 import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { IRequestHandler } from "./IRequestHandler";
+import { IRequestHandler, PostHandle } from "./IRequestHandler";
 
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { GameApplication } from "./../../../../../GameApplication";
 
 export abstract class RequestHandler implements IRequestHandler {
 	protected gameApplication: GameApplication;
+	protected postHandle: PostHandle;
 
 	public abstract getCode(): number;
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		return null;
+	}
+
+	public setPostHandle(postHandle: PostHandle) {
+		this.postHandle = postHandle;
 	}
 
 	protected newInvalidRequestParameters(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {

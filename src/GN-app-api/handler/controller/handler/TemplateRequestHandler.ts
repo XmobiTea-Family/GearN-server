@@ -42,6 +42,10 @@ export class TemplateRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(DebugParameterCode.Boolean, request.booleanValue);
 
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, request, operationResponse, []);
+		}
+
 		return operationResponse;
 	}
 }

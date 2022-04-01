@@ -12,7 +12,7 @@ export class ApiMiddleware {
 
 	private authTokenCollection: mongoDB.Collection<mongoDB.Document>;
 
-	public init(authTokenCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setAuthTokenCollection(authTokenCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.authTokenCollection = authTokenCollection;
 	}
 

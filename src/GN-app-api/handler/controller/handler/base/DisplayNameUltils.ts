@@ -1,3 +1,7 @@
+const RandomCharacter = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+import { xRandom } from "../../../../../GN-library/xrandom/lib/xRandom";
+
 export class DisplayNameUltils {
 	public static normalizeString(input: string): string {
 		if (!input) return "";
@@ -99,5 +103,15 @@ export class DisplayNameUltils {
 		}
 
 		return inputReturn;
+	}
+
+	public static generateRandomString(length: number): string {
+		let nameReturn = "";
+
+		while (nameReturn.length < length) {
+			nameReturn += RandomCharacter[xRandom.randomInt(0, RandomCharacter.length)];
+		}
+
+		return nameReturn;
 	}
 }

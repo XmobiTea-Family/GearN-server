@@ -1,3 +1,3 @@
 export class GetAppConfigErrorCode {
-	public static readonly Ok = 1;
+	public static readonly Ok: number = 1;
 }

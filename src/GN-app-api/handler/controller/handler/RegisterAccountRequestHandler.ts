@@ -1,0 +1,66 @@
+import { OperationRequest } from "./../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../GN-common/constant/OperationCode";
+
+import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
+import { LoginParameterCode } from "../../../../GN-common/constant/parameterCode/LoginParameterCode";
+import { LoginErrorCode } from "../../../../GN-common/constant/errorCode/LoginErrorCode";
+import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandler";
+
+import bcrypt from "bcrypt";
+
+class RegisterAccountOperationRequest extends OperationRequest {
+	username: string;
+	password: string;
+
+	constructor(operationRequest: OperationRequest) {
+		super(operationRequest);
+
+		this.username = this.parameters.getString(LoginParameterCode.Username);
+		this.password = this.parameters.getString(LoginParameterCode.Password);
+	}
+
+	public isValidRequest() {
+		if (!this.username) return false;
+		if (!this.password) return false;
+
+		return true;
+	}
+}
+
+export class RegisterAccountRequestHandler extends LoginRequestHandler {
+	public getCode() {
+		return OperationCode.RegisterAccount;
+	}
+
+	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = new RegisterAccountOperationRequest(operationRequest);
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		let username = request.username.toLowerCase();
+		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByUsername(username);
+
+		if (sparkPlayer) {
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			operationResponse.setReturnCode(ReturnCode.Ok);
+			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesExists);
+
+			return operationResponse;
+		}
+
+		let password = request.password;
+		let passwordHash = await bcrypt.hash(password, 10);
+
+		sparkPlayer = await this.gameApplication
+			.getDatabase()
+			.createPlayerByUsernameAndPassword(username, passwordHash, this.DefaultSegments, request.getOriginRequest().getIP());
+		if (!sparkPlayer) return this.newOperationInternalServerError(request);
+
+		return await this.onAuthenticationResponse(authInfo, request as LoginOperationRequest, sparkPlayer);
+	}
+}

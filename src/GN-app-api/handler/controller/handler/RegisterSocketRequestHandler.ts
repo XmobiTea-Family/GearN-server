@@ -43,16 +43,25 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setParameter(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
 
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, operationRequest, operationResponse, []);
+		}
+
 		return operationResponse;
 	}
 
 	private setAuthInfoSocket(sid: string, authInfo: AuthInfo): void {
-		// let socket = io.of('/').sockets.get(sid);
-		// if (socket) {
-		//     socket.authInfo = authInfo;
-		//     socket.isAuthenticated = true;
-		//     socket.userId = authInfo.UserId;
-		//     socket.join(socket.userId);
-		// }
+		let socket = this.gameApplication.getSocketApp().getIO().of('/').sockets.get(sid);
+		if (socket) {
+            authInfo.setOtherData("SocketId", sid);
+
+            let socketAny = socket as any;
+		    socketAny.authInfo = authInfo;
+		    socketAny.isAuthenticated = true;
+
+            let userId = authInfo.getUserId();
+		    socketAny.userId = userId;
+		    socket.join(userId);
+		}
 	}
 }

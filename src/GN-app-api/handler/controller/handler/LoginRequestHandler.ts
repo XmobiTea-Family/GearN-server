@@ -17,9 +17,7 @@ import { xGamePlayer } from "./../../../../GN-library/xdatabase/lib/entity/xGame
 
 import bcrypt from "bcrypt";
 
-const DefaultSegments = { UserRole: UserRoleType.UserNonActivate };
-
-class LoginOperationRequest extends OperationRequest {
+export class LoginOperationRequest extends OperationRequest {
 	loginType: number;
 	username: string;
 	password: string;
@@ -104,6 +102,8 @@ class LoginOperationRequest extends OperationRequest {
 }
 
 export class LoginRequestHandler extends RequestHandler {
+	protected DefaultSegments = { UserRole: UserRoleType.UserNonActivate };
+
 	public getCode() {
 		return OperationCode.Login;
 	}
@@ -169,7 +169,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByDeviceInfo(deviceInfo);
 		if (!sparkPlayer) {
-			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByDeviceInfo(deviceInfo, DefaultSegments, request.getOriginRequest().getIP());
+			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByDeviceInfo(deviceInfo, this.DefaultSegments, request.getOriginRequest().getIP());
 		}
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
@@ -226,7 +226,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByPublicAddress(publicAddress);
 		if (!sparkPlayer) {
-			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByPublicAddress(publicAddress, DefaultSegments, request.getOriginRequest().getIP());
+			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByPublicAddress(publicAddress, this.DefaultSegments, request.getOriginRequest().getIP());
 		}
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
@@ -237,13 +237,13 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByCustomId(customId);
 		if (!sparkPlayer) {
-			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByCustomId(customId, DefaultSegments, request.getOriginRequest().getIP());
+			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByCustomId(customId, this.DefaultSegments, request.getOriginRequest().getIP());
 		}
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
 	}
 
-	private async onAuthenticationResponse(authInfo: AuthInfo, request: LoginOperationRequest, sparkPlayer: xSparkPlayer): Promise<OperationResponse> {
+	protected async onAuthenticationResponse(authInfo: AuthInfo, request: LoginOperationRequest, sparkPlayer: xSparkPlayer): Promise<OperationResponse> {
 		sparkPlayer.updateTsLastSeen();
 
 		let currentMillisecond = xDatetime.getCurrentMilliseconds();
@@ -278,16 +278,16 @@ export class LoginRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		let oldAuthInfo = this.gameApplication.getApiMiddleware().getAuthInfoByUserId(userId);
+		let oldAuthInfo = this.gameApplication.getHttpApp().getApiMiddleware().getAuthInfoByUserId(userId);
 
 		if (oldAuthInfo) {
 			oldAuthInfo.setOtherUserLogin(true);
-			this.gameApplication.getApiMiddleware().updateAuthInfo(oldAuthInfo);
+			this.gameApplication.getHttpApp().getApiMiddleware().updateAuthInfo(oldAuthInfo);
 			// Remove cái này đi
 		}
 
 		let newAuth = AuthInfo.Builder().setUserId(userId).setRole(gamePlayer.getSegmentValue("UserRole")).build();
-		let newAuthInfo = this.gameApplication.getApiMiddleware().generateAuthToken(newAuth);
+		let newAuthInfo = this.gameApplication.getHttpApp().getApiMiddleware().generateAuthToken(newAuth);
 
 		if (oldAuthInfo) {
 			let roomId = oldAuthInfo.getOtherData("RoomId");
@@ -336,7 +336,7 @@ export class LoginRequestHandler extends RequestHandler {
 		let facebookId = loginOperationRequest.facebookId;
 		let email = loginOperationRequest.facebookEmail;
 
-		let sparkPlayer = await this.gameApplication.getDatabase().createPlayerByFacebookId(facebookId, DefaultSegments, request.getOriginRequest().getIP(), email);
+		let sparkPlayer = await this.gameApplication.getDatabase().createPlayerByFacebookId(facebookId, this.DefaultSegments, request.getOriginRequest().getIP(), email);
 
 		if (!sparkPlayer) {
 			return this.newOperationInternalServerError(request);
@@ -398,6 +398,10 @@ export class LoginRequestHandler extends RequestHandler {
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.Ok);
 		operationResponse.setParameter(ParameterCode.AuthToken, authInfo.getAuthToken());
+
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, request, operationResponse, [gamePlayer, sparkPlayer]);
+		}
 
 		return operationResponse;
 	}

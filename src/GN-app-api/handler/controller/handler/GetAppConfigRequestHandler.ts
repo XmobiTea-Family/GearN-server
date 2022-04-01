@@ -65,6 +65,10 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 
 		if (configNotUptodateLst.length != 0) operationResponse.setParameter(GetAppConfigParameterCode.ConfigNotUptodateLst, configNotUptodateLst);
 
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, operationRequest, operationResponse, []);
+		}
+
 		return operationResponse;
 	}
 }

@@ -2,28 +2,39 @@ import { wrap } from "async-middleware";
 import { Router } from "express";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { Request } from "./../../GN-common/entity/operationRequest/base/Request";
-import { AppHandlerBase } from "./AppHandlerBase";
 import express from "express";
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
+import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 
-export class HttpAppHandler extends AppHandlerBase {
+interface OnHttpRequest {
+	(request: Request): Promise<OperationResponse>;
+}
+
+export class HttpAppHandler {
+	private _onRequestCb: OnHttpRequest;
+	private apiMiddleware: ApiMiddleware;
+	
 	private router: Router;
 
 	public setRouter(router: Router): void {
 		this.router = router;
 	}
 
-	public run(): void {
-		this.router.get('/ts', (req: express.Request, res: express.Response) => {
-		    return res.json([ReturnCode.Ok, new Date().getTime()]);
-		});
+	public setApiMiddleware(apiMiddleware: ApiMiddleware): void {
+		this.apiMiddleware = apiMiddleware;
+	}
 
+	public setOnHttpRequest(_onRequestCb: OnHttpRequest) {
+		this._onRequestCb = _onRequestCb;
+	}
+
+	public run(): void {
 		this.router.get('/getConfig', (req: express.Request, res: express.Response) => {
 		    return res.json([ReturnCode.Ok, new Date().getTime()]);
 		});
 
 		let router2 = express.Router();
-		this.router.use("/api", wrap(this.gameApplication.getApiMiddleware().authenticateToken), router2);
+		this.router.use("/api", wrap(this.apiMiddleware.authenticateToken), router2);
 
 		router2.post("/:code", async (req: express.Request, res: express.Response) => {
 			let operationResponse = await this.onHttpRequest(req);
@@ -40,7 +51,7 @@ export class HttpAppHandler extends AppHandlerBase {
 
 	private async onHttpRequest(req: express.Request): Promise<OperationResponse> {
 		let code = Number.parseInt(req.params.code);
-		let operationResponse = new OperationResponse(code, ReturnCode.Ok);
+		let operationResponse = new OperationResponse(code, 0);
 
 		let body = req.body;
 		// let id = body.i;
@@ -72,7 +83,13 @@ export class HttpAppHandler extends AppHandlerBase {
 
 		console.log("[RECV] %O", request);
 
-		operationResponse = await this.gameApplication.getRequestController().handleRequest(request);
+		if (this._onRequestCb != null) {
+			operationResponse = await this._onRequestCb(request);
+		}
+		else {
+			operationResponse.setReturnCode(ReturnCode.InternalServerError);
+		}
+		
 		return operationResponse;
 	}
 }

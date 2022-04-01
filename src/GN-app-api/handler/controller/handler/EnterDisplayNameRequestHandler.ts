@@ -73,6 +73,10 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 			operationResponse.setParameter(EnterDisplayNameParameterCode.DisplayName, gamePlayer.getSegmentValue("UserRole"));
 		}
 
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, operationRequest, operationResponse, [gamePlayer]);
+		}
+
 		return operationResponse;
 	}
 }

@@ -11,6 +11,7 @@ import { Express } from "express";
 import http from "http";
 import https from "https";
 import fs from "fs";
+import { GameApplication } from "../GameApplication";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -67,6 +68,7 @@ interface OnServerRunSuccess {
 export class ServerApplication extends BuilderBase {
 	private httpApp: HttpApp;
 	private socketApp: SocketApp;
+	private gameApplication: GameApplication;
 
 	public run(onServerRunSuccess: OnServerRunSuccess): void {
 		const port = this.applicationSettings.getPort();
@@ -74,23 +76,35 @@ export class ServerApplication extends BuilderBase {
 		const app = express();
 		const server = this.getServer(app, this.getApplicationSettings());
 
-		this.httpApp = this.createHttpApp();
+		this.httpApp = this.newHttpApp();
 		this.httpApp.setAppSettings(this.getHttpAppSettings());
 		this.httpApp.setApp(app);
 		this.httpApp.run();
 
-		this.socketApp = new SocketApp();
+		this.socketApp = this.newSocketApp();
 		this.socketApp.setAppSettings(this.getSocketAppSettings());
 		this.socketApp.setServer(server);
 		this.socketApp.run();
+
+		this.gameApplication = new GameApplication();
+		this.gameApplication.setHttpApp(this.httpApp);
+		this.gameApplication.setSocketApp(this.socketApp);
 
 		server.listen(port, () => {
 			if (onServerRunSuccess != null) onServerRunSuccess(port);
 		});
 	}
 
-	private createHttpApp(): HttpApp {
+	public getGameApplication(): GameApplication {
+		return this.gameApplication;
+	}
+
+	private newHttpApp(): HttpApp {
 		return new HttpApp();
+	}
+
+	private newSocketApp(): SocketApp {
+		return new SocketApp();
 	}
 
 	private getServer(app: Express, settings: ApplicationSettings): http.Server {
