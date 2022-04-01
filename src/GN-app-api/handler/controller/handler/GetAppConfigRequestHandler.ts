@@ -1,0 +1,65 @@
+import { RequestHandler } from "./base/RequestHandler";
+
+import { OperationRequest } from "./../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../GN-common/constant/OperationCode";
+
+import { AuthInfo } from "../../../../GN-common/entity/AuthInfo";
+import { GNArray } from "../../../../GN-common/common/GNData";
+import { GetAppConfigParameterCode } from "../../../../GN-common/constant/parameterCode/GetAppConfigParameterCode";
+
+class GetAppConfigOperationRequest extends OperationRequest {
+	configTypes: GNArray;
+
+	constructor(operationRequest: OperationRequest) {
+		super(operationRequest);
+
+		this.configTypes = this.parameters.getGNArray(GetAppConfigParameterCode.ConfigTypes);
+	}
+
+	public isValidRequest() {
+        if (this.configTypes == null) return false;
+
+		return true;
+	}
+}
+
+export class GetAppConfigRequestHandler extends RequestHandler {
+	public getCode() {
+		return OperationCode.Debug;
+	}
+
+	public handle = async (authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> => {
+		let request = new GetAppConfigOperationRequest(operationRequest);
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+        let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+        let configNotUptodateLst: string[] = [];
+
+        let configGame = this.gameApplication.getConfigGame();
+
+        let configTypes = request.configTypes;
+
+        for (let i = 0; i < configTypes.count(); i++) {
+            let configType = configTypes.getGNArray(i);
+
+            let configName = configType.getString(0);
+            let config = configGame.getConfig(configName);
+    
+            if (config != null) {
+                let configVersion = configType.getNumber(1);
+                if (configVersion < config.getVersion()) {
+                    configNotUptodateLst.push(configName);
+                }
+            }
+        }
+
+        if (configNotUptodateLst.length != 0)
+            operationResponse.setParameter(GetAppConfigParameterCode.ConfigNotUptodateLst, configNotUptodateLst);
+
+		return operationResponse;
+	};
+}

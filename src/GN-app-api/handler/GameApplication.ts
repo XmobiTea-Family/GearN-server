@@ -4,10 +4,12 @@ import { IRequestHandler } from "./controller/handler/base/IRequestHandler";
 import { DebugRequestHandler } from "./controller/handler/DebugRequestHandler";
 import { ApiMiddleware } from "./../../GN-startup/middleware/ApiMiddleware";
 import { Socket } from "socket.io";
+import { xConfig } from "../../GN-library/xconfig/lib/xConfig";
 
 export class GameApplication {
     private requestController: RequestController;
     private apiMiddleware: ApiMiddleware;
+    private configGame: xConfig;
 
     private static instance: GameApplication;
 
@@ -24,7 +26,7 @@ export class GameApplication {
         this.requestController = new RequestController();
         this.apiMiddleware = new ApiMiddleware();
 
-        this.addHandler(new DebugRequestHandler(this));
+        this.requestController.addHandler(new DebugRequestHandler(this));
     }
 
     public getRequestController(): RequestController {
@@ -35,8 +37,8 @@ export class GameApplication {
         return this.apiMiddleware;
     }
 
-    public addHandler(requestHandler: IRequestHandler) {
-        this.requestController.addHandler(requestHandler.getCode(), requestHandler.handle);
+    public getConfigGame(): xConfig {
+        return this.configGame;
     }
 
     public handleSocketDisconnect(socket: Socket, data: string) {}

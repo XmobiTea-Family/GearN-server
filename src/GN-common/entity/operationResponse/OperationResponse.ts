@@ -28,6 +28,11 @@ export class OperationResponse {
 		return this;
 	}
 
+	public setParameter(k: number, value: any): OperationResponse {
+		this.parameters.add(k, value);
+		return this;
+	}
+
 	public toString(): string {
 		return this.operationCode + " " + this.responseId + " " + this.parameters.toString();
 	}
@@ -58,6 +63,15 @@ export class OperationResponse {
 		let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
 		operationInvalid.setReturnCode(ReturnCode.InternalServerError);
+		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
+
+		return operationInvalid;
+	}
+
+	public static newOperationNotAuthorized(operationCode: number, responseId: number, debugMessage?: string): OperationResponse {
+		let operationInvalid = this.newOperationResponse(operationCode, responseId);
+
+		operationInvalid.setReturnCode(ReturnCode.OperationNotAuthorized);
 		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
 
 		return operationInvalid;
