@@ -1,0 +1,7 @@
+src/
+test/
+.editorconfig
+.gitignore
+tsconfig.json
+tsconfig-build.json
+webpack.config.js
