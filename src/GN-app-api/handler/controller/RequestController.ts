@@ -11,20 +11,25 @@ export class RequestController {
 
 	private requestUnAuthenticatedCodes: number[];
 
-	private _addHandler(code: number, handler: (authInfo: AuthInfo, operationRequest: OperationRequest) => Promise<OperationResponse>, onlyAuthenticated: boolean) {
+	private _addHandler(
+		code: number,
+		handler: (authInfo: AuthInfo, operationRequest: OperationRequest) => Promise<OperationResponse>,
+		onlyAuthenticated: boolean
+	) {
 		this.handlers[code] = handler;
 
 		if (!onlyAuthenticated) this.requestUnAuthenticatedCodes.push(code);
 	}
 
 	public addHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
-        this._addHandler(requestHandler.getCode(), requestHandler.handle, onlyAuthenticated);
-    }
+		this._addHandler(requestHandler.getCode(), requestHandler.handle, onlyAuthenticated);
+	}
 
 	public async handleRequest(request: Request): Promise<OperationResponse> {
 		let code = request.getCode();
 		let isAuthenticated = request.getAuthenticated();
-		if (!isAuthenticated) {	// if the user not authentication
+		if (!isAuthenticated) {
+			// if the user not authentication
 			// and this request not in unAthenticated
 			if (this.requestUnAuthenticatedCodes.indexOf(code) == -1) {
 				return OperationResponse.newOperationNotAuthorized(code, request.getRequestId());

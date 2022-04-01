@@ -24,15 +24,3 @@ export class ApplicationStartup {
 		});
 	}
 }
-
-process.on("uncaughtException", (uncaughtException: Error) => {
-	console.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
-});
-
-process.on("uncaughtError", (uncaughtException: Error) => {
-	console.log("Uncaught Error at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
-});
-
-process.on("unhandledRejection", (reason: Error) => {
-	console.log("Unhandled Rejection at: %s - message: %s", reason.stack, reason.message);
-});

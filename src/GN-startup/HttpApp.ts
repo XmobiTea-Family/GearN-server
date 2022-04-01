@@ -4,7 +4,7 @@ import { HttpAppHandler } from "./routes/HttpAppHandler";
 import cors from "cors";
 import express from "express";
 import { Express } from "express";
-import { GameApplication } from "./../GN-app-api/handler/GameApplication";
+import { GameApplication } from "./../GameApplication";
 import { ReturnCode } from "./../GN-common/constant/ReturnCode";
 import bodyParser from "body-parser-with-msgpack";
 

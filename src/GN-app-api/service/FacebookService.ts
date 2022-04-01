@@ -11,10 +11,10 @@ export class FacebookService implements IFacebookService {
 		await axios
 			.get(graphFBAPIUrl + graphFBAPIContentURL + accessToken)
 			.then((response) => {
-				answer.data = response.data;
+				answer = response.data;
 			})
 			.catch((error) => {
-				answer.error = error;
+				answer["error"] = error;
 			});
 
 		return answer;

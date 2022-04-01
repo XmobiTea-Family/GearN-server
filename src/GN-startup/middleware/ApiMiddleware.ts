@@ -4,10 +4,19 @@ import express from "express";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { Md5Generate } from "./../../GN-common/helper/Md5Generate";
-import { nanoid } from 'nanoid';
+import { nanoid } from "nanoid";
+import * as mongoDB from "mongodb";
 
 export class ApiMiddleware {
 	private authInfoDic: { [k: string]: AuthInfo };
+
+	private authTokenCollection: mongoDB.Collection<mongoDB.Document>;
+
+	public init(authTokenCollection: mongoDB.Collection<mongoDB.Document>) {
+		this.authTokenCollection = authTokenCollection;
+	}
+
+	public run() {}
 
 	public generateAuthToken(info: AuthInfo) {
 		let authToken = Md5Generate.getMd5(nanoid());
@@ -21,7 +30,7 @@ export class ApiMiddleware {
 			.build();
 
 		this.authInfoDic[authToken] = authInfo;
-		// authTokenCollection.insertOne(authInfo);
+		this.authTokenCollection.insertOne(authInfo);
 
 		return authInfo;
 	}
@@ -35,7 +44,7 @@ export class ApiMiddleware {
 		let authToken = authInfo.getAuthToken();
 
 		this.authInfoDic[authToken] = authInfo;
-		// authTokenCollection.updateOne({"AuthInfo": authInfo}, {"$set": authInfo});
+		this.authTokenCollection.updateOne({ AuthInfo: authInfo }, { $set: authInfo });
 	}
 
 	public async authenticateToken(req: express.Request, res: express.Response, next: Function) {
@@ -49,10 +58,18 @@ export class ApiMiddleware {
 		} else {
 			let authInfo = this.authInfoDic[authToken];
 			if (authInfo == null) {
-				// authInfo = await authTokenCollection.findOne({"AuthToken": authToken});
+				let authInfoTemp = await this.authTokenCollection.findOne({ AuthToken: authToken });
 
-				if (authInfo != null) {
-					authInfo.setOtherData("RoomId", null);
+				if (authInfoTemp != null) {
+					authInfo = AuthInfo.Builder()
+						.setAuthToken(authInfoTemp["AuthToken"])
+						.setOtherData("RoomId", null)
+						.setIsRemove(false)
+						.setOtherUserLogin(false)
+						.setRole(authInfoTemp["Role"])
+						.setTsExpire(authInfoTemp["TsExpire"])
+						.setUserId(authInfoTemp["UserId"])
+						.build();
 				}
 			}
 

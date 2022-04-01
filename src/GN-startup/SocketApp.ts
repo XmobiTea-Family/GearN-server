@@ -3,7 +3,7 @@ import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { Server } from "socket.io";
 import http from "http";
 import { SocketAppHandler } from "./routes/SocketAppHandler";
-import { GameApplication } from "./../GN-app-api/handler/GameApplication";
+import { GameApplication } from "./../GameApplication";
 
 export class SocketApp {
 	private appSettings: SocketAppSettings;

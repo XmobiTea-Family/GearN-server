@@ -2,6 +2,8 @@ import { Request } from "./base/Request";
 import { GNData, GNHashtable } from "./../../common/GNData";
 
 export class OperationRequest {
+	protected originRequest: Request;
+
 	protected operationCode: number;
 	protected requestId: number;
 	protected parameters: GNHashtable;
@@ -22,19 +24,25 @@ export class OperationRequest {
 		return this.parameters;
 	}
 
+	public getOriginRequest(): Request {
+		return this.originRequest;
+	}
+
 	constructor(operationRequest?: OperationRequest) {
 		if (operationRequest != null) {
 			this.operationCode = operationRequest.operationCode;
 			this.requestId = operationRequest.requestId;
 			this.parameters = operationRequest.parameters;
+			this.originRequest = operationRequest.originRequest;
 		}
 	}
 
 	public static newOperationRequest(request: Request): OperationRequest {
 		let answer = new OperationRequest();
+		answer.originRequest = request;
+
 		answer.operationCode = request.getCode();
 		answer.requestId = request.getRequestId();
-
 		let gnHashtable = new GNHashtable();
 
 		let d = request.getParameters();

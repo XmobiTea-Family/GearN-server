@@ -1,4 +1,4 @@
-import { GameApplication } from "./../../GN-app-api/handler/GameApplication";
+import { GameApplication } from "./../../GameApplication";
 
 export class AppHandlerBase {
 	protected gameApplication: GameApplication;
