@@ -23,7 +23,7 @@
         "stripInternal": true,
         "skipLibCheck": true
     },
-    "exclude": ["./node_modules/"]
+    "exclude": ["node_modules"]
 }
 // {
 //     "compilerOptions": {
