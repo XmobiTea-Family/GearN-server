@@ -31,6 +31,12 @@ import { LockService } from "./GN-app-api/service/LockService";
 import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
 import { LoginType } from "./GN-common/constant/enumType/LoginType";
 
+interface CreateIndexesOptions {
+	unique?: boolean;
+	sparse?: boolean;
+	expireAfterSeconds?: number;
+}
+
 export class GameApplication {
 	private socketApp: SocketApp;
 	private httpApp: HttpApp;
@@ -114,6 +120,13 @@ export class GameApplication {
 
 	public addHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true): void {
 		this.requestController.addHandler(requestHandler, onlyAuthenticated);
+	}
+
+	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
+		this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
+			if (error != null) console.error("Create index FAILED at collection " + collectionName + ", index: " + index + ", error: " + error);
+			else console.log("Create index success at collection " + collectionName + ", index: " + index + ", result: " + result);
+		});
 	}
 
 	public getHandler(code: number): IRequestHandler {
