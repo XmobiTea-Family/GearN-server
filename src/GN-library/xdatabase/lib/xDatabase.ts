@@ -19,6 +19,12 @@ interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
 }
 
+export declare interface CreateIndexesOptions {
+	unique?: boolean;
+	sparse?: boolean;
+	expireAfterSeconds?: number;
+}
+
 export class xDatabase {
 	private client: mongoDB.MongoClient;
 	private db: mongoDB.Db;
@@ -69,7 +75,23 @@ export class xDatabase {
 		return this.db.collection(collectionName);
 	}
 
-	public safeCreateIndexes(collectionName: string, indexSpecs: mongoDB.IndexDescription[]): void {}
+	public async createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions, cb?: mongoDB.Callback<string>): Promise<void> {
+		let collection = this.collection(collectionName);
+
+		let createIndexesOptions = {
+			background: true,
+		};
+
+		if (options != null) {
+			let createIndexesOptionsAny = createIndexesOptions as any;
+
+			createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
+			createIndexesOptionsAny.sparse = options.sparse;
+			createIndexesOptionsAny.unique = options.unique;
+		}
+
+		await collection.createIndex(index, createIndexesOptions, cb);
+	}
 
 	public async loadPlayer(userId: string): Promise<xSparkPlayer> {
 		let collection = this.systemCollection(SparkCollectionName.Player);
