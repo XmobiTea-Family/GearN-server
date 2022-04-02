@@ -1,16 +1,10 @@
-const { FacebookService } = require('./dist/index');
+const { DefaultApplicationStartup } = require('./dist/index');
 
-a();
+let applicationStartup = new DefaultApplicationStartup();
+applicationStartup.run();
 
-async function a () {
-    let fb = new FacebookService();
-    let result = await fb.getBasicInfoByAccessToken("");
-
-    console.log("%O", result);
-}
-
-// const applicationStartup = new ApplicationStartup();
-// applicationStartup.run();
+// let gameApplication = applicationStartup.getGameApplication();
+// console.log("%O", gameApplication);
 
 process.on("uncaughtException", (uncaughtException) => {
 	console.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);

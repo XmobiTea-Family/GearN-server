@@ -15,10 +15,8 @@ import { GameApplication } from "./../GameApplication";
 import { MailSettings } from "./settings/MailSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { OtherSettings } from "./settings/OtherSettings";
-
-interface OnRunSuccess {
-	(): void;
-}
+import { AppleService } from "./../GN-app-api/service/AppleService";
+import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -105,7 +103,7 @@ export class ServerApplication extends BuilderBase {
 
 		const port = this.applicationSettings.getPort();
 		console.log("[GN] Try run server on the port " + port);
-		
+
 		const app = express();
 		const server = this.getServer(app, this.getApplicationSettings());
 
@@ -125,16 +123,19 @@ export class ServerApplication extends BuilderBase {
 		this.gameApplication.setHttpApp(this.httpApp);
 		this.gameApplication.setSocketApp(this.socketApp);
 
-		this.gameApplication.getDatabase().run(() => {
-			console.log("[GN] Database run success");
-		}, (err) => {
-			console.error("[GN] Database connect error " + err);
-		});
+		this.gameApplication.getDatabase().run(
+			() => {
+				console.log("[GN] Database run success");
+			},
+			(err) => {
+				console.error("[GN] Database connect error " + err);
+			}
+		);
 
 		if (this.mailSettings.getEnable()) {
 			this.gameApplication.getMail().run(() => {
 				console.log("[GN] Send Grid Mail run success");
-			})
+			});
 		}
 
 		let authTokenCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAuthTokenCollectionName());
@@ -143,7 +144,7 @@ export class ServerApplication extends BuilderBase {
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
 
-		this.gameApplication.getAppleService().setMainPackageName(this.getOtherSettings().getPackageName());
+		(this.gameApplication.getAppleService() as AppleService).setMainPackageName(this.getOtherSettings().getPackageName());
 
 		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
 		this.gameApplication.getConfigGame().setConfigCollection(configCollection);
@@ -171,13 +172,13 @@ export class ServerApplication extends BuilderBase {
 			let connectionString = this.databaseSettings.getConnectionString();
 			let databaseName = this.databaseSettings.getDatabaseName();
 			let gameName = this.databaseSettings.getGameName();
-	
+
 			let minPoolSize = this.databaseSettings.getMinPoolSize();
 			let maxPoolSize = this.databaseSettings.getMaxPoolSize();
-	
+
 			let options = {
 				maxPoolSize: maxPoolSize,
-				minPoolSize: minPoolSize
+				minPoolSize: minPoolSize,
 			};
 			gameApplication.getDatabase().init(connectionString, databaseName, gameName, options);
 		}
@@ -186,7 +187,7 @@ export class ServerApplication extends BuilderBase {
 		{
 			let sendGridApiKey = this.mailSettings.getSendGridApiKey();
 			let fromEmail = this.mailSettings.getFromEmail();
-	
+
 			gameApplication.getMail().init(sendGridApiKey, fromEmail);
 		}
 

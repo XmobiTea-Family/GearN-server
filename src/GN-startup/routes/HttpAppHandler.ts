@@ -6,7 +6,7 @@ import express from "express";
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { GameApplication } from "./../../GameApplication";
-import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -18,6 +18,7 @@ export class HttpAppHandler {
 	private gameApplication: GameApplication;
 
 	private router: Router;
+	private apiRouter: Router;
 
 	public setRouter(router: Router): void {
 		this.router = router;
@@ -36,25 +37,25 @@ export class HttpAppHandler {
 	}
 
 	public run(): void {
-		this.router.get('/getConfig/:configName', (req: express.Request, res: express.Response) => {
+		this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
 			let configName = req.params.configName;
 			if (configName != null) {
 				let configItem = this.gameApplication.getConfigGame().getConfig(configName);
-		
-				if (configItem != null) return res.json([ReturnCode.Ok, {0: configItem.toJson()}]);
+
+				if (configItem != null) return res.json([ReturnCode.Ok, { 1: configItem.toJson() }]);
 			}
-		
-		    return res.json([ReturnCode.OperationInvalid]);
+
+			return res.json([ReturnCode.OperationInvalid]);
 		});
 
 		this.router.get("/ts", (req: express.Request, res: express.Response) => {
-			return res.json([ReturnCode.Ok, {0: xDatetime.getCurrentMilliseconds()}]);
+			return res.json([ReturnCode.Ok, { 1: xDatetime.getCurrentMilliseconds() }]);
 		});
 
-		let router2 = express.Router();
-		this.router.use("/api", wrap(this.apiMiddleware.authenticateToken), router2);
+		this.apiRouter = express.Router();
+		this.router.use("/api", wrap(this.apiMiddleware.authenticateToken), this.apiRouter);
 
-		router2.post("/:code", async (req: express.Request, res: express.Response) => {
+		this.apiRouter.post("/:code", async (req: express.Request, res: express.Response) => {
 			let operationResponse = await this.onHttpRequest(req);
 
 			if (operationResponse != null) {
@@ -102,11 +103,10 @@ export class HttpAppHandler {
 
 		if (this._onRequestCb != null) {
 			operationResponse = await this._onRequestCb(request);
-		}
-		else {
+		} else {
 			operationResponse.setReturnCode(ReturnCode.InternalServerError);
 		}
-		
+
 		return operationResponse;
 	}
 }

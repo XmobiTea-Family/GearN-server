@@ -16,7 +16,7 @@ export class xCacheData {
 		delete this.dataDic[key];
 	}
 
-    constructor(dataDic?: { [k: string]: any }) {
-        this.dataDic = dataDic != null ? dataDic : {};
-    }
+	constructor(dataDic?: { [k: string]: any }) {
+		this.dataDic = dataDic != null ? dataDic : {};
+	}
 }

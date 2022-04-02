@@ -1,4 +1,4 @@
-import { IBuilder } from "../../GN-library/xbuilder/lib/IBuilder";
+import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 abstract class BuilderBase {
 	protected authToken: string;

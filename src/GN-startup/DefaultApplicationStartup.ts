@@ -6,14 +6,21 @@ import { GameApplication } from "../GameApplication";
 import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
+import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 
 export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
 
-	public run(): void {
+	public run(onRunSuccess?: OnRunSuccess): void {
 		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).build();
 
-		let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigin("*").addMethods("GET", "POST").setCredentials(true).addAllowedHeaders("authtoken").build();
+		let httpAppSettings = HttpAppSettings.Builder()
+			.setEnable(true)
+			.setOrigin("*")
+			.addMethods("GET", "POST")
+			.setCredentials(true)
+			.addAllowedHeaders("authtoken")
+			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).build();
 
@@ -32,9 +39,27 @@ export class DefaultApplicationStartup {
 			.setMaxPoolSize(100)
 			.build();
 
-		let mailSettings = MailSettings.Builder().setFromEmail("changx@xmobitea.com").setSendGridApiKey("SG.HtH0ZjTQTRqeHBARvEgktQ.f9vle8kPkWDVkqhmdNKZWYuGBFak!__rHVUGPicPlko").build();
+		let mailSettings = MailSettings.Builder()
+			.setFromEmail("changx@xmobitea.com")
+			.setSendGridApiKey("SG.HtH0ZjTQTRqeHBARvEgktQ.f9vle8kPkWDVkqhmdNKZWYuGBFak!__rHVUGPicPlko")
+			.build();
 
-		this.serverApplication = ServerApplication.Builder()
+		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings);
+
+		this.serverApplication.run(() => {
+			if (onRunSuccess != null) onRunSuccess();
+		});
+	}
+
+	protected newServerApplication(
+		applicationSettings: ApplicationSettings,
+		httpAppSettings: HttpAppSettings,
+		socketAppSettings: SocketAppSettings,
+		otherSettings: OtherSettings,
+		databaseSettings: DatabaseSettings,
+		mailSettings: MailSettings
+	) {
+		return ServerApplication.Builder()
 			.setApplicationSettings(applicationSettings)
 			.setHttpAppSettings(httpAppSettings)
 			.setSocketAppSettings(socketAppSettings)
@@ -42,11 +67,6 @@ export class DefaultApplicationStartup {
 			.setDatabaseSettings(databaseSettings)
 			.setMailSettings(mailSettings)
 			.build();
-
-		console.log("GN Server init");
-		this.serverApplication.run(() => {
-			console.log("GN Server now is running!");
-		});
 	}
 
 	public getGameApplication(): GameApplication {

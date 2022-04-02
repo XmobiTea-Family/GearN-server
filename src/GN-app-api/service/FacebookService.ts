@@ -11,8 +11,7 @@ export class FacebookService implements IFacebookService {
 		try {
 			let result = await axios.get(graphFBAPIUrl + graphFBAPIContentURL + accessToken);
 			answer = result.data;
-		}
-		catch (error) {
+		} catch (error) {
 			answer["error"] = error;
 		}
 

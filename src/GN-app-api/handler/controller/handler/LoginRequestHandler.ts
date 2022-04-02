@@ -1,3 +1,5 @@
+const MAX_RANDOM_MESSAGE_COUNT = 100;
+
 import { RequestHandler } from "./base/RequestHandler";
 
 import { OperationRequest } from "./../../../../GN-common/entity/operationRequest/OperationRequest";
@@ -15,7 +17,25 @@ import { xSparkPlayer } from "./../../../../GN-library/xdatabase/lib/entity/xSpa
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { xGamePlayer } from "./../../../../GN-library/xdatabase/lib/entity/xGamePlayer";
 
+import { Md5Generate } from "./../../../../GN-common/helper/Md5Generate";
+import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUltils";
+
 import bcrypt from "bcrypt";
+import Web3 from "web3";
+import { xRandom } from "../../../../GN-library/xrandom/lib/xRandom";
+
+const web3Instance = new Web3();
+
+const randomMessages: string[] = [];
+generateRandomMessage();
+
+function generateRandomMessage() {
+	for (let i = 0; i < MAX_RANDOM_MESSAGE_COUNT; i++) {
+		let name = DisplayNameUltils.generateRandomString(50);
+		let md5 = Md5Generate.getMd5(name);
+		randomMessages.push(name + md5);
+	}
+}
 
 export class LoginOperationRequest extends OperationRequest {
 	loginType: number;
@@ -86,6 +106,8 @@ export class LoginOperationRequest extends OperationRequest {
 
 			return true;
 		} else if (this.loginType == LoginType.PublicAddress) {
+			if (!this.signature && !this.publicAddress && !this.message) return true;
+
 			if (!this.signature) return false;
 			if (!this.publicAddress) return false;
 			if (!this.message) return false;
@@ -117,22 +139,24 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let loginType = request.loginType;
 
-		if (loginType == LoginType.Account) {
-			return await this.handleLoginOperationByAccount(authInfo, request);
-		} else if (loginType == LoginType.Device) {
-			return await this.handleLoginOperationByDevice(authInfo, request);
-		} else if (loginType == LoginType.Facebook) {
-			return await this.handleLoginOperationByFacebook(authInfo, request);
-		} else if (loginType == LoginType.Google) {
-			return await this.handleLoginOperationByGoogle(authInfo, request);
-		} else if (loginType == LoginType.Apple) {
-			return await this.handleLoginOperationByApple(authInfo, request);
-		} else if (loginType == LoginType.UserId) {
-			return await this.handleLoginOperationByUserId(authInfo, request);
-		} else if (loginType == LoginType.PublicAddress) {
-			return await this.handleLoginOperationByPublicAddress(authInfo, request);
-		} else if (loginType == LoginType.CustomId) {
-			return await this.handleLoginOperationByCustomId(authInfo, request);
+		if (this.gameApplication.getLoginTypeEnables().indexOf(loginType) != -1) {
+			if (loginType == LoginType.Account) {
+				return await this.handleLoginOperationByAccount(authInfo, request);
+			} else if (loginType == LoginType.Device) {
+				return await this.handleLoginOperationByDevice(authInfo, request);
+			} else if (loginType == LoginType.Facebook) {
+				return await this.handleLoginOperationByFacebook(authInfo, request);
+			} else if (loginType == LoginType.Google) {
+				return await this.handleLoginOperationByGoogle(authInfo, request);
+			} else if (loginType == LoginType.Apple) {
+				return await this.handleLoginOperationByApple(authInfo, request);
+			} else if (loginType == LoginType.UserId) {
+				return await this.handleLoginOperationByUserId(authInfo, request);
+			} else if (loginType == LoginType.PublicAddress) {
+				return await this.handleLoginOperationByPublicAddress(authInfo, request);
+			} else if (loginType == LoginType.CustomId) {
+				return await this.handleLoginOperationByCustomId(authInfo, request);
+			}
 		}
 
 		return this.newOperationInvalid(request);
@@ -209,20 +233,163 @@ export class LoginRequestHandler extends RequestHandler {
 		return await this.handleFacebookAuthenticationResponse(authInfo, request, sparkPlayer, facebookToken, result);
 	}
 
-	private async handleLoginOperationByGoogle(authInfo: AuthInfo, request: LoginOperationRequest) {
+	private async handleLoginOperationByGoogle(authInfo: AuthInfo, request: LoginOperationRequest): Promise<OperationResponse> {
 		return this.newOperationInvalid(request);
 	}
 
-	private async handleLoginOperationByApple(authInfo: AuthInfo, request: LoginOperationRequest) {
-		return this.newOperationInvalid(request);
+	private async handleLoginOperationByApple(authInfo: AuthInfo, request: LoginOperationRequest): Promise<OperationResponse> {
+		let appleToken = request.appleToken;
+
+		let result = await this.gameApplication.getAppleService().verifyAppleToken(appleToken);
+
+		if (result["error"] != null) {
+			return this.newOperationInvalid(request);
+		}
+
+		let loginOperationRequest = request as any;
+
+		let appleUserId = result["sub"];
+		loginOperationRequest.appleUserId = appleUserId;
+		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByAppleUserId(appleUserId);
+
+		if (!sparkPlayer) {
+			let appleDisplayName = loginOperationRequest.displayName;
+			let appleId = result["email"] || "";
+
+			if (!appleDisplayName) {
+				if (appleId) {
+					try {
+						appleDisplayName = appleId.split("@")[0];
+					} catch (err) {
+						console.error(err);
+					}
+				}
+			}
+
+			loginOperationRequest.appleUserId = appleUserId;
+			loginOperationRequest.appleDisplayName = appleDisplayName;
+			loginOperationRequest.appleId = appleId;
+
+			if (authInfo != null) return await this.handleSyncCurrentAccountByAppleOperation(authInfo, request, appleToken, result);
+
+			return await this.handleRegisterByAppleOperation(authInfo, request, result);
+		}
+
+		return await this.handleAppleAuthenticationResponse(authInfo, request, sparkPlayer, appleToken, result);
 	}
 
-	private async handleLoginOperationByUserId(authInfo: AuthInfo, request: LoginOperationRequest) {
-		return this.newOperationInvalid(request);
+	private async handleSyncCurrentAccountByAppleOperation(
+		authInfo: AuthInfo,
+		request: LoginOperationRequest,
+		appleToken: string,
+		result: { [k: string]: any }
+	): Promise<OperationResponse> {
+		let loginOperationRequest = request as any;
+		let appleUserId = loginOperationRequest.appleUserId;
+
+		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayer(authInfo.getUserId());
+		if (!sparkPlayer) {
+			return this.newOperationInternalServerError(request);
+		}
+
+		if (sparkPlayer.getUserExternal("AppleUserId") == appleUserId) {
+			return this.onAuthenticationResponse(authInfo, request, sparkPlayer);
+		}
+
+		sparkPlayer.setUserExternal("AppleUserId", appleUserId);
+		if (loginOperationRequest.appleDisplayName) sparkPlayer.setFullname(loginOperationRequest.appleDisplayName);
+
+		let email = loginOperationRequest.appleId;
+		if (email) {
+			// mail.sendFacebookRegisterMail(DEFAULT_LANGUAGE, email, sparkPlayer.getFullname());
+			sparkPlayer.setUserEmail(email, true);
+		}
+
+		return await this.handleAppleAuthenticationResponse(authInfo, request, sparkPlayer, appleToken, result);
+	}
+
+	private async handleRegisterByAppleOperation(authInfo: AuthInfo, request: LoginOperationRequest, result: { [k: string]: any }) {
+		let loginOperationRequest = request as any;
+
+		let appleUserId = loginOperationRequest.appleUserId;
+		let email = loginOperationRequest.appleId;
+
+		let sparkPlayer = await this.gameApplication
+			.getDatabase()
+			.createPlayerByAppleUserId(appleUserId, this.DefaultSegments, request.getOriginRequest().getIP(), email);
+
+		if (!sparkPlayer) {
+			return this.newOperationInternalServerError(request);
+		}
+
+		if (loginOperationRequest.appleDisplayName) sparkPlayer.setFullname(loginOperationRequest.appleDisplayName);
+
+		if (email) {
+			// mail.sendFacebookRegisterMail(DEFAULT_LANGUAGE, email, sparkPlayer.getFullname());
+		}
+
+		return await this.handleAppleAuthenticationResponse(authInfo, request, sparkPlayer, loginOperationRequest.appleToken, result);
+	}
+
+	private async handleAppleAuthenticationResponse(
+		authInfo: AuthInfo,
+		request: LoginOperationRequest,
+		sparkPlayer: xSparkPlayer,
+		appleToken: string,
+		result: { [k: string]: any }
+	): Promise<OperationResponse> {
+		let loginOperationRequest = request as any;
+
+		let appleDisplayName = loginOperationRequest.appleDisplayName;
+		let email = loginOperationRequest.appleId;
+		let appleUserId = loginOperationRequest.appleUserId;
+
+		this.gameApplication.getDatabase().saveAppleExternal(sparkPlayer.getUserId(), appleUserId, appleDisplayName, email, appleToken);
+
+		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
+	}
+
+	private async handleLoginOperationByUserId(authInfo: AuthInfo, request: LoginOperationRequest): Promise<OperationResponse> {
+		let userId = request.userId;
+
+		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayer(userId);
+		if (!sparkPlayer) {
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			operationResponse.setReturnCode(ReturnCode.Ok);
+			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
+
+			return operationResponse;
+		}
+
+		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
 	}
 
 	private async handleLoginOperationByPublicAddress(authInfo: AuthInfo, request: LoginOperationRequest): Promise<OperationResponse> {
+		let message = request.message;
 		let publicAddress = request.publicAddress;
+		let signature = request.signature;
+
+		if (!signature && !publicAddress && !message) {
+			return await this.handleLoginOperationByPublicAddressSendRandomMessage(authInfo, request);
+		}
+
+		let isMatch = randomMessages.indexOf(message) != -1;
+
+		if (!isMatch) {
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			operationResponse.setReturnCode(ReturnCode.Ok);
+			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.RandomMessageExpired);
+
+			return operationResponse;
+		}
+
+		if (this.getPublicAddress(message, signature) != publicAddress) {
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			operationResponse.setReturnCode(ReturnCode.Ok);
+			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.PublicAddressWrong);
+
+			return operationResponse;
+		}
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByPublicAddress(publicAddress);
 		if (!sparkPlayer) {
@@ -230,6 +397,31 @@ export class LoginRequestHandler extends RequestHandler {
 		}
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
+	}
+
+	private async handleLoginOperationByPublicAddressSendRandomMessage(authInfo: AuthInfo, request: LoginOperationRequest): Promise<OperationResponse> {
+		if (authInfo != null) {
+			return this.newOperationInvalid(request);
+		}
+
+		let message = randomMessages[xRandom.randomInt(0, randomMessages.length)];
+
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.Ok);
+
+		operationResponse.setParameter(LoginParameterCode.Message, message);
+
+		return operationResponse;
+	}
+
+	private getPublicAddress(message: string, signature: string): string {
+		try {
+			return web3Instance.eth.accounts.recover(message, signature);
+		} catch (err) {
+			console.log(err);
+			return "";
+		}
 	}
 
 	private async handleLoginOperationByCustomId(authInfo: AuthInfo, request: LoginOperationRequest): Promise<OperationResponse> {
@@ -330,13 +522,19 @@ export class LoginRequestHandler extends RequestHandler {
 		return await this.handleFacebookAuthenticationResponse(authInfo, request, sparkPlayer, facebookToken, fbBasicInfo);
 	}
 
-	private async handleRegisterByFacebookOperation(authInfo: AuthInfo, request: LoginOperationRequest, fbBasicInfo: { [k: string]: any }) {
+	private async handleRegisterByFacebookOperation(
+		authInfo: AuthInfo,
+		request: LoginOperationRequest,
+		fbBasicInfo: { [k: string]: any }
+	): Promise<OperationResponse> {
 		let loginOperationRequest = request as any;
 
 		let facebookId = loginOperationRequest.facebookId;
 		let email = loginOperationRequest.facebookEmail;
 
-		let sparkPlayer = await this.gameApplication.getDatabase().createPlayerByFacebookId(facebookId, this.DefaultSegments, request.getOriginRequest().getIP(), email);
+		let sparkPlayer = await this.gameApplication
+			.getDatabase()
+			.createPlayerByFacebookId(facebookId, this.DefaultSegments, request.getOriginRequest().getIP(), email);
 
 		if (!sparkPlayer) {
 			return this.newOperationInternalServerError(request);

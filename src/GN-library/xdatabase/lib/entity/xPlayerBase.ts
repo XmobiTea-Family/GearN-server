@@ -10,7 +10,7 @@ const EMPTY_STR = "";
 const DOT = ".";
 
 import * as mongoDB from "mongodb";
-import { xDatetime } from "../../../xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../../xdatetime/lib/xDatetime";
 
 export class xPlayerBase {
 	protected collection: mongoDB.Collection<mongoDB.Document>;

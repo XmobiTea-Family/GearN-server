@@ -3,12 +3,7 @@ import { OperationResponse } from "./../../../../../GN-common/entity/operationRe
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 
 export interface PostHandle {
-	(
-		authInfo: AuthInfo,
-		operationRequest: OperationRequest,
-		operationResponse: OperationResponse,
-		...otherParams: any[]
-	): Promise<void>;
+	(authInfo: AuthInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, ...otherParams: any[]): Promise<void>;
 }
 
 export interface IRequestHandler {

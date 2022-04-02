@@ -51,17 +51,17 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 	}
 
 	private setAuthInfoSocket(sid: string, authInfo: AuthInfo): void {
-		let socket = this.gameApplication.getSocketApp().getIO().of('/').sockets.get(sid);
+		let socket = this.gameApplication.getSocketApp().getIO().of("/").sockets.get(sid);
 		if (socket) {
-            authInfo.setOtherData("SocketId", sid);
+			authInfo.setOtherData("SocketId", sid);
 
-            let socketAny = socket as any;
-		    socketAny.authInfo = authInfo;
-		    socketAny.isAuthenticated = true;
+			let socketAny = socket as any;
+			socketAny.authInfo = authInfo;
+			socketAny.isAuthenticated = true;
 
-            let userId = authInfo.getUserId();
-		    socketAny.userId = userId;
-		    socket.join(userId);
+			let userId = authInfo.getUserId();
+			socketAny.userId = userId;
+			socket.join(userId);
 		}
 	}
 }

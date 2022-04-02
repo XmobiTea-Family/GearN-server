@@ -2,20 +2,18 @@ const RUNTIME = "Runtime.";
 const META = "Meta.";
 const SYSTEM = "System.";
 
-const sparkCollectionName = {
+export const SparkCollectionName = {
 	Player: "Player",
 	Friend: "Friend",
 	ExternalFBAuthentication: "ExternalFBAuthentication",
+	ExternalAppleAuthentication: "ExternalAppleAuthentication",
 };
 
 import * as mongoDB from "mongodb";
-import { xDatetime } from "../../xdatetime/lib/xDatetime";
+import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
+import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { xGamePlayer } from "./entity/xGamePlayer";
 import { xSparkPlayer } from "./entity/xSparkPlayer";
-
-interface OnMongoRunSuccess {
-	(): void;
-}
 
 interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
@@ -33,44 +31,48 @@ export class xDatabase {
 		this.gameName = gameName;
 	}
 
-	public run(onMongoRunSuccess?: OnMongoRunSuccess, onMongoRunError?: OnMongoRunError): void {
+	public run(onMongoRunSuccess?: OnRunSuccess, onMongoRunError?: OnMongoRunError): void {
 		this.client.connect((err, result) => {
 			if (err) {
-				console.log(err);
 				if (onMongoRunError != null) onMongoRunError(err);
 			} else {
-				console.log("MongoDb has connect.");
 				if (onMongoRunSuccess != null) onMongoRunSuccess();
 			}
 		});
 	}
 
 	public runtimeCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(RUNTIME + collectionName);
+		return this.collection(RUNTIME + collectionName);
 	}
 
 	public metaCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(META + collectionName);
+		return this.collection(META + collectionName);
 	}
 
 	public systemCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(SYSTEM + collectionName);
+		return this.collection(SYSTEM + collectionName);
 	}
 
 	public runtimeGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(RUNTIME + this.gameName + collectionName);
+		return this.collection(RUNTIME + this.gameName + collectionName);
 	}
 
 	public metaGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(META + this.gameName + collectionName);
+		return this.collection(META + this.gameName + collectionName);
 	}
 
 	public systemGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(SYSTEM + this.gameName + collectionName);
+		return this.collection(SYSTEM + this.gameName + collectionName);
 	}
 
+	public collection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
+		return this.db.collection(collectionName);
+	}
+
+	public safeCreateIndexes(collectionName: string, indexSpecs: mongoDB.IndexDescription[]): void {}
+
 	public async loadPlayer(userId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let result = await collection.findOne({ _id: new mongoDB.ObjectId(userId) });
 		if (result) {
 			let thisPlayer = new xSparkPlayer(result, collection);
@@ -81,7 +83,7 @@ export class xDatabase {
 	}
 
 	public async loadPlayerByUsernameAndPassword(username: string, password: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let result = await collection.findOne({ Username: username, Password: password });
 		if (result) {
 			let thisPlayer = new xSparkPlayer(result, collection);
@@ -92,7 +94,7 @@ export class xDatabase {
 	}
 
 	public async loadPlayerByUsername(username: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let result = await collection.findOne({ Username: username });
 		if (result) {
 			return new xSparkPlayer(result, collection);
@@ -101,7 +103,7 @@ export class xDatabase {
 	}
 
 	public async loadPlayerByEmail(email: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let result = await collection.findOne({ "UserEmail.Value": email, "UserEmail.IsConfirm": true });
 		if (result) {
 			return new xSparkPlayer(result, collection);
@@ -110,7 +112,7 @@ export class xDatabase {
 	}
 
 	public async loadPlayerByDeviceInfo(deviceInfo: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let result = await collection.findOne({ "UserExternal.DeviceInfo": deviceInfo });
 		if (result) {
 			return new xSparkPlayer(result, collection);
@@ -119,7 +121,7 @@ export class xDatabase {
 	}
 
 	public async createPlayerByDeviceInfo(deviceInfo: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let result = {
 			Username: "",
@@ -148,7 +150,7 @@ export class xDatabase {
 	}
 
 	public async loadPlayerByCustomId(customId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let result = await collection.findOne({ "UserExternal.CustomId": customId });
 		if (result) {
 			return new xSparkPlayer(result, collection);
@@ -157,7 +159,7 @@ export class xDatabase {
 	}
 
 	public async createPlayerByCustomId(customId: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let result = {
 			Username: "",
@@ -186,7 +188,7 @@ export class xDatabase {
 	}
 
 	public async loadPlayerByPublicAddress(publicAddress: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let result = await collection.findOne({ "UserExternal.PublicAddress": publicAddress });
 		if (result) {
 			return new xSparkPlayer(result, collection);
@@ -195,7 +197,7 @@ export class xDatabase {
 	}
 
 	public async createPlayerByPublicAddress(publicAddress: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let result = {
 			Username: "",
@@ -224,7 +226,7 @@ export class xDatabase {
 	}
 
 	public async createPlayerByUsernameAndPassword(username: string, password: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let result = {
 			Username: username,
@@ -253,7 +255,7 @@ export class xDatabase {
 	}
 
 	public async loadPlayerByFacebookId(facebookId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 
 		let result = await collection.findOne({ "UserExternal.FacebookId": facebookId });
 		if (result) {
@@ -263,7 +265,7 @@ export class xDatabase {
 	}
 
 	public async createPlayerByFacebookId(facebookId: string, segments: {}, ipAddressCreate: string, email: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		let result = {
@@ -301,18 +303,18 @@ export class xDatabase {
 		return new xSparkPlayer(result, collection);
 	}
 
-	public async loadPlayerByAppleId(appleId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+	public async loadPlayerByAppleUserId(appleUserId: string): Promise<xSparkPlayer> {
+		let collection = this.systemCollection(SparkCollectionName.Player);
 
-		let result = await collection.findOne({ "UserExternal.AppleId": appleId });
+		let result = await collection.findOne({ "UserExternal.AppleUserId": appleUserId });
 		if (result) {
 			return new xSparkPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async createPlayerByAppleId(appleId: string, segments: {}, ipAddressCreate: string, email: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(sparkCollectionName.Player);
+	public async createPlayerByAppleUserId(appleUserId: string, segments: {}, ipAddressCreate: string, email: string): Promise<xSparkPlayer> {
+		let collection = this.systemCollection(SparkCollectionName.Player);
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		let result = {
@@ -320,7 +322,7 @@ export class xDatabase {
 			Password: "",
 			Fullname: "",
 			UserExternal: {
-				AppleId: appleId,
+				AppleUserId: appleUserId,
 			},
 			UserBan: {},
 			UserEmail: {},
@@ -351,7 +353,7 @@ export class xDatabase {
 	}
 
 	public async saveFBExternal(userId: string, facebookId: string, facebookName: string, facebookEmail: string, facebookToken: string) {
-		await this.systemCollection(sparkCollectionName.ExternalFBAuthentication).updateOne(
+		await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).updateOne(
 			{ UserId: userId },
 			{
 				$set: {
@@ -360,6 +362,7 @@ export class xDatabase {
 					ExternalEmail: facebookEmail,
 					Token: facebookToken,
 					TsUpdate: xDatetime.getCurrentMilliseconds(),
+					IsRemove: false,
 				},
 			},
 			{
@@ -369,15 +372,56 @@ export class xDatabase {
 	}
 
 	public async loadFBExternal(facebookId: string) {
-		return await this.systemCollection(sparkCollectionName.ExternalFBAuthentication).findOne({ ExternalId: facebookId });
+		return await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).findOne({ ExternalId: facebookId, IsRemove: false });
+	}
+
+	public async unConnectFBExternal(facebookId: string) {
+		await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).updateOne(
+			{ ExternalId: facebookId, IsRemove: false },
+			{
+				$set: {
+					IsRemove: true,
+				},
+			}
+		);
+	}
+
+	public async saveAppleExternal(userId: string, appleUserId: string, appleDisplayName: string, appleId: string, appleToken: string) {
+		await this.systemCollection(SparkCollectionName.ExternalAppleAuthentication).updateOne(
+			{ UserId: userId },
+			{
+				$set: {
+					ExternalId: appleUserId,
+					ExternalDisplayName: appleDisplayName,
+					ExternalEmail: appleId,
+					Token: appleToken,
+					TsUpdate: xDatetime.getCurrentMilliseconds(),
+					IsRemove: false,
+				},
+			},
+			{
+				upsert: true,
+			}
+		);
+	}
+
+	public async unConnectAppleExternal(appleUserId: string) {
+		await this.systemCollection(SparkCollectionName.ExternalAppleAuthentication).updateOne(
+			{ ExternalId: appleUserId, IsRemove: false },
+			{
+				$set: {
+					IsRemove: true,
+				},
+			}
+		);
 	}
 
 	public async loadFriend(userId: string) {
-		return await this.systemCollection(sparkCollectionName.Friend).findOne({ UserId: userId });
+		return await this.systemCollection(SparkCollectionName.Friend).findOne({ UserId: userId });
 	}
 
 	public async saveFriend(userId: string, doc: {}) {
-		await this.systemCollection(sparkCollectionName.Friend).updateOne(
+		await this.systemCollection(SparkCollectionName.Friend).updateOne(
 			{ UserId: userId },
 			{
 				$set: doc,
@@ -389,7 +433,7 @@ export class xDatabase {
 	}
 
 	public async loadGamePlayer(userId: string): Promise<xGamePlayer> {
-		let collection = this.systemGameCollection(sparkCollectionName.Player);
+		let collection = this.systemGameCollection(SparkCollectionName.Player);
 		let result = collection.findOne({ UserId: userId });
 		if (result) {
 			return new xGamePlayer(result, collection);
@@ -399,7 +443,7 @@ export class xDatabase {
 	}
 
 	private async createGamePlayer(userId: string, segments: {}): Promise<xGamePlayer> {
-		let collection = this.systemGameCollection(sparkCollectionName.Player);
+		let collection = this.systemGameCollection(SparkCollectionName.Player);
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let pushRegistrations: any[] = [];
 

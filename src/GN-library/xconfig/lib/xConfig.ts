@@ -1,9 +1,6 @@
 import { xConfigItem } from "./entity/xConfigItem";
 import * as mongoDB from "mongodb";
-
-interface OnRunSuccess {
-	(): void;
-}
+import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
 
 export class xConfig {
 	private configDic: { [k: string]: xConfigItem } = {};
@@ -22,7 +19,7 @@ export class xConfig {
 	public async syncAllConfig(): Promise<void> {
 		let results = await this.configCollection.find();
 
-		while (results.hasNext()) {
+		while (await results.hasNext()) {
 			let result = await results.next();
 			let configName = result["ConfigName"];
 			if (!configName) {

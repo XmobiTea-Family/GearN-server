@@ -6,54 +6,50 @@ import jwksClient from "jwks-rsa";
 import { IAppleService } from "./IAppleService";
 
 export class AppleService implements IAppleService {
-    private client: jwksClient.JwksClient;
-    private mainPackageName: string;
+	private client: jwksClient.JwksClient;
+	private mainPackageName: string;
 
-    constructor() {
-        this.client = jwksClient({
-            jwksUri: MAIN_iss_auth_keys
-        });
-    }
+	constructor() {
+		this.client = jwksClient({
+			jwksUri: MAIN_iss_auth_keys,
+		});
+	}
 
-    public setMainPackageName(mainPackageName: string): void {
-        this.mainPackageName = mainPackageName; 
-    }
+	public setMainPackageName(mainPackageName: string): void {
+		this.mainPackageName = mainPackageName;
+	}
 
-    public async verifyAppleToken(token: string): Promise<{ [k: string]: any }> {
-        let answer: { [k: string]: any } = {};
+	public async verifyAppleToken(token: string): Promise<{ [k: string]: any }> {
+		let answer: { [k: string]: any } = {};
 
 		try {
 			await jwt.verify(token, this.getApplePublicKey, null, (err: VerifyErrors | null, decoded: JwtPayload) => {
-                if (err) {
-                    answer["error"] = err;
-                }
-                else {
-                    if (decoded.iss !== MAIN_iss) {
-                        answer["error"] = "unexpected issuer (iss claim): " + decoded.iss;
-                    }
-                    else if (decoded.aud !== this.mainPackageName) {
-                        answer["error"] = "unexpected audience (aud claim): " + decoded.aud;
-                    }
-                    else {
-                        answer = decoded;
-                    }
-                }
-            });
-		}
-		catch (error) {
+				if (err) {
+					answer["error"] = err;
+				} else {
+					if (decoded.iss !== MAIN_iss) {
+						answer["error"] = "unexpected issuer (iss claim): " + decoded.iss;
+					} else if (decoded.aud !== this.mainPackageName) {
+						answer["error"] = "unexpected audience (aud claim): " + decoded.aud;
+					} else {
+						answer = decoded;
+					}
+				}
+			});
+		} catch (error) {
 			answer["error"] = error;
 		}
 
 		return answer;
-    }
+	}
 
-    private getApplePublicKey(header: JwtHeader, callback: SigningKeyCallback) {
-        this.client.getSigningKey(header.kid, (err: Error, key: jwksClient.SigningKey) => {
-            if (err) return callback(err, null);
+	private getApplePublicKey(header: JwtHeader, callback: SigningKeyCallback) {
+		this.client.getSigningKey(header.kid, (err: Error, key: jwksClient.SigningKey) => {
+			if (err) return callback(err, null);
 
-            // var signingKey = key.publicKey || key.rsaPublicKey;
-            var signingKey = key.getPublicKey();
-            return callback(null, signingKey);
-        });
-    }
+			// var signingKey = key.publicKey || key.rsaPublicKey;
+			var signingKey = key.getPublicKey();
+			return callback(null, signingKey);
+		});
+	}
 }

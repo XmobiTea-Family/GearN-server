@@ -6,7 +6,7 @@ import express from "express";
 import { Express } from "express";
 import { ReturnCode } from "./../GN-common/constant/ReturnCode";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
-import { GameApplication } from "../GameApplication";
+import { GameApplication } from "./../GameApplication";
 
 export class HttpApp {
 	private appSettings: HttpAppSettings;
@@ -43,7 +43,7 @@ export class HttpApp {
 		this.app.use(express.json());
 
 		this.app.get("/info", (req: express.Request, res: express.Response) => {
-			return res.json([ReturnCode.Ok, {0: "GN Server - Copyright XmobiTea 2022\nVersion: 1.0.0"}]);
+			return res.json([ReturnCode.Ok, { 1: "GN Server - Copyright XmobiTea 2022\nVersion: 1.0.0" }]);
 		});
 
 		this.app.get("/ping", async function (req: express.Request, res: express.Response) {
@@ -74,7 +74,7 @@ export class HttpApp {
 		this.httpAppHandler.setRouter(this.app);
 		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.httpAppHandler.setGameApplication(this.gameApplication);
-		
+
 		if (this.appSettings.getEnable()) {
 			this.httpAppHandler.run();
 		}

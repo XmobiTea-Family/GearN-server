@@ -5,7 +5,7 @@ abstract class BuilderBase {
 	protected gameName: string;
 	protected databaseName: string;
 
-    protected minPoolSize: number;
+	protected minPoolSize: number;
 	protected maxPoolSize: number;
 
 	public getConnectionString(): string {
@@ -16,11 +16,11 @@ abstract class BuilderBase {
 		return this.gameName;
 	}
 
-    public getDatabaseName(): string {
+	public getDatabaseName(): string {
 		return this.databaseName;
 	}
 
-    public getMinPoolSize(): number {
+	public getMinPoolSize(): number {
 		return this.minPoolSize;
 	}
 
@@ -34,27 +34,27 @@ abstract class BuilderBase {
 class Builder extends BuilderBase implements IBuilder<DatabaseSettings> {
 	public setConnectionString(connectionString: string): Builder {
 		this.connectionString = connectionString;
-        return this;
+		return this;
 	}
 
 	public setGameName(gameName: string): Builder {
 		this.gameName = gameName;
-        return this;
+		return this;
 	}
 
-    public setDatabaseName(databaseName: string): Builder {
+	public setDatabaseName(databaseName: string): Builder {
 		this.databaseName = databaseName;
-        return this;
+		return this;
 	}
 
 	public setMinPoolSize(minPoolSize: number): Builder {
 		this.minPoolSize = minPoolSize;
-        return this;
+		return this;
 	}
 
 	public setMaxPoolSize(maxPoolSize: number): Builder {
 		this.maxPoolSize = maxPoolSize;
-        return this;
+		return this;
 	}
 
 	constructor() {
@@ -74,7 +74,7 @@ export class DatabaseSettings extends BuilderBase {
 		this.gameName = builder.getGameName();
 		this.databaseName = builder.getDatabaseName();
 
-        this.minPoolSize = builder.getMinPoolSize();
+		this.minPoolSize = builder.getMinPoolSize();
 		this.maxPoolSize = builder.getMaxPoolSize();
 	}
 

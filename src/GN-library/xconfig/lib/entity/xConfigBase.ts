@@ -29,7 +29,7 @@ export class xConfigBase {
 		this.version = result["Version"];
 	}
 
-    public toJson(): string {
-        return JSON.stringify(this.doc);
-    }
+	public toJson(): string {
+		return JSON.stringify(this.doc);
+	}
 }

@@ -21,10 +21,15 @@ import { RegisterAccountRequestHandler } from "./GN-app-api/handler/controller/h
 import { RegisterSocketRequestHandler } from "./GN-app-api/handler/controller/handler/RegisterSocketRequestHandler";
 import { AppleService } from "./GN-app-api/service/AppleService";
 import { xMail } from "./GN-library/xmail/lib/xMail";
-
-interface OnRunSuccess {
-	(): void;
-}
+import { TimerService } from "./GN-app-api/service/TimerService";
+import { IFacebookService } from "./GN-app-api/service/IFacebookService";
+import { IAppleService } from "./GN-app-api/service/IAppleService";
+import { ITimerService } from "./GN-app-api/service/ITimerService";
+import { OnRunSuccess } from "./GN-library/xbuilder/lib/OnRunSuccess";
+import { ILockService } from "./GN-app-api/service/ILockService";
+import { LockService } from "./GN-app-api/service/LockService";
+import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
+import { LoginType } from "./GN-common/constant/enumType/LoginType";
 
 export class GameApplication {
 	private socketApp: SocketApp;
@@ -35,17 +40,36 @@ export class GameApplication {
 	private xConfig: xConfig;
 	private xDatabase: xDatabase;
 	private xMail: xMail;
+	private xCacheData: xCacheData;
 
-	private facebookService: FacebookService;
-	private appleService: AppleService;
+	private facebookService: IFacebookService;
+	private appleService: IAppleService;
+	private timerService: ITimerService;
+	private lockService: ILockService;
+
+	private loginTypeEnables: LoginType[] = [];
 
 	constructor() {
+		this.loginTypeEnables = [
+			LoginType.Account,
+			LoginType.Device,
+			LoginType.Facebook,
+			LoginType.Google,
+			LoginType.Apple,
+			LoginType.UserId,
+			LoginType.PublicAddress,
+			LoginType.CustomId,
+		];
+
 		this.facebookService = new FacebookService();
 		this.appleService = new AppleService();
+		this.timerService = new TimerService();
+		this.lockService = new LockService();
 
 		this.xConfig = new xConfig();
 		this.xDatabase = new xDatabase();
 		this.xMail = new xMail();
+		this.xCacheData = new xCacheData();
 
 		this.requestController = new RequestController();
 	}
@@ -108,30 +132,50 @@ export class GameApplication {
 		return this.xMail;
 	}
 
-	public getFacebookService(): FacebookService {
+	public getCacheData(): xCacheData {
+		return this.xCacheData;
+	}
+
+	public getFacebookService(): IFacebookService {
 		return this.facebookService;
 	}
 
-	public getAppleService(): AppleService {
+	public getAppleService(): IAppleService {
 		return this.appleService;
 	}
 
-	public sendEventTo(userId: string, operationEvent: OperationEvent) {
+	public getTimerService(): ITimerService {
+		return this.timerService;
+	}
+
+	public getLockService(): ILockService {
+		return this.lockService;
+	}
+
+	public getLoginTypeEnables(): LoginType[] {
+		return this.loginTypeEnables;
+	}
+
+	public setLoginTypeEnables(loginTypeEnables: LoginType[]): void {
+		this.loginTypeEnables = loginTypeEnables;
+	}
+
+	public sendEventTo(userId: string, operationEvent: OperationEvent): void {
 		this.socketApp.getEmitter().to(userId).emit(EVENT_CMD, operationEvent.toSocketData());
 	}
 
-	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent) {
+	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): void {
 		for (let i = 0; i < userIds.length; i++) {
 			let userId = userIds[i];
 			this.sendEventTo(userId, operationEvent);
 		}
 	}
 
-	public sendEventToAllPlayer(operationEvent: OperationEvent) {
+	public sendEventToAllPlayer(operationEvent: OperationEvent): void {
 		this.socketApp.getEmitter().of("/").emit(EVENT_CMD, operationEvent.toSocketData());
 	}
 
-	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent) {
+	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent): void {
 		this.socketApp
 			.getEmitter()
 			.of("/" + namespace)

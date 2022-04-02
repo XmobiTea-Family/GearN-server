@@ -3,14 +3,12 @@ import { DefaultApplicationStartup } from "./DefaultApplicationStartup";
 import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { HttpAppSettings } from "./settings/HttpAppSettings";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
-import { ServerApplication } from "./ServerApplication";
 import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
+import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 
 import dotenv from "dotenv";
-
-// require('dotenv').config({'path': __dirname + '/.env' });
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
 	public configPathEnv(pathEnv: string): void {
@@ -19,7 +17,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		});
 	}
 
-	public run(): void {
+	public run(onRunSuccess?: OnRunSuccess): void {
 		let applicationSettings = ApplicationSettings.Builder()
 			.setUseSSL(process.env.USE_SSL === "TRUE")
 			.setCertFilePath(process.env.CERT_FILE_PATH)
@@ -62,18 +60,10 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setSendGridApiKey(process.env.MAIL_SG_API_KEY)
 			.build();
 
-		this.serverApplication = ServerApplication.Builder()
-			.setApplicationSettings(applicationSettings)
-			.setHttpAppSettings(httpAppSettings)
-			.setSocketAppSettings(socketAppSettings)
-			.setOtherSettings(otherSettings)
-			.setDatabaseSettings(databaseSettings)
-			.setMailSettings(mailSettings)
-			.build();
+		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings);
 
-		console.log("GN Server init");
 		this.serverApplication.run(() => {
-			console.log("GN Server now is running!");
+			if (onRunSuccess != null) onRunSuccess();
 		});
 	}
 }

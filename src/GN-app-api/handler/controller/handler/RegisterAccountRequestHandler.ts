@@ -10,6 +10,7 @@ import { LoginErrorCode } from "./../../../../GN-common/constant/errorCode/Login
 import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandler";
 
 import bcrypt from "bcrypt";
+import { LoginType } from "../../../../GN-common/constant/enumType/LoginType";
 
 class RegisterAccountOperationRequest extends OperationRequest {
 	username: string;
@@ -40,6 +41,10 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (this.gameApplication.getLoginTypeEnables().indexOf(LoginType.Account) == -1) {
+			return this.newOperationInvalid(request);
 		}
 
 		let username = request.username.toLowerCase();

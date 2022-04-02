@@ -1,4 +1,5 @@
 import sgMail from "@sendgrid/mail";
+import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
 
 interface OnSendMailSuccess {
 	(): void;
@@ -6,10 +7,6 @@ interface OnSendMailSuccess {
 
 interface OnSendMailError {
 	(error: string): void;
-}
-
-interface OnRunSuccess {
-	(): void;
 }
 
 export class xMail {
@@ -32,7 +29,7 @@ export class xMail {
 
 	public async sendMail(toEmail: string, subject: string, contentHTML: string, onSendMailSuccess?: OnSendMailSuccess, onSendMailError?: OnSendMailError) {
 		if (!this.isInit) return;
-		
+
 		let msg = {
 			to: toEmail,
 			from: this.fromEmail,
