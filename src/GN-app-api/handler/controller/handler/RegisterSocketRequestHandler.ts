@@ -44,7 +44,7 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 		operationResponse.setParameter(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
 
 		if (this.postHandle != null) {
-			await this.postHandle(authInfo, operationRequest, operationResponse, []);
+			await this.postHandle(authInfo, request, operationResponse);
 		}
 
 		return operationResponse;

@@ -1,7 +1,16 @@
-const { ApplicationStartup } = require('./dist/index');
+const { FacebookService } = require('./dist/index');
 
-const applicationStartup = new ApplicationStartup();
-applicationStartup.run();
+a();
+
+async function a () {
+    let fb = new FacebookService();
+    let result = await fb.getBasicInfoByAccessToken("");
+
+    console.log("%O", result);
+}
+
+// const applicationStartup = new ApplicationStartup();
+// applicationStartup.run();
 
 process.on("uncaughtException", (uncaughtException) => {
 	console.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
@@ -14,3 +23,4 @@ process.on("uncaughtError", (uncaughtException) => {
 process.on("unhandledRejection", (reason) => {
 	console.log("Unhandled Rejection at: %s - message: %s", reason.stack, reason.message);
 });
+

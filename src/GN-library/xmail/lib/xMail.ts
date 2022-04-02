@@ -8,7 +8,13 @@ interface OnSendMailError {
 	(error: string): void;
 }
 
+interface OnRunSuccess {
+	(): void;
+}
+
 export class xMail {
+	private isInit: boolean = false;
+
 	private sendGridApiKey: string;
 	private fromEmail: string;
 
@@ -17,17 +23,16 @@ export class xMail {
 		this.fromEmail = fromEmail;
 	}
 
-	public run(): void {
+	public run(onRunSuccess?: OnRunSuccess): void {
 		sgMail.setApiKey(this.sendGridApiKey);
+		this.isInit = true;
+
+		if (onRunSuccess != null) onRunSuccess();
 	}
 
-	public async sendMail(
-		toEmail: string,
-		subject: string,
-		contentHTML: string,
-		onSendMailSuccess?: OnSendMailSuccess,
-		onSendMailError?: OnSendMailError
-	): Promise<void> {
+	public async sendMail(toEmail: string, subject: string, contentHTML: string, onSendMailSuccess?: OnSendMailSuccess, onSendMailError?: OnSendMailError) {
+		if (!this.isInit) return;
+		
 		let msg = {
 			to: toEmail,
 			from: this.fromEmail,

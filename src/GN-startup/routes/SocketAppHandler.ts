@@ -52,8 +52,8 @@ export class SocketAppHandler {
 			await this.onSocketRequest(socket, data);
 		});
 
-		socket.on(DISCONNECT_CMD, async (data) => {
-			await this.onSocketDisconnect(socket, data);
+		socket.on(DISCONNECT_CMD, (data) => {
+			this.onSocketDisconnect(socket, data);
 		});
 	}
 
@@ -129,7 +129,7 @@ export class SocketAppHandler {
 		// }
 	}
 
-	private async onSocketDisconnect(socket: Socket, data: string) {
-		if (this._onDisconnectCb != null) await this._onDisconnectCb(socket, data);
+	private onSocketDisconnect(socket: Socket, data: string) {
+		if (this._onDisconnectCb != null) this._onDisconnectCb(socket, data);
 	}
 }

@@ -8,14 +8,13 @@ export class FacebookService implements IFacebookService {
 	public async getBasicInfoByAccessToken(accessToken: string): Promise<{ [k: string]: any }> {
 		let answer: { [k: string]: any } = {};
 
-		await axios
-			.get(graphFBAPIUrl + graphFBAPIContentURL + accessToken)
-			.then((response) => {
-				answer = response.data;
-			})
-			.catch((error) => {
-				answer["error"] = error;
-			});
+		try {
+			let result = await axios.get(graphFBAPIUrl + graphFBAPIContentURL + accessToken);
+			answer = result.data;
+		}
+		catch (error) {
+			answer["error"] = error;
+		}
 
 		return answer;
 	}

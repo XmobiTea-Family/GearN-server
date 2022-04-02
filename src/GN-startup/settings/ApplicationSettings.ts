@@ -57,10 +57,6 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 }
 
 export class ApplicationSettings extends BuilderBase {
-	public getPort(): number {
-		return this.port;
-	}
-
 	constructor(builder: Builder) {
 		super();
 

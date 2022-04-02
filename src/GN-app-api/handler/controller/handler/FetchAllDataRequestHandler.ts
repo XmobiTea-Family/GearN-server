@@ -7,9 +7,9 @@ import { OperationCode } from "./../../../../GN-common/constant/OperationCode";
 import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
-import { FetchAllDataParameterCode } from "../../../../GN-common/constant/parameterCode/FetchAllDataParameterCode";
-import { FetchAllDataErrorCode } from "../../../../GN-common/constant/errorCode/FetchAllDataErrorCode";
-import { xDatetime } from "../../../../GN-library/xdatetime/lib/xDatetime";
+import { FetchAllDataParameterCode } from "./../../../../GN-common/constant/parameterCode/FetchAllDataParameterCode";
+import { FetchAllDataErrorCode } from "./../../../../GN-common/constant/errorCode/FetchAllDataErrorCode";
+import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 
 class FetchAllDataOperationRequest extends OperationRequest {
 	constructor(operationRequest: OperationRequest) {
@@ -69,7 +69,7 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 		operationResponse.setParameter(FetchAllDataParameterCode.DisplayName, gamePlayer.getDisplayName());
 
 		if (this.postHandle != null) {
-			await this.postHandle(authInfo, operationRequest, operationResponse, [gamePlayer]);
+			await this.postHandle(authInfo, request, operationResponse, gamePlayer);
 		}
 
 		return operationResponse;

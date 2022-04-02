@@ -28,4 +28,8 @@ export class xConfigBase {
 		this.configName = result["ConfigName"];
 		this.version = result["Version"];
 	}
+
+    public toJson(): string {
+        return JSON.stringify(this.doc);
+    }
 }

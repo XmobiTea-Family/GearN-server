@@ -400,7 +400,7 @@ export class LoginRequestHandler extends RequestHandler {
 		operationResponse.setParameter(ParameterCode.AuthToken, authInfo.getAuthToken());
 
 		if (this.postHandle != null) {
-			await this.postHandle(authInfo, request, operationResponse, [gamePlayer, sparkPlayer]);
+			await this.postHandle(authInfo, request, operationResponse, gamePlayer, sparkPlayer);
 		}
 
 		return operationResponse;

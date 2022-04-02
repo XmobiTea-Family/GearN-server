@@ -6,7 +6,7 @@ import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { LoginParameterCode } from "../../../../GN-common/constant/parameterCode/LoginParameterCode";
-import { LoginErrorCode } from "../../../../GN-common/constant/errorCode/LoginErrorCode";
+import { LoginErrorCode } from "./../../../../GN-common/constant/errorCode/LoginErrorCode";
 import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandler";
 
 import bcrypt from "bcrypt";
@@ -60,6 +60,8 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 			.getDatabase()
 			.createPlayerByUsernameAndPassword(username, passwordHash, this.DefaultSegments, request.getOriginRequest().getIP());
 		if (!sparkPlayer) return this.newOperationInternalServerError(request);
+
+		(request as any).isRegisterRequest = true;
 
 		return await this.onAuthenticationResponse(authInfo, request as LoginOperationRequest, sparkPlayer);
 	}

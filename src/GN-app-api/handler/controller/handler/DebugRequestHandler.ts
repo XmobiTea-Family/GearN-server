@@ -2,14 +2,14 @@ import { RequestHandler } from "./base/RequestHandler";
 
 import { OperationRequest } from "./../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../GN-common/constant/OperationCode";
+import { OperationCode } from "./../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../GN-common/entity/AuthInfo";
-import { DebugParameterCode } from "../../../../GN-common/constant/parameterCode/DebugParameterCode";
-import { GNArray, GNHashtable } from "../../../../GN-common/common/GNData";
-import { ParameterCode } from "../../../../GN-common/constant/parameterCode/ParameterCode";
-import { DebugErrorCode } from "../../../../GN-common/constant/errorCode/DebugErrorCode";
-import { ReturnCode } from "../../../../GN-common/constant/ReturnCode";
+import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
+import { DebugParameterCode } from "./../../../../GN-common/constant/parameterCode/DebugParameterCode";
+import { GNArray, GNHashtable } from "./../../../../GN-common/common/GNData";
+import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
+import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/DebugErrorCode";
+import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 
 class DebugOperationRequest extends OperationRequest {
 	booleanValue: boolean;

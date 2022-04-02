@@ -1,16 +1,22 @@
 import { xConfigItem } from "./entity/xConfigItem";
 import * as mongoDB from "mongodb";
 
+interface OnRunSuccess {
+	(): void;
+}
+
 export class xConfig {
 	private configDic: { [k: string]: xConfigItem } = {};
 	private configCollection: mongoDB.Collection<mongoDB.Document>;
 
-	public setConfigCollection(configCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setConfigCollection(configCollection: mongoDB.Collection<mongoDB.Document>): void {
 		this.configCollection = configCollection;
 	}
 
-	public run() {
+	public run(onRunSuccess?: OnRunSuccess): void {
 		this.syncAllConfig();
+
+		if (onRunSuccess != null) onRunSuccess();
 	}
 
 	public async syncAllConfig(): Promise<void> {

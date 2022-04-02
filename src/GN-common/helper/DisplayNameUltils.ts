@@ -1,6 +1,6 @@
 const RandomCharacter = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-import { xRandom } from "../../../../../GN-library/xrandom/lib/xRandom";
+import { xRandom } from "./../../GN-library/xrandom/lib/xRandom";
 
 export class DisplayNameUltils {
 	public static normalizeString(input: string): string {

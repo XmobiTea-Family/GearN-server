@@ -5,6 +5,8 @@ import { Request } from "./../../GN-common/entity/operationRequest/base/Request"
 import express from "express";
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
+import { GameApplication } from "./../../GameApplication";
+import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -13,7 +15,8 @@ interface OnHttpRequest {
 export class HttpAppHandler {
 	private _onRequestCb: OnHttpRequest;
 	private apiMiddleware: ApiMiddleware;
-	
+	private gameApplication: GameApplication;
+
 	private router: Router;
 
 	public setRouter(router: Router): void {
@@ -24,13 +27,28 @@ export class HttpAppHandler {
 		this.apiMiddleware = apiMiddleware;
 	}
 
+	public setGameApplication(gameApplication: GameApplication): void {
+		this.gameApplication = gameApplication;
+	}
+
 	public setOnHttpRequest(_onRequestCb: OnHttpRequest) {
 		this._onRequestCb = _onRequestCb;
 	}
 
 	public run(): void {
-		this.router.get('/getConfig', (req: express.Request, res: express.Response) => {
-		    return res.json([ReturnCode.Ok, new Date().getTime()]);
+		this.router.get('/getConfig/:configName', (req: express.Request, res: express.Response) => {
+			let configName = req.params.configName;
+			if (configName != null) {
+				let configItem = this.gameApplication.getConfigGame().getConfig(configName);
+		
+				if (configItem != null) return res.json([ReturnCode.Ok, {0: configItem.toJson()}]);
+			}
+		
+		    return res.json([ReturnCode.OperationInvalid]);
+		});
+
+		this.router.get("/ts", (req: express.Request, res: express.Response) => {
+			return res.json([ReturnCode.Ok, {0: xDatetime.getCurrentMilliseconds()}]);
 		});
 
 		let router2 = express.Router();
@@ -54,7 +72,6 @@ export class HttpAppHandler {
 		let operationResponse = new OperationResponse(code, 0);
 
 		let body = req.body;
-		// let id = body.i;
 		let params = body.d;
 
 		console.log(params);

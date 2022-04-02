@@ -11,7 +11,7 @@ import { EnterDisplayNameErrorCode } from "./../../../../GN-common/constant/erro
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { UserRoleType } from "./../../../../GN-common/constant/enumType/UserRoleType";
-import { DisplayNameUltils } from "./base/DisplayNameUltils";
+import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUltils";
 
 class EnterDisplayNameOperationRequest extends OperationRequest {
 	displayName: string;
@@ -74,7 +74,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 		}
 
 		if (this.postHandle != null) {
-			await this.postHandle(authInfo, operationRequest, operationResponse, [gamePlayer]);
+			await this.postHandle(authInfo, request, operationResponse, gamePlayer);
 		}
 
 		return operationResponse;

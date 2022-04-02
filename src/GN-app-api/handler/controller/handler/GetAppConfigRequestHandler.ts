@@ -2,14 +2,14 @@ import { RequestHandler } from "./base/RequestHandler";
 
 import { OperationRequest } from "./../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../GN-common/constant/OperationCode";
+import { OperationCode } from "./../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../GN-common/entity/AuthInfo";
-import { GNArray } from "../../../../GN-common/common/GNData";
-import { GetAppConfigParameterCode } from "../../../../GN-common/constant/parameterCode/GetAppConfigParameterCode";
-import { ParameterCode } from "../../../../GN-common/constant/parameterCode/ParameterCode";
-import { GetAppConfigErrorCode } from "../../../../GN-common/constant/errorCode/GetAppConfigErrorCode";
-import { ReturnCode } from "../../../../GN-common/constant/ReturnCode";
+import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
+import { GNArray } from "./../../../../GN-common/common/GNData";
+import { GetAppConfigParameterCode } from "./../../../../GN-common/constant/parameterCode/GetAppConfigParameterCode";
+import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
+import { GetAppConfigErrorCode } from "./../../../../GN-common/constant/errorCode/GetAppConfigErrorCode";
+import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 
 class GetAppConfigOperationRequest extends OperationRequest {
 	configTypes: GNArray;
@@ -66,7 +66,7 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 		if (configNotUptodateLst.length != 0) operationResponse.setParameter(GetAppConfigParameterCode.ConfigNotUptodateLst, configNotUptodateLst);
 
 		if (this.postHandle != null) {
-			await this.postHandle(authInfo, operationRequest, operationResponse, []);
+			await this.postHandle(authInfo, request, operationResponse);
 		}
 
 		return operationResponse;

@@ -11,12 +11,22 @@ import { Express } from "express";
 import http from "http";
 import https from "https";
 import fs from "fs";
-import { GameApplication } from "../GameApplication";
+import { GameApplication } from "./../GameApplication";
+import { MailSettings } from "./settings/MailSettings";
+import { DatabaseSettings } from "./settings/DatabaseSettings";
+import { OtherSettings } from "./settings/OtherSettings";
+
+interface OnRunSuccess {
+	(): void;
+}
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
 	protected httpAppSettings: HttpAppSettings;
 	protected socketAppSettings: SocketAppSettings;
+	protected mailSettings: MailSettings;
+	protected databaseSettings: DatabaseSettings;
+	protected otherSettings: OtherSettings;
 
 	public getApplicationSettings(): ApplicationSettings {
 		return this.applicationSettings;
@@ -30,25 +40,49 @@ abstract class BuilderBase {
 		return this.socketAppSettings;
 	}
 
+	public getDatabaseSettings(): DatabaseSettings {
+		return this.databaseSettings;
+	}
+
+	public getMailSettings(): MailSettings {
+		return this.mailSettings;
+	}
+
+	public getOtherSettings(): OtherSettings {
+		return this.otherSettings;
+	}
+
 	constructor() {}
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 	public setApplicationSettings(applicationSettings: ApplicationSettings): Builder {
 		this.applicationSettings = applicationSettings;
-
 		return this;
 	}
 
 	public setHttpAppSettings(httpAppSettings: HttpAppSettings): Builder {
 		this.httpAppSettings = httpAppSettings;
-
 		return this;
 	}
 
 	public setSocketAppSettings(socketAppSettings: SocketAppSettings): Builder {
 		this.socketAppSettings = socketAppSettings;
+		return this;
+	}
 
+	public setDatabaseSettings(databaseSettings: DatabaseSettings): Builder {
+		this.databaseSettings = databaseSettings;
+		return this;
+	}
+
+	public setMailSettings(mailSettings: MailSettings): Builder {
+		this.mailSettings = mailSettings;
+		return this;
+	}
+
+	public setOtherSettings(otherSettings: OtherSettings): Builder {
+		this.otherSettings = otherSettings;
 		return this;
 	}
 
@@ -61,24 +95,26 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 	}
 }
 
-interface OnServerRunSuccess {
-	(port: number): void;
-}
-
 export class ServerApplication extends BuilderBase {
 	private httpApp: HttpApp;
 	private socketApp: SocketApp;
 	private gameApplication: GameApplication;
 
-	public run(onServerRunSuccess: OnServerRunSuccess): void {
-		const port = this.applicationSettings.getPort();
+	public run(onRunSuccess?: OnRunSuccess): void {
+		console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
 
+		const port = this.applicationSettings.getPort();
+		console.log("[GN] Try run server on the port " + port);
+		
 		const app = express();
 		const server = this.getServer(app, this.getApplicationSettings());
+
+		this.gameApplication = this.newGameApplication();
 
 		this.httpApp = this.newHttpApp();
 		this.httpApp.setAppSettings(this.getHttpAppSettings());
 		this.httpApp.setApp(app);
+		this.httpApp.setGameApplication(this.gameApplication);
 		this.httpApp.run();
 
 		this.socketApp = this.newSocketApp();
@@ -86,13 +122,75 @@ export class ServerApplication extends BuilderBase {
 		this.socketApp.setServer(server);
 		this.socketApp.run();
 
-		this.gameApplication = new GameApplication();
 		this.gameApplication.setHttpApp(this.httpApp);
 		this.gameApplication.setSocketApp(this.socketApp);
 
-		server.listen(port, () => {
-			if (onServerRunSuccess != null) onServerRunSuccess(port);
+		this.gameApplication.getDatabase().run(() => {
+			console.log("[GN] Database run success");
+		}, (err) => {
+			console.error("[GN] Database connect error " + err);
 		});
+
+		if (this.mailSettings.getEnable()) {
+			this.gameApplication.getMail().run(() => {
+				console.log("[GN] Send Grid Mail run success");
+			})
+		}
+
+		let authTokenCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAuthTokenCollectionName());
+		this.httpApp.getApiMiddleware().setAuthTokenCollection(authTokenCollection);
+
+		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
+		this.socketApp.setEmitter(adapterEventCollection);
+
+		this.gameApplication.getAppleService().setMainPackageName(this.getOtherSettings().getPackageName());
+
+		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
+		this.gameApplication.getConfigGame().setConfigCollection(configCollection);
+		this.gameApplication.getConfigGame().run(() => {
+			console.log("[GN] Config Game run success");
+		});
+
+		this.gameApplication.run(() => {
+			console.log("[GN] Game Application run success");
+		});
+
+		server.listen(port, () => {
+			console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
+			console.log("[GN] Server Application running on port " + port);
+
+			if (onRunSuccess != null) onRunSuccess();
+		});
+	}
+
+	private newGameApplication(): GameApplication {
+		let gameApplication = new GameApplication();
+
+		// settings database
+		{
+			let connectionString = this.databaseSettings.getConnectionString();
+			let databaseName = this.databaseSettings.getDatabaseName();
+			let gameName = this.databaseSettings.getGameName();
+	
+			let minPoolSize = this.databaseSettings.getMinPoolSize();
+			let maxPoolSize = this.databaseSettings.getMaxPoolSize();
+	
+			let options = {
+				maxPoolSize: maxPoolSize,
+				minPoolSize: minPoolSize
+			};
+			gameApplication.getDatabase().init(connectionString, databaseName, gameName, options);
+		}
+
+		// setting mail
+		{
+			let sendGridApiKey = this.mailSettings.getSendGridApiKey();
+			let fromEmail = this.mailSettings.getFromEmail();
+	
+			gameApplication.getMail().init(sendGridApiKey, fromEmail);
+		}
+
+		return gameApplication;
 	}
 
 	public getGameApplication(): GameApplication {
@@ -126,6 +224,9 @@ export class ServerApplication extends BuilderBase {
 		this.applicationSettings = builder.getApplicationSettings();
 		this.httpAppSettings = builder.getHttpAppSettings();
 		this.socketAppSettings = builder.getSocketAppSettings();
+		this.databaseSettings = builder.getDatabaseSettings();
+		this.mailSettings = builder.getMailSettings();
+		this.otherSettings = builder.getOtherSettings();
 	}
 
 	public static Builder(): Builder {
