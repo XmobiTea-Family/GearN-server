@@ -13,7 +13,7 @@ import dotenv from "dotenv";
 export class ServerApplicationStartup extends DefaultApplicationStartup {
 	public configPathEnv(pathEnv: string): void {
 		dotenv.config({
-			path: __dirname + pathEnv,
+			path: pathEnv,
 		});
 	}
 

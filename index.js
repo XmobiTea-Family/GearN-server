@@ -1,6 +1,7 @@
-const { DefaultApplicationStartup } = require('./dist/index');
+const { ServerApplicationStartup } = require('./dist/index');
 
-let applicationStartup = new DefaultApplicationStartup();
+let applicationStartup = new ServerApplicationStartup();
+applicationStartup.configPathEnv(__dirname + "/.debug.env");
 applicationStartup.run();
 
 // let gameApplication = applicationStartup.getGameApplication();
