@@ -42,20 +42,21 @@ export class HttpApp {
 	public run(): void {
 		this.app.use(express.json());
 
-		this.app.get("/info", (req: express.Request, res: express.Response) => {
-			return res.json([ReturnCode.Ok, { 1: "GN Server - Copyright XmobiTea 2022\nVersion: 1.0.0" }]);
+		this.app.post("/", (req: express.Request, res: express.Response) => {
+			return res.sendStatus(403);
+		});
+
+		this.app.get("/", (req: express.Request, res: express.Response) => {
+			return res.send(
+				'<a href="https://xmobitea.com"><h1 style="text-align:center;">XmobiTea</h1></a>' +
+				'<h3 style="text-align:center;">-->==>>> [GN Server] <<<==<--</h3>' +
+				'<h4 style="text-align:center;"> Version: ' + GameApplication.getServerVersion() + '</h4><br>' +
+				'<h4 style="text-align:center;">©2022 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
+				);
 		});
 
 		this.app.get("/ping", async function (req: express.Request, res: express.Response) {
 			return res.sendStatus(200);
-		});
-
-		this.app.get("/", (req: express.Request, res: express.Response) => {
-			return res.sendStatus(403);
-		});
-
-		this.app.post("/", (req: express.Request, res: express.Response) => {
-			return res.sendStatus(403);
 		});
 
 		this.app.use(

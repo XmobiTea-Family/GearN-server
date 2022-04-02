@@ -1,4 +1,4 @@
-const { ServerApplicationStartup } = require('./dist/index');
+const { ServerApplicationStartup } = require("./dist/index");
 
 let applicationStartup = new ServerApplicationStartup();
 applicationStartup.configPathEnv(__dirname + "/.debug.env");
@@ -18,4 +18,3 @@ process.on("uncaughtError", (uncaughtException) => {
 process.on("unhandledRejection", (reason) => {
 	console.log("Unhandled Rejection at: %s - message: %s", reason.stack, reason.message);
 });
-

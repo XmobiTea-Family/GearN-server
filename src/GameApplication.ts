@@ -38,6 +38,10 @@ interface CreateIndexesOptions {
 }
 
 export class GameApplication {
+	public static getServerVersion(): string {
+		return "0.1.0";
+	}
+
 	private socketApp: SocketApp;
 	private httpApp: HttpApp;
 
@@ -124,8 +128,8 @@ export class GameApplication {
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
 		this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
-			if (error != null) console.error("Create index FAILED at collection " + collectionName + ", index: " + index + ", error: " + error);
-			else console.log("Create index success at collection " + collectionName + ", index: " + index + ", result: " + result);
+			if (error != null) console.error("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
+			else console.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
 		});
 	}
 

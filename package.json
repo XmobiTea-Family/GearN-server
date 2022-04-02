@@ -1,16 +1,15 @@
 {
-  "name": "xmobitea-gn-server",
-  "version": "1.0.0",
-  "description": "GN Server for Unity",
+  "name": "@xmobitea/gn-server",
+  "version": "0.1.0",
+  "description": "Game Networking Server by XmobiTea",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "scripts": {
-    "debug": "node index",
     "test": "mocha -r ts-node/register ./test/**/*.test.ts",
     "build": "rm -rf ./dist && webpack --mode production --display-modules",
     "push": "npm run build && npm run test && npm publish && git push"
   },
-  "author": "XmobiTea",
+  "author": "changx.develop@gmail.com (https://xmobitea.com)",
   "license": "ISC",
   "devDependencies": {
     "@types/async-lock": "^1.1.3",
@@ -53,5 +52,20 @@
     "socket.io": "^4.4.0",
     "socketio-file-upload": "*",
     "web3": "^1.7.1"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XmobiTea-Family/GN-Server.git"
+  },
+  "keywords": [
+    "GN",
+    "Server"
+  ],
+  "bugs": {
+    "url": "https://github.com/XmobiTea-Family/GN-Server/issues"
+  },
+  "homepage": "https://github.com/XmobiTea-Family/GN-Server#readme"
 }
