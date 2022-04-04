@@ -16,6 +16,9 @@ export { RequestHandler };
 import { OperationCode } from "./GN-common/constant/OperationCode";
 export { OperationCode };
 
+import { EventCode } from "./GN-common/constant/EventCode";
+export { EventCode };
+
 import { AuthInfo } from "./GN-common/entity/AuthInfo";
 export { AuthInfo };
 

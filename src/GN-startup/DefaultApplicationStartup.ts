@@ -2,7 +2,7 @@ import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { HttpAppSettings } from "./settings/HttpAppSettings";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { ServerApplication } from "./ServerApplication";
-import { GameApplication } from "../GameApplication";
+import { GameApplication } from "./../GameApplication";
 import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";

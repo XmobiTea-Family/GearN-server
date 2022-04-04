@@ -5,12 +5,12 @@ import { OperationCode } from "./../../../../GN-common/constant/OperationCode";
 import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
-import { LoginParameterCode } from "../../../../GN-common/constant/parameterCode/LoginParameterCode";
+import { LoginParameterCode } from "./../../../../GN-common/constant/parameterCode/LoginParameterCode";
 import { LoginErrorCode } from "./../../../../GN-common/constant/errorCode/LoginErrorCode";
 import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandler";
 
 import bcrypt from "bcrypt";
-import { LoginType } from "../../../../GN-common/constant/enumType/LoginType";
+import { LoginType } from "./../../../../GN-common/constant/enumType/LoginType";
 
 class RegisterAccountOperationRequest extends OperationRequest {
 	username: string;

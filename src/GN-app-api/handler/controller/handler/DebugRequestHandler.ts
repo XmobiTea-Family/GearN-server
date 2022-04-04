@@ -10,6 +10,8 @@ import { GNArray, GNHashtable } from "./../../../../GN-common/common/GNData";
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/DebugErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
+import { OperationEvent } from "./../../../../GN-common/entity/operationEvent/OperationEvent";
+import { EventCode } from "./../../../../GN-common/constant/EventCode";
 
 class DebugOperationRequest extends OperationRequest {
 	booleanValue: boolean;
@@ -54,6 +56,13 @@ export class DebugRequestHandler extends RequestHandler {
 		operationResponse.setParameter(DebugParameterCode.String, request.stringValue);
 		operationResponse.setParameter(DebugParameterCode.GNHashtable, request.gnHashtableValue);
 		operationResponse.setParameter(DebugParameterCode.GNArray, request.gnArrayValue);
+
+		if (authInfo != null) {
+			let operationEvent = new OperationEvent(EventCode.OnDebug);
+			operationEvent.setParameters(operationResponse.getParameters());
+
+			this.gameApplication.sendEventTo(authInfo.getUserId(), operationEvent);
+		}
 
 		return operationResponse;
 	}

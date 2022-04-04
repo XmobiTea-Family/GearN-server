@@ -1,4 +1,4 @@
-const GN_VERSION = "0.1.3";
+const GN_VERSION = "0.1.4";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -90,12 +90,12 @@ export class GameApplication {
 
 	public init(): void {
 		this.requestController.addHandler(new DebugRequestHandler(this), false);
-		this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
-		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
 		this.requestController.addHandler(new GetAppConfigRequestHandler(this), false);
 		this.requestController.addHandler(new LoginRequestHandler(this), false);
 		this.requestController.addHandler(new RegisterAccountRequestHandler(this), false);
+		this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
 		this.requestController.addHandler(new RegisterSocketRequestHandler(this));
+		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {
@@ -201,20 +201,20 @@ export class GameApplication {
 		this.loginTypeEnables = loginTypeEnables;
 	}
 
-	public sendEventTo(userId: string, operationEvent: OperationEvent): void {
-		this.socketApp.getSocketAppHandler().sendEventTo(userId, operationEvent);
+	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().sendEventTo(userId, operationEvent);
 	}
 
-	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): void {
-		this.socketApp.getSocketAppHandler().sendEventToMoreUser(userIds, operationEvent);
+	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().sendEventToMoreUser(userIds, operationEvent);
 	}
 
-	public sendEventToAllPlayer(operationEvent: OperationEvent): void {
-		this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent);
+	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent);
 	}
 
-	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent): void {
-		this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
+	public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
 	}
 
 	private handleSocketDisconnect(socket: Socket, data: string) {

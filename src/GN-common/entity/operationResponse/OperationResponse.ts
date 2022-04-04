@@ -39,6 +39,10 @@ export class OperationResponse {
 		return this;
 	}
 
+	public getParameters(): GNHashtable {
+		return this.parameters;
+	}
+
 	public toString(): string {
 		return this.operationCode + " " + this.responseId + " " + this.parameters.toString();
 	}

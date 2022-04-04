@@ -12,7 +12,8 @@ import { OperationEvent } from "./../../GN-common/entity/operationEvent/Operatio
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
 import { Emitter } from "@socket.io/mongo-emitter";
 import { encode, decode } from "@msgpack/msgpack";
-import { ApiMiddleware } from "../middleware/ApiMiddleware";
+import { ApiMiddleware } from "./../middleware/ApiMiddleware";
+import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -88,7 +89,16 @@ export class SocketAppHandler {
 		if (data.length == 0) return;
 
 		let authToken = data[0] as string;
-		if (!authToken) return;
+		if (!authToken) {
+			if (socket.data.isAuthenticated === true) {
+				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
+
+				socket.data.isAuthenticated = true;
+				socket.data.authInfo = null;
+			}
+
+			return;
+		}
 
 		let authInfo = this.apiMiddleware.getAuthInfoByAuthToken(authToken);
 
@@ -159,13 +169,13 @@ export class SocketAppHandler {
 		socket.emit(EVENT_CMD, encode(socketData));
 	}
 
-	public sendEventTo(userId: string, operationEvent: OperationEvent): void {
+	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
 
 		this.emitter.to(userId).emit(EVENT_CMD, encode(socketData));
 	}
 
-	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): void {
+	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
 		let socketDataMsgPack = encode(socketData);
 
@@ -175,13 +185,13 @@ export class SocketAppHandler {
 		}
 	}
 
-	public sendEventToAllPlayer(operationEvent: OperationEvent): void {
+	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
 
 		this.emitter.of("/").emit(EVENT_CMD, encode(socketData));
 	}
 
-	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent): void {
+	public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
 
 		this.emitter.of("/" + namespace).emit(EVENT_CMD, encode(socketData));
