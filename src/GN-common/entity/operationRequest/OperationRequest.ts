@@ -1,5 +1,5 @@
 import { Request } from "./base/Request";
-import { GNData, GNHashtable } from "./../../common/GNData";
+import { GNHashtable } from "./../../common/GNData";
 
 export class OperationRequest {
 	protected originRequest: Request;
@@ -52,8 +52,9 @@ export class OperationRequest {
 			let key = keys[i];
 
 			let keyInt = Number.parseInt(key);
-
-			gnHashtable.add(keyInt, GNData.createUseDataFromOriginData(d[key]));
+			
+			if (!isNaN(keyInt))
+				gnHashtable.add(keyInt, d[key]);
 		}
 
 		answer.parameters = gnHashtable;

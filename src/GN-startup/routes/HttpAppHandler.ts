@@ -53,15 +53,18 @@ export class HttpAppHandler {
 		});
 
 		this.apiRouter = express.Router();
-		this.router.use("/api", wrap(this.apiMiddleware.authenticateToken), this.apiRouter);
+		this.router.use("/api", wrap((req, res, next) => {
+			return this.apiMiddleware.authenticateToken(req, res, next);
+		}), this.apiRouter);
 
 		this.apiRouter.post("/:code", async (req: express.Request, res: express.Response) => {
 			let operationResponse = await this.onHttpRequest(req);
 
 			if (operationResponse != null) {
-				console.log("[SEND] %O", operationResponse);
+				let httpData = operationResponse.toHttpData();
+				console.log("[HTTP SEND] %O", httpData);
 
-				return res.send(operationResponse.toHttpData());
+				return res.send(httpData);
 			}
 
 			return res.send([ReturnCode.OperationInvalid]);
@@ -99,7 +102,7 @@ export class HttpAppHandler {
 		request.setParameters(parameters);
 		request.setAuthenticate((req as any).authInfo);
 
-		console.log("[RECV] %O", request);
+		console.log("[HTTP RECV] %O", request);
 
 		if (this._onRequestCb != null) {
 			operationResponse = await this._onRequestCb(request);

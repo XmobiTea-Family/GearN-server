@@ -17,6 +17,14 @@ export class RequestController {
 		if (!onlyAuthenticated) this.requestUnAuthenticatedCodes.push(code);
 	}
 
+	public removeHandler(code: number) {
+		delete this.handlers[code];
+	}
+
+	public removeAllHandlers() {
+		this.handlers = [];
+	}
+
 	public getHandler(code: number): IRequestHandler {
 		return this.handlers[code];
 	}

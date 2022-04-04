@@ -46,6 +46,7 @@ export class SocketApp {
 		});
 
 		this.socketAppHandler = new SocketAppHandler();
+		this.socketAppHandler.setEmitter(this.emitter);
 		this.socketAppHandler.setServer(this.io);
 
 		if (this.appSettings.getEnable()) {

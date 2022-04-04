@@ -13,4 +13,5 @@ export class LoginParameterCode {
 	public static readonly Message: number = 12;
 	public static readonly CustomId: number = 13;
 	public static readonly TsExpire: number = 14;
+	public static readonly Reason: number = 15;
 }

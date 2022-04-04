@@ -69,9 +69,9 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 
 		if (gamePlayer.getSegmentValue("UserRole") == UserRoleType.UserNonActivate) {
 			gamePlayer.setSegmentValue("UserRole", UserRoleType.User);
-
-			operationResponse.setParameter(EnterDisplayNameParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
 		}
+
+		operationResponse.setParameter(EnterDisplayNameParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse, gamePlayer);

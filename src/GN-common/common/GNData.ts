@@ -52,7 +52,7 @@ export abstract class GNData implements IGNData {
 			let value1 = value[key];
 			let keyInt = Number.parseInt(key);
 
-			answer.add(keyInt, GNData.createUseDataFromOriginData(value1));
+			answer.add(keyInt, value1);
 		}
 
 		return answer;
@@ -63,13 +63,13 @@ export abstract class GNData implements IGNData {
 
 		let valueArr = <Array<any>>value;
 		for (let i = 0; i < valueArr.length; i++) {
-			answer.add(GNData.createUseDataFromOriginData(valueArr[i]));
+			answer.add(valueArr[i]);
 		}
 
 		return answer;
 	}
 
-	public static createUseDataFromOriginData(value: any): GNDataType {
+	protected static createUseDataFromOriginData(value: any): GNDataType {
 		if (value == null) return null;
 
 		let typeOfValue = typeof value;
@@ -79,6 +79,10 @@ export abstract class GNData implements IGNData {
 		if (typeOfValue === "number") return value as number;
 
 		if (typeOfValue === "boolean") return value as boolean;
+
+		if (value instanceof GNArray) return value;
+
+		if (value instanceof GNHashtable) return value;
 
 		if (typeOfValue === "object") {
 			return this.createGNHashtableFromObject(value);

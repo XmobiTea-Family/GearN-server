@@ -4,7 +4,7 @@ let applicationStartup = new ServerApplicationStartup();
 applicationStartup.configPathEnv(__dirname + "/.debug.env");
 applicationStartup.run();
 
-// let gameApplication = applicationStartup.getGameApplication();
+let gameApplication = applicationStartup.getGameApplication();
 // console.log("%O", gameApplication);
 
 process.on("uncaughtException", (uncaughtException) => {

@@ -4,7 +4,6 @@ import { HttpAppHandler } from "./routes/HttpAppHandler";
 import cors from "cors";
 import express from "express";
 import { Express } from "express";
-import { ReturnCode } from "./../GN-common/constant/ReturnCode";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
 import { GameApplication } from "./../GameApplication";
 
@@ -41,6 +40,7 @@ export class HttpApp {
 
 	public run(): void {
 		this.app.use(express.json());
+		this.app.use(express.urlencoded({ extended: false }));
 
 		this.app.post("/", (req: express.Request, res: express.Response) => {
 			return res.sendStatus(403);

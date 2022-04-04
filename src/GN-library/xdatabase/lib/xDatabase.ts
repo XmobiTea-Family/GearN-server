@@ -266,13 +266,11 @@ export class xDatabase {
 			RefreshToken: "",
 		};
 		await collection.insertOne(result);
-
 		return new xSparkPlayer(result, collection);
 	}
 
 	public async loadPlayerByFacebookId(facebookId: string): Promise<xSparkPlayer> {
 		let collection = this.systemCollection(SparkCollectionName.Player);
-
 		let result = await collection.findOne({ "UserExternal.FacebookId": facebookId });
 		if (result) {
 			return new xSparkPlayer(result, collection);
@@ -315,13 +313,11 @@ export class xDatabase {
 			};
 
 		await collection.insertOne(result);
-
 		return new xSparkPlayer(result, collection);
 	}
 
 	public async loadPlayerByAppleUserId(appleUserId: string): Promise<xSparkPlayer> {
 		let collection = this.systemCollection(SparkCollectionName.Player);
-
 		let result = await collection.findOne({ "UserExternal.AppleUserId": appleUserId });
 		if (result) {
 			return new xSparkPlayer(result, collection);
@@ -364,7 +360,6 @@ export class xDatabase {
 			};
 
 		await collection.insertOne(result);
-
 		return new xSparkPlayer(result, collection);
 	}
 
@@ -450,7 +445,7 @@ export class xDatabase {
 
 	public async loadGamePlayer(userId: string): Promise<xGamePlayer> {
 		let collection = this.systemGameCollection(SparkCollectionName.Player);
-		let result = collection.findOne({ UserId: userId });
+		let result = await collection.findOne({ UserId: userId });
 		if (result) {
 			return new xGamePlayer(result, collection);
 		}
@@ -476,7 +471,6 @@ export class xDatabase {
 			PrivateData: {},
 		};
 		await collection.insertOne(result);
-
 		let thisPlayer = new xGamePlayer(result, collection);
 		return thisPlayer;
 	}

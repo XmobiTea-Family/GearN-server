@@ -448,6 +448,7 @@ export class LoginRequestHandler extends RequestHandler {
 					operationResponse.setReturnCode(ReturnCode.Ok);
 					operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserHadBanned);
 					operationResponse.setParameter(LoginParameterCode.TsExpire, banNormal["TsExpire"]);
+					operationResponse.setParameter(LoginParameterCode.Reason, banNormal["Reason"]);
 
 					return operationResponse;
 				} else {

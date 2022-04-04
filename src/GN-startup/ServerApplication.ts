@@ -152,6 +152,7 @@ export class ServerApplication extends BuilderBase {
 			console.log("[GN] Config Game run success");
 		});
 
+		this.gameApplication.init();
 		this.gameApplication.run(() => {
 			console.log("[GN] Game Application run success");
 		});

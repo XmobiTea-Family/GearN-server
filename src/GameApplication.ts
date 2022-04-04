@@ -1,3 +1,4 @@
+const GN_VERSION = "0.1.2";
 const EVENT_CMD = "e";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
@@ -39,7 +40,7 @@ interface CreateIndexesOptions {
 
 export class GameApplication {
 	public static getServerVersion(): string {
-		return "0.1.0";
+		return GN_VERSION;
 	}
 
 	private socketApp: SocketApp;
@@ -82,10 +83,15 @@ export class GameApplication {
 		this.xCacheData = new xCacheData();
 
 		this.requestController = new RequestController();
+
+		(this.timerService as TimerService).run();
+
 	}
 
 	public init(): void {
-		// this.requestController.addHandler(new DebugRequestHandler(this), false);
+
+
+		this.requestController.addHandler(new DebugRequestHandler(this), false);
 		this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
 		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
 		this.requestController.addHandler(new GetAppConfigRequestHandler(this), false);
@@ -95,9 +101,17 @@ export class GameApplication {
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {
-		this.httpApp.getHttpAppHandler().setOnHttpRequest(this.handleOnRequest);
-		this.socketApp.getSocketAppHandler().setOnSocketDisconnect(this.handleSocketDisconnect);
-		this.socketApp.getSocketAppHandler().setOnSocketRequest(this.handleOnRequest);
+		this.httpApp.getHttpAppHandler().setOnHttpRequest((request: Request) => {
+			return this.handleOnRequest(request);
+		});
+
+		this.socketApp.getSocketAppHandler().setOnSocketDisconnect((socket: Socket, data) => {
+			this.handleSocketDisconnect(socket, data);
+		});
+
+		this.socketApp.getSocketAppHandler().setOnSocketRequest((request: Request) => {
+			return this.handleOnRequest(request);
+		});
 
 		if (onRunSuccess != null) onRunSuccess();
 	}
@@ -135,6 +149,10 @@ export class GameApplication {
 
 	public getHandler(code: number): IRequestHandler {
 		return this.requestController.getHandler(code);
+	}
+
+	public removeHandler(code: number): void {
+		return this.requestController.removeHandler(code);
 	}
 
 	public getConfigGame(): xConfig {
@@ -178,25 +196,19 @@ export class GameApplication {
 	}
 
 	public sendEventTo(userId: string, operationEvent: OperationEvent): void {
-		this.socketApp.getEmitter().to(userId).emit(EVENT_CMD, operationEvent.toSocketData());
+		this.socketApp.getSocketAppHandler().sendEventTo(userId, operationEvent);
 	}
 
 	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): void {
-		for (let i = 0; i < userIds.length; i++) {
-			let userId = userIds[i];
-			this.sendEventTo(userId, operationEvent);
-		}
+		this.socketApp.getSocketAppHandler().sendEventToMoreUser(userIds, operationEvent);
 	}
 
 	public sendEventToAllPlayer(operationEvent: OperationEvent): void {
-		this.socketApp.getEmitter().of("/").emit(EVENT_CMD, operationEvent.toSocketData());
+		this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent);
 	}
 
 	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent): void {
-		this.socketApp
-			.getEmitter()
-			.of("/" + namespace)
-			.emit(EVENT_CMD, operationEvent.toSocketData());
+		this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
 	}
 
 	private handleSocketDisconnect(socket: Socket, data: string) {

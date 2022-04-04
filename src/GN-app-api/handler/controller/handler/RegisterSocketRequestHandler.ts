@@ -55,12 +55,12 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 		if (socket) {
 			authInfo.setOtherData("SocketId", sid);
 
-			let socketAny = socket as any;
-			socketAny.authInfo = authInfo;
-			socketAny.isAuthenticated = true;
+			socket.data.authInfo = authInfo;
+			socket.data.isAuthenticated = true;
 
 			let userId = authInfo.getUserId();
-			socketAny.userId = userId;
+			socket.data.userId = userId;
+			
 			socket.join(userId);
 		}
 	}
