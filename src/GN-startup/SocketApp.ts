@@ -6,11 +6,13 @@ import { SocketAppHandler } from "./routes/SocketAppHandler";
 import { createAdapter } from "@socket.io/mongo-adapter";
 import { Emitter } from "@socket.io/mongo-emitter";
 import * as mongoDB from "mongodb";
+import { ApiMiddleware } from "./middleware/ApiMiddleware";
 
 export class SocketApp {
 	private appSettings: SocketAppSettings;
 	private server: http.Server;
 	private socketAppHandler: SocketAppHandler;
+	private apiMiddleware: ApiMiddleware;
 	private io: Server;
 
 	private emitter: Emitter;
@@ -35,6 +37,10 @@ export class SocketApp {
 		return this.socketAppHandler;
 	}
 
+	public setApiMiddleware(apiMiddleware: ApiMiddleware) {
+		this.apiMiddleware = apiMiddleware;
+	}
+
 	public setAppSettings(appSettings: SocketAppSettings): void {
 		this.appSettings = appSettings;
 	}
@@ -48,6 +54,7 @@ export class SocketApp {
 		this.socketAppHandler = new SocketAppHandler();
 		this.socketAppHandler.setEmitter(this.emitter);
 		this.socketAppHandler.setServer(this.io);
+		this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
 
 		if (this.appSettings.getEnable()) {
 			this.socketAppHandler.run();

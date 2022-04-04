@@ -26,8 +26,8 @@ export class HttpApp {
 		return this.httpAppHandler;
 	}
 
-	public getApiMiddleware(): ApiMiddleware {
-		return this.apiMiddleware;
+	public setApiMiddleware(apiMiddleware: ApiMiddleware) {
+		this.apiMiddleware = apiMiddleware;
 	}
 
 	public setAppSettings(appSettings: HttpAppSettings): void {
@@ -68,13 +68,11 @@ export class HttpApp {
 			})
 		);
 
-		this.apiMiddleware = new ApiMiddleware();
-		this.apiMiddleware.run();
-
 		this.httpAppHandler = new HttpAppHandler();
 		this.httpAppHandler.setRouter(this.app);
 		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.httpAppHandler.setGameApplication(this.gameApplication);
+		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
 
 		if (this.appSettings.getEnable()) {
 			this.httpAppHandler.run();

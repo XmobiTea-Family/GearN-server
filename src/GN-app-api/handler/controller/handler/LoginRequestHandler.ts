@@ -471,23 +471,22 @@ export class LoginRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		let oldAuthInfo = this.gameApplication.getHttpApp().getApiMiddleware().getAuthInfoByUserId(userId);
+		let oldAuthInfo = this.gameApplication.getApiMiddleware().getAuthInfoByUserId(userId);
 
 		if (oldAuthInfo) {
 			oldAuthInfo.setOtherUserLogin(true);
-			this.gameApplication.getHttpApp().getApiMiddleware().updateAuthInfo(oldAuthInfo);
-			// Remove cái này đi
+			this.gameApplication.getApiMiddleware().updateAuthInfo(oldAuthInfo);
 		}
 
 		let newAuth = AuthInfo.Builder().setUserId(userId).setRole(gamePlayer.getSegmentValue("UserRole")).build();
-		let newAuthInfo = this.gameApplication.getHttpApp().getApiMiddleware().generateAuthToken(newAuth);
+		let newAuthInfo = this.gameApplication.getApiMiddleware().generateAuthToken(newAuth);
 
-		if (oldAuthInfo) {
-			let roomId = oldAuthInfo.getOtherData("RoomId");
-			if (roomId != null) {
-				newAuthInfo.setOtherData("RoomId", roomId);
-			}
-		}
+		// if (oldAuthInfo) {
+		// 	let roomId = oldAuthInfo.getOtherData("RoomId");
+		// 	if (roomId != null) {
+		// 		newAuthInfo.setOtherData("RoomId", roomId);
+		// 	}
+		// }
 
 		return await this.handleLoginSuccess(newAuthInfo, request, sparkPlayer, gamePlayer);
 	}

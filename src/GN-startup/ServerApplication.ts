@@ -17,6 +17,7 @@ import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { OtherSettings } from "./settings/OtherSettings";
 import { AppleService } from "./../GN-app-api/service/AppleService";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
+import { ApiMiddleware } from "./middleware/ApiMiddleware";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -97,6 +98,7 @@ export class ServerApplication extends BuilderBase {
 	private httpApp: HttpApp;
 	private socketApp: SocketApp;
 	private gameApplication: GameApplication;
+	private apiMiddleware: ApiMiddleware;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
 		console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
@@ -107,15 +109,21 @@ export class ServerApplication extends BuilderBase {
 		const app = express();
 		const server = this.getServer(app, this.getApplicationSettings());
 
+		this.apiMiddleware = this.newApiMiddleware();
+		this.apiMiddleware.run();
+
 		this.gameApplication = this.newGameApplication();
+		this.gameApplication.setApiMiddleware(this.apiMiddleware);
 
 		this.httpApp = this.newHttpApp();
+		this.httpApp.setApiMiddleware(this.apiMiddleware);
 		this.httpApp.setAppSettings(this.getHttpAppSettings());
 		this.httpApp.setApp(app);
 		this.httpApp.setGameApplication(this.gameApplication);
 		this.httpApp.run();
 
 		this.socketApp = this.newSocketApp();
+		this.socketApp.setApiMiddleware(this.apiMiddleware);
 		this.socketApp.setAppSettings(this.getSocketAppSettings());
 		this.socketApp.setServer(server);
 		this.socketApp.run();
@@ -139,7 +147,7 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		let authTokenCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAuthTokenCollectionName());
-		this.httpApp.getApiMiddleware().setAuthTokenCollection(authTokenCollection);
+		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
 
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
@@ -193,6 +201,11 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		return gameApplication;
+	}
+
+	private newApiMiddleware(): ApiMiddleware {
+		this.apiMiddleware = new ApiMiddleware();
+		return this.apiMiddleware;
 	}
 
 	public getGameApplication(): GameApplication {

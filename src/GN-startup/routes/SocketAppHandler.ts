@@ -1,6 +1,7 @@
 const CONNECT_CMD = "connection";
 const DISCONNECT_CMD = "disconnect";
 
+const REQUEST_AUTHTOKEN_CMD = "a";
 const REQUEST_CMD = "r";
 const RESPONSE_CMD = "r";
 const EVENT_CMD = "e";
@@ -11,6 +12,7 @@ import { OperationEvent } from "./../../GN-common/entity/operationEvent/Operatio
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
 import { Emitter } from "@socket.io/mongo-emitter";
 import { encode, decode } from "@msgpack/msgpack";
+import { ApiMiddleware } from "../middleware/ApiMiddleware";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -23,12 +25,17 @@ interface OnSocketRequest {
 export class SocketAppHandler {
 	private _onDisconnectCb: OnSocketDisconnect;
 	private _onRequestCb: OnSocketRequest;
+	private apiMiddleware: ApiMiddleware;
 
 	private server: Server;
 	private emitter: Emitter;
 
 	public setServer(server: Server): void {
 		this.server = server;
+	}
+
+	public setApiMiddleware(apiMiddleware: ApiMiddleware): void {
+		this.apiMiddleware = apiMiddleware;
 	}
 
 	public setEmitter(emitter: Emitter) {
@@ -54,6 +61,11 @@ export class SocketAppHandler {
 		console.log("MasterClient connect with " + socket.id);
 
 		this.initSocket(socket);
+
+		socket.on(REQUEST_AUTHTOKEN_CMD, (...data) => {
+			this.onSocketRequestAuthToken(socket, data);
+		});
+
 		socket.on(REQUEST_CMD, (...data) => {
 			this.onSocketRequest(socket, data);
 		});
@@ -63,7 +75,7 @@ export class SocketAppHandler {
 		});
 	}
 
-	private async initSocket(socket: Socket) {
+	private initSocket(socket: Socket) {
 		let ip = socket.conn.remoteAddress;
 		if (ip.substring(0, 7) == "::ffff:") {
 			ip = ip.substring(7);
@@ -72,43 +84,59 @@ export class SocketAppHandler {
 		socket.data.IPAddress = ip;
 	}
 
-	private async onSocketRequest(socket: Socket, data: any) {
-		let requestData: any;
+	private onSocketRequestAuthToken(socket: Socket, data: any) {
+		if (data.length == 0) return;
 
-		try {
-			let buffer = data[0] as Buffer;
-			if (buffer[0] == 4) {
-				buffer = buffer.slice(1);
+		let authToken = data[0] as string;
+		if (!authToken) return;
+
+		let authInfo = this.apiMiddleware.getAuthInfoByAuthToken(authToken);
+
+		if (authInfo != null) {
+			socket.data.isAuthenticated = true;
+			socket.data.authInfo = authInfo;
+			socket.join(authInfo.getUserId());
+		}
+	}
+
+	private onSocketRequest(socket: Socket, data: any) {
+		this.apiMiddleware.socketAuthenticateToken(socket, async () => {
+			let requestData: any;
+
+			try {
+				let buffer = data[0] as Buffer;
+				if (buffer[0] == 4) {
+					buffer = buffer.slice(1);
+				}
+
+				requestData = decode(buffer);
+			} catch (err) {
+				console.error(err);
+				return;
 			}
 
-			requestData = decode(buffer);
-		}
-		catch (err) {
-			console.error(err);
-			return;
-		}
+			let code = requestData[0] as number;
+			let params = requestData.length > 1 ? (requestData[1] as {}) : {};
+			let requestId = requestData.length > 2 ? (requestData[2] as number) : -1;
 
-		let code = requestData[0] as number;
-		let params = requestData.length > 1 ? (requestData[1] as {}) : {};
-		let requestId = requestData.length > 2 ? (requestData[2] as number) : -1;
+			if (this._onRequestCb != null) {
+				let request = new Request(code);
+				request.setIP(socket.data.IPAddress);
+				request.setParameters(params);
+				request.setRequestId(requestId);
 
-		if (this._onRequestCb != null) {
-			let request = new Request(code);
-			request.setIP(socket.handshake.address);
-			request.setParameters(params);
-			request.setRequestId(requestId);
-	
-			let isAuthenticated = socket.data.isAuthenticated;
-			if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
+				let isAuthenticated = socket.data.isAuthenticated;
+				if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
 
-			console.log("[SOCKET RECV] %O", request);
+				console.log("[SOCKET RECV] %O", request);
 
-			let operationResponse = await this._onRequestCb(request);
+				let operationResponse = await this._onRequestCb(request);
 
-			if (operationResponse != null) {
-				this.sendResponseForSocket(socket, operationResponse);
+				if (operationResponse != null) {
+					this.sendResponseForSocket(socket, operationResponse);
+				}
 			}
-		}
+		});
 	}
 
 	private onSocketDisconnect(socket: Socket, data: string) {
@@ -156,8 +184,6 @@ export class SocketAppHandler {
 	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent): void {
 		let socketData = operationEvent.toSocketData();
 
-		this.emitter
-			.of("/" + namespace)
-			.emit(EVENT_CMD, encode(socketData));
+		this.emitter.of("/" + namespace).emit(EVENT_CMD, encode(socketData));
 	}
 }

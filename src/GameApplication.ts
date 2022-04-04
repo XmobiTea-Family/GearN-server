@@ -1,5 +1,4 @@
-const GN_VERSION = "0.1.2";
-const EVENT_CMD = "e";
+const GN_VERSION = "0.1.3";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -31,6 +30,7 @@ import { ILockService } from "./GN-app-api/service/ILockService";
 import { LockService } from "./GN-app-api/service/LockService";
 import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
 import { LoginType } from "./GN-common/constant/enumType/LoginType";
+import { ApiMiddleware } from "./GN-startup/middleware/ApiMiddleware";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -45,6 +45,7 @@ export class GameApplication {
 
 	private socketApp: SocketApp;
 	private httpApp: HttpApp;
+	private apiMiddleware: ApiMiddleware;
 
 	private requestController: RequestController;
 
@@ -85,12 +86,9 @@ export class GameApplication {
 		this.requestController = new RequestController();
 
 		(this.timerService as TimerService).run();
-
 	}
 
 	public init(): void {
-
-
 		this.requestController.addHandler(new DebugRequestHandler(this), false);
 		this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
 		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
@@ -122,6 +120,14 @@ export class GameApplication {
 
 	public setHttpApp(httpApp: HttpApp): void {
 		this.httpApp = httpApp;
+	}
+
+	public setApiMiddleware(apiMiddleware: ApiMiddleware) {
+		this.apiMiddleware = apiMiddleware;
+	}
+
+	public getApiMiddleware(): ApiMiddleware {
+		return this.apiMiddleware;
 	}
 
 	public getSocketApp(): SocketApp {
@@ -212,15 +218,14 @@ export class GameApplication {
 	}
 
 	private handleSocketDisconnect(socket: Socket, data: string) {
-		let socketAny = socket as any;
-		if (socketAny.isAuthenticated) {
-			socketAny.isAuthenticated = false;
-			let authInfo = socketAny.authInfo as AuthInfo;
+		if (socket.data.isAuthenticated) {
+			socket.data.isAuthenticated = false;
+			let authInfo = socket.data.authInfo as AuthInfo;
 			authInfo.removeOtherData("SocketId");
 		}
 
-		if (socketAny.userId != null) {
-			socket.leave(socketAny.userId);
+		if (socket.data.userId != null) {
+			socket.leave(socket.data.userId);
 		}
 	}
 

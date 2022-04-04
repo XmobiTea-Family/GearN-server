@@ -1,3 +1,4 @@
+const AUTH_TOKEN = "a";
 const EXPIRED_TOKEN = 2 * 1000 * 60 * 60 * 24;
 
 import express from "express";
@@ -6,6 +7,7 @@ import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { Md5Generate } from "./../../GN-common/helper/Md5Generate";
 import { nanoid } from "nanoid";
 import * as mongoDB from "mongodb";
+import { Socket } from "socket.io";
 
 export class ApiMiddleware {
 	private authInfoDic: { [k: string]: AuthInfo };
@@ -40,6 +42,10 @@ export class ApiMiddleware {
 		return authInfoLst.find((x) => x.getUserId() == userId);
 	}
 
+	public getAuthInfoByAuthToken(authToken: string) {
+		return this.authInfoDic[authToken];
+	}
+
 	public updateAuthInfo(authInfo: AuthInfo) {
 		let authToken = authInfo.getAuthToken();
 
@@ -49,7 +55,7 @@ export class ApiMiddleware {
 
 	public async authenticateToken(req: express.Request, res: express.Response, next: Function) {
 		let headers = req.headers;
-		let authToken = headers["authtoken"] as string;
+		let authToken = headers[AUTH_TOKEN] as string;
 
 		let reqAny = req as any;
 
@@ -63,7 +69,7 @@ export class ApiMiddleware {
 				if (authInfoTemp != null) {
 					authInfo = AuthInfo.Builder()
 						.setAuthToken(authInfoTemp["AuthToken"])
-						.setOtherData("RoomId", null)
+						// .setOtherData("RoomId", null)
 						.setIsRemove(false)
 						.setOtherUserLogin(false)
 						.setRole(authInfoTemp["Role"])
@@ -94,6 +100,29 @@ export class ApiMiddleware {
 
 					this.authInfoDic[authToken] = authInfo;
 				}
+			}
+		}
+
+		return next();
+	}
+
+	public async socketAuthenticateToken(socket: Socket, next: Function) {
+		if (socket.data.isAuthenticated === true) {
+			let authInfo = socket.data.authInfo as AuthInfo;
+			let authToken = authInfo.getAuthToken();
+
+			if (authInfo.getOtherUserLogin()) {
+				delete this.authInfoDic[authToken];
+
+				socket.data.isAuthenticated = false;
+			} else if (authInfo.isRemove()) {
+				delete this.authInfoDic[authToken];
+
+				socket.data.isAuthenticated = false;
+			} else if (authInfo.getTsExpire() < new Date().getTime()) {
+				delete this.authInfoDic[authToken];
+
+				socket.data.isAuthenticated = false;
 			}
 		}
 

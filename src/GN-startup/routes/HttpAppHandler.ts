@@ -53,9 +53,13 @@ export class HttpAppHandler {
 		});
 
 		this.apiRouter = express.Router();
-		this.router.use("/api", wrap((req, res, next) => {
-			return this.apiMiddleware.authenticateToken(req, res, next);
-		}), this.apiRouter);
+		this.router.use(
+			"/api",
+			wrap((req, res, next) => {
+				return this.apiMiddleware.authenticateToken(req, res, next);
+			}),
+			this.apiRouter
+		);
 
 		this.apiRouter.post("/:code", async (req: express.Request, res: express.Response) => {
 			let operationResponse = await this.onHttpRequest(req);
