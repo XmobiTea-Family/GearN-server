@@ -8,56 +8,54 @@ import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 
-import dotenv from "dotenv";
-
 export class ServerApplicationStartup extends DefaultApplicationStartup {
-	public configPathEnv(pathEnv: string): void {
-		dotenv.config({
-			path: pathEnv,
-		});
+	private gnConfig: {[k: string]: any};
+
+	public config(gnConfig: {}): void {
+		this.gnConfig = gnConfig;
 	}
 
 	public run(onRunSuccess?: OnRunSuccess): void {
 		let applicationSettings = ApplicationSettings.Builder()
-			.setUseSSL(process.env.USE_SSL === "TRUE")
-			.setCertFilePath(process.env.CERT_FILE_PATH)
-			.setKeyFilePath(process.env.KEY_FILE_PATH)
-			.setPort(Number.parseInt(process.env.PORT))
+			.setUseSSL(this.gnConfig["useSsl"])
+			.setCertFilePath(this.gnConfig["keyFilePath"])
+			.setKeyFilePath(this.gnConfig["certFilePath"])
+			.setPort(this.gnConfig["port"])
 			.build();
 
 		let httpAppSettings = HttpAppSettings.Builder()
-			.setEnable(process.env.HTTP_APP_ENABLE === "TRUE")
-			.setOrigin(process.env.HTTP_APP_ALLOW_ORIGIN)
-			.addMethods("GET", "POST")
-			.setCredentials(process.env.HTTP_APP_CREDENTIALS === "TRUE")
-			.addAllowedHeaders(process.env.HTTP_APP_ALLOW_HEADERS)
+			.setEnable(this.gnConfig["httpAppEnable"])
+			.setOrigin(this.gnConfig["httpAppAllowOrigin"])
+			.addMethods(this.gnConfig["httpAppAllowMethods"])
+			.setCredentials(this.gnConfig["httpAppCredentials"])
+			.addAllowedHeaders(this.gnConfig["httpAppAllowHeaders"])
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder()
-			.setEnable(process.env.SOCKET_APP_ENABLE === "TRUE")
-			.setPingInterval(Number.parseInt(process.env.SOCKET_APP_PING_INTERVAL))
-			.setPingTimeout(Number.parseInt(process.env.SOCKET_APP_PING_TIMEOUT))
+			.setEnable(this.gnConfig["socketAppEnable"])
+			.setPingInterval(this.gnConfig["socketAppPingInterval"])
+			.setPingTimeout(this.gnConfig["socketAppPingTimeout"])
 			.build();
 
 		let otherSettings = OtherSettings.Builder()
-			.setAdapterEventCollectionName(process.env.ADAPTER_EVENT_COLLECTION_NAME)
-			.setAuthTokenCollectionName(process.env.AUTH_INFO_COLLECTION_NAME)
-			.setConfigGameCollectionName(process.env.CONFIG_COLLECTION_NAME)
-			.setPackageName(process.env.PACKAGE_NAME)
+			.setAdapterEventCollectionName(this.gnConfig["adapterEventCollectionName"])
+			.setAuthTokenCollectionName(this.gnConfig["authInfoCollectionName"])
+			.setConfigGameCollectionName(this.gnConfig["configCollectionName"])
+			.setPackageName(this.gnConfig["packageName"])
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()
-			.setConnectionString(process.env.DATABASE_CONNECTION_STRING)
-			.setDatabaseName(process.env.DATABASE_NAME)
-			.setGameName(process.env.DATABASE_GAME_NAME)
-			.setMinPoolSize(Number.parseInt(process.env.DATABASE_MIN_POOL_SIZE))
-			.setMaxPoolSize(Number.parseInt(process.env.DATABASE_MAX_POOL_SIZE))
+			.setConnectionString(this.gnConfig["databaseConnectionString"])
+			.setDatabaseName(this.gnConfig["databaseName"])
+			.setGameName(this.gnConfig["databaseGameName"])
+			.setMinPoolSize(this.gnConfig["databaseMinPoolSize"])
+			.setMaxPoolSize(this.gnConfig["databaseMaxPoolSize"])
 			.build();
 
 		let mailSettings = MailSettings.Builder()
-			.setEnable(process.env.MAIL_ENABLE === "TRUE")
-			.setFromEmail(process.env.MAIL_SEND_FROM)
-			.setSendGridApiKey(process.env.MAIL_SG_API_KEY)
+			.setEnable(this.gnConfig["mailEnable"])
+			.setFromEmail(this.gnConfig["mailSendFrom"])
+			.setSendGridApiKey(this.gnConfig["mailSendGridApiKey"])
 			.build();
 
 		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings);

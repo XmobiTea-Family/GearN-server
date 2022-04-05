@@ -1,0 +1,34 @@
+{
+    "name": "debug",
+    "options": {
+        "port": 2202,
+        "useSsl": false,
+        "keyFilePath":"",
+        "certFilePath": "",
+
+        "httpAppEnable": true,
+        "httpAppAllowOrigin": "*",
+        "httpAppCredentials": true,
+        "httpAppAllowMethods": ["GET", "POST"],
+        "httpAppAllowHeaders": ["a"],
+        
+        "socketAppEnable":true,
+        "socketAppPingInterval": 50000,
+        "socketAppPingTimeout": 5000,
+
+        "adapterEventCollectionName": "AdapterEventCollection",
+        "authInfoCollectionName": "AuthInfoCollection",
+        "configCollectionName": "ConfigGame",
+        "packageName": "com.xmobitea.GNServer",
+        
+        "databaseConnectionString": "mongodb://localhost:27017",
+        "databaseName": "XmobiTea",
+        "databaseGameName": "GN.",
+        "databaseMinPoolSize": 5,
+        "databaseMaxPoolSize": 100,
+
+        "mailEnable": false,
+        "mailSendFrom": "changx@xmobitea.com",
+        "mailSendGridApiKey": "SG."
+    }
+}
