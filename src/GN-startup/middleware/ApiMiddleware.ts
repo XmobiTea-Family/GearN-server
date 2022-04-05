@@ -32,7 +32,7 @@ export class ApiMiddleware {
 			.build();
 
 		this.authInfoDic[authToken] = authInfo;
-		this.authTokenCollection.insertOne(authInfo);
+		this.authTokenCollection.insertOne(authInfo.toDocumentData());
 
 		return authInfo;
 	}
@@ -50,7 +50,7 @@ export class ApiMiddleware {
 		let authToken = authInfo.getAuthToken();
 
 		this.authInfoDic[authToken] = authInfo;
-		this.authTokenCollection.updateOne({ AuthInfo: authInfo }, { $set: authInfo });
+		this.authTokenCollection.updateOne({ AuthInfo: authInfo }, { $set: authInfo.toDocumentData() });
 	}
 
 	public async authenticateToken(req: express.Request, res: express.Response, next: Function) {
@@ -70,11 +70,12 @@ export class ApiMiddleware {
 					authInfo = AuthInfo.Builder()
 						.setAuthToken(authInfoTemp["AuthToken"])
 						// .setOtherData("RoomId", null)
-						.setIsRemove(false)
-						.setOtherUserLogin(false)
+						.setIsRemove(authInfoTemp["IsRemove"])
+						.setOtherUserLogin(authInfoTemp["OtherUserLogin"])
 						.setRole(authInfoTemp["Role"])
 						.setTsExpire(authInfoTemp["TsExpire"])
 						.setUserId(authInfoTemp["UserId"])
+						.setOtherDatas(authInfoTemp["OtherDatas"])
 						.build();
 				}
 			}

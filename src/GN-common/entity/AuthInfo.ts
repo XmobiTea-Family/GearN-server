@@ -69,6 +69,11 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
+	public setOtherDatas(otherDatas: {}): Builder {
+		this.otherDatas = otherDatas;
+		return this as Builder;
+	}
+
 	public removeOtherData(key: string): Builder {
 		delete this.otherDatas[key];
 		return this as Builder;
@@ -131,6 +136,18 @@ export class AuthInfo extends BuilderBase {
 		this.tsExpire = builder.getTsExpire();
 		this.otherUserLogin = builder.getOtherUserLogin();
 		this.otherDatas = builder.getOtherDatas();
+	}
+
+	public toDocumentData() {
+		return {
+			"AuthToken": this.authToken,
+			"UserId": this.userId,
+			"Role": this.role,
+			"IsRemove": this.remove,
+			"TsExpire": this.tsExpire,
+			"OtherUserLogin": this.otherUserLogin,
+			"OtherDatas": this.otherDatas
+		}
 	}
 
 	public static Builder(): Builder {

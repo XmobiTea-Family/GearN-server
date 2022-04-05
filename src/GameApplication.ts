@@ -1,4 +1,4 @@
-const GN_VERSION = "0.1.5";
+const GN_VERSION = "0.1.6";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";

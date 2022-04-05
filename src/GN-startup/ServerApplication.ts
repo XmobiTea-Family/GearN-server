@@ -149,7 +149,7 @@ export class ServerApplication extends BuilderBase {
 		let authTokenCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAuthTokenCollectionName());
 		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
 
-		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
+		let adapterEventCollection = this.gameApplication.getDatabase().systemCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
 
 		(this.gameApplication.getAppleService() as AppleService).setMainPackageName(this.getOtherSettings().getPackageName());
