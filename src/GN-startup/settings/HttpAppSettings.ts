@@ -43,7 +43,7 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 		return this;
 	}
 
-	public addMethods(...methodTypes: MethodType[]): Builder {
+	public addMethods(methodTypes: MethodType[]): Builder {
 		methodTypes.forEach((methodType) => this.addMethod(methodType));
 		return this;
 	}
@@ -62,7 +62,7 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 		return this;
 	}
 
-	public addAllowedHeaders(...allowedHeaders: string[]): Builder {
+	public addAllowedHeaders(allowedHeaders: string[]): Builder {
 		allowedHeaders.forEach((allowedHeader) => this.addAllowedHeader(allowedHeader));
 		return this;
 	}

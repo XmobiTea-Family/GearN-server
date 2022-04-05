@@ -14,7 +14,7 @@ export class DefaultApplicationStartup {
 	public run(onRunSuccess?: OnRunSuccess): void {
 		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).build();
 
-		let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigin("*").addMethods("GET", "POST").setCredentials(true).addAllowedHeaders("a").build();
+		let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigin("*").addMethods(["GET", "POST"]).setCredentials(true).addAllowedHeaders(["a"]).build();
 
 		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).build();
 

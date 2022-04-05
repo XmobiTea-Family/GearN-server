@@ -1,7 +1,9 @@
+const gnConfig = require("./GNconfig.debug.json");
+
 const { ServerApplicationStartup } = require("./dist/index");
 
 let applicationStartup = new ServerApplicationStartup();
-applicationStartup.configPathEnv(__dirname + "/.debug.env");
+applicationStartup.config(gnConfig.options);
 applicationStartup.run();
 
 let gameApplication = applicationStartup.getGameApplication();
