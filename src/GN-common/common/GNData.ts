@@ -85,11 +85,8 @@ export abstract class GNData implements IGNData {
 		if (value instanceof GNHashtable) return value;
 
 		if (typeOfValue === "object") {
-			return this.createGNHashtableFromObject(value);
-		}
-
-		if (value.length != null) {
-			return this.createGNArrayFromArray(value);
+			if (Array.isArray(value)) return this.createGNArrayFromArray(value);
+			else return this.createGNHashtableFromObject(value);
 		}
 
 		return null;
