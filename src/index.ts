@@ -1,3 +1,31 @@
+import { DebugParameterCode } from "./GN-common/constant/parameterCode/DebugParameterCode";
+import { GetAppConfigParameterCode } from "./GN-common/constant/parameterCode/GetAppConfigParameterCode";
+import { LoginParameterCode } from "./GN-common/constant/parameterCode/LoginParameterCode";
+import { EnterDisplayNameParameterCode } from "./GN-common/constant/parameterCode/EnterDisplayNameParameterCode";
+import { FetchAllDataParameterCode } from "./GN-common/constant/parameterCode/FetchAllDataParameterCode";
+import { RegisterSocketParameterCode } from "./GN-common/constant/parameterCode/RegisterSocketParameterCode";
+
+export { DebugParameterCode };
+export { GetAppConfigParameterCode };
+export { LoginParameterCode };
+export { EnterDisplayNameParameterCode };
+export { FetchAllDataParameterCode };
+export { RegisterSocketParameterCode };
+
+import { DebugErrorCode } from "./GN-common/constant/errorCode/DebugErrorCode";
+import { GetAppConfigErrorCode } from "./GN-common/constant/errorCode/GetAppConfigErrorCode";
+import { LoginErrorCode } from "./GN-common/constant/errorCode/LoginErrorCode";
+import { EnterDisplayNameErrorCode } from "./GN-common/constant/errorCode/EnterDisplayNameErrorCode";
+import { FetchAllDataErrorCode } from "./GN-common/constant/errorCode/FetchAllDataErrorCode";
+import { RegisterSocketErrorCode } from "./GN-common/constant/errorCode/RegisterSocketErrorCode";
+
+export { DebugErrorCode };
+export { GetAppConfigErrorCode };
+export { LoginErrorCode };
+export { EnterDisplayNameErrorCode };
+export { FetchAllDataErrorCode };
+export { RegisterSocketErrorCode };
+
 import { OperationRequest } from "./GN-common/entity/operationRequest/OperationRequest";
 export { OperationRequest };
 
