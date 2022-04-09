@@ -91,3 +91,9 @@ export { xDatetime };
 
 import { xRandom } from "./GN-library/xrandom/lib/xRandom";
 export { xRandom };
+
+import { Debug } from "./GN-library/xdebug/lib/xDebug";
+export { Debug };
+
+import { GameApplication } from "./GameApplication";
+export { GameApplication };

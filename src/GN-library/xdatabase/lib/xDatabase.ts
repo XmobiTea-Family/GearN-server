@@ -79,9 +79,9 @@ export class xDatabase {
 		if (options != null) {
 			let createIndexesOptionsAny = createIndexesOptions as any;
 
-			createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
-			createIndexesOptionsAny.sparse = options.sparse;
-			createIndexesOptionsAny.unique = options.unique;
+			if (options.expireAfterSeconds != null) createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
+			if (options.sparse != null) createIndexesOptionsAny.sparse = options.sparse;
+			if (options.unique != null) createIndexesOptionsAny.unique = options.unique;
 		}
 
 		collection.createIndex(index, createIndexesOptions, cb);

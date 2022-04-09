@@ -29,6 +29,12 @@
 
         "mailEnable": false,
         "mailSendFrom": "changx@xmobitea.com",
-        "mailSendGridApiKey": "SG."
+        "mailSendGridApiKey": "SG.",
+
+        "debugToolEnable": true,
+
+        "logToConsoleEnable": true,
+		"logToFileEnable": true,
+		"logPath": "./log/Server.log"
     }
 }

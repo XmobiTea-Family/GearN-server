@@ -7,6 +7,7 @@ import { OperationResponse } from "./../../GN-common/entity/operationResponse/Op
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { GameApplication } from "./../../GameApplication";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "../../GN-library/xdebug/lib/xDebug";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -66,7 +67,7 @@ export class HttpAppHandler {
 
 			if (operationResponse != null) {
 				let httpData = operationResponse.toHttpData();
-				console.log("[HTTP SEND] %O", httpData);
+				Debug.log("[HTTP SEND] %O", httpData);
 
 				return res.send(httpData);
 			}
@@ -81,8 +82,6 @@ export class HttpAppHandler {
 
 		let body = req.body;
 		let params = body.d;
-
-		console.log(params);
 
 		let parameters = null;
 		if (!params) parameters = {};
@@ -106,7 +105,7 @@ export class HttpAppHandler {
 		request.setParameters(parameters);
 		request.setAuthenticate((req as any).authInfo);
 
-		console.log("[HTTP RECV] %O", request);
+		Debug.log("[HTTP RECV] %O", request);
 
 		if (this._onRequestCb != null) {
 			operationResponse = await this._onRequestCb(request);

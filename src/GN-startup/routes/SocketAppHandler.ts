@@ -14,6 +14,7 @@ import { Emitter } from "@socket.io/mongo-emitter";
 import { encode, decode } from "@msgpack/msgpack";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
+import { Debug } from "../../GN-library/xdebug/lib/xDebug";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -59,7 +60,7 @@ export class SocketAppHandler {
 	}
 
 	private socketConnect(socket: Socket) {
-		console.log("MasterClient connect with " + socket.id);
+		Debug.log("MasterClient connect with " + socket.id);
 
 		this.initSocket(socket);
 
@@ -121,7 +122,7 @@ export class SocketAppHandler {
 
 				requestData = decode(buffer);
 			} catch (err) {
-				console.error(err);
+				Debug.logException(err);
 				return;
 			}
 
@@ -138,7 +139,7 @@ export class SocketAppHandler {
 				let isAuthenticated = socket.data.isAuthenticated;
 				if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
 
-				console.log("[SOCKET RECV] %O", request);
+				Debug.log("[SOCKET RECV] %O", request);
 
 				let operationResponse = await this._onRequestCb(request);
 
@@ -150,21 +151,21 @@ export class SocketAppHandler {
 	}
 
 	private onSocketDisconnect(socket: Socket, data: string) {
-		console.log("MasterClient disconnected " + socket.id);
+		Debug.log("MasterClient disconnected " + socket.id);
 
 		if (this._onDisconnectCb != null) this._onDisconnectCb(socket, data);
 	}
 
 	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse) {
 		let socketData = operationResponse.toSocketData();
-		console.log("[SOCKET SEND] %O", socketData);
+		Debug.log("[SOCKET SEND] %O", socketData);
 
 		socket.emit(RESPONSE_CMD, encode(socketData));
 	}
 
 	private sendEventForSocket(socket: Socket, operationEvent: OperationEvent) {
 		let socketData = operationEvent.toSocketData();
-		console.log("[EVENT SEND] %O", socketData);
+		Debug.log("[EVENT SEND] %O", socketData);
 
 		socket.emit(EVENT_CMD, encode(socketData));
 	}

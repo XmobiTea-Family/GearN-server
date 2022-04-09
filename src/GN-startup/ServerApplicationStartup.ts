@@ -7,9 +7,10 @@ import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
+import { LogSettings } from "./settings/LogSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
-	private gnConfig: {[k: string]: any};
+	private gnConfig: { [k: string]: any };
 
 	public config(gnConfig: {}): void {
 		this.gnConfig = gnConfig;
@@ -58,7 +59,21 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setSendGridApiKey(this.gnConfig["mailSendGridApiKey"])
 			.build();
 
-		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings);
+		let logSettings = LogSettings.Builder()
+			.setLogToFileEnable(this.gnConfig["logToFileEnable"])
+			.setLogToConsoleEnable(this.gnConfig["logToConsoleEnable"])
+			.setLogPath(this.gnConfig["logPath"])
+			.build();
+
+		this.serverApplication = this.newServerApplication(
+			applicationSettings,
+			httpAppSettings,
+			socketAppSettings,
+			otherSettings,
+			databaseSettings,
+			mailSettings,
+			logSettings
+		);
 
 		this.serverApplication.run(() => {
 			if (onRunSuccess != null) onRunSuccess();

@@ -18,6 +18,8 @@ import { OtherSettings } from "./settings/OtherSettings";
 import { AppleService } from "./../GN-app-api/service/AppleService";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
+import { Debug } from "../GN-library/xdebug/lib/xDebug";
+import { LogSettings } from "./settings/LogSettings";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -26,6 +28,7 @@ abstract class BuilderBase {
 	protected mailSettings: MailSettings;
 	protected databaseSettings: DatabaseSettings;
 	protected otherSettings: OtherSettings;
+	protected logSettings: LogSettings;
 
 	public getApplicationSettings(): ApplicationSettings {
 		return this.applicationSettings;
@@ -49,6 +52,10 @@ abstract class BuilderBase {
 
 	public getOtherSettings(): OtherSettings {
 		return this.otherSettings;
+	}
+
+	public getLogSettings(): LogSettings {
+		return this.logSettings;
 	}
 
 	constructor() {}
@@ -85,6 +92,11 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 		return this;
 	}
 
+	public setLogSettings(logSettings: LogSettings): Builder {
+		this.logSettings = logSettings;
+		return this;
+	}
+
 	public build() {
 		return new ServerApplication(this);
 	}
@@ -101,10 +113,20 @@ export class ServerApplication extends BuilderBase {
 	private apiMiddleware: ApiMiddleware;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
+		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
+		console.log("[GN Server] FullLogPath at: " + fullLogPath);
+
+		Debug.init({
+			isLogToConsoleEnable: this.getLogSettings().getLogToConsoleEnable(),
+			isLogToFileEnable: this.getLogSettings().getLogToFileEnable(),
+			logPath: fullLogPath
+		});
+		Debug.run();
+
+		Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
 
 		const port = this.applicationSettings.getPort();
-		console.log("[GN] Try run server on the port " + port);
+		Debug.log("[GN] Try run server on the port " + port);
 
 		const app = express();
 		const server = this.getServer(app, this.getApplicationSettings());
@@ -133,16 +155,16 @@ export class ServerApplication extends BuilderBase {
 
 		this.gameApplication.getDatabase().run(
 			() => {
-				console.log("[GN] Database run success");
+				Debug.log("[GN] Database run success");
 			},
 			(err) => {
-				console.error("[GN] Database connect error " + err);
+				Debug.logError("[GN] Database connect error " + err);
 			}
 		);
 
 		if (this.mailSettings.getEnable()) {
 			this.gameApplication.getMail().run(() => {
-				console.log("[GN] Send Grid Mail run success");
+				Debug.log("[GN] Send Grid Mail run success");
 			});
 		}
 
@@ -157,17 +179,17 @@ export class ServerApplication extends BuilderBase {
 		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
 		this.gameApplication.getConfigGame().setConfigCollection(configCollection);
 		this.gameApplication.getConfigGame().run(() => {
-			console.log("[GN] Config Game run success");
+			Debug.log("[GN] Config Game run success");
 		});
 
 		this.gameApplication.init();
 		this.gameApplication.run(() => {
-			console.log("[GN] Game Application run success");
+			Debug.log("[GN] Game Application run success");
 		});
 
 		server.listen(port, () => {
-			console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
-			console.log("[GN] Server Application running on port " + port);
+			Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
+			Debug.log("[GN] Server Application running on port " + port);
 
 			if (onRunSuccess != null) onRunSuccess();
 		});
@@ -242,6 +264,7 @@ export class ServerApplication extends BuilderBase {
 		this.databaseSettings = builder.getDatabaseSettings();
 		this.mailSettings = builder.getMailSettings();
 		this.otherSettings = builder.getOtherSettings();
+		this.logSettings = builder.getLogSettings();
 	}
 
 	public static Builder(): Builder {
