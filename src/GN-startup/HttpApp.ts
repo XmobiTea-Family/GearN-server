@@ -73,6 +73,7 @@ export class HttpApp {
 		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.httpAppHandler.setGameApplication(this.gameApplication);
 		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
+		this.httpAppHandler.setEnableSendAndReceive(this.appSettings.getEnableSendAndReceive());
 
 		if (this.appSettings.getEnable()) {
 			this.httpAppHandler.run();

@@ -8,6 +8,7 @@ abstract class BuilderBase {
 	protected methods: MethodType[];
 	protected allowedHeaders: string[];
 	protected credentials: boolean;
+	protected enableSendAndReceive: boolean;
 
 	public getEnable(): boolean {
 		return this.enable;
@@ -27,6 +28,10 @@ abstract class BuilderBase {
 
 	public getCredentials(): boolean {
 		return this.credentials;
+	}
+
+	public getEnableSendAndReceive(): boolean {
+		return this.enableSendAndReceive;
 	}
 
 	constructor() {}
@@ -74,7 +79,11 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 
 	public setEnable(enable: boolean): Builder {
 		this.enable = enable;
+		return this;
+	}
 
+	public setEnableSendAndReceive(enableSendAndReceive: boolean): Builder {
+		this.enableSendAndReceive = enableSendAndReceive;
 		return this;
 	}
 
@@ -99,6 +108,7 @@ export class HttpAppSettings extends BuilderBase {
 		this.enable = builder.getEnable();
 		this.allowedHeaders = builder.getAllowedHeaders();
 		this.credentials = builder.getCredentials();
+		this.enableSendAndReceive = builder.getEnableSendAndReceive();
 	}
 
 	public static Builder(): Builder {

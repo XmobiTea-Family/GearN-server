@@ -7,12 +7,14 @@
         "certFilePath": "",
 
         "httpAppEnable": true,
+        "httpAppEnableSendAndReceive": true,
         "httpAppAllowOrigin": "*",
         "httpAppCredentials": true,
         "httpAppAllowMethods": ["GET", "POST"],
         "httpAppAllowHeaders": ["a"],
         
         "socketAppEnable":true,
+        "socketAppEnableSendAndReceive": true,
         "socketAppPingInterval": 50000,
         "socketAppPingTimeout": 5000,
 

@@ -119,7 +119,7 @@ export class ServerApplication extends BuilderBase {
 		Debug.init({
 			isLogToConsoleEnable: this.getLogSettings().getLogToConsoleEnable(),
 			isLogToFileEnable: this.getLogSettings().getLogToFileEnable(),
-			logPath: fullLogPath
+			logPath: fullLogPath,
 		});
 		Debug.run();
 

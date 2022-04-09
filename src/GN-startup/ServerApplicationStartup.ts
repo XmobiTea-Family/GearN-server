@@ -30,12 +30,14 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.addMethods(this.gnConfig["httpAppAllowMethods"])
 			.setCredentials(this.gnConfig["httpAppCredentials"])
 			.addAllowedHeaders(this.gnConfig["httpAppAllowHeaders"])
+			.setEnableSendAndReceive(this.gnConfig["httpAppEnableSendAndReceive"])
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(this.gnConfig["socketAppEnable"])
 			.setPingInterval(this.gnConfig["socketAppPingInterval"])
 			.setPingTimeout(this.gnConfig["socketAppPingTimeout"])
+			.setEnableSendAndReceive(this.gnConfig["socketAppEnableSendAndReceive"])
 			.build();
 
 		let otherSettings = OtherSettings.Builder()

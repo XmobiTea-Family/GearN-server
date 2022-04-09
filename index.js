@@ -7,7 +7,6 @@ applicationStartup.config(gnConfig.options);
 applicationStartup.run();
 
 let gameApplication = applicationStartup.getGameApplication();
-//Debug.log("%O", gameApplication);
 
 process.on("uncaughtException", (uncaughtException) => {
 	Debug.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);

@@ -17,6 +17,7 @@ export class HttpAppHandler {
 	private _onRequestCb: OnHttpRequest;
 	private apiMiddleware: ApiMiddleware;
 	private gameApplication: GameApplication;
+	private enableSendAndReceive: boolean;
 
 	private router: Router;
 	private apiRouter: Router;
@@ -35,6 +36,10 @@ export class HttpAppHandler {
 
 	public setOnHttpRequest(_onRequestCb: OnHttpRequest) {
 		this._onRequestCb = _onRequestCb;
+	}
+
+	public setEnableSendAndReceive(enableSendAndReceive: boolean): void {
+		this.enableSendAndReceive = enableSendAndReceive;
 	}
 
 	public run(): void {
@@ -67,7 +72,9 @@ export class HttpAppHandler {
 
 			if (operationResponse != null) {
 				let httpData = operationResponse.toHttpData();
-				Debug.log("[HTTP SEND] %O", httpData);
+				if (this.enableSendAndReceive) {
+					Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+				}
 
 				return res.send(httpData);
 			}
@@ -81,6 +88,7 @@ export class HttpAppHandler {
 		let operationResponse = new OperationResponse(code, 0);
 
 		let body = req.body;
+
 		let params = body.d;
 
 		let parameters = null;
@@ -105,7 +113,10 @@ export class HttpAppHandler {
 		request.setParameters(parameters);
 		request.setAuthenticate((req as any).authInfo);
 
-		Debug.log("[HTTP RECV] %O", request);
+		if (this.enableSendAndReceive) {
+			Debug.log("[HTTP RECV] %O", request);
+			Debug.log("[Parameters] " + params);
+		}
 
 		if (this._onRequestCb != null) {
 			operationResponse = await this._onRequestCb(request);

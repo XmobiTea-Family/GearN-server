@@ -15,9 +15,16 @@ export class DefaultApplicationStartup {
 	public run(onRunSuccess?: OnRunSuccess): void {
 		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).build();
 
-		let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigin("*").addMethods(["GET", "POST"]).setCredentials(true).addAllowedHeaders(["a"]).build();
+		let httpAppSettings = HttpAppSettings.Builder()
+			.setEnable(true)
+			.setOrigin("*")
+			.addMethods(["GET", "POST"])
+			.setCredentials(true)
+			.addAllowedHeaders(["a"])
+			.setEnableSendAndReceive(true)
+			.build();
 
-		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).build();
+		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).setEnableSendAndReceive(true).build();
 
 		let otherSettings = OtherSettings.Builder()
 			.setAdapterEventCollectionName("AdapterEventCollection")
@@ -39,13 +46,17 @@ export class DefaultApplicationStartup {
 			.setSendGridApiKey("SG.HtH0ZjTQTRqeHBARvEgktQ.f9vle8kPkWDVkqhmdNKZWYuGBFak!__rHVUGPicPlko")
 			.build();
 
-		let logSettings = LogSettings.Builder()
-			.setLogToFileEnable(true)
-			.setLogToConsoleEnable(true)
-			.setLogPath("./log/Server.log")
-			.build();
+		let logSettings = LogSettings.Builder().setLogToFileEnable(true).setLogToConsoleEnable(true).setLogPath("./log/Server.log").build();
 
-		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings, logSettings);
+		this.serverApplication = this.newServerApplication(
+			applicationSettings,
+			httpAppSettings,
+			socketAppSettings,
+			otherSettings,
+			databaseSettings,
+			mailSettings,
+			logSettings
+		);
 
 		this.serverApplication.run(() => {
 			if (onRunSuccess != null) onRunSuccess();
