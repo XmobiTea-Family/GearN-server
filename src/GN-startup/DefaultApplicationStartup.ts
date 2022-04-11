@@ -23,6 +23,8 @@ export class DefaultApplicationStartup {
 			.setCredentials(true)
 			.addAllowedHeaders(["a"])
 			.setEnableSendAndReceiveDebug(true)
+			.setEnablePostViaJson(true)
+			.setEnablePostViaMsgPack(true)
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).setEnableSendAndReceiveDebug(true).build();
@@ -42,10 +44,7 @@ export class DefaultApplicationStartup {
 			.setMaxPoolSize(100)
 			.build();
 
-		let mailSettings = MailSettings.Builder()
-			.setFromEmail("changx@xmobitea.com")
-			.setSendGridApiKey("SG.")
-			.build();
+		let mailSettings = MailSettings.Builder().setFromEmail("changx@xmobitea.com").setSendGridApiKey("SG.").build();
 
 		let logSettings = LogSettings.Builder().setLogToFileEnable(true).setLogToConsoleEnable(true).setLogPath("./log/Server.log").build();
 

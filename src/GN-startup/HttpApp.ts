@@ -60,7 +60,6 @@ export class HttpApp {
 	}
 
 	public run(): void {
-		this.app.use(express.json());
 		this.app.use(express.urlencoded({ extended: false }));
 
 		this.app.post("/", (req: express.Request, res: express.Response) => {
@@ -96,6 +95,8 @@ export class HttpApp {
 		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.httpAppHandler.setGameApplication(this.gameApplication);
 		this.httpAppHandler.setEnableSendAndReceiveDebug(this.appSettings.getEnableSendAndReceiveDebug());
+		this.httpAppHandler.setEnablePostViaMsgPack(this.appSettings.getEnablePostViaMsgPack());
+		this.httpAppHandler.setEnablePostViaJson(this.appSettings.getEnablePostViaJson());
 
 		if (this.appSettings.getEnable()) {
 			this.httpAppHandler.run();

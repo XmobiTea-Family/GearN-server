@@ -32,6 +32,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setCredentials(this.gnConfig["httpAppCredentials"])
 			.addAllowedHeaders(this.gnConfig["httpAppAllowHeaders"])
 			.setEnableSendAndReceiveDebug(this.gnConfig["httpAppEnableSendAndReceiveDebug"])
+			.setEnablePostViaMsgPack(this.gnConfig["httpAppEnablePostViaMsgPack"])
+			.setEnablePostViaJson(this.gnConfig["httpAppEnablePostViaJson"])
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder()

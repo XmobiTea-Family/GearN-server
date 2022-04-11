@@ -8,6 +8,8 @@ import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { GameApplication } from "./../../GameApplication";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
+import msgpack from "express-msgpack";
+import { encode } from "@msgpack/msgpack";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -19,9 +21,12 @@ export class HttpAppHandler {
 
 	private gameApplication: GameApplication;
 	private enableSendAndReceiveDebug: boolean;
+	private enablePostViaMsgPack: boolean;
+	private enablePostViaJson: boolean;
 
 	private router: Router;
-	private apiRouter: Router;
+	private apiJsonRouter: Router;
+	private apiMsgPackRouter: Router;
 
 	public setRouter(router: Router): void {
 		this.router = router;
@@ -43,6 +48,14 @@ export class HttpAppHandler {
 		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
 	}
 
+	public setEnablePostViaMsgPack(enablePostViaMsgPack: boolean): void {
+		this.enablePostViaMsgPack = enablePostViaMsgPack;
+	}
+
+	public setEnablePostViaJson(enablePostViaJson: boolean): void {
+		this.enablePostViaJson = enablePostViaJson;
+	}
+
 	public run(): void {
 		this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
 			let configName = req.params.configName;
@@ -59,49 +72,74 @@ export class HttpAppHandler {
 			return res.json([ReturnCode.Ok, { 1: xDatetime.getCurrentMilliseconds() }]);
 		});
 
-		this.apiRouter = express.Router();
-		this.router.use(
-			"/api",
-			wrap((req, res, next) => {
-				return this.apiMiddleware.authenticateToken(req, res, next);
-			}),
-			this.apiRouter
-		);
+		const apiRouter = express.Router();
+		this.router.use("/api", apiRouter);
 
-		this.apiRouter.post("/:code", async (req: express.Request, res: express.Response) => {
-			let operationResponse = await this.onHttpRequest(req);
-
-			if (operationResponse != null) {
-				let httpData = operationResponse.toHttpData();
-				if (this.enableSendAndReceiveDebug) {
-					Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+		if (this.enablePostViaJson)
+		{
+			this.apiJsonRouter = express.Router();
+			this.apiJsonRouter.use(express.json());
+	
+			apiRouter.use(
+				"/0",
+				wrap((req, res, next) => {
+					return this.apiMiddleware.authenticateTokenViaJson(req, res, next);
+				}),
+				this.apiJsonRouter
+			);
+	
+			this.apiJsonRouter.post("/:code", async (req: express.Request, res: express.Response) => {
+				let operationResponse = await this.onHttpRequest(req);
+	
+				if (operationResponse != null) {
+					let httpData = operationResponse.toHttpData();
+					if (this.enableSendAndReceiveDebug) {
+						Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+					}
+	
+					return res.send(httpData);
 				}
-
-				return res.send(httpData);
-			}
-
-			return res.send([ReturnCode.OperationInvalid]);
-		});
+	
+				return res.send([ReturnCode.OperationInvalid]);
+			});
+		}
+		
+		if (this.enablePostViaMsgPack)
+		{
+			this.apiMsgPackRouter = express.Router();
+			this.apiMsgPackRouter.use(msgpack());
+	
+			apiRouter.use(
+				"/1",
+				wrap((req, res, next) => {
+					return this.apiMiddleware.authenticateTokenViaMsgPack(req, res, next);
+				}),
+				this.apiMsgPackRouter
+			);
+	
+			this.apiMsgPackRouter.post("/:code", async (req: express.Request, res: express.Response) => {
+				let operationResponse = await this.onHttpRequest(req);
+	
+				if (operationResponse != null) {
+					let httpData = operationResponse.toHttpData();
+					if (this.enableSendAndReceiveDebug) {
+						Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+					}
+	
+					return res.send(Buffer.from(encode(httpData)));
+				}
+				
+				return res.send(Buffer.from(encode([ReturnCode.OperationInvalid])));
+			});
+		}
 	}
 
 	private async onHttpRequest(req: express.Request): Promise<OperationResponse> {
 		let code = Number.parseInt(req.params.code);
 		let operationResponse = new OperationResponse(code, 0);
 
-		let body = req.body;
-
-		let params = body.d;
-
-		let parameters = null;
-		if (!params) parameters = {};
-		else {
-			try {
-				parameters = JSON.parse(params);
-			} catch (err) {
-				operationResponse.setReturnCode(ReturnCode.InternalServerError);
-				return operationResponse;
-			}
-		}
+		let parameters = req.body;
+		if (!parameters) parameters = {};
 
 		let ip = req.socket.remoteAddress;
 		if (ip.substring(0, 7) == "::ffff:") {
@@ -116,7 +154,7 @@ export class HttpAppHandler {
 
 		if (this.enableSendAndReceiveDebug) {
 			Debug.log("[HTTP RECV] %O", request);
-			Debug.log("[Parameters] " + params);
+			Debug.log("[Parameters] " + JSON.stringify(parameters));
 		}
 
 		if (this._onRequestCb != null) {

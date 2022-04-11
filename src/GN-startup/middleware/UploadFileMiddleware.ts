@@ -29,7 +29,7 @@ export class UploadFileMiddleware {
 	public run() {}
 
 	private storage(): multer.StorageEngine {
-		let uploadPath = __dirname + "/../../../../../" + this.uploadPath;
+		let uploadPath = __dirname + "/../../../../" + this.uploadPath;
 
 		return multer.diskStorage({
 			destination: (req, file, cb) => {

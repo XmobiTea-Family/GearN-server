@@ -41,7 +41,7 @@ export class UploadFileHandler {
 		this.router.use(
 			"/upload",
 			wrap((req, res, next) => {
-				return this.apiMiddleware.authenticateToken(req, res, next);
+				return this.apiMiddleware.authenticateTokenViaJson(req, res, next);
 			}),
 			this.uploadRouter
 		);
@@ -66,7 +66,11 @@ export class UploadFileHandler {
 	}
 
 	public run(): void {
-		let uploadPath = __dirname + "/../../../../../" + this.uploadPath;
+		this.uploadRouter.use(express.json());
+		this.uploadRouter.use(express.urlencoded({ extended: false }));
+		// this.uploadRouter.use(msgpack());
+
+		let uploadPath = __dirname + "/../../../../" + this.uploadPath;
 
 		if (!fs.existsSync(uploadPath)) {
 			fs.mkdirSync(uploadPath, { mode: "0775" });

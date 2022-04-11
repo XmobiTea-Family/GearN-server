@@ -12,6 +12,8 @@
         "httpAppAllowMethods": ["GET", "POST"],
         "httpAppAllowHeaders": ["a"],
         "httpAppEnableSendAndReceiveDebug": true,
+        "httpAppEnablePostViaMsgPack": true,
+        "httpAppEnablePostViaJson": true,
 
         "socketAppEnable":true,
         "socketAppPingInterval": 50000,

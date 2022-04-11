@@ -8,6 +8,7 @@ import { Md5Generate } from "./../../GN-common/helper/Md5Generate";
 import { nanoid } from "nanoid";
 import * as mongoDB from "mongodb";
 import { Socket } from "socket.io";
+import { encode } from "@msgpack/msgpack";
 
 export class ApiMiddleware {
 	private authInfoDic: { [k: string]: AuthInfo };
@@ -53,7 +54,7 @@ export class ApiMiddleware {
 		this.authTokenCollection.updateOne({ AuthInfo: authInfo }, { $set: authInfo.toDocumentData() });
 	}
 
-	public async authenticateToken(req: express.Request, res: express.Response, next: Function) {
+	public async authenticateTokenViaJson(req: express.Request, res: express.Response, next: Function) {
 		let headers = req.headers;
 		let authToken = headers[AUTH_TOKEN] as string;
 
@@ -87,6 +88,60 @@ export class ApiMiddleware {
 					delete this.authInfoDic[authToken];
 
 					return res.send([ReturnCode.OperationNotAuthorized]);
+				} else if (authInfo.isRemove()) {
+					delete this.authInfoDic[authToken];
+
+					reqAny.isAuthenticated = false;
+				} else if (authInfo.getTsExpire() < new Date().getTime()) {
+					delete this.authInfoDic[authToken];
+
+					reqAny.isAuthenticated = false;
+				} else {
+					reqAny.isAuthenticated = true;
+					reqAny.authInfo = authInfo;
+
+					this.authInfoDic[authToken] = authInfo;
+				}
+			}
+		}
+
+		return next();
+	}
+
+	public async authenticateTokenViaMsgPack(req: express.Request, res: express.Response, next: Function) {
+		let headers = req.headers;
+		let authToken = headers[AUTH_TOKEN] as string;
+
+		let reqAny = req as any;
+
+		if (!authToken) {
+			reqAny.isAuthenticated = false;
+		} else {
+			let authInfo = this.authInfoDic[authToken];
+			if (authInfo == null) {
+				let authInfoTemp = await this.authTokenCollection.findOne({ AuthToken: authToken });
+
+				if (authInfoTemp != null) {
+					authInfo = AuthInfo.Builder()
+						.setAuthToken(authInfoTemp["AuthToken"])
+						// .setOtherData("RoomId", null)
+						.setIsRemove(authInfoTemp["IsRemove"])
+						.setOtherUserLogin(authInfoTemp["OtherUserLogin"])
+						.setRole(authInfoTemp["Role"])
+						.setTsExpire(authInfoTemp["TsExpire"])
+						.setUserId(authInfoTemp["UserId"])
+						.setOtherDatas(authInfoTemp["OtherDatas"])
+						.build();
+				}
+			}
+
+			if (authInfo == null) {
+				reqAny.isAuthenticated = false;
+			} else {
+				if (authInfo.getOtherUserLogin()) {
+					delete this.authInfoDic[authToken];
+					
+					return res.send(Buffer.from(encode([ReturnCode.OperationNotAuthorized])));
 				} else if (authInfo.isRemove()) {
 					delete this.authInfoDic[authToken];
 
