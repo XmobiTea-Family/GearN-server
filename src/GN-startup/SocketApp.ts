@@ -55,7 +55,7 @@ export class SocketApp {
 		this.socketAppHandler.setEmitter(this.emitter);
 		this.socketAppHandler.setServer(this.io);
 		this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
-		this.socketAppHandler.setEnableSendAndReceive(this.appSettings.getEnableSendAndReceive());
+		this.socketAppHandler.setEnableSendAndReceiveDebug(this.appSettings.getEnableSendAndReceiveDebug());
 
 		if (this.appSettings.getEnable()) {
 			this.socketAppHandler.run();

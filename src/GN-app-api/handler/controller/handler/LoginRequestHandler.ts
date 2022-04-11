@@ -23,7 +23,7 @@ import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUlt
 import bcrypt from "bcrypt";
 import Web3 from "web3";
 import { xRandom } from "./../../../../GN-library/xrandom/lib/xRandom";
-import { Debug } from "../../../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../../../GN-library/xdebug/lib/xDebug";
 
 const web3Instance = new Web3();
 

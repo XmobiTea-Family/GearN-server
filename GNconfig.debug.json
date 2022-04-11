@@ -7,23 +7,28 @@
         "certFilePath": "",
 
         "httpAppEnable": true,
-        "httpAppEnableSendAndReceive": true,
         "httpAppAllowOrigin": "*",
         "httpAppCredentials": true,
         "httpAppAllowMethods": ["GET", "POST"],
         "httpAppAllowHeaders": ["a"],
-        
+        "httpAppEnableSendAndReceiveDebug": true,
+
         "socketAppEnable":true,
-        "socketAppEnableSendAndReceive": true,
         "socketAppPingInterval": 50000,
         "socketAppPingTimeout": 5000,
+        "socketAppEnableSendAndReceiveDebug": true,
+
+        "uploadFileEnable": true,
+        "uploadPath": "./file-upload",
+        "maxSizeUpload": 52428800,
+        "mimeTypeAccepts": ["image/png"],
 
         "adapterEventCollectionName": "AdapterEventCollection",
         "authInfoCollectionName": "AuthInfoCollection",
-        "configCollectionName": "ConfigGame",
+        "configCollectionName": "Config",
         "packageName": "com.xmobitea.GNServer",
-        
-        "databaseConnectionString": "mongodb://localhost:27017",
+
+        "databaseConnectionString": "mongodb://localhost:27017/?replicaSet=rs0",
         "databaseName": "XmobiTea",
         "databaseGameName": "GN.",
         "databaseMinPoolSize": 5,
@@ -33,10 +38,13 @@
         "mailSendFrom": "changx@xmobitea.com",
         "mailSendGridApiKey": "SG.",
 
-        "debugToolEnable": true,
+		"debugToolEnable": true,
+		"testToolEnable": true,
+        "logToolEnable": true,
+		"toolHashs": ["hashhere"],
 
-        "logToConsoleEnable": true,
+		"logToConsoleEnable": true,
 		"logToFileEnable": true,
-		"logPath": "./log/Server.log"
+		"logPath": "./log/debug/Server.log"
     }
 }

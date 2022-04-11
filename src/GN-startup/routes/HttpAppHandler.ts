@@ -7,7 +7,7 @@ import { OperationResponse } from "./../../GN-common/entity/operationResponse/Op
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { GameApplication } from "./../../GameApplication";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
-import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -16,8 +16,9 @@ interface OnHttpRequest {
 export class HttpAppHandler {
 	private _onRequestCb: OnHttpRequest;
 	private apiMiddleware: ApiMiddleware;
+
 	private gameApplication: GameApplication;
-	private enableSendAndReceive: boolean;
+	private enableSendAndReceiveDebug: boolean;
 
 	private router: Router;
 	private apiRouter: Router;
@@ -38,8 +39,8 @@ export class HttpAppHandler {
 		this._onRequestCb = _onRequestCb;
 	}
 
-	public setEnableSendAndReceive(enableSendAndReceive: boolean): void {
-		this.enableSendAndReceive = enableSendAndReceive;
+	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): void {
+		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
 	}
 
 	public run(): void {
@@ -72,7 +73,7 @@ export class HttpAppHandler {
 
 			if (operationResponse != null) {
 				let httpData = operationResponse.toHttpData();
-				if (this.enableSendAndReceive) {
+				if (this.enableSendAndReceiveDebug) {
 					Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
 				}
 
@@ -113,7 +114,7 @@ export class HttpAppHandler {
 		request.setParameters(parameters);
 		request.setAuthenticate((req as any).authInfo);
 
-		if (this.enableSendAndReceive) {
+		if (this.enableSendAndReceiveDebug) {
 			Debug.log("[HTTP RECV] %O", request);
 			Debug.log("[Parameters] " + params);
 		}

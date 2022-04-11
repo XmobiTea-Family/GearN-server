@@ -8,6 +8,7 @@ import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
+import { UploadFileSettings } from "./settings/UploadFileSettings";
 
 export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
@@ -21,10 +22,10 @@ export class DefaultApplicationStartup {
 			.addMethods(["GET", "POST"])
 			.setCredentials(true)
 			.addAllowedHeaders(["a"])
-			.setEnableSendAndReceive(true)
+			.setEnableSendAndReceiveDebug(true)
 			.build();
 
-		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).setEnableSendAndReceive(true).build();
+		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).setEnableSendAndReceiveDebug(true).build();
 
 		let otherSettings = OtherSettings.Builder()
 			.setAdapterEventCollectionName("AdapterEventCollection")
@@ -43,10 +44,17 @@ export class DefaultApplicationStartup {
 
 		let mailSettings = MailSettings.Builder()
 			.setFromEmail("changx@xmobitea.com")
-			.setSendGridApiKey("SG.HtH0ZjTQTRqeHBARvEgktQ.f9vle8kPkWDVkqhmdNKZWYuGBFak!__rHVUGPicPlko")
+			.setSendGridApiKey("SG.")
 			.build();
 
 		let logSettings = LogSettings.Builder().setLogToFileEnable(true).setLogToConsoleEnable(true).setLogPath("./log/Server.log").build();
+
+		let uploadFileSettings = UploadFileSettings.Builder()
+			.setEnable(true)
+			.setMaxSizeUpload(1024 * 1024 * 50)
+			.setUploadPath("./file-upload")
+			.setMimeTypeAccepts(["image/png"])
+			.build();
 
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
@@ -55,7 +63,8 @@ export class DefaultApplicationStartup {
 			otherSettings,
 			databaseSettings,
 			mailSettings,
-			logSettings
+			logSettings,
+			uploadFileSettings
 		);
 
 		this.serverApplication.run(() => {
@@ -70,7 +79,8 @@ export class DefaultApplicationStartup {
 		otherSettings: OtherSettings,
 		databaseSettings: DatabaseSettings,
 		mailSettings: MailSettings,
-		logSettings: LogSettings
+		logSettings: LogSettings,
+		uploadFileSettings: UploadFileSettings
 	) {
 		return ServerApplication.Builder()
 			.setApplicationSettings(applicationSettings)
@@ -80,6 +90,7 @@ export class DefaultApplicationStartup {
 			.setDatabaseSettings(databaseSettings)
 			.setMailSettings(mailSettings)
 			.setLogSettings(logSettings)
+			.setUploadFileSettings(uploadFileSettings)
 			.build();
 	}
 

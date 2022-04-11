@@ -1,4 +1,4 @@
-import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ITimerService } from "./ITimerService";
 
 export class TimerService implements ITimerService {

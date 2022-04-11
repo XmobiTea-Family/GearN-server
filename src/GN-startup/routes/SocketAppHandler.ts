@@ -14,7 +14,7 @@ import { Emitter } from "@socket.io/mongo-emitter";
 import { encode, decode } from "@msgpack/msgpack";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
-import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -29,12 +29,12 @@ export class SocketAppHandler {
 	private _onRequestCb: OnSocketRequest;
 	private apiMiddleware: ApiMiddleware;
 
-	private enableSendAndReceive: boolean;
+	private enableSendAndReceiveDebug: boolean;
 	private server: Server;
 	private emitter: Emitter;
 
-	public setEnableSendAndReceive(enableSendAndReceive: boolean): void {
-		this.enableSendAndReceive = enableSendAndReceive;
+	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): void {
+		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
 	}
 
 	public setServer(server: Server): void {
@@ -65,7 +65,7 @@ export class SocketAppHandler {
 	}
 
 	private socketConnect(socket: Socket) {
-		if (this.enableSendAndReceive) Debug.log("[SOCKET] on socket connect with " + socket.id);
+		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET] on socket connect with " + socket.id);
 
 		this.initSocket(socket);
 
@@ -144,8 +144,8 @@ export class SocketAppHandler {
 				let isAuthenticated = socket.data.isAuthenticated;
 				if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
 
-				if (this.enableSendAndReceive) {
-					Debug.log("[SOCKET RECV] %O", JSON.stringify(request));
+				if (this.enableSendAndReceiveDebug) {
+					Debug.log("[SOCKET RECV] %O", request);
 					Debug.log("[Parameters] " + JSON.stringify(params));
 				}
 
@@ -159,35 +159,35 @@ export class SocketAppHandler {
 	}
 
 	private onSocketDisconnect(socket: Socket, data: string) {
-		if (this.enableSendAndReceive) Debug.log("[SOCKET] on socket disconencted " + socket.id);
+		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET] on socket disconencted " + socket.id);
 
 		if (this._onDisconnectCb != null) this._onDisconnectCb(socket, data);
 	}
 
 	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse) {
 		let socketData = operationResponse.toSocketData();
-		if (this.enableSendAndReceive) Debug.log("[SOCKET SEND] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(socketData));
 
 		socket.emit(RESPONSE_CMD, encode(socketData));
 	}
 
 	private sendEventForSocket(socket: Socket, operationEvent: OperationEvent) {
 		let socketData = operationEvent.toSocketData();
-		if (this.enableSendAndReceive) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
 
 		socket.emit(EVENT_CMD, encode(socketData));
 	}
 
 	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
-		if (this.enableSendAndReceive) Debug.log("[EVENT SEND EVENT TO] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] %O", JSON.stringify(socketData));
 
 		this.emitter.to(userId).emit(EVENT_CMD, encode(socketData));
 	}
 
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
-		if (this.enableSendAndReceive) Debug.log("[EVENT SEND EVENT TO MORE USER] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO MORE USER] %O", JSON.stringify(socketData));
 
 		let socketDataMsgPack = encode(socketData);
 
@@ -199,14 +199,14 @@ export class SocketAppHandler {
 
 	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
-		if (this.enableSendAndReceive) Debug.log("[EVENT SEND EVENT TO ALL PLAYER] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ALL PLAYER] %O", JSON.stringify(socketData));
 
 		this.emitter.of("/").emit(EVENT_CMD, encode(socketData));
 	}
 
 	public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
-		if (this.enableSendAndReceive) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
 
 		this.emitter.of("/" + namespace).emit(EVENT_CMD, encode(socketData));
 	}

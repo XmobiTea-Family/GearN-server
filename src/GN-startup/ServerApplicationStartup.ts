@@ -8,6 +8,7 @@ import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
+import { UploadFileSettings } from "./settings/UploadFileSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
 	private gnConfig: { [k: string]: any };
@@ -30,14 +31,14 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.addMethods(this.gnConfig["httpAppAllowMethods"])
 			.setCredentials(this.gnConfig["httpAppCredentials"])
 			.addAllowedHeaders(this.gnConfig["httpAppAllowHeaders"])
-			.setEnableSendAndReceive(this.gnConfig["httpAppEnableSendAndReceive"])
+			.setEnableSendAndReceiveDebug(this.gnConfig["httpAppEnableSendAndReceiveDebug"])
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(this.gnConfig["socketAppEnable"])
 			.setPingInterval(this.gnConfig["socketAppPingInterval"])
 			.setPingTimeout(this.gnConfig["socketAppPingTimeout"])
-			.setEnableSendAndReceive(this.gnConfig["socketAppEnableSendAndReceive"])
+			.setEnableSendAndReceiveDebug(this.gnConfig["socketAppEnableSendAndReceiveDebug"])
 			.build();
 
 		let otherSettings = OtherSettings.Builder()
@@ -67,6 +68,13 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setLogPath(this.gnConfig["logPath"])
 			.build();
 
+		let uploadFileSettings = UploadFileSettings.Builder()
+			.setEnable(this.gnConfig["uploadFileEnable"])
+			.setUploadPath(this.gnConfig["uploadPath"])
+			.setMaxSizeUpload(this.gnConfig["maxSizeUpload"])
+			.setMimeTypeAccepts(this.gnConfig["mimeTypeAccepts"])
+			.build();
+
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
 			httpAppSettings,
@@ -74,7 +82,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			otherSettings,
 			databaseSettings,
 			mailSettings,
-			logSettings
+			logSettings,
+			uploadFileSettings
 		);
 
 		this.serverApplication.run(() => {

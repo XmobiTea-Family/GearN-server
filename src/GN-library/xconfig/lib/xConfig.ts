@@ -1,7 +1,7 @@
 import { xConfigItem } from "./entity/xConfigItem";
 import * as mongoDB from "mongodb";
 import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
-import { Debug } from "../../xdebug/lib/xDebug";
+import { Debug } from "./../../xdebug/lib/xDebug";
 
 export class xConfig {
 	private configDic: { [k: string]: xConfigItem } = {};
