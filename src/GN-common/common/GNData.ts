@@ -158,7 +158,7 @@ export class GNHashtable extends GNData {
 }
 
 export class GNArray extends GNData {
-	private array: Array<any>;
+	private array: Array<any> = [];
 
 	public clear(): void {
 		this.array = [];
