@@ -22,6 +22,7 @@ import { Debug } from "./../GN-library/xdebug/lib/xDebug";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
+import { LicenseKeyApplication } from "./LicenseKeyApplication";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -124,10 +125,14 @@ export class ServerApplication extends BuilderBase {
 	private gameApplication: GameApplication;
 	private apiMiddleware: ApiMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
+	private licenseKeyApplication: LicenseKeyApplication;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
 		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
-		console.log("[GN Server] FullLogPath at: " + fullLogPath);
+		console.log("[GN] FullLogPath at: " + fullLogPath);
+
+		let licenseKeyFilePath = __dirname + "/../../../../" + this.getApplicationSettings().getLicenseKeyFilePath();
+		if (licenseKeyFilePath) console.log("[GN] Found LicenseKeyFilePath at: " + licenseKeyFilePath);
 
 		Debug.init({
 			isLogToConsoleEnable: this.getLogSettings().getLogToConsoleEnable(),
@@ -191,6 +196,7 @@ export class ServerApplication extends BuilderBase {
 
 		let authTokenCollection = this.gameApplication.getDatabase().systemCollection(this.getOtherSettings().getAuthTokenCollectionName());
 		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
+		this.apiMiddleware.setExpiredToken(this.applicationSettings.getExpiredToken());
 
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
@@ -214,6 +220,20 @@ export class ServerApplication extends BuilderBase {
 		this.gameApplication.run(() => {
 			Debug.log("[GN] Game Application run success");
 		});
+
+		try {
+			this.licenseKeyApplication = new LicenseKeyApplication();
+			this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
+			this.licenseKeyApplication.setServer(server);
+			this.licenseKeyApplication.setApp(app);
+			this.licenseKeyApplication.setGameApplication(this.gameApplication);
+			this.licenseKeyApplication.run();
+		}
+		catch (exception: Error) {
+			Debug.logException(exception);
+
+			return;
+		}
 
 		server.listen(port, () => {
 			Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");

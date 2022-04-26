@@ -1,5 +1,4 @@
 const AUTH_TOKEN = "a";
-const EXPIRED_TOKEN = 2 * 1000 * 60 * 60 * 24;
 
 import express from "express";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
@@ -15,8 +14,14 @@ export class ApiMiddleware {
 
 	private authTokenCollection: mongoDB.Collection<mongoDB.Document>;
 
+	private expiredToken: number = 2 * 1000 * 60 * 60 * 24;
+
 	public setAuthTokenCollection(authTokenCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.authTokenCollection = authTokenCollection;
+	}
+
+	public setExpiredToken(expiredToken: number) {
+		this.expiredToken = expiredToken;
 	}
 
 	public run() {}
@@ -28,7 +33,7 @@ export class ApiMiddleware {
 			.setUserId(info.getUserId())
 			.setRole(info.getRole())
 			.setIsRemove(false)
-			.setTsExpire(new Date().getTime() + EXPIRED_TOKEN)
+			.setTsExpire(new Date().getTime() + this.expiredToken)
 			.setOtherUserLogin(false)
 			.build();
 
@@ -92,7 +97,7 @@ export class ApiMiddleware {
 					delete this.authInfoDic[authToken];
 
 					reqAny.isAuthenticated = false;
-				} else if (authInfo.getTsExpire() < new Date().getTime()) {
+				} else if (authInfo.getTsExpire() != -1 && authInfo.getTsExpire() < new Date().getTime()) {
 					delete this.authInfoDic[authToken];
 
 					reqAny.isAuthenticated = false;
@@ -146,7 +151,7 @@ export class ApiMiddleware {
 					delete this.authInfoDic[authToken];
 
 					reqAny.isAuthenticated = false;
-				} else if (authInfo.getTsExpire() < new Date().getTime()) {
+				} else if (authInfo.getTsExpire() != -1 && authInfo.getTsExpire() < new Date().getTime()) {
 					delete this.authInfoDic[authToken];
 
 					reqAny.isAuthenticated = false;
