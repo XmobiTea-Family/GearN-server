@@ -18,6 +18,13 @@ import { OtherSettings } from "./settings/OtherSettings";
 import { AppleService } from "./../GN-app-api/service/AppleService";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
+import { Debug } from "./../GN-library/xdebug/lib/xDebug";
+import { LogSettings } from "./settings/LogSettings";
+import { UploadFileSettings } from "./settings/UploadFileSettings";
+import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
+import { LicenseKeyApplication } from "./LicenseKeyApplication";
+import { Md5Generate } from "./../GN-common/helper/Md5Generate";
+import { nanoid } from "nanoid";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -26,6 +33,8 @@ abstract class BuilderBase {
 	protected mailSettings: MailSettings;
 	protected databaseSettings: DatabaseSettings;
 	protected otherSettings: OtherSettings;
+	protected logSettings: LogSettings;
+	protected uploadFileSettings: UploadFileSettings;
 
 	public getApplicationSettings(): ApplicationSettings {
 		return this.applicationSettings;
@@ -49,6 +58,14 @@ abstract class BuilderBase {
 
 	public getOtherSettings(): OtherSettings {
 		return this.otherSettings;
+	}
+
+	public getLogSettings(): LogSettings {
+		return this.logSettings;
+	}
+
+	public getUploadFileSettings(): UploadFileSettings {
+		return this.uploadFileSettings;
 	}
 
 	constructor() {}
@@ -85,6 +102,16 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 		return this;
 	}
 
+	public setLogSettings(logSettings: LogSettings): Builder {
+		this.logSettings = logSettings;
+		return this;
+	}
+
+	public setUploadFileSettings(uploadFileSettings: UploadFileSettings): Builder {
+		this.uploadFileSettings = uploadFileSettings;
+		return this;
+	}
+
 	public build() {
 		return new ServerApplication(this);
 	}
@@ -99,15 +126,45 @@ export class ServerApplication extends BuilderBase {
 	private socketApp: SocketApp;
 	private gameApplication: GameApplication;
 	private apiMiddleware: ApiMiddleware;
+	private uploadFileMiddleware: UploadFileMiddleware;
+	private licenseKeyApplication: LicenseKeyApplication;
+
+	private sessionId: string;
+    private secretkey: string;
+    private secretId: string;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
+		let salt = nanoid(10);
+        this.sessionId = nanoid(15);
+        this.secretkey = nanoid(20);
+        this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
+
+		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
+		console.log("[GN] FullLogPath at: " + fullLogPath);
+
+		let licenseKeyFilePath = this.getApplicationSettings().getLicenseKeyFilePath() ? (__dirname + "/../../../../" + this.getApplicationSettings().getLicenseKeyFilePath()) : null;
+		if (licenseKeyFilePath) console.log("[GN] Found LicenseKeyFilePath at: " + licenseKeyFilePath);
+
+		Debug.init({
+			isLogToConsoleEnable: this.getLogSettings().getLogToConsoleEnable(),
+			isLogToFileEnable: this.getLogSettings().getLogToFileEnable(),
+			logPath: fullLogPath,
+		});
+		Debug.run();
+
+		Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
 
 		const port = this.applicationSettings.getPort();
-		console.log("[GN] Try run server on the port " + port);
+		Debug.log("[GN] Try run server on the port " + port);
 
 		const app = express();
 		const server = this.getServer(app, this.getApplicationSettings());
+
+		this.uploadFileMiddleware = this.newUploadMiddleware();
+		this.uploadFileMiddleware.setMaxSizeUpload(this.uploadFileSettings.getMaxSizeUpload());
+		this.uploadFileMiddleware.setMimeTypeAccepts(this.uploadFileSettings.getMimeTypeAccepts());
+		this.uploadFileMiddleware.setUploadPath(this.uploadFileSettings.getUploadPath());
+		this.uploadFileMiddleware.run();
 
 		this.apiMiddleware = this.newApiMiddleware();
 		this.apiMiddleware.run();
@@ -117,9 +174,12 @@ export class ServerApplication extends BuilderBase {
 
 		this.httpApp = this.newHttpApp();
 		this.httpApp.setApiMiddleware(this.apiMiddleware);
+		this.httpApp.setUploadFileMiddleware(this.uploadFileMiddleware);
 		this.httpApp.setAppSettings(this.getHttpAppSettings());
+		this.httpApp.setUploadFileSettings(this.getUploadFileSettings());
 		this.httpApp.setApp(app);
 		this.httpApp.setGameApplication(this.gameApplication);
+		this.httpApp.setSessionId(this.sessionId);
 		this.httpApp.run();
 
 		this.socketApp = this.newSocketApp();
@@ -133,23 +193,28 @@ export class ServerApplication extends BuilderBase {
 
 		this.gameApplication.getDatabase().run(
 			() => {
-				console.log("[GN] Database run success");
+				Debug.log("[GN] Database run success");
 			},
 			(err) => {
-				console.error("[GN] Database connect error " + err);
+				Debug.logError("[GN] Database connect error " + err);
 			}
 		);
 
 		if (this.mailSettings.getEnable()) {
 			this.gameApplication.getMail().run(() => {
-				console.log("[GN] Send Grid Mail run success");
+				Debug.log("[GN] Send Grid Mail run success");
 			});
 		}
 
-		let authTokenCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAuthTokenCollectionName());
+		let authTokenCollection = this.gameApplication.getDatabase().systemCollection(this.getOtherSettings().getAuthTokenCollectionName());
 		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
 
-		let adapterEventCollection = this.gameApplication.getDatabase().systemCollection(this.getOtherSettings().getAdapterEventCollectionName());
+		let playerGameCollection = this.gameApplication.getDatabase().systemGameCollection("Player");
+		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
+
+		this.apiMiddleware.setExpiredToken(this.applicationSettings.getExpiredToken());
+
+		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
 
 		(this.gameApplication.getAppleService() as AppleService).setMainPackageName(this.getOtherSettings().getPackageName());
@@ -157,17 +222,43 @@ export class ServerApplication extends BuilderBase {
 		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
 		this.gameApplication.getConfigGame().setConfigCollection(configCollection);
 		this.gameApplication.getConfigGame().run(() => {
-			console.log("[GN] Config Game run success");
+			Debug.log("[GN] Config Game run success");
 		});
+
+		let uploadFileInfoCollection = this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo");
+		this.gameApplication.getDatabase().createIndex("System." + this.gameApplication.getDatabase().getGameName() + "UploadFileInfo", { FileId: 1 });
+		this.gameApplication.getDatabase().createIndex("System." + this.gameApplication.getDatabase().getGameName() + "UploadFileInfo", { UserId: 1 });
+
+		this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
+		this.uploadFileMiddleware.setUploadFileInfoCollection(uploadFileInfoCollection);
 
 		this.gameApplication.init();
 		this.gameApplication.run(() => {
-			console.log("[GN] Game Application run success");
+			Debug.log("[GN] Game Application run success");
 		});
 
+		try {
+			this.licenseKeyApplication = new LicenseKeyApplication();
+			this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
+			this.licenseKeyApplication.setServer(server);
+			this.licenseKeyApplication.setApp(app);
+			this.licenseKeyApplication.setGameApplication(this.gameApplication);
+			this.licenseKeyApplication.setSessionId(this.sessionId);
+			this.licenseKeyApplication.setSecretkey(this.secretkey);
+			this.licenseKeyApplication.setSecretId(this.secretId);
+			this.licenseKeyApplication.setSalt(salt);
+			this.licenseKeyApplication.setPort(port);
+			this.licenseKeyApplication.run();
+		}
+		catch (err: any) {
+			Debug.logError(err);
+
+			return;
+		}
+
 		server.listen(port, () => {
-			console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
-			console.log("[GN] Server Application running on port " + port);
+			Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
+			Debug.log("[GN] Server Application running on port " + port + " with id: " + this.sessionId);
 
 			if (onRunSuccess != null) onRunSuccess();
 		});
@@ -204,8 +295,13 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	private newApiMiddleware(): ApiMiddleware {
-		this.apiMiddleware = new ApiMiddleware();
-		return this.apiMiddleware;
+		let apiMiddleware = new ApiMiddleware();
+		return apiMiddleware;
+	}
+
+	private newUploadMiddleware(): UploadFileMiddleware {
+		let uploadFileMiddleware = new UploadFileMiddleware();
+		return uploadFileMiddleware;
 	}
 
 	public getGameApplication(): GameApplication {
@@ -242,6 +338,8 @@ export class ServerApplication extends BuilderBase {
 		this.databaseSettings = builder.getDatabaseSettings();
 		this.mailSettings = builder.getMailSettings();
 		this.otherSettings = builder.getOtherSettings();
+		this.logSettings = builder.getLogSettings();
+		this.uploadFileSettings = builder.getUploadFileSettings();
 	}
 
 	public static Builder(): Builder {

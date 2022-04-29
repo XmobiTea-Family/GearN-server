@@ -24,6 +24,14 @@ export class xDatabase {
 	private db: mongoDB.Db;
 	private gameName: string;
 
+	public getGameName(): string {
+		return this.gameName;
+	}
+
+	public getDb(): mongoDB.Db {
+		return this.db;
+	}
+
 	public init(url: string, dbName: string, gameName: string, options?: mongoDB.MongoClientOptions): void {
 		this.client = new mongoDB.MongoClient(url, options);
 
@@ -79,9 +87,9 @@ export class xDatabase {
 		if (options != null) {
 			let createIndexesOptionsAny = createIndexesOptions as any;
 
-			createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
-			createIndexesOptionsAny.sparse = options.sparse;
-			createIndexesOptionsAny.unique = options.unique;
+			if (options.expireAfterSeconds != null) createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
+			if (options.sparse != null) createIndexesOptionsAny.sparse = options.sparse;
+			if (options.unique != null) createIndexesOptionsAny.unique = options.unique;
 		}
 
 		collection.createIndex(index, createIndexesOptions, cb);
@@ -363,7 +371,7 @@ export class xDatabase {
 		return new xSparkPlayer(result, collection);
 	}
 
-	public async saveFBExternal(userId: string, facebookId: string, facebookName: string, facebookEmail: string, facebookToken: string) {
+	public async saveFBExternal(userId: string, facebookId: string, facebookName: string, facebookEmail: string, facebookToken: string): Promise<void> {
 		await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).updateOne(
 			{ UserId: userId },
 			{

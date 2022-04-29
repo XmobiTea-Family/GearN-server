@@ -23,6 +23,7 @@ import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUlt
 import bcrypt from "bcrypt";
 import Web3 from "web3";
 import { xRandom } from "./../../../../GN-library/xrandom/lib/xRandom";
+import { Debug } from "./../../../../GN-library/xdebug/lib/xDebug";
 
 const web3Instance = new Web3();
 
@@ -261,7 +262,7 @@ export class LoginRequestHandler extends RequestHandler {
 					try {
 						appleDisplayName = appleId.split("@")[0];
 					} catch (err) {
-						console.error(err);
+						Debug.logException(err);
 					}
 				}
 			}
@@ -419,7 +420,7 @@ export class LoginRequestHandler extends RequestHandler {
 		try {
 			return web3Instance.eth.accounts.recover(message, signature);
 		} catch (err) {
-			console.log(err);
+			Debug.logException(err);
 			return "";
 		}
 	}

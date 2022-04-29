@@ -1,4 +1,4 @@
-const GN_VERSION = "0.1.6";
+const GN_VERSION = "0.3.3";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -31,6 +31,7 @@ import { LockService } from "./GN-app-api/service/LockService";
 import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
 import { LoginType } from "./GN-common/constant/enumType/LoginType";
 import { ApiMiddleware } from "./GN-startup/middleware/ApiMiddleware";
+import { Debug } from "./GN-library/xdebug/lib/xDebug";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -148,8 +149,8 @@ export class GameApplication {
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
 		this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
-			if (error != null) console.error("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
-			else console.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
+			if (error != null) Debug.logError("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
+			else Debug.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
 		});
 	}
 

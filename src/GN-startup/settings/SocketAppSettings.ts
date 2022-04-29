@@ -4,6 +4,7 @@ abstract class BuilderBase {
 	protected enable: boolean;
 	protected pingInterval: number;
 	protected pingTimeout: number;
+	protected enableSendAndReceiveDebug: boolean;
 
 	public getEnable(): boolean {
 		return this.enable;
@@ -15,6 +16,10 @@ abstract class BuilderBase {
 
 	public getPingTimeout(): number {
 		return this.pingTimeout;
+	}
+
+	public getEnableSendAndReceiveDebug(): boolean {
+		return this.enableSendAndReceiveDebug;
 	}
 
 	constructor() {}
@@ -33,7 +38,11 @@ class Builder extends BuilderBase implements IBuilder<SocketAppSettings> {
 
 	public setEnable(enable: boolean): Builder {
 		this.enable = enable;
+		return this;
+	}
 
+	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): Builder {
+		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
 		return this;
 	}
 
@@ -53,6 +62,7 @@ export class SocketAppSettings extends BuilderBase {
 		this.pingInterval = builder.getPingInterval();
 		this.pingTimeout = builder.getPingTimeout();
 		this.enable = builder.getEnable();
+		this.enableSendAndReceiveDebug = builder.getEnableSendAndReceiveDebug();
 	}
 
 	public static Builder(): Builder {

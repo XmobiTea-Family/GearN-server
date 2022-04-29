@@ -15,6 +15,10 @@ export abstract class RequestHandler implements IRequestHandler {
 		return null;
 	}
 
+	protected init(): void {
+
+	}
+
 	public setPostHandle(postHandle: PostHandle) {
 		this.postHandle = postHandle;
 	}
@@ -33,5 +37,6 @@ export abstract class RequestHandler implements IRequestHandler {
 
 	constructor(gameApplication: GameApplication) {
 		this.gameApplication = gameApplication;
+		this.init();
 	}
 }

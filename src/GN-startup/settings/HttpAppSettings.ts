@@ -8,6 +8,9 @@ abstract class BuilderBase {
 	protected methods: MethodType[];
 	protected allowedHeaders: string[];
 	protected credentials: boolean;
+	protected enableSendAndReceiveDebug: boolean;
+	protected enablePostViaMsgPack: boolean;
+	protected enablePostViaJson: boolean;
 
 	public getEnable(): boolean {
 		return this.enable;
@@ -27,6 +30,18 @@ abstract class BuilderBase {
 
 	public getCredentials(): boolean {
 		return this.credentials;
+	}
+
+	public getEnableSendAndReceiveDebug(): boolean {
+		return this.enableSendAndReceiveDebug;
+	}
+
+	public getEnablePostViaMsgPack(): boolean {
+		return this.enablePostViaMsgPack;
+	}
+
+	public getEnablePostViaJson(): boolean {
+		return this.enablePostViaJson;
 	}
 
 	constructor() {}
@@ -74,7 +89,21 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 
 	public setEnable(enable: boolean): Builder {
 		this.enable = enable;
+		return this;
+	}
 
+	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): Builder {
+		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
+		return this;
+	}
+
+	public setEnablePostViaMsgPack(enablePostViaMsgPack: boolean): Builder {
+		this.enablePostViaMsgPack = enablePostViaMsgPack;
+		return this;
+	}
+
+	public setEnablePostViaJson(enablePostViaJson: boolean): Builder {
+		this.enablePostViaJson = enablePostViaJson;
 		return this;
 	}
 
@@ -99,6 +128,9 @@ export class HttpAppSettings extends BuilderBase {
 		this.enable = builder.getEnable();
 		this.allowedHeaders = builder.getAllowedHeaders();
 		this.credentials = builder.getCredentials();
+		this.enableSendAndReceiveDebug = builder.getEnableSendAndReceiveDebug();
+		this.enablePostViaMsgPack = builder.getEnablePostViaMsgPack();
+		this.enablePostViaJson = builder.getEnablePostViaJson();
 	}
 
 	public static Builder(): Builder {

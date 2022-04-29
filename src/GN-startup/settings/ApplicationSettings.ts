@@ -7,6 +7,9 @@ abstract class BuilderBase {
 	protected keyFilePath: string;
 	protected certFilePath: string;
 
+	protected licenseKeyFilePath: string;
+	protected expiredToken: number;
+
 	public getPort(): number {
 		return this.port;
 	}
@@ -21,6 +24,14 @@ abstract class BuilderBase {
 
 	public getCertFilePath(): string {
 		return this.certFilePath;
+	}
+
+	public getLicenseKeyFilePath(): string {
+		return this.licenseKeyFilePath;
+	}
+
+	public getExpiredToken(): number {
+		return this.expiredToken;
 	}
 
 	constructor() {}
@@ -47,6 +58,16 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 		return this;
 	}
 
+	public setLicenseKeyFilePath(licenseKeyFilePath: string): Builder {
+		this.licenseKeyFilePath = licenseKeyFilePath;
+		return this;
+	}
+
+	public setExpiredToken(expiredToken: number): Builder {
+		this.expiredToken = expiredToken;
+		return this;
+	}
+
 	constructor() {
 		super();
 	}
@@ -64,6 +85,8 @@ export class ApplicationSettings extends BuilderBase {
 		this.useSSL = builder.getUseSSL();
 		this.keyFilePath = builder.getKeyFilePath();
 		this.certFilePath = builder.getCertFilePath();
+		this.licenseKeyFilePath = builder.getLicenseKeyFilePath();
+		this.expiredToken = builder.getExpiredToken();
 	}
 
 	public static Builder(): Builder {

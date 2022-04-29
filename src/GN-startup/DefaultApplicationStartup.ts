@@ -7,16 +7,27 @@ import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
+import { LogSettings } from "./settings/LogSettings";
+import { UploadFileSettings } from "./settings/UploadFileSettings";
 
 export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).build();
+		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).setExpiredToken(2 * 24 * 60 * 60 * 1000).setLicenseKeyFilePath("./gnserver.licensekey").build();
 
-		let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigin("*").addMethods(["GET", "POST"]).setCredentials(true).addAllowedHeaders(["a"]).build();
+		let httpAppSettings = HttpAppSettings.Builder()
+			.setEnable(true)
+			.setOrigin("*")
+			.addMethods(["GET", "POST"])
+			.setCredentials(true)
+			.addAllowedHeaders(["a"])
+			.setEnableSendAndReceiveDebug(true)
+			.setEnablePostViaJson(true)
+			.setEnablePostViaMsgPack(true)
+			.build();
 
-		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).build();
+		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).setEnableSendAndReceiveDebug(true).build();
 
 		let otherSettings = OtherSettings.Builder()
 			.setAdapterEventCollectionName("AdapterEventCollection")
@@ -33,12 +44,27 @@ export class DefaultApplicationStartup {
 			.setMaxPoolSize(100)
 			.build();
 
-		let mailSettings = MailSettings.Builder()
-			.setFromEmail("changx@xmobitea.com")
-			.setSendGridApiKey("SG.HtH0ZjTQTRqeHBARvEgktQ.f9vle8kPkWDVkqhmdNKZWYuGBFak!__rHVUGPicPlko")
+		let mailSettings = MailSettings.Builder().setFromEmail("changx@xmobitea.com").setSendGridApiKey("SG.").build();
+
+		let logSettings = LogSettings.Builder().setLogToFileEnable(true).setLogToConsoleEnable(true).setLogPath("./log/Server.log").build();
+
+		let uploadFileSettings = UploadFileSettings.Builder()
+			.setEnable(true)
+			.setMaxSizeUpload(1024 * 1024 * 50)
+			.setUploadPath("./file-upload")
+			.setMimeTypeAccepts(["image/png"])
 			.build();
 
-		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings);
+		this.serverApplication = this.newServerApplication(
+			applicationSettings,
+			httpAppSettings,
+			socketAppSettings,
+			otherSettings,
+			databaseSettings,
+			mailSettings,
+			logSettings,
+			uploadFileSettings
+		);
 
 		this.serverApplication.run(() => {
 			if (onRunSuccess != null) onRunSuccess();
@@ -51,7 +77,9 @@ export class DefaultApplicationStartup {
 		socketAppSettings: SocketAppSettings,
 		otherSettings: OtherSettings,
 		databaseSettings: DatabaseSettings,
-		mailSettings: MailSettings
+		mailSettings: MailSettings,
+		logSettings: LogSettings,
+		uploadFileSettings: UploadFileSettings
 	) {
 		return ServerApplication.Builder()
 			.setApplicationSettings(applicationSettings)
@@ -60,6 +88,8 @@ export class DefaultApplicationStartup {
 			.setOtherSettings(otherSettings)
 			.setDatabaseSettings(databaseSettings)
 			.setMailSettings(mailSettings)
+			.setLogSettings(logSettings)
+			.setUploadFileSettings(uploadFileSettings)
 			.build();
 	}
 

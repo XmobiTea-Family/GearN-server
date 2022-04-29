@@ -5,39 +5,39 @@ interface IGNData {
 	remove(k: number): boolean;
 	count(): number;
 
-	getBoolean(k: number): boolean;
-	getString(k: number): string;
-	getNumber(k: number): number;
-	getGNHashtable(k: number): GNHashtable;
-	getGNArray(k: number): GNArray;
+	getBoolean(k: number, def?: boolean): boolean;
+	getString(k: number, def?: string): string;
+	getNumber(k: number, def?: number): number;
+	getGNHashtable(k: number, def?: GNHashtable): GNHashtable;
+	getGNArray(k: number, def?: GNArray): GNArray;
 }
 
 export abstract class GNData implements IGNData {
-	protected get<T>(k: number): T {
-		return null;
+	protected get<T>(k: number, def?: T): T {
+		return def;
 	}
 
 	public abstract clear(): void;
 	public abstract remove(k: number): boolean;
 	public abstract count(): number;
 
-	public getBoolean(k: number): boolean {
+	public getBoolean(k: number, def?: boolean): boolean {
 		return this.get(k);
 	}
 
-	public getString(k: number): string {
+	public getString(k: number, def?: string): string {
 		return this.get(k);
 	}
 
-	public getNumber(k: number): number {
+	public getNumber(k: number, def?: number): number {
 		return this.get(k);
 	}
 
-	public getGNHashtable(k: number): GNHashtable {
+	public getGNHashtable(k: number, def?: GNHashtable): GNHashtable {
 		return this.get(k);
 	}
 
-	public getGNArray(k: number): GNArray {
+	public getGNArray(k: number, def?: GNArray): GNArray {
 		return this.get(k);
 	}
 
@@ -85,11 +85,8 @@ export abstract class GNData implements IGNData {
 		if (value instanceof GNHashtable) return value;
 
 		if (typeOfValue === "object") {
-			return this.createGNHashtableFromObject(value);
-		}
-
-		if (value.length != null) {
-			return this.createGNArrayFromArray(value);
+			if (Array.isArray(value)) return this.createGNArrayFromArray(value);
+			else return this.createGNHashtableFromObject(value);
 		}
 
 		return null;
@@ -135,10 +132,10 @@ export class GNHashtable extends GNData {
 		return Object.keys(this.dict).length;
 	}
 
-	protected get<T>(k: number): T {
+	protected get<T>(k: number, def?: T): T {
 		let value = this.dict[k];
 
-		if (value == null) return null;
+		if (value == null) return def;
 		return <T>value;
 	}
 
@@ -161,7 +158,7 @@ export class GNHashtable extends GNData {
 }
 
 export class GNArray extends GNData {
-	private array: Array<any>;
+	private array: Array<any> = [];
 
 	public clear(): void {
 		this.array = [];
@@ -178,12 +175,12 @@ export class GNArray extends GNData {
 		return 0;
 	}
 
-	protected get<T>(k: number): T {
+	protected get<T>(k: number, def?: T): T {
 		if (k < 0 || k >= this.array.length) return null;
 
 		let value = this.array[k];
 
-		if (value == null) return null;
+		if (value == null) return def;
 		return <T>value;
 	}
 

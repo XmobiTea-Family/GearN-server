@@ -12,14 +12,14 @@ export class xDatetime {
 	}
 
 	public static getMilliseconds(date: Date): number {
-		return date.getTime();
+		return Math.round(date.getTime());
 	}
 
 	public static getDateAtMilliseconds(milliseconds: number): Date {
 		return new Date(milliseconds);
 	}
 
-	public static getToday0hMilliseconds() {
+	public static getToday0hMilliseconds(): number {
 		let now = new Date();
 		let today0h = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 

@@ -7,9 +7,11 @@ import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
+import { LogSettings } from "./settings/LogSettings";
+import { UploadFileSettings } from "./settings/UploadFileSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
-	private gnConfig: {[k: string]: any};
+	private gnConfig: { [k: string]: any };
 
 	public config(gnConfig: {}): void {
 		this.gnConfig = gnConfig;
@@ -21,6 +23,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setCertFilePath(this.gnConfig["keyFilePath"])
 			.setKeyFilePath(this.gnConfig["certFilePath"])
 			.setPort(this.gnConfig["port"])
+			.setLicenseKeyFilePath(this.gnConfig["licenseKeyFilePath"])
+			.setExpiredToken(this.gnConfig["expiredTokenInMs"])
 			.build();
 
 		let httpAppSettings = HttpAppSettings.Builder()
@@ -29,12 +33,16 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.addMethods(this.gnConfig["httpAppAllowMethods"])
 			.setCredentials(this.gnConfig["httpAppCredentials"])
 			.addAllowedHeaders(this.gnConfig["httpAppAllowHeaders"])
+			.setEnableSendAndReceiveDebug(this.gnConfig["httpAppEnableSendAndReceiveDebug"])
+			.setEnablePostViaMsgPack(this.gnConfig["httpAppEnablePostViaMsgPack"])
+			.setEnablePostViaJson(this.gnConfig["httpAppEnablePostViaJson"])
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(this.gnConfig["socketAppEnable"])
 			.setPingInterval(this.gnConfig["socketAppPingInterval"])
 			.setPingTimeout(this.gnConfig["socketAppPingTimeout"])
+			.setEnableSendAndReceiveDebug(this.gnConfig["socketAppEnableSendAndReceiveDebug"])
 			.build();
 
 		let otherSettings = OtherSettings.Builder()
@@ -58,7 +66,29 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setSendGridApiKey(this.gnConfig["mailSendGridApiKey"])
 			.build();
 
-		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings);
+		let logSettings = LogSettings.Builder()
+			.setLogToFileEnable(this.gnConfig["logToFileEnable"])
+			.setLogToConsoleEnable(this.gnConfig["logToConsoleEnable"])
+			.setLogPath(this.gnConfig["logPath"])
+			.build();
+
+		let uploadFileSettings = UploadFileSettings.Builder()
+			.setEnable(this.gnConfig["uploadFileEnable"])
+			.setUploadPath(this.gnConfig["uploadPath"])
+			.setMaxSizeUpload(this.gnConfig["maxSizeUpload"])
+			.setMimeTypeAccepts(this.gnConfig["mimeTypeAccepts"])
+			.build();
+
+		this.serverApplication = this.newServerApplication(
+			applicationSettings,
+			httpAppSettings,
+			socketAppSettings,
+			otherSettings,
+			databaseSettings,
+			mailSettings,
+			logSettings,
+			uploadFileSettings
+		);
 
 		this.serverApplication.run(() => {
 			if (onRunSuccess != null) onRunSuccess();
