@@ -15,6 +15,7 @@ import { encode, decode } from "@msgpack/msgpack";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
+import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -99,7 +100,7 @@ export class SocketAppHandler {
 			if (socket.data.isAuthenticated === true) {
 				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
 
-				socket.data.isAuthenticated = true;
+				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 			}
 
@@ -116,7 +117,7 @@ export class SocketAppHandler {
 	}
 
 	private onSocketRequest(socket: Socket, data: any) {
-		this.apiMiddleware.socketAuthenticateToken(socket, async () => {
+		this.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
 			let requestData: any;
 
 			try {
@@ -149,7 +150,15 @@ export class SocketAppHandler {
 					Debug.log("[Parameters] " + JSON.stringify(params));
 				}
 
-				let operationResponse = await this._onRequestCb(request);
+				let operationResponse: OperationResponse;
+
+				if (returnCode != ReturnCode.Ok) {
+					operationResponse = await this._onRequestCb(request);
+				}
+				else {
+					operationResponse = new OperationResponse(request.getCode(), request.getRequestId());
+					operationResponse.setReturnCode(returnCode);
+				}
 
 				if (operationResponse != null) {
 					this.sendResponseForSocket(socket, operationResponse);

@@ -14,7 +14,7 @@ export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).build();
+		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).setExpiredToken(2 * 24 * 60 * 60 * 1000).setLicenseKeyFilePath("./gnserver.licensekey").build();
 
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(true)

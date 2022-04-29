@@ -1,4 +1,6 @@
 export class ReturnCode {
+	public static readonly MaxCCUReject = -8;
+
 	public static readonly OperationNotAuthorized = -7;
 	public static readonly InvalidRequestParameters = -6;
 	public static readonly OperationInvalid = -3;

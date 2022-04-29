@@ -23,6 +23,8 @@ export class HttpApp {
 	private uploadFileMiddleware: UploadFileMiddleware;
 	private gameApplication: GameApplication;
 
+	private sessionId: string;
+
 	public setApp(app: Express): void {
 		this.app = app;
 	}
@@ -59,6 +61,10 @@ export class HttpApp {
 		this.gameApplication = gameApplication;
 	}
 
+	public setSessionId(sessionId: string): void {
+		this.sessionId = sessionId;
+	}
+
 	public run(): void {
 		this.app.use(express.urlencoded({ extended: false }));
 
@@ -70,9 +76,9 @@ export class HttpApp {
 			return res.send(
 				'<a href="https://xmobitea.com"><h1 style="text-align:center;">XmobiTea</h1></a>' +
 					'<h3 style="text-align:center;">-->==>>> [GN Server] <<<==<--</h3>' +
-					'<h4 style="text-align:center;"> Version: ' +
-					GameApplication.getServerVersion() +
-					"</h4><br>" +
+					'<h4 style="text-align:center;"> Version: ' + GameApplication.getServerVersion() + '</h4>' + 
+					'Buy license at <a href="https://gnserver.xmobitea.com">XmobiTea GN Server</a>' +
+					'<br>' +
 					'<h4 style="text-align:center;">©2022 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
 			);
 		});
@@ -81,10 +87,13 @@ export class HttpApp {
 			return res.sendStatus(200);
 		});
 
+		let allowedHeaders = this.appSettings.getAllowedHeaders();
+		allowedHeaders.push(this.sessionId);
+
 		this.app.use(
 			cors({
 				origin: this.appSettings.getOrigin(),
-				allowedHeaders: this.appSettings.getAllowedHeaders(),
+				allowedHeaders: allowedHeaders,
 				credentials: this.appSettings.getCredentials(),
 				methods: this.appSettings.getMethods(),
 			})

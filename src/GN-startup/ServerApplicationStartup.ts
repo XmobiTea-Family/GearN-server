@@ -23,6 +23,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setCertFilePath(this.gnConfig["keyFilePath"])
 			.setKeyFilePath(this.gnConfig["certFilePath"])
 			.setPort(this.gnConfig["port"])
+			.setLicenseKeyFilePath(this.gnConfig["licenseKeyFilePath"])
+			.setExpiredToken(this.gnConfig["expiredTokenInMs"])
 			.build();
 
 		let httpAppSettings = HttpAppSettings.Builder()

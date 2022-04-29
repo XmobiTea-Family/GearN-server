@@ -23,6 +23,8 @@ import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
 import { LicenseKeyApplication } from "./LicenseKeyApplication";
+import { Md5Generate } from "./../GN-common/helper/Md5Generate";
+import { nanoid } from "nanoid";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -127,11 +129,20 @@ export class ServerApplication extends BuilderBase {
 	private uploadFileMiddleware: UploadFileMiddleware;
 	private licenseKeyApplication: LicenseKeyApplication;
 
+	private sessionId: string;
+    private secretkey: string;
+    private secretId: string;
+
 	public run(onRunSuccess?: OnRunSuccess): void {
+		let salt = nanoid(10);
+        this.sessionId = nanoid(15);
+        this.secretkey = nanoid(20);
+        this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
+
 		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
 		console.log("[GN] FullLogPath at: " + fullLogPath);
 
-		let licenseKeyFilePath = __dirname + "/../../../../" + this.getApplicationSettings().getLicenseKeyFilePath();
+		let licenseKeyFilePath = this.getApplicationSettings().getLicenseKeyFilePath() ? (__dirname + "/../../../../" + this.getApplicationSettings().getLicenseKeyFilePath()) : null;
 		if (licenseKeyFilePath) console.log("[GN] Found LicenseKeyFilePath at: " + licenseKeyFilePath);
 
 		Debug.init({
@@ -168,6 +179,7 @@ export class ServerApplication extends BuilderBase {
 		this.httpApp.setUploadFileSettings(this.getUploadFileSettings());
 		this.httpApp.setApp(app);
 		this.httpApp.setGameApplication(this.gameApplication);
+		this.httpApp.setSessionId(this.sessionId);
 		this.httpApp.run();
 
 		this.socketApp = this.newSocketApp();
@@ -196,6 +208,10 @@ export class ServerApplication extends BuilderBase {
 
 		let authTokenCollection = this.gameApplication.getDatabase().systemCollection(this.getOtherSettings().getAuthTokenCollectionName());
 		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
+
+		let playerGameCollection = this.gameApplication.getDatabase().systemGameCollection("Player");
+		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
+
 		this.apiMiddleware.setExpiredToken(this.applicationSettings.getExpiredToken());
 
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
@@ -227,17 +243,22 @@ export class ServerApplication extends BuilderBase {
 			this.licenseKeyApplication.setServer(server);
 			this.licenseKeyApplication.setApp(app);
 			this.licenseKeyApplication.setGameApplication(this.gameApplication);
+			this.licenseKeyApplication.setSessionId(this.sessionId);
+			this.licenseKeyApplication.setSecretkey(this.secretkey);
+			this.licenseKeyApplication.setSecretId(this.secretId);
+			this.licenseKeyApplication.setSalt(salt);
+			this.licenseKeyApplication.setPort(port);
 			this.licenseKeyApplication.run();
 		}
-		catch (exception: Error) {
-			Debug.logException(exception);
+		catch (err: any) {
+			Debug.logError(err);
 
 			return;
 		}
 
 		server.listen(port, () => {
 			Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
-			Debug.log("[GN] Server Application running on port " + port);
+			Debug.log("[GN] Server Application running on port " + port + " with id: " + this.sessionId);
 
 			if (onRunSuccess != null) onRunSuccess();
 		});
