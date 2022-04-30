@@ -1,9 +1,14 @@
-const gnConfig = require("./GNconfig.debug.json");
+const fs = require("fs");
+
+const optionsPath = __dirname + "/./GNconfig.debug.json";
+let optionStr = fs.readFileSync(optionsPath).toString();
+let fullOptions = JSON.parse(optionStr);
+let options = fullOptions.options;
 
 const { ServerApplicationStartup, Debug } = require("./dist/index");
 
 let applicationStartup = new ServerApplicationStartup();
-applicationStartup.config(gnConfig.options);
+applicationStartup.config(options);
 applicationStartup.run();
 
 let gameApplication = applicationStartup.getGameApplication();

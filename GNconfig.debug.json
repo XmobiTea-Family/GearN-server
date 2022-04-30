@@ -12,7 +12,7 @@
 		"httpAppAllowOrigin": "*",
 		"httpAppCredentials": true,
 		"httpAppAllowMethods": ["GET", "POST"],
-		"httpAppAllowHeaders": ["a", "content-length"],
+		"httpAppAllowHeaders": ["a", "content-type"],
 		"httpAppEnableSendAndReceiveDebug": true,
 		"httpAppEnablePostViaMsgPack": true,
 		"httpAppEnablePostViaJson": true,
