@@ -232,6 +232,10 @@ export class LicenseKeyApplication {
 		if (!this.licenseKeyFilePath) {
 			// this is no license key
 			LicenseKeyApplication.maxCCU = 20;
+
+			setTimeout(() => {
+				this.debug(-1, LicenseKeyApplication.maxCCU);
+			}, 500);
 		} else {
 			let allLines = fs.readFileSync(this.licenseKeyFilePath).toString("utf-8");
 
@@ -252,7 +256,7 @@ export class LicenseKeyApplication {
 							let errorCode = gnHashtable.getNumber(0);
 							setTimeout(() => {
 								this.debug(errorCode, LicenseKeyApplication.maxCCU);
-							});
+							}, 500);
 						}
 					});
 
@@ -278,7 +282,7 @@ export class LicenseKeyApplication {
 					let errorCode = gnHashtable.getNumber(0);
 					setTimeout(() => {
 						this.debug(errorCode, LicenseKeyApplication.maxCCU);
-					});
+					}, 500);
 				}
 
 				LicenseKeyApplication.maxCCU = newMaxCCU;

@@ -21,7 +21,7 @@ export class DefaultApplicationStartup {
 			.setOrigin("*")
 			.addMethods(["GET", "POST"])
 			.setCredentials(true)
-			.addAllowedHeaders(["a"])
+			.addAllowedHeaders(["a", "content-type"])
 			.setEnableSendAndReceiveDebug(true)
 			.setEnablePostViaJson(true)
 			.setEnablePostViaMsgPack(true)
