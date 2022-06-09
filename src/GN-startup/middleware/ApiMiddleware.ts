@@ -1,5 +1,6 @@
 const AUTH_TOKEN = "a";
 const FIVE_MINUTE_TS = 5 * 60 * 1000;
+const TS_REMOVE_AUTH_INFO_DIC = 1000 * 60 * 60 * 12;
 
 import express from "express";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
@@ -10,6 +11,8 @@ import * as mongoDB from "mongodb";
 import { Socket } from "socket.io";
 import { encode } from "@msgpack/msgpack";
 import { LicenseKeyApplication } from "./../LicenseKeyApplication";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 export class ApiMiddleware {
 	private authInfoDic: { [k: string]: AuthInfo };
@@ -42,27 +45,61 @@ export class ApiMiddleware {
 
 		setInterval(() => {
 			this.getDAULast30Min();
+			this.checkAndRemoveDict();
 		}, FIVE_MINUTE_TS);
 	}
 
 	private async getDAULast30Min() {
 		this.maxCCU = LicenseKeyApplication.GetMaxCCU();
 		
-		if (this.maxCCU != -1) {
-			this.dauLast30Min = [];
-
-			let playerLast30Mins = await this.playerGameCollection.find({}).sort({TsLastSeen: -1}).limit(50).toArray();
-
-			for (let i = 0; i < playerLast30Mins.length; i++) {
-				let playerLast30Min = playerLast30Mins[i];
-				this.dauLast30Min.push(playerLast30Min.UserId);
+		try {
+			if (this.maxCCU != -1) {
+				this.dauLast30Min = [];
+	
+				let playerLast30Mins = await this.playerGameCollection.find({}).sort({TsLastSeen: -1}).limit(50).toArray();
+	
+				for (let i = 0; i < playerLast30Mins.length; i++) {
+					let playerLast30Min = playerLast30Mins[i];
+					this.dauLast30Min.push(playerLast30Min.UserId);
+				}
 			}
+		}
+		catch (err) {
+			Debug.logException(err);
+		}
+	}
+
+	private async checkAndRemoveDict() {
+		try {
+			let removeCount = 0;
+
+			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+			let tsRemove = currentMilliseconds - TS_REMOVE_AUTH_INFO_DIC;
+
+			let authInfoLst = Object.values(this.authInfoDic);
+			
+			for (let i = 0; i < authInfoLst.length; i++) {
+				let authInfo = authInfoLst[i];
+
+				if (authInfo != null) {
+					if (authInfo.getTsLastUpdate() < tsRemove) {
+						delete this.authInfoDic[authInfo.getAuthToken()];
+						removeCount++;
+					}
+				}
+			}
+
+			Debug.log("[GN] ApiMiddleware remove " + removeCount + "/" + authInfoLst.length);
+		}
+		catch (err) {
+			Debug.logException(err);
 		}
 	}
 
 	public generateAuthToken(info: AuthInfo) {
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let authToken = Md5Generate.getMd5(nanoid());
-		let tsExpire = this.expiredToken == -1 ? -1 : (new Date().getTime() + this.expiredToken);
+		let tsExpire = this.expiredToken == -1 ? -1 : (currentMilliseconds + this.expiredToken);
 
 		let authInfo = AuthInfo.Builder()
 			.setAuthToken(authToken)
@@ -71,6 +108,7 @@ export class ApiMiddleware {
 			.setIsRemove(false)
 			.setTsExpire(tsExpire)
 			.setOtherUserLogin(false)
+			.setTsLastUpdate(currentMilliseconds)
 			.build();
 
 		this.authInfoDic[authToken] = authInfo;
@@ -96,7 +134,7 @@ export class ApiMiddleware {
 	}
 
 	public async authenticateTokenViaJson(req: express.Request, res: express.Response, next: Function) {
-		let returnCode = await this.getRetturnCodeAuthenticate(req);
+		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
 			return res.send([returnCode]);
 		}
@@ -105,7 +143,7 @@ export class ApiMiddleware {
 	}
 
 	public async authenticateTokenViaMsgPack(req: express.Request, res: express.Response, next: Function) {
-		let returnCode = await this.getRetturnCodeAuthenticate(req);
+		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
 			return res.send(Buffer.from(encode([returnCode])));
 		}
@@ -113,7 +151,15 @@ export class ApiMiddleware {
 		return next();
 	}
 
-	private async getRetturnCodeAuthenticate(req: express.Request): Promise<number> {
+	public async getIP(req: express.Request, res: express.Response, next: Function) {
+		let ip = this.createIP(req.socket.remoteAddress);
+
+		(req as any).ip = ip;
+
+		return next();
+	}
+
+	private async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
 		let headers = req.headers;
 		let authToken = headers[AUTH_TOKEN] as string;
 
@@ -143,6 +189,8 @@ export class ApiMiddleware {
 			if (authInfo == null) {
 				reqAny.isAuthenticated = false;
 			} else {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
 				if (authInfo.getOtherUserLogin()) {
 					delete this.authInfoDic[authToken];
 					
@@ -151,7 +199,7 @@ export class ApiMiddleware {
 					delete this.authInfoDic[authToken];
 
 					reqAny.isAuthenticated = false;
-				} else if (authInfo.getTsExpire() != -1 && authInfo.getTsExpire() < new Date().getTime()) {
+				} else if (authInfo.getTsExpire() != -1 && authInfo.getTsExpire() < currentMilliseconds) {
 					delete this.authInfoDic[authToken];
 
 					reqAny.isAuthenticated = false;
@@ -160,6 +208,7 @@ export class ApiMiddleware {
 					reqAny.authInfo = authInfo;
 
 					this.authInfoDic[authToken] = authInfo;
+					authInfo.setTsLastUpdate(currentMilliseconds);
 				}
 			}
 		}
@@ -179,6 +228,8 @@ export class ApiMiddleware {
 
 	public async socketAuthenticateToken(socket: Socket, next: (returnCode: number) => void) {
 		if (socket.data.isAuthenticated === true) {
+			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
 			let authInfo = socket.data.authInfo as AuthInfo;
 			let authToken = authInfo.getAuthToken();
 
@@ -198,13 +249,16 @@ export class ApiMiddleware {
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
-			} else if (authInfo.getTsExpire() < new Date().getTime()) {
+			} else if (authInfo.getTsExpire() < currentMilliseconds) {
 				delete this.authInfoDic[authToken];
 
 				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
+			}
+			else {
+				authInfo.setTsLastUpdate(currentMilliseconds);
 			}
 		}
 
@@ -219,6 +273,14 @@ export class ApiMiddleware {
 		}
 
 		return next(ReturnCode.Ok);
+	}
+
+	public createIP(ip: string): string {
+		if (ip.substring(0, 7) == "::ffff:") {
+			ip = ip.substring(7);
+		}
+
+		return ip;
 	}
 
 	constructor() {

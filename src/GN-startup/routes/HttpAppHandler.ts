@@ -10,6 +10,7 @@ import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import msgpack from "express-msgpack";
 import { encode } from "@msgpack/msgpack";
+import { AntiDdosMiddleware } from "../middleware/AntiDdosMiddleware";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -18,6 +19,7 @@ interface OnHttpRequest {
 export class HttpAppHandler {
 	private _onRequestCb: OnHttpRequest;
 	private apiMiddleware: ApiMiddleware;
+	private antiDdosMiddleware: AntiDdosMiddleware;
 
 	private gameApplication: GameApplication;
 	private enableSendAndReceiveDebug: boolean;
@@ -83,7 +85,16 @@ export class HttpAppHandler {
 			apiRouter.use(
 				"/0",
 				wrap((req, res, next) => {
+					return this.apiMiddleware.getIP(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkDDosForIPViaJson(req, res, next);
+				}),
+				wrap((req, res, next) => {
 					return this.apiMiddleware.authenticateTokenViaJson(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkDDosViaJson(req, res, next);
 				}),
 				this.apiJsonRouter
 			);
@@ -112,7 +123,16 @@ export class HttpAppHandler {
 			apiRouter.use(
 				"/1",
 				wrap((req, res, next) => {
+					return this.apiMiddleware.getIP(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkDDosForIPViaMsgPack(req, res, next);
+				}),
+				wrap((req, res, next) => {
 					return this.apiMiddleware.authenticateTokenViaMsgPack(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkDDosViaMsgPack(req, res, next);
 				}),
 				this.apiMsgPackRouter
 			);
@@ -141,16 +161,15 @@ export class HttpAppHandler {
 		let parameters = req.body;
 		if (!parameters) parameters = {};
 
-		let ip = req.socket.remoteAddress;
-		if (ip.substring(0, 7) == "::ffff:") {
-			ip = ip.substring(7);
-		}
+		let reqAny = req as any;
+
+		let ip = reqAny.ip;
 
 		let request = new Request(code);
 		request.setRequestId(0);
 		request.setIP(ip);
 		request.setParameters(parameters);
-		request.setAuthenticate((req as any).authInfo);
+		request.setAuthenticate(reqAny.authInfo);
 
 		if (this.enableSendAndReceiveDebug) {
 			Debug.log("[HTTP RECV] %O", request);

@@ -84,11 +84,8 @@ export class SocketAppHandler {
 	}
 
 	private initSocket(socket: Socket) {
-		let ip = socket.conn.remoteAddress;
-		if (ip.substring(0, 7) == "::ffff:") {
-			ip = ip.substring(7);
-		}
-
+		let ip = this.apiMiddleware.createIP(socket.conn.remoteAddress);
+	
 		socket.data.IPAddress = ip;
 	}
 

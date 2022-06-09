@@ -8,6 +8,7 @@ abstract class BuilderBase {
 	protected tsExpire: number;
 	protected otherUserLogin: boolean;
 	protected otherDatas: { [k: string]: any };
+	protected tsLastUpdate: number;
 
 	public getAuthToken(): string {
 		return this.authToken;
@@ -37,6 +38,10 @@ abstract class BuilderBase {
 		return this.otherDatas;
 	}
 
+	public getTsLastUpdate(): number {
+		return this.tsLastUpdate;
+	}
+
 	public setAuthToken(authToken: string): Builder {
 		return this as Builder;
 	}
@@ -56,6 +61,11 @@ abstract class BuilderBase {
 
 	public setTsExpire(tsExpire: number): Builder {
 		//this.tsExpire = tsExpire;
+		return this as Builder;
+	}
+
+	public setTsLastUpdate(tsLastUpdate: number): Builder {
+		this.tsLastUpdate = tsLastUpdate;
 		return this as Builder;
 	}
 
@@ -136,6 +146,7 @@ export class AuthInfo extends BuilderBase {
 		this.tsExpire = builder.getTsExpire();
 		this.otherUserLogin = builder.getOtherUserLogin();
 		this.otherDatas = builder.getOtherDatas();
+		this.tsLastUpdate = builder.getTsLastUpdate();
 	}
 
 	public toDocumentData() {

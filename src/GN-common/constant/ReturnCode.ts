@@ -1,4 +1,6 @@
 export class ReturnCode {
+	public static readonly MaxSizeRequestReject = -10;
+	public static readonly MaxRequestReject = -9;
 	public static readonly MaxCCUReject = -8;
 
 	public static readonly OperationNotAuthorized = -7;
