@@ -7,12 +7,14 @@ import { createAdapter } from "@socket.io/mongo-adapter";
 import { Emitter } from "@socket.io/mongo-emitter";
 import * as mongoDB from "mongodb";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
+import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 
 export class SocketApp {
 	private appSettings: SocketAppSettings;
 	private server: http.Server;
 	private socketAppHandler: SocketAppHandler;
 	private apiMiddleware: ApiMiddleware;
+	private antiDdosMiddleware: AntiDdosMiddleware;
 	private io: Server;
 
 	private emitter: Emitter;
@@ -45,6 +47,10 @@ export class SocketApp {
 		this.appSettings = appSettings;
 	}
 
+	public setAntiDdosMiddleware(antiDdosMiddleware: AntiDdosMiddleware): void {
+		this.antiDdosMiddleware = antiDdosMiddleware;
+	}
+
 	public run(): void {
 		this.io = new Server(this.server, {
 			pingInterval: this.appSettings.getPingInterval(),
@@ -55,6 +61,7 @@ export class SocketApp {
 		this.socketAppHandler.setEmitter(this.emitter);
 		this.socketAppHandler.setServer(this.io);
 		this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
+		this.socketAppHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.socketAppHandler.setEnableSendAndReceiveDebug(this.appSettings.getEnableSendAndReceiveDebug());
 
 		if (this.appSettings.getEnable()) {

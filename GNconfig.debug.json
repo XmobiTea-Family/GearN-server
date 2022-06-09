@@ -16,26 +16,16 @@
 		"httpAppEnableSendAndReceiveDebug": true,
 		"httpAppEnablePostViaMsgPack": true,
 		"httpAppEnablePostViaJson": true,
-		"httpAppMaxIPRequestPerSecond": 50,
-		"httpAppMaxRequestPerSecond": 20,
-		"httpAppMaxPendingRequest": 100,
-		"httpAppMaxRequestSize": 1024,
 
 		"socketAppEnable": true,
 		"socketAppPingInterval": 50000,
 		"socketAppPingTimeout": 5000,
 		"socketAppEnableSendAndReceiveDebug": true,
-		"socketAppMaxIPRequestPerSecond": 50,
-		"socketAppMaxRequestPerSecond": 20,
-		"socketAppMaxPendingRequest": 100,
-		"socketAppMaxRequestSize": 1024,
 
 		"uploadFileEnable": true,
 		"uploadPath": "./file-upload",
 		"maxSizeUpload": 52428800,
 		"mimeTypeAccepts": ["image/png"],
-		"maxUploadPendingRequest": 50,
-		"maxDownloadPendingRequest": 50,
 
 		"adapterEventCollectionName": "AdapterEventCollection",
 		"authInfoCollectionName": "AuthInfoCollection",
@@ -59,6 +49,17 @@
 
 		"logToConsoleEnable": true,
 		"logToFileEnable": true,
-		"logPath": "./log/debug/Server.log"
+		"logPath": "./log/debug/Server.log",
+
+		"socketMaxRequestPerSecondPerIp": 50,
+		"socketMaxRequestPerSecondPerPeer": 20,
+		"socketMaxPendingRequest": 100,
+		"socketMaxRequestSize": 1024,
+		"httpMaxRequestPerSecondPerIp": 50,
+		"httpMaxRequestPerSecondPerPeer": 20,
+		"httpMaxPendingRequest": 100,
+		"httpMaxRequestSize": 1024,
+		"maxUploadPendingRequest": 50,
+		"maxDownloadPendingRequest": 50
 	}
 }

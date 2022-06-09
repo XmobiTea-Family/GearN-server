@@ -9,6 +9,7 @@ import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
+import { DdosSettings } from "./settings/DDosSettings";
 
 export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
@@ -55,6 +56,19 @@ export class DefaultApplicationStartup {
 			.setMimeTypeAccepts(["image/png"])
 			.build();
 
+		let ddosSettings = DdosSettings.Builder()
+			.setSocketMaxRequestPerSecondPerIp(50)
+			.setSocketMaxRequestPerSecondPerPeer(20)
+			.setSocketMaxPendingRequest(100)
+			.setSocketMaxRequestSize(1024)
+			.setHttpMaxRequestPerSecondPerIp(50)
+			.setHttpMaxRequestPerSecondPerPeer(20)
+			.setHttpMaxPendingRequest(100)
+			.setHttpMaxRequestSize(1024)
+			.setMaxUploadPendingRequest(50)
+			.setMaxDownloadPendingRequest(50)
+			.build();
+
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
 			httpAppSettings,
@@ -63,7 +77,8 @@ export class DefaultApplicationStartup {
 			databaseSettings,
 			mailSettings,
 			logSettings,
-			uploadFileSettings
+			uploadFileSettings,
+			ddosSettings
 		);
 
 		this.serverApplication.run(() => {
@@ -79,7 +94,8 @@ export class DefaultApplicationStartup {
 		databaseSettings: DatabaseSettings,
 		mailSettings: MailSettings,
 		logSettings: LogSettings,
-		uploadFileSettings: UploadFileSettings
+		uploadFileSettings: UploadFileSettings,
+		ddosSettings: DdosSettings
 	) {
 		return ServerApplication.Builder()
 			.setApplicationSettings(applicationSettings)
@@ -90,6 +106,7 @@ export class DefaultApplicationStartup {
 			.setMailSettings(mailSettings)
 			.setLogSettings(logSettings)
 			.setUploadFileSettings(uploadFileSettings)
+			.setDdosSettings(ddosSettings)
 			.build();
 	}
 

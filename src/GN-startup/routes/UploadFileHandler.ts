@@ -6,11 +6,13 @@ import fs from "fs";
 import express from "express";
 import { wrap } from "async-middleware";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
+import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 
 export class UploadFileHandler {
 	private apiMiddleware: ApiMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
-
+	private antiDdosMiddleware: AntiDdosMiddleware;
+	
 	private router: Router;
 	private uploadRouter: Router;
 	private uploadPath: string;
@@ -22,6 +24,10 @@ export class UploadFileHandler {
 
 	public setApiMiddleware(apiMiddleware: ApiMiddleware): void {
 		this.apiMiddleware = apiMiddleware;
+	}
+
+	public setAntiDdosMiddleware(antiDdosMiddleware: AntiDdosMiddleware): void {
+		this.antiDdosMiddleware = antiDdosMiddleware;
 	}
 
 	public setUploadFileMiddleware(uploadFileMiddleware: UploadFileMiddleware): void {

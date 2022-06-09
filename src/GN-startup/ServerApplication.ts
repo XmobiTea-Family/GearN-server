@@ -25,6 +25,8 @@ import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
 import { LicenseKeyApplication } from "./LicenseKeyApplication";
 import { Md5Generate } from "./../GN-common/helper/Md5Generate";
 import { nanoid } from "nanoid";
+import { DdosSettings } from "./settings/DDosSettings";
+import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -35,6 +37,7 @@ abstract class BuilderBase {
 	protected otherSettings: OtherSettings;
 	protected logSettings: LogSettings;
 	protected uploadFileSettings: UploadFileSettings;
+	protected ddosSettings: DdosSettings;
 
 	public getApplicationSettings(): ApplicationSettings {
 		return this.applicationSettings;
@@ -66,6 +69,10 @@ abstract class BuilderBase {
 
 	public getUploadFileSettings(): UploadFileSettings {
 		return this.uploadFileSettings;
+	}
+
+	public getDdosSettings(): DdosSettings {
+		return this.ddosSettings;
 	}
 
 	constructor() {}
@@ -112,6 +119,11 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 		return this;
 	}
 
+	public setDdosSettings(ddosSettings: DdosSettings): Builder {
+		this.ddosSettings = ddosSettings;
+		return this;
+	}
+
 	public build() {
 		return new ServerApplication(this);
 	}
@@ -126,6 +138,7 @@ export class ServerApplication extends BuilderBase {
 	private socketApp: SocketApp;
 	private gameApplication: GameApplication;
 	private apiMiddleware: ApiMiddleware;
+	private antiDdosMiddleware: AntiDdosMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
 	private licenseKeyApplication: LicenseKeyApplication;
 
@@ -169,6 +182,19 @@ export class ServerApplication extends BuilderBase {
 		this.apiMiddleware = this.newApiMiddleware();
 		this.apiMiddleware.run();
 
+		this.antiDdosMiddleware = this.newAntiDdosMiddleware();
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerIp(this.ddosSettings.getSocketMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerPeer(this.ddosSettings.getSocketMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setSocketMaxPendingRequest(this.ddosSettings.getSocketMaxPendingRequest());
+		this.antiDdosMiddleware.setSocketMaxRequestSize(this.ddosSettings.getSocketMaxRequestSize());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerIp(this.ddosSettings.getHttpMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerPeer(this.ddosSettings.getHttpMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setHttpMaxPendingRequest(this.ddosSettings.getHttpMaxPendingRequest());
+		this.antiDdosMiddleware.setHttpMaxRequestSize(this.ddosSettings.getHttpMaxRequestSize());
+		this.antiDdosMiddleware.setMaxUploadPendingRequest(this.ddosSettings.getMaxUploadPendingRequest());
+		this.antiDdosMiddleware.setMaxDownloadPendingRequest(this.ddosSettings.getMaxDownloadPendingRequest());
+		this.antiDdosMiddleware.run();
+
 		this.gameApplication = this.newGameApplication();
 		this.gameApplication.setApiMiddleware(this.apiMiddleware);
 
@@ -180,12 +206,14 @@ export class ServerApplication extends BuilderBase {
 		this.httpApp.setApp(app);
 		this.httpApp.setGameApplication(this.gameApplication);
 		this.httpApp.setSessionId(this.sessionId);
+		this.httpApp.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.httpApp.run();
 
 		this.socketApp = this.newSocketApp();
 		this.socketApp.setApiMiddleware(this.apiMiddleware);
 		this.socketApp.setAppSettings(this.getSocketAppSettings());
 		this.socketApp.setServer(server);
+		this.socketApp.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.socketApp.run();
 
 		this.gameApplication.setHttpApp(this.httpApp);
@@ -299,6 +327,11 @@ export class ServerApplication extends BuilderBase {
 		return apiMiddleware;
 	}
 
+	private newAntiDdosMiddleware(): AntiDdosMiddleware {
+		let antiDdosMiddleware = new AntiDdosMiddleware();
+		return antiDdosMiddleware;
+	}
+
 	private newUploadMiddleware(): UploadFileMiddleware {
 		let uploadFileMiddleware = new UploadFileMiddleware();
 		return uploadFileMiddleware;
@@ -340,6 +373,7 @@ export class ServerApplication extends BuilderBase {
 		this.otherSettings = builder.getOtherSettings();
 		this.logSettings = builder.getLogSettings();
 		this.uploadFileSettings = builder.getUploadFileSettings();
+		this.ddosSettings = builder.getDdosSettings();
 	}
 
 	public static Builder(): Builder {

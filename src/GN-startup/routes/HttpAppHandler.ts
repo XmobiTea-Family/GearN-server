@@ -10,7 +10,7 @@ import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import msgpack from "express-msgpack";
 import { encode } from "@msgpack/msgpack";
-import { AntiDdosMiddleware } from "../middleware/AntiDdosMiddleware";
+import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -36,6 +36,10 @@ export class HttpAppHandler {
 
 	public setApiMiddleware(apiMiddleware: ApiMiddleware): void {
 		this.apiMiddleware = apiMiddleware;
+	}
+
+	public setAntiDdosMiddleware(antiDdosMiddleware: AntiDdosMiddleware): void {
+		this.antiDdosMiddleware = antiDdosMiddleware;
 	}
 
 	public setGameApplication(gameApplication: GameApplication): void {
@@ -80,6 +84,11 @@ export class HttpAppHandler {
 		if (this.enablePostViaJson)
 		{
 			this.apiJsonRouter = express.Router();
+
+			this.apiJsonRouter.use(wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkRequestSizeBodyViaJson(req, res, next);
+			}));
+
 			this.apiJsonRouter.use(express.json());
 	
 			apiRouter.use(
@@ -88,20 +97,20 @@ export class HttpAppHandler {
 					return this.apiMiddleware.getIP(req, res, next);
 				}),
 				wrap((req, res, next) => {
-					return this.antiDdosMiddleware.checkDDosForIPViaJson(req, res, next);
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaJson(req, res, next);
 				}),
 				wrap((req, res, next) => {
 					return this.apiMiddleware.authenticateTokenViaJson(req, res, next);
 				}),
 				wrap((req, res, next) => {
-					return this.antiDdosMiddleware.checkDDosViaJson(req, res, next);
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaJson(req, res, next);
 				}),
 				this.apiJsonRouter
 			);
 	
 			this.apiJsonRouter.post("/:code", async (req: express.Request, res: express.Response) => {
 				let operationResponse = await this.onHttpRequest(req);
-	
+				
 				if (operationResponse != null) {
 					let httpData = operationResponse.toHttpData();
 					if (this.enableSendAndReceiveDebug) {
@@ -118,6 +127,11 @@ export class HttpAppHandler {
 		if (this.enablePostViaMsgPack)
 		{
 			this.apiMsgPackRouter = express.Router();
+
+			this.apiJsonRouter.use(wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkRequestSizeBodyViaMsgPack(req, res, next);
+			}));
+
 			this.apiMsgPackRouter.use(msgpack());
 	
 			apiRouter.use(
@@ -126,13 +140,13 @@ export class HttpAppHandler {
 					return this.apiMiddleware.getIP(req, res, next);
 				}),
 				wrap((req, res, next) => {
-					return this.antiDdosMiddleware.checkDDosForIPViaMsgPack(req, res, next);
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaMsgPack(req, res, next);
 				}),
 				wrap((req, res, next) => {
 					return this.apiMiddleware.authenticateTokenViaMsgPack(req, res, next);
 				}),
 				wrap((req, res, next) => {
-					return this.antiDdosMiddleware.checkDDosViaMsgPack(req, res, next);
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaMsgPack(req, res, next);
 				}),
 				this.apiMsgPackRouter
 			);
@@ -148,7 +162,7 @@ export class HttpAppHandler {
 	
 					return res.send(Buffer.from(encode(httpData)));
 				}
-				
+
 				return res.send(Buffer.from(encode([ReturnCode.OperationInvalid])));
 			});
 		}

@@ -16,6 +16,7 @@ import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
+import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -29,6 +30,7 @@ export class SocketAppHandler {
 	private _onDisconnectCb: OnSocketDisconnect;
 	private _onRequestCb: OnSocketRequest;
 	private apiMiddleware: ApiMiddleware;
+	private antiDdosMiddleware: AntiDdosMiddleware;
 
 	private enableSendAndReceiveDebug: boolean;
 	private server: Server;
@@ -44,6 +46,10 @@ export class SocketAppHandler {
 
 	public setApiMiddleware(apiMiddleware: ApiMiddleware): void {
 		this.apiMiddleware = apiMiddleware;
+	}
+
+	public setAntiDdosMiddleware(antiDdosMiddleware: AntiDdosMiddleware): void {
+		this.antiDdosMiddleware = antiDdosMiddleware;
 	}
 
 	public setEmitter(emitter: Emitter) {

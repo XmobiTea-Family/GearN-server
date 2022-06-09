@@ -11,6 +11,7 @@ import { GameApplication } from "./../GameApplication";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { CreateNewFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/CreateNewFileUploadInfoRequestHandler";
 import { GetFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/GetFileUploadInfoRequestHandler";
+import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 
 export class HttpApp {
 	private uploadFileSettings: UploadFileSettings;
@@ -18,6 +19,7 @@ export class HttpApp {
 	private app: Express;
 	private httpAppHandler: HttpAppHandler;
 	private uploadFileHandler: UploadFileHandler;
+	private antiDdosMiddleware: AntiDdosMiddleware;
 
 	private apiMiddleware: ApiMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
@@ -65,6 +67,10 @@ export class HttpApp {
 		this.sessionId = sessionId;
 	}
 
+	public setAntiDdosMiddleware(antiDdosMiddleware: AntiDdosMiddleware): void {
+		this.antiDdosMiddleware = antiDdosMiddleware;
+	}
+
 	public run(): void {
 		this.app.use(express.urlencoded({ extended: false }));
 
@@ -102,6 +108,7 @@ export class HttpApp {
 		this.httpAppHandler = new HttpAppHandler();
 		this.httpAppHandler.setRouter(this.app);
 		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
+		this.httpAppHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.httpAppHandler.setGameApplication(this.gameApplication);
 		this.httpAppHandler.setEnableSendAndReceiveDebug(this.appSettings.getEnableSendAndReceiveDebug());
 		this.httpAppHandler.setEnablePostViaMsgPack(this.appSettings.getEnablePostViaMsgPack());
@@ -114,6 +121,7 @@ export class HttpApp {
 		this.uploadFileHandler = new UploadFileHandler();
 		this.uploadFileHandler.setRouter(this.app);
 		this.uploadFileHandler.setApiMiddleware(this.apiMiddleware);
+		this.uploadFileHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.uploadFileHandler.setUploadFileMiddleware(this.uploadFileMiddleware);
 		this.uploadFileHandler.setUploadPath(this.uploadFileSettings.getUploadPath());
 

@@ -9,6 +9,7 @@ import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
+import { DdosSettings } from "./settings/DDosSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
 	private gnConfig: { [k: string]: any };
@@ -79,6 +80,19 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setMimeTypeAccepts(this.gnConfig["mimeTypeAccepts"])
 			.build();
 
+		let ddosSettings = DdosSettings.Builder()
+			.setSocketMaxRequestPerSecondPerIp(this.gnConfig["socketMaxRequestPerSecondPerIp"])
+			.setSocketMaxRequestPerSecondPerPeer(this.gnConfig["socketMaxRequestPerSecondPerPeer"])
+			.setSocketMaxPendingRequest(this.gnConfig["socketMaxPendingRequest"])
+			.setSocketMaxRequestSize(this.gnConfig["socketMaxRequestSize"])
+			.setHttpMaxRequestPerSecondPerIp(this.gnConfig["httpMaxRequestPerSecondPerIp"])
+			.setHttpMaxRequestPerSecondPerPeer(this.gnConfig["httpMaxRequestPerSecondPerPeer"])
+			.setHttpMaxPendingRequest(this.gnConfig["httpMaxPendingRequest"])
+			.setHttpMaxRequestSize(this.gnConfig["httpMaxRequestSize"])
+			.setMaxUploadPendingRequest(this.gnConfig["maxUploadPendingRequest"])
+			.setMaxDownloadPendingRequest(this.gnConfig["maxDownloadPendingRequest"])
+			.build();
+
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
 			httpAppSettings,
@@ -87,7 +101,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			databaseSettings,
 			mailSettings,
 			logSettings,
-			uploadFileSettings
+			uploadFileSettings,
+			ddosSettings
 		);
 
 		this.serverApplication.run(() => {
