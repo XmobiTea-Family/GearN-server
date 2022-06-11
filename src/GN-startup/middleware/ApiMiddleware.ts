@@ -163,7 +163,9 @@ export class ApiMiddleware {
 	public async getIP(req: express.Request, res: express.Response, next: Function) {
 		let ip = this.createIP(req.socket.remoteAddress);
 
-		(req as any).ip = ip;
+		let reqAny = req as any;
+
+		reqAny.xip = ip;
 
 		return next();
 	}

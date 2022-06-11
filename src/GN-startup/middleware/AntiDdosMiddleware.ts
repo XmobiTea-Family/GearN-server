@@ -122,7 +122,8 @@ export class AntiDdosMiddleware {
 	}
 
     private getReturnCodeForRequestSizeHttp(req: express.Request): number {
-		let ip = req.ip;
+		let reqAny = req as any;
+		let ip = reqAny.xip;
 
 		let contentLengthStr: string = req.headers['content-length'];
 		if (contentLengthStr) {
@@ -289,7 +290,7 @@ export class AntiDdosMiddleware {
 	private getReturnCodeForMaxRequestPerSecondPerIp(req: express.Request): number {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let reqAny = req as any;
-		let id = reqAny.ip;
+		let id = reqAny.xip;
 		let httpRequestPerIPItem = this.httpRequestPerIPDic[id];
 		if (httpRequestPerIPItem == null) {
 			httpRequestPerIPItem = {
@@ -364,7 +365,7 @@ export class AntiDdosMiddleware {
 
 		if (isAuthenticated && authInfo != null) {
 			let id = authInfo.getUserId();
-			let ip = reqAny.ip;
+			let ip = reqAny.xip;
 
 			let httpRequestPerPeerItem = this.httpRequestPerPeerDic[id];
 			if (httpRequestPerPeerItem == null) {
@@ -444,7 +445,8 @@ export class AntiDdosMiddleware {
 	}
 
 	public async addPendingUploadRequest(req: express.Request, res: express.Response, next: Function) {
-		let ip = req.ip;
+		let reqAny = req as any;
+		let ip = reqAny.xip;
 
 		let maxUploadPendingRequest = this.maxUploadPendingRequest;
 		if (this.ipBlackLst.indexOf(ip)) maxUploadPendingRequest = maxUploadPendingRequest / K_MULTIPLE;
@@ -492,7 +494,8 @@ export class AntiDdosMiddleware {
 	}
 
 	public async addPendingDownloadRequest(req: express.Request, res: express.Response, next: Function) {
-		let ip = req.ip;
+		let reqAny= req as any;
+		let ip = reqAny.xip;
 
 		let maxDownloadPendingRequest = this.maxDownloadPendingRequest;
 		if (this.ipBlackLst.indexOf(ip)) maxDownloadPendingRequest = maxDownloadPendingRequest / K_MULTIPLE;

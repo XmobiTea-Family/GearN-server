@@ -186,7 +186,7 @@ export class HttpAppHandler {
 		let operationResponse: OperationResponse;
 		let reqAny = req as any;
 		let parameters = req.body;
-		let ip = reqAny.ip;
+		let ip = reqAny.xip;
 		let request = new Request(code);
 		request.setRequestId(0);
 		request.setIP(ip);
