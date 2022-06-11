@@ -5,10 +5,10 @@ import express from "express";
 import { Socket } from "socket.io";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { encode } from "@msgpack/msgpack";
-import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
-import { AuthInfo } from "../../GN-common/entity/AuthInfo";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
+import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import * as mongoDB from "mongodb";
-import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 
 interface MaxRequestItem {
 	id: string;

@@ -72,7 +72,8 @@ export class SocketApp {
 	public setEmitter(adapterEventCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.emitter = new Emitter(adapterEventCollection);
 		if (this.socketAppHandler != null) this.socketAppHandler.setEmitter(this.emitter);
-		this.io.adapter(createAdapter(adapterEventCollection));
+
+		this.io.adapter(createAdapter(adapterEventCollection) as any);
 	}
 
 	constructor() {}

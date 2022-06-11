@@ -38,7 +38,7 @@ export class DefaultApplicationStartup {
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()
-			.setConnectionString("mongodb://localhost:27017")
+			.setConnectionString("mongodb://admin:assmin@127.0.0.1:27017/?replicaSet=rs0")
 			.setDatabaseName("XmobiTea")
 			.setGameName("GN.")
 			.setMinPoolSize(5)
