@@ -60,6 +60,7 @@
 		"httpMaxPendingRequest": 100,
 		"httpMaxRequestSize": 1024,
 		"maxUploadPendingRequest": 50,
-		"maxDownloadPendingRequest": 50
+		"maxDownloadPendingRequest": 50,
+		"reportDdosCollectionName": "ReportDdosCollection"
 	}
 }

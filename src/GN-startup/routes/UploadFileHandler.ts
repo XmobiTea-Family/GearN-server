@@ -47,12 +47,26 @@ export class UploadFileHandler {
 		this.router.use(
 			"/upload",
 			wrap((req, res, next) => {
-				return this.apiMiddleware.authenticateTokenViaJson(req, res, next);
+				return this.apiMiddleware.getIP(req, res, next);
+			}),
+			wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkMaxUploadRequestPerSecondPerIp(req, res, next);
+			}),
+			wrap((req, res, next) => {
+				return this.apiMiddleware.authenticateUploadToken(req, res, next);
+			}),
+			wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkMaxUploadRequestPerSecondPerPeer(req, res, next);
 			}),
 			this.uploadRouter
 		);
 
-		this.uploadRouter.get("/:fileId", async (req: express.Request, res: express.Response): Promise<any> => {
+		this.uploadRouter.get("/:fileId",
+			wrap((req, res, next) => {
+				return this.antiDdosMiddleware.addPendingDownloadRequest(req, res, next);
+			}),
+
+			async (req: express.Request, res: express.Response): Promise<any> => {
 			let fileId = req.params.fileId;
 			if (!fileId) return res.sendStatus(400);
 
@@ -61,6 +75,8 @@ export class UploadFileHandler {
 
 			let fullPath = fileDoc["FullPath"];
 			fs.readFile(fullPath, (err, data) => {
+				this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
+
 				if (err) {
 					return res.status(404).send(err.message);
 				}
@@ -85,10 +101,15 @@ export class UploadFileHandler {
 		this.uploadRouter.post(
 			"/:fileId",
 			wrap((req, res, next) => {
+				return this.antiDdosMiddleware.addPendingUploadRequest(req, res, next);
+			}),
+			wrap((req, res, next) => {
 				return this.uploadFileMiddleware.checkFileUploadInvalid(req, res, next);
 			}),
 			wrap(this.uploadFileMiddleware.handleUpload().single("f")),
 			async (req: express.Request, res: express.Response): Promise<any> => {
+				this.antiDdosMiddleware.removePendingUploadRequest(req, res);
+
 				let file = req.file;
 				if (!file) {
 					return res.sendStatus(415);

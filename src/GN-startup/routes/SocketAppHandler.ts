@@ -77,11 +77,29 @@ export class SocketAppHandler {
 		this.initSocket(socket);
 
 		socket.on(REQUEST_AUTHTOKEN_CMD, (...data) => {
-			this.onSocketRequestAuthToken(socket, data);
+			this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, () => {
+				this.onSocketRequestAuthToken(socket, data);
+			});
 		});
 
 		socket.on(REQUEST_CMD, (...data) => {
-			this.onSocketRequest(socket, data);
+			this.antiDdosMiddleware.checkRequestSizeBodyViaSocket(socket, data, () => {
+				this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, () => {
+					this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaSocket(socket, data, () => {
+						this.antiDdosMiddleware.addPendingRequestViaSocket(socket, data, () => {
+							this.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
+								let operationResponse = await this.onSocketRequest(socket, data, returnCode);
+	
+								if (operationResponse != null) {
+									this.sendResponseForSocket(socket, operationResponse);
+								}
+	
+								this.antiDdosMiddleware.removePendingRequestViaSocket(socket, data);
+							});
+						});
+					});
+				});
+			});
 		});
 
 		socket.on(DISCONNECT_CMD, (data) => {
@@ -96,7 +114,16 @@ export class SocketAppHandler {
 	}
 
 	private onSocketRequestAuthToken(socket: Socket, data: any) {
-		if (data.length == 0) return;
+		if (data.length == 0) {
+			if (socket.data.isAuthenticated === true) {
+				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
+
+				socket.data.isAuthenticated = false;
+				socket.data.authInfo = null;
+			}
+
+			return;
+		}
 
 		let authToken = data[0] as string;
 		if (!authToken) {
@@ -119,55 +146,61 @@ export class SocketAppHandler {
 		}
 	}
 
-	private onSocketRequest(socket: Socket, data: any) {
-		this.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
-			let requestData: any;
+	private async onSocketRequest(socket: Socket, data: any, returnCode: number) : Promise<OperationResponse> {
+		let requestData: any;
+	
+		let buffer = data[0] as Buffer;
+		if (buffer[0] == 4) {
+			buffer = buffer.slice(1);
+		}
 
+		try {
+			requestData = decode(buffer);
+		} catch (err) {
+			Debug.logException(err);
+			return null;
+		}
+
+		if (requestData.length == 0) {
+			return null;
+		}
+
+		let code = requestData[0] as number;
+		let params = requestData.length > 1 ? (requestData[1] as {}) : {};
+		let requestId = requestData.length > 2 ? (requestData[2] as number) : -1;
+
+		let request = new Request(code);
+		request.setIP(socket.data.IPAddress);
+		request.setParameters(params);
+		request.setRequestId(requestId);
+
+		let isAuthenticated = socket.data.isAuthenticated;
+		if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
+
+		if (this.enableSendAndReceiveDebug) {
+			Debug.log("[SOCKET RECV] %O", request);
+			Debug.log("[Parameters] " + JSON.stringify(params));
+		}
+
+		let operationResponse: OperationResponse;
+
+		if (returnCode == ReturnCode.Ok) {
 			try {
-				let buffer = data[0] as Buffer;
-				if (buffer[0] == 4) {
-					buffer = buffer.slice(1);
-				}
+				operationResponse = await this._onRequestCb(request);
+			}
+			catch (err) {
+				operationResponse = new OperationResponse(request.getCode(), request.getRequestId());
+				operationResponse.setReturnCode(ReturnCode.InternalServerError);
 
-				requestData = decode(buffer);
-			} catch (err) {
 				Debug.logException(err);
-				return;
 			}
-
-			let code = requestData[0] as number;
-			let params = requestData.length > 1 ? (requestData[1] as {}) : {};
-			let requestId = requestData.length > 2 ? (requestData[2] as number) : -1;
-
-			if (this._onRequestCb != null) {
-				let request = new Request(code);
-				request.setIP(socket.data.IPAddress);
-				request.setParameters(params);
-				request.setRequestId(requestId);
-
-				let isAuthenticated = socket.data.isAuthenticated;
-				if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
-
-				if (this.enableSendAndReceiveDebug) {
-					Debug.log("[SOCKET RECV] %O", request);
-					Debug.log("[Parameters] " + JSON.stringify(params));
-				}
-
-				let operationResponse: OperationResponse;
-
-				if (returnCode != ReturnCode.Ok) {
-					operationResponse = await this._onRequestCb(request);
-				}
-				else {
-					operationResponse = new OperationResponse(request.getCode(), request.getRequestId());
-					operationResponse.setReturnCode(returnCode);
-				}
-
-				if (operationResponse != null) {
-					this.sendResponseForSocket(socket, operationResponse);
-				}
-			}
-		});
+		}
+		else {
+			operationResponse = new OperationResponse(request.getCode(), request.getRequestId());
+			operationResponse.setReturnCode(returnCode);
+		}
+		
+		return operationResponse;
 	}
 
 	private onSocketDisconnect(socket: Socket, data: string) {

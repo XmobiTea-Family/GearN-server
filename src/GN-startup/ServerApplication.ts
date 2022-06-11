@@ -239,8 +239,10 @@ export class ServerApplication extends BuilderBase {
 
 		let playerGameCollection = this.gameApplication.getDatabase().systemGameCollection("Player");
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
-
 		this.apiMiddleware.setExpiredToken(this.applicationSettings.getExpiredToken());
+
+		let reportDdosCollection = this.gameApplication.getDatabase().systemGameCollection(this.getDdosSettings().getReportDdosCollectionName());
+		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);

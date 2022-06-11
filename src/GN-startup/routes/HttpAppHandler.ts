@@ -105,12 +105,17 @@ export class HttpAppHandler {
 				wrap((req, res, next) => {
 					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaJson(req, res, next);
 				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.addPendingRequestViaJson(req, res, next);
+				}),
 				this.apiJsonRouter
 			);
 	
 			this.apiJsonRouter.post("/:code", async (req: express.Request, res: express.Response) => {
 				let operationResponse = await this.onHttpRequest(req);
 				
+				this.antiDdosMiddleware.removePendingRequest(req, res);
+
 				if (operationResponse != null) {
 					let httpData = operationResponse.toHttpData();
 					if (this.enableSendAndReceiveDebug) {
@@ -148,12 +153,17 @@ export class HttpAppHandler {
 				wrap((req, res, next) => {
 					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaMsgPack(req, res, next);
 				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.addPendingRequestViaMsgPack(req, res, next);
+				}),
 				this.apiMsgPackRouter
 			);
 	
 			this.apiMsgPackRouter.post("/:code", async (req: express.Request, res: express.Response) => {
 				let operationResponse = await this.onHttpRequest(req);
 	
+				this.antiDdosMiddleware.removePendingRequest(req, res);
+
 				if (operationResponse != null) {
 					let httpData = operationResponse.toHttpData();
 					if (this.enableSendAndReceiveDebug) {
@@ -169,30 +179,30 @@ export class HttpAppHandler {
 	}
 
 	private async onHttpRequest(req: express.Request): Promise<OperationResponse> {
-		let code = Number.parseInt(req.params.code);
-		let operationResponse = new OperationResponse(code, 0);
+		let codeStr = req.params.code;
+		if (isNaN(codeStr as any)) return null;
 
-		let parameters = req.body;
-		if (!parameters) parameters = {};
-
+		let code = Number.parseInt(codeStr);
+		let operationResponse: OperationResponse;
 		let reqAny = req as any;
-
+		let parameters = req.body;
 		let ip = reqAny.ip;
-
 		let request = new Request(code);
 		request.setRequestId(0);
 		request.setIP(ip);
-		request.setParameters(parameters);
+		request.setParameters(!parameters ? {} : parameters);
 		request.setAuthenticate(reqAny.authInfo);
-
+		
 		if (this.enableSendAndReceiveDebug) {
 			Debug.log("[HTTP RECV] %O", request);
 			Debug.log("[Parameters] " + JSON.stringify(parameters));
 		}
 
-		if (this._onRequestCb != null) {
+		try {
 			operationResponse = await this._onRequestCb(request);
-		} else {
+		}
+		catch {
+			operationResponse = new OperationResponse(code, 0);
 			operationResponse.setReturnCode(ReturnCode.InternalServerError);
 		}
 

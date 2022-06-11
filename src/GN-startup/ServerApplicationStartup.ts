@@ -91,6 +91,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setHttpMaxRequestSize(this.gnConfig["httpMaxRequestSize"])
 			.setMaxUploadPendingRequest(this.gnConfig["maxUploadPendingRequest"])
 			.setMaxDownloadPendingRequest(this.gnConfig["maxDownloadPendingRequest"])
+			.setReportDdosCollectionName(this.gnConfig["reportDdosCollectionName"])
 			.build();
 
 		this.serverApplication = this.newServerApplication(
