@@ -241,8 +241,11 @@ export class ServerApplication extends BuilderBase {
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
 		this.apiMiddleware.setExpiredToken(this.applicationSettings.getExpiredToken());
 
-		let reportDdosCollection = this.gameApplication.getDatabase().systemGameCollection(this.getDdosSettings().getReportDdosCollectionName());
+		let reportDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getReportDdosCollectionName());
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
+
+		let banDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getBanDdosCollectionName());
+		this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);

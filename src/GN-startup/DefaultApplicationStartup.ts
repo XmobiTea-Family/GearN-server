@@ -68,6 +68,7 @@ export class DefaultApplicationStartup {
 			.setMaxUploadPendingRequest(50)
 			.setMaxDownloadPendingRequest(50)
 			.setReportDdosCollectionName("ReportDdosCollection")
+			.setBanDdosCollectionName("BanDdosCollection")
 			.build();
 
 		this.serverApplication = this.newServerApplication(

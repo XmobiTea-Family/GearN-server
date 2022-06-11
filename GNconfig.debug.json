@@ -53,14 +53,15 @@
 
 		"socketMaxRequestPerSecondPerIp": 50,
 		"socketMaxRequestPerSecondPerPeer": 20,
-		"socketMaxPendingRequest": 100,
+		"socketMaxPendingRequest": 1000,
 		"socketMaxRequestSize": 1024,
 		"httpMaxRequestPerSecondPerIp": 50,
 		"httpMaxRequestPerSecondPerPeer": 20,
-		"httpMaxPendingRequest": 100,
+		"httpMaxPendingRequest": 1000,
 		"httpMaxRequestSize": 1024,
-		"maxUploadPendingRequest": 50,
-		"maxDownloadPendingRequest": 50,
-		"reportDdosCollectionName": "ReportDdosCollection"
+		"maxUploadPendingRequest": 200,
+		"maxDownloadPendingRequest": 200,
+		"reportDdosCollectionName": "ReportDdosCollection",
+		"banDdosCollectionName": "BanDdosCollection"
 	}
 }

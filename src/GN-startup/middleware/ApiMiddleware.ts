@@ -52,20 +52,20 @@ export class ApiMiddleware {
 	private async getDAULast30Min() {
 		this.maxCCU = LicenseKeyApplication.GetMaxCCU();
 		
-		try {
-			if (this.maxCCU != -1) {
-				this.dauLast30Min = [];
-	
+		if (this.maxCCU != -1) {
+			this.dauLast30Min.length = 0;
+
+			try {
 				let playerLast30Mins = await this.playerGameCollection.find({}).sort({TsLastSeen: -1}).limit(50).toArray();
-	
+
 				for (let i = 0; i < playerLast30Mins.length; i++) {
 					let playerLast30Min = playerLast30Mins[i];
 					this.dauLast30Min.push(playerLast30Min.UserId);
 				}
 			}
-		}
-		catch (err) {
-			Debug.logException(err);
+			catch (err) {
+				Debug.logException(err);
+			}
 		}
 	}
 
