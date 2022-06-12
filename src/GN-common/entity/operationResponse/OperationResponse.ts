@@ -100,11 +100,24 @@ export class OperationResponse {
 		return this.responseId;
 	}
 
+	private invalidMemberData() {
+		let anwser = [];
+
+		if (this.invalidMembers != null) {
+			for (let i = 0; i < this.invalidMembers.length; i++) {
+				let invalidMember = this.invalidMembers[i];
+				anwser.push([invalidMember.code, invalidMember.invalidMemberType as number]);
+			}
+		}
+
+		return anwser;
+	}
+
 	public toSocketData(): [number, any, number] {
-		return [this.returnCode, this.returnCode == ReturnCode.Ok ? this.parameters.toData() : this.debugMessage, this.responseId];
+		return [this.returnCode, this.returnCode == ReturnCode.Ok ? this.parameters.toData() : this.returnCode == ReturnCode.InvalidRequestParameters ? this.invalidMemberData() : this.debugMessage, this.responseId];
 	}
 
 	public toHttpData(): [number, any] {
-		return [this.returnCode, this.returnCode == ReturnCode.Ok ? this.parameters.toData() : this.debugMessage];
+		return [this.returnCode, this.returnCode == ReturnCode.Ok ? this.parameters.toData() : this.returnCode == ReturnCode.InvalidRequestParameters ? this.invalidMemberData() : this.debugMessage];
 	}
 }
