@@ -9,17 +9,15 @@ import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/Pa
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { RegisterSocketParameterCode } from "./../../../../GN-common/constant/parameterCode/RegisterSocketParameterCode";
 import { RegisterSocketErrorCode } from "./../../../../GN-common/constant/errorCode/RegisterSocketErrorCode";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class RegisterSocketOperationRequest extends OperationRequest {
+	@DataMember(RegisterSocketParameterCode.SId)
 	sid: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.sid = this.parameters.getString(RegisterSocketParameterCode.SId);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
 }
@@ -30,7 +28,7 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new RegisterSocketOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, RegisterSocketOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

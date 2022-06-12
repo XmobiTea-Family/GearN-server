@@ -10,17 +10,15 @@ import { GetAppConfigParameterCode } from "./../../../../GN-common/constant/para
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { GetAppConfigErrorCode } from "./../../../../GN-common/constant/errorCode/GetAppConfigErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class GetAppConfigOperationRequest extends OperationRequest {
+	@DataMember(GetAppConfigParameterCode.ConfigTypes)
 	configTypes: GNArray;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.configTypes = this.parameters.getGNArray(GetAppConfigParameterCode.ConfigTypes);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		if (this.configTypes == null) return false;
 
 		return true;
@@ -33,7 +31,7 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new GetAppConfigOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, GetAppConfigOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

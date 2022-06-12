@@ -12,17 +12,15 @@ import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { UserRoleType } from "./../../../../GN-common/constant/enumType/UserRoleType";
 import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUltils";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class EnterDisplayNameOperationRequest extends OperationRequest {
+	@DataMember(EnterDisplayNameParameterCode.DisplayName)
 	displayName: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.displayName = this.parameters.getString(EnterDisplayNameParameterCode.DisplayName);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		if (!this.displayName) return false;
 
 		return true;
@@ -35,7 +33,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new EnterDisplayNameOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, EnterDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

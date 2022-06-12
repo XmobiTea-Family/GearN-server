@@ -9,17 +9,15 @@ import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/Pa
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { FileUploadInfoParameterCode } from "./../../../../GN-common/constant/parameterCode/FileUploadInfoParameterCode";
 import { FileUploadInfoErrorCode } from "./../../../../GN-common/constant/errorCode/FileUploadInfoErrorCode";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class GetFileUploadInfoOperationRequest extends OperationRequest {
+	@DataMember(FileUploadInfoParameterCode.FileId)
 	fileId: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.fileId = this.parameters.getString(FileUploadInfoParameterCode.FileId);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+		
 		if (!this.fileId) return false;
 
 		return true;
@@ -32,7 +30,7 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new GetFileUploadInfoOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, GetFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

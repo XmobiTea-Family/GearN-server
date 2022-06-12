@@ -4,10 +4,12 @@ import { IRequestHandler, PostHandle } from "./IRequestHandler";
 
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { GameApplication } from "./../../../../../GameApplication";
+import { IRequestConverterService } from "./../../../../service/IRequestConverterService";
 
 export abstract class RequestHandler implements IRequestHandler {
 	protected gameApplication: GameApplication;
 	protected postHandle: PostHandle;
+	protected requestConverterService: IRequestConverterService;
 
 	public abstract getCode(): number;
 
@@ -37,6 +39,8 @@ export abstract class RequestHandler implements IRequestHandler {
 
 	constructor(gameApplication: GameApplication) {
 		this.gameApplication = gameApplication;
+		this.requestConverterService = gameApplication.getRequestConverterService();
+
 		this.init();
 	}
 }

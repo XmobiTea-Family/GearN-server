@@ -24,6 +24,7 @@ import bcrypt from "bcrypt";
 import Web3 from "web3";
 import { xRandom } from "./../../../../GN-library/xrandom/lib/xRandom";
 import { Debug } from "./../../../../GN-library/xdebug/lib/xDebug";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 const web3Instance = new Web3();
 
@@ -39,48 +40,64 @@ function generateRandomMessage() {
 }
 
 export class LoginOperationRequest extends OperationRequest {
+	@DataMember(LoginParameterCode.LoginType)
 	loginType: number;
+
+	@DataMember(LoginParameterCode.Username, true)
 	username: string;
+	@DataMember(LoginParameterCode.Password, true)
 	password: string;
+	@DataMember(LoginParameterCode.DeviceInfo, true)
 	deviceInfo: string;
+	@DataMember(LoginParameterCode.FacebookToken, true)
 	facebookToken: string;
+	@DataMember(LoginParameterCode.GoogleToken, true)
 	googleToken: string;
+	@DataMember(LoginParameterCode.UserId, true)
 	userId: string;
+	@DataMember(LoginParameterCode.AppleToken, true)
 	appleToken: string;
+	@DataMember(LoginParameterCode.DisplayName, true)
 	displayName: string;
+	@DataMember(LoginParameterCode.Signature, true)
 	signature: string;
+	@DataMember(LoginParameterCode.PublicAddress, true)
 	publicAddress: string;
+	@DataMember(LoginParameterCode.Message, true)
 	message: string;
+	@DataMember(LoginParameterCode.CustomId, true)
 	customId: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
+	// constructor(operationRequest: OperationRequest) {
+	// 	super(operationRequest);
 
-		this.loginType = this.parameters.getNumber(LoginParameterCode.LoginType);
+	// 	this.loginType = this.parameters.getNumber(LoginParameterCode.LoginType);
 
-		if (this.loginType == LoginType.Account) {
-			this.username = this.parameters.getString(LoginParameterCode.Username);
-			this.password = this.parameters.getString(LoginParameterCode.Password);
-		} else if (this.loginType == LoginType.Device) {
-			this.deviceInfo = this.parameters.getString(LoginParameterCode.DeviceInfo);
-		} else if (this.loginType == LoginType.Facebook) {
-			this.facebookToken = this.parameters.getString(LoginParameterCode.FacebookToken);
-		} else if (this.loginType == LoginType.Google) {
-			this.googleToken = this.parameters.getString(LoginParameterCode.GoogleToken);
-		} else if (this.loginType == LoginType.Apple) {
-			this.appleToken = this.parameters.getString(LoginParameterCode.AppleToken);
-		} else if (this.loginType == LoginType.UserId) {
-			this.userId = this.parameters.getString(LoginParameterCode.UserId);
-		} else if (this.loginType == LoginType.PublicAddress) {
-			this.signature = this.parameters.getString(LoginParameterCode.Signature);
-			this.publicAddress = this.parameters.getString(LoginParameterCode.PublicAddress);
-			this.message = this.parameters.getString(LoginParameterCode.Message);
-		} else if (this.loginType == LoginType.CustomId) {
-			this.customId = this.parameters.getString(LoginParameterCode.CustomId);
-		}
-	}
+	// 	if (this.loginType == LoginType.Account) {
+	// 		this.username = this.parameters.getString(LoginParameterCode.Username);
+	// 		this.password = this.parameters.getString(LoginParameterCode.Password);
+	// 	} else if (this.loginType == LoginType.Device) {
+	// 		this.deviceInfo = this.parameters.getString(LoginParameterCode.DeviceInfo);
+	// 	} else if (this.loginType == LoginType.Facebook) {
+	// 		this.facebookToken = this.parameters.getString(LoginParameterCode.FacebookToken);
+	// 	} else if (this.loginType == LoginType.Google) {
+	// 		this.googleToken = this.parameters.getString(LoginParameterCode.GoogleToken);
+	// 	} else if (this.loginType == LoginType.Apple) {
+	// 		this.appleToken = this.parameters.getString(LoginParameterCode.AppleToken);
+	// 	} else if (this.loginType == LoginType.UserId) {
+	// 		this.userId = this.parameters.getString(LoginParameterCode.UserId);
+	// 	} else if (this.loginType == LoginType.PublicAddress) {
+	// 		this.signature = this.parameters.getString(LoginParameterCode.Signature);
+	// 		this.publicAddress = this.parameters.getString(LoginParameterCode.PublicAddress);
+	// 		this.message = this.parameters.getString(LoginParameterCode.Message);
+	// 	} else if (this.loginType == LoginType.CustomId) {
+	// 		this.customId = this.parameters.getString(LoginParameterCode.CustomId);
+	// 	}
+	// }
 
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		if (this.loginType == LoginType.Account) {
 			if (!this.username) return false;
 			if (!this.password) return false;
@@ -132,7 +149,7 @@ export class LoginRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new LoginOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, LoginOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

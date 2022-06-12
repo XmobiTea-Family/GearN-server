@@ -1,4 +1,4 @@
-const GN_VERSION = "0.3.7";
+const GN_VERSION = "0.3.8";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -32,6 +32,8 @@ import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
 import { LoginType } from "./GN-common/constant/enumType/LoginType";
 import { ApiMiddleware } from "./GN-startup/middleware/ApiMiddleware";
 import { Debug } from "./GN-library/xdebug/lib/xDebug";
+import { IRequestConverterService } from "./GN-app-api/service/IRequestConverterService";
+import { RequestConverterService } from "./GN-app-api/service/RequestConverterService";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -59,6 +61,7 @@ export class GameApplication {
 	private appleService: IAppleService;
 	private timerService: ITimerService;
 	private lockService: ILockService;
+	private requestConverterService: IRequestConverterService;
 
 	private loginTypeEnables: LoginType[] = [];
 
@@ -78,6 +81,7 @@ export class GameApplication {
 		this.appleService = new AppleService();
 		this.timerService = new TimerService();
 		this.lockService = new LockService();
+		this.requestConverterService = new RequestConverterService();
 
 		this.xConfig = new xConfig();
 		this.xDatabase = new xDatabase();
@@ -85,6 +89,7 @@ export class GameApplication {
 		this.xCacheData = new xCacheData();
 
 		this.requestController = new RequestController();
+		this.requestController.setRequestConverterService(this.requestConverterService);
 
 		(this.timerService as TimerService).run();
 	}
@@ -192,6 +197,10 @@ export class GameApplication {
 
 	public getLockService(): ILockService {
 		return this.lockService;
+	}
+
+	public getRequestConverterService(): IRequestConverterService {
+		return this.requestConverterService;
 	}
 
 	public getLoginTypeEnables(): LoginType[] {

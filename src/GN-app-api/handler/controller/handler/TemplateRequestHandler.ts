@@ -9,17 +9,15 @@ import { DebugParameterCode } from "./../../../../GN-common/constant/parameterCo
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/DebugErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class TemplateOperationRequest extends OperationRequest {
+	@DataMember(DebugParameterCode.Boolean)
 	booleanValue: boolean;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.booleanValue = this.parameters.getBoolean(DebugParameterCode.Boolean);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
 }
@@ -30,7 +28,7 @@ export class TemplateRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new TemplateOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, TemplateOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

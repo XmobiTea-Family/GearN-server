@@ -12,11 +12,9 @@ import { FetchAllDataErrorCode } from "./../../../../GN-common/constant/errorCod
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 
 class FetchAllDataOperationRequest extends OperationRequest {
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
 }
@@ -27,7 +25,7 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new FetchAllDataOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, FetchAllDataOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

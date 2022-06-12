@@ -41,8 +41,10 @@ export class DefaultApplicationStartup {
 			.setConnectionString("mongodb://admin:assmin@127.0.0.1:27017/?replicaSet=rs0")
 			.setDatabaseName("XmobiTea")
 			.setGameName("GN.")
-			.setMinPoolSize(5)
-			.setMaxPoolSize(100)
+			.setOptions({
+				"minPoolSize": 5,
+				"maxPoolSize": 100
+			})
 			.build();
 
 		let mailSettings = MailSettings.Builder().setFromEmail("changx@xmobitea.com").setSendGridApiKey("SG.").build();

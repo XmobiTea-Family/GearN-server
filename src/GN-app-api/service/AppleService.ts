@@ -47,8 +47,7 @@ export class AppleService implements IAppleService {
 		this.client.getSigningKey(header.kid, (err: Error, key: jwksClient.SigningKey) => {
 			if (err) return callback(err, null);
 
-			// var signingKey = key.publicKey || key.rsaPublicKey;
-			var signingKey = key.getPublicKey();
+			let signingKey = key.getPublicKey();
 			return callback(null, signingKey);
 		});
 	}

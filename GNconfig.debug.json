@@ -35,8 +35,10 @@
 		"databaseConnectionString": "mongodb://admin:assmin@127.0.0.1:27017/?replicaSet=rs0",
 		"databaseName": "XmobiTea",
 		"databaseGameName": "GN.",
-		"databaseMinPoolSize": 5,
-		"databaseMaxPoolSize": 100,
+		"databaseOptions": {
+			"minPoolSize": 5,
+			"maxPoolSize": 100
+		},
 
 		"mailEnable": false,
 		"mailSendFrom": "changx@xmobitea.com",

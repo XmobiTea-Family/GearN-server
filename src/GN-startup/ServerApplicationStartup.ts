@@ -57,8 +57,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setConnectionString(this.gnConfig["databaseConnectionString"])
 			.setDatabaseName(this.gnConfig["databaseName"])
 			.setGameName(this.gnConfig["databaseGameName"])
-			.setMinPoolSize(this.gnConfig["databaseMinPoolSize"])
-			.setMaxPoolSize(this.gnConfig["databaseMaxPoolSize"])
+			.setOptions(this.gnConfig["databaseOptions"])
 			.build();
 
 		let mailSettings = MailSettings.Builder()

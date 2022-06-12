@@ -2,6 +2,7 @@ import { OperationRequest } from "./../../../GN-common/entity/operationRequest/O
 import { OperationResponse } from "./../../../GN-common/entity/operationResponse/OperationResponse";
 import { Request } from "./../../../GN-common/entity/operationRequest/base/Request";
 import { IRequestHandler } from "./handler/base/IRequestHandler";
+import { IRequestConverterService } from "./../../service/IRequestConverterService";
 
 export class RequestController {
 	private handlers: {
@@ -9,6 +10,12 @@ export class RequestController {
 	};
 
 	private requestUnAuthenticatedCodes: number[];
+
+	private requestConverterService: IRequestConverterService;
+
+	public setRequestConverterService(requestConverterService: IRequestConverterService): void {
+		this.requestConverterService = requestConverterService;
+	}
 
 	public addHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
 		let code = requestHandler.getCode();
@@ -40,7 +47,7 @@ export class RequestController {
 			}
 		}
 
-		let operationRequest = OperationRequest.newOperationRequest(request);
+		let operationRequest = this.requestConverterService.newOperationRequest(request);
 
 		let handler = this.handlers[operationRequest.getOperationCode()];
 		if (handler != null) {

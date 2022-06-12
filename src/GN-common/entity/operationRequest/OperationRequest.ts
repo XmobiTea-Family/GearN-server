@@ -8,8 +8,10 @@ export class OperationRequest {
 	protected requestId: number;
 	protected parameters: GNHashtable;
 
+    protected isValid: boolean;
+
 	public isValidRequest(): boolean {
-		return true;
+		return this.isValid;
 	}
 
 	public getOperationCode(): number {
@@ -28,39 +30,7 @@ export class OperationRequest {
 		return this.originRequest;
 	}
 
-	constructor(operationRequest?: OperationRequest) {
-		if (operationRequest != null) {
-			this.operationCode = operationRequest.operationCode;
-			this.requestId = operationRequest.requestId;
-			this.parameters = operationRequest.parameters;
-			this.originRequest = operationRequest.originRequest;
-		}
-	}
-
-	public static newOperationRequest(request: Request): OperationRequest {
-		let answer = new OperationRequest();
-		answer.originRequest = request;
-
-		answer.operationCode = request.getCode();
-		answer.requestId = request.getRequestId();
-		let gnHashtable = new GNHashtable();
-
-		let d = request.getParameters();
-
-		let keys = Object.keys(d);
-		for (let i = 0; i < keys.length; i++) {
-			let key = keys[i];
-
-			let keyInt = Number.parseInt(key);
-			
-			if (!isNaN(keyInt))
-				gnHashtable.add(keyInt, d[key]);
-		}
-
-		answer.parameters = gnHashtable;
-
-		return answer;
-	}
+	constructor() { }
 
 	public toString(): string {
 		return this.operationCode + " " + this.requestId + " " + this.parameters.toData.toString();

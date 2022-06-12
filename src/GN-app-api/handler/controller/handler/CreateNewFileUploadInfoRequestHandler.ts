@@ -11,17 +11,15 @@ import { nanoid } from "nanoid";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { FileUploadInfoParameterCode } from "./../../../../GN-common/constant/parameterCode/FileUploadInfoParameterCode";
 import { FileUploadInfoErrorCode } from "./../../../../GN-common/constant/errorCode/FileUploadInfoErrorCode";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
+	@DataMember(FileUploadInfoParameterCode.OriginFileName)
 	originFileName: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.originFileName = this.parameters.getString(FileUploadInfoParameterCode.OriginFileName);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		if (!this.originFileName) return false;
 
 		return true;
@@ -34,7 +32,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new CreateNewFileUploadInfoOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, CreateNewFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

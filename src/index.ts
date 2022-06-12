@@ -97,3 +97,6 @@ export { Debug };
 
 import { GameApplication } from "./GameApplication";
 export { GameApplication };
+
+import { DataMember } from "./GN-app-api/service/RequestConverterService";
+export { DataMember };

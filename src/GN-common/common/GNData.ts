@@ -5,6 +5,7 @@ interface IGNData {
 	remove(k: number): boolean;
 	count(): number;
 
+	getObject(k: number, def?: object): object;
 	getBoolean(k: number, def?: boolean): boolean;
 	getString(k: number, def?: string): string;
 	getNumber(k: number, def?: number): number;
@@ -22,23 +23,27 @@ export abstract class GNData implements IGNData {
 	public abstract count(): number;
 
 	public getBoolean(k: number, def?: boolean): boolean {
-		return this.get(k);
+		return this.get(k, def);
+	}
+
+	public getObject(k: number, def?: object): object {
+		return this.get(k, def);
 	}
 
 	public getString(k: number, def?: string): string {
-		return this.get(k);
+		return this.get(k, def);
 	}
 
 	public getNumber(k: number, def?: number): number {
-		return this.get(k);
+		return this.get(k, def);
 	}
 
 	public getGNHashtable(k: number, def?: GNHashtable): GNHashtable {
-		return this.get(k);
+		return this.get(k, def);
 	}
 
 	public getGNArray(k: number, def?: GNArray): GNArray {
-		return this.get(k);
+		return this.get(k, def);
 	}
 
 	private static createGNHashtableFromObject(value: any): GNHashtable {
@@ -126,6 +131,13 @@ export class GNHashtable extends GNData {
 
 		delete this.dict[k];
 		return false;
+	}
+
+	public containsKey(k: number): boolean {
+		let keys = Object.keys(this.dict);
+		let kStr = k.toString();
+		
+		return keys.indexOf(kStr) != -1;
 	}
 
 	public count(): number {

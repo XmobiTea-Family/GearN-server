@@ -12,25 +12,27 @@ import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/Debug
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { OperationEvent } from "./../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../GN-common/constant/EventCode";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class DebugOperationRequest extends OperationRequest {
+	@DataMember(DebugParameterCode.Boolean, true)
 	booleanValue: boolean;
+
+	@DataMember(DebugParameterCode.Boolean, true)
 	numberValue: number;
+
+	@DataMember(DebugParameterCode.Number, true)
 	stringValue: string;
+
+	@DataMember(DebugParameterCode.GNHashtable, true)
 	gnHashtableValue: GNHashtable;
+
+	@DataMember(DebugParameterCode.GNArray, true)
 	gnArrayValue: GNArray;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.booleanValue = this.parameters.getBoolean(DebugParameterCode.Boolean);
-		this.numberValue = this.parameters.getNumber(DebugParameterCode.Number);
-		this.stringValue = this.parameters.getString(DebugParameterCode.String);
-		this.gnHashtableValue = this.parameters.getGNHashtable(DebugParameterCode.GNHashtable);
-		this.gnArrayValue = this.parameters.getGNArray(DebugParameterCode.GNArray);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
 }
@@ -41,7 +43,7 @@ export class DebugRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new DebugOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, DebugOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

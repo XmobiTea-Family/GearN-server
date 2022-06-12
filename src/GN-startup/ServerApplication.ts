@@ -306,13 +306,7 @@ export class ServerApplication extends BuilderBase {
 			let databaseName = this.databaseSettings.getDatabaseName();
 			let gameName = this.databaseSettings.getGameName();
 
-			let minPoolSize = this.databaseSettings.getMinPoolSize();
-			let maxPoolSize = this.databaseSettings.getMaxPoolSize();
-
-			let options = {
-				maxPoolSize: maxPoolSize,
-				minPoolSize: minPoolSize,
-			};
+			let options = this.databaseSettings.getOptions();
 			gameApplication.getDatabase().init(connectionString, databaseName, gameName, options);
 		}
 

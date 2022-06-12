@@ -11,19 +11,18 @@ import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandle
 
 import bcrypt from "bcrypt";
 import { LoginType } from "./../../../../GN-common/constant/enumType/LoginType";
+import { DataMember } from "./../../../service/RequestConverterService";
 
 class RegisterAccountOperationRequest extends OperationRequest {
+	@DataMember(LoginParameterCode.Username)
 	username: string;
+
+	@DataMember(LoginParameterCode.Password)
 	password: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.username = this.parameters.getString(LoginParameterCode.Username);
-		this.password = this.parameters.getString(LoginParameterCode.Password);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		if (!this.username) return false;
 		if (!this.password) return false;
 
@@ -37,7 +36,7 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new RegisterAccountOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, RegisterAccountOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
