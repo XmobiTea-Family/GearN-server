@@ -1,5 +1,6 @@
 import { ReturnCode } from "./../../constant/ReturnCode";
 import { GNHashtable } from "./../../common/GNData";
+import { InvalidMember } from "./../InvalidMember";
 
 export class OperationResponse {
 	private operationCode: number;
@@ -7,7 +8,8 @@ export class OperationResponse {
 	private returnCode: number;
 	private debugMessage: string;
 	private parameters: GNHashtable;
-
+	private invalidMembers: InvalidMember[];
+	
 	constructor(operationCode: number, responseId: number) {
 		this.operationCode = operationCode;
 		this.responseId = responseId;
@@ -47,6 +49,11 @@ export class OperationResponse {
 		return this.operationCode + " " + this.responseId + " " + this.parameters.toString();
 	}
 
+	public setInvalidMembers(invalidMembers: InvalidMember[]): OperationResponse {
+		this.invalidMembers = invalidMembers;
+		return this;
+	}
+
 	public static newOperationResponse(operationCode: number, responseId: number): OperationResponse {
 		return new OperationResponse(operationCode, responseId);
 	}
@@ -60,10 +67,12 @@ export class OperationResponse {
 		return operationInvalid;
 	}
 
-	public static newOperationInvalidRequestParameters(operationCode: number, responseId: number, debugMessage?: string): OperationResponse {
+	public static newOperationInvalidRequestParameters(operationCode: number, responseId: number, invalidMembers: InvalidMember[], debugMessage?: string): OperationResponse {
 		let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
 		operationInvalid.setReturnCode(ReturnCode.InvalidRequestParameters);
+		operationInvalid.setInvalidMembers(invalidMembers);
+		
 		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
 
 		return operationInvalid;

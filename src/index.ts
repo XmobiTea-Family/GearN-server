@@ -98,5 +98,5 @@ export { Debug };
 import { GameApplication } from "./GameApplication";
 export { GameApplication };
 
-import { DataMember } from "./GN-app-api/service/RequestConverterService";
-export { DataMember };
+import { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMemberArgs, NumberDataMember } from "./GN-common/entity/DataMember";
+export { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMemberArgs, NumberDataMember };

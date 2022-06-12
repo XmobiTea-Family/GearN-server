@@ -24,7 +24,7 @@ import bcrypt from "bcrypt";
 import Web3 from "web3";
 import { xRandom } from "./../../../../GN-library/xrandom/lib/xRandom";
 import { Debug } from "./../../../../GN-library/xdebug/lib/xDebug";
-import { DataMember } from "./../../../service/RequestConverterService";
+import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 const web3Instance = new Web3();
 
@@ -40,60 +40,33 @@ function generateRandomMessage() {
 }
 
 export class LoginOperationRequest extends OperationRequest {
-	@DataMember(LoginParameterCode.LoginType)
+	@StringDataMember({ code: LoginParameterCode.LoginType, minLength: 1, maxLength: 15 })
 	loginType: number;
 
-	@DataMember(LoginParameterCode.Username, true)
+	@StringDataMember({ code: LoginParameterCode.Username, isOptional: true })
 	username: string;
-	@DataMember(LoginParameterCode.Password, true)
+	@StringDataMember({ code: LoginParameterCode.Password, isOptional: true })
 	password: string;
-	@DataMember(LoginParameterCode.DeviceInfo, true)
+	@StringDataMember({ code: LoginParameterCode.DeviceInfo, isOptional: true })
 	deviceInfo: string;
-	@DataMember(LoginParameterCode.FacebookToken, true)
+	@StringDataMember({ code: LoginParameterCode.FacebookToken, isOptional: true })
 	facebookToken: string;
-	@DataMember(LoginParameterCode.GoogleToken, true)
+	@StringDataMember({ code: LoginParameterCode.GoogleToken, isOptional: true })
 	googleToken: string;
-	@DataMember(LoginParameterCode.UserId, true)
+	@StringDataMember({ code: LoginParameterCode.UserId, isOptional: true })
 	userId: string;
-	@DataMember(LoginParameterCode.AppleToken, true)
+	@StringDataMember({ code: LoginParameterCode.AppleToken, isOptional: true })
 	appleToken: string;
-	@DataMember(LoginParameterCode.DisplayName, true)
+	@StringDataMember({ code: LoginParameterCode.DisplayName, isOptional: true })
 	displayName: string;
-	@DataMember(LoginParameterCode.Signature, true)
+	@StringDataMember({ code: LoginParameterCode.Signature, isOptional: true })
 	signature: string;
-	@DataMember(LoginParameterCode.PublicAddress, true)
+	@StringDataMember({ code: LoginParameterCode.PublicAddress, isOptional: true })
 	publicAddress: string;
-	@DataMember(LoginParameterCode.Message, true)
+	@StringDataMember({ code: LoginParameterCode.Message, isOptional: true })
 	message: string;
-	@DataMember(LoginParameterCode.CustomId, true)
+	@StringDataMember({ code: LoginParameterCode.CustomId, isOptional: true })
 	customId: string;
-
-	// constructor(operationRequest: OperationRequest) {
-	// 	super(operationRequest);
-
-	// 	this.loginType = this.parameters.getNumber(LoginParameterCode.LoginType);
-
-	// 	if (this.loginType == LoginType.Account) {
-	// 		this.username = this.parameters.getString(LoginParameterCode.Username);
-	// 		this.password = this.parameters.getString(LoginParameterCode.Password);
-	// 	} else if (this.loginType == LoginType.Device) {
-	// 		this.deviceInfo = this.parameters.getString(LoginParameterCode.DeviceInfo);
-	// 	} else if (this.loginType == LoginType.Facebook) {
-	// 		this.facebookToken = this.parameters.getString(LoginParameterCode.FacebookToken);
-	// 	} else if (this.loginType == LoginType.Google) {
-	// 		this.googleToken = this.parameters.getString(LoginParameterCode.GoogleToken);
-	// 	} else if (this.loginType == LoginType.Apple) {
-	// 		this.appleToken = this.parameters.getString(LoginParameterCode.AppleToken);
-	// 	} else if (this.loginType == LoginType.UserId) {
-	// 		this.userId = this.parameters.getString(LoginParameterCode.UserId);
-	// 	} else if (this.loginType == LoginType.PublicAddress) {
-	// 		this.signature = this.parameters.getString(LoginParameterCode.Signature);
-	// 		this.publicAddress = this.parameters.getString(LoginParameterCode.PublicAddress);
-	// 		this.message = this.parameters.getString(LoginParameterCode.Message);
-	// 	} else if (this.loginType == LoginType.CustomId) {
-	// 		this.customId = this.parameters.getString(LoginParameterCode.CustomId);
-	// 	}
-	// }
 
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;

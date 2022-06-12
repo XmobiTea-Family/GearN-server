@@ -11,20 +11,17 @@ import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandle
 
 import bcrypt from "bcrypt";
 import { LoginType } from "./../../../../GN-common/constant/enumType/LoginType";
-import { DataMember } from "./../../../service/RequestConverterService";
+import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class RegisterAccountOperationRequest extends OperationRequest {
-	@DataMember(LoginParameterCode.Username)
+	@StringDataMember({ code: LoginParameterCode.Username, mustNonNull: true, minLength: 5, maxLength: 32 })
 	username: string;
 
-	@DataMember(LoginParameterCode.Password)
+	@StringDataMember({ code: LoginParameterCode.Password, mustNonNull: true, minLength: 8, maxLength: 64 })
 	password: string;
 
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
-
-		if (!this.username) return false;
-		if (!this.password) return false;
 
 		return true;
 	}

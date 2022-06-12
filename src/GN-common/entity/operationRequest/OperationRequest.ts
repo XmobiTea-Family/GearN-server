@@ -1,5 +1,6 @@
 import { Request } from "./base/Request";
 import { GNHashtable } from "./../../common/GNData";
+import { InvalidMember } from "./../InvalidMember";
 
 export class OperationRequest {
 	protected originRequest: Request;
@@ -9,6 +10,8 @@ export class OperationRequest {
 	protected parameters: GNHashtable;
 
     protected isValid: boolean;
+
+	private invalidMembers: InvalidMember[];
 
 	public isValidRequest(): boolean {
 		return this.isValid;
@@ -30,9 +33,19 @@ export class OperationRequest {
 		return this.originRequest;
 	}
 
-	constructor() { }
+	constructor() {
+		this.invalidMembers = [];
+	 }
 
 	public toString(): string {
 		return this.operationCode + " " + this.requestId + " " + this.parameters.toData.toString();
 	}
+
+    public addInvalidMember(invalidMember: InvalidMember) {
+        this.invalidMembers.push(invalidMember);
+    }
+
+    public getInvalidMembers(): InvalidMember[] {
+        return this.invalidMembers;
+    }
 }

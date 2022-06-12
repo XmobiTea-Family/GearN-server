@@ -26,7 +26,7 @@ export abstract class RequestHandler implements IRequestHandler {
 	}
 
 	protected newInvalidRequestParameters(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationResponse.newOperationInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), debugMessage);
+		return OperationResponse.newOperationInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.getInvalidMembers(), debugMessage);
 	}
 
 	protected newOperationInvalid(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {

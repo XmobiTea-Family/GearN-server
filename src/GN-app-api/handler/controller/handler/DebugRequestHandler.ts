@@ -12,22 +12,22 @@ import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/Debug
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { OperationEvent } from "./../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../GN-common/constant/EventCode";
-import { DataMember } from "./../../../service/RequestConverterService";
+import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class DebugOperationRequest extends OperationRequest {
-	@DataMember(DebugParameterCode.Boolean, true)
+	@BooleanDataMemberArgs({ code: DebugParameterCode.Boolean, isOptional: true })
 	booleanValue: boolean;
 
-	@DataMember(DebugParameterCode.Boolean, true)
+	@NumberDataMember({ code: DebugParameterCode.Number, isOptional: true })
 	numberValue: number;
 
-	@DataMember(DebugParameterCode.Number, true)
+	@StringDataMember({ code: DebugParameterCode.String, isOptional: true })
 	stringValue: string;
 
-	@DataMember(DebugParameterCode.GNHashtable, true)
+	@GNHashtableDataMember({ code: DebugParameterCode.GNHashtable, isOptional: true })
 	gnHashtableValue: GNHashtable;
 
-	@DataMember(DebugParameterCode.GNArray, true)
+	@GNArrayDataMember({ code: DebugParameterCode.GNArray, isOptional: true })
 	gnArrayValue: GNArray;
 
 	public isValidRequest() {

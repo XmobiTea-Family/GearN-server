@@ -10,16 +10,14 @@ import { GetAppConfigParameterCode } from "./../../../../GN-common/constant/para
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { GetAppConfigErrorCode } from "./../../../../GN-common/constant/errorCode/GetAppConfigErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
-import { DataMember } from "./../../../service/RequestConverterService";
+import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class GetAppConfigOperationRequest extends OperationRequest {
-	@DataMember(GetAppConfigParameterCode.ConfigTypes)
+	@GNArrayDataMember({ code: GetAppConfigParameterCode.ConfigTypes, mustNonNull: true, minLength: 1 })
 	configTypes: GNArray;
 
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
-
-		if (this.configTypes == null) return false;
 
 		return true;
 	}

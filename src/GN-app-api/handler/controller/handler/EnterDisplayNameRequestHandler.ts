@@ -12,16 +12,14 @@ import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { UserRoleType } from "./../../../../GN-common/constant/enumType/UserRoleType";
 import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUltils";
-import { DataMember } from "./../../../service/RequestConverterService";
+import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class EnterDisplayNameOperationRequest extends OperationRequest {
-	@DataMember(EnterDisplayNameParameterCode.DisplayName)
+	@StringDataMember({ code: EnterDisplayNameParameterCode.DisplayName, mustNonNull: true, minLength: 3, maxLength: 40 })
 	displayName: string;
 
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
-
-		if (!this.displayName) return false;
 
 		return true;
 	}
