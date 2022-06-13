@@ -9,7 +9,7 @@ import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/Pa
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { RegisterSocketParameterCode } from "./../../../../GN-common/constant/parameterCode/RegisterSocketParameterCode";
 import { RegisterSocketErrorCode } from "./../../../../GN-common/constant/errorCode/RegisterSocketErrorCode";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class RegisterSocketOperationRequest extends OperationRequest {
 	@StringDataMember({ code: RegisterSocketParameterCode.SId, mustNonNull: true, minLength: 16, maxLength: 24 })

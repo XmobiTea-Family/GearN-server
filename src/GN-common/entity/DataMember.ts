@@ -97,7 +97,7 @@ export const StringDataMember = (args: StringDataMemberArgs) => (prototype: any,
     field.maxLength = args.maxLength;
 };
 
-export const BooleanDataMemberArgs = (args: BooleanDataMemberArgs) => (prototype: any, propertyKey: string) => {
+export const BooleanDataMember = (args: BooleanDataMemberArgs) => (prototype: any, propertyKey: string) => {
     let field = initFieldMetadata<EnhancedFieldMetadata>(prototype, propertyKey);
     field.code = args.code;
     field.isOptional = args.isOptional;

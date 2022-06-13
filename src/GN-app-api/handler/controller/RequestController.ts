@@ -1,4 +1,3 @@
-import { OperationRequest } from "./../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../GN-common/entity/operationResponse/OperationResponse";
 import { Request } from "./../../../GN-common/entity/operationRequest/base/Request";
 import { IRequestHandler } from "./handler/base/IRequestHandler";

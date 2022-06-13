@@ -10,7 +10,7 @@ import { GetAppConfigParameterCode } from "./../../../../GN-common/constant/para
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { GetAppConfigErrorCode } from "./../../../../GN-common/constant/errorCode/GetAppConfigErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class GetAppConfigOperationRequest extends OperationRequest {
 	@GNArrayDataMember({ code: GetAppConfigParameterCode.ConfigTypes, mustNonNull: true, minLength: 1 })

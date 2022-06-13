@@ -24,7 +24,7 @@ import bcrypt from "bcrypt";
 import Web3 from "web3";
 import { xRandom } from "./../../../../GN-library/xrandom/lib/xRandom";
 import { Debug } from "./../../../../GN-library/xdebug/lib/xDebug";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 const web3Instance = new Web3();
 
@@ -40,7 +40,7 @@ function generateRandomMessage() {
 }
 
 export class LoginOperationRequest extends OperationRequest {
-	@StringDataMember({ code: LoginParameterCode.LoginType, minLength: 1, maxLength: 15 })
+	@NumberDataMember({ code: LoginParameterCode.LoginType, minValue: 1, maxValue: 15, mustInt: true })
 	loginType: number;
 
 	@StringDataMember({ code: LoginParameterCode.Username, isOptional: true })

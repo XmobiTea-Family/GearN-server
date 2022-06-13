@@ -10,7 +10,7 @@ import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { FetchAllDataParameterCode } from "./../../../../GN-common/constant/parameterCode/FetchAllDataParameterCode";
 import { FetchAllDataErrorCode } from "./../../../../GN-common/constant/errorCode/FetchAllDataErrorCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class FetchAllDataOperationRequest extends OperationRequest {
 	public isValidRequest() {

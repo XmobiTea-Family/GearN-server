@@ -9,7 +9,7 @@ import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/Pa
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { FileUploadInfoParameterCode } from "./../../../../GN-common/constant/parameterCode/FileUploadInfoParameterCode";
 import { FileUploadInfoErrorCode } from "./../../../../GN-common/constant/errorCode/FileUploadInfoErrorCode";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class GetFileUploadInfoOperationRequest extends OperationRequest {
 	@StringDataMember({ code: FileUploadInfoParameterCode.FileId, mustNonNull: true, minLength: 10, maxLength: 20 })

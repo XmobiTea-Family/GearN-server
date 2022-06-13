@@ -11,7 +11,7 @@ import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandle
 
 import bcrypt from "bcrypt";
 import { LoginType } from "./../../../../GN-common/constant/enumType/LoginType";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class RegisterAccountOperationRequest extends OperationRequest {
 	@StringDataMember({ code: LoginParameterCode.Username, mustNonNull: true, minLength: 5, maxLength: 32 })

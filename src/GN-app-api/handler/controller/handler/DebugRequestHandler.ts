@@ -12,10 +12,10 @@ import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/Debug
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { OperationEvent } from "./../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../GN-common/constant/EventCode";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class DebugOperationRequest extends OperationRequest {
-	@BooleanDataMemberArgs({ code: DebugParameterCode.Boolean, isOptional: true })
+	@BooleanDataMember({ code: DebugParameterCode.Boolean, isOptional: true })
 	booleanValue: boolean;
 
 	@NumberDataMember({ code: DebugParameterCode.Number, isOptional: true })

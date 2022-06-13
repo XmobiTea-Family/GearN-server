@@ -12,7 +12,7 @@ import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { UserRoleType } from "./../../../../GN-common/constant/enumType/UserRoleType";
 import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUltils";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class EnterDisplayNameOperationRequest extends OperationRequest {
 	@StringDataMember({ code: EnterDisplayNameParameterCode.DisplayName, mustNonNull: true, minLength: 3, maxLength: 40 })

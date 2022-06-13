@@ -9,10 +9,10 @@ import { DebugParameterCode } from "./../../../../GN-common/constant/parameterCo
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/DebugErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class TemplateOperationRequest extends OperationRequest {
-	@BooleanDataMemberArgs({ code: DebugParameterCode.Boolean })
+	@BooleanDataMember({ code: DebugParameterCode.Boolean })
 	booleanValue: boolean;
 
 	public isValidRequest() {

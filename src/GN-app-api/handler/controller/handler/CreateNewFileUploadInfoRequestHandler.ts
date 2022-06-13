@@ -11,7 +11,7 @@ import { nanoid } from "nanoid";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { FileUploadInfoParameterCode } from "./../../../../GN-common/constant/parameterCode/FileUploadInfoParameterCode";
 import { FileUploadInfoErrorCode } from "./../../../../GN-common/constant/errorCode/FileUploadInfoErrorCode";
-import { DataMember, BooleanDataMemberArgs, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
 	@StringDataMember({ code: FileUploadInfoParameterCode.OriginFileName, mustNonNull: true, minLength: 5, maxLength: 50 })
