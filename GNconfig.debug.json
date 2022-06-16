@@ -36,8 +36,6 @@
 		"databaseName": "XmobiTea",
 		"databaseGameName": "GN.",
 		"databaseOptions": {
-			"minPoolSize": 5,
-			"maxPoolSize": 100
 		},
 
 		"mailEnable": false,

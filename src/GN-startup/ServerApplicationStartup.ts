@@ -91,7 +91,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setMaxUploadPendingRequest(this.gnConfig["maxUploadPendingRequest"])
 			.setMaxDownloadPendingRequest(this.gnConfig["maxDownloadPendingRequest"])
 			.setReportDdosCollectionName(this.gnConfig["reportDdosCollectionName"])
-			.setBanDdosCollectionName(this.gnConfig["BanDdosCollection"])
+			.setBanDdosCollectionName(this.gnConfig["banDdosCollectionName"])
 			.build();
 
 		this.serverApplication = this.newServerApplication(
