@@ -1,4 +1,5 @@
 export class OperationCode {
+	public static readonly Logout: number = -10;
 	public static readonly Debug: number = -1;
 	public static readonly GetAppConfig: number = 1;
 	public static readonly Login: number = 2;
