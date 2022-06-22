@@ -98,5 +98,5 @@ export { Debug };
 import { GameApplication } from "./GameApplication";
 export { GameApplication };
 
-import { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember } from "./GN-common/entity/DataMember";
-export { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember };
+import { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, FieldType } from "./GN-common/entity/DataMember";
+export { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, FieldType };

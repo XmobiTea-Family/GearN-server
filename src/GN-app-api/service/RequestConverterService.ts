@@ -2,8 +2,8 @@ import { OperationRequest } from "./../../GN-common/entity/operationRequest/Oper
 import { IRequestConverterService, Constructor } from "./IRequestConverterService";
 import { Request } from "./../../GN-common/entity/operationRequest/base/Request";
 import { GNHashtable, GNArray, GNData } from "./../../GN-common/common/GNData";
-import { EnhancedFieldMetadata, EnhancedObjectMedata } from "./../../GN-common/entity/DataMember";
-import { getObjectMetadata, DataType } from "@clairejs/core";
+import { EnhancedFieldMetadata, EnhancedObjectMedata, FieldType } from "./../../GN-common/entity/DataMember";
+import { getObjectMetadata, DataType, Field } from "@clairejs/core";
 import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
 
 export class RequestConverterService implements IRequestConverterService {
@@ -24,15 +24,15 @@ export class RequestConverterService implements IRequestConverterService {
 
         for (let i = 0; i < declaredFields.length; i++) {
             let field = declaredFields[i];
-            let fieldType = field.dataType;
+            let fieldType = field.fieldType;
 
             let containsKey = parameters.containsKey(field.code);
             let value = parameters.getObject(field.code);
 
             if (field.isOptional) {
                 if (containsKey && value != null) {
-                    if (fieldType == DataType.OBJECT) {
-                        if (value instanceof GNHashtable && answerAny[field.name] instanceof GNHashtable) {
+                    if (fieldType == FieldType.GNHashtable) {
+                        if (value instanceof GNHashtable) {
                             let lastValue = value as GNHashtable;
 
                             if (field.mustNonNull) {
@@ -70,7 +70,18 @@ export class RequestConverterService implements IRequestConverterService {
 
                             answerAny[field.name] = lastValue;
                         }
-                        else if (value instanceof GNArray && answerAny[field.name] instanceof GNArray) {
+                        else {
+                            answer.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+        
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (fieldType == FieldType.GNArray) {
+                        if (value instanceof GNArray) {
                             let lastValue = value as GNArray;
 
                             if (field.mustNonNull) {
@@ -118,7 +129,7 @@ export class RequestConverterService implements IRequestConverterService {
                             break;
                         }
                     }
-                    else if (fieldType == DataType.BOOLEAN) {
+                    else if (fieldType == FieldType.Boolean) {
                         if (typeof value === "boolean") {
                             let lastValue: boolean = value as any as boolean;
     
@@ -138,7 +149,7 @@ export class RequestConverterService implements IRequestConverterService {
                             break;
                         }
                     }
-                    else if (fieldType == DataType.NUMBER) {
+                    else if (fieldType == FieldType.Number) {
                         if (typeof value === "number") {
                             let lastValue: number = value as any as number;
     
@@ -192,7 +203,7 @@ export class RequestConverterService implements IRequestConverterService {
                             break;
                         }
                     }
-                    else if (fieldType == DataType.STRING) {
+                    else if (fieldType == FieldType.String) {
                         let lastValue: string = value as any as string;
 
                         if (field.mustNonNull) {
@@ -230,91 +241,63 @@ export class RequestConverterService implements IRequestConverterService {
 
                         answerAny[field.name] = lastValue;
                     }
+                    else if (fieldType == FieldType.Other) {
+                        let lastValue = value;
+
+                        answerAny[field.name] = lastValue;
+                    }
                 }
                 else {
-                    if (fieldType == DataType.OBJECT) {
+                    if (fieldType == FieldType.GNHashtable || fieldType == FieldType.GNArray) {
                         let lastValue: GNData = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
-                        if (answerAny[field.name] instanceof GNHashtable) {
-                            if (field.mustNonNull) {
-                                if (lastValue == null) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableNull
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                            }
-
-                            if (lastValue != null) {
-                                if (lastValue.count() < field.minLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                                else if (lastValue.count() > field.maxLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
+                        if (field.mustNonNull) {
+                            let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableNull : InvalidMemberType.GNArrayNull;
+                            if (lastValue == null) {
+                                answer.addInvalidMember({
+                                    code: field.code,
+                                    invalidMemberType: invalidMemberType
+                                });
+            
+                                isValidRequest = false;
+                                break;
                             }
                         }
-                        else if (answerAny[field.name] instanceof GNArray) {
-                            if (field.mustNonNull) {
-                                if (lastValue == null) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayNull
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                            }
 
-                            if (lastValue != null) {
-                                if (lastValue.count() < field.minLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                                else if (lastValue.count() > field.maxLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
+                        if (lastValue != null) {
+                            if (lastValue.count() < field.minLength) {
+                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMinLength : InvalidMemberType.GNArrayMinLength;
+                                answer.addInvalidMember({
+                                    code: field.code,
+                                    invalidMemberType: invalidMemberType
+                                });
+            
+                                isValidRequest = false;
+                                break;
+                            }
+                            else if (lastValue.count() > field.maxLength) {
+                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMaxLength : InvalidMemberType.GNArrayMaxLength;
+                                answer.addInvalidMember({
+                                    code: field.code,
+                                    invalidMemberType: invalidMemberType
+                                });
+            
+                                isValidRequest = false;
+                                break;
                             }
                         }
 
                         answerAny[field.name] = lastValue;
                     }
-                    else if (fieldType == DataType.BOOLEAN) {
+                    else if (fieldType == FieldType.Boolean) {
                         let lastValue: boolean = false;
 
                         if (field.defaultValue != null) lastValue = field.defaultValue;
                         
                         answerAny[field.name] = lastValue;
                     }
-                    else if (fieldType == DataType.NUMBER) {
+                    else if (fieldType == FieldType.Number) {
                         let lastValue: number = 0;
                         
                         if (field.defaultValue != null) lastValue = field.defaultValue;
@@ -355,7 +338,7 @@ export class RequestConverterService implements IRequestConverterService {
 
                         answerAny[field.name] = lastValue;
                     }
-                    else if (fieldType == DataType.STRING) {
+                    else if (fieldType == FieldType.String) {
                         let lastValue: string = null;
 
                         if (field.defaultValue != null) lastValue = field.defaultValue;
@@ -395,6 +378,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                         answerAny[field.name] = lastValue;
                     }
+                    else if (fieldType == FieldType.Other) {
+                        let lastValue = null;
+
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
+
+                        answerAny[field.name] = lastValue;
+                    }
                 }
             }
             else {
@@ -409,8 +399,8 @@ export class RequestConverterService implements IRequestConverterService {
                 }
 
                 if (value != null) {
-                    if (fieldType == DataType.OBJECT) {
-                        if (value instanceof GNHashtable && answerAny[field.name] instanceof GNHashtable) {
+                    if (fieldType == FieldType.GNHashtable) {
+                        if (value instanceof GNHashtable) {
                             let lastValue = value as GNHashtable;
 
                             if (field.mustNonNull) {
@@ -448,7 +438,18 @@ export class RequestConverterService implements IRequestConverterService {
 
                             answerAny[field.name] = lastValue;
                         }
-                        else if (value instanceof GNArray && answerAny[field.name] instanceof GNArray) {
+                        else {
+                            answer.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (fieldType == FieldType.GNArray) {
+                        if (value instanceof GNArray) {
                             let lastValue = value as GNArray;
 
                             if (field.mustNonNull) {
@@ -491,15 +492,12 @@ export class RequestConverterService implements IRequestConverterService {
                                 code: field.code,
                                 invalidMemberType: InvalidMemberType.TypeInvalid
                             });
-        
-                            isValidRequest = false;
-                            break;
 
                             isValidRequest = false;
                             break;
                         }
                     }
-                    else if (fieldType == DataType.BOOLEAN) {
+                    else if (fieldType == FieldType.Boolean) {
                         if (typeof value === "boolean") {
                             let lastValue: boolean = value as any as boolean;
                         
@@ -515,7 +513,7 @@ export class RequestConverterService implements IRequestConverterService {
                             break;
                         }
                     }
-                    else if (fieldType == DataType.NUMBER) {
+                    else if (fieldType == FieldType.Number) {
                         if (typeof value === "number") {
                             let lastValue: number = value as any as number;
 
@@ -565,7 +563,7 @@ export class RequestConverterService implements IRequestConverterService {
                             break;
                         }
                     }
-                    else if (fieldType == DataType.STRING) {
+                    else if (fieldType == FieldType.String) {
                         let lastValue: string = value as any as string;
 
                         if (field.mustNonNull) {
@@ -603,89 +601,61 @@ export class RequestConverterService implements IRequestConverterService {
 
                         answerAny[field.name] = lastValue;
                     }
+                    else if (fieldType == FieldType.Other) {
+                        let lastValue = value;
+
+                        answerAny[field.name] = lastValue;
+                    }
                 }
                 else {
-                    if (fieldType == DataType.OBJECT) {
+                    if (fieldType == FieldType.GNHashtable || fieldType == FieldType.GNArray) {
                         let lastValue: GNData = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
-                        if (answerAny[field.name] instanceof GNHashtable) {
-                            if (field.mustNonNull) {
-                                if (lastValue == null) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableNull
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                            }
-
-                            if (lastValue != null) {
-                                if (lastValue.count() < field.minLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                                else if (lastValue.count() > field.maxLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
+                        if (field.mustNonNull) {
+                            if (lastValue == null) {
+                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableNull : InvalidMemberType.GNArrayNull;
+                                answer.addInvalidMember({
+                                    code: field.code,
+                                    invalidMemberType: invalidMemberType
+                                });
+            
+                                isValidRequest = false;
+                                break;
                             }
                         }
-                        else if (answerAny[field.name] instanceof GNArray) {
-                            if (field.mustNonNull) {
-                                if (lastValue == null) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayNull
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                            }
 
-                            if (lastValue != null) {
-                                if (lastValue.count() < field.minLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                                else if (lastValue.count() > field.maxLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
+                        if (lastValue != null) {
+                            if (lastValue.count() < field.minLength) {
+                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMinLength : InvalidMemberType.GNArrayMinLength;
+                                answer.addInvalidMember({
+                                    code: field.code,
+                                    invalidMemberType: invalidMemberType
+                                });
+            
+                                isValidRequest = false;
+                                break;
+                            }
+                            else if (lastValue.count() > field.maxLength) {
+                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMaxLength : InvalidMemberType.GNArrayMaxLength;
+                                answer.addInvalidMember({
+                                    code: field.code,
+                                    invalidMemberType: invalidMemberType
+                                });
+            
+                                isValidRequest = false;
+                                break;
                             }
                         }
 
                         answerAny[field.name] = lastValue;
                     }
-                    else if (fieldType == DataType.BOOLEAN) {
+                    else if (fieldType == FieldType.Boolean) {
                         let lastValue: boolean = false;
                         
                         answerAny[field.name] = lastValue;
                     }
-                    else if (fieldType == DataType.NUMBER) {
+                    else if (fieldType == FieldType.Number) {
                         let lastValue: number = 0;
 
                         if (field.activeConditionValid) {
@@ -724,7 +694,7 @@ export class RequestConverterService implements IRequestConverterService {
 
                         answerAny[field.name] = lastValue;
                     }
-                    else if (fieldType == DataType.STRING) {
+                    else if (fieldType == FieldType.String) {
                         let lastValue: string = null;
 
                         if (field.mustNonNull) {
@@ -759,6 +729,11 @@ export class RequestConverterService implements IRequestConverterService {
                                 break;
                             }
                         }
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    else if (fieldType == FieldType.Other) {
+                        let lastValue = null;
 
                         answerAny[field.name] = lastValue;
                     }

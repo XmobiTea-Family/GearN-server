@@ -1,4 +1,9 @@
 type GNDataType = string | number | boolean | null | GNArray | GNHashtable;
+enum GNType {
+	None = 0,
+	GNArray = 1,
+	GNHashtable = 2
+};
 
 interface IGNData {
 	clear(): void;
@@ -111,6 +116,10 @@ export abstract class GNData implements IGNData {
 		return value;
 	}
 
+	public getType(): GNType {
+		return GNType.None;
+	}
+
 	public toData(): any {
 		return null;
 	}
@@ -153,6 +162,10 @@ export class GNHashtable extends GNData {
 
 	public add(k: number, value: any) {
 		this.dict[k] = GNData.createUseDataFromOriginData(value);
+	}
+
+	public getType(): GNType {
+		return GNType.GNHashtable;
 	}
 
 	public toData(): {} {
@@ -198,6 +211,10 @@ export class GNArray extends GNData {
 
 	public add(value: any) {
 		this.array.push(GNData.createUseDataFromOriginData(value));
+	}
+
+	public getType(): GNType {
+		return GNType.GNArray;
 	}
 
 	public toData() {
