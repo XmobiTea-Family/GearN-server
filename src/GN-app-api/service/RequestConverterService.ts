@@ -3,7 +3,7 @@ import { IRequestConverterService, Constructor } from "./IRequestConverterServic
 import { Request } from "./../../GN-common/entity/operationRequest/base/Request";
 import { GNHashtable, GNArray, GNData } from "./../../GN-common/common/GNData";
 import { EnhancedFieldMetadata, EnhancedObjectMedata, FieldType } from "./../../GN-common/entity/DataMember";
-import { getObjectMetadata, DataType, Field } from "@clairejs/core";
+import { getObjectMetadata } from "@clairejs/core";
 import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
 
 export class RequestConverterService implements IRequestConverterService {
@@ -170,7 +170,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     }
                                 }
                                 
-                                if (lastValue < field.minLength) {
+                                if (lastValue < field.minValue) {
                                     answer.addInvalidMember({
                                         code: field.code,
                                         invalidMemberType: InvalidMemberType.NumberMinValue
@@ -179,8 +179,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     isValidRequest = false;
                                     break;
                                 }
-    
-                                if (lastValue > field.minLength) {
+                                else if (lastValue > field.maxValue) {
                                     answer.addInvalidMember({
                                         code: field.code,
                                         invalidMemberType: InvalidMemberType.NumberMaxValue
@@ -204,42 +203,55 @@ export class RequestConverterService implements IRequestConverterService {
                         }
                     }
                     else if (fieldType == FieldType.String) {
-                        let lastValue: string = value as any as string;
+                        if (typeof value === "string") {
+                            let lastValue: string = value as any as string;
 
-                        if (field.mustNonNull) {
-                            if (lastValue == null) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringNull
-                                });
-            
-                                isValidRequest = false;
-                                break;
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringNull
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+        
+                                if (lastValue != null) {
+                                    if (lastValue.length < field.minLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMinLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.length > field.maxLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMaxLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
                             }
+    
+                            answerAny[field.name] = lastValue;
                         }
-
-                        if (lastValue != null) {
-                            if (lastValue.length < field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMinLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
-                            else if (lastValue.length > field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMaxLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
+                        else {
+                            answer.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+        
+                            isValidRequest = false;
+                            break;
                         }
-
-                        answerAny[field.name] = lastValue;
                     }
                     else if (fieldType == FieldType.Other) {
                         let lastValue = value;
@@ -252,39 +264,41 @@ export class RequestConverterService implements IRequestConverterService {
                         let lastValue: GNData = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
-                        if (field.mustNonNull) {
-                            let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableNull : InvalidMemberType.GNArrayNull;
-                            if (lastValue == null) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: invalidMemberType
-                                });
-            
-                                isValidRequest = false;
-                                break;
+                        if (field.activeConditionValid) {
+                            if (field.mustNonNull) {
+                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableNull : InvalidMemberType.GNArrayNull;
+                                if (lastValue == null) {
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
-                        }
-
-                        if (lastValue != null) {
-                            if (lastValue.count() < field.minLength) {
-                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMinLength : InvalidMemberType.GNArrayMinLength;
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: invalidMemberType
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
-                            else if (lastValue.count() > field.maxLength) {
-                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMaxLength : InvalidMemberType.GNArrayMaxLength;
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: invalidMemberType
-                                });
-            
-                                isValidRequest = false;
-                                break;
+    
+                            if (lastValue != null) {
+                                if (lastValue.count() < field.minLength) {
+                                    let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMinLength : InvalidMemberType.GNArrayMinLength;
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.count() > field.maxLength) {
+                                    let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMaxLength : InvalidMemberType.GNArrayMaxLength;
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
                         }
 
@@ -292,14 +306,12 @@ export class RequestConverterService implements IRequestConverterService {
                     }
                     else if (fieldType == FieldType.Boolean) {
                         let lastValue: boolean = false;
-
                         if (field.defaultValue != null) lastValue = field.defaultValue;
                         
                         answerAny[field.name] = lastValue;
                     }
                     else if (fieldType == FieldType.Number) {
                         let lastValue: number = 0;
-                        
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
                         if (field.activeConditionValid) {
@@ -315,7 +327,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 }
                             }
                             
-                            if (lastValue < field.minLength) {
+                            if (lastValue < field.minValue) {
                                 answer.addInvalidMember({
                                     code: field.code,
                                     invalidMemberType: InvalidMemberType.NumberMinValue
@@ -324,8 +336,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 isValidRequest = false;
                                 break;
                             }
-
-                            if (lastValue > field.minLength) {
+                            else if (lastValue > field.maxValue) {
                                 answer.addInvalidMember({
                                     code: field.code,
                                     invalidMemberType: InvalidMemberType.NumberMaxValue
@@ -340,39 +351,40 @@ export class RequestConverterService implements IRequestConverterService {
                     }
                     else if (fieldType == FieldType.String) {
                         let lastValue: string = null;
-
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
-                        if (field.mustNonNull) {
-                            if (lastValue == null) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringNull
-                                });
-            
-                                isValidRequest = false;
-                                break;
+                        if (field.activeConditionValid) {
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringNull
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
-                        }
-
-                        if (lastValue != null) {
-                            if (lastValue.length < field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMinLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
-                            else if (lastValue.length > field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMaxLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
+    
+                            if (lastValue != null) {
+                                if (lastValue.length < field.minLength) {
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringMinLength
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.length > field.maxLength) {
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringMaxLength
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
                         }
 
@@ -380,7 +392,6 @@ export class RequestConverterService implements IRequestConverterService {
                     }
                     else if (fieldType == FieldType.Other) {
                         let lastValue = null;
-
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
                         answerAny[field.name] = lastValue;
@@ -403,36 +414,38 @@ export class RequestConverterService implements IRequestConverterService {
                         if (value instanceof GNHashtable) {
                             let lastValue = value as GNHashtable;
 
-                            if (field.mustNonNull) {
-                                if (lastValue == null) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableNull
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNHashtableNull
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
                                 }
-                            }
-
-                            if (lastValue != null) {
-                                if (lastValue.count() < field.minLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                                else if (lastValue.count() > field.maxLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
+    
+                                if (lastValue != null) {
+                                    if (lastValue.count() < field.minLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.count() > field.maxLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
                                 }
                             }
 
@@ -452,36 +465,38 @@ export class RequestConverterService implements IRequestConverterService {
                         if (value instanceof GNArray) {
                             let lastValue = value as GNArray;
 
-                            if (field.mustNonNull) {
-                                if (lastValue == null) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayNull
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNArrayNull
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
                                 }
-                            }
-
-                            if (lastValue != null) {
-                                if (lastValue.count() < field.minLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
-                                }
-                                else if (lastValue.count() > field.maxLength) {
-                                    answer.addInvalidMember({
-                                        code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
-                                    });
-                
-                                    isValidRequest = false;
-                                    break;
+    
+                                if (lastValue != null) {
+                                    if (lastValue.count() < field.minLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.count() > field.maxLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
                                 }
                             }
 
@@ -530,7 +545,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     }
                                 }
                                 
-                                if (lastValue < field.minLength) {
+                                if (lastValue < field.minValue) {
                                     answer.addInvalidMember({
                                         code: field.code,
                                         invalidMemberType: InvalidMemberType.NumberMinValue
@@ -539,8 +554,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     isValidRequest = false;
                                     break;
                                 }
-
-                                if (lastValue > field.minLength) {
+                                else if (lastValue > field.maxValue) {
                                     answer.addInvalidMember({
                                         code: field.code,
                                         invalidMemberType: InvalidMemberType.NumberMaxValue
@@ -564,42 +578,55 @@ export class RequestConverterService implements IRequestConverterService {
                         }
                     }
                     else if (fieldType == FieldType.String) {
-                        let lastValue: string = value as any as string;
+                        if (typeof value === "string") {
+                            let lastValue: string = value as any as string;
 
-                        if (field.mustNonNull) {
-                            if (lastValue == null) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringNull
-                                });
-            
-                                isValidRequest = false;
-                                break;
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringNull
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+        
+                                if (lastValue != null) {
+                                    if (lastValue.length < field.minLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMinLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.length > field.maxLength) {
+                                        answer.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMaxLength
+                                        });
+                    
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
                             }
+    
+                            answerAny[field.name] = lastValue;
                         }
-
-                        if (lastValue != null) {
-                            if (lastValue.length < field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMinLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
-                            else if (lastValue.length > field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMaxLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
+                        else {
+                            answer.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+        
+                            isValidRequest = false;
+                            break;
                         }
-
-                        answerAny[field.name] = lastValue;
                     }
                     else if (fieldType == FieldType.Other) {
                         let lastValue = value;
@@ -612,39 +639,41 @@ export class RequestConverterService implements IRequestConverterService {
                         let lastValue: GNData = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
-                        if (field.mustNonNull) {
-                            if (lastValue == null) {
-                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableNull : InvalidMemberType.GNArrayNull;
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: invalidMemberType
-                                });
-            
-                                isValidRequest = false;
-                                break;
+                        if (field.activeConditionValid) {
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableNull : InvalidMemberType.GNArrayNull;
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
-                        }
-
-                        if (lastValue != null) {
-                            if (lastValue.count() < field.minLength) {
-                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMinLength : InvalidMemberType.GNArrayMinLength;
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: invalidMemberType
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
-                            else if (lastValue.count() > field.maxLength) {
-                                let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMaxLength : InvalidMemberType.GNArrayMaxLength;
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: invalidMemberType
-                                });
-            
-                                isValidRequest = false;
-                                break;
+    
+                            if (lastValue != null) {
+                                if (lastValue.count() < field.minLength) {
+                                    let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMinLength : InvalidMemberType.GNArrayMinLength;
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.count() > field.maxLength) {
+                                    let invalidMemberType = fieldType == FieldType.GNHashtable ? InvalidMemberType.GNHashtableMaxLength : InvalidMemberType.GNArrayMaxLength;
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
                         }
 
@@ -652,11 +681,13 @@ export class RequestConverterService implements IRequestConverterService {
                     }
                     else if (fieldType == FieldType.Boolean) {
                         let lastValue: boolean = false;
-                        
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
+
                         answerAny[field.name] = lastValue;
                     }
                     else if (fieldType == FieldType.Number) {
                         let lastValue: number = 0;
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
 
                         if (field.activeConditionValid) {
                             if (field.mustInt === true) {
@@ -680,8 +711,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 isValidRequest = false;
                                 break;
                             }
-
-                            if (lastValue > field.minLength) {
+                            else if (lastValue > field.maxLength) {
                                 answer.addInvalidMember({
                                     code: field.code,
                                     invalidMemberType: InvalidMemberType.NumberMaxValue
@@ -696,37 +726,40 @@ export class RequestConverterService implements IRequestConverterService {
                     }
                     else if (fieldType == FieldType.String) {
                         let lastValue: string = null;
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
 
-                        if (field.mustNonNull) {
-                            if (lastValue == null) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringNull
-                                });
-            
-                                isValidRequest = false;
-                                break;
+                        if (field.activeConditionValid) {
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringNull
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
-                        }
-
-                        if (lastValue != null) {
-                            if (lastValue.length < field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMinLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
-                            }
-                            else if (lastValue.length > field.minLength) {
-                                answer.addInvalidMember({
-                                    code: field.code,
-                                    invalidMemberType: InvalidMemberType.StringMaxLength
-                                });
-            
-                                isValidRequest = false;
-                                break;
+    
+                            if (lastValue != null) {
+                                if (lastValue.length < field.minLength) {
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringMinLength
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.length > field.maxLength) {
+                                    answer.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringMaxLength
+                                    });
+                
+                                    isValidRequest = false;
+                                    break;
+                                }
                             }
                         }
 
@@ -734,6 +767,7 @@ export class RequestConverterService implements IRequestConverterService {
                     }
                     else if (fieldType == FieldType.Other) {
                         let lastValue = null;
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
 
                         answerAny[field.name] = lastValue;
                     }
