@@ -57,12 +57,10 @@ export abstract class GNData implements IGNData {
 		let valueKeys = Object.keys(value);
 		for (let i = 0; i < valueKeys.length; i++) {
 			let key = valueKeys[i];
-			if (!isNaN(key as any)) continue;
+			if (isNaN(key as any)) continue;
 
-			let value1 = value[key];
 			let keyInt = Number.parseInt(key);
-
-			answer.add(keyInt, value1);
+			answer.add(keyInt, value[key]);
 		}
 
 		return answer;
