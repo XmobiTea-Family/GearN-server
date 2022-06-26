@@ -27,6 +27,7 @@ import { Md5Generate } from "./../GN-common/helper/Md5Generate";
 import { nanoid } from "nanoid";
 import { DdosSettings } from "./settings/DDosSettings";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
+import { GoogleService } from "./../GN-app-api/service/GoogleService";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -250,7 +251,8 @@ export class ServerApplication extends BuilderBase {
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
 
-		(this.gameApplication.getAppleService() as AppleService).setMainPackageName(this.getOtherSettings().getPackageName());
+		(this.gameApplication.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
+		(this.gameApplication.getGoogleService() as GoogleService).setFirebaseProductId(this.getOtherSettings().getFirebaseProductId());
 
 		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
 		this.gameApplication.getConfigGame().setConfigCollection(configCollection);

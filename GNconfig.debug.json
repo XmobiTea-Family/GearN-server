@@ -31,6 +31,8 @@
 		"authInfoCollectionName": "AuthInfoCollection",
 		"configCollectionName": "Config",
 		"packageName": "com.xmobitea.GNServer",
+		"appleClientId": "com.xmobitea.GNServer",
+		"firebaseProductId": "gn-server",
 
 		"databaseConnectionString": "mongodb://admin:assmin@127.0.0.1:27017/?replicaSet=rs0",
 		"databaseName": "XmobiTea",

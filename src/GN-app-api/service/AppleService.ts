@@ -7,7 +7,7 @@ import { IAppleService } from "./IAppleService";
 
 export class AppleService implements IAppleService {
 	private client: jwksClient.JwksClient;
-	private mainPackageName: string;
+	private appleClientId: string;
 
 	constructor() {
 		this.client = jwksClient({
@@ -15,8 +15,8 @@ export class AppleService implements IAppleService {
 		});
 	}
 
-	public setMainPackageName(mainPackageName: string): void {
-		this.mainPackageName = mainPackageName;
+	public setAppleClientId(appleClientId: string): void {
+		this.appleClientId = appleClientId;
 	}
 
 	public async verifyAppleToken(token: string): Promise<{ [k: string]: any }> {
@@ -29,7 +29,7 @@ export class AppleService implements IAppleService {
 				} else {
 					if (decoded.iss !== MAIN_iss) {
 						answer["error"] = "unexpected issuer (iss claim): " + decoded.iss;
-					} else if (decoded.aud !== this.mainPackageName) {
+					} else if (decoded.aud !== this.appleClientId) {
 						answer["error"] = "unexpected audience (aud claim): " + decoded.aud;
 					} else {
 						answer = decoded;

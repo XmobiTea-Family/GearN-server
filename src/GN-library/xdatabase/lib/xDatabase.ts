@@ -7,6 +7,7 @@ export const SparkCollectionName = {
 	Friend: "Friend",
 	ExternalFBAuthentication: "ExternalFBAuthentication",
 	ExternalAppleAuthentication: "ExternalAppleAuthentication",
+	ExternalGoogleAuthentication: "ExternalGoogleAuthentication",
 };
 
 import * as mongoDB from "mongodb";
@@ -371,6 +372,53 @@ export class xDatabase {
 		return new xSparkPlayer(result, collection);
 	}
 
+	public async loadPlayerByGoogleUserId(googleUserId: string): Promise<xSparkPlayer> {
+		let collection = this.systemCollection(SparkCollectionName.Player);
+		let result = await collection.findOne({ "UserExternal.GoogleUserId": googleUserId });
+		if (result) {
+			return new xSparkPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async createPlayerByGoogleUserId(googleUserId: string, segments: {}, ipAddressCreate: string, email: string): Promise<xSparkPlayer> {
+		let collection = this.systemCollection(SparkCollectionName.Player);
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		let result = {
+			Username: "",
+			Password: "",
+			Fullname: "",
+			UserExternal: {
+				GoogleUserId: googleUserId,
+			},
+			UserBan: {},
+			UserEmail: {},
+			UserNumberPhone: {},
+			UserAddress: {},
+			UserPassport: {},
+			Location: {},
+			TsBirthday: 0,
+			TsCreate: currentMilliseconds,
+			TsLastSeen: currentMilliseconds,
+			IPAddressCreate: ipAddressCreate,
+			Segments: segments,
+			ScriptData: {},
+			PrivateData: {},
+			AccessToken: "",
+			RefreshToken: "",
+		};
+
+		if (email)
+			result["UserEmail"] = {
+				Value: email,
+				IsConfirm: true,
+			};
+
+		await collection.insertOne(result);
+		return new xSparkPlayer(result, collection);
+	}
+
 	public async saveFBExternal(userId: string, facebookId: string, facebookName: string, facebookEmail: string, facebookToken: string): Promise<void> {
 		await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).updateOne(
 			{ UserId: userId },
@@ -414,6 +462,25 @@ export class xDatabase {
 					ExternalDisplayName: appleDisplayName,
 					ExternalEmail: appleId,
 					Token: appleToken,
+					TsUpdate: xDatetime.getCurrentMilliseconds(),
+					IsRemove: false,
+				},
+			},
+			{
+				upsert: true,
+			}
+		);
+	}
+
+	public async saveGoogleExternal(userId: string, googleUserId: string, googleDisplayName: string, email: string, googleToken: string) {
+		await this.systemCollection(SparkCollectionName.ExternalGoogleAuthentication).updateOne(
+			{ UserId: userId },
+			{
+				$set: {
+					ExternalId: googleUserId,
+					ExternalDisplayName: googleDisplayName,
+					ExternalEmail: email,
+					Token: googleToken,
 					TsUpdate: xDatetime.getCurrentMilliseconds(),
 					IsRemove: false,
 				},

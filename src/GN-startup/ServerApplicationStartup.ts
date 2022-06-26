@@ -51,6 +51,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setAuthTokenCollectionName(this.gnConfig["authInfoCollectionName"])
 			.setConfigGameCollectionName(this.gnConfig["configCollectionName"])
 			.setPackageName(this.gnConfig["packageName"])
+			.setAppleClientId(this.gnConfig["appleClientId"])
+			.setFirebaseProductId(this.gnConfig["firebaseProductId"])
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()

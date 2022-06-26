@@ -1,6 +1,6 @@
 {
   "name": "@xmobitea/gn-server",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Game Networking Server by XmobiTea",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",

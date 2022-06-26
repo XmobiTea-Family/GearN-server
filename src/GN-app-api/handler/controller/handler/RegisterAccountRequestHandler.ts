@@ -59,7 +59,7 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 
 		sparkPlayer = await this.gameApplication
 			.getDatabase()
-			.createPlayerByUsernameAndPassword(username, passwordHash, this.DefaultSegments, request.getOriginRequest().getIP());
+			.createPlayerByUsernameAndPassword(username, passwordHash, this.defaultSegments, request.getOriginRequest().getIP());
 		if (!sparkPlayer) return this.newOperationInternalServerError(request);
 
 		(request as any).isRegisterRequest = true;

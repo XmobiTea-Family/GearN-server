@@ -35,6 +35,8 @@ export class DefaultApplicationStartup {
 			.setAuthTokenCollectionName("AuthInfoCollection")
 			.setConfigGameCollectionName("ConfigGame")
 			.setPackageName("com.xmobitea.GNServer")
+			.setAppleClientId("com.xmobitea.GNServer")
+			.setFirebaseProductId("gn-server")
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()
