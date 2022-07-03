@@ -1,4 +1,4 @@
-const GN_VERSION = "0.4.6";
+const GN_VERSION = "0.4.7";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -87,8 +87,7 @@ export class GameApplication {
 		this.appleService = new AppleService();
 		this.web3Service = new Web3Service();
 		this.googleService = new GoogleService();
-		this.googleService.verifyGoogleToken("eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk4OTdjZjk0NTllMjU0ZmYxYzY3YTRlYjZlZmVhNTJmMjFhOWJhMTQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiQ2jDoG5nIFgiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EtL0FPaDE0R2d2TWR2MlJud2lWSUpJek05bEIwTFh2VHJ5RDVJRVdqRVNSZU9tPXM5Ni1jIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL2duLWRhc2hib2FyZCIsImF1ZCI6ImduLWRhc2hib2FyZCIsImF1dGhfdGltZSI6MTY1NjIyNDAyOSwidXNlcl9pZCI6IkNyc0xCcWFNR3Jja3dPSHpRS3FIWlRVUjNmSjMiLCJzdWIiOiJDcnNMQnFhTUdyY2t3T0h6UUtxSFpUVVIzZkozIiwiaWF0IjoxNjU2MjI0MDI5LCJleHAiOjE2NTYyMjc2MjksImVtYWlsIjoiY2hhbmd4LmRldmVsb3BAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDI1MzI0MjE2OTE2OTgwMTMzMDQiXSwiZW1haWwiOlsiY2hhbmd4LmRldmVsb3BAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.hQUkDimlc6d2KVQMXunzm-yPWQZ2ddmhNecqLsYmznvTNvhuIKyq46MTV2IRY_1UPGa3ecy9Ibs1Y6P_nZft6lRBMbbgSoi7o768KFUuxzugHD2w_KJV5LGM7Fs1wxL3CdOFAwFOrkFgT57EOszOeBBimZIHJYCXgUPQHCT-9hcdndNhZD1LehwmR4YAZ9yYxVyMN62k77kNKzvqM_8XqWrZSRvGpM8HK6YX36-e4ZGgu9yJFTsg7bVe5iJsGFDJhqP0MEEX2i663TnCuaS5U8xFQzgoXMQwPj1qD82YqWmYde7LcLixkCh7W4-EunjKFLBQuHcEPliJzV7OxKmuzQ");
-		
+
 		this.timerService = new TimerService();
 		this.lockService = new LockService();
 		this.requestConverterService = new RequestConverterService();

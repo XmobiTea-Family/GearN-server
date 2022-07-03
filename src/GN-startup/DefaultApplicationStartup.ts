@@ -36,7 +36,7 @@ export class DefaultApplicationStartup {
 			.setConfigGameCollectionName("ConfigGame")
 			.setPackageName("com.xmobitea.GNServer")
 			.setAppleClientId("com.xmobitea.GNServer")
-			.setFirebaseProductId("gn-server")
+			.setGoogleClientId("gn-server")
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()

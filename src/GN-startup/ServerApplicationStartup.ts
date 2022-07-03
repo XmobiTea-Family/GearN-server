@@ -52,7 +52,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setConfigGameCollectionName(this.gnConfig["configCollectionName"])
 			.setPackageName(this.gnConfig["packageName"])
 			.setAppleClientId(this.gnConfig["appleClientId"])
-			.setFirebaseProductId(this.gnConfig["firebaseProductId"])
+			.setGoogleClientId(this.gnConfig["googleClientId"])
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()

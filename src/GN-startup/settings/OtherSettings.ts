@@ -6,7 +6,7 @@ abstract class BuilderBase {
 	protected configGameCollectionName: string;
 	protected packageName: string;
 	protected appleClientId: string;
-	protected firebaseProductId: string;
+	protected googleClientId: string;
 
 	public getAuthTokenCollectionName(): string {
 		return this.authTokenCollectionName;
@@ -28,8 +28,8 @@ abstract class BuilderBase {
 		return this.appleClientId;
 	}
 
-	public getFirebaseProductId(): string {
-		return this.firebaseProductId;
+	public getGoogleClientId(): string {
+		return this.googleClientId;
 	}
 
 	constructor() {}
@@ -61,8 +61,8 @@ class Builder extends BuilderBase implements IBuilder<OtherSettings> {
 		return this;
 	}
 
-	public setFirebaseProductId(firebaseProductId: string): Builder {
-		this.firebaseProductId = firebaseProductId;
+	public setGoogleClientId(googleClientId: string): Builder {
+		this.googleClientId = googleClientId;
 		return this;
 	}
 
@@ -84,7 +84,7 @@ export class OtherSettings extends BuilderBase {
 		this.configGameCollectionName = builder.getConfigGameCollectionName();
 		this.packageName = builder.getPackageName();
 		this.appleClientId = builder.getAppleClientId();
-		this.firebaseProductId = builder.getFirebaseProductId();
+		this.googleClientId = builder.getGoogleClientId();
 	}
 
 	public static Builder(): Builder {

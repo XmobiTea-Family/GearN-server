@@ -83,7 +83,7 @@ export class HttpApp {
 				'<a href="https://xmobitea.com"><h1 style="text-align:center;">XmobiTea</h1></a>' +
 					'<h3 style="text-align:center;">-->==>>> [GN Server] <<<==<--</h3>' +
 					'<h4 style="text-align:center;"> Version: ' + GameApplication.getServerVersion() + '</h4>' + 
-					'Buy license at <a href="https://gnserver.xmobitea.com">XmobiTea GN Server</a>' +
+					'<h4 style="text-align:center;">Buy license at <a href="https://gn.xmobitea.com">XmobiTea GN Server</a></h4>' +
 					'<br>' +
 					'<h4 style="text-align:center;">©2022 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
 			);

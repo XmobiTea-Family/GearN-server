@@ -1,41 +1,41 @@
-const MAIN_iss = "https://securetoken.google.com/";
-const pubKeyUrl = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com";
-const RS256 = "RS256";
+const googleAPIUrl = "https://www.googleapis.com";
+const googleAPITokenInfoURL = "/oauth2/v3/tokeninfo?access_token=";
+const googleAPIUserInfoURL = "/oauth2/v3/userinfo?access_token=";
 
 import { IGoogleService } from "./IGoogleService";
-import jwt, { Jwt, JwtPayload } from 'jsonwebtoken';
 import axios from "axios";
 
 export class GoogleService implements IGoogleService {
-    private pubKeys: string[];
-	private firebaseProductId: string;
+	private googleClientId: string;
 
-	public setFirebaseProductId(firebaseProductId: string): void {
-		this.firebaseProductId = firebaseProductId;
+	public setGoogleClientId(googleClientId: string): void {
+		this.googleClientId = googleClientId;
 	}
+
+    private async debugToken() {
+        return;
+
+        let accessToken = "ya29.A0ARrdaM-0XBkRR0bqNFGx6fAoML5WKvYvKROwSdaG2GZcnwDfG3eATkQAGuogRm0hUuDYhmt0n5xXXTBlTo3dCJeKHhjhel1PUOJ9UrYx_a6kPnsO3t7cIajICx__X41oOd05I1nvgALCStBo_XkjcUJP78DY_SEzFHd0YUNnWUtBVEFTQVRBU0ZRRl91NjFWQ2w5amtDSS1UV0F1YWlzWnJvMllHdw0171";
+
+        this.verifyGoogleToken(accessToken);
+    }
 
     public async verifyGoogleToken(accessToken: string): Promise<{ [k: string]: any }> {
         let answer: { [k: string]: any } = {};
 
         try {
-            let jwtFull = jwt.decode(accessToken, { complete: true }) as Jwt;
-            let header = jwtFull.header;
-            let decoded = jwtFull.payload as JwtPayload;
+            let tokenInfoResult = await axios.get(googleAPIUrl + googleAPITokenInfoURL + accessToken);
+            let data = tokenInfoResult.data;
 
-            if (header.alg !== RS256) {
-                answer["error"] = "unexpected alg (alg claim): " + header.alg;
+            if (data.error_description != null) {
+                answer["error"] = data.error_description;
             }
-            else if (this.pubKeys.indexOf(header.kid) == -1) {
-                answer["error"] = "unexpected kid (kid claim): " + header.kid;
-            }
-            else if (decoded.iss !== MAIN_iss + this.firebaseProductId) {
-                answer["error"] = "unexpected issuer (iss claim): " + decoded.iss;
-            }
-            else if (decoded.aud !== this.firebaseProductId) {
-                answer["error"] = "unexpected audience (aud claim): " + decoded.aud;
+            else if (data.aud !== this.googleClientId) {
+                answer["error"] = "unexpected audience (aud claim): " + data.aud;
             }
             else {
-                answer = decoded;
+                let userInfoResult = await axios.get(googleAPIUrl + googleAPIUserInfoURL + accessToken);
+                answer = userInfoResult.data;
             }
         }
         catch (err) {
@@ -46,32 +46,6 @@ export class GoogleService implements IGoogleService {
     }
 
     constructor() {
-        this.pubKeys = [];
-        this.reloadPubKey();
-
-        setInterval(() => {
-            this.reloadPubKey();
-        }, 1000 * 60 * 60 * 12);
-    }
-
-    private async reloadPubKey(): Promise<void> {
-        try {
-            let result = await axios.get(pubKeyUrl);
-
-            let data = result.data;
-            
-            let keys = Object.keys(data);
-
-            this.pubKeys.length = 0;
-            for (let i = 0; i < keys.length; i++) {
-                this.pubKeys.push(keys[i]);
-            }
-        } catch (error) {
-            console.log(error);
-
-            setTimeout(() => {
-                this.reloadPubKey();
-            }, 5000);
-        }
+        this.debugToken();
     }
 }

@@ -292,7 +292,7 @@ export class LicenseKeyApplication {
 
 	private debug(errorCode: number, ccu: number) {
 		if (errorCode == -1) {
-			Debug.log("[GN] No license Key found, maxCCU is " + ccu, "please try go https://gnserver.xmobitea.com to get free license key");
+			Debug.log("[GN] No license Key found, maxCCU is " + ccu, "please try go https://gn.xmobitea.com to get free license key");
 		} else if (errorCode == 1) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " verify success, maxCCU is " + ccu);
 		} else if (errorCode == 2) {

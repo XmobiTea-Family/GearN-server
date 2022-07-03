@@ -252,7 +252,7 @@ export class ServerApplication extends BuilderBase {
 		this.socketApp.setEmitter(adapterEventCollection);
 
 		(this.gameApplication.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
-		(this.gameApplication.getGoogleService() as GoogleService).setFirebaseProductId(this.getOtherSettings().getFirebaseProductId());
+		(this.gameApplication.getGoogleService() as GoogleService).setGoogleClientId(this.getOtherSettings().getGoogleClientId());
 
 		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
 		this.gameApplication.getConfigGame().setConfigCollection(configCollection);

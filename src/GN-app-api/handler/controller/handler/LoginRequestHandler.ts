@@ -187,16 +187,18 @@ export class LoginRequestHandler extends RequestHandler {
 		let facebookId = result["id"];
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByFacebookId(facebookId);
 
+		let displayName = result["name"] || "";
+		let facebookEmail = result["email"] || "";
+
+		if (!displayName) displayName = request.displayName;
+
+		let loginOperationRequest = request as any;
+
+		loginOperationRequest.facebookId = facebookId;
+		loginOperationRequest.displayName = displayName;
+		loginOperationRequest.facebookEmail = facebookEmail;
+
 		if (!sparkPlayer) {
-			let facebookDisplayName = result["name"] || "";
-			let facebookEmail = result["email"] || "";
-
-			let loginOperationRequest = request as any;
-
-			loginOperationRequest.facebookId = facebookId;
-			loginOperationRequest.facebookDisplayName = facebookDisplayName;
-			loginOperationRequest.facebookEmail = facebookEmail;
-
 			if (authInfo != null) return await this.handleSyncCurrentAccountByFacebookOperation(authInfo, request, facebookToken, result);
 
 			return await this.handleRegisterByFacebookOperation(authInfo, request, result);
@@ -220,24 +222,24 @@ export class LoginRequestHandler extends RequestHandler {
 		loginOperationRequest.appleUserId = appleUserId;
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByAppleUserId(appleUserId);
 
-		if (!sparkPlayer) {
-			let appleDisplayName = loginOperationRequest.displayName;
-			let appleId = result["email"] || "";
+		let displayName = loginOperationRequest.displayName;
+		let appleId = result["email"] || "";
 
-			if (!appleDisplayName) {
-				if (appleId) {
-					try {
-						appleDisplayName = appleId.split("@")[0];
-					} catch (err) {
-						Debug.logException(err);
-					}
+		if (!displayName) {
+			if (appleId) {
+				try {
+					displayName = appleId.split("@")[0];
+				} catch (err) {
+					Debug.logException(err);
 				}
 			}
+		}
 
-			loginOperationRequest.appleUserId = appleUserId;
-			loginOperationRequest.appleDisplayName = appleDisplayName;
-			loginOperationRequest.appleId = appleId;
+		loginOperationRequest.appleUserId = appleUserId;
+		loginOperationRequest.displayName = displayName;
+		loginOperationRequest.appleId = appleId;
 
+		if (!sparkPlayer) {
 			if (authInfo != null) return await this.handleSyncCurrentAccountByAppleOperation(authInfo, request, appleToken, result);
 
 			return await this.handleRegisterByAppleOperation(authInfo, request, result);
@@ -261,24 +263,26 @@ export class LoginRequestHandler extends RequestHandler {
 		loginOperationRequest.googleUserId = googleUserId;
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByGoogleUserId(googleUserId);
 
-		if (!sparkPlayer) {
-			let googleDisplayName = result["name"] || "";
-			let email = result["email"] || "";
+		let displayName = result["name"] || "";
+		let email = result["email"] || "";
 
-			if (!googleDisplayName) {
-				if (email) {
-					try {
-						googleDisplayName = email.split("@")[0];
-					} catch (err) {
-						Debug.logException(err);
-					}
+		if (!displayName) displayName = request.displayName;
+
+		if (!displayName) {
+			if (email) {
+				try {
+					displayName = email.split("@")[0];
+				} catch (err) {
+					Debug.logException(err);
 				}
 			}
+		}
 
-			loginOperationRequest.googleUserId = googleUserId;
-			loginOperationRequest.googleDisplayName = googleDisplayName;
-			loginOperationRequest.email = email;
+		loginOperationRequest.googleUserId = googleUserId;
+		loginOperationRequest.displayName = displayName;
+		loginOperationRequest.email = email;
 
+		if (!sparkPlayer) {
 			if (authInfo != null) return await this.handleSyncCurrentAccountByGoogleOperation(authInfo, request, googleToken, result);
 
 			return await this.handleRegisterByGoogleOperation(authInfo, request, result);
@@ -306,7 +310,7 @@ export class LoginRequestHandler extends RequestHandler {
 		}
 
 		sparkPlayer.setUserExternal("AppleUserId", appleUserId);
-		if (loginOperationRequest.appleDisplayName) sparkPlayer.setFullname(loginOperationRequest.appleDisplayName);
+		if (loginOperationRequest.displayName) sparkPlayer.setFullname(loginOperationRequest.displayName);
 
 		let email = loginOperationRequest.appleId;
 		if (email) {
@@ -336,7 +340,7 @@ export class LoginRequestHandler extends RequestHandler {
 		}
 
 		sparkPlayer.setUserExternal("GoogleUserId", googleUserId);
-		if (loginOperationRequest.googleDisplayName) sparkPlayer.setFullname(loginOperationRequest.googleDisplayName);
+		if (loginOperationRequest.displayName) sparkPlayer.setFullname(loginOperationRequest.displayName);
 
 		let email = loginOperationRequest.email;
 		if (email) {
@@ -361,7 +365,7 @@ export class LoginRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		if (loginOperationRequest.appleDisplayName) sparkPlayer.setFullname(loginOperationRequest.appleDisplayName);
+		if (loginOperationRequest.displayName) sparkPlayer.setFullname(loginOperationRequest.displayName);
 
 		if (email) {
 			// mail.sendFacebookRegisterMail(DEFAULT_LANGUAGE, email, sparkPlayer.getFullname());
@@ -384,7 +388,7 @@ export class LoginRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		if (loginOperationRequest.googleDisplayName) sparkPlayer.setFullname(loginOperationRequest.googleDisplayName);
+		if (loginOperationRequest.displayName) sparkPlayer.setFullname(loginOperationRequest.displayName);
 
 		if (email) {
 			// mail.sendFacebookRegisterMail(DEFAULT_LANGUAGE, email, sparkPlayer.getFullname());
@@ -402,11 +406,11 @@ export class LoginRequestHandler extends RequestHandler {
 	): Promise<OperationResponse> {
 		let loginOperationRequest = request as any;
 
-		let appleDisplayName = loginOperationRequest.appleDisplayName;
+		let displayName = loginOperationRequest.displayName;
 		let email = loginOperationRequest.appleId;
 		let appleUserId = loginOperationRequest.appleUserId;
 
-		this.gameApplication.getDatabase().saveAppleExternal(sparkPlayer.getUserId(), appleUserId, appleDisplayName, email, appleToken);
+		this.gameApplication.getDatabase().saveAppleExternal(sparkPlayer.getUserId(), appleUserId, displayName, email, appleToken);
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
 	}
@@ -420,11 +424,11 @@ export class LoginRequestHandler extends RequestHandler {
 	): Promise<OperationResponse> {
 		let loginOperationRequest = request as any;
 
-		let googleDisplayName = loginOperationRequest.googleDisplayName;
+		let displayName = loginOperationRequest.displayName;
 		let email = loginOperationRequest.email;
 		let googleUserId = loginOperationRequest.googleUserId;
 
-		this.gameApplication.getDatabase().saveGoogleExternal(sparkPlayer.getUserId(), googleUserId, googleDisplayName, email, googleToken);
+		this.gameApplication.getDatabase().saveGoogleExternal(sparkPlayer.getUserId(), googleUserId, displayName, email, googleToken);
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
 	}
@@ -547,6 +551,14 @@ export class LoginRequestHandler extends RequestHandler {
 			this.gameApplication.getApiMiddleware().updateAuthInfo(oldAuthInfo);
 		}
 
+		if (request.displayName && !gamePlayer.getDisplayName()) {
+			gamePlayer.setDisplayName(request.displayName);
+
+			if (gamePlayer.getSegmentValue("UserRole") == UserRoleType.UserNonActivate) {
+				gamePlayer.setSegmentValue("UserRole", UserRoleType.User);
+			}
+		}
+
 		let newAuth = AuthInfo.Builder().setUserId(userId).setRole(gamePlayer.getSegmentValue("UserRole")).build();
 		let newAuthInfo = this.gameApplication.getApiMiddleware().generateAuthToken(newAuth);
 
@@ -576,11 +588,11 @@ export class LoginRequestHandler extends RequestHandler {
 		}
 
 		if (sparkPlayer.getUserExternal("FacebookId") == fbId) {
-			return this.newOperationInvalid(request);
+			return this.onAuthenticationResponse(authInfo, request, sparkPlayer);
 		}
 
 		sparkPlayer.setUserExternal("FacebookId", fbId);
-		if (loginOperationRequest.facebookDisplayName) sparkPlayer.setFullname(loginOperationRequest.facebookDisplayName);
+		if (loginOperationRequest.displayName) sparkPlayer.setFullname(loginOperationRequest.displayName);
 
 		let email = loginOperationRequest.facebookEmail;
 		if (email) {
@@ -609,7 +621,7 @@ export class LoginRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		sparkPlayer.setFullname(loginOperationRequest.facebookDisplayName);
+		if (loginOperationRequest.displayName) sparkPlayer.setFullname(loginOperationRequest.displayName);
 
 		if (email) {
 			// mail.sendFacebookRegisterMail(DEFAULT_LANGUAGE, email, sparkPlayer.getFullname());
