@@ -1,6 +1,7 @@
 const googleAPIUrl = "https://www.googleapis.com";
-const googleAPITokenInfoURL = "/oauth2/v3/tokeninfo?access_token=";
-const googleAPIUserInfoURL = "/oauth2/v3/userinfo?access_token=";
+const googleAPITokenInfoAccessTokenURL = "/oauth2/v3/tokeninfo?access_token=";
+const googleAPIUserInfoAccessTokenURL = "/oauth2/v3/userinfo?access_token=";
+const googleAPITokenInfoIdTokenURL = "/oauth2/v3/tokeninfo?id_token=";
 
 import { IGoogleService } from "./IGoogleService";
 import axios from "axios";
@@ -15,16 +16,16 @@ export class GoogleService implements IGoogleService {
     private async debugToken() {
         return;
 
-        let accessToken = "ya29.A0ARrdaM-0XBkRR0bqNFGx6fAoML5WKvYvKROwSdaG2GZcnwDfG3eATkQAGuogRm0hUuDYhmt0n5xXXTBlTo3dCJeKHhjhel1PUOJ9UrYx_a6kPnsO3t7cIajICx__X41oOd05I1nvgALCStBo_XkjcUJP78DY_SEzFHd0YUNnWUtBVEFTQVRBU0ZRRl91NjFWQ2w5amtDSS1UV0F1YWlzWnJvMllHdw0171";
+        let accessToken = "ya29.A0AVA9y1vmClxTRY0kM7l6kFv86JMktyL5VoszK59CyDUaQdkAPSCYSRGezkzvNfSdgE54FHIw_-kvqGntTX7ihYbfccPBNhjxbkboXQEP_UjCnDpQUnr-DHmxLnSdwAFdWk2Kn5P_egmGufe6ttgkWCVEL0HDjikhCdyRYUNnWUtBVEFTQVRBU0ZRRl91NjFWaFM4bENkX0JZTkswV1dVdjFqVDg3UQ0171";
 
-        this.verifyGoogleToken(accessToken);
+        this.verifyGoogleTokenViaAccessToken(accessToken);
     }
 
-    public async verifyGoogleToken(accessToken: string): Promise<{ [k: string]: any }> {
+    public async verifyGoogleTokenViaAccessToken(accessToken: string): Promise<{ [k: string]: any }> {
         let answer: { [k: string]: any } = {};
 
         try {
-            let tokenInfoResult = await axios.get(googleAPIUrl + googleAPITokenInfoURL + accessToken);
+            let tokenInfoResult = await axios.get(googleAPIUrl + googleAPITokenInfoAccessTokenURL + accessToken);
             let data = tokenInfoResult.data;
 
             if (data.error_description != null) {
@@ -34,12 +35,43 @@ export class GoogleService implements IGoogleService {
                 answer["error"] = "unexpected audience (aud claim): " + data.aud;
             }
             else {
-                let userInfoResult = await axios.get(googleAPIUrl + googleAPIUserInfoURL + accessToken);
-                answer = userInfoResult.data;
+                let userInfoResult = await axios.get(googleAPIUrl + googleAPIUserInfoAccessTokenURL + accessToken);
+                answer = data;
+
+                let userInfoDataKeys = Object.keys(userInfoResult.data);
+                for (let i = 0; i < userInfoDataKeys.length; i++) {
+                    let key = userInfoDataKeys[i];
+
+                    answer[key] = userInfoResult.data[key];
+                }
             }
         }
         catch (err) {
-            answer["error"] = err;
+            answer["error"] = "Invalid Value";
+        }
+
+        return answer;
+    }
+
+    public async verifyGoogleTokenViaIdToken(idToken: string): Promise<{ [k: string]: any }> {
+        let answer: { [k: string]: any } = {};
+
+        try {
+            let tokenInfoResult = await axios.get(googleAPIUrl + googleAPITokenInfoIdTokenURL + idToken);
+            let data = tokenInfoResult.data;
+
+            if (data.error_description != null) {
+                answer["error"] = data.error_description;
+            }
+            else if (data.aud !== this.googleClientId) {
+                answer["error"] = "unexpected audience (aud claim): " + data.aud;
+            }
+            else {
+                answer = data;
+            }
+        }
+        catch (err) {
+            answer["error"] = "Invalid Value";
         }
 
         return answer;

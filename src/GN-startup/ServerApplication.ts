@@ -272,24 +272,17 @@ export class ServerApplication extends BuilderBase {
 			Debug.log("[GN] Game Application run success");
 		});
 
-		try {
-			this.licenseKeyApplication = new LicenseKeyApplication();
-			this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
-			this.licenseKeyApplication.setServer(server);
-			this.licenseKeyApplication.setApp(app);
-			this.licenseKeyApplication.setGameApplication(this.gameApplication);
-			this.licenseKeyApplication.setSessionId(this.sessionId);
-			this.licenseKeyApplication.setSecretkey(this.secretkey);
-			this.licenseKeyApplication.setSecretId(this.secretId);
-			this.licenseKeyApplication.setSalt(salt);
-			this.licenseKeyApplication.setPort(port);
-			this.licenseKeyApplication.run();
-		}
-		catch (err: any) {
-			Debug.logError(err);
-
-			return;
-		}
+		this.licenseKeyApplication = new LicenseKeyApplication();
+		this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
+		this.licenseKeyApplication.setServer(server);
+		this.licenseKeyApplication.setApp(app);
+		this.licenseKeyApplication.setGameApplication(this.gameApplication);
+		this.licenseKeyApplication.setSessionId(this.sessionId);
+		this.licenseKeyApplication.setSecretkey(this.secretkey);
+		this.licenseKeyApplication.setSecretId(this.secretId);
+		this.licenseKeyApplication.setSalt(salt);
+		this.licenseKeyApplication.setPort(port);
+		this.licenseKeyApplication.run();
 
 		server.listen(port, () => {
 			Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");

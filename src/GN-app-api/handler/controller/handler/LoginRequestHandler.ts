@@ -14,6 +14,7 @@ import { UserRoleType } from "./../../../../GN-common/constant/enumType/UserRole
 import { xSparkPlayer } from "./../../../../GN-library/xdatabase/lib/entity/xSparkPlayer";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { xGamePlayer } from "./../../../../GN-library/xdatabase/lib/entity/xGamePlayer";
+import { GoogleLoginType } from "./../../../../GN-common/constant/enumType/GoogleLoginType";
 
 import bcrypt from "bcrypt";
 
@@ -32,8 +33,10 @@ export class LoginOperationRequest extends OperationRequest {
 	deviceInfo: string;
 	@StringDataMember({ code: LoginParameterCode.FacebookToken, isOptional: true })
 	facebookToken: string;
-	@StringDataMember({ code: LoginParameterCode.GoogleToken, isOptional: true })
+	@StringDataMember({ code: LoginParameterCode.GoogleToken, isOptional: true, maxLength: 1500, minLength: 100 })
 	googleToken: string;
+	@NumberDataMember({ code: LoginParameterCode.GoogleLoginType, isOptional: true, minValue: 1, maxValue: 2 })
+	googleLoginType: number;
 	@StringDataMember({ code: LoginParameterCode.UserId, isOptional: true })
 	userId: string;
 	@StringDataMember({ code: LoginParameterCode.AppleToken, isOptional: true })
@@ -68,7 +71,14 @@ export class LoginOperationRequest extends OperationRequest {
 		} else if (this.loginType == LoginType.Google) {
 			if (!this.googleToken) return false;
 
-			return true;
+			if (this.googleLoginType == GoogleLoginType.AccessToken) {
+				return true;
+			}
+			else if (this.googleLoginType == GoogleLoginType.IdToken) {
+				return true;
+			}
+
+			return false;
 		} else if (this.loginType == LoginType.Apple) {
 			if (!this.appleToken) return false;
 
@@ -250,8 +260,9 @@ export class LoginRequestHandler extends RequestHandler {
 
 	private async handleLoginOperationByGoogle(authInfo: AuthInfo, request: LoginOperationRequest): Promise<OperationResponse> {
 		let googleToken = request.googleToken;
+		let googleLoginType = request.googleLoginType;
 
-		let result = await this.gameApplication.getGoogleService().verifyGoogleToken(googleToken);
+		let result = googleLoginType == GoogleLoginType.AccessToken ? await this.gameApplication.getGoogleService().verifyGoogleTokenViaAccessToken(googleToken) : googleLoginType == GoogleLoginType.IdToken ? await this.gameApplication.getGoogleService().verifyGoogleTokenViaIdToken(googleToken) : { "error": "Invalid GoogleLoginType" };
 
 		if (result["error"] != null) {
 			return this.newOperationInvalid(request);
@@ -410,7 +421,7 @@ export class LoginRequestHandler extends RequestHandler {
 		let email = loginOperationRequest.appleId;
 		let appleUserId = loginOperationRequest.appleUserId;
 
-		this.gameApplication.getDatabase().saveAppleExternal(sparkPlayer.getUserId(), appleUserId, displayName, email, appleToken);
+		this.gameApplication.getDatabase().saveAppleExternal(sparkPlayer.getUserId(), appleUserId, displayName, email, appleToken, result);
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
 	}
@@ -428,7 +439,7 @@ export class LoginRequestHandler extends RequestHandler {
 		let email = loginOperationRequest.email;
 		let googleUserId = loginOperationRequest.googleUserId;
 
-		this.gameApplication.getDatabase().saveGoogleExternal(sparkPlayer.getUserId(), googleUserId, displayName, email, googleToken);
+		this.gameApplication.getDatabase().saveGoogleExternal(sparkPlayer.getUserId(), googleUserId, displayName, email, googleToken, result);
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
 	}
@@ -639,7 +650,7 @@ export class LoginRequestHandler extends RequestHandler {
 	): Promise<OperationResponse> {
 		let facebookName = fbBasicInfo["name"] || "";
 		let userId = sparkPlayer.getUserId();
-		this.gameApplication.getDatabase().saveFBExternal(userId, fbBasicInfo["id"], facebookName, fbBasicInfo["email"] || "", facebookToken);
+		this.gameApplication.getDatabase().saveFBExternal(userId, fbBasicInfo["id"], facebookName, fbBasicInfo["email"] || "", facebookToken, fbBasicInfo);
 
 		if (fbBasicInfo["friends"]) {
 			let friendArr = fbBasicInfo["friends"]["data"];

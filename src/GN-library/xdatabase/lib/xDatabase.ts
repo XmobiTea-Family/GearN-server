@@ -419,7 +419,7 @@ export class xDatabase {
 		return new xSparkPlayer(result, collection);
 	}
 
-	public async saveFBExternal(userId: string, facebookId: string, facebookName: string, facebookEmail: string, facebookToken: string): Promise<void> {
+	public async saveFBExternal(userId: string, facebookId: string, facebookName: string, facebookEmail: string, facebookToken: string, result: any): Promise<void> {
 		await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).updateOne(
 			{ UserId: userId },
 			{
@@ -429,6 +429,7 @@ export class xDatabase {
 					ExternalEmail: facebookEmail,
 					Token: facebookToken,
 					TsUpdate: xDatetime.getCurrentMilliseconds(),
+					Result: result,
 					IsRemove: false,
 				},
 			},
@@ -448,12 +449,12 @@ export class xDatabase {
 			{
 				$set: {
 					IsRemove: true,
-				},
+				}
 			}
 		);
 	}
 
-	public async saveAppleExternal(userId: string, appleUserId: string, appleDisplayName: string, appleId: string, appleToken: string) {
+	public async saveAppleExternal(userId: string, appleUserId: string, appleDisplayName: string, appleId: string, appleToken: string, result: any) {
 		await this.systemCollection(SparkCollectionName.ExternalAppleAuthentication).updateOne(
 			{ UserId: userId },
 			{
@@ -463,25 +464,7 @@ export class xDatabase {
 					ExternalEmail: appleId,
 					Token: appleToken,
 					TsUpdate: xDatetime.getCurrentMilliseconds(),
-					IsRemove: false,
-				},
-			},
-			{
-				upsert: true,
-			}
-		);
-	}
-
-	public async saveGoogleExternal(userId: string, googleUserId: string, googleDisplayName: string, email: string, googleToken: string) {
-		await this.systemCollection(SparkCollectionName.ExternalGoogleAuthentication).updateOne(
-			{ UserId: userId },
-			{
-				$set: {
-					ExternalId: googleUserId,
-					ExternalDisplayName: googleDisplayName,
-					ExternalEmail: email,
-					Token: googleToken,
-					TsUpdate: xDatetime.getCurrentMilliseconds(),
+					Result: result,
 					IsRemove: false,
 				},
 			},
@@ -497,7 +480,38 @@ export class xDatabase {
 			{
 				$set: {
 					IsRemove: true,
+				}
+			}
+		);
+	}
+
+	public async saveGoogleExternal(userId: string, googleUserId: string, googleDisplayName: string, email: string, googleToken: string, result: any) {
+		await this.systemCollection(SparkCollectionName.ExternalGoogleAuthentication).updateOne(
+			{ UserId: userId },
+			{
+				$set: {
+					ExternalId: googleUserId,
+					ExternalDisplayName: googleDisplayName,
+					ExternalEmail: email,
+					Token: googleToken,
+					TsUpdate: xDatetime.getCurrentMilliseconds(),
+					Result: result,
+					IsRemove: false,
 				},
+			},
+			{
+				upsert: true,
+			}
+		);
+	}
+
+	public async unConnectGoogleExternal(googleUserId: string) {
+		await this.systemCollection(SparkCollectionName.ExternalGoogleAuthentication).updateOne(
+			{ ExternalId: googleUserId, IsRemove: false },
+			{
+				$set: {
+					IsRemove: true,
+				}
 			}
 		);
 	}

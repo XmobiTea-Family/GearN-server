@@ -196,8 +196,6 @@ export class LicenseKeyApplication {
 	}
 
 	public run(): void {
-		this.verifyMinute = VERIFY_MINUTE;
-
 		const verifyRouter = express.Router();
 		verifyRouter.use(express.json());
 
@@ -246,26 +244,33 @@ export class LicenseKeyApplication {
 				LicenseKey: allLines[3],
 			};
 
-			VerifyApi.authentication(this.licenseKeyInfo, (authenticationSuccess) => {
-				if (authenticationSuccess) {
-					LicenseKeyApplication.maxCCU = 50;
-
-					VerifyApi.verifyServerApplication(this.licenseKeyInfo, this.sessionId, this.secretkey, this.salt, this.port.toString(), (gnHashtable) => {
-						if (gnHashtable) {
-							LicenseKeyApplication.maxCCU = gnHashtable.getNumber(5, LicenseKeyApplication.maxCCU);
-							let errorCode = gnHashtable.getNumber(0);
-							setTimeout(() => {
-								this.debug(errorCode, LicenseKeyApplication.maxCCU);
-							}, 500);
-						}
-					});
-
-					this.gameApplication.getTimerService().subscriberEveryMinute(() => {
-						this.validateApp();
-					});
-				}
-			});
+			setTimeout(() => {
+				this.authenticationApp();
+			}, 500);
 		}
+	}
+
+	private authenticationApp() {
+		VerifyApi.authentication(this.licenseKeyInfo, (authenticationSuccess) => {
+			if (authenticationSuccess) {
+				LicenseKeyApplication.maxCCU = 50;
+
+				this.validateApp();
+
+				this.gameApplication.getTimerService().subscriberEveryMinute(() => {
+					this.validateApp();
+				});
+			}
+			else {
+				setTimeout(() => {
+					this.debug(4, LicenseKeyApplication.maxCCU);
+				}, 500);
+
+				setTimeout(() => {
+					this.authenticationApp();
+				}, 5000);
+			}
+		});
 	}
 
 	private validateApp() {
@@ -299,6 +304,8 @@ export class LicenseKeyApplication {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " invalid, maxCCU is " + ccu);
 		} else if (errorCode == 3) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " expired, maxCCU is " + ccu);
+		} else if (errorCode == 4) {
+			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " does authentication error, resend after 5 seconds, maxCCU is " + ccu);
 		} else {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " unknown error, maxCCU is " + ccu);
 		}

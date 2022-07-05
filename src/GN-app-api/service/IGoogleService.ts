@@ -1,3 +1,4 @@
 export interface IGoogleService {
-	verifyGoogleToken(accessToken: string): Promise<{ [k: string]: any }>;
+	verifyGoogleTokenViaAccessToken(accessToken: string): Promise<{ [k: string]: any }>;
+	verifyGoogleTokenViaIdToken(idToken: string): Promise<{ [k: string]: any }>;
 }

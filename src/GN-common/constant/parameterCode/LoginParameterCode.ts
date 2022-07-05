@@ -14,4 +14,5 @@ export class LoginParameterCode {
 	public static readonly CustomId: number = 13;
 	public static readonly TsExpire: number = 14;
 	public static readonly Reason: number = 15;
+	public static readonly GoogleLoginType = 16;
 }
