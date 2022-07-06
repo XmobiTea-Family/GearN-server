@@ -21,7 +21,7 @@ class VerifyApi {
 
 	private static authToken: string;
 
-	private static async send(subUri: string, postData: any): Promise<{ [k: string]: any }> {
+	private static async send(subUri: string, postData: any): Promise<any[]> {
 		let headers: any = {
 			"Content-Type": "application/json",
 		};
@@ -30,7 +30,7 @@ class VerifyApi {
 			headers["a"] = this.authToken as string;
 		}
 
-		let answer: { [k: string]: any } = {};
+		let answer: [any];
 
 		try {
 			let result = await axios.post(this.BaseUrl + "/" + subUri, postData, {
@@ -38,14 +38,16 @@ class VerifyApi {
 			});
 			answer = result.data;
 		} catch (error) {
-			answer["error"] = error;
+			answer = [
+				ReturnCode.InternalServerError
+			];
 		}
 
 		return answer;
 	}
 
-	private static async sendRequestViaJson(code: number, postData: any): Promise<{ [k: string]: any }> {
-		return await this.send("0/" + code, postData);
+	private static async sendRequestViaJson(code: number, postData: {}): Promise<any[]> {
+		return await this.send("api/0/" + code, postData);
 	}
 
 	public static async authentication(licenseKeyInfo: LicenseKeyInfo, callback: (authenticationSuccess: boolean) => void) {
@@ -58,24 +60,20 @@ class VerifyApi {
 		);
 
 		let answer = await this.sendRequestViaJson(OperationCode.Login, postData.toData());
-		if (answer.error) {
-			callback(false);
-		} else {
-			try {
-				let returnData = JSON.parse(answer as any);
-				let returnCode = returnData[0] as number;
-				if (returnCode == ReturnCode.Ok) {
-					let parameters = JSON.parse(returnData[1]);
+		try {
+			let returnData = answer;
+			let returnCode = returnData[0] as number;
+			if (returnCode == ReturnCode.Ok) {
+				let parameters = returnData[1];
 
-					this.authToken = parameters[ParameterCode.AuthToken.toString()];
-					callback(true);
-				} else {
-					callback(false);
-				}
-			} catch (err) {
-				Debug.logError("authentication ", err);
+				this.authToken = parameters[ParameterCode.AuthToken.toString()];
+				callback(true);
+			} else {
 				callback(false);
 			}
+		} catch (err) {
+			Debug.logError("authentication ", err);
+			callback(false);
 		}
 	}
 
@@ -98,34 +96,30 @@ class VerifyApi {
 		postData.add(8, port);
 
 		let answer = await this.sendRequestViaJson(12, postData.toData());
-		if (answer.error) {
-			callback(null);
-		} else {
-			try {
-				let gnHashtable = new GNHashtable();
+		try {
+			let gnHashtable = new GNHashtable();
 
-				let returnData = JSON.parse(answer as any);
-				let returnCode = returnData[0] as number;
-				if (returnCode == ReturnCode.Ok) {
-					let parameters = JSON.parse(returnData[1]);
+			let returnData = answer;
+			let returnCode = returnData[0] as number;
+			if (returnCode == ReturnCode.Ok) {
+				let parameters = returnData[1];
 
-					let keys = Object.keys(parameters);
-					for (let i = 0; i < keys.length; i++) {
-						let key = keys[i];
-						if (isNaN(key as any)) continue;
+				let keys = Object.keys(parameters);
+				for (let i = 0; i < keys.length; i++) {
+					let key = keys[i];
+					if (isNaN(key as any)) continue;
 
-						let keyInt = Number.parseInt(key);
-						gnHashtable.add(keyInt, parameters[key]);
-					}
-
-					callback(gnHashtable);
-				} else {
-					callback(gnHashtable);
+					let keyInt = Number.parseInt(key);
+					gnHashtable.add(keyInt, parameters[key]);
 				}
-			} catch (err) {
-				Debug.logError("authentication ", err);
-				callback(null);
+
+				callback(gnHashtable);
+			} else {
+				callback(gnHashtable);
 			}
+		} catch (err) {
+			Debug.logError("authentication ", err);
+			callback(null);
 		}
 	}
 }
@@ -235,7 +229,8 @@ export class LicenseKeyApplication {
 				this.debug(-1, LicenseKeyApplication.maxCCU);
 			}, 500);
 		} else {
-			let allLines = fs.readFileSync(this.licenseKeyFilePath).toString("utf-8");
+			//let allLines = fs.readFileSync("D:/GN_GN-Dashboard.license", 'utf-8').split(/\r?\n/);
+			let allLines = fs.readFileSync(this.licenseKeyFilePath, 'utf-8').split(/\r?\n/);
 
 			this.licenseKeyInfo = {
 				ProjectName: allLines[0],
@@ -299,7 +294,7 @@ export class LicenseKeyApplication {
 		if (errorCode == -1) {
 			Debug.log("[GN] No license Key found, maxCCU is " + ccu, "please try go https://gn.xmobitea.com to get free license key");
 		} else if (errorCode == 1) {
-			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " verify success, maxCCU is " + ccu);
+			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " verify success, maxCCU is " + (ccu == -1) ? "unlimited" : ccu);
 		} else if (errorCode == 2) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " invalid, maxCCU is " + ccu);
 		} else if (errorCode == 3) {
