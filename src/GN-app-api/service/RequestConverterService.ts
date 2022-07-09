@@ -661,10 +661,7 @@ export class RequestConverterService implements IRequestConverterService {
 		let keys = Object.keys(d);
 		for (let i = 0; i < keys.length; i++) {
 			let key = keys[i];
-            if (isNaN(key as any)) continue;
-
-			let keyInt = Number.parseInt(key);
-            gnHashtable.add(keyInt, d[key]);
+            gnHashtable.add(key, d[key]);
 		}
 
 		answer.parameters = gnHashtable;

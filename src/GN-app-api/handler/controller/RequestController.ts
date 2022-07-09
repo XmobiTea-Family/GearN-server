@@ -28,7 +28,7 @@ export class RequestController {
 	}
 
 	public removeAllHandlers() {
-		this.handlers = [];
+		this.handlers = {};
 	}
 
 	public getHandler(code: number): IRequestHandler {

@@ -39,7 +39,7 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse);

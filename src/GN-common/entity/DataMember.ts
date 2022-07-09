@@ -2,7 +2,7 @@ import { ObjectFieldMetadata, ObjectMetadata, initFieldMetadata } from "@clairej
 import { GNArray, GNHashtable } from "./../common/GNData";
 
 export interface EnhancedFieldMetadata extends ObjectFieldMetadata {
-    code: number;
+    code: string;
     isOptional: boolean;
     fieldType: FieldType;
     defaultValue: any;
@@ -31,7 +31,7 @@ export interface EnhancedObjectMedata extends ObjectMetadata {
 }
 
 interface DataMemberBaseArgs {
-    code: number;
+    code: string;
     isOptional?: boolean;
     defaultValue?: any;
 }

@@ -9,7 +9,7 @@ export class OperationEvent {
 		this.parameters = new GNHashtable();
 	}
 
-	public setParameter(k: number, value: any): OperationEvent {
+	public setScriptData(k: string, value: any): OperationEvent {
 		this.parameters.add(k, value);
 		return this;
 	}

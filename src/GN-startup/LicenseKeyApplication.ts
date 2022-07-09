@@ -87,13 +87,13 @@ class VerifyApi {
 	) {
 		let postData = new GNHashtable();
 
-		postData.add(1, sessionId);
-		postData.add(2, licenseKeyInfo.ProductId);
-		postData.add(3, licenseKeyInfo.UnformattedLicenseKey);
-		postData.add(4, licenseKeyInfo.LicenseKey);
-		postData.add(6, secretkey);
-		postData.add(7, salt);
-		postData.add(8, port);
+		postData.add("1", sessionId);
+		postData.add("2", licenseKeyInfo.ProductId);
+		postData.add("3", licenseKeyInfo.UnformattedLicenseKey);
+		postData.add("4", licenseKeyInfo.LicenseKey);
+		postData.add("6", secretkey);
+		postData.add("7", salt);
+		postData.add("8", port);
 
 		let answer = await this.sendRequestViaJson(12, postData.toData());
 		try {
@@ -107,10 +107,7 @@ class VerifyApi {
 				let keys = Object.keys(parameters);
 				for (let i = 0; i < keys.length; i++) {
 					let key = keys[i];
-					if (isNaN(key as any)) continue;
-
-					let keyInt = Number.parseInt(key);
-					gnHashtable.add(keyInt, parameters[key]);
+					gnHashtable.add(key, parameters[key]);
 				}
 
 				callback(gnHashtable);

@@ -68,14 +68,14 @@ export class HttpAppHandler {
 			if (configName != null) {
 				let configItem = this.gameApplication.getConfigGame().getConfig(configName);
 
-				if (configItem != null) return res.json([ReturnCode.Ok, { 1: configItem.toJson() }]);
+				if (configItem != null) return res.json([ReturnCode.Ok, { "1": configItem.toJson() }]);
 			}
 
 			return res.json([ReturnCode.OperationInvalid]);
 		});
 
 		this.router.get("/ts", (req: express.Request, res: express.Response) => {
-			return res.json([ReturnCode.Ok, { 1: xDatetime.getCurrentMilliseconds() }]);
+			return res.json([ReturnCode.Ok, { "1": xDatetime.getCurrentMilliseconds() }]);
 		});
 
 		const apiRouter = express.Router();

@@ -44,7 +44,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, EnterDisplayNameErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, EnterDisplayNameErrorCode.Ok);
 
 		let displayNameNormalizeCollection = this.gameApplication.getDatabase().runtimeGameCollection("DisplayNameNormalizeCollection");
 		displayNameNormalizeCollection.updateOne(
@@ -61,7 +61,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 		);
 
 		gamePlayer.setDisplayName(request.displayName);
-		operationResponse.setParameter(EnterDisplayNameParameterCode.DisplayName, request.displayName);
+		operationResponse.setScriptData(EnterDisplayNameParameterCode.DisplayName, request.displayName);
 
 		if (gamePlayer.getSegmentValue("UserRole") == UserRoleType.UserNonActivate) {
 			gamePlayer.setSegmentValue("UserRole", UserRoleType.User);
@@ -70,7 +70,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 			this.gameApplication.getApiMiddleware().updateAuthInfo(authInfo);
 		}
 
-		operationResponse.setParameter(EnterDisplayNameParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
+		operationResponse.setScriptData(EnterDisplayNameParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse, gamePlayer);

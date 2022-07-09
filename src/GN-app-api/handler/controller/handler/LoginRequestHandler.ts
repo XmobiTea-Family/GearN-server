@@ -152,7 +152,7 @@ export class LoginRequestHandler extends RequestHandler {
 		if (sparkPlayer == null) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
 
 			return operationResponse;
 		}
@@ -162,7 +162,7 @@ export class LoginRequestHandler extends RequestHandler {
 		if (!isMatch) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
 
 			return operationResponse;
 		}
@@ -189,7 +189,7 @@ export class LoginRequestHandler extends RequestHandler {
 		if (result["error"] != null) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.ErrorWhenLoginFacebook);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.ErrorWhenLoginFacebook);
 
 			return operationResponse;
 		}
@@ -451,7 +451,7 @@ export class LoginRequestHandler extends RequestHandler {
 		if (!sparkPlayer) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
 
 			return operationResponse;
 		}
@@ -471,7 +471,7 @@ export class LoginRequestHandler extends RequestHandler {
 		if (!this.gameApplication.getWeb3Service().isMatch(message)) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.RandomMessageExpired);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.RandomMessageExpired);
 
 			return operationResponse;
 		}
@@ -479,7 +479,7 @@ export class LoginRequestHandler extends RequestHandler {
 		if (this.gameApplication.getWeb3Service().getPublicAddress(message, signature) != publicAddress) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.PublicAddressWrong);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.PublicAddressWrong);
 
 			return operationResponse;
 		}
@@ -501,9 +501,9 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.Ok);
 
-		operationResponse.setParameter(LoginParameterCode.Message, message);
+		operationResponse.setScriptData(LoginParameterCode.Message, message);
 
 		return operationResponse;
 	}
@@ -530,9 +530,9 @@ export class LoginRequestHandler extends RequestHandler {
 				if (banNormal["TsExpire"] > currentMillisecond) {
 					let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 					operationResponse.setReturnCode(ReturnCode.Ok);
-					operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserHadBanned);
-					operationResponse.setParameter(LoginParameterCode.TsExpire, banNormal["TsExpire"]);
-					operationResponse.setParameter(LoginParameterCode.Reason, banNormal["Reason"]);
+					operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserHadBanned);
+					operationResponse.setScriptData(LoginParameterCode.TsExpire, banNormal["TsExpire"]);
+					operationResponse.setScriptData(LoginParameterCode.Reason, banNormal["Reason"]);
 
 					return operationResponse;
 				} else {
@@ -686,8 +686,8 @@ export class LoginRequestHandler extends RequestHandler {
 	): Promise<OperationResponse> {
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.Ok);
-		operationResponse.setParameter(ParameterCode.AuthToken, authInfo.getAuthToken());
+		operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.AuthToken, authInfo.getAuthToken());
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse, gamePlayer, sparkPlayer);

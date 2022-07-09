@@ -36,9 +36,9 @@ export class TemplateRequestHandler extends RequestHandler {
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, DebugErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, DebugErrorCode.Ok);
 
-		operationResponse.setParameter(DebugParameterCode.Boolean, request.booleanValue);
+		operationResponse.setScriptData(DebugParameterCode.Boolean, request.booleanValue);
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse);

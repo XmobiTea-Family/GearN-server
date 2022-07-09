@@ -31,7 +31,7 @@ export class OperationResponse {
 		return this;
 	}
 
-	public setParameter(k: number, value: any): OperationResponse {
+	public setScriptData(k: string, value: any): OperationResponse {
 		this.parameters.add(k, value);
 		return this;
 	}

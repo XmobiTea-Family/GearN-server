@@ -49,7 +49,7 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 		if (sparkPlayer) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesExists);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesExists);
 
 			return operationResponse;
 		}

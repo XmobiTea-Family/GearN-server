@@ -1,4 +1,4 @@
 export class EnterDisplayNameParameterCode {
-	public static readonly DisplayName: number = 1;
-	public static readonly UserRole: number = 2;
+	public static readonly DisplayName: string = "1";
+	public static readonly UserRole: string = "2";
 }

@@ -1,5 +1,5 @@
 export class ParameterCode {
-	public static readonly AuthToken: number = -2;
-	public static readonly Ts: number = -1;
-	public static readonly ErrorCode: number = 0;
+	public static readonly AuthToken: string = "A";
+	public static readonly Ts: string = "T";
+	public static readonly ErrorCode: string = "E";
 }
