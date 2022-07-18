@@ -8,8 +8,6 @@ const UserAddress = "UserAddress";
 const UserPassport = "UserPassport";
 const TsBirthday = "TsBirthday";
 const IPAddressCreate = "IPAddressCreate";
-const AccessToken = "AccessToken";
-const RefreshToken = "RefreshToken";
 
 const Value = "Value";
 const IsConfirm = "IsConfirm";
@@ -35,9 +33,6 @@ export class xSparkPlayer extends xPlayerBase {
 	private tsBirthday: number;
 
 	private ipAddressCreate: string;
-
-	private accessToken: string;
-	private refreshToken: string;
 
 	constructor(result: any, collection: mongoDB.Collection<mongoDB.Document>) {
 		super(result, collection);
@@ -219,41 +214,5 @@ export class xSparkPlayer extends xPlayerBase {
 
 	public getIPAddressCreate() {
 		return this.ipAddressCreate;
-	}
-
-	public getAccessToken() {
-		return this.accessToken;
-	}
-
-	public setAccessToken(accessToken: string) {
-		this.accessToken = accessToken;
-
-		let updateQuery: { [k: string]: any } = {};
-		updateQuery[AccessToken] = accessToken;
-
-		this.collection.updateOne(
-			{ _id: this._id },
-			{
-				$set: updateQuery,
-			}
-		);
-	}
-
-	public getRefreshToken() {
-		return this.refreshToken;
-	}
-
-	public setRefreshToken(refreshToken: string) {
-		this.refreshToken = refreshToken;
-
-		let updateQuery: { [k: string]: any } = {};
-		updateQuery[RefreshToken] = refreshToken;
-
-		this.collection.updateOne(
-			{ _id: this._id },
-			{
-				$set: updateQuery,
-			}
-		);
 	}
 }

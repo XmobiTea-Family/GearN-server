@@ -688,6 +688,7 @@ export class LoginRequestHandler extends RequestHandler {
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.Ok);
 		operationResponse.setScriptData(ParameterCode.AuthToken, authInfo.getAuthToken());
+		operationResponse.setScriptData(ParameterCode.UserId, authInfo.getUserId());
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse, gamePlayer, sparkPlayer);

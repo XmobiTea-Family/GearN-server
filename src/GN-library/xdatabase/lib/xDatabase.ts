@@ -168,7 +168,6 @@ export class xDatabase {
 			Segments: segments,
 			ScriptData: {},
 			PrivateData: {},
-			AccessToken: "",
 		};
 		await collection.insertOne(result);
 		return new xSparkPlayer(result, collection);
@@ -206,7 +205,6 @@ export class xDatabase {
 			Segments: segments,
 			ScriptData: {},
 			PrivateData: {},
-			AccessToken: "",
 		};
 		await collection.insertOne(result);
 		return new xSparkPlayer(result, collection);
@@ -244,7 +242,6 @@ export class xDatabase {
 			Segments: segments,
 			ScriptData: {},
 			PrivateData: {},
-			AccessToken: "",
 		};
 		await collection.insertOne(result);
 		return new xSparkPlayer(result, collection);
@@ -271,8 +268,6 @@ export class xDatabase {
 			Segments: segments,
 			ScriptData: {},
 			PrivateData: {},
-			AccessToken: "",
-			RefreshToken: "",
 		};
 		await collection.insertOne(result);
 		return new xSparkPlayer(result, collection);
@@ -311,8 +306,6 @@ export class xDatabase {
 			Segments: segments,
 			ScriptData: {},
 			PrivateData: {},
-			AccessToken: "",
-			RefreshToken: "",
 		};
 
 		if (email)
@@ -358,8 +351,6 @@ export class xDatabase {
 			Segments: segments,
 			ScriptData: {},
 			PrivateData: {},
-			AccessToken: "",
-			RefreshToken: "",
 		};
 
 		if (email)
@@ -405,8 +396,6 @@ export class xDatabase {
 			Segments: segments,
 			ScriptData: {},
 			PrivateData: {},
-			AccessToken: "",
-			RefreshToken: "",
 		};
 
 		if (email)

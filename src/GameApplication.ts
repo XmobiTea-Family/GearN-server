@@ -38,6 +38,7 @@ import { IWeb3Service } from "./GN-app-api/service/IWeb3Service";
 import { Web3Service } from "./GN-app-api/service/Web3Service";
 import { IGoogleService } from "./GN-app-api/service/IGoogleService";
 import { GoogleService } from "./GN-app-api/service/GoogleService";
+import { FetchSparkPlayerRequestHandler } from "./GN-app-api/handler/controller/handler/FetchSparkPlayerRequestHandler";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -111,6 +112,7 @@ export class GameApplication {
 		this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
 		this.requestController.addHandler(new RegisterSocketRequestHandler(this));
 		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
+		this.requestController.addHandler(new FetchSparkPlayerRequestHandler(this));
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {

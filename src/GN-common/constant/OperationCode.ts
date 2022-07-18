@@ -9,4 +9,5 @@ export class OperationCode {
 	public static readonly FetchAllData: number = 6;
 	public static readonly CreateNewFileUploadInfo: number = 7;
 	public static readonly GetFileUploadInfo: number = 8;
+	public static readonly FetchSparkPlayer: number = 9;
 }
