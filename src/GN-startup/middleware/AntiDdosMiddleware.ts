@@ -491,7 +491,7 @@ export class AntiDdosMiddleware {
 	}
 
 	public async addPendingDownloadRequest(req: express.Request, res: express.Response, next: Function) {
-		let reqAny= req as any;
+		let reqAny = req as any;
 		let ip = reqAny.xip;
 
 		let maxDownloadPendingRequest = this.maxDownloadPendingRequest;
