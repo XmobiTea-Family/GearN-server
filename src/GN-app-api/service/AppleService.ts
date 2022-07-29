@@ -23,7 +23,14 @@ export class AppleService implements IAppleService {
 		let answer: { [k: string]: any } = {};
 
 		try {
-			await jwt.verify(token, this.getApplePublicKey, null, (err: VerifyErrors | null, decoded: JwtPayload) => {
+			await jwt.verify(token, (header: JwtHeader, callback: SigningKeyCallback) => {
+				this.client.getSigningKey(header.kid, (err: Error, key: jwksClient.SigningKey) => {
+					if (err) return callback(err, null);
+		
+					let signingKey = key.getPublicKey();
+					return callback(null, signingKey);
+				});
+			}, null, (err: VerifyErrors | null, decoded: JwtPayload) => {
 				if (err) {
 					answer["error"] = err;
 				} else {
@@ -41,14 +48,5 @@ export class AppleService implements IAppleService {
 		}
 
 		return answer;
-	}
-
-	private getApplePublicKey(header: JwtHeader, callback: SigningKeyCallback) {
-		this.client.getSigningKey(header.kid, (err: Error, key: jwksClient.SigningKey) => {
-			if (err) return callback(err, null);
-
-			let signingKey = key.getPublicKey();
-			return callback(null, signingKey);
-		});
 	}
 }
