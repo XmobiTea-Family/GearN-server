@@ -23,6 +23,8 @@ export class ApiMiddleware {
 
 	private expiredToken: number = 2 * 1000 * 60 * 60 * 24;
 
+	private headerIP: string;
+
 	private dauLast30Min: Array<string>;
 
 	private maxCCU: number;
@@ -37,6 +39,14 @@ export class ApiMiddleware {
 
 	public setExpiredToken(expiredToken: number) {
 		this.expiredToken = expiredToken;
+	}
+
+	public setHeaderIP(headerIP: string) {
+		this.headerIP = headerIP;
+	}
+
+	public getHeaderIP() {
+		return this.headerIP;
 	}
 
 	public run() {
@@ -161,7 +171,17 @@ export class ApiMiddleware {
 	}
 
 	public async getIP(req: express.Request, res: express.Response, next: Function) {
-		let ip = this.createIP(req.socket.remoteAddress);
+		let ip: string = null;
+
+		if (this.headerIP != null) {
+			ip = req.header(this.headerIP);
+		}
+
+		if (ip == null) {
+			ip = req.socket.remoteAddress;
+		}
+
+		ip = this.createIP(ip);
 
 		let reqAny = req as any;
 

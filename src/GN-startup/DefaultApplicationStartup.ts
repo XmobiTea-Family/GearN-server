@@ -37,6 +37,7 @@ export class DefaultApplicationStartup {
 			.setPackageName("com.xmobitea.GNServer")
 			.setAppleClientId("com.xmobitea.GNServer")
 			.setGoogleClientId("gn-server")
+			.setHeaderIP("x-ip")
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()

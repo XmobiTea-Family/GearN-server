@@ -108,7 +108,19 @@ export class SocketAppHandler {
 	}
 
 	private initSocket(socket: Socket) {
-		let ip = this.apiMiddleware.createIP(socket.conn.remoteAddress);
+		let ip: string = null;
+		
+		let headerIP = this.apiMiddleware.getHeaderIP();
+		if (headerIP != null) {
+			ip = socket.handshake.headers[headerIP] as string;
+		}
+
+		if (ip == null) {
+			// ip = socket.conn.remoteAddress;
+			ip = socket.handshake.address;
+		}
+
+		ip = this.apiMiddleware.createIP(ip);
 	
 		socket.data.IPAddress = ip;
 	}

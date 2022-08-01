@@ -53,6 +53,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setPackageName(this.gnConfig["packageName"])
 			.setAppleClientId(this.gnConfig["appleClientId"])
 			.setGoogleClientId(this.gnConfig["googleClientId"])
+			.setHeaderIP(this.gnConfig["headerIP"])
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()

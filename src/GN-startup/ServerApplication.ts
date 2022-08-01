@@ -175,25 +175,25 @@ export class ServerApplication extends BuilderBase {
 		const server = this.getServer(app, this.getApplicationSettings());
 
 		this.uploadFileMiddleware = this.newUploadMiddleware();
-		this.uploadFileMiddleware.setMaxSizeUpload(this.uploadFileSettings.getMaxSizeUpload());
-		this.uploadFileMiddleware.setMimeTypeAccepts(this.uploadFileSettings.getMimeTypeAccepts());
-		this.uploadFileMiddleware.setUploadPath(this.uploadFileSettings.getUploadPath());
+		this.uploadFileMiddleware.setMaxSizeUpload(this.getUploadFileSettings().getMaxSizeUpload());
+		this.uploadFileMiddleware.setMimeTypeAccepts(this.getUploadFileSettings().getMimeTypeAccepts());
+		this.uploadFileMiddleware.setUploadPath(this.getUploadFileSettings().getUploadPath());
 		this.uploadFileMiddleware.run();
 
 		this.apiMiddleware = this.newApiMiddleware();
 		this.apiMiddleware.run();
 
 		this.antiDdosMiddleware = this.newAntiDdosMiddleware();
-		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerIp(this.ddosSettings.getSocketMaxRequestPerSecondPerIp());
-		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerPeer(this.ddosSettings.getSocketMaxRequestPerSecondPerPeer());
-		this.antiDdosMiddleware.setSocketMaxPendingRequest(this.ddosSettings.getSocketMaxPendingRequest());
-		this.antiDdosMiddleware.setSocketMaxRequestSize(this.ddosSettings.getSocketMaxRequestSize());
-		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerIp(this.ddosSettings.getHttpMaxRequestPerSecondPerIp());
-		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerPeer(this.ddosSettings.getHttpMaxRequestPerSecondPerPeer());
-		this.antiDdosMiddleware.setHttpMaxPendingRequest(this.ddosSettings.getHttpMaxPendingRequest());
-		this.antiDdosMiddleware.setHttpMaxRequestSize(this.ddosSettings.getHttpMaxRequestSize());
-		this.antiDdosMiddleware.setMaxUploadPendingRequest(this.ddosSettings.getMaxUploadPendingRequest());
-		this.antiDdosMiddleware.setMaxDownloadPendingRequest(this.ddosSettings.getMaxDownloadPendingRequest());
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerIp(this.getDdosSettings().getSocketMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerPeer(this.getDdosSettings().getSocketMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setSocketMaxPendingRequest(this.getDdosSettings().getSocketMaxPendingRequest());
+		this.antiDdosMiddleware.setSocketMaxRequestSize(this.getDdosSettings().getSocketMaxRequestSize());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerIp(this.getDdosSettings().getHttpMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerPeer(this.getDdosSettings().getHttpMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setHttpMaxPendingRequest(this.getDdosSettings().getHttpMaxPendingRequest());
+		this.antiDdosMiddleware.setHttpMaxRequestSize(this.getDdosSettings().getHttpMaxRequestSize());
+		this.antiDdosMiddleware.setMaxUploadPendingRequest(this.getDdosSettings().getMaxUploadPendingRequest());
+		this.antiDdosMiddleware.setMaxDownloadPendingRequest(this.getDdosSettings().getMaxDownloadPendingRequest());
 		this.antiDdosMiddleware.run();
 
 		this.gameApplication = this.newGameApplication();
@@ -240,7 +240,8 @@ export class ServerApplication extends BuilderBase {
 
 		let playerGameCollection = this.gameApplication.getDatabase().systemGameCollection("Player");
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
-		this.apiMiddleware.setExpiredToken(this.applicationSettings.getExpiredToken());
+		this.apiMiddleware.setExpiredToken(this.getApplicationSettings().getExpiredToken());
+		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 
 		let reportDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getReportDdosCollectionName());
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);

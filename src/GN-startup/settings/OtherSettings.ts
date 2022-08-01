@@ -7,6 +7,7 @@ abstract class BuilderBase {
 	protected packageName: string;
 	protected appleClientId: string;
 	protected googleClientId: string;
+	protected headerIP: string;
 
 	public getAuthTokenCollectionName(): string {
 		return this.authTokenCollectionName;
@@ -30,6 +31,10 @@ abstract class BuilderBase {
 
 	public getGoogleClientId(): string {
 		return this.googleClientId;
+	}
+
+	public getHeaderIP(): string {
+		return this.headerIP;
 	}
 
 	constructor() {}
@@ -66,6 +71,11 @@ class Builder extends BuilderBase implements IBuilder<OtherSettings> {
 		return this;
 	}
 
+	public setHeaderIP(headerIP: string): Builder {
+		this.headerIP = headerIP;
+		return this;
+	}
+
 	constructor() {
 		super();
 	}
@@ -85,6 +95,7 @@ export class OtherSettings extends BuilderBase {
 		this.packageName = builder.getPackageName();
 		this.appleClientId = builder.getAppleClientId();
 		this.googleClientId = builder.getGoogleClientId();
+		this.headerIP = builder.getHeaderIP();
 	}
 
 	public static Builder(): Builder {
