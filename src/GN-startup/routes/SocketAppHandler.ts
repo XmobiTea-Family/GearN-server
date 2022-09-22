@@ -242,6 +242,13 @@ export class SocketAppHandler {
 		this.emitter.to(userId).emit(EVENT_CMD, encode(socketData));
 	}
 
+	public async sendEventToRoom(roomIds: string | string[], operationEvent: OperationEvent): Promise<void> {
+		let socketData = operationEvent.toSocketData();
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] %O", JSON.stringify(socketData));
+
+		this.emitter.to(roomIds).emit(EVENT_CMD, encode(socketData));
+	}
+
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO MORE USER] %O", JSON.stringify(socketData));
@@ -266,5 +273,54 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
 
 		this.emitter.of("/" + namespace).emit(EVENT_CMD, encode(socketData));
+	}
+
+	public getSocketViaUserId(userId: string): Socket {
+		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
+		if (authInfo != null) {
+			return this.getSocketViaSocketId(authInfo.getSocketId());
+		}
+
+		return null;
+	}
+
+	public getSocketViaAuthToken(authToken: string): Socket {
+		let authInfo = this.apiMiddleware.getAuthInfoByAuthToken(authToken);
+		if (authInfo != null) {
+			return this.getSocketViaSocketId(authInfo.getSocketId());
+		}
+		
+		return null;
+	}
+
+	public getSocketViaSocketId(socketId: string): Socket {
+		if (socketId) {
+			return this.server.sockets.sockets.get(socketId);
+		}
+
+		return null;
+	}
+
+	public async joinRoom(userId: string, roomIds: string | string[]): Promise<void> {
+		let socket = this.getSocketViaUserId(userId);
+		if (socket) {
+			await socket.join(roomIds);
+		}
+	}
+
+	public async leaveRoom(userId: string, roomId: string): Promise<void> {
+		let socket = this.getSocketViaUserId(userId);
+		if (socket) {
+			await socket.leave(roomId);
+		}
+	}
+
+	public getRooms(userId: string): Set<string> {
+		let socket = this.getSocketViaUserId(userId);
+		if (socket) {
+			return socket.rooms;
+		}
+
+		return null;
 	}
 }

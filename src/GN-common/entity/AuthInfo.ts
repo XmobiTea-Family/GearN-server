@@ -9,6 +9,7 @@ abstract class BuilderBase {
 	protected otherUserLogin: boolean;
 	protected otherDatas: { [k: string]: any };
 	protected tsLastUpdate: number;
+	protected socketId: string;
 
 	public getAuthToken(): string {
 		return this.authToken;
@@ -40,6 +41,15 @@ abstract class BuilderBase {
 
 	public getTsLastUpdate(): number {
 		return this.tsLastUpdate;
+	}
+
+	public getSocketId(): string {
+		return this.socketId;
+	}
+
+	public setSocketId(socketId: string): Builder {
+		this.socketId = socketId;
+		return this as Builder;
 	}
 
 	public setAuthToken(authToken: string): Builder {
@@ -147,6 +157,7 @@ export class AuthInfo extends BuilderBase {
 		this.otherUserLogin = builder.getOtherUserLogin();
 		this.otherDatas = builder.getOtherDatas();
 		this.tsLastUpdate = builder.getTsLastUpdate();
+		this.socketId = builder.getSocketId();
 	}
 
 	public toDocumentData() {
@@ -157,7 +168,8 @@ export class AuthInfo extends BuilderBase {
 			"IsRemove": this.remove,
 			"TsExpire": this.tsExpire,
 			"OtherUserLogin": this.otherUserLogin,
-			"OtherDatas": this.otherDatas
+			"OtherDatas": this.otherDatas,
+			"SocketId": this.socketId
 		}
 	}
 

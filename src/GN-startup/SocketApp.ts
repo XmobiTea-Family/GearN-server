@@ -74,6 +74,7 @@ export class SocketApp {
 		if (this.socketAppHandler != null) this.socketAppHandler.setEmitter(this.emitter);
 
 		this.io.adapter(createAdapter(adapterEventCollection) as any);
+		
 	}
 
 	constructor() {}

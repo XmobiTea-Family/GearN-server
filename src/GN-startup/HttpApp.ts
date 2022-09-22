@@ -93,6 +93,18 @@ export class HttpApp {
 			return res.sendStatus(200);
 		});
 
+		this.app.get("/stats", async function (req: express.Request, res: express.Response) {
+			let cpuUsage = process.cpuUsage();
+			let memoryUsage = process.memoryUsage();
+			let resourceUsage = process.resourceUsage();
+
+			return res.json({
+				"CpuUsage": cpuUsage,
+				"MemoryUsage": memoryUsage,
+				"ResourceUsage": resourceUsage
+			});
+		});
+
 		let allowedHeaders = this.appSettings.getAllowedHeaders();
 		allowedHeaders.push(this.sessionId);
 

@@ -119,6 +119,7 @@ export class ApiMiddleware {
 			.setTsExpire(tsExpire)
 			.setOtherUserLogin(false)
 			.setTsLastUpdate(currentMilliseconds)
+			.setSocketId("")
 			.build();
 
 		this.authInfoDic[authToken] = authInfo;
@@ -140,7 +141,7 @@ export class ApiMiddleware {
 		let authToken = authInfo.getAuthToken();
 
 		this.authInfoDic[authToken] = authInfo;
-		this.authTokenCollection.updateOne({ AuthInfo: authInfo }, { $set: authInfo.toDocumentData() });
+		this.authTokenCollection.updateOne({ AuthToken: authToken }, { $set: authInfo.toDocumentData() });
 	}
 
 	public async authenticateTokenViaJson(req: express.Request, res: express.Response, next: Function) {
@@ -266,8 +267,9 @@ export class ApiMiddleware {
 
 			if (authInfo.getOtherUserLogin()) {
 				delete this.authInfoDic[authToken];
+				authInfo.setSocketId("");
 
-				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
+				socket.leave(authInfo.getUserId());
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
@@ -275,21 +277,24 @@ export class ApiMiddleware {
 				return next(ReturnCode.OperationNotAuthorized);
 			} else if (authInfo.isRemove()) {
 				delete this.authInfoDic[authToken];
+				authInfo.setSocketId("");
 
-				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
+				socket.leave(authInfo.getUserId());
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 			} else if (authInfo.getTsExpire() < currentMilliseconds) {
 				delete this.authInfoDic[authToken];
+				authInfo.setSocketId("");
 
-				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
+				socket.leave(authInfo.getUserId());
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 			}
 			else {
 				authInfo.setTsLastUpdate(currentMilliseconds);
+				authInfo.setSocketId(socket.id);
 			}
 		}
 
