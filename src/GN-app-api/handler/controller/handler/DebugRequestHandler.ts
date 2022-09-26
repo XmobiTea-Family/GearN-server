@@ -66,6 +66,8 @@ export class DebugRequestHandler extends RequestHandler {
 			this.gameApplication.sendEventTo(authInfo.getUserId(), operationEvent);
 		}
 
+		this.gameApplication.joinRoom(authInfo.getUserId(), "test");
+
 		return operationResponse;
 	}
 }

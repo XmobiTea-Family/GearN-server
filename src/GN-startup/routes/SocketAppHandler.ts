@@ -155,6 +155,9 @@ export class SocketAppHandler {
 			socket.data.authInfo = authInfo;
 			socket.join(authInfo.getUserId());
 			socket.join(authInfo.getSocketRoomIds());
+
+			console.log("--------- SOCKET " + socket.id);
+			authInfo.setSocketId(socket.id);
 		}
 	}
 
@@ -294,8 +297,10 @@ export class SocketAppHandler {
 	}
 
 	public getSocketViaSocketId(socketId: string): Socket {
+		console.log("--SOCKET ID--- " + socketId);
+
 		if (socketId) {
-			return this.server.sockets.sockets.get(socketId);
+			return this.server.of("/").sockets.get(socketId);
 		}
 
 		return null;
@@ -303,6 +308,8 @@ export class SocketAppHandler {
 
 	public async joinRoom(userId: string, roomIds: string | string[]): Promise<void> {
 		let socket = this.getSocketViaUserId(userId);
+		console.log(socket != null);
+
 		if (socket) {
 			await socket.join(roomIds);
 		}

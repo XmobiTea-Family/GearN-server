@@ -119,7 +119,7 @@ export class ApiMiddleware {
 			.setTsExpire(tsExpire)
 			.setOtherUserLogin(false)
 			.setTsLastUpdate(currentMilliseconds)
-			.setSocketId("")
+			.setSocketId('')
 			.setSocketRoomIds([])
 			.build();
 
@@ -156,6 +156,8 @@ export class ApiMiddleware {
 					.setSocketId(authInfoTemp["SocketId"])
 					.setSocketRoomIds(authInfoTemp["SocketRoomIds"])
 					.build();
+
+				this.authInfoDic[authToken] = authInfo;
 			}
 		}
 
@@ -294,7 +296,6 @@ export class ApiMiddleware {
 
 			if (authInfo.getOtherUserLogin()) {
 				delete this.authInfoDic[authToken];
-				authInfo.setSocketId("");
 
 				socket.rooms.forEach(room => socket.leave(room));
 		
@@ -304,7 +305,6 @@ export class ApiMiddleware {
 				return next(ReturnCode.OperationNotAuthorized);
 			} else if (authInfo.isRemove()) {
 				delete this.authInfoDic[authToken];
-				authInfo.setSocketId("");
 
 				socket.rooms.forEach(room => socket.leave(room));
 
@@ -312,7 +312,6 @@ export class ApiMiddleware {
 				socket.data.authInfo = null;
 			} else if (authInfo.getTsExpire() < currentMilliseconds) {
 				delete this.authInfoDic[authToken];
-				authInfo.setSocketId("");
 
 				socket.rooms.forEach(room => socket.leave(room));
 
@@ -321,7 +320,6 @@ export class ApiMiddleware {
 			}
 			else {
 				authInfo.setTsLastUpdate(currentMilliseconds);
-				authInfo.setSocketId(socket.id);
 			}
 		}
 

@@ -58,6 +58,8 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 			socket.data.userId = userId;
 			
 			socket.join(userId);
+
+			authInfo.setSocketId(sid);
 		}
 	}
 }

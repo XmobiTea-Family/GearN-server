@@ -53,6 +53,7 @@ abstract class BuilderBase {
 	}
 
 	public setSocketId(socketId: string): Builder {
+		console.log("setSocketId -------- " + socketId);
 		this.socketId = socketId;
 		return this as Builder;
 	}
