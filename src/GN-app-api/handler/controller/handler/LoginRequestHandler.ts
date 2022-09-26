@@ -573,13 +573,6 @@ export class LoginRequestHandler extends RequestHandler {
 		let newAuth = AuthInfo.Builder().setUserId(userId).setRole(gamePlayer.getSegmentValue("UserRole")).build();
 		let newAuthInfo = this.gameApplication.getApiMiddleware().generateAuthToken(newAuth);
 
-		// if (oldAuthInfo) {
-		// 	let roomId = oldAuthInfo.getOtherData("RoomId");
-		// 	if (roomId != null) {
-		// 		newAuthInfo.setOtherData("RoomId", roomId);
-		// 	}
-		// }
-
 		return await this.handleLoginSuccess(newAuthInfo, request, sparkPlayer, gamePlayer);
 	}
 

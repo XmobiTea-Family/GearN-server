@@ -10,6 +10,7 @@ abstract class BuilderBase {
 	protected otherDatas: { [k: string]: any };
 	protected tsLastUpdate: number;
 	protected socketId: string;
+	protected socketRoomIds: string[];
 
 	public getAuthToken(): string {
 		return this.authToken;
@@ -47,8 +48,32 @@ abstract class BuilderBase {
 		return this.socketId;
 	}
 
+	public getSocketRoomIds(): string[] {
+		return this.socketRoomIds;
+	}
+
 	public setSocketId(socketId: string): Builder {
 		this.socketId = socketId;
+		return this as Builder;
+	}
+
+	public setSocketRoomIds(roomIds: string[]): Builder {
+		this.socketRoomIds = roomIds;
+		return this as Builder;
+	}
+
+	public addSocketRoomId(roomId: string): Builder {
+		if (this.socketRoomIds.indexOf(roomId) == -1)
+			this.socketRoomIds.push(roomId);
+
+		return this as Builder;
+	}
+
+	public removeSocketRoomId(roomId: string): Builder {
+		let indexOf = this.socketRoomIds.indexOf(roomId);
+		if (indexOf != -1)
+			this.socketRoomIds.splice(indexOf, 1);
+
 		return this as Builder;
 	}
 
@@ -109,6 +134,7 @@ abstract class BuilderBase {
 
 	constructor() {
 		this.otherDatas = {};
+		this.socketRoomIds = [];
 	}
 }
 
@@ -158,6 +184,7 @@ export class AuthInfo extends BuilderBase {
 		this.otherDatas = builder.getOtherDatas();
 		this.tsLastUpdate = builder.getTsLastUpdate();
 		this.socketId = builder.getSocketId();
+		this.socketRoomIds = builder.getSocketRoomIds();
 	}
 
 	public toDocumentData() {
@@ -169,7 +196,8 @@ export class AuthInfo extends BuilderBase {
 			"TsExpire": this.tsExpire,
 			"OtherUserLogin": this.otherUserLogin,
 			"OtherDatas": this.otherDatas,
-			"SocketId": this.socketId
+			"SocketId": this.socketId,
+			"SocketRoomIds": this.socketRoomIds
 		}
 	}
 

@@ -172,8 +172,8 @@ export class GNArray extends GNData {
 	public remove(k: number): boolean {
 		if (k < 0 || k >= this.array.length) return false;
 
-		this.array = this.array.splice(k, 1);
-		return false;
+		this.array.splice(k, 1);
+		return true;
 	}
 
 	public count(): number {

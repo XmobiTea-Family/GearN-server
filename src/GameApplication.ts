@@ -249,8 +249,8 @@ export class GameApplication {
 	private handleSocketDisconnect(socket: Socket, data: string) {
 		if (socket.data.isAuthenticated) {
 			socket.data.isAuthenticated = false;
-			let authInfo = socket.data.authInfo as AuthInfo;
-			authInfo.removeOtherData("SocketId");
+			// let authInfo = socket.data.authInfo as AuthInfo;
+			// authInfo.removeOtherData("SocketId");
 		}
 
 		if (socket.data.userId != null) {

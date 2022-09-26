@@ -65,7 +65,7 @@ export class xGamePlayer extends xPlayerBase {
 		if (thisPushData) {
 			let indexOf = this.pushRegistrations.indexOf(thisPushData);
 			if (indexOf != -1) {
-				this.pushRegistrations = this.pushRegistrations.splice(indexOf, 1);
+				this.pushRegistrations.splice(indexOf, 1);
 			}
 
 			let updateQuery: { [k: string]: any } = {};

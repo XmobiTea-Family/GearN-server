@@ -13,7 +13,6 @@ import { OperationResponse } from "./../../GN-common/entity/operationResponse/Op
 import { Emitter } from "@socket.io/mongo-emitter";
 import { encode, decode } from "@msgpack/msgpack";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
-import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
@@ -77,8 +76,8 @@ export class SocketAppHandler {
 		this.initSocket(socket);
 
 		socket.on(REQUEST_AUTHTOKEN_CMD, (...data) => {
-			this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, () => {
-				this.onSocketRequestAuthToken(socket, data);
+			this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, async () => {
+				await this.onSocketRequestAuthToken(socket, data);
 			});
 		});
 
@@ -125,10 +124,10 @@ export class SocketAppHandler {
 		socket.data.IPAddress = ip;
 	}
 
-	private onSocketRequestAuthToken(socket: Socket, data: any) {
+	private async onSocketRequestAuthToken(socket: Socket, data: any) {
 		if (data.length == 0) {
 			if (socket.data.isAuthenticated === true) {
-				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
+				socket.rooms.forEach(room => socket.leave(room));
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
@@ -140,7 +139,7 @@ export class SocketAppHandler {
 		let authToken = data[0] as string;
 		if (!authToken) {
 			if (socket.data.isAuthenticated === true) {
-				socket.leave((socket.data.authInfo as AuthInfo).getUserId());
+				socket.rooms.forEach(room => socket.leave(room));
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
@@ -149,12 +148,13 @@ export class SocketAppHandler {
 			return;
 		}
 
-		let authInfo = this.apiMiddleware.getAuthInfoByAuthToken(authToken);
+		let authInfo = await this.apiMiddleware.getAuthInfoByAuthTokenInDatabase(authToken);
 
 		if (authInfo != null) {
 			socket.data.isAuthenticated = true;
 			socket.data.authInfo = authInfo;
 			socket.join(authInfo.getUserId());
+			socket.join(authInfo.getSocketRoomIds());
 		}
 	}
 

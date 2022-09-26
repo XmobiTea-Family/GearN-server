@@ -66,7 +66,7 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 	public removeMethod(methodType: MethodType): Builder {
 		let indexOf = this.methods.indexOf(methodType);
 		if (indexOf != -1) {
-			this.methods = this.methods.splice(indexOf, 1);
+			this.methods.splice(indexOf, 1);
 		}
 
 		return this;

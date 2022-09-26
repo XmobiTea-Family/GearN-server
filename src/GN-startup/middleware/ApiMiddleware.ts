@@ -120,6 +120,7 @@ export class ApiMiddleware {
 			.setOtherUserLogin(false)
 			.setTsLastUpdate(currentMilliseconds)
 			.setSocketId("")
+			.setSocketRoomIds([])
 			.build();
 
 		this.authInfoDic[authToken] = authInfo;
@@ -135,6 +136,30 @@ export class ApiMiddleware {
 
 	public getAuthInfoByAuthToken(authToken: string) {
 		return this.authInfoDic[authToken];
+	}
+
+	public async getAuthInfoByAuthTokenInDatabase(authToken: string) : Promise<AuthInfo> {
+		let authInfo = this.getAuthInfoByAuthToken(authToken);
+		if (authInfo == null) {
+			let authInfoTemp = await this.authTokenCollection.findOne({ AuthToken: authToken });
+
+			if (authInfoTemp != null) {
+				authInfo = AuthInfo.Builder()
+					.setAuthToken(authInfoTemp["AuthToken"])
+					// .setOtherData("RoomId", null)
+					.setIsRemove(authInfoTemp["IsRemove"])
+					.setOtherUserLogin(authInfoTemp["OtherUserLogin"])
+					.setRole(authInfoTemp["Role"])
+					.setTsExpire(authInfoTemp["TsExpire"])
+					.setUserId(authInfoTemp["UserId"])
+					.setOtherDatas(authInfoTemp["OtherDatas"])
+					.setSocketId(authInfoTemp["SocketId"])
+					.setSocketRoomIds(authInfoTemp["SocketRoomIds"])
+					.build();
+			}
+		}
+
+		return authInfo;
 	}
 
 	public updateAuthInfo(authInfo: AuthInfo) {
@@ -214,6 +239,8 @@ export class ApiMiddleware {
 						.setTsExpire(authInfoTemp["TsExpire"])
 						.setUserId(authInfoTemp["UserId"])
 						.setOtherDatas(authInfoTemp["OtherDatas"])
+						.setSocketId(authInfoTemp["SocketId"])
+						.setSocketRoomIds(authInfoTemp["SocketRoomIds"])
 						.build();
 				}
 			}
@@ -269,8 +296,8 @@ export class ApiMiddleware {
 				delete this.authInfoDic[authToken];
 				authInfo.setSocketId("");
 
-				socket.leave(authInfo.getUserId());
-
+				socket.rooms.forEach(room => socket.leave(room));
+		
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 
@@ -279,7 +306,7 @@ export class ApiMiddleware {
 				delete this.authInfoDic[authToken];
 				authInfo.setSocketId("");
 
-				socket.leave(authInfo.getUserId());
+				socket.rooms.forEach(room => socket.leave(room));
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
@@ -287,7 +314,7 @@ export class ApiMiddleware {
 				delete this.authInfoDic[authToken];
 				authInfo.setSocketId("");
 
-				socket.leave(authInfo.getUserId());
+				socket.rooms.forEach(room => socket.leave(room));
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
