@@ -16,6 +16,7 @@ import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 export class ApiMiddleware {
 	private authInfoDic: { [k: string]: AuthInfo };
+	private authInfoViaUserIdDic: { [k: string]: AuthInfo };
 
 	private authTokenCollection: mongoDB.Collection<mongoDB.Document>;
 
@@ -93,7 +94,18 @@ export class ApiMiddleware {
 
 				if (authInfo != null) {
 					if (authInfo.getTsLastUpdate() < tsRemove) {
-						delete this.authInfoDic[authInfo.getAuthToken()];
+						let authToken = authInfo.getAuthToken();
+						let userId = authInfo.getUserId();
+
+						let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+
+						if (authInfoViaUserId != null) {
+							if (authInfoViaUserId.getAuthToken() == authToken) {
+								delete this.authInfoViaUserIdDic[userId];
+							}
+						}
+
+						delete this.authInfoDic[authToken];
 						removeCount++;
 					}
 				}
@@ -109,6 +121,7 @@ export class ApiMiddleware {
 	public generateAuthToken(info: AuthInfo) {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let authToken = Md5Generate.getMd5(nanoid());
+		let userId = info.getUserId();
 		let tsExpire = this.expiredToken == -1 ? -1 : (currentMilliseconds + this.expiredToken);
 
 		let authInfo = AuthInfo.Builder()
@@ -119,19 +132,20 @@ export class ApiMiddleware {
 			.setTsExpire(tsExpire)
 			.setOtherUserLogin(false)
 			.setTsLastUpdate(currentMilliseconds)
-			.setSocketId('')
-			.setSocketRoomIds([])
+			.setSocketId(info.getSocketId())
+			.setSocketRoomIds(info.getSocketRoomIds())
+			.setTsCreate(currentMilliseconds)
 			.build();
 
 		this.authInfoDic[authToken] = authInfo;
+		this.authInfoViaUserIdDic[userId] = authInfo;
 		this.authTokenCollection.insertOne(authInfo.toDocumentData());
 
 		return authInfo;
 	}
 
 	public getAuthInfoByUserId(userId: string) {
-		let authInfoLst = Object.values(this.authInfoDic);
-		return authInfoLst.find((x) => x.getUserId() == userId);
+		return this.authInfoViaUserIdDic[userId];
 	}
 
 	public getAuthInfoByAuthToken(authToken: string) {
@@ -144,6 +158,7 @@ export class ApiMiddleware {
 			let authInfoTemp = await this.authTokenCollection.findOne({ AuthToken: authToken });
 
 			if (authInfoTemp != null) {
+				let userId = authInfoTemp["UserId"];
 				authInfo = AuthInfo.Builder()
 					.setAuthToken(authInfoTemp["AuthToken"])
 					// .setOtherData("RoomId", null)
@@ -151,13 +166,21 @@ export class ApiMiddleware {
 					.setOtherUserLogin(authInfoTemp["OtherUserLogin"])
 					.setRole(authInfoTemp["Role"])
 					.setTsExpire(authInfoTemp["TsExpire"])
-					.setUserId(authInfoTemp["UserId"])
+					.setUserId(userId)
 					.setOtherDatas(authInfoTemp["OtherDatas"])
 					.setSocketId(authInfoTemp["SocketId"])
 					.setSocketRoomIds(authInfoTemp["SocketRoomIds"])
+					.setTsCreate(authInfoTemp["TsCreate"])
 					.build();
 
 				this.authInfoDic[authToken] = authInfo;
+				
+				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+				if (authInfoViaUserId == null) this.authInfoViaUserIdDic[userId] = authInfo;
+				else {
+					if (authInfoViaUserId.getTsCreate() < authInfo.getTsCreate())
+						this.authInfoViaUserIdDic[userId] = authInfo;
+				}
 			}
 		}
 
@@ -227,41 +250,45 @@ export class ApiMiddleware {
 		if (!authToken) {
 			reqAny.isAuthenticated = false;
 		} else {
-			let authInfo = this.authInfoDic[authToken];
-			if (authInfo == null) {
-				let authInfoTemp = await this.authTokenCollection.findOne({ AuthToken: authToken });
-
-				if (authInfoTemp != null) {
-					authInfo = AuthInfo.Builder()
-						.setAuthToken(authInfoTemp["AuthToken"])
-						// .setOtherData("RoomId", null)
-						.setIsRemove(authInfoTemp["IsRemove"])
-						.setOtherUserLogin(authInfoTemp["OtherUserLogin"])
-						.setRole(authInfoTemp["Role"])
-						.setTsExpire(authInfoTemp["TsExpire"])
-						.setUserId(authInfoTemp["UserId"])
-						.setOtherDatas(authInfoTemp["OtherDatas"])
-						.setSocketId(authInfoTemp["SocketId"])
-						.setSocketRoomIds(authInfoTemp["SocketRoomIds"])
-						.build();
-				}
-			}
-
+			let authInfo = await this.getAuthInfoByAuthTokenInDatabase(authToken);
+			
 			if (authInfo == null) {
 				reqAny.isAuthenticated = false;
 			} else {
 				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				let userId = authInfo.getUserId();
 
 				if (authInfo.getOtherUserLogin()) {
 					delete this.authInfoDic[authToken];
-					
+
+					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+					if (authInfoViaUserId) {
+						if (authInfoViaUserId.getAuthToken() == authToken) {
+							delete this.authInfoViaUserIdDic[userId];
+						}
+					}
+
 					return ReturnCode.OperationNotAuthorized;
 				} else if (authInfo.isRemove()) {
 					delete this.authInfoDic[authToken];
 
+					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+					if (authInfoViaUserId) {
+						if (authInfoViaUserId.getAuthToken() == authToken) {
+							delete this.authInfoViaUserIdDic[userId];
+						}
+					}
+
 					reqAny.isAuthenticated = false;
 				} else if (authInfo.getTsExpire() != -1 && authInfo.getTsExpire() < currentMilliseconds) {
 					delete this.authInfoDic[authToken];
+
+					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+					if (authInfoViaUserId) {
+						if (authInfoViaUserId.getAuthToken() == authToken) {
+							delete this.authInfoViaUserIdDic[userId];
+						}
+					}
 
 					reqAny.isAuthenticated = false;
 				} else {
@@ -269,6 +296,14 @@ export class ApiMiddleware {
 					reqAny.authInfo = authInfo;
 
 					this.authInfoDic[authToken] = authInfo;
+
+					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+					if (authInfoViaUserId == null) this.authInfoViaUserIdDic[userId] = authInfo;
+					else {
+						if (authInfoViaUserId.getTsCreate() < authInfo.getTsCreate())
+							this.authInfoViaUserIdDic[userId] = authInfo;
+					}
+
 					authInfo.setTsLastUpdate(currentMilliseconds);
 				}
 			}
@@ -293,9 +328,17 @@ export class ApiMiddleware {
 
 			let authInfo = socket.data.authInfo as AuthInfo;
 			let authToken = authInfo.getAuthToken();
+			let userId = authInfo.getUserId();
 
 			if (authInfo.getOtherUserLogin()) {
 				delete this.authInfoDic[authToken];
+
+				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+				if (authInfoViaUserId) {
+					if (authInfoViaUserId.getAuthToken() == authToken) {
+						delete this.authInfoViaUserIdDic[userId];
+					}
+				}
 
 				socket.rooms.forEach(room => socket.leave(room));
 		
@@ -306,12 +349,26 @@ export class ApiMiddleware {
 			} else if (authInfo.isRemove()) {
 				delete this.authInfoDic[authToken];
 
+				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+				if (authInfoViaUserId) {
+					if (authInfoViaUserId.getAuthToken() == authToken) {
+						delete this.authInfoViaUserIdDic[userId];
+					}
+				}
+
 				socket.rooms.forEach(room => socket.leave(room));
 
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 			} else if (authInfo.getTsExpire() < currentMilliseconds) {
 				delete this.authInfoDic[authToken];
+
+				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+				if (authInfoViaUserId) {
+					if (authInfoViaUserId.getAuthToken() == authToken) {
+						delete this.authInfoViaUserIdDic[userId];
+					}
+				}
 
 				socket.rooms.forEach(room => socket.leave(room));
 
@@ -346,5 +403,6 @@ export class ApiMiddleware {
 
 	constructor() {
 		this.authInfoDic = {};
+		this.authInfoViaUserIdDic = {};
 	}
 }

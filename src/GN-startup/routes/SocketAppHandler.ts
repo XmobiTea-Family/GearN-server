@@ -16,6 +16,7 @@ import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
+import { AuthInfo } from "../../GN-common/entity/AuthInfo";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -153,10 +154,10 @@ export class SocketAppHandler {
 		if (authInfo != null) {
 			socket.data.isAuthenticated = true;
 			socket.data.authInfo = authInfo;
+
 			socket.join(authInfo.getUserId());
 			socket.join(authInfo.getSocketRoomIds());
 
-			console.log("--------- SOCKET " + socket.id);
 			authInfo.setSocketId(socket.id);
 		}
 	}
@@ -245,11 +246,11 @@ export class SocketAppHandler {
 		this.emitter.to(userId).emit(EVENT_CMD, encode(socketData));
 	}
 
-	public async sendEventToRoom(roomIds: string | string[], operationEvent: OperationEvent): Promise<void> {
+	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
 		let socketData = operationEvent.toSocketData();
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] %O", JSON.stringify(socketData));
 
-		this.emitter.to(roomIds).emit(EVENT_CMD, encode(socketData));
+		this.emitter.to(roomId).emit(EVENT_CMD, encode(socketData));
 	}
 
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
@@ -280,44 +281,38 @@ export class SocketAppHandler {
 
 	public getSocketViaUserId(userId: string): Socket {
 		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
-		if (authInfo != null) {
-			return this.getSocketViaSocketId(authInfo.getSocketId());
-		}
-
-		return null;
+		return this.getSocketViaAuthInfo(authInfo);
 	}
 
 	public getSocketViaAuthToken(authToken: string): Socket {
 		let authInfo = this.apiMiddleware.getAuthInfoByAuthToken(authToken);
-		if (authInfo != null) {
-			return this.getSocketViaSocketId(authInfo.getSocketId());
-		}
-		
-		return null;
+		return this.getSocketViaAuthInfo(authInfo);
 	}
 
 	public getSocketViaSocketId(socketId: string): Socket {
-		console.log("--SOCKET ID--- " + socketId);
-
-		if (socketId) {
-			return this.server.of("/").sockets.get(socketId);
-		}
-
-		return null;
+		return socketId ? this.server.of("/").sockets.get(socketId) : null;
 	}
 
-	public async joinRoom(userId: string, roomIds: string | string[]): Promise<void> {
-		let socket = this.getSocketViaUserId(userId);
-		console.log(socket != null);
+	public getSocketViaAuthInfo(authInfo: AuthInfo) {
+		return authInfo ? this.getSocketViaSocketId(authInfo.getSocketId()) : null;
+	}
+
+	public async joinRoom(userId: string, roomId: string): Promise<void> {
+		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
+		let socket = this.getSocketViaAuthInfo(authInfo);
 
 		if (socket) {
-			await socket.join(roomIds);
+			authInfo.addSocketRoomId(roomId);
+			await socket.join(roomId);
 		}
 	}
 
 	public async leaveRoom(userId: string, roomId: string): Promise<void> {
-		let socket = this.getSocketViaUserId(userId);
+		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
+		let socket = this.getSocketViaAuthInfo(authInfo);
+
 		if (socket) {
+			authInfo.removeSocketRoomId(roomId);
 			await socket.leave(roomId);
 		}
 	}

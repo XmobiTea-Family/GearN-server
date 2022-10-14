@@ -570,7 +570,12 @@ export class LoginRequestHandler extends RequestHandler {
 			}
 		}
 
-		let newAuth = AuthInfo.Builder().setUserId(userId).setRole(gamePlayer.getSegmentValue("UserRole")).build();
+		let newAuth = AuthInfo.Builder()
+			.setUserId(userId)
+			.setRole(gamePlayer.getSegmentValue("UserRole"))
+			.setSocketId('')
+			.setSocketRoomIds([])
+			.build();
 		let newAuthInfo = this.gameApplication.getApiMiddleware().generateAuthToken(newAuth);
 
 		return await this.handleLoginSuccess(newAuthInfo, request, sparkPlayer, gamePlayer);

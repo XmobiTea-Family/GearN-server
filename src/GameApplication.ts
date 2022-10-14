@@ -234,16 +234,8 @@ export class GameApplication {
 		return await this.socketApp.getSocketAppHandler().sendEventTo(userId, operationEvent);
 	}
 
-	public async sendEventToRoom(roomIds: string | string[], operationEvent: OperationEvent): Promise<void> {
-		return await this.socketApp.getSocketAppHandler().sendEventToRoom(roomIds, operationEvent);
-	}
-
-	public async joinRoom(userId: string, roomIds: string | string[]): Promise<void> {
-		return await this.socketApp.getSocketAppHandler().joinRoom(userId, roomIds);
-	}
-
-	public async leaveRoom(userId: string, roomId: string): Promise<void> {
-		return await this.socketApp.getSocketAppHandler().leaveRoom(userId, roomId);
+	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().sendEventToRoom(roomId, operationEvent);
 	}
 
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
@@ -254,8 +246,20 @@ export class GameApplication {
 		return await this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent);
 	}
 
-	public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
-		return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
+	// public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
+	// 	return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
+	// }
+
+	public async joinRoom(userId: string, roomId: string): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().joinRoom(userId, roomId);
+	}
+
+	public async leaveRoom(userId: string, roomId: string): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().leaveRoom(userId, roomId);
+	}
+
+	public getRooms(userId: string): Set<string> {
+		return this.socketApp.getSocketAppHandler().getRooms(userId);
 	}
 
 	private handleSocketDisconnect(socket: Socket, data: string) {
