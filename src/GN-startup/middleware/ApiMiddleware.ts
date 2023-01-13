@@ -61,7 +61,7 @@ export class ApiMiddleware {
 	}
 
 	private async getDAULast30Min() {
-		this.maxCCU = LicenseKeyApplication.GetMaxCCU();
+		this.maxCCU = LicenseKeyApplication.getMaxCCU();
 
 		if (this.maxCCU != -1) {
 			this.dauLast30Min.length = 0;

@@ -3,6 +3,7 @@ import * as mongoDB from "mongodb";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import express from "express";
+import fs from "fs";
 
 export class UploadFileMiddleware {
 	private uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>;
@@ -29,7 +30,13 @@ export class UploadFileMiddleware {
 	public run() { }
 
 	private storage(): multer.StorageEngine {
-		let uploadPath = __dirname + "/../../../../" + this.uploadPath;
+		let configUploadPath = this.uploadPath;
+		let uploadPath = configUploadPath;
+		if (uploadPath) {
+			if (!fs.existsSync(uploadPath)) {
+				uploadPath = __dirname + "/../../../../" + this.uploadPath;
+			}
+		}
 
 		return multer.diskStorage({
 			destination: (req, file, cb) => {

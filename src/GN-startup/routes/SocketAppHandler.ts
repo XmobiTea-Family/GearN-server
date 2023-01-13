@@ -10,7 +10,7 @@ import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
-import { Commands } from "../../GN-common/constant/Commands";
+import { Commands } from "./../../GN-common/constant/Commands";
 //import e from "cors";
 
 interface OnSocketDisconnect {

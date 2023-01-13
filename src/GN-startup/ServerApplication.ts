@@ -153,11 +153,36 @@ export class ServerApplication extends BuilderBase {
 		this.secretkey = nanoid(20);
 		this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
 
-		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
+		let configFullLogPath = this.getLogSettings().getLogPath();
+		let fullLogPath = configFullLogPath;
+		if (fullLogPath) {
+			if (!fs.existsSync(fullLogPath)) {
+				fullLogPath = __dirname + "/../../../../" + configFullLogPath;
+
+				if (!fs.existsSync(fullLogPath)) {
+					fullLogPath = null;
+				}
+			}
+		}
+
 		console.log("[GN] FullLogPath at: " + fullLogPath);
 
-		let licenseKeyFilePath = this.getApplicationSettings().getLicenseKeyFilePath() ? (__dirname + "/../../../../" + this.getApplicationSettings().getLicenseKeyFilePath()) : null;
+		let configLicenseKeyFilePath = this.getApplicationSettings().getLicenseKeyFilePath();
+		let licenseKeyFilePath = configLicenseKeyFilePath;
+		if (licenseKeyFilePath) {
+			if (!fs.existsSync(licenseKeyFilePath)) {
+				licenseKeyFilePath = __dirname + "/../../../../" + configLicenseKeyFilePath;
+
+				if (!fs.existsSync(licenseKeyFilePath)) {
+					licenseKeyFilePath = null;
+				}
+			}
+		}
+
 		if (licenseKeyFilePath) console.log("[GN] Found LicenseKeyFilePath at: " + licenseKeyFilePath);
+		else {
+			if (configLicenseKeyFilePath) console.log("[GN] LicenseKeyFilePath invalid, please recheck.");
+		}
 
 		Debug.init({
 			isLogToConsoleEnable: this.getLogSettings().getLogToConsoleEnable(),
