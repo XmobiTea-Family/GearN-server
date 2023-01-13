@@ -1,6 +1,7 @@
 import { xConfigItem } from "./entity/xConfigItem";
 import * as mongoDB from "mongodb";
 import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
+import { Debug } from "./../../xdebug/lib/xDebug";
 
 export class xConfig {
 	private configDic: { [k: string]: xConfigItem } = {};
@@ -23,12 +24,12 @@ export class xConfig {
 			let result = await results.next();
 			let configName = result["ConfigName"];
 			if (!configName) {
-				console.error("ConfigName null at " + result);
+				Debug.logError("ConfigName null at " + result);
 			} else {
 				let configItem = new xConfigItem(result);
 				this.configDic[configName] = configItem;
 
-				console.log("Update success config " + configName);
+				Debug.log("Update success config " + configName);
 			}
 		}
 
@@ -38,18 +39,19 @@ export class xConfig {
 	public async syncConfig(configName: string): Promise<xConfigItem> {
 		let result = await this.configCollection.findOne({ ConfigName: configName });
 		if (result == null) {
-			console.error("Can not found " + configName);
+			Debug.logError("Can not found " + configName);
 			return null;
 		}
 
 		let configItem = new xConfigItem(result);
 		this.configDic[configName] = configItem;
 
-		console.log("Update success config " + configName);
+		Debug.log("Update success config " + configName);
 		return configItem;
 	}
 
 	public getConfig(configName: string): xConfigItem {
 		return this.configDic[configName];
 	}
+
 }

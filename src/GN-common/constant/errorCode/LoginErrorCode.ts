@@ -7,4 +7,5 @@ export class LoginErrorCode {
 	public static readonly ErrorWhenLoginApple: number = 6;
 	public static readonly RandomMessageExpired: number = 7;
 	public static readonly PublicAddressWrong: number = 8;
+	public static readonly MaxCCU: number = 9;
 }

@@ -1,4 +1,4 @@
-const GN_VERSION = "0.1.5";
+const GN_VERSION = "1.0.7";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -10,7 +10,7 @@ import { FacebookService } from "./GN-app-api/service/FacebookService";
 import { SocketApp } from "./GN-startup/SocketApp";
 import { HttpApp } from "./GN-startup/HttpApp";
 import { IRequestHandler } from "./GN-app-api/handler/controller/handler/base/IRequestHandler";
-import { AuthInfo } from "./GN-common/entity/AuthInfo";
+// import { AuthInfo } from "./GN-common/entity/AuthInfo";
 import { OperationResponse } from "./GN-common/entity/operationResponse/OperationResponse";
 import { Request } from "./GN-common/entity/operationRequest/base/Request";
 import { EnterDisplayNameRequestHandler } from "./GN-app-api/handler/controller/handler/EnterDisplayNameRequestHandler";
@@ -31,6 +31,14 @@ import { LockService } from "./GN-app-api/service/LockService";
 import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
 import { LoginType } from "./GN-common/constant/enumType/LoginType";
 import { ApiMiddleware } from "./GN-startup/middleware/ApiMiddleware";
+import { Debug } from "./GN-library/xdebug/lib/xDebug";
+import { IRequestConverterService } from "./GN-app-api/service/IRequestConverterService";
+import { RequestConverterService } from "./GN-app-api/service/RequestConverterService";
+import { IWeb3Service } from "./GN-app-api/service/IWeb3Service";
+import { Web3Service } from "./GN-app-api/service/Web3Service";
+import { IGoogleService } from "./GN-app-api/service/IGoogleService";
+import { GoogleService } from "./GN-app-api/service/GoogleService";
+import { FetchSparkPlayerRequestHandler } from "./GN-app-api/handler/controller/handler/FetchSparkPlayerRequestHandler";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -56,8 +64,11 @@ export class GameApplication {
 
 	private facebookService: IFacebookService;
 	private appleService: IAppleService;
+	private web3Service: IWeb3Service;
+	private googleService: IGoogleService;
 	private timerService: ITimerService;
 	private lockService: ILockService;
+	private requestConverterService: IRequestConverterService;
 
 	private loginTypeEnables: LoginType[] = [];
 
@@ -75,8 +86,12 @@ export class GameApplication {
 
 		this.facebookService = new FacebookService();
 		this.appleService = new AppleService();
+		this.web3Service = new Web3Service();
+		this.googleService = new GoogleService();
+
 		this.timerService = new TimerService();
 		this.lockService = new LockService();
+		this.requestConverterService = new RequestConverterService();
 
 		this.xConfig = new xConfig();
 		this.xDatabase = new xDatabase();
@@ -84,6 +99,7 @@ export class GameApplication {
 		this.xCacheData = new xCacheData();
 
 		this.requestController = new RequestController();
+		this.requestController.setRequestConverterService(this.requestConverterService);
 
 		(this.timerService as TimerService).run();
 	}
@@ -96,6 +112,7 @@ export class GameApplication {
 		this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
 		this.requestController.addHandler(new RegisterSocketRequestHandler(this));
 		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
+		this.requestController.addHandler(new FetchSparkPlayerRequestHandler(this));
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {
@@ -148,8 +165,8 @@ export class GameApplication {
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
 		this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
-			if (error != null) console.error("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
-			else console.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
+			if (error != null) Debug.logError("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
+			else Debug.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
 		});
 	}
 
@@ -185,12 +202,24 @@ export class GameApplication {
 		return this.appleService;
 	}
 
+	public getWeb3Service(): IWeb3Service {
+		return this.web3Service;
+	}
+
+	public getGoogleService(): IGoogleService {
+		return this.googleService;
+	}
+
 	public getTimerService(): ITimerService {
 		return this.timerService;
 	}
 
 	public getLockService(): ILockService {
 		return this.lockService;
+	}
+
+	public getRequestConverterService(): IRequestConverterService {
+		return this.requestConverterService;
 	}
 
 	public getLoginTypeEnables(): LoginType[] {
@@ -205,6 +234,10 @@ export class GameApplication {
 		return await this.socketApp.getSocketAppHandler().sendEventTo(userId, operationEvent);
 	}
 
+	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().sendEventToRoom(roomId, operationEvent);
+	}
+
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
 		return await this.socketApp.getSocketAppHandler().sendEventToMoreUser(userIds, operationEvent);
 	}
@@ -213,15 +246,27 @@ export class GameApplication {
 		return await this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent);
 	}
 
-	public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
-		return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
+	// public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
+	// 	return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
+	// }
+
+	public async joinRoom(userId: string, roomId: string): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().joinRoom(userId, roomId);
+	}
+
+	public async leaveRoom(userId: string, roomId: string): Promise<void> {
+		return await this.socketApp.getSocketAppHandler().leaveRoom(userId, roomId);
+	}
+
+	public getRooms(userId: string): Set<string> {
+		return this.socketApp.getSocketAppHandler().getRooms(userId);
 	}
 
 	private handleSocketDisconnect(socket: Socket, data: string) {
 		if (socket.data.isAuthenticated) {
 			socket.data.isAuthenticated = false;
-			let authInfo = socket.data.authInfo as AuthInfo;
-			authInfo.removeOtherData("SocketId");
+			// let authInfo = socket.data.authInfo as AuthInfo;
+			// authInfo.removeOtherData("SocketId");
 		}
 
 		if (socket.data.userId != null) {
@@ -232,4 +277,5 @@ export class GameApplication {
 	private handleOnRequest(request: Request): Promise<OperationResponse> {
 		return this.requestController.handleRequest(request);
 	}
+
 }

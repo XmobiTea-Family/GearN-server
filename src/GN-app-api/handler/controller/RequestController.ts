@@ -1,7 +1,8 @@
-import { OperationRequest } from "./../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../GN-common/entity/operationResponse/OperationResponse";
 import { Request } from "./../../../GN-common/entity/operationRequest/base/Request";
 import { IRequestHandler } from "./handler/base/IRequestHandler";
+import { IRequestConverterService } from "./../../service/IRequestConverterService";
+import { OperationHelper } from "./../../../GN-common/entity/operationHelper/OperationHelper";
 
 export class RequestController {
 	private handlers: {
@@ -9,6 +10,12 @@ export class RequestController {
 	};
 
 	private requestUnAuthenticatedCodes: number[];
+
+	private requestConverterService: IRequestConverterService;
+
+	public setRequestConverterService(requestConverterService: IRequestConverterService): void {
+		this.requestConverterService = requestConverterService;
+	}
 
 	public addHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
 		let code = requestHandler.getCode();
@@ -22,7 +29,7 @@ export class RequestController {
 	}
 
 	public removeAllHandlers() {
-		this.handlers = [];
+		this.handlers = {};
 	}
 
 	public getHandler(code: number): IRequestHandler {
@@ -31,16 +38,16 @@ export class RequestController {
 
 	public async handleRequest(request: Request): Promise<OperationResponse> {
 		let code = request.getCode();
-		let isAuthenticated = request.getAuthenticated();
+		let isAuthenticated = request.isAuthenticated();
 		if (!isAuthenticated) {
 			// if the user not authentication
 			// and this request not in unAthenticated
 			if (this.requestUnAuthenticatedCodes.indexOf(code) == -1) {
-				return OperationResponse.newOperationNotAuthorized(code, request.getRequestId());
+				return OperationHelper.newOperationResponseNotAuthorized(code, request.getRequestId(), request.isEncrypted());
 			}
 		}
 
-		let operationRequest = OperationRequest.newOperationRequest(request);
+		let operationRequest = this.requestConverterService.newOperationRequest(request);
 
 		let handler = this.handlers[operationRequest.getOperationCode()];
 		if (handler != null) {
@@ -54,4 +61,5 @@ export class RequestController {
 		this.handlers = {};
 		this.requestUnAuthenticatedCodes = [];
 	}
+
 }

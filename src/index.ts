@@ -1,5 +1,40 @@
+import { DebugParameterCode } from "./GN-common/constant/parameterCode/DebugParameterCode";
+import { GetAppConfigParameterCode } from "./GN-common/constant/parameterCode/GetAppConfigParameterCode";
+import { LoginParameterCode } from "./GN-common/constant/parameterCode/LoginParameterCode";
+import { EnterDisplayNameParameterCode } from "./GN-common/constant/parameterCode/EnterDisplayNameParameterCode";
+import { FetchAllDataParameterCode } from "./GN-common/constant/parameterCode/FetchAllDataParameterCode";
+import { RegisterSocketParameterCode } from "./GN-common/constant/parameterCode/RegisterSocketParameterCode";
+import { FetchSparkPlayerParameterCode } from "./GN-common/constant/parameterCode/FetchSparkPlayerParameterCode";
+
+export { DebugParameterCode };
+export { GetAppConfigParameterCode };
+export { LoginParameterCode };
+export { EnterDisplayNameParameterCode };
+export { FetchAllDataParameterCode };
+export { RegisterSocketParameterCode };
+export { FetchSparkPlayerParameterCode };
+
+import { DebugErrorCode } from "./GN-common/constant/errorCode/DebugErrorCode";
+import { GetAppConfigErrorCode } from "./GN-common/constant/errorCode/GetAppConfigErrorCode";
+import { LoginErrorCode } from "./GN-common/constant/errorCode/LoginErrorCode";
+import { EnterDisplayNameErrorCode } from "./GN-common/constant/errorCode/EnterDisplayNameErrorCode";
+import { FetchAllDataErrorCode } from "./GN-common/constant/errorCode/FetchAllDataErrorCode";
+import { RegisterSocketErrorCode } from "./GN-common/constant/errorCode/RegisterSocketErrorCode";
+import { FetchSparkPlayerErrorCode } from "./GN-common/constant/errorCode/FetchSparkPlayerErrorCode";
+
+export { DebugErrorCode };
+export { GetAppConfigErrorCode };
+export { LoginErrorCode };
+export { EnterDisplayNameErrorCode };
+export { FetchAllDataErrorCode };
+export { RegisterSocketErrorCode };
+export { FetchSparkPlayerErrorCode };
+
 import { OperationRequest } from "./GN-common/entity/operationRequest/OperationRequest";
 export { OperationRequest };
+
+import { CommonOperationRequest } from "./GN-common/entity/operationRequest/CommonOperationRequest";
+export { CommonOperationRequest };
 
 import { OperationResponse } from "./GN-common/entity/operationResponse/OperationResponse";
 export { OperationResponse };
@@ -63,3 +98,12 @@ export { xDatetime };
 
 import { xRandom } from "./GN-library/xrandom/lib/xRandom";
 export { xRandom };
+
+import { Debug } from "./GN-library/xdebug/lib/xDebug";
+export { Debug };
+
+import { GameApplication } from "./GameApplication";
+export { GameApplication };
+
+import { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, FieldType } from "./GN-common/entity/DataMember";
+export { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, FieldType };

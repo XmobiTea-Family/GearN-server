@@ -1,15 +1,25 @@
-import { Request } from "./base/Request";
+
 import { GNHashtable } from "./../../common/GNData";
 
 export class OperationRequest {
-	protected originRequest: Request;
+	public static readonly DefaultTimeOut: number = 15;
 
-	protected operationCode: number;
-	protected requestId: number;
-	protected parameters: GNHashtable;
+	private isValid: boolean;
 
 	public isValidRequest(): boolean {
-		return true;
+		return this.isValid;
+	}
+
+	private operationCode: number;
+	private requestId: number;
+	private parameters: GNHashtable;
+	private encrypted: boolean;
+	private timeout: number;
+
+	constructor(operationCode: number, encrypted: boolean, timeout: number = OperationRequest.DefaultTimeOut) {
+		this.operationCode = operationCode;
+		this.encrypted = encrypted;
+		this.timeout = timeout;
 	}
 
 	public getOperationCode(): number {
@@ -24,45 +34,44 @@ export class OperationRequest {
 		return this.parameters;
 	}
 
-	public getOriginRequest(): Request {
-		return this.originRequest;
+	public isEncrypted(): boolean {
+		return this.encrypted;
 	}
 
-	constructor(operationRequest?: OperationRequest) {
-		if (operationRequest != null) {
-			this.operationCode = operationRequest.operationCode;
-			this.requestId = operationRequest.requestId;
-			this.parameters = operationRequest.parameters;
-			this.originRequest = operationRequest.originRequest;
-		}
+	public getTimeout(): number {
+		return this.timeout;
 	}
 
-	public static newOperationRequest(request: Request): OperationRequest {
-		let answer = new OperationRequest();
-		answer.originRequest = request;
+	public setRequestId(requestId: number): OperationRequest {
+		this.requestId = requestId;
+		return this;
+	}
 
-		answer.operationCode = request.getCode();
-		answer.requestId = request.getRequestId();
-		let gnHashtable = new GNHashtable();
+	public setScriptData(key: string, value: any): OperationRequest {
+		if (this.parameters == null) this.parameters = new GNHashtable();
 
-		let d = request.getParameters();
+		this.parameters.add(key, value);
 
-		let keys = Object.keys(d);
-		for (let i = 0; i < keys.length; i++) {
-			let key = keys[i];
+		return this;
+	}
 
-			let keyInt = Number.parseInt(key);
-			
-			if (!isNaN(keyInt))
-				gnHashtable.add(keyInt, d[key]);
-		}
+	public setParameters(parameters: GNHashtable): OperationRequest {
+		this.parameters = parameters;
+		return this;
+	}
 
-		answer.parameters = gnHashtable;
+	public setEncrypted(encrypted: boolean): OperationRequest {
+		this.encrypted = encrypted;
+		return this;
+	}
 
-		return answer;
+	public setTimeout(timeout: number): OperationRequest {
+		this.timeout = timeout;
+		return this;
 	}
 
 	public toString(): string {
-		return this.operationCode + " " + this.requestId + " " + this.parameters.toData.toString();
+		return this.operationCode + " " + this.requestId + " " + this.parameters.toString();
 	}
+
 }

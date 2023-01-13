@@ -1,3 +1,4 @@
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ITimerService } from "./ITimerService";
 
 export class TimerService implements ITimerService {
@@ -31,7 +32,7 @@ export class TimerService implements ITimerService {
 			try {
 				this.everySecondRunnableLst[i]();
 			} catch (err) {
-				console.error("onEverySecond", err);
+				Debug.logError("onEverySecond", err);
 			}
 		}
 	}
@@ -41,7 +42,7 @@ export class TimerService implements ITimerService {
 			try {
 				this.everyMinuteRunnableLst[i]();
 			} catch (err) {
-				console.error("onEveryMinute", err);
+				Debug.logError("onEveryMinute", err);
 			}
 		}
 	}
@@ -51,7 +52,7 @@ export class TimerService implements ITimerService {
 			try {
 				this.everyHourRunnableLst[i]();
 			} catch (err) {
-				console.error("onEveryHour", err);
+				Debug.logError("onEveryHour", err);
 			}
 		}
 	}
@@ -61,7 +62,7 @@ export class TimerService implements ITimerService {
 			try {
 				this.everyDayRunnableLst[i]();
 			} catch (err) {
-				console.error("onEveryDay", err);
+				Debug.logError("onEveryDay", err);
 			}
 		}
 	}
@@ -108,4 +109,5 @@ export class TimerService implements ITimerService {
 		let indexOf = this.everyDayRunnableLst.indexOf(runnable);
 		if (indexOf != -1) this.everyDayRunnableLst.splice(indexOf, 1);
 	}
+
 }

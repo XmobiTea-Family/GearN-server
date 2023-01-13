@@ -1,5 +1,6 @@
 import { ReturnCode } from "./../../constant/ReturnCode";
 import { GNHashtable } from "./../../common/GNData";
+import { InvalidMember } from "./../InvalidMember";
 
 export class OperationResponse {
 	private operationCode: number;
@@ -7,16 +8,48 @@ export class OperationResponse {
 	private returnCode: number;
 	private debugMessage: string;
 	private parameters: GNHashtable;
+	private encrypted: boolean;
 
-	constructor(operationCode: number, responseId: number) {
+	private invalidMembers: InvalidMember[];
+
+	constructor(operationCode: number, responseId: number, encrypted: boolean = true) {
 		this.operationCode = operationCode;
 		this.responseId = responseId;
+		this.encrypted = encrypted;
 		this.parameters = new GNHashtable();
 		this.debugMessage = null;
 	}
 
+	public getOperationCode(): number {
+		return this.operationCode;
+	}
+
 	public getReturnCode(): number {
 		return this.returnCode;
+	}
+
+	public getParameters(): GNHashtable {
+		return this.parameters;
+	}
+
+	public isEncrypted(): boolean {
+		return this.encrypted;
+	}
+
+	public getResponseId(): number {
+		return this.responseId;
+	}
+
+	public getDebugMessage(): string {
+		return this.debugMessage;
+	}
+
+	public getInvalidMembers(): InvalidMember[] {
+		return this.invalidMembers;
+	}
+
+	public hasError(): boolean {
+		return this.getReturnCode() != ReturnCode.Ok;
 	}
 
 	public setReturnCode(returnCode: number): OperationResponse {
@@ -29,7 +62,7 @@ export class OperationResponse {
 		return this;
 	}
 
-	public setParameter(k: number, value: any): OperationResponse {
+	public setScriptData(k: string, value: any): OperationResponse {
 		this.parameters.add(k, value);
 		return this;
 	}
@@ -39,63 +72,18 @@ export class OperationResponse {
 		return this;
 	}
 
-	public getParameters(): GNHashtable {
-		return this.parameters;
+	public setEncrypted(encrypted: boolean): OperationResponse {
+		this.encrypted = encrypted;
+		return this;
+	}
+
+	public setInvalidMembers(invalidMembers: InvalidMember[]): OperationResponse {
+		this.invalidMembers = invalidMembers;
+		return this;
 	}
 
 	public toString(): string {
 		return this.operationCode + " " + this.responseId + " " + this.parameters.toString();
 	}
 
-	public static newOperationResponse(operationCode: number, responseId: number): OperationResponse {
-		return new OperationResponse(operationCode, responseId);
-	}
-
-	public static newOperationInvalid(operationCode: number, responseId: number, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId);
-
-		operationInvalid.setReturnCode(ReturnCode.OperationInvalid);
-		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
-
-		return operationInvalid;
-	}
-
-	public static newOperationInvalidRequestParameters(operationCode: number, responseId: number, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId);
-
-		operationInvalid.setReturnCode(ReturnCode.InvalidRequestParameters);
-		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
-
-		return operationInvalid;
-	}
-
-	public static newOperationInternalServerError(operationCode: number, responseId: number, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId);
-
-		operationInvalid.setReturnCode(ReturnCode.InternalServerError);
-		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
-
-		return operationInvalid;
-	}
-
-	public static newOperationNotAuthorized(operationCode: number, responseId: number, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId);
-
-		operationInvalid.setReturnCode(ReturnCode.OperationNotAuthorized);
-		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
-
-		return operationInvalid;
-	}
-
-	public getResponseId(): number {
-		return this.responseId;
-	}
-
-	public toSocketData(): [number, any, number] {
-		return [this.returnCode, this.returnCode == ReturnCode.Ok ? this.parameters.toData() : this.debugMessage, this.responseId];
-	}
-
-	public toHttpData(): [number, any] {
-		return [this.returnCode, this.returnCode == ReturnCode.Ok ? this.parameters.toData() : this.debugMessage];
-	}
 }

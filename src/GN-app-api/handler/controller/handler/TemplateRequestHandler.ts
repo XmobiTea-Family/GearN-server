@@ -9,19 +9,18 @@ import { DebugParameterCode } from "./../../../../GN-common/constant/parameterCo
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/DebugErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class TemplateOperationRequest extends OperationRequest {
+	@BooleanDataMember({ code: DebugParameterCode.Boolean })
 	booleanValue: boolean;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.booleanValue = this.parameters.getBoolean(DebugParameterCode.Boolean);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
+
 }
 
 export class TemplateRequestHandler extends RequestHandler {
@@ -30,17 +29,17 @@ export class TemplateRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new TemplateOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, TemplateOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, DebugErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, DebugErrorCode.Ok);
 
-		operationResponse.setParameter(DebugParameterCode.Boolean, request.booleanValue);
+		operationResponse.setScriptData(DebugParameterCode.Boolean, request.booleanValue);
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse);
@@ -48,4 +47,5 @@ export class TemplateRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

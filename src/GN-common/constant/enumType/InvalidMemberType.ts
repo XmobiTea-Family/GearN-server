@@ -1,0 +1,17 @@
+export enum InvalidMemberType {
+    UnknownError = 0,
+    DataRequired = 1,
+    TypeInvalid = 2,
+    StringNull = 3,
+    StringMinLength = 4,
+    StringMaxLength = 5,
+    NumberMinValue = 6,
+    NumberMaxValue = 7,
+    NumberMustInt = 8,
+    GNHashtableNull = 9,
+    GNHashtableMinLength = 10,
+    GNHashtableMaxLength = 11,
+    GNArrayNull = 12,
+    GNArrayMinLength = 13,
+    GNArrayMaxLength = 14,
+}

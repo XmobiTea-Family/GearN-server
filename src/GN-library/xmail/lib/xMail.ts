@@ -50,4 +50,5 @@ export class xMail {
 			if (onSendMailError != null) onSendMailError(err.message);
 		}
 	}
+
 }

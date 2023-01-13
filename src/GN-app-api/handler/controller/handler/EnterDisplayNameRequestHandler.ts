@@ -12,21 +12,18 @@ import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { UserRoleType } from "./../../../../GN-common/constant/enumType/UserRoleType";
 import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUltils";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class EnterDisplayNameOperationRequest extends OperationRequest {
+	@StringDataMember({ code: EnterDisplayNameParameterCode.DisplayName, mustNonNull: true, minLength: 3, maxLength: 40 })
 	displayName: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.displayName = this.parameters.getString(EnterDisplayNameParameterCode.DisplayName);
-	}
-
 	public isValidRequest() {
-		if (!this.displayName) return false;
+		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
+
 }
 
 export class EnterDisplayNameRequestHandler extends RequestHandler {
@@ -35,7 +32,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new EnterDisplayNameOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, EnterDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -46,9 +43,9 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, EnterDisplayNameErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, EnterDisplayNameErrorCode.Ok);
 
 		let displayNameNormalizeCollection = this.gameApplication.getDatabase().runtimeGameCollection("DisplayNameNormalizeCollection");
 		displayNameNormalizeCollection.updateOne(
@@ -65,13 +62,16 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 		);
 
 		gamePlayer.setDisplayName(request.displayName);
-		operationResponse.setParameter(EnterDisplayNameParameterCode.DisplayName, request.displayName);
+		operationResponse.setScriptData(EnterDisplayNameParameterCode.DisplayName, request.displayName);
 
 		if (gamePlayer.getSegmentValue("UserRole") == UserRoleType.UserNonActivate) {
 			gamePlayer.setSegmentValue("UserRole", UserRoleType.User);
+
+			authInfo.setRole(UserRoleType.User);
+			this.gameApplication.getApiMiddleware().updateAuthInfo(authInfo);
 		}
 
-		operationResponse.setParameter(EnterDisplayNameParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
+		operationResponse.setScriptData(EnterDisplayNameParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse, gamePlayer);
@@ -79,4 +79,5 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

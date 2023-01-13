@@ -12,27 +12,30 @@ import { DebugErrorCode } from "./../../../../GN-common/constant/errorCode/Debug
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { OperationEvent } from "./../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../GN-common/constant/EventCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class DebugOperationRequest extends OperationRequest {
+	@BooleanDataMember({ code: DebugParameterCode.Boolean, isOptional: true })
 	booleanValue: boolean;
+
+	@NumberDataMember({ code: DebugParameterCode.Number, isOptional: true })
 	numberValue: number;
+
+	@StringDataMember({ code: DebugParameterCode.String, isOptional: true })
 	stringValue: string;
+
+	@GNHashtableDataMember({ code: DebugParameterCode.GNHashtable, isOptional: true })
 	gnHashtableValue: GNHashtable;
+
+	@GNArrayDataMember({ code: DebugParameterCode.GNArray, isOptional: true })
 	gnArrayValue: GNArray;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.booleanValue = this.parameters.getBoolean(DebugParameterCode.Boolean);
-		this.numberValue = this.parameters.getNumber(DebugParameterCode.Number);
-		this.stringValue = this.parameters.getString(DebugParameterCode.String);
-		this.gnHashtableValue = this.parameters.getGNHashtable(DebugParameterCode.GNHashtable);
-		this.gnArrayValue = this.parameters.getGNArray(DebugParameterCode.GNArray);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
+
 }
 
 export class DebugRequestHandler extends RequestHandler {
@@ -41,21 +44,21 @@ export class DebugRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new DebugOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, DebugOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, DebugErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, DebugErrorCode.Ok);
 
-		operationResponse.setParameter(DebugParameterCode.Boolean, request.booleanValue);
-		operationResponse.setParameter(DebugParameterCode.Number, request.numberValue);
-		operationResponse.setParameter(DebugParameterCode.String, request.stringValue);
-		operationResponse.setParameter(DebugParameterCode.GNHashtable, request.gnHashtableValue);
-		operationResponse.setParameter(DebugParameterCode.GNArray, request.gnArrayValue);
+		operationResponse.setScriptData(DebugParameterCode.Boolean, request.booleanValue);
+		operationResponse.setScriptData(DebugParameterCode.Number, request.numberValue);
+		operationResponse.setScriptData(DebugParameterCode.String, request.stringValue);
+		operationResponse.setScriptData(DebugParameterCode.GNHashtable, request.gnHashtableValue);
+		operationResponse.setScriptData(DebugParameterCode.GNArray, request.gnArrayValue);
 
 		if (authInfo != null) {
 			let operationEvent = new OperationEvent(EventCode.OnDebug);
@@ -64,6 +67,9 @@ export class DebugRequestHandler extends RequestHandler {
 			this.gameApplication.sendEventTo(authInfo.getUserId(), operationEvent);
 		}
 
+		this.gameApplication.joinRoom(authInfo.getUserId(), "test");
+
 		return operationResponse;
 	}
+
 }

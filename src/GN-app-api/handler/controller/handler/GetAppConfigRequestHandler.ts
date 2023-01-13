@@ -10,21 +10,18 @@ import { GetAppConfigParameterCode } from "./../../../../GN-common/constant/para
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { GetAppConfigErrorCode } from "./../../../../GN-common/constant/errorCode/GetAppConfigErrorCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class GetAppConfigOperationRequest extends OperationRequest {
+	@GNArrayDataMember({ code: GetAppConfigParameterCode.ConfigTypes, mustNonNull: true, minLength: 1 })
 	configTypes: GNArray;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.configTypes = this.parameters.getGNArray(GetAppConfigParameterCode.ConfigTypes);
-	}
-
 	public isValidRequest() {
-		if (this.configTypes == null) return false;
+		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
+
 }
 
 export class GetAppConfigRequestHandler extends RequestHandler {
@@ -33,15 +30,15 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new GetAppConfigOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, GetAppConfigOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, GetAppConfigErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, GetAppConfigErrorCode.Ok);
 
 		let configNotUptodateLst: string[] = [];
 
@@ -63,7 +60,7 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 			}
 		}
 
-		if (configNotUptodateLst.length != 0) operationResponse.setParameter(GetAppConfigParameterCode.ConfigNotUptodateLst, configNotUptodateLst);
+		operationResponse.setScriptData(GetAppConfigParameterCode.ConfigNotUptodateLst, configNotUptodateLst);
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse);
@@ -71,4 +68,5 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

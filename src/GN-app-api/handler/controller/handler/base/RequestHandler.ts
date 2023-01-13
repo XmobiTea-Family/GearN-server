@@ -4,10 +4,13 @@ import { IRequestHandler, PostHandle } from "./IRequestHandler";
 
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { GameApplication } from "./../../../../../GameApplication";
+import { IRequestConverterService } from "./../../../../service/IRequestConverterService";
+import { OperationHelper } from "./../../../../../GN-common/entity/operationHelper/OperationHelper";
 
 export abstract class RequestHandler implements IRequestHandler {
 	protected gameApplication: GameApplication;
 	protected postHandle: PostHandle;
+	protected requestConverterService: IRequestConverterService;
 
 	public abstract getCode(): number;
 
@@ -15,23 +18,31 @@ export abstract class RequestHandler implements IRequestHandler {
 		return null;
 	}
 
+	protected init(): void {
+
+	}
+
 	public setPostHandle(postHandle: PostHandle) {
 		this.postHandle = postHandle;
 	}
 
 	protected newInvalidRequestParameters(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationResponse.newOperationInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), debugMessage);
+		return OperationHelper.newOperationResponseInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), (operationRequest as any).invalidMembers, operationRequest.isEncrypted(), debugMessage);
 	}
 
 	protected newOperationInvalid(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationResponse.newOperationInvalid(operationRequest.getOperationCode(), operationRequest.getRequestId(), debugMessage);
+		return OperationHelper.newOperationResponseInvalid(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
 	}
 
 	protected newOperationInternalServerError(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationResponse.newOperationInternalServerError(operationRequest.getOperationCode(), operationRequest.getRequestId(), debugMessage);
+		return OperationHelper.newOperationResponseInternalServerError(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
 	}
 
 	constructor(gameApplication: GameApplication) {
 		this.gameApplication = gameApplication;
+		this.requestConverterService = gameApplication.getRequestConverterService();
+
+		this.init();
 	}
+
 }

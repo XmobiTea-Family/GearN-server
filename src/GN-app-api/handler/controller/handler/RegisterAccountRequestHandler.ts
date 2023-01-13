@@ -11,24 +11,21 @@ import { LoginOperationRequest, LoginRequestHandler } from "./LoginRequestHandle
 
 import bcrypt from "bcrypt";
 import { LoginType } from "./../../../../GN-common/constant/enumType/LoginType";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class RegisterAccountOperationRequest extends OperationRequest {
+	@StringDataMember({ code: LoginParameterCode.Username, mustNonNull: true, minLength: 5, maxLength: 32 })
 	username: string;
+
+	@StringDataMember({ code: LoginParameterCode.Password, mustNonNull: true, minLength: 8, maxLength: 64 })
 	password: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.username = this.parameters.getString(LoginParameterCode.Username);
-		this.password = this.parameters.getString(LoginParameterCode.Password);
-	}
-
 	public isValidRequest() {
-		if (!this.username) return false;
-		if (!this.password) return false;
+		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
+
 }
 
 export class RegisterAccountRequestHandler extends LoginRequestHandler {
@@ -37,7 +34,7 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new RegisterAccountOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, RegisterAccountOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -51,9 +48,9 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByUsername(username);
 
 		if (sparkPlayer) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesExists);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesExists);
 
 			return operationResponse;
 		}
@@ -63,11 +60,12 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 
 		sparkPlayer = await this.gameApplication
 			.getDatabase()
-			.createPlayerByUsernameAndPassword(username, passwordHash, this.DefaultSegments, request.getOriginRequest().getIP());
+			.createPlayerByUsernameAndPassword(username, passwordHash, this.defaultSegments, (request as any).originRequest.getIP());
 		if (!sparkPlayer) return this.newOperationInternalServerError(request);
 
 		(request as any).isRegisterRequest = true;
 
 		return await this.onAuthenticationResponse(authInfo, request as LoginOperationRequest, sparkPlayer);
 	}
+
 }

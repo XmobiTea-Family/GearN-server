@@ -7,9 +7,12 @@ import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
+import { LogSettings } from "./settings/LogSettings";
+import { UploadFileSettings } from "./settings/UploadFileSettings";
+import { DdosSettings } from "./settings/DDosSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
-	private gnConfig: {[k: string]: any};
+	private gnConfig: { [k: string]: any };
 
 	public config(gnConfig: {}): void {
 		this.gnConfig = gnConfig;
@@ -21,20 +24,32 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setCertFilePath(this.gnConfig["keyFilePath"])
 			.setKeyFilePath(this.gnConfig["certFilePath"])
 			.setPort(this.gnConfig["port"])
+			.setLicenseKeyFilePath(this.gnConfig["licenseKeyFilePath"])
+			.setExpiredToken(this.gnConfig["expiredTokenInMs"])
 			.build();
 
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(this.gnConfig["httpAppEnable"])
-			.setOrigin(this.gnConfig["httpAppAllowOrigin"])
+			.setOrigins(this.gnConfig["httpAppAllowOrigin"])
 			.addMethods(this.gnConfig["httpAppAllowMethods"])
 			.setCredentials(this.gnConfig["httpAppCredentials"])
 			.addAllowedHeaders(this.gnConfig["httpAppAllowHeaders"])
+			.setEnableSendAndReceiveDebug(this.gnConfig["httpAppEnableSendAndReceiveDebug"])
+			.setEnablePostViaMsgPack(this.gnConfig["httpAppEnablePostViaMsgPack"])
+			.setEnablePostViaJson(this.gnConfig["httpAppEnablePostViaJson"])
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(this.gnConfig["socketAppEnable"])
+			.setOrigins(this.gnConfig["socketAppAllowOrigin"])
+			.addMethods(this.gnConfig["socketAppAllowMethods"])
+			.setCredentials(this.gnConfig["socketAppCredentials"])
+			.setEnablePostViaMsgPack(this.gnConfig["socketAppEnablePostViaMsgPack"])
+			.setEnablePostViaJson(this.gnConfig["socketAppEnablePostViaJson"])
+			.addAllowedHeaders(this.gnConfig["socketAppAllowHeaders"])
 			.setPingInterval(this.gnConfig["socketAppPingInterval"])
 			.setPingTimeout(this.gnConfig["socketAppPingTimeout"])
+			.setEnableSendAndReceiveDebug(this.gnConfig["socketAppEnableSendAndReceiveDebug"])
 			.build();
 
 		let otherSettings = OtherSettings.Builder()
@@ -42,14 +57,16 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setAuthTokenCollectionName(this.gnConfig["authInfoCollectionName"])
 			.setConfigGameCollectionName(this.gnConfig["configCollectionName"])
 			.setPackageName(this.gnConfig["packageName"])
+			.setAppleClientId(this.gnConfig["appleClientId"])
+			.setGoogleClientId(this.gnConfig["googleClientId"])
+			.setHeaderIP(this.gnConfig["headerIP"])
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()
 			.setConnectionString(this.gnConfig["databaseConnectionString"])
 			.setDatabaseName(this.gnConfig["databaseName"])
 			.setGameName(this.gnConfig["databaseGameName"])
-			.setMinPoolSize(this.gnConfig["databaseMinPoolSize"])
-			.setMaxPoolSize(this.gnConfig["databaseMaxPoolSize"])
+			.setOptions(this.gnConfig["databaseOptions"])
 			.build();
 
 		let mailSettings = MailSettings.Builder()
@@ -58,10 +75,49 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setSendGridApiKey(this.gnConfig["mailSendGridApiKey"])
 			.build();
 
-		this.serverApplication = this.newServerApplication(applicationSettings, httpAppSettings, socketAppSettings, otherSettings, databaseSettings, mailSettings);
+		let logSettings = LogSettings.Builder()
+			.setLogToFileEnable(this.gnConfig["logToFileEnable"])
+			.setLogToConsoleEnable(this.gnConfig["logToConsoleEnable"])
+			.setLogPath(this.gnConfig["logPath"])
+			.build();
+
+		let uploadFileSettings = UploadFileSettings.Builder()
+			.setEnable(this.gnConfig["uploadFileEnable"])
+			.setUploadPath(this.gnConfig["uploadPath"])
+			.setMaxSizeUpload(this.gnConfig["maxSizeUpload"])
+			.setMimeTypeAccepts(this.gnConfig["mimeTypeAccepts"])
+			.build();
+
+		let ddosSettings = DdosSettings.Builder()
+			.setSocketMaxRequestPerSecondPerIp(this.gnConfig["socketMaxRequestPerSecondPerIp"])
+			.setSocketMaxRequestPerSecondPerPeer(this.gnConfig["socketMaxRequestPerSecondPerPeer"])
+			.setSocketMaxPendingRequest(this.gnConfig["socketMaxPendingRequest"])
+			.setSocketMaxRequestSize(this.gnConfig["socketMaxRequestSize"])
+			.setHttpMaxRequestPerSecondPerIp(this.gnConfig["httpMaxRequestPerSecondPerIp"])
+			.setHttpMaxRequestPerSecondPerPeer(this.gnConfig["httpMaxRequestPerSecondPerPeer"])
+			.setHttpMaxPendingRequest(this.gnConfig["httpMaxPendingRequest"])
+			.setHttpMaxRequestSize(this.gnConfig["httpMaxRequestSize"])
+			.setMaxUploadPendingRequest(this.gnConfig["maxUploadPendingRequest"])
+			.setMaxDownloadPendingRequest(this.gnConfig["maxDownloadPendingRequest"])
+			.setReportDdosCollectionName(this.gnConfig["reportDdosCollectionName"])
+			.setBanDdosCollectionName(this.gnConfig["banDdosCollectionName"])
+			.build();
+
+		this.serverApplication = this.newServerApplication(
+			applicationSettings,
+			httpAppSettings,
+			socketAppSettings,
+			otherSettings,
+			databaseSettings,
+			mailSettings,
+			logSettings,
+			uploadFileSettings,
+			ddosSettings
+		);
 
 		this.serverApplication.run(() => {
 			if (onRunSuccess != null) onRunSuccess();
 		});
 	}
+
 }

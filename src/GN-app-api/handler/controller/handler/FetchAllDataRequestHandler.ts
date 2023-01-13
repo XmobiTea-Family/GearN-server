@@ -10,15 +10,15 @@ import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { FetchAllDataParameterCode } from "./../../../../GN-common/constant/parameterCode/FetchAllDataParameterCode";
 import { FetchAllDataErrorCode } from "./../../../../GN-common/constant/errorCode/FetchAllDataErrorCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class FetchAllDataOperationRequest extends OperationRequest {
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
+
 }
 
 export class FetchAllDataRequestHandler extends RequestHandler {
@@ -27,7 +27,7 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new FetchAllDataOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, FetchAllDataOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -38,7 +38,7 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let banNormal = gamePlayer.getUserBan("Normal");
@@ -47,10 +47,10 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 				let currentMillisecond = xDatetime.getCurrentMilliseconds();
 
 				if (banNormal["TsExpire"] > currentMillisecond) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, FetchAllDataErrorCode.UserHadBanned);
+					operationResponse.setScriptData(ParameterCode.ErrorCode, FetchAllDataErrorCode.UserHadBanned);
 
-					operationResponse.setParameter(FetchAllDataParameterCode.TsExpire, banNormal["TsExpire"]);
-					operationResponse.setParameter(FetchAllDataParameterCode.Reason, banNormal["Reason"]);
+					operationResponse.setScriptData(FetchAllDataParameterCode.TsExpire, banNormal["TsExpire"]);
+					operationResponse.setScriptData(FetchAllDataParameterCode.Reason, banNormal["Reason"]);
 
 					return operationResponse;
 				} else {
@@ -60,13 +60,13 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 			}
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, FetchAllDataErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, FetchAllDataErrorCode.Ok);
 
 		gamePlayer.updateTsLastSeen();
 
-		operationResponse.setParameter(FetchAllDataParameterCode.UserId, gamePlayer.getUserId());
-		operationResponse.setParameter(FetchAllDataParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
-		operationResponse.setParameter(FetchAllDataParameterCode.DisplayName, gamePlayer.getDisplayName());
+		operationResponse.setScriptData(FetchAllDataParameterCode.UserId, gamePlayer.getUserId());
+		operationResponse.setScriptData(FetchAllDataParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));
+		operationResponse.setScriptData(FetchAllDataParameterCode.DisplayName, gamePlayer.getDisplayName());
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse, gamePlayer);
@@ -74,4 +74,5 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

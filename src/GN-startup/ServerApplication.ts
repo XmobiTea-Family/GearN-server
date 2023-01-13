@@ -18,6 +18,16 @@ import { OtherSettings } from "./settings/OtherSettings";
 import { AppleService } from "./../GN-app-api/service/AppleService";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
+import { Debug } from "./../GN-library/xdebug/lib/xDebug";
+import { LogSettings } from "./settings/LogSettings";
+import { UploadFileSettings } from "./settings/UploadFileSettings";
+import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
+import { LicenseKeyApplication } from "./LicenseKeyApplication";
+import { Md5Generate } from "./../GN-common/helper/Md5Generate";
+import { nanoid } from "nanoid";
+import { DdosSettings } from "./settings/DDosSettings";
+import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
+import { GoogleService } from "./../GN-app-api/service/GoogleService";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -26,6 +36,9 @@ abstract class BuilderBase {
 	protected mailSettings: MailSettings;
 	protected databaseSettings: DatabaseSettings;
 	protected otherSettings: OtherSettings;
+	protected logSettings: LogSettings;
+	protected uploadFileSettings: UploadFileSettings;
+	protected ddosSettings: DdosSettings;
 
 	public getApplicationSettings(): ApplicationSettings {
 		return this.applicationSettings;
@@ -51,7 +64,19 @@ abstract class BuilderBase {
 		return this.otherSettings;
 	}
 
-	constructor() {}
+	public getLogSettings(): LogSettings {
+		return this.logSettings;
+	}
+
+	public getUploadFileSettings(): UploadFileSettings {
+		return this.uploadFileSettings;
+	}
+
+	public getDdosSettings(): DdosSettings {
+		return this.ddosSettings;
+	}
+
+	constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
@@ -85,6 +110,21 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 		return this;
 	}
 
+	public setLogSettings(logSettings: LogSettings): Builder {
+		this.logSettings = logSettings;
+		return this;
+	}
+
+	public setUploadFileSettings(uploadFileSettings: UploadFileSettings): Builder {
+		this.uploadFileSettings = uploadFileSettings;
+		return this;
+	}
+
+	public setDdosSettings(ddosSettings: DdosSettings): Builder {
+		this.ddosSettings = ddosSettings;
+		return this;
+	}
+
 	public build() {
 		return new ServerApplication(this);
 	}
@@ -99,33 +139,82 @@ export class ServerApplication extends BuilderBase {
 	private socketApp: SocketApp;
 	private gameApplication: GameApplication;
 	private apiMiddleware: ApiMiddleware;
+	private antiDdosMiddleware: AntiDdosMiddleware;
+	private uploadFileMiddleware: UploadFileMiddleware;
+	private licenseKeyApplication: LicenseKeyApplication;
+
+	private sessionId: string;
+	private secretkey: string;
+	private secretId: string;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
+		let salt = nanoid(10);
+		this.sessionId = nanoid(15);
+		this.secretkey = nanoid(20);
+		this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
+
+		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
+		console.log("[GN] FullLogPath at: " + fullLogPath);
+
+		let licenseKeyFilePath = this.getApplicationSettings().getLicenseKeyFilePath() ? (__dirname + "/../../../../" + this.getApplicationSettings().getLicenseKeyFilePath()) : null;
+		if (licenseKeyFilePath) console.log("[GN] Found LicenseKeyFilePath at: " + licenseKeyFilePath);
+
+		Debug.init({
+			isLogToConsoleEnable: this.getLogSettings().getLogToConsoleEnable(),
+			isLogToFileEnable: this.getLogSettings().getLogToFileEnable(),
+			logPath: fullLogPath,
+		});
+		Debug.run();
+
+		Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
 
 		const port = this.applicationSettings.getPort();
-		console.log("[GN] Try run server on the port " + port);
+		Debug.log("[GN] Try run server on the port " + port);
 
 		const app = express();
 		const server = this.getServer(app, this.getApplicationSettings());
 
+		this.uploadFileMiddleware = this.newUploadMiddleware();
+		this.uploadFileMiddleware.setMaxSizeUpload(this.getUploadFileSettings().getMaxSizeUpload());
+		this.uploadFileMiddleware.setMimeTypeAccepts(this.getUploadFileSettings().getMimeTypeAccepts());
+		this.uploadFileMiddleware.setUploadPath(this.getUploadFileSettings().getUploadPath());
+		this.uploadFileMiddleware.run();
+
 		this.apiMiddleware = this.newApiMiddleware();
 		this.apiMiddleware.run();
+
+		this.antiDdosMiddleware = this.newAntiDdosMiddleware();
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerIp(this.getDdosSettings().getSocketMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerPeer(this.getDdosSettings().getSocketMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setSocketMaxPendingRequest(this.getDdosSettings().getSocketMaxPendingRequest());
+		this.antiDdosMiddleware.setSocketMaxRequestSize(this.getDdosSettings().getSocketMaxRequestSize());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerIp(this.getDdosSettings().getHttpMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerPeer(this.getDdosSettings().getHttpMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setHttpMaxPendingRequest(this.getDdosSettings().getHttpMaxPendingRequest());
+		this.antiDdosMiddleware.setHttpMaxRequestSize(this.getDdosSettings().getHttpMaxRequestSize());
+		this.antiDdosMiddleware.setMaxUploadPendingRequest(this.getDdosSettings().getMaxUploadPendingRequest());
+		this.antiDdosMiddleware.setMaxDownloadPendingRequest(this.getDdosSettings().getMaxDownloadPendingRequest());
+		this.antiDdosMiddleware.run();
 
 		this.gameApplication = this.newGameApplication();
 		this.gameApplication.setApiMiddleware(this.apiMiddleware);
 
 		this.httpApp = this.newHttpApp();
 		this.httpApp.setApiMiddleware(this.apiMiddleware);
+		this.httpApp.setUploadFileMiddleware(this.uploadFileMiddleware);
 		this.httpApp.setAppSettings(this.getHttpAppSettings());
+		this.httpApp.setUploadFileSettings(this.getUploadFileSettings());
 		this.httpApp.setApp(app);
 		this.httpApp.setGameApplication(this.gameApplication);
+		this.httpApp.setSessionId(this.sessionId);
+		this.httpApp.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.httpApp.run();
 
 		this.socketApp = this.newSocketApp();
 		this.socketApp.setApiMiddleware(this.apiMiddleware);
 		this.socketApp.setAppSettings(this.getSocketAppSettings());
 		this.socketApp.setServer(server);
+		this.socketApp.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.socketApp.run();
 
 		this.gameApplication.setHttpApp(this.httpApp);
@@ -133,41 +222,72 @@ export class ServerApplication extends BuilderBase {
 
 		this.gameApplication.getDatabase().run(
 			() => {
-				console.log("[GN] Database run success");
+				Debug.log("[GN] Database run success");
 			},
 			(err) => {
-				console.error("[GN] Database connect error " + err);
+				Debug.logError("[GN] Database connect error " + err);
 			}
 		);
 
 		if (this.mailSettings.getEnable()) {
 			this.gameApplication.getMail().run(() => {
-				console.log("[GN] Send Grid Mail run success");
+				Debug.log("[GN] Send Grid Mail run success");
 			});
 		}
 
-		let authTokenCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAuthTokenCollectionName());
+		let authTokenCollection = this.gameApplication.getDatabase().systemCollection(this.getOtherSettings().getAuthTokenCollectionName());
 		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
+
+		let playerGameCollection = this.gameApplication.getDatabase().systemGameCollection("Player");
+		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
+		this.apiMiddleware.setExpiredToken(this.getApplicationSettings().getExpiredToken());
+		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
+
+		let reportDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getReportDdosCollectionName());
+		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
+
+		let banDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getBanDdosCollectionName());
+		this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
 
-		(this.gameApplication.getAppleService() as AppleService).setMainPackageName(this.getOtherSettings().getPackageName());
+		(this.gameApplication.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
+		(this.gameApplication.getGoogleService() as GoogleService).setGoogleClientId(this.getOtherSettings().getGoogleClientId());
 
 		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
 		this.gameApplication.getConfigGame().setConfigCollection(configCollection);
 		this.gameApplication.getConfigGame().run(() => {
-			console.log("[GN] Config Game run success");
+			Debug.log("[GN] Config Game run success");
 		});
+
+		let uploadFileInfoCollection = this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo");
+		this.gameApplication.getDatabase().createIndex("System." + this.gameApplication.getDatabase().getGameName() + "UploadFileInfo", { FileId: 1 });
+		this.gameApplication.getDatabase().createIndex("System." + this.gameApplication.getDatabase().getGameName() + "UploadFileInfo", { UserId: 1 });
+
+		this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
+		this.uploadFileMiddleware.setUploadFileInfoCollection(uploadFileInfoCollection);
 
 		this.gameApplication.init();
 		this.gameApplication.run(() => {
-			console.log("[GN] Game Application run success");
+			Debug.log("[GN] Game Application run success");
 		});
 
+		this.licenseKeyApplication = new LicenseKeyApplication();
+		this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
+		this.licenseKeyApplication.setServer(server);
+		this.licenseKeyApplication.setApp(app);
+		this.licenseKeyApplication.setGameApplication(this.gameApplication);
+		this.licenseKeyApplication.setSessionId(this.sessionId);
+		this.licenseKeyApplication.setSecretkey(this.secretkey);
+		this.licenseKeyApplication.setSecretId(this.secretId);
+		this.licenseKeyApplication.setSalt(salt);
+		this.licenseKeyApplication.setPort(port);
+		this.licenseKeyApplication.run();
+
 		server.listen(port, () => {
-			console.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
-			console.log("[GN] Server Application running on port " + port);
+			Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
+			Debug.log("[GN] Server Application running on port " + port + " with id: " + this.sessionId);
 
 			if (onRunSuccess != null) onRunSuccess();
 		});
@@ -182,13 +302,7 @@ export class ServerApplication extends BuilderBase {
 			let databaseName = this.databaseSettings.getDatabaseName();
 			let gameName = this.databaseSettings.getGameName();
 
-			let minPoolSize = this.databaseSettings.getMinPoolSize();
-			let maxPoolSize = this.databaseSettings.getMaxPoolSize();
-
-			let options = {
-				maxPoolSize: maxPoolSize,
-				minPoolSize: minPoolSize,
-			};
+			let options = this.databaseSettings.getOptions();
 			gameApplication.getDatabase().init(connectionString, databaseName, gameName, options);
 		}
 
@@ -204,8 +318,18 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	private newApiMiddleware(): ApiMiddleware {
-		this.apiMiddleware = new ApiMiddleware();
-		return this.apiMiddleware;
+		let apiMiddleware = new ApiMiddleware();
+		return apiMiddleware;
+	}
+
+	private newAntiDdosMiddleware(): AntiDdosMiddleware {
+		let antiDdosMiddleware = new AntiDdosMiddleware();
+		return antiDdosMiddleware;
+	}
+
+	private newUploadMiddleware(): UploadFileMiddleware {
+		let uploadFileMiddleware = new UploadFileMiddleware();
+		return uploadFileMiddleware;
 	}
 
 	public getGameApplication(): GameApplication {
@@ -242,9 +366,13 @@ export class ServerApplication extends BuilderBase {
 		this.databaseSettings = builder.getDatabaseSettings();
 		this.mailSettings = builder.getMailSettings();
 		this.otherSettings = builder.getOtherSettings();
+		this.logSettings = builder.getLogSettings();
+		this.uploadFileSettings = builder.getUploadFileSettings();
+		this.ddosSettings = builder.getDdosSettings();
 	}
 
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

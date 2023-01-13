@@ -14,4 +14,5 @@ export interface ITimerService {
 	subscriberEveryDay(runnable: () => void): void;
 
 	unSubscriberEveryDay(runnable: () => void): void;
+
 }

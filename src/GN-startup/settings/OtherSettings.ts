@@ -5,6 +5,9 @@ abstract class BuilderBase {
 	protected adapterEventCollectionName: string;
 	protected configGameCollectionName: string;
 	protected packageName: string;
+	protected appleClientId: string;
+	protected googleClientId: string;
+	protected headerIP: string;
 
 	public getAuthTokenCollectionName(): string {
 		return this.authTokenCollectionName;
@@ -22,7 +25,20 @@ abstract class BuilderBase {
 		return this.packageName;
 	}
 
-	constructor() {}
+	public getAppleClientId(): string {
+		return this.appleClientId;
+	}
+
+	public getGoogleClientId(): string {
+		return this.googleClientId;
+	}
+
+	public getHeaderIP(): string {
+		return this.headerIP;
+	}
+
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<OtherSettings> {
@@ -46,13 +62,37 @@ class Builder extends BuilderBase implements IBuilder<OtherSettings> {
 		return this;
 	}
 
+	public setAppleClientId(appleClientId: string): Builder {
+		this.appleClientId = appleClientId;
+		return this;
+	}
+
+	public setGoogleClientId(googleClientId: string): Builder {
+		this.googleClientId = googleClientId;
+		return this;
+	}
+
+	public setHeaderIP(headerIP: string): Builder {
+		this.headerIP = headerIP;
+		return this;
+	}
+
 	constructor() {
 		super();
+
+		this.authTokenCollectionName = "";
+		this.adapterEventCollectionName = "";
+		this.configGameCollectionName = "";
+		this.packageName = "";
+		this.appleClientId = "";
+		this.googleClientId = "";
+		this.headerIP = "";
 	}
 
 	public build() {
 		return new OtherSettings(this);
 	}
+
 }
 
 export class OtherSettings extends BuilderBase {
@@ -63,9 +103,13 @@ export class OtherSettings extends BuilderBase {
 		this.adapterEventCollectionName = builder.getAdapterEventCollectionName();
 		this.configGameCollectionName = builder.getConfigGameCollectionName();
 		this.packageName = builder.getPackageName();
+		this.appleClientId = builder.getAppleClientId();
+		this.googleClientId = builder.getGoogleClientId();
+		this.headerIP = builder.getHeaderIP();
 	}
 
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

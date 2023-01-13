@@ -1,34 +1,76 @@
 {
-    "name": "debug",
-    "options": {
-        "port": 2202,
-        "useSsl": false,
-        "keyFilePath":"",
-        "certFilePath": "",
+	"name": "debug",
+	"options": {
+		"port": 2202,
+		"useSsl": false,
+		"keyFilePath": "",
+		"certFilePath": "",
+		"licenseKeyFilePath": "",
+		"expiredTokenInMs": 172800000,
 
-        "httpAppEnable": true,
-        "httpAppAllowOrigin": "*",
-        "httpAppCredentials": true,
-        "httpAppAllowMethods": ["GET", "POST"],
-        "httpAppAllowHeaders": ["a"],
-        
-        "socketAppEnable":true,
-        "socketAppPingInterval": 50000,
-        "socketAppPingTimeout": 5000,
+		"httpAppEnable": true,
+		"httpAppAllowOrigin": "*",
+		"httpAppCredentials": true,
+		"httpAppAllowMethods": ["GET", "POST"],
+		"httpAppAllowHeaders": ["a", "content-type"],
+		"httpAppEnableSendAndReceiveDebug": true,
+		"httpAppEnablePostViaMsgPack": true,
+		"httpAppEnablePostViaJson": true,
 
-        "adapterEventCollectionName": "AdapterEventCollection",
-        "authInfoCollectionName": "AuthInfoCollection",
-        "configCollectionName": "ConfigGame",
-        "packageName": "com.xmobitea.GNServer",
-        
-        "databaseConnectionString": "mongodb://localhost:27017",
-        "databaseName": "XmobiTea",
-        "databaseGameName": "GN.",
-        "databaseMinPoolSize": 5,
-        "databaseMaxPoolSize": 100,
+		"socketAppEnable": true,
+		"socketAppAllowOrigin": "*",
+		"socketAppCredentials": true,
+		"socketAppAllowMethods": ["GET"],
+		"socketAppAllowHeaders": [],
+		"socketAppEnableSendAndReceiveDebug": true,
+		"socketAppEnablePostViaMsgPack": true,
+		"socketAppEnablePostViaJson": true,
+		"socketAppPingInterval": 50000,
+		"socketAppPingTimeout": 5000,
 
-        "mailEnable": false,
-        "mailSendFrom": "changx@xmobitea.com",
-        "mailSendGridApiKey": "SG."
-    }
+		"uploadFileEnable": true,
+		"uploadPath": "./file-upload",
+		"maxSizeUpload": 52428800,
+		"mimeTypeAccepts": ["image/png"],
+
+		"adapterEventCollectionName": "AdapterEventCollection",
+		"authInfoCollectionName": "AuthInfoCollection",
+		"configCollectionName": "Config",
+		"packageName": "com.xmobitea.GNServer",
+		"appleClientId": "com.xmobitea.GNServer",
+		"googleClientId": "gn-server",
+		"headerIP": "x-ip",
+		
+		"databaseConnectionString": "mongodb://127.0.0.1:27017/",
+		"databaseName": "XmobiTea",
+		"databaseGameName": "GN.",
+		"databaseOptions": {
+		},
+
+		"mailEnable": false,
+		"mailSendFrom": "changx@xmobitea.com",
+		"mailSendGridApiKey": "SG.",
+
+		"debugToolEnable": true,
+		"testToolEnable": true,
+		"logToolEnable": true,
+		"toolHashs": ["hashhere"],
+
+		"logToConsoleEnable": true,
+		"logToFileEnable": true,
+		"logPath": "./log/debug/Server.log",
+
+		"socketMaxRequestPerSecondPerIp": 50,
+		"socketMaxRequestPerSecondPerPeer": 20,
+		"socketMaxPendingRequest": 1000,
+		"socketMaxRequestSize": 1024,
+		"httpMaxRequestPerSecondPerIp": 50,
+		"httpMaxRequestPerSecondPerPeer": 20,
+		"httpMaxPendingRequest": 1000,
+		"httpMaxRequestSize": 1024,
+		"maxUploadPendingRequest": 200,
+		"maxDownloadPendingRequest": 200,
+		"reportDdosCollectionName": "ReportDdosCollection",
+		"banDdosCollectionName": "BanDdosCollection"
+	}
 }

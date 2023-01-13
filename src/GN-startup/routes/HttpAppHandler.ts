@@ -7,6 +7,12 @@ import { OperationResponse } from "./../../GN-common/entity/operationResponse/Op
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { GameApplication } from "./../../GameApplication";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
+import msgpack from "express-msgpack";
+import { encode } from "@msgpack/msgpack";
+import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
+import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
+import { Commands } from "./../../GN-common/constant/Commands";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -15,10 +21,16 @@ interface OnHttpRequest {
 export class HttpAppHandler {
 	private _onRequestCb: OnHttpRequest;
 	private apiMiddleware: ApiMiddleware;
+	private antiDdosMiddleware: AntiDdosMiddleware;
+
 	private gameApplication: GameApplication;
+	private enableSendAndReceiveDebug: boolean;
+	private enablePostViaMsgPack: boolean;
+	private enablePostViaJson: boolean;
 
 	private router: Router;
-	private apiRouter: Router;
+	private apiJsonRouter: Router;
+	private apiMsgPackRouter: Router;
 
 	public setRouter(router: Router): void {
 		this.router = router;
@@ -26,6 +38,10 @@ export class HttpAppHandler {
 
 	public setApiMiddleware(apiMiddleware: ApiMiddleware): void {
 		this.apiMiddleware = apiMiddleware;
+	}
+
+	public setAntiDdosMiddleware(antiDdosMiddleware: AntiDdosMiddleware): void {
+		this.antiDdosMiddleware = antiDdosMiddleware;
 	}
 
 	public setGameApplication(gameApplication: GameApplication): void {
@@ -36,84 +52,188 @@ export class HttpAppHandler {
 		this._onRequestCb = _onRequestCb;
 	}
 
+	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): void {
+		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
+	}
+
+	public setEnablePostViaMsgPack(enablePostViaMsgPack: boolean): void {
+		this.enablePostViaMsgPack = enablePostViaMsgPack;
+	}
+
+	public setEnablePostViaJson(enablePostViaJson: boolean): void {
+		this.enablePostViaJson = enablePostViaJson;
+	}
+
 	public run(): void {
 		this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
+			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+
 			let configName = req.params.configName;
 			if (configName != null) {
 				let configItem = this.gameApplication.getConfigGame().getConfig(configName);
 
-				if (configItem != null) return res.json([ReturnCode.Ok, { 1: configItem.toJson() }]);
+				if (configItem != null) return res.json([ReturnCode.Ok, { "1": configItem.toJson() }]);
 			}
 
 			return res.json([ReturnCode.OperationInvalid]);
 		});
 
 		this.router.get("/ts", (req: express.Request, res: express.Response) => {
-			return res.json([ReturnCode.Ok, { 1: xDatetime.getCurrentMilliseconds() }]);
+			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+
+			return res.json([ReturnCode.Ok, { "1": xDatetime.getCurrentMilliseconds() }]);
 		});
 
-		this.apiRouter = express.Router();
-		this.router.use(
-			"/api",
-			wrap((req, res, next) => {
-				return this.apiMiddleware.authenticateToken(req, res, next);
-			}),
-			this.apiRouter
-		);
+		const apiRouter = express.Router();
+		this.router.use("/api", apiRouter);
 
-		this.apiRouter.post("/:code", async (req: express.Request, res: express.Response) => {
-			let operationResponse = await this.onHttpRequest(req);
+		if (this.enablePostViaJson) {
+			this.apiJsonRouter = express.Router();
 
-			if (operationResponse != null) {
-				let httpData = operationResponse.toHttpData();
-				console.log("[HTTP SEND] %O", httpData);
+			this.apiJsonRouter.use(wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkRequestSizeBodyViaJson(req, res, next);
+			}));
 
-				return res.send(httpData);
-			}
+			this.apiJsonRouter.use(express.json());
 
-			return res.send([ReturnCode.OperationInvalid]);
-		});
+			apiRouter.use(
+				"/0",
+				wrap((req, res, next) => {
+					return this.apiMiddleware.getIP(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaJson(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.apiMiddleware.authenticateTokenViaJson(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaJson(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.addPendingRequestViaJson(req, res, next);
+				}),
+				this.apiJsonRouter
+			);
+
+			this.apiJsonRouter.post("/:code", async (req: express.Request, res: express.Response) => {
+				let operationResponse = await this.onHttpRequest(req, false);
+
+				this.antiDdosMiddleware.removePendingRequest(req, res);
+
+				if (operationResponse != null) {
+					let httpData = OperationHelper.toResponseHttpData(operationResponse);
+					if (this.enableSendAndReceiveDebug) {
+						Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+					}
+
+					if (operationResponse.isEncrypted()) {
+						let content = Buffer.from(encode(httpData));
+						res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
+						res.setHeader(Commands.CONTENT_LENGTH, content.length);
+						return res.send(content);
+					}
+					else {
+						res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+						return res.send(httpData);
+					}
+				}
+
+				res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+				return res.send([ReturnCode.OperationInvalid]);
+			});
+		}
+
+		if (this.enablePostViaMsgPack) {
+			this.apiMsgPackRouter = express.Router();
+
+			this.apiJsonRouter.use(wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkRequestSizeBodyViaMsgPack(req, res, next);
+			}));
+
+			this.apiMsgPackRouter.use(msgpack());
+			apiRouter.use(
+				"/1",
+				wrap((req, res, next) => {
+					return this.apiMiddleware.getIP(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaMsgPack(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.apiMiddleware.authenticateTokenViaMsgPack(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaMsgPack(req, res, next);
+				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.addPendingRequestViaMsgPack(req, res, next);
+				}),
+				this.apiMsgPackRouter
+			);
+
+			this.apiMsgPackRouter.post("/:code", async (req: express.Request, res: express.Response) => {
+				let operationResponse = await this.onHttpRequest(req, true);
+
+				this.antiDdosMiddleware.removePendingRequest(req, res);
+
+				if (operationResponse != null) {
+					let httpData = OperationHelper.toResponseHttpData(operationResponse);
+					if (this.enableSendAndReceiveDebug) {
+						Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+					}
+
+					if (operationResponse.isEncrypted()) {
+						let content = Buffer.from(encode(httpData));
+						res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
+						res.setHeader(Commands.CONTENT_LENGTH, content.length);
+						return res.send(content);
+					}
+					else {
+						let content = httpData;
+						res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+						return res.send(content);
+					}
+				}
+
+				let content = Buffer.from(encode([ReturnCode.OperationInvalid]));
+				res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
+				res.setHeader(Commands.CONTENT_LENGTH, content.length);
+				return res.send(content);
+			});
+		}
 	}
 
-	private async onHttpRequest(req: express.Request): Promise<OperationResponse> {
-		let code = Number.parseInt(req.params.code);
-		let operationResponse = new OperationResponse(code, 0);
+	private async onHttpRequest(req: express.Request, encrypted: boolean): Promise<OperationResponse> {
+		let codeStr = req.params.code;
+		if (isNaN(codeStr as any)) return null;
 
-		let body = req.body;
-		let params = body.d;
-
-		console.log(params);
-
-		let parameters = null;
-		if (!params) parameters = {};
-		else {
-			try {
-				parameters = JSON.parse(params);
-			} catch (err) {
-				operationResponse.setReturnCode(ReturnCode.InternalServerError);
-				return operationResponse;
-			}
-		}
-
-		let ip = req.socket.remoteAddress;
-		if (ip.substring(0, 7) == "::ffff:") {
-			ip = ip.substring(7);
-		}
-
+		let code = Number.parseInt(codeStr);
+		let operationResponse: OperationResponse;
+		let reqAny = req as any;
+		let parameters = req.body;
+		let ip = reqAny.xip;
 		let request = new Request(code);
 		request.setRequestId(0);
 		request.setIP(ip);
-		request.setParameters(parameters);
-		request.setAuthenticate((req as any).authInfo);
+		request.setParameters(!parameters ? {} : parameters);
+		request.setAuthenticate(reqAny.authInfo);
+		request.setEncrypted(encrypted);
 
-		console.log("[HTTP RECV] %O", request);
+		if (this.enableSendAndReceiveDebug) {
+			Debug.log("[HTTP RECV] %O", request);
+			Debug.log("[Parameters] " + JSON.stringify(parameters));
+		}
 
-		if (this._onRequestCb != null) {
+		try {
 			operationResponse = await this._onRequestCb(request);
-		} else {
+		}
+		catch {
+			operationResponse = new OperationResponse(code, 0, request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.InternalServerError);
 		}
 
 		return operationResponse;
 	}
+
 }

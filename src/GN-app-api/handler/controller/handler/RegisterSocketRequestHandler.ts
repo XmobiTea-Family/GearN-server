@@ -9,19 +9,18 @@ import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/Pa
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { RegisterSocketParameterCode } from "./../../../../GN-common/constant/parameterCode/RegisterSocketParameterCode";
 import { RegisterSocketErrorCode } from "./../../../../GN-common/constant/errorCode/RegisterSocketErrorCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class RegisterSocketOperationRequest extends OperationRequest {
+	@StringDataMember({ code: RegisterSocketParameterCode.SId, mustNonNull: true, minLength: 16, maxLength: 24 })
 	sid: string;
 
-	constructor(operationRequest: OperationRequest) {
-		super(operationRequest);
-
-		this.sid = this.parameters.getString(RegisterSocketParameterCode.SId);
-	}
-
 	public isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
 		return true;
 	}
+
 }
 
 export class RegisterSocketRequestHandler extends RequestHandler {
@@ -30,7 +29,7 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 	}
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = new RegisterSocketOperationRequest(operationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, RegisterSocketOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -39,9 +38,9 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 		let sid = request.sid;
 		this.setAuthInfoSocket(sid, authInfo);
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse);
@@ -58,8 +57,11 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 
 			let userId = authInfo.getUserId();
 			socket.data.userId = userId;
-			
+
 			socket.join(userId);
+
+			authInfo.setSocketId(sid);
 		}
 	}
+
 }
