@@ -25,4 +25,5 @@ export class xDatetime {
 
 		return this.getMilliseconds(today0h);
 	}
+
 }

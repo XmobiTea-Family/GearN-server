@@ -1,6 +1,6 @@
 {
   "name": "@xmobitea/gn-server",
-  "version": "0.4.1",
+  "version": "1.0.7",
   "description": "Game Networking Server by XmobiTea",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -56,7 +56,7 @@
     "path": "*",
     "socket.io": "^4.4.0",
     "socketio-file-upload": "*",
-    "web3": "^1.7.1"
+    "web3": "^1.7.4"
   },
   "directories": {
     "test": "test"

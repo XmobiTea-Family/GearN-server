@@ -26,7 +26,7 @@ export class UploadFileMiddleware {
 		this.uploadFileInfoCollection = uploadFileInfoCollection;
 	}
 
-	public run() {}
+	public run() { }
 
 	private storage(): multer.StorageEngine {
 		let uploadPath = __dirname + "/../../../../" + this.uploadPath;
@@ -87,4 +87,5 @@ export class UploadFileMiddleware {
 
 		return res.sendStatus(401);
 	}
+
 }

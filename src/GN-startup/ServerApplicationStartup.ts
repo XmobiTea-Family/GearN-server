@@ -30,7 +30,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(this.gnConfig["httpAppEnable"])
-			.setOrigin(this.gnConfig["httpAppAllowOrigin"])
+			.setOrigins(this.gnConfig["httpAppAllowOrigin"])
 			.addMethods(this.gnConfig["httpAppAllowMethods"])
 			.setCredentials(this.gnConfig["httpAppCredentials"])
 			.addAllowedHeaders(this.gnConfig["httpAppAllowHeaders"])
@@ -41,6 +41,12 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(this.gnConfig["socketAppEnable"])
+			.setOrigins(this.gnConfig["socketAppAllowOrigin"])
+			.addMethods(this.gnConfig["socketAppAllowMethods"])
+			.setCredentials(this.gnConfig["socketAppCredentials"])
+			.setEnablePostViaMsgPack(this.gnConfig["socketAppEnablePostViaMsgPack"])
+			.setEnablePostViaJson(this.gnConfig["socketAppEnablePostViaJson"])
+			.addAllowedHeaders(this.gnConfig["socketAppAllowHeaders"])
 			.setPingInterval(this.gnConfig["socketAppPingInterval"])
 			.setPingTimeout(this.gnConfig["socketAppPingTimeout"])
 			.setEnableSendAndReceiveDebug(this.gnConfig["socketAppEnableSendAndReceiveDebug"])
@@ -51,6 +57,9 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setAuthTokenCollectionName(this.gnConfig["authInfoCollectionName"])
 			.setConfigGameCollectionName(this.gnConfig["configCollectionName"])
 			.setPackageName(this.gnConfig["packageName"])
+			.setAppleClientId(this.gnConfig["appleClientId"])
+			.setGoogleClientId(this.gnConfig["googleClientId"])
+			.setHeaderIP(this.gnConfig["headerIP"])
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()
@@ -110,4 +119,5 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			if (onRunSuccess != null) onRunSuccess();
 		});
 	}
+
 }

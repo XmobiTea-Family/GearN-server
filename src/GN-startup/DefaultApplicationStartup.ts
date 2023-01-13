@@ -19,7 +19,7 @@ export class DefaultApplicationStartup {
 
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(true)
-			.setOrigin("*")
+			.setOrigins("*")
 			.addMethods(["GET", "POST"])
 			.setCredentials(true)
 			.addAllowedHeaders(["a", "content-type"])
@@ -28,13 +28,27 @@ export class DefaultApplicationStartup {
 			.setEnablePostViaMsgPack(true)
 			.build();
 
-		let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setPingInterval(50000).setPingTimeout(5000).setEnableSendAndReceiveDebug(true).build();
+		let socketAppSettings = SocketAppSettings.Builder()
+			.setEnable(true)
+			.setOrigins("*")
+			.addMethods([])
+			.setCredentials(true)
+			.addAllowedHeaders([])
+			.setEnableSendAndReceiveDebug(true)
+			.setEnablePostViaJson(true)
+			.setEnablePostViaMsgPack(true)
+			.setPingInterval(50000)
+			.setPingTimeout(5000)
+			.build();
 
 		let otherSettings = OtherSettings.Builder()
 			.setAdapterEventCollectionName("AdapterEventCollection")
 			.setAuthTokenCollectionName("AuthInfoCollection")
 			.setConfigGameCollectionName("ConfigGame")
 			.setPackageName("com.xmobitea.GNServer")
+			.setAppleClientId("com.xmobitea.GNServer")
+			.setGoogleClientId("gn-server")
+			.setHeaderIP("x-ip")
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()
@@ -47,9 +61,16 @@ export class DefaultApplicationStartup {
 			})
 			.build();
 
-		let mailSettings = MailSettings.Builder().setFromEmail("changx@xmobitea.com").setSendGridApiKey("SG.").build();
+		let mailSettings = MailSettings.Builder()
+			.setFromEmail("changx@xmobitea.com")
+			.setSendGridApiKey("SG.")
+			.build();
 
-		let logSettings = LogSettings.Builder().setLogToFileEnable(true).setLogToConsoleEnable(true).setLogPath("./log/Server.log").build();
+		let logSettings = LogSettings.Builder()
+			.setLogToFileEnable(true)
+			.setLogToConsoleEnable(true)
+			.setLogPath("./log/Server.log")
+			.build();
 
 		let uploadFileSettings = UploadFileSettings.Builder()
 			.setEnable(true)
@@ -117,4 +138,5 @@ export class DefaultApplicationStartup {
 	public getGameApplication(): GameApplication {
 		return this.serverApplication.getGameApplication();
 	}
+
 }

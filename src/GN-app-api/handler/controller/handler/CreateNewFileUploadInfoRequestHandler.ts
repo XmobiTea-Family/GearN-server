@@ -22,6 +22,7 @@ class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
@@ -47,16 +48,17 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo").insertOne(doc);
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, FileUploadInfoErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, FileUploadInfoErrorCode.Ok);
 
-		operationResponse.setParameter(FileUploadInfoParameterCode.FileId, doc["FileId"]);
-		operationResponse.setParameter(FileUploadInfoParameterCode.OriginFileName, doc["OriginFileName"]);
-		operationResponse.setParameter(FileUploadInfoParameterCode.TsCreate, doc["TsCreate"]);
-		operationResponse.setParameter(FileUploadInfoParameterCode.TsUploadExpire, doc["TsUploadExpire"]);
-		operationResponse.setParameter(FileUploadInfoParameterCode.UserId, doc["UserId"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.FileId, doc["FileId"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.OriginFileName, doc["OriginFileName"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.TsCreate, doc["TsCreate"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.TsUploadExpire, doc["TsUploadExpire"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.UserId, doc["UserId"]);
 
 		return operationResponse;
 	}
+
 }

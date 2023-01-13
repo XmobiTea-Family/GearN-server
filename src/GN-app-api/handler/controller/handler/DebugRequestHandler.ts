@@ -35,6 +35,7 @@ class DebugOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class DebugRequestHandler extends RequestHandler {
@@ -49,15 +50,15 @@ export class DebugRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, DebugErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, DebugErrorCode.Ok);
 
-		operationResponse.setParameter(DebugParameterCode.Boolean, request.booleanValue);
-		operationResponse.setParameter(DebugParameterCode.Number, request.numberValue);
-		operationResponse.setParameter(DebugParameterCode.String, request.stringValue);
-		operationResponse.setParameter(DebugParameterCode.GNHashtable, request.gnHashtableValue);
-		operationResponse.setParameter(DebugParameterCode.GNArray, request.gnArrayValue);
+		operationResponse.setScriptData(DebugParameterCode.Boolean, request.booleanValue);
+		operationResponse.setScriptData(DebugParameterCode.Number, request.numberValue);
+		operationResponse.setScriptData(DebugParameterCode.String, request.stringValue);
+		operationResponse.setScriptData(DebugParameterCode.GNHashtable, request.gnHashtableValue);
+		operationResponse.setScriptData(DebugParameterCode.GNArray, request.gnArrayValue);
 
 		if (authInfo != null) {
 			let operationEvent = new OperationEvent(EventCode.OnDebug);
@@ -66,6 +67,9 @@ export class DebugRequestHandler extends RequestHandler {
 			this.gameApplication.sendEventTo(authInfo.getUserId(), operationEvent);
 		}
 
+		this.gameApplication.joinRoom(authInfo.getUserId(), "test");
+
 		return operationResponse;
 	}
+
 }

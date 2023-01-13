@@ -81,16 +81,28 @@ export class HttpApp {
 		this.app.get("/", (req: express.Request, res: express.Response) => {
 			return res.send(
 				'<a href="https://xmobitea.com"><h1 style="text-align:center;">XmobiTea</h1></a>' +
-					'<h3 style="text-align:center;">-->==>>> [GN Server] <<<==<--</h3>' +
-					'<h4 style="text-align:center;"> Version: ' + GameApplication.getServerVersion() + '</h4>' + 
-					'Buy license at <a href="https://gnserver.xmobitea.com">XmobiTea GN Server</a>' +
-					'<br>' +
-					'<h4 style="text-align:center;">©2022 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
+				'<h3 style="text-align:center;">-->==>>> [GN Server] <<<==<--</h3>' +
+				'<h4 style="text-align:center;"> Version: ' + GameApplication.getServerVersion() + '</h4>' +
+				'<h4 style="text-align:center;">Buy license at <a href="https://gn.xmobitea.com">XmobiTea GN Server</a></h4>' +
+				'<br>' +
+				'<h4 style="text-align:center;">©2022 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
 			);
 		});
 
 		this.app.get("/ping", async function (req: express.Request, res: express.Response) {
 			return res.sendStatus(200);
+		});
+
+		this.app.get("/stats", async function (req: express.Request, res: express.Response) {
+			let cpuUsage = process.cpuUsage();
+			let memoryUsage = process.memoryUsage();
+			let resourceUsage = process.resourceUsage();
+
+			return res.json({
+				"CpuUsage": cpuUsage,
+				"MemoryUsage": memoryUsage,
+				"ResourceUsage": resourceUsage
+			});
 		});
 
 		let allowedHeaders = this.appSettings.getAllowedHeaders();
@@ -134,5 +146,6 @@ export class HttpApp {
 		}
 	}
 
-	constructor() {}
+	constructor() { }
+
 }

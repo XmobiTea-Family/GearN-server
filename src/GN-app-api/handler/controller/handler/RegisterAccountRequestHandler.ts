@@ -25,6 +25,7 @@ class RegisterAccountOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class RegisterAccountRequestHandler extends LoginRequestHandler {
@@ -47,9 +48,9 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByUsername(username);
 
 		if (sparkPlayer) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
-			operationResponse.setParameter(ParameterCode.ErrorCode, LoginErrorCode.UserDoesExists);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesExists);
 
 			return operationResponse;
 		}
@@ -59,11 +60,12 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 
 		sparkPlayer = await this.gameApplication
 			.getDatabase()
-			.createPlayerByUsernameAndPassword(username, passwordHash, this.DefaultSegments, request.getOriginRequest().getIP());
+			.createPlayerByUsernameAndPassword(username, passwordHash, this.defaultSegments, (request as any).originRequest.getIP());
 		if (!sparkPlayer) return this.newOperationInternalServerError(request);
 
 		(request as any).isRegisterRequest = true;
 
 		return await this.onAuthenticationResponse(authInfo, request as LoginOperationRequest, sparkPlayer);
 	}
+
 }

@@ -20,6 +20,7 @@ class RegisterSocketOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class RegisterSocketRequestHandler extends RequestHandler {
@@ -37,9 +38,9 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 		let sid = request.sid;
 		this.setAuthInfoSocket(sid, authInfo);
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, RegisterSocketErrorCode.Ok);
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse);
@@ -56,8 +57,11 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 
 			let userId = authInfo.getUserId();
 			socket.data.userId = userId;
-			
+
 			socket.join(userId);
+
+			authInfo.setSocketId(sid);
 		}
 	}
+
 }

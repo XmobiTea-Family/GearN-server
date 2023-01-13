@@ -17,7 +17,8 @@ abstract class BuilderBase {
 		return this.logPath;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<LogSettings> {
@@ -38,11 +39,16 @@ class Builder extends BuilderBase implements IBuilder<LogSettings> {
 
 	constructor() {
 		super();
+
+		this.logToFileEnable = false;
+		this.logToConsoleEnable = false;
+		this.logPath = "";
 	}
 
 	public build() {
 		return new LogSettings(this);
 	}
+
 }
 
 export class LogSettings extends BuilderBase {
@@ -57,4 +63,5 @@ export class LogSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

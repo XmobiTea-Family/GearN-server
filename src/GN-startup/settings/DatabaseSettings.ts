@@ -23,7 +23,8 @@ abstract class BuilderBase {
 		return this.options;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<DatabaseSettings> {
@@ -49,11 +50,17 @@ class Builder extends BuilderBase implements IBuilder<DatabaseSettings> {
 
 	constructor() {
 		super();
+
+		this.connectionString = "";
+		this.gameName = "";
+		this.databaseName = "";
+		this.options = {};
 	}
 
 	public build() {
 		return new DatabaseSettings(this);
 	}
+
 }
 
 export class DatabaseSettings extends BuilderBase {
@@ -70,4 +77,5 @@ export class DatabaseSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

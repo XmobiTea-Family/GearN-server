@@ -9,6 +9,9 @@ abstract class BuilderBase {
 	protected otherUserLogin: boolean;
 	protected otherDatas: { [k: string]: any };
 	protected tsLastUpdate: number;
+	protected socketId: string;
+	protected socketRoomIds: string[];
+	protected tsCreate: number;
 
 	public getAuthToken(): string {
 		return this.authToken;
@@ -40,6 +43,48 @@ abstract class BuilderBase {
 
 	public getTsLastUpdate(): number {
 		return this.tsLastUpdate;
+	}
+
+	public getSocketId(): string {
+		return this.socketId;
+	}
+
+	public getSocketRoomIds(): string[] {
+		return this.socketRoomIds;
+	}
+
+	public getTsCreate() {
+		return this.tsCreate;
+	}
+
+	public setTsCreate(tsCreate: number): Builder {
+		//this.tsCreate = tsCreate;
+		return this as Builder;
+	}
+
+	public setSocketId(socketId: string): Builder {
+		this.socketId = socketId;
+		return this as Builder;
+	}
+
+	public setSocketRoomIds(roomIds: string[]): Builder {
+		this.socketRoomIds = roomIds;
+		return this as Builder;
+	}
+
+	public addSocketRoomId(roomId: string): Builder {
+		if (this.socketRoomIds.indexOf(roomId) == -1)
+			this.socketRoomIds.push(roomId);
+
+		return this as Builder;
+	}
+
+	public removeSocketRoomId(roomId: string): Builder {
+		let indexOf = this.socketRoomIds.indexOf(roomId);
+		if (indexOf != -1)
+			this.socketRoomIds.splice(indexOf, 1);
+
+		return this as Builder;
 	}
 
 	public setAuthToken(authToken: string): Builder {
@@ -99,7 +144,9 @@ abstract class BuilderBase {
 
 	constructor() {
 		this.otherDatas = {};
+		this.socketRoomIds = [];
 	}
+
 }
 
 class Builder extends BuilderBase implements IBuilder<AuthInfo> {
@@ -123,6 +170,11 @@ class Builder extends BuilderBase implements IBuilder<AuthInfo> {
 		return this;
 	}
 
+	public setTsCreate(tsCreate: number): Builder {
+		this.tsCreate = tsCreate;
+		return this as Builder;
+	}
+
 	public build(): AuthInfo {
 		return new AuthInfo(this);
 	}
@@ -133,6 +185,7 @@ class Builder extends BuilderBase implements IBuilder<AuthInfo> {
 		// this.methods = [];
 		// this.allowedHeaders = [];
 	}
+
 }
 
 export class AuthInfo extends BuilderBase {
@@ -147,6 +200,9 @@ export class AuthInfo extends BuilderBase {
 		this.otherUserLogin = builder.getOtherUserLogin();
 		this.otherDatas = builder.getOtherDatas();
 		this.tsLastUpdate = builder.getTsLastUpdate();
+		this.socketId = builder.getSocketId();
+		this.socketRoomIds = builder.getSocketRoomIds();
+		this.tsCreate = builder.getTsCreate();
 	}
 
 	public toDocumentData() {
@@ -157,11 +213,15 @@ export class AuthInfo extends BuilderBase {
 			"IsRemove": this.remove,
 			"TsExpire": this.tsExpire,
 			"OtherUserLogin": this.otherUserLogin,
-			"OtherDatas": this.otherDatas
+			"OtherDatas": this.otherDatas,
+			"SocketId": this.socketId,
+			"SocketRoomIds": this.socketRoomIds,
+			"TsCreate": this.tsCreate
 		}
 	}
 
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

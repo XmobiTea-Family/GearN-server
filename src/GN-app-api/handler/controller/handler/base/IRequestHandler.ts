@@ -12,4 +12,5 @@ export interface IRequestHandler {
 	handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
 
 	setPostHandle(postHandle: PostHandle): void;
+
 }

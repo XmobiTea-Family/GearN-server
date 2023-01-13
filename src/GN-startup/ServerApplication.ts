@@ -27,6 +27,7 @@ import { Md5Generate } from "./../GN-common/helper/Md5Generate";
 import { nanoid } from "nanoid";
 import { DdosSettings } from "./settings/DDosSettings";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
+import { GoogleService } from "./../GN-app-api/service/GoogleService";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -75,7 +76,7 @@ abstract class BuilderBase {
 		return this.ddosSettings;
 	}
 
-	constructor() {}
+	constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
@@ -143,14 +144,14 @@ export class ServerApplication extends BuilderBase {
 	private licenseKeyApplication: LicenseKeyApplication;
 
 	private sessionId: string;
-    private secretkey: string;
-    private secretId: string;
+	private secretkey: string;
+	private secretId: string;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
 		let salt = nanoid(10);
-        this.sessionId = nanoid(15);
-        this.secretkey = nanoid(20);
-        this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
+		this.sessionId = nanoid(15);
+		this.secretkey = nanoid(20);
+		this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
 
 		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
 		console.log("[GN] FullLogPath at: " + fullLogPath);
@@ -174,25 +175,25 @@ export class ServerApplication extends BuilderBase {
 		const server = this.getServer(app, this.getApplicationSettings());
 
 		this.uploadFileMiddleware = this.newUploadMiddleware();
-		this.uploadFileMiddleware.setMaxSizeUpload(this.uploadFileSettings.getMaxSizeUpload());
-		this.uploadFileMiddleware.setMimeTypeAccepts(this.uploadFileSettings.getMimeTypeAccepts());
-		this.uploadFileMiddleware.setUploadPath(this.uploadFileSettings.getUploadPath());
+		this.uploadFileMiddleware.setMaxSizeUpload(this.getUploadFileSettings().getMaxSizeUpload());
+		this.uploadFileMiddleware.setMimeTypeAccepts(this.getUploadFileSettings().getMimeTypeAccepts());
+		this.uploadFileMiddleware.setUploadPath(this.getUploadFileSettings().getUploadPath());
 		this.uploadFileMiddleware.run();
 
 		this.apiMiddleware = this.newApiMiddleware();
 		this.apiMiddleware.run();
 
 		this.antiDdosMiddleware = this.newAntiDdosMiddleware();
-		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerIp(this.ddosSettings.getSocketMaxRequestPerSecondPerIp());
-		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerPeer(this.ddosSettings.getSocketMaxRequestPerSecondPerPeer());
-		this.antiDdosMiddleware.setSocketMaxPendingRequest(this.ddosSettings.getSocketMaxPendingRequest());
-		this.antiDdosMiddleware.setSocketMaxRequestSize(this.ddosSettings.getSocketMaxRequestSize());
-		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerIp(this.ddosSettings.getHttpMaxRequestPerSecondPerIp());
-		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerPeer(this.ddosSettings.getHttpMaxRequestPerSecondPerPeer());
-		this.antiDdosMiddleware.setHttpMaxPendingRequest(this.ddosSettings.getHttpMaxPendingRequest());
-		this.antiDdosMiddleware.setHttpMaxRequestSize(this.ddosSettings.getHttpMaxRequestSize());
-		this.antiDdosMiddleware.setMaxUploadPendingRequest(this.ddosSettings.getMaxUploadPendingRequest());
-		this.antiDdosMiddleware.setMaxDownloadPendingRequest(this.ddosSettings.getMaxDownloadPendingRequest());
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerIp(this.getDdosSettings().getSocketMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setSocketMaxRequestPerSecondPerPeer(this.getDdosSettings().getSocketMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setSocketMaxPendingRequest(this.getDdosSettings().getSocketMaxPendingRequest());
+		this.antiDdosMiddleware.setSocketMaxRequestSize(this.getDdosSettings().getSocketMaxRequestSize());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerIp(this.getDdosSettings().getHttpMaxRequestPerSecondPerIp());
+		this.antiDdosMiddleware.setHttpMaxRequestPerSecondPerPeer(this.getDdosSettings().getHttpMaxRequestPerSecondPerPeer());
+		this.antiDdosMiddleware.setHttpMaxPendingRequest(this.getDdosSettings().getHttpMaxPendingRequest());
+		this.antiDdosMiddleware.setHttpMaxRequestSize(this.getDdosSettings().getHttpMaxRequestSize());
+		this.antiDdosMiddleware.setMaxUploadPendingRequest(this.getDdosSettings().getMaxUploadPendingRequest());
+		this.antiDdosMiddleware.setMaxDownloadPendingRequest(this.getDdosSettings().getMaxDownloadPendingRequest());
 		this.antiDdosMiddleware.run();
 
 		this.gameApplication = this.newGameApplication();
@@ -239,7 +240,8 @@ export class ServerApplication extends BuilderBase {
 
 		let playerGameCollection = this.gameApplication.getDatabase().systemGameCollection("Player");
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
-		this.apiMiddleware.setExpiredToken(this.applicationSettings.getExpiredToken());
+		this.apiMiddleware.setExpiredToken(this.getApplicationSettings().getExpiredToken());
+		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 
 		let reportDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getReportDdosCollectionName());
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
@@ -250,7 +252,8 @@ export class ServerApplication extends BuilderBase {
 		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
 
-		(this.gameApplication.getAppleService() as AppleService).setMainPackageName(this.getOtherSettings().getPackageName());
+		(this.gameApplication.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
+		(this.gameApplication.getGoogleService() as GoogleService).setGoogleClientId(this.getOtherSettings().getGoogleClientId());
 
 		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
 		this.gameApplication.getConfigGame().setConfigCollection(configCollection);
@@ -270,24 +273,17 @@ export class ServerApplication extends BuilderBase {
 			Debug.log("[GN] Game Application run success");
 		});
 
-		try {
-			this.licenseKeyApplication = new LicenseKeyApplication();
-			this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
-			this.licenseKeyApplication.setServer(server);
-			this.licenseKeyApplication.setApp(app);
-			this.licenseKeyApplication.setGameApplication(this.gameApplication);
-			this.licenseKeyApplication.setSessionId(this.sessionId);
-			this.licenseKeyApplication.setSecretkey(this.secretkey);
-			this.licenseKeyApplication.setSecretId(this.secretId);
-			this.licenseKeyApplication.setSalt(salt);
-			this.licenseKeyApplication.setPort(port);
-			this.licenseKeyApplication.run();
-		}
-		catch (err: any) {
-			Debug.logError(err);
-
-			return;
-		}
+		this.licenseKeyApplication = new LicenseKeyApplication();
+		this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
+		this.licenseKeyApplication.setServer(server);
+		this.licenseKeyApplication.setApp(app);
+		this.licenseKeyApplication.setGameApplication(this.gameApplication);
+		this.licenseKeyApplication.setSessionId(this.sessionId);
+		this.licenseKeyApplication.setSecretkey(this.secretkey);
+		this.licenseKeyApplication.setSecretId(this.secretId);
+		this.licenseKeyApplication.setSalt(salt);
+		this.licenseKeyApplication.setPort(port);
+		this.licenseKeyApplication.run();
 
 		server.listen(port, () => {
 			Debug.log("[GN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
@@ -378,4 +374,5 @@ export class ServerApplication extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

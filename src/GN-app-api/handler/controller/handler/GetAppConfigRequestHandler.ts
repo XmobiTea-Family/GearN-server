@@ -21,6 +21,7 @@ class GetAppConfigOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class GetAppConfigRequestHandler extends RequestHandler {
@@ -35,9 +36,9 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-		operationResponse.setParameter(ParameterCode.ErrorCode, GetAppConfigErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, GetAppConfigErrorCode.Ok);
 
 		let configNotUptodateLst: string[] = [];
 
@@ -59,7 +60,7 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 			}
 		}
 
-		if (configNotUptodateLst.length != 0) operationResponse.setParameter(GetAppConfigParameterCode.ConfigNotUptodateLst, configNotUptodateLst);
+		operationResponse.setScriptData(GetAppConfigParameterCode.ConfigNotUptodateLst, configNotUptodateLst);
 
 		if (this.postHandle != null) {
 			await this.postHandle(authInfo, request, operationResponse);
@@ -67,4 +68,5 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

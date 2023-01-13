@@ -20,6 +20,7 @@ class GetFileUploadInfoOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class GetFileUploadInfoRequestHandler extends RequestHandler {
@@ -36,30 +37,31 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 
 		let doc = await this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo").findOne({ FileId: request.fileId });
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		if (!doc) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, FileUploadInfoErrorCode.FileIdNotFound);
+			operationResponse.setScriptData(ParameterCode.ErrorCode, FileUploadInfoErrorCode.FileIdNotFound);
 			return operationResponse;
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, FileUploadInfoErrorCode.Ok);
+		operationResponse.setScriptData(ParameterCode.ErrorCode, FileUploadInfoErrorCode.Ok);
 
-		operationResponse.setParameter(FileUploadInfoParameterCode.FileId, doc["FileId"]);
-		operationResponse.setParameter(FileUploadInfoParameterCode.OriginFileName, doc["OriginFileName"]);
-		operationResponse.setParameter(FileUploadInfoParameterCode.TsCreate, doc["TsCreate"]);
-		operationResponse.setParameter(FileUploadInfoParameterCode.UserId, doc["UserId"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.FileId, doc["FileId"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.OriginFileName, doc["OriginFileName"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.TsCreate, doc["TsCreate"]);
+		operationResponse.setScriptData(FileUploadInfoParameterCode.UserId, doc["UserId"]);
 
 		if (doc["TsUploadFile"] != null) {
-			operationResponse.setParameter(FileUploadInfoParameterCode.TsUploadFile, doc["TsUploadFile"]);
-			operationResponse.setParameter(FileUploadInfoParameterCode.MimeType, doc["MimeType"]);
-			operationResponse.setParameter(FileUploadInfoParameterCode.Size, doc["Size"]);
-			operationResponse.setParameter(FileUploadInfoParameterCode.FolderFileName, doc["FolderFileName"]);
+			operationResponse.setScriptData(FileUploadInfoParameterCode.TsUploadFile, doc["TsUploadFile"]);
+			operationResponse.setScriptData(FileUploadInfoParameterCode.MimeType, doc["MimeType"]);
+			operationResponse.setScriptData(FileUploadInfoParameterCode.Size, doc["Size"]);
+			operationResponse.setScriptData(FileUploadInfoParameterCode.FolderFileName, doc["FolderFileName"]);
 		} else {
-			operationResponse.setParameter(FileUploadInfoParameterCode.TsUploadExpire, doc["TsUploadExpire"]);
+			operationResponse.setScriptData(FileUploadInfoParameterCode.TsUploadExpire, doc["TsUploadExpire"]);
 		}
 
 		return operationResponse;
 	}
+
 }

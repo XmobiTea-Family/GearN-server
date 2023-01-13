@@ -1,7 +1,7 @@
 export enum InvalidMemberType {
     UnknownError = 0,
     DataRequired = 1,
-	TypeInvalid = 2,
+    TypeInvalid = 2,
     StringNull = 3,
     StringMinLength = 4,
     StringMaxLength = 5,

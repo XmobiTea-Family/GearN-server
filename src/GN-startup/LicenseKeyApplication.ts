@@ -1,5 +1,3 @@
-const VERIFY_MINUTE = 5;
-
 import http from "http";
 import { GameApplication } from "./../GameApplication";
 import { Express } from "express";
@@ -21,7 +19,7 @@ class VerifyApi {
 
 	private static authToken: string;
 
-	private static async send(subUri: string, postData: any): Promise<{ [k: string]: any }> {
+	private static async send(subUri: string, postData: any): Promise<any[]> {
 		let headers: any = {
 			"Content-Type": "application/json",
 		};
@@ -30,7 +28,7 @@ class VerifyApi {
 			headers["a"] = this.authToken as string;
 		}
 
-		let answer: { [k: string]: any } = {};
+		let answer: [any];
 
 		try {
 			let result = await axios.post(this.BaseUrl + "/" + subUri, postData, {
@@ -38,14 +36,16 @@ class VerifyApi {
 			});
 			answer = result.data;
 		} catch (error) {
-			answer["error"] = error;
+			answer = [
+				ReturnCode.InternalServerError
+			];
 		}
 
 		return answer;
 	}
 
-	private static async sendRequestViaJson(code: number, postData: any): Promise<{ [k: string]: any }> {
-		return await this.send("0/" + code, postData);
+	private static async sendRequestViaJson(code: number, postData: {}): Promise<any[]> {
+		return await this.send("api/0/" + code, postData);
 	}
 
 	public static async authentication(licenseKeyInfo: LicenseKeyInfo, callback: (authenticationSuccess: boolean) => void) {
@@ -58,24 +58,20 @@ class VerifyApi {
 		);
 
 		let answer = await this.sendRequestViaJson(OperationCode.Login, postData.toData());
-		if (answer.error) {
-			callback(false);
-		} else {
-			try {
-				let returnData = JSON.parse(answer as any);
-				let returnCode = returnData[0] as number;
-				if (returnCode == ReturnCode.Ok) {
-					let parameters = JSON.parse(returnData[1]);
+		try {
+			let returnData = answer;
+			let returnCode = returnData[0] as number;
+			if (returnCode == ReturnCode.Ok) {
+				let parameters = returnData[1];
 
-					this.authToken = parameters[ParameterCode.AuthToken.toString()];
-					callback(true);
-				} else {
-					callback(false);
-				}
-			} catch (err) {
-				Debug.logError("authentication ", err);
+				this.authToken = parameters[ParameterCode.AuthToken.toString()];
+				callback(true);
+			} else {
 				callback(false);
 			}
+		} catch (err) {
+			Debug.logError("authentication ", err);
+			callback(false);
 		}
 	}
 
@@ -89,43 +85,36 @@ class VerifyApi {
 	) {
 		let postData = new GNHashtable();
 
-		postData.add(1, sessionId);
-		postData.add(2, licenseKeyInfo.ProductId);
-		postData.add(3, licenseKeyInfo.UnformattedLicenseKey);
-		postData.add(4, licenseKeyInfo.LicenseKey);
-		postData.add(6, secretkey);
-		postData.add(7, salt);
-		postData.add(8, port);
+		postData.add("1", sessionId);
+		postData.add("2", licenseKeyInfo.ProductId);
+		postData.add("3", licenseKeyInfo.UnformattedLicenseKey);
+		postData.add("4", licenseKeyInfo.LicenseKey);
+		postData.add("6", secretkey);
+		postData.add("7", salt);
+		postData.add("8", port);
 
 		let answer = await this.sendRequestViaJson(12, postData.toData());
-		if (answer.error) {
-			callback(null);
-		} else {
-			try {
-				let gnHashtable = new GNHashtable();
+		try {
+			let gnHashtable = new GNHashtable();
 
-				let returnData = JSON.parse(answer as any);
-				let returnCode = returnData[0] as number;
-				if (returnCode == ReturnCode.Ok) {
-					let parameters = JSON.parse(returnData[1]);
+			let returnData = answer;
+			let returnCode = returnData[0] as number;
+			if (returnCode == ReturnCode.Ok) {
+				let parameters = returnData[1];
 
-					let keys = Object.keys(parameters);
-					for (let i = 0; i < keys.length; i++) {
-						let key = keys[i];
-
-						let keyInt = Number.parseInt(key);
-
-						if (!isNaN(keyInt)) gnHashtable.add(keyInt, parameters[key]);
-					}
-
-					callback(gnHashtable);
-				} else {
-					callback(gnHashtable);
+				let keys = Object.keys(parameters);
+				for (let i = 0; i < keys.length; i++) {
+					let key = keys[i];
+					gnHashtable.add(key, parameters[key]);
 				}
-			} catch (err) {
-				Debug.logError("authentication ", err);
-				callback(null);
+
+				callback(gnHashtable);
+			} else {
+				callback(gnHashtable);
 			}
+		} catch (err) {
+			Debug.logError("authentication ", err);
+			callback(null);
 		}
 	}
 }
@@ -138,6 +127,8 @@ interface LicenseKeyInfo {
 }
 
 export class LicenseKeyApplication {
+	private static readonly VERIFY_MINUTE: number = 5;
+
 	private sessionId: string;
 	private secretId: string;
 	private secretkey: string;
@@ -196,8 +187,6 @@ export class LicenseKeyApplication {
 	}
 
 	public run(): void {
-		this.verifyMinute = VERIFY_MINUTE;
-
 		const verifyRouter = express.Router();
 		verifyRouter.use(express.json());
 
@@ -237,7 +226,8 @@ export class LicenseKeyApplication {
 				this.debug(-1, LicenseKeyApplication.maxCCU);
 			}, 500);
 		} else {
-			let allLines = fs.readFileSync(this.licenseKeyFilePath).toString("utf-8");
+			//let allLines = fs.readFileSync("D:/GN_GN-Dashboard.license", 'utf-8').split(/\r?\n/);
+			let allLines = fs.readFileSync(this.licenseKeyFilePath, 'utf-8').split(/\r?\n/);
 
 			this.licenseKeyInfo = {
 				ProjectName: allLines[0],
@@ -246,33 +236,40 @@ export class LicenseKeyApplication {
 				LicenseKey: allLines[3],
 			};
 
-			VerifyApi.authentication(this.licenseKeyInfo, (authenticationSuccess) => {
-				if (authenticationSuccess) {
-					LicenseKeyApplication.maxCCU = 50;
-
-					VerifyApi.verifyServerApplication(this.licenseKeyInfo, this.sessionId, this.secretkey, this.salt, this.port.toString(), (gnHashtable) => {
-						if (gnHashtable) {
-							LicenseKeyApplication.maxCCU = gnHashtable.getNumber(5, LicenseKeyApplication.maxCCU);
-							let errorCode = gnHashtable.getNumber(0);
-							setTimeout(() => {
-								this.debug(errorCode, LicenseKeyApplication.maxCCU);
-							}, 500);
-						}
-					});
-
-					this.gameApplication.getTimerService().subscriberEveryMinute(() => {
-						this.validateApp();
-					});
-				}
-			});
+			setTimeout(() => {
+				this.authenticationApp();
+			}, 500);
 		}
+	}
+
+	private authenticationApp() {
+		VerifyApi.authentication(this.licenseKeyInfo, (authenticationSuccess) => {
+			if (authenticationSuccess) {
+				LicenseKeyApplication.maxCCU = 50;
+
+				this.validateApp();
+
+				this.gameApplication.getTimerService().subscriberEveryMinute(() => {
+					this.validateApp();
+				});
+			}
+			else {
+				setTimeout(() => {
+					this.debug(4, LicenseKeyApplication.maxCCU);
+				}, 500);
+
+				setTimeout(() => {
+					this.authenticationApp();
+				}, 5000);
+			}
+		});
 	}
 
 	private validateApp() {
 		this.verifyMinute -= 1;
 		if (this.verifyMinute > 0) return;
 
-		this.verifyMinute = VERIFY_MINUTE;
+		this.verifyMinute = LicenseKeyApplication.VERIFY_MINUTE;
 
 		VerifyApi.verifyServerApplication(this.licenseKeyInfo, this.sessionId, this.secretkey, this.salt, this.port.toString(), (gnHashtable) => {
 			if (gnHashtable) {
@@ -292,15 +289,18 @@ export class LicenseKeyApplication {
 
 	private debug(errorCode: number, ccu: number) {
 		if (errorCode == -1) {
-			Debug.log("[GN] No license Key found, maxCCU is " + ccu, "please try go https://gnserver.xmobitea.com to get free license key");
+			Debug.log("[GN] No license Key found, maxCCU is " + ccu, "please try go https://gn.xmobitea.com to get free license key");
 		} else if (errorCode == 1) {
-			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " verify success, maxCCU is " + ccu);
+			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " verify success, maxCCU is " + (ccu == -1) ? "unlimited" : ccu);
 		} else if (errorCode == 2) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " invalid, maxCCU is " + ccu);
 		} else if (errorCode == 3) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " expired, maxCCU is " + ccu);
+		} else if (errorCode == 4) {
+			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " does authentication error, resend after 5 seconds, maxCCU is " + ccu);
 		} else {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " unknown error, maxCCU is " + ccu);
 		}
 	}
+
 }

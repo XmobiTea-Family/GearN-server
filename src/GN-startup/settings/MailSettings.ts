@@ -17,7 +17,8 @@ abstract class BuilderBase {
 		return this.fromEmail;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<MailSettings> {
@@ -38,11 +39,16 @@ class Builder extends BuilderBase implements IBuilder<MailSettings> {
 
 	constructor() {
 		super();
+
+		this.enable = false;
+		this.sendGridApiKey = "";
+		this.fromEmail = "";
 	}
 
 	public build() {
 		return new MailSettings(this);
 	}
+
 }
 
 export class MailSettings extends BuilderBase {
@@ -57,4 +63,5 @@ export class MailSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

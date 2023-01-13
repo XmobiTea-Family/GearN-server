@@ -1,20 +1,25 @@
-import { Request } from "./base/Request";
+
 import { GNHashtable } from "./../../common/GNData";
-import { InvalidMember } from "./../InvalidMember";
 
 export class OperationRequest {
-	protected originRequest: Request;
+	public static readonly DefaultTimeOut: number = 15;
 
-	protected operationCode: number;
-	protected requestId: number;
-	protected parameters: GNHashtable;
-
-    protected isValid: boolean;
-
-	private invalidMembers: InvalidMember[];
+	private isValid: boolean;
 
 	public isValidRequest(): boolean {
 		return this.isValid;
+	}
+
+	private operationCode: number;
+	private requestId: number;
+	private parameters: GNHashtable;
+	private encrypted: boolean;
+	private timeout: number;
+
+	constructor(operationCode: number, encrypted: boolean, timeout: number = OperationRequest.DefaultTimeOut) {
+		this.operationCode = operationCode;
+		this.encrypted = encrypted;
+		this.timeout = timeout;
 	}
 
 	public getOperationCode(): number {
@@ -29,23 +34,44 @@ export class OperationRequest {
 		return this.parameters;
 	}
 
-	public getOriginRequest(): Request {
-		return this.originRequest;
+	public isEncrypted(): boolean {
+		return this.encrypted;
 	}
 
-	constructor() {
-		this.invalidMembers = [];
-	 }
+	public getTimeout(): number {
+		return this.timeout;
+	}
+
+	public setRequestId(requestId: number): OperationRequest {
+		this.requestId = requestId;
+		return this;
+	}
+
+	public setScriptData(key: string, value: any): OperationRequest {
+		if (this.parameters == null) this.parameters = new GNHashtable();
+
+		this.parameters.add(key, value);
+
+		return this;
+	}
+
+	public setParameters(parameters: GNHashtable): OperationRequest {
+		this.parameters = parameters;
+		return this;
+	}
+
+	public setEncrypted(encrypted: boolean): OperationRequest {
+		this.encrypted = encrypted;
+		return this;
+	}
+
+	public setTimeout(timeout: number): OperationRequest {
+		this.timeout = timeout;
+		return this;
+	}
 
 	public toString(): string {
-		return this.operationCode + " " + this.requestId + " " + this.parameters.toData.toString();
+		return this.operationCode + " " + this.requestId + " " + this.parameters.toString();
 	}
 
-    public addInvalidMember(invalidMember: InvalidMember) {
-        this.invalidMembers.push(invalidMember);
-    }
-
-    public getInvalidMembers(): InvalidMember[] {
-        return this.invalidMembers;
-    }
 }

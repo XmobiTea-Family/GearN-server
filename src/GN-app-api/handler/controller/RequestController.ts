@@ -2,6 +2,7 @@ import { OperationResponse } from "./../../../GN-common/entity/operationResponse
 import { Request } from "./../../../GN-common/entity/operationRequest/base/Request";
 import { IRequestHandler } from "./handler/base/IRequestHandler";
 import { IRequestConverterService } from "./../../service/IRequestConverterService";
+import { OperationHelper } from "./../../../GN-common/entity/operationHelper/OperationHelper";
 
 export class RequestController {
 	private handlers: {
@@ -28,7 +29,7 @@ export class RequestController {
 	}
 
 	public removeAllHandlers() {
-		this.handlers = [];
+		this.handlers = {};
 	}
 
 	public getHandler(code: number): IRequestHandler {
@@ -37,12 +38,12 @@ export class RequestController {
 
 	public async handleRequest(request: Request): Promise<OperationResponse> {
 		let code = request.getCode();
-		let isAuthenticated = request.getAuthenticated();
+		let isAuthenticated = request.isAuthenticated();
 		if (!isAuthenticated) {
 			// if the user not authentication
 			// and this request not in unAthenticated
 			if (this.requestUnAuthenticatedCodes.indexOf(code) == -1) {
-				return OperationResponse.newOperationNotAuthorized(code, request.getRequestId());
+				return OperationHelper.newOperationResponseNotAuthorized(code, request.getRequestId(), request.isEncrypted());
 			}
 		}
 
@@ -60,4 +61,5 @@ export class RequestController {
 		this.handlers = {};
 		this.requestUnAuthenticatedCodes = [];
 	}
+
 }

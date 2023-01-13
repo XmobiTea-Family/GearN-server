@@ -55,6 +55,13 @@ export class SocketApp {
 		this.io = new Server(this.server, {
 			pingInterval: this.appSettings.getPingInterval(),
 			pingTimeout: this.appSettings.getPingTimeout(),
+
+			cors: {
+				origin: this.appSettings.getOrigin(),
+				allowedHeaders: this.appSettings.getAllowedHeaders(),
+				credentials: this.appSettings.getCredentials(),
+				methods: this.appSettings.getMethods(),
+			}
 		});
 
 		this.socketAppHandler = new SocketAppHandler();
@@ -63,6 +70,8 @@ export class SocketApp {
 		this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.socketAppHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.socketAppHandler.setEnableSendAndReceiveDebug(this.appSettings.getEnableSendAndReceiveDebug());
+		this.socketAppHandler.setEnablePostViaMsgPack(this.appSettings.getEnablePostViaMsgPack());
+		this.socketAppHandler.setEnablePostViaJson(this.appSettings.getEnablePostViaJson());
 
 		if (this.appSettings.getEnable()) {
 			this.socketAppHandler.run();
@@ -74,7 +83,9 @@ export class SocketApp {
 		if (this.socketAppHandler != null) this.socketAppHandler.setEmitter(this.emitter);
 
 		this.io.adapter(createAdapter(adapterEventCollection) as any);
+
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
