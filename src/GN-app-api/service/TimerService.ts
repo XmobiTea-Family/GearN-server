@@ -109,4 +109,5 @@ export class TimerService implements ITimerService {
 		let indexOf = this.everyDayRunnableLst.indexOf(runnable);
 		if (indexOf != -1) this.everyDayRunnableLst.splice(indexOf, 1);
 	}
+
 }

@@ -37,7 +37,8 @@ abstract class BuilderBase {
 		return this.headerIP;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<OtherSettings> {
@@ -78,11 +79,20 @@ class Builder extends BuilderBase implements IBuilder<OtherSettings> {
 
 	constructor() {
 		super();
+
+		this.authTokenCollectionName = "";
+		this.adapterEventCollectionName = "";
+		this.configGameCollectionName = "";
+		this.packageName = "";
+		this.appleClientId = "";
+		this.googleClientId = "";
+		this.headerIP = "";
 	}
 
 	public build() {
 		return new OtherSettings(this);
 	}
+
 }
 
 export class OtherSettings extends BuilderBase {
@@ -101,4 +111,5 @@ export class OtherSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

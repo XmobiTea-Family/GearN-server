@@ -22,6 +22,7 @@ class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
@@ -47,7 +48,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo").insertOne(doc);
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, FileUploadInfoErrorCode.Ok);
 
@@ -59,4 +60,5 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

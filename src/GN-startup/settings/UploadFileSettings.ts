@@ -4,7 +4,7 @@ abstract class BuilderBase {
 	protected enable: boolean;
 	protected uploadPath: string;
 	protected maxSizeUpload: number;
-    protected mimeTypeAccepts: string[];
+	protected mimeTypeAccepts: string[];
 
 	public getEnable(): boolean {
 		return this.enable;
@@ -22,7 +22,8 @@ abstract class BuilderBase {
 		return this.mimeTypeAccepts;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<UploadFileSettings> {
@@ -35,26 +36,30 @@ class Builder extends BuilderBase implements IBuilder<UploadFileSettings> {
 		this.uploadPath = uploadPath;
 		return this;
 	}
-	
+
 	public setMaxSizeUpload(maxSizeUpload: number): Builder {
 		this.maxSizeUpload = maxSizeUpload;
 		return this;
 	}
 
-    public setMimeTypeAccepts(mimeTypeAccepts: string[]): Builder {
+	public setMimeTypeAccepts(mimeTypeAccepts: string[]): Builder {
 		this.mimeTypeAccepts = mimeTypeAccepts;
 		return this;
+	}
+
+	constructor() {
+		super();
+
+		this.enable = false;
+		this.uploadPath = "";
+		this.maxSizeUpload = 0;
+		this.mimeTypeAccepts = [];
 	}
 
 	public build() {
 		return new UploadFileSettings(this);
 	}
 
-	constructor() {
-		super();
-
-		this.mimeTypeAccepts = [];
-	}
 }
 
 export class UploadFileSettings extends BuilderBase {
@@ -70,4 +75,5 @@ export class UploadFileSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

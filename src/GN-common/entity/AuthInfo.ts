@@ -59,7 +59,7 @@ abstract class BuilderBase {
 
 	public setTsCreate(tsCreate: number): Builder {
 		//this.tsCreate = tsCreate;
-		return this as Builder; 
+		return this as Builder;
 	}
 
 	public setSocketId(socketId: string): Builder {
@@ -146,6 +146,7 @@ abstract class BuilderBase {
 		this.otherDatas = {};
 		this.socketRoomIds = [];
 	}
+
 }
 
 class Builder extends BuilderBase implements IBuilder<AuthInfo> {
@@ -171,7 +172,7 @@ class Builder extends BuilderBase implements IBuilder<AuthInfo> {
 
 	public setTsCreate(tsCreate: number): Builder {
 		this.tsCreate = tsCreate;
-		return this as Builder; 
+		return this as Builder;
 	}
 
 	public build(): AuthInfo {
@@ -184,6 +185,7 @@ class Builder extends BuilderBase implements IBuilder<AuthInfo> {
 		// this.methods = [];
 		// this.allowedHeaders = [];
 	}
+
 }
 
 export class AuthInfo extends BuilderBase {
@@ -221,4 +223,5 @@ export class AuthInfo extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

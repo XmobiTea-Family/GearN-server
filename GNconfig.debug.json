@@ -18,9 +18,15 @@
 		"httpAppEnablePostViaJson": true,
 
 		"socketAppEnable": true,
+		"socketAppAllowOrigin": "*",
+		"socketAppCredentials": true,
+		"socketAppAllowMethods": ["GET"],
+		"socketAppAllowHeaders": [],
+		"socketAppEnableSendAndReceiveDebug": true,
+		"socketAppEnablePostViaMsgPack": true,
+		"socketAppEnablePostViaJson": true,
 		"socketAppPingInterval": 50000,
 		"socketAppPingTimeout": 5000,
-		"socketAppEnableSendAndReceiveDebug": true,
 
 		"uploadFileEnable": true,
 		"uploadPath": "./file-upload",

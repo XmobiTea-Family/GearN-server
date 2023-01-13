@@ -21,6 +21,7 @@ class GetAppConfigOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class GetAppConfigRequestHandler extends RequestHandler {
@@ -35,7 +36,7 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, GetAppConfigErrorCode.Ok);
 
@@ -67,4 +68,5 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

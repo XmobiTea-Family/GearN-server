@@ -80,4 +80,5 @@ export class Debug {
 			this.logger.fatal(message);
 		}
 	}
+
 }

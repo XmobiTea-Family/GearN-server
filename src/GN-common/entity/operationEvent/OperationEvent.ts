@@ -1,12 +1,27 @@
 import { GNHashtable } from "./../../common/GNData";
 
 export class OperationEvent {
+
 	private eventCode: number;
 	private parameters: GNHashtable;
+	private encrypted: boolean;
 
-	constructor(eventCode: number) {
+	constructor(eventCode: number, parameters: GNHashtable = null, encrypted: boolean = true) {
 		this.eventCode = eventCode;
-		this.parameters = new GNHashtable();
+		this.parameters = parameters;
+		this.encrypted = encrypted;
+	}
+
+	public getEventCode(): number {
+		return this.eventCode;
+	}
+
+	public getParameters(): GNHashtable {
+		return this.parameters;
+	}
+
+	public isEncrypted(): boolean {
+		return this.encrypted;
 	}
 
 	public setScriptData(k: string, value: any): OperationEvent {
@@ -19,11 +34,13 @@ export class OperationEvent {
 		return this;
 	}
 
+	public setEncrypted(encrypted: boolean): OperationEvent {
+		this.encrypted = encrypted;
+		return this;
+	}
+
 	public toString(): string {
 		return this.eventCode + " " + this.parameters.toString();
 	}
 
-	public toSocketData(): [number, {}] {
-		return [this.eventCode, this.parameters.toData()];
-	}
 }

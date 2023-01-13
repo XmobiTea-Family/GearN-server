@@ -1,25 +1,23 @@
-const Username = "Username";
-const Password = "Password";
-const Fullname = "Fullname";
-const UserExternal = "UserExternal";
-const UserEmail = "UserEmail";
-const UserNumberPhone = "UserNumberPhone";
-const UserAddress = "UserAddress";
-const UserPassport = "UserPassport";
-const TsBirthday = "TsBirthday";
-const IPAddressCreate = "IPAddressCreate";
-
-const Value = "Value";
-const IsConfirm = "IsConfirm";
-const PinCode = "PinCode";
-const TsExpire = "TsExpire";
-
-const DOT = ".";
-
 import * as mongoDB from "mongodb";
 import { xPlayerBase } from "./xPlayerBase";
 
 export class xSparkPlayer extends xPlayerBase {
+	private static readonly Username: string = "Username";
+	private static readonly Password: string = "Password";
+	private static readonly Fullname: string = "Fullname";
+	private static readonly UserExternal: string = "UserExternal";
+	private static readonly UserEmail: string = "UserEmail";
+	private static readonly UserNumberPhone: string = "UserNumberPhone";
+	private static readonly UserAddress: string = "UserAddress";
+	private static readonly UserPassport: string = "UserPassport";
+	private static readonly TsBirthday: string = "TsBirthday";
+	private static readonly IPAddressCreate: string = "IPAddressCreate";
+
+	private static readonly Value: string = "Value";
+	private static readonly IsConfirm: string = "IsConfirm";
+	private static readonly PinCode: string = "PinCode";
+	private static readonly TsExpire: string = "TsExpire";
+
 	private username: string;
 	private password: string;
 	private fullname: string;
@@ -40,17 +38,17 @@ export class xSparkPlayer extends xPlayerBase {
 	}
 
 	private setDocument(result: mongoDB.WithId<mongoDB.Document>) {
-		this.username = result[Username];
-		this.password = result[Password];
-		this.fullname = result[Fullname];
-		this.userExternal = result[UserExternal];
-		this.userEmail = result[UserEmail];
-		this.userNumberPhone = result[UserNumberPhone];
-		this.userAddress = result[UserAddress];
-		this.userPassport = result[UserPassport];
-		this.tsBirthday = result[TsBirthday];
+		this.username = result[xSparkPlayer.Username];
+		this.password = result[xSparkPlayer.Password];
+		this.fullname = result[xSparkPlayer.Fullname];
+		this.userExternal = result[xSparkPlayer.UserExternal];
+		this.userEmail = result[xSparkPlayer.UserEmail];
+		this.userNumberPhone = result[xSparkPlayer.UserNumberPhone];
+		this.userAddress = result[xSparkPlayer.UserAddress];
+		this.userPassport = result[xSparkPlayer.UserPassport];
+		this.tsBirthday = result[xSparkPlayer.TsBirthday];
 
-		this.ipAddressCreate = result[IPAddressCreate];
+		this.ipAddressCreate = result[xSparkPlayer.IPAddressCreate];
 	}
 
 	public getUsername(): string {
@@ -112,7 +110,7 @@ export class xSparkPlayer extends xPlayerBase {
 		this.userExternal[key] = value;
 
 		let updateQuery: { [k: string]: any } = {};
-		updateQuery[UserExternal + DOT + key] = value;
+		updateQuery[xSparkPlayer.UserExternal + xSparkPlayer.DOT + key] = value;
 
 		this.collection.updateOne(
 			{ _id: this._id },
@@ -127,12 +125,12 @@ export class xSparkPlayer extends xPlayerBase {
 	}
 
 	public setUserEmail(value: string, isConfirm: boolean) {
-		this.userEmail[Value] = value;
-		this.userEmail[IsConfirm] = isConfirm;
+		this.userEmail[xSparkPlayer.Value] = value;
+		this.userEmail[xSparkPlayer.IsConfirm] = isConfirm;
 
 		let updateQuery: { [k: string]: any } = {};
-		updateQuery[UserEmail + DOT + Value] = value;
-		updateQuery[UserEmail + DOT + IsConfirm] = isConfirm;
+		updateQuery[xSparkPlayer.UserEmail + xSparkPlayer.DOT + xSparkPlayer.Value] = value;
+		updateQuery[xSparkPlayer.UserEmail + xSparkPlayer.DOT + xSparkPlayer.IsConfirm] = isConfirm;
 
 		this.collection.updateOne(
 			{ _id: this._id },
@@ -144,12 +142,12 @@ export class xSparkPlayer extends xPlayerBase {
 
 	public setPinCodeUserMail(pinCode: string, tsExpire: number) {
 		if (!pinCode) {
-			delete this.userEmail[PinCode];
-			delete this.userEmail[TsExpire];
+			delete this.userEmail[xSparkPlayer.PinCode];
+			delete this.userEmail[xSparkPlayer.TsExpire];
 
 			let updateQuery: { [k: string]: any } = {};
-			updateQuery[UserEmail + DOT + PinCode] = pinCode;
-			updateQuery[UserEmail + DOT + TsExpire] = tsExpire;
+			updateQuery[xSparkPlayer.UserEmail + xSparkPlayer.DOT + xSparkPlayer.PinCode] = pinCode;
+			updateQuery[xSparkPlayer.UserEmail + xSparkPlayer.DOT + xSparkPlayer.TsExpire] = tsExpire;
 
 			this.collection.updateOne(
 				{ _id: this._id },
@@ -158,12 +156,12 @@ export class xSparkPlayer extends xPlayerBase {
 				}
 			);
 		} else {
-			this.userEmail[PinCode] = pinCode;
-			this.userEmail[TsExpire] = tsExpire;
+			this.userEmail[xSparkPlayer.PinCode] = pinCode;
+			this.userEmail[xSparkPlayer.TsExpire] = tsExpire;
 
 			let updateQuery: { [k: string]: any } = {};
-			updateQuery[UserEmail + DOT + PinCode] = pinCode;
-			updateQuery[UserEmail + DOT + TsExpire] = tsExpire;
+			updateQuery[xSparkPlayer.UserEmail + xSparkPlayer.DOT + xSparkPlayer.PinCode] = pinCode;
+			updateQuery[xSparkPlayer.UserEmail + xSparkPlayer.DOT + xSparkPlayer.TsExpire] = tsExpire;
 
 			this.collection.updateOne(
 				{ _id: this._id },
@@ -179,12 +177,12 @@ export class xSparkPlayer extends xPlayerBase {
 	}
 
 	public setUserNumberPhone(value: string, isConfirm: boolean) {
-		this.userNumberPhone[Value] = value;
-		this.userNumberPhone[IsConfirm] = isConfirm;
+		this.userNumberPhone[xSparkPlayer.Value] = value;
+		this.userNumberPhone[xSparkPlayer.IsConfirm] = isConfirm;
 
 		let updateQuery: { [k: string]: any } = {};
-		updateQuery[UserNumberPhone + DOT + Value] = value;
-		updateQuery[UserNumberPhone + DOT + IsConfirm] = isConfirm;
+		updateQuery[xSparkPlayer.UserNumberPhone + xSparkPlayer.DOT + xSparkPlayer.Value] = value;
+		updateQuery[xSparkPlayer.UserNumberPhone + xSparkPlayer.DOT + xSparkPlayer.IsConfirm] = isConfirm;
 
 		this.collection.updateOne(
 			{ _id: this._id },
@@ -198,15 +196,15 @@ export class xSparkPlayer extends xPlayerBase {
 		return this.userAddress;
 	}
 
-	public setUserAddress() {}
+	public setUserAddress() { }
 
 	public getUserPassport() {
 		return this.userPassport;
 	}
 
-	public setUserPassport() {}
+	public setUserPassport() { }
 
-	public getTsBirthday() {}
+	public getTsBirthday() { }
 
 	public setTsBirthday() {
 		return this.tsBirthday;
@@ -215,4 +213,5 @@ export class xSparkPlayer extends xPlayerBase {
 	public getIPAddressCreate() {
 		return this.ipAddressCreate;
 	}
+
 }

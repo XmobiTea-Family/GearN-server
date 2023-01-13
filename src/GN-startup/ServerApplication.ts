@@ -76,7 +76,7 @@ abstract class BuilderBase {
 		return this.ddosSettings;
 	}
 
-	constructor() {}
+	constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
@@ -144,14 +144,14 @@ export class ServerApplication extends BuilderBase {
 	private licenseKeyApplication: LicenseKeyApplication;
 
 	private sessionId: string;
-    private secretkey: string;
-    private secretId: string;
+	private secretkey: string;
+	private secretId: string;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
 		let salt = nanoid(10);
-        this.sessionId = nanoid(15);
-        this.secretkey = nanoid(20);
-        this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
+		this.sessionId = nanoid(15);
+		this.secretkey = nanoid(20);
+		this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
 
 		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
 		console.log("[GN] FullLogPath at: " + fullLogPath);
@@ -374,4 +374,5 @@ export class ServerApplication extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

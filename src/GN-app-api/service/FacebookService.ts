@@ -1,15 +1,15 @@
-const graphFBAPIUrl = "https://graph.facebook.com";
-const graphFBAPIContentURL = "/me?fields=id,name,email,friends&access_token=";
-
 import { IFacebookService } from "./IFacebookService";
 import axios from "axios";
 
 export class FacebookService implements IFacebookService {
+	private static readonly graphFBAPIUrl: string = "https://graph.facebook.com";
+	private static readonly graphFBAPIContentURL: string = "/me?fields=id,name,email,friends&access_token=";
+
 	public async getBasicInfoByAccessToken(accessToken: string): Promise<{ [k: string]: any }> {
 		let answer: { [k: string]: any } = {};
 
 		try {
-			let result = await axios.get(graphFBAPIUrl + graphFBAPIContentURL + accessToken);
+			let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIContentURL + accessToken);
 			answer = result.data;
 		} catch (error) {
 			answer["error"] = error;
@@ -17,4 +17,5 @@ export class FacebookService implements IFacebookService {
 
 		return answer;
 	}
+
 }

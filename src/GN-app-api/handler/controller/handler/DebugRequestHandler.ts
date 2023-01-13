@@ -35,6 +35,7 @@ class DebugOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class DebugRequestHandler extends RequestHandler {
@@ -49,7 +50,7 @@ export class DebugRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, DebugErrorCode.Ok);
 
@@ -70,4 +71,5 @@ export class DebugRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

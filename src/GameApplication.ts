@@ -1,4 +1,4 @@
-const GN_VERSION = "1.0.3";
+const GN_VERSION = "1.0.7";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -10,7 +10,7 @@ import { FacebookService } from "./GN-app-api/service/FacebookService";
 import { SocketApp } from "./GN-startup/SocketApp";
 import { HttpApp } from "./GN-startup/HttpApp";
 import { IRequestHandler } from "./GN-app-api/handler/controller/handler/base/IRequestHandler";
-import { AuthInfo } from "./GN-common/entity/AuthInfo";
+// import { AuthInfo } from "./GN-common/entity/AuthInfo";
 import { OperationResponse } from "./GN-common/entity/operationResponse/OperationResponse";
 import { Request } from "./GN-common/entity/operationRequest/base/Request";
 import { EnterDisplayNameRequestHandler } from "./GN-app-api/handler/controller/handler/EnterDisplayNameRequestHandler";
@@ -277,4 +277,5 @@ export class GameApplication {
 	private handleOnRequest(request: Request): Promise<OperationResponse> {
 		return this.requestController.handleRequest(request);
 	}
+
 }

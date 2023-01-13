@@ -50,4 +50,5 @@ export class xConfigItem extends xConfigBase {
 		let value = this.get<{ [k: number]: any }>(key);
 		return value != null ? value : def;
 	}
+
 }

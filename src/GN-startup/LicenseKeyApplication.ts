@@ -1,5 +1,3 @@
-const VERIFY_MINUTE = 5;
-
 import http from "http";
 import { GameApplication } from "./../GameApplication";
 import { Express } from "express";
@@ -129,6 +127,8 @@ interface LicenseKeyInfo {
 }
 
 export class LicenseKeyApplication {
+	private static readonly VERIFY_MINUTE: number = 5;
+
 	private sessionId: string;
 	private secretId: string;
 	private secretkey: string;
@@ -269,7 +269,7 @@ export class LicenseKeyApplication {
 		this.verifyMinute -= 1;
 		if (this.verifyMinute > 0) return;
 
-		this.verifyMinute = VERIFY_MINUTE;
+		this.verifyMinute = LicenseKeyApplication.VERIFY_MINUTE;
 
 		VerifyApi.verifyServerApplication(this.licenseKeyInfo, this.sessionId, this.secretkey, this.salt, this.port.toString(), (gnHashtable) => {
 			if (gnHashtable) {
@@ -302,4 +302,5 @@ export class LicenseKeyApplication {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " unknown error, maxCCU is " + ccu);
 		}
 	}
+
 }

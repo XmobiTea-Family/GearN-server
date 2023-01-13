@@ -53,4 +53,5 @@ export class xConfig {
 	public getConfig(configName: string): xConfigItem {
 		return this.configDic[configName];
 	}
+
 }

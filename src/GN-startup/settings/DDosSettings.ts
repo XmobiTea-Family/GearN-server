@@ -16,7 +16,7 @@ abstract class BuilderBase {
 
 	protected reportDdosCollectionName: string;
 	protected banDdosCollectionName: string;
-	
+
 	public getSocketMaxRequestPerSecondPerIp(): number {
 		return this.socketMaxRequestPerSecondPerIp;
 	}
@@ -25,11 +25,11 @@ abstract class BuilderBase {
 		return this.socketMaxRequestPerSecondPerPeer;
 	}
 
-    public getSocketMaxPendingRequest(): number {
+	public getSocketMaxPendingRequest(): number {
 		return this.socketMaxPendingRequest;
 	}
 
-    public getSocketMaxRequestSize(): number {
+	public getSocketMaxRequestSize(): number {
 		return this.socketMaxRequestSize;
 	}
 
@@ -41,19 +41,19 @@ abstract class BuilderBase {
 		return this.httpMaxRequestPerSecondPerPeer;
 	}
 
-    public getHttpMaxPendingRequest(): number {
+	public getHttpMaxPendingRequest(): number {
 		return this.httpMaxPendingRequest;
 	}
 
-    public getHttpMaxRequestSize(): number {
+	public getHttpMaxRequestSize(): number {
 		return this.httpMaxRequestSize;
 	}
 
-    public getMaxUploadPendingRequest(): number {
+	public getMaxUploadPendingRequest(): number {
 		return this.maxUploadPendingRequest;
 	}
 
-    public getMaxDownloadPendingRequest(): number {
+	public getMaxDownloadPendingRequest(): number {
 		return this.maxDownloadPendingRequest;
 	}
 
@@ -65,77 +65,95 @@ abstract class BuilderBase {
 		return this.banDdosCollectionName;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<DdosSettings> {
-    public setSocketMaxRequestPerSecondPerIp(socketMaxRequestPerSecondPerIp: number): Builder {
+	public setSocketMaxRequestPerSecondPerIp(socketMaxRequestPerSecondPerIp: number): Builder {
 		this.socketMaxRequestPerSecondPerIp = socketMaxRequestPerSecondPerIp;
-        return this;
+		return this;
 	}
 
 	public setSocketMaxRequestPerSecondPerPeer(socketMaxRequestPerSecondPerPeer: number): Builder {
-        this.socketMaxRequestPerSecondPerPeer = socketMaxRequestPerSecondPerPeer;
-        return this;
+		this.socketMaxRequestPerSecondPerPeer = socketMaxRequestPerSecondPerPeer;
+		return this;
 	}
 
-    public setSocketMaxPendingRequest(socketMaxPendingRequest: number): Builder {
-        this.socketMaxPendingRequest = socketMaxPendingRequest;
-        return this;
+	public setSocketMaxPendingRequest(socketMaxPendingRequest: number): Builder {
+		this.socketMaxPendingRequest = socketMaxPendingRequest;
+		return this;
 	}
 
-    public setSocketMaxRequestSize(socketMaxRequestSize: number): Builder {
-        this.socketMaxRequestSize = socketMaxRequestSize;
-        return this;
+	public setSocketMaxRequestSize(socketMaxRequestSize: number): Builder {
+		this.socketMaxRequestSize = socketMaxRequestSize;
+		return this;
 	}
 
 	public setHttpMaxRequestPerSecondPerIp(httpMaxRequestPerSecondPerIp: number): Builder {
-        this.httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp;
-        return this;
+		this.httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp;
+		return this;
 	}
 
 	public setHttpMaxRequestPerSecondPerPeer(httpMaxRequestPerSecondPerPeer: number): Builder {
-        this.httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer;
-        return this;
+		this.httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer;
+		return this;
 	}
 
-    public setHttpMaxPendingRequest(httpMaxPendingRequest: number): Builder {
-        this.httpMaxPendingRequest = httpMaxPendingRequest;
-        return this;
+	public setHttpMaxPendingRequest(httpMaxPendingRequest: number): Builder {
+		this.httpMaxPendingRequest = httpMaxPendingRequest;
+		return this;
 	}
 
-    public setHttpMaxRequestSize(httpMaxRequestSize: number): Builder {
-        this.httpMaxRequestSize = httpMaxRequestSize;
-        return this;
+	public setHttpMaxRequestSize(httpMaxRequestSize: number): Builder {
+		this.httpMaxRequestSize = httpMaxRequestSize;
+		return this;
 	}
 
-    public setMaxUploadPendingRequest(maxUploadPendingRequest: number): Builder {
-        this.maxUploadPendingRequest = maxUploadPendingRequest;
-        return this;
+	public setMaxUploadPendingRequest(maxUploadPendingRequest: number): Builder {
+		this.maxUploadPendingRequest = maxUploadPendingRequest;
+		return this;
 	}
 
-    public setMaxDownloadPendingRequest(maxDownloadPendingRequest: number): Builder {
-        this.maxDownloadPendingRequest = maxDownloadPendingRequest;
-        return this;
+	public setMaxDownloadPendingRequest(maxDownloadPendingRequest: number): Builder {
+		this.maxDownloadPendingRequest = maxDownloadPendingRequest;
+		return this;
 	}
 
 	public setReportDdosCollectionName(reportDdosCollectionName: string): Builder {
-        this.reportDdosCollectionName = reportDdosCollectionName;
-        return this;
+		this.reportDdosCollectionName = reportDdosCollectionName;
+		return this;
 	}
 
 	public setBanDdosCollectionName(banDdosCollectionName: string): Builder {
-        this.banDdosCollectionName = banDdosCollectionName;
-        return this;
+		this.banDdosCollectionName = banDdosCollectionName;
+		return this;
 	}
 
 	constructor() {
 		super();
+
+		this.socketMaxRequestPerSecondPerIp = 0;
+		this.socketMaxRequestPerSecondPerPeer = 0;
+		this.socketMaxPendingRequest = 0;
+		this.socketMaxRequestSize = 0;
+
+		this.httpMaxRequestPerSecondPerIp = 0;
+		this.httpMaxRequestPerSecondPerPeer = 0;
+		this.httpMaxPendingRequest = 0;
+		this.httpMaxRequestSize = 0;
+
+		this.maxUploadPendingRequest = 0;
+		this.maxDownloadPendingRequest = 0;
+
+		this.reportDdosCollectionName = "";
+		this.banDdosCollectionName = "";
 	}
 
 	public build() {
 		return new DdosSettings(this);
 	}
+
 }
 
 export class DdosSettings extends BuilderBase {
@@ -152,7 +170,7 @@ export class DdosSettings extends BuilderBase {
 		this.httpMaxPendingRequest = builder.getHttpMaxPendingRequest();
 		this.httpMaxRequestSize = builder.getHttpMaxRequestSize();
 
-        this.maxUploadPendingRequest = builder.getMaxUploadPendingRequest();
+		this.maxUploadPendingRequest = builder.getMaxUploadPendingRequest();
 		this.maxDownloadPendingRequest = builder.getMaxDownloadPendingRequest();
 
 		this.reportDdosCollectionName = builder.getReportDdosCollectionName();
@@ -162,4 +180,5 @@ export class DdosSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

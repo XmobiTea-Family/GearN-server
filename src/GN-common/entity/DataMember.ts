@@ -8,13 +8,14 @@ export interface EnhancedFieldMetadata extends ObjectFieldMetadata {
     defaultValue: any;
 
     activeConditionValid: boolean;
-    
+
     mustNonNull?: boolean;
     minLength?: number;
     maxLength?: number;
     minValue?: number;
     maxValue?: number;
     mustInt?: boolean;
+
 }
 
 export enum FieldType {
@@ -24,24 +25,28 @@ export enum FieldType {
     Boolean = 3,
     GNHashtable = 4,
     GNArray = 5,
+
 }
 
 export interface EnhancedObjectMedata extends ObjectMetadata {
     fields: EnhancedFieldMetadata[];
+
 }
 
 interface DataMemberBaseArgs {
     code: string;
     isOptional?: boolean;
     defaultValue?: any;
+
 }
 
 interface DataMemberArgs extends DataMemberBaseArgs {
     fieldType?: FieldType;
+
 }
 
 interface OtherDataMemberArgs extends DataMemberBaseArgs {
-    
+
 }
 
 interface StringDataMemberArgs extends OtherDataMemberArgs {
@@ -49,10 +54,12 @@ interface StringDataMemberArgs extends OtherDataMemberArgs {
     mustNonNull?: boolean;
     minLength?: number;
     maxLength?: number;
+
 }
 
 interface BooleanDataMemberArgs extends OtherDataMemberArgs {
     defaultValue?: boolean;
+
 }
 
 interface NumberDataMemberArgs extends OtherDataMemberArgs {
@@ -60,6 +67,7 @@ interface NumberDataMemberArgs extends OtherDataMemberArgs {
     minValue?: number;
     maxValue?: number;
     mustInt?: boolean;
+
 }
 
 interface GNHashtableDataMemberArgs extends OtherDataMemberArgs {
@@ -67,6 +75,7 @@ interface GNHashtableDataMemberArgs extends OtherDataMemberArgs {
     mustNonNull?: boolean;
     minLength?: number;
     maxLength?: number;
+
 }
 
 interface GNArrayDataMemberArgs extends OtherDataMemberArgs {
@@ -74,6 +83,7 @@ interface GNArrayDataMemberArgs extends OtherDataMemberArgs {
     mustNonNull?: boolean;
     minLength?: number;
     maxLength?: number;
+
 }
 
 export const DataMember = (args: DataMemberArgs) => (prototype: any, propertyKey: string) => {
@@ -84,6 +94,7 @@ export const DataMember = (args: DataMemberArgs) => (prototype: any, propertyKey
     field.fieldType = args.fieldType == null ? FieldType.Other : args.fieldType;
 
     field.activeConditionValid = false;
+
 };
 
 export const StringDataMember = (args: StringDataMemberArgs) => (prototype: any, propertyKey: string) => {
@@ -112,6 +123,7 @@ export const StringDataMember = (args: StringDataMemberArgs) => (prototype: any,
     field.mustNonNull = args.mustNonNull;
     field.minLength = args.minLength;
     field.maxLength = args.maxLength;
+
 };
 
 export const BooleanDataMember = (args: BooleanDataMemberArgs) => (prototype: any, propertyKey: string) => {
@@ -122,6 +134,7 @@ export const BooleanDataMember = (args: BooleanDataMemberArgs) => (prototype: an
     field.fieldType = FieldType.Boolean;
 
     field.activeConditionValid = false;
+
 };
 
 export const GNHashtableDataMember = (args: GNHashtableDataMemberArgs) => (prototype: any, propertyKey: string) => {
@@ -150,6 +163,7 @@ export const GNHashtableDataMember = (args: GNHashtableDataMemberArgs) => (proto
     field.mustNonNull = args.mustNonNull;
     field.minLength = args.minLength;
     field.maxLength = args.maxLength;
+
 };
 
 export const GNArrayDataMember = (args: GNArrayDataMemberArgs) => (prototype: any, propertyKey: string) => {
@@ -178,6 +192,7 @@ export const GNArrayDataMember = (args: GNArrayDataMemberArgs) => (prototype: an
     field.mustNonNull = args.mustNonNull;
     field.minLength = args.minLength;
     field.maxLength = args.maxLength;
+
 };
 
 export const NumberDataMember = (args: NumberDataMemberArgs) => (prototype: any, propertyKey: string) => {
@@ -206,4 +221,5 @@ export const NumberDataMember = (args: NumberDataMemberArgs) => (prototype: any,
     field.minValue = args.minValue;
     field.maxValue = args.maxValue;
     field.mustInt = args.mustInt;
+
 };

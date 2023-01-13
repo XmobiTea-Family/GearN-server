@@ -106,19 +106,52 @@ export abstract class GNData implements IGNData {
 		return value;
 	}
 
-	public toData(): any {
-		return null;
-	}
+	public abstract toData(): any;
 }
 
-export class GNHashtable extends GNData {
+export class GNHashtableBuilder {
 	private dict: { [k: string]: any } = {};
 
-	public clear(): void {
+	public add(k: string, value: any): GNHashtableBuilder {
+		this.dict[k] = value;
+
+		return this;
+	}
+
+	public addAll(dict: { [k: string]: any }) {
+		let keys = Object.keys(dict);
+		keys.forEach(keyStr => {
+			this.add(keyStr, dict[keyStr]);
+		});
+
+		return this;
+	}
+
+	constructor() {
 		this.dict = {};
 	}
 
-	public remove(k: string): boolean {
+	public build(): GNHashtable {
+		let answer = new GNHashtable();
+
+		let keys = Object.keys(this.dict);
+		keys.forEach(keyStr => {
+			answer.add(keyStr, this.dict[keyStr]);
+		});
+
+		return answer;
+	}
+
+}
+
+export class GNHashtable extends GNData {
+	private dict: { [k: string]: GNDataType } = {};
+
+	public override clear(): void {
+		this.dict = {};
+	}
+
+	public override remove(k: string): boolean {
 		if (this.containsKey(k)) {
 			delete this.dict[k];
 			return true;
@@ -127,29 +160,29 @@ export class GNHashtable extends GNData {
 		return false;
 	}
 
-	public containsKey(k: string): boolean {
-		let keys = Object.keys(this.dict);
-		let kStr = k.toString();
-		
-		return keys.indexOf(kStr) != -1;
-	}
-
-	public count(): number {
+	public override count(): number {
 		return Object.keys(this.dict).length;
 	}
 
-	protected get<T>(k: string, def?: T): T {
+	public containsKey(k: string): boolean {
+		let keys = Object.keys(this.dict);
+		let kStr = k.toString();
+
+		return keys.indexOf(kStr) != -1;
+	}
+
+	protected override get<T>(k: string, def?: T): T {
 		let value = this.dict[k];
 
 		if (value == null) return def;
-		return <T>value;
+		return <T>(value as any);
 	}
 
 	public add(k: string, value: any) {
 		this.dict[k] = GNData.createUseDataFromOriginData(value);
 	}
 
-	public toData(): {} {
+	public override toData(): {} {
 		let anwser: { [k: string]: any } = {};
 
 		let keys = Object.keys(this.dict);
@@ -160,27 +193,67 @@ export class GNHashtable extends GNData {
 
 		return anwser;
 	}
+
+	public static builder(): GNHashtableBuilder {
+		return new GNHashtableBuilder();
+	}
+
+	public toString(): string {
+		return JSON.stringify(this.dict);
+	}
+}
+
+export class GNArrayBuilder {
+	private array: Array<any> = [];
+
+	public add(value: any): GNArrayBuilder {
+		this.array.push(value);
+
+		return this;
+	}
+
+	public addAll(array: any[]): GNArrayBuilder {
+		array.forEach(o => {
+			this.add(o);
+		});
+
+		return this;
+	}
+
+	public build(): GNArray {
+		let awnser = new GNArray();
+
+		this.array.forEach(o => {
+			awnser.add(o);
+		});
+
+		return awnser;
+	}
+
+	constructor() {
+		this.array = [];
+	}
 }
 
 export class GNArray extends GNData {
 	private array: Array<GNDataType> = [];
 
-	public clear(): void {
+	public override clear(): void {
 		this.array = [];
 	}
 
-	public remove(k: number): boolean {
+	public override remove(k: number): boolean {
 		if (k < 0 || k >= this.array.length) return false;
 
 		this.array.splice(k, 1);
 		return true;
 	}
 
-	public count(): number {
+	public override count(): number {
 		return this.array.length;
 	}
 
-	protected get<T>(k: number, def?: T): T {
+	protected override get<T>(k: number, def?: T): T {
 		if (k < 0 || k >= this.array.length) return null;
 
 		let value = this.array[k];
@@ -193,7 +266,7 @@ export class GNArray extends GNData {
 		this.array.push(GNData.createUseDataFromOriginData(value));
 	}
 
-	public toData() {
+	public override toData() {
 		let anwser = [];
 
 		for (let i = 0; i < this.array.length; i++) {
@@ -201,5 +274,13 @@ export class GNArray extends GNData {
 		}
 
 		return anwser;
+	}
+
+	public static builder(): GNArrayBuilder {
+		return new GNArrayBuilder();
+	}
+
+	public toString(): string {
+		return JSON.stringify(this.array);
 	}
 }

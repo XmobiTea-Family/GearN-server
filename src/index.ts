@@ -33,6 +33,9 @@ export { FetchSparkPlayerErrorCode };
 import { OperationRequest } from "./GN-common/entity/operationRequest/OperationRequest";
 export { OperationRequest };
 
+import { CommonOperationRequest } from "./GN-common/entity/operationRequest/CommonOperationRequest";
+export { CommonOperationRequest };
+
 import { OperationResponse } from "./GN-common/entity/operationResponse/OperationResponse";
 export { OperationResponse };
 

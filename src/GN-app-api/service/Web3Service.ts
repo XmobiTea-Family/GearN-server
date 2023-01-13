@@ -12,11 +12,12 @@ const randomMessages: string[] = [];
 generateRandomMessage();
 
 function generateRandomMessage() {
-	for (let i = 0; i < MAX_RANDOM_MESSAGE_COUNT; i++) {
-		let name = DisplayNameUltils.generateRandomString(50);
-		let md5 = Md5Generate.getMd5(name);
-		randomMessages.push(name + md5);
-	}
+    for (let i = 0; i < MAX_RANDOM_MESSAGE_COUNT; i++) {
+        let name = DisplayNameUltils.generateRandomString(50);
+        let md5 = Md5Generate.getMd5(name);
+        randomMessages.push(name + md5);
+    }
+
 }
 
 export class Web3Service implements IWeb3Service {
@@ -29,11 +30,12 @@ export class Web3Service implements IWeb3Service {
         }
     }
 
-    public isMatch(message: string) : boolean{
+    public isMatch(message: string): boolean {
         return randomMessages.indexOf(message) != -1
     }
 
     public getRandomMessage(): string {
         return randomMessages[xRandom.randomInt(0, randomMessages.length)];
     }
+
 }

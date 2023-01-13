@@ -20,6 +20,7 @@ class GetFileUploadInfoOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class GetFileUploadInfoRequestHandler extends RequestHandler {
@@ -36,7 +37,7 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 
 		let doc = await this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo").findOne({ FileId: request.fileId });
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		if (!doc) {
@@ -62,4 +63,5 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

@@ -34,7 +34,8 @@ abstract class BuilderBase {
 		return this.expiredToken;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
@@ -70,11 +71,19 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 
 	constructor() {
 		super();
+
+		this.port = 0;
+		this.useSSL = false;
+		this.keyFilePath = "";
+		this.certFilePath = "";
+		this.licenseKeyFilePath = "";
+		this.expiredToken = 0;
 	}
 
 	public build() {
 		return new ApplicationSettings(this);
 	}
+
 }
 
 export class ApplicationSettings extends BuilderBase {
@@ -92,4 +101,5 @@ export class ApplicationSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

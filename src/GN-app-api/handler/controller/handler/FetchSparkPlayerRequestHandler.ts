@@ -19,7 +19,8 @@ class FetchSparkPlayerOperationRequest extends OperationRequest {
 
 		return true;
 	}
- }
+
+}
 
 export class FetchSparkPlayerRequestHandler extends RequestHandler {
 	public getCode() {
@@ -38,7 +39,7 @@ export class FetchSparkPlayerRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let banNormal = sparkPlayer.getUserBan("Normal");
@@ -68,13 +69,13 @@ export class FetchSparkPlayerRequestHandler extends RequestHandler {
 		operationResponse.setScriptData(FetchSparkPlayerParameterCode.Fullname, sparkPlayer.getFullname());
 		operationResponse.setScriptData(FetchSparkPlayerParameterCode.TsCreate, sparkPlayer.getTsCreate());
 
-        let gsUserExternal = new GNHashtable();
-        gsUserExternal.add(FetchSparkPlayerParameterCode.CustomId, sparkPlayer.getUserExternal("CustomId"));
-        gsUserExternal.add(FetchSparkPlayerParameterCode.FacebookId, sparkPlayer.getUserExternal("FacebookId"));
-        gsUserExternal.add(FetchSparkPlayerParameterCode.GoogleUserId, sparkPlayer.getUserExternal("GoogleUserId"));
-        gsUserExternal.add(FetchSparkPlayerParameterCode.AppleUserId, sparkPlayer.getUserExternal("AppleUserId"));
-        gsUserExternal.add(FetchSparkPlayerParameterCode.DeviceInfo, sparkPlayer.getUserExternal("DeviceInfo"));
-        gsUserExternal.add(FetchSparkPlayerParameterCode.PublicAddress, sparkPlayer.getUserExternal("PublicAddress"));
+		let gsUserExternal = new GNHashtable();
+		gsUserExternal.add(FetchSparkPlayerParameterCode.CustomId, sparkPlayer.getUserExternal("CustomId"));
+		gsUserExternal.add(FetchSparkPlayerParameterCode.FacebookId, sparkPlayer.getUserExternal("FacebookId"));
+		gsUserExternal.add(FetchSparkPlayerParameterCode.GoogleUserId, sparkPlayer.getUserExternal("GoogleUserId"));
+		gsUserExternal.add(FetchSparkPlayerParameterCode.AppleUserId, sparkPlayer.getUserExternal("AppleUserId"));
+		gsUserExternal.add(FetchSparkPlayerParameterCode.DeviceInfo, sparkPlayer.getUserExternal("DeviceInfo"));
+		gsUserExternal.add(FetchSparkPlayerParameterCode.PublicAddress, sparkPlayer.getUserExternal("PublicAddress"));
 		operationResponse.setScriptData(FetchSparkPlayerParameterCode.UserExternal, gsUserExternal);
 
 		if (this.postHandle != null) {
@@ -83,4 +84,5 @@ export class FetchSparkPlayerRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

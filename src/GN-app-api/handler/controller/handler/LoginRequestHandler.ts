@@ -103,6 +103,7 @@ export class LoginOperationRequest extends OperationRequest {
 
 		return false;
 	}
+
 }
 
 export class LoginRequestHandler extends RequestHandler {
@@ -150,7 +151,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByUsername(username);
 		if (sparkPlayer == null) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
 			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
 
@@ -160,7 +161,7 @@ export class LoginRequestHandler extends RequestHandler {
 		let isMatch = await bcrypt.compare(password, sparkPlayer.getPassword());
 
 		if (!isMatch) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
 			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
 
@@ -175,7 +176,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByDeviceInfo(deviceInfo);
 		if (!sparkPlayer) {
-			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByDeviceInfo(deviceInfo, this.defaultSegments, request.getOriginRequest().getIP());
+			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByDeviceInfo(deviceInfo, this.defaultSegments, (request as any).originRequest.getIP());
 		}
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
@@ -187,7 +188,7 @@ export class LoginRequestHandler extends RequestHandler {
 		let result = await this.gameApplication.getFacebookService().getBasicInfoByAccessToken(facebookToken);
 
 		if (result["error"] != null) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
 			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.ErrorWhenLoginFacebook);
 
@@ -370,7 +371,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication
 			.getDatabase()
-			.createPlayerByAppleUserId(appleUserId, this.defaultSegments, request.getOriginRequest().getIP(), email);
+			.createPlayerByAppleUserId(appleUserId, this.defaultSegments, (request as any).originRequest.getIP(), email);
 
 		if (!sparkPlayer) {
 			return this.newOperationInternalServerError(request);
@@ -393,7 +394,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication
 			.getDatabase()
-			.createPlayerByGoogleUserId(googleUserId, this.defaultSegments, request.getOriginRequest().getIP(), email);
+			.createPlayerByGoogleUserId(googleUserId, this.defaultSegments, (request as any).originRequest.getIP(), email);
 
 		if (!sparkPlayer) {
 			return this.newOperationInternalServerError(request);
@@ -449,7 +450,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayer(userId);
 		if (!sparkPlayer) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
 			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserDoesNotExists);
 
@@ -469,7 +470,7 @@ export class LoginRequestHandler extends RequestHandler {
 		}
 
 		if (!this.gameApplication.getWeb3Service().isMatch(message)) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
 			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.RandomMessageExpired);
 
@@ -477,7 +478,7 @@ export class LoginRequestHandler extends RequestHandler {
 		}
 
 		if (this.gameApplication.getWeb3Service().getPublicAddress(message, signature) != publicAddress) {
-			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.Ok);
 			operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.PublicAddressWrong);
 
@@ -486,7 +487,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByPublicAddress(publicAddress);
 		if (!sparkPlayer) {
-			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByPublicAddress(publicAddress, this.defaultSegments, request.getOriginRequest().getIP());
+			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByPublicAddress(publicAddress, this.defaultSegments, (request as any).originRequest.getIP());
 		}
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
@@ -499,7 +500,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let message = this.gameApplication.getWeb3Service().getRandomMessage();
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.Ok);
 
@@ -513,7 +514,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByCustomId(customId);
 		if (!sparkPlayer) {
-			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByCustomId(customId, this.defaultSegments, request.getOriginRequest().getIP());
+			sparkPlayer = await this.gameApplication.getDatabase().createPlayerByCustomId(customId, this.defaultSegments, (request as any).originRequest.getIP());
 		}
 
 		return await this.onAuthenticationResponse(authInfo, request, sparkPlayer);
@@ -528,7 +529,7 @@ export class LoginRequestHandler extends RequestHandler {
 		if (banNormal != null) {
 			if (banNormal["IsBan"]) {
 				if (banNormal["TsExpire"] > currentMillisecond) {
-					let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+					let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 					operationResponse.setReturnCode(ReturnCode.Ok);
 					operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.UserHadBanned);
 					operationResponse.setScriptData(LoginParameterCode.TsExpire, banNormal["TsExpire"]);
@@ -624,7 +625,7 @@ export class LoginRequestHandler extends RequestHandler {
 
 		let sparkPlayer = await this.gameApplication
 			.getDatabase()
-			.createPlayerByFacebookId(facebookId, this.defaultSegments, request.getOriginRequest().getIP(), email);
+			.createPlayerByFacebookId(facebookId, this.defaultSegments, (request as any).originRequest.getIP(), email);
 
 		if (!sparkPlayer) {
 			return this.newOperationInternalServerError(request);
@@ -682,7 +683,7 @@ export class LoginRequestHandler extends RequestHandler {
 		sparkPlayer: xSparkPlayer,
 		gamePlayer: xGamePlayer
 	): Promise<OperationResponse> {
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, LoginErrorCode.Ok);
 		operationResponse.setScriptData(ParameterCode.AuthToken, authInfo.getAuthToken());
@@ -694,4 +695,5 @@ export class LoginRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

@@ -4,6 +4,7 @@ export class Request {
 	private authInfo: any = null;
 	private ip: string;
 	private parameters: { [k: string]: any } = {};
+	private encrypted: boolean;
 
 	constructor(code: number) {
 		this.code = code;
@@ -25,6 +26,10 @@ export class Request {
 		this.parameters = parameters;
 	}
 
+	public setEncrypted(encrypted: boolean) {
+		this.encrypted = encrypted;
+	}
+
 	public getCode(): number {
 		return this.code;
 	}
@@ -33,7 +38,7 @@ export class Request {
 		return this.requestId;
 	}
 
-	public getAuthenticated(): boolean {
+	public isAuthenticated(): boolean {
 		return this.authInfo != null;
 	}
 
@@ -48,4 +53,9 @@ export class Request {
 	public getParameters(): { [k: string]: any } {
 		return this.parameters;
 	}
+
+	public isEncrypted(): boolean {
+		return this.encrypted;
+	}
+
 }

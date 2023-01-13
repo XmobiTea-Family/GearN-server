@@ -7,12 +7,13 @@ import express from "express";
 import { wrap } from "async-middleware";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
+import { Commands } from "../../GN-common/constant/Commands";
 
 export class UploadFileHandler {
 	private apiMiddleware: ApiMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
 	private antiDdosMiddleware: AntiDdosMiddleware;
-	
+
 	private router: Router;
 	private uploadRouter: Router;
 	private uploadPath: string;
@@ -67,24 +68,24 @@ export class UploadFileHandler {
 			}),
 
 			async (req: express.Request, res: express.Response): Promise<any> => {
-			let fileId = req.params.fileId;
-			if (!fileId) return res.sendStatus(400);
+				let fileId = req.params.fileId;
+				if (!fileId) return res.sendStatus(400);
 
-			let fileDoc = await this.uploadFileInfoCollection.findOne({ FileId: fileId });
-			if (!fileDoc) return res.sendStatus(404);
+				let fileDoc = await this.uploadFileInfoCollection.findOne({ FileId: fileId });
+				if (!fileDoc) return res.sendStatus(404);
 
-			let fullPath = fileDoc["FullPath"];
-			fs.readFile(fullPath, (err, data) => {
-				this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
+				let fullPath = fileDoc["FullPath"];
+				fs.readFile(fullPath, (err, data) => {
+					this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
 
-				if (err) {
-					return res.status(404).send(err.message);
-				}
+					if (err) {
+						return res.status(404).send(err.message);
+					}
 
-				res.writeHead(200, { "Content-type": fileDoc["MimeType"] });
-				return res.end(data);
+					res.writeHead(200, { "Content-type": fileDoc["MimeType"] });
+					return res.end(data);
+				});
 			});
-		});
 	}
 
 	public run(): void {
@@ -106,7 +107,7 @@ export class UploadFileHandler {
 			wrap((req, res, next) => {
 				return this.uploadFileMiddleware.checkFileUploadInvalid(req, res, next);
 			}),
-			wrap(this.uploadFileMiddleware.handleUpload().single("f")),
+			wrap(this.uploadFileMiddleware.handleUpload().single(Commands.File)),
 			async (req: express.Request, res: express.Response): Promise<any> => {
 				this.antiDdosMiddleware.removePendingUploadRequest(req, res);
 
@@ -137,4 +138,5 @@ export class UploadFileHandler {
 			}
 		);
 	}
+
 }

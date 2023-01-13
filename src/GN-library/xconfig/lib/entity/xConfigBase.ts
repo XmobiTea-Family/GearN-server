@@ -32,4 +32,5 @@ export class xConfigBase {
 	public toJson(): string {
 		return JSON.stringify(this.doc);
 	}
+
 }

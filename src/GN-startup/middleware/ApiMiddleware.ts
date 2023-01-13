@@ -1,7 +1,3 @@
-const AUTH_TOKEN = "a";
-const FIVE_MINUTE_TS = 5 * 60 * 1000;
-const TS_REMOVE_AUTH_INFO_DIC = 1000 * 60 * 60 * 12;
-
 import express from "express";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
@@ -13,8 +9,12 @@ import { encode } from "@msgpack/msgpack";
 import { LicenseKeyApplication } from "./../LicenseKeyApplication";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
+import { Commands } from "./../../GN-common/constant/Commands";
 
 export class ApiMiddleware {
+	private static readonly FIVE_MINUTE_TS: number = 5 * 60 * 1000;
+	private static readonly TS_REMOVE_AUTH_INFO_DIC: number = 1000 * 60 * 60 * 12;
+
 	private authInfoDic: { [k: string]: AuthInfo };
 	private authInfoViaUserIdDic: { [k: string]: AuthInfo };
 
@@ -57,17 +57,17 @@ export class ApiMiddleware {
 		setInterval(() => {
 			this.getDAULast30Min();
 			this.checkAndRemoveDict();
-		}, FIVE_MINUTE_TS);
+		}, ApiMiddleware.FIVE_MINUTE_TS);
 	}
 
 	private async getDAULast30Min() {
 		this.maxCCU = LicenseKeyApplication.GetMaxCCU();
-		
+
 		if (this.maxCCU != -1) {
 			this.dauLast30Min.length = 0;
 
 			try {
-				let playerLast30Mins = await this.playerGameCollection.find({}).sort({TsLastSeen: -1}).limit(50).toArray();
+				let playerLast30Mins = await this.playerGameCollection.find({}).sort({ TsLastSeen: -1 }).limit(50).toArray();
 
 				for (let i = 0; i < playerLast30Mins.length; i++) {
 					let playerLast30Min = playerLast30Mins[i];
@@ -85,10 +85,10 @@ export class ApiMiddleware {
 			let removeCount = 0;
 
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-			let tsRemove = currentMilliseconds - TS_REMOVE_AUTH_INFO_DIC;
+			let tsRemove = currentMilliseconds - ApiMiddleware.TS_REMOVE_AUTH_INFO_DIC;
 
 			let authInfoLst = Object.values(this.authInfoDic);
-			
+
 			for (let i = 0; i < authInfoLst.length; i++) {
 				let authInfo = authInfoLst[i];
 
@@ -152,7 +152,7 @@ export class ApiMiddleware {
 		return this.authInfoDic[authToken];
 	}
 
-	public async getAuthInfoByAuthTokenInDatabase(authToken: string) : Promise<AuthInfo> {
+	public async getAuthInfoByAuthTokenInDatabase(authToken: string): Promise<AuthInfo> {
 		let authInfo = this.getAuthInfoByAuthToken(authToken);
 		if (authInfo == null) {
 			let authInfoTemp = await this.authTokenCollection.findOne({ AuthToken: authToken });
@@ -174,7 +174,7 @@ export class ApiMiddleware {
 					.build();
 
 				this.authInfoDic[authToken] = authInfo;
-				
+
 				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
 				if (authInfoViaUserId == null) this.authInfoViaUserIdDic[userId] = authInfo;
 				else {
@@ -197,6 +197,7 @@ export class ApiMiddleware {
 	public async authenticateTokenViaJson(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
+			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 			return res.send([returnCode]);
 		}
 
@@ -215,7 +216,10 @@ export class ApiMiddleware {
 	public async authenticateTokenViaMsgPack(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
-			return res.send(Buffer.from(encode([returnCode])));
+			let content = Buffer.from(encode([returnCode]));
+			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
+			res.setHeader(Commands.CONTENT_LENGTH, content.length);
+			return res.send(content);
 		}
 
 		return next();
@@ -243,7 +247,7 @@ export class ApiMiddleware {
 
 	private async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
 		let headers = req.headers;
-		let authToken = headers[AUTH_TOKEN] as string;
+		let authToken = headers[Commands.RequestAuthTokenCmd] as string;
 
 		let reqAny = req as any;
 
@@ -251,7 +255,7 @@ export class ApiMiddleware {
 			reqAny.isAuthenticated = false;
 		} else {
 			let authInfo = await this.getAuthInfoByAuthTokenInDatabase(authToken);
-			
+
 			if (authInfo == null) {
 				reqAny.isAuthenticated = false;
 			} else {
@@ -310,7 +314,7 @@ export class ApiMiddleware {
 		}
 
 		if (this.maxCCU != -1) {
-			let dauLast30Min =  [...this.dauLast30Min];
+			let dauLast30Min = [...this.dauLast30Min];
 
 			if (dauLast30Min.length >= this.maxCCU) {
 				if (!reqAny.isAuthenticated || !dauLast30Min.includes((reqAny.authInfo as AuthInfo).getUserId())) {
@@ -341,7 +345,7 @@ export class ApiMiddleware {
 				}
 
 				socket.rooms.forEach(room => socket.leave(room));
-		
+
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 
@@ -381,7 +385,7 @@ export class ApiMiddleware {
 		}
 
 		if (this.maxCCU != -1) {
-			let dauLast30Min =  [...this.dauLast30Min];
+			let dauLast30Min = [...this.dauLast30Min];
 
 			if (dauLast30Min.length >= this.maxCCU) {
 				if (!socket.data.isAuthenticated || !dauLast30Min.includes((socket.data.authInfo as AuthInfo).getUserId())) {
@@ -405,4 +409,5 @@ export class ApiMiddleware {
 		this.authInfoDic = {};
 		this.authInfoViaUserIdDic = {};
 	}
+
 }

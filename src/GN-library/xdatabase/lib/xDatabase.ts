@@ -1,7 +1,3 @@
-const RUNTIME = "Runtime.";
-const META = "Meta.";
-const SYSTEM = "System.";
-
 export const SparkCollectionName = {
 	Player: "Player",
 	Friend: "Friend",
@@ -21,6 +17,10 @@ interface OnMongoRunError {
 }
 
 export class xDatabase {
+	private static readonly RUNTIME: string = "Runtime.";
+	private static readonly META: string = "Meta.";
+	private static readonly SYSTEM: string = "System.";
+
 	private client: mongoDB.MongoClient;
 	private db: mongoDB.Db;
 	private gameName: string;
@@ -51,27 +51,27 @@ export class xDatabase {
 	}
 
 	public runtimeCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(RUNTIME + collectionName);
+		return this.collection(xDatabase.RUNTIME + collectionName);
 	}
 
 	public metaCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(META + collectionName);
+		return this.collection(xDatabase.META + collectionName);
 	}
 
 	public systemCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(SYSTEM + collectionName);
+		return this.collection(xDatabase.SYSTEM + collectionName);
 	}
 
 	public runtimeGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(RUNTIME + this.gameName + collectionName);
+		return this.collection(xDatabase.RUNTIME + this.gameName + collectionName);
 	}
 
 	public metaGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(META + this.gameName + collectionName);
+		return this.collection(xDatabase.META + this.gameName + collectionName);
 	}
 
 	public systemGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(SYSTEM + this.gameName + collectionName);
+		return this.collection(xDatabase.SYSTEM + this.gameName + collectionName);
 	}
 
 	public collection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
@@ -552,4 +552,5 @@ export class xDatabase {
 		let thisPlayer = new xGamePlayer(result, collection);
 		return thisPlayer;
 	}
+
 }

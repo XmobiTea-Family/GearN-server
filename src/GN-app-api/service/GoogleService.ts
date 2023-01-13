@@ -1,17 +1,17 @@
-const googleAPIUrl = "https://www.googleapis.com";
-const googleAPITokenInfoAccessTokenURL = "/oauth2/v3/tokeninfo?access_token=";
-const googleAPIUserInfoAccessTokenURL = "/oauth2/v3/userinfo?access_token=";
-const googleAPITokenInfoIdTokenURL = "/oauth2/v3/tokeninfo?id_token=";
-
 import { IGoogleService } from "./IGoogleService";
 import axios from "axios";
 
 export class GoogleService implements IGoogleService {
-	private googleClientId: string;
+    private static readonly googleAPIUrl: string = "https://www.googleapis.com";
+    private static readonly googleAPITokenInfoAccessTokenURL: string = "/oauth2/v3/tokeninfo?access_token=";
+    private static readonly googleAPIUserInfoAccessTokenURL: string = "/oauth2/v3/userinfo?access_token=";
+    private static readonly googleAPITokenInfoIdTokenURL: string = "/oauth2/v3/tokeninfo?id_token=";
 
-	public setGoogleClientId(googleClientId: string): void {
-		this.googleClientId = googleClientId;
-	}
+    private googleClientId: string;
+
+    public setGoogleClientId(googleClientId: string): void {
+        this.googleClientId = googleClientId;
+    }
 
     private async debugToken() {
         return;
@@ -25,7 +25,7 @@ export class GoogleService implements IGoogleService {
         let answer: { [k: string]: any } = {};
 
         try {
-            let tokenInfoResult = await axios.get(googleAPIUrl + googleAPITokenInfoAccessTokenURL + accessToken);
+            let tokenInfoResult = await axios.get(GoogleService.googleAPIUrl + GoogleService.googleAPITokenInfoAccessTokenURL + accessToken);
             let data = tokenInfoResult.data;
 
             if (data.error_description != null) {
@@ -35,7 +35,7 @@ export class GoogleService implements IGoogleService {
                 answer["error"] = "unexpected audience (aud claim): " + data.aud;
             }
             else {
-                let userInfoResult = await axios.get(googleAPIUrl + googleAPIUserInfoAccessTokenURL + accessToken);
+                let userInfoResult = await axios.get(GoogleService.googleAPIUrl + GoogleService.googleAPIUserInfoAccessTokenURL + accessToken);
                 answer = data;
 
                 let userInfoDataKeys = Object.keys(userInfoResult.data);
@@ -57,7 +57,7 @@ export class GoogleService implements IGoogleService {
         let answer: { [k: string]: any } = {};
 
         try {
-            let tokenInfoResult = await axios.get(googleAPIUrl + googleAPITokenInfoIdTokenURL + idToken);
+            let tokenInfoResult = await axios.get(GoogleService.googleAPIUrl + GoogleService.googleAPITokenInfoIdTokenURL + idToken);
             let data = tokenInfoResult.data;
 
             if (data.error_description != null) {
@@ -80,4 +80,5 @@ export class GoogleService implements IGoogleService {
     constructor() {
         this.debugToken();
     }
+
 }

@@ -44,11 +44,12 @@ abstract class BuilderBase {
 		return this.enablePostViaJson;
 	}
 
-	constructor() {}
+	constructor() { }
+
 }
 
 class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
-	public setOrigin(origin: string): Builder {
+	public setOrigins(origin: string): Builder {
 		this.origin = origin;
 		return this;
 	}
@@ -114,9 +115,16 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 	constructor() {
 		super();
 
+		this.enable = false;
+		this.origin = "";
 		this.methods = [];
 		this.allowedHeaders = [];
+		this.credentials = false;
+		this.enableSendAndReceiveDebug = false;
+		this.enablePostViaMsgPack = false;
+		this.enablePostViaJson = false;
 	}
+
 }
 
 export class HttpAppSettings extends BuilderBase {
@@ -136,4 +144,5 @@ export class HttpAppSettings extends BuilderBase {
 	public static Builder(): Builder {
 		return new Builder();
 	}
+
 }

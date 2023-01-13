@@ -18,7 +18,8 @@ class FetchAllDataOperationRequest extends OperationRequest {
 
 		return true;
 	}
- }
+
+}
 
 export class FetchAllDataRequestHandler extends RequestHandler {
 	public getCode() {
@@ -37,7 +38,7 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let banNormal = gamePlayer.getUserBan("Normal");
@@ -73,4 +74,5 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

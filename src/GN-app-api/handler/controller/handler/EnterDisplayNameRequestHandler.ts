@@ -23,6 +23,7 @@ class EnterDisplayNameOperationRequest extends OperationRequest {
 
 		return true;
 	}
+
 }
 
 export class EnterDisplayNameRequestHandler extends RequestHandler {
@@ -42,7 +43,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 			return this.newOperationInternalServerError(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
+		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, EnterDisplayNameErrorCode.Ok);
 
@@ -78,4 +79,5 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
 }

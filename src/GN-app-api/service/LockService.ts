@@ -11,4 +11,5 @@ export class LockService implements ILockService {
 	public isBusy(key?: string): boolean {
 		return asyncLock.isBusy(key);
 	}
+
 }

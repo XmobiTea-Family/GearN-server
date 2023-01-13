@@ -1,12 +1,12 @@
-const UserId = "UserId";
-const DisplayName = "DisplayName";
-const PushRegistrations = "PushRegistrations";
-const PushId = "PushId";
-
 import * as mongoDB from "mongodb";
 import { xPlayerBase } from "./xPlayerBase";
 
 export class xGamePlayer extends xPlayerBase {
+	private static readonly UserId: string = "UserId";
+	private static readonly DisplayName: string = "DisplayName";
+	private static readonly PushRegistrations: string = "PushRegistrations";
+	private static readonly PushId: string = "PushId";
+
 	private displayName: string;
 	private pushRegistrations: { [k: string]: any }[];
 
@@ -16,10 +16,10 @@ export class xGamePlayer extends xPlayerBase {
 	}
 
 	private setDocument(result: mongoDB.WithId<mongoDB.Document>) {
-		this.userId = result[UserId];
+		this.userId = result[xGamePlayer.UserId];
 
-		this.displayName = result[DisplayName];
-		this.pushRegistrations = result[PushRegistrations];
+		this.displayName = result[xGamePlayer.DisplayName];
+		this.pushRegistrations = result[xGamePlayer.PushRegistrations];
 	}
 
 	public getDisplayName(): string {
@@ -39,17 +39,18 @@ export class xGamePlayer extends xPlayerBase {
 	}
 
 	public getPush(pushId: string) {
-		return this.pushRegistrations.find((x) => x[PushId] == pushId);
+		return this.pushRegistrations.find((x) => x[xGamePlayer.PushId] == pushId);
 	}
+
 	public addPush(pushData: { [k: string]: any }) {
-		let thisPushData = this.getPush(pushData[PushId]);
+		let thisPushData = this.getPush(pushData[xGamePlayer.PushId]);
 
 		if (thisPushData) {
 		} else {
 			this.pushRegistrations.push(pushData);
 
 			let updateQuery: { [k: string]: any } = {};
-			updateQuery[PushRegistrations] = pushData;
+			updateQuery[xGamePlayer.PushRegistrations] = pushData;
 
 			this.collection.updateOne(
 				{ _id: this._id },
@@ -59,6 +60,7 @@ export class xGamePlayer extends xPlayerBase {
 			);
 		}
 	}
+
 	public removePush(pushId: string) {
 		let thisPushData = this.getPush(pushId);
 
@@ -69,7 +71,7 @@ export class xGamePlayer extends xPlayerBase {
 			}
 
 			let updateQuery: { [k: string]: any } = {};
-			updateQuery[PushRegistrations] = {
+			updateQuery[xGamePlayer.PushRegistrations] = {
 				PushId: pushId,
 			};
 
@@ -81,11 +83,12 @@ export class xGamePlayer extends xPlayerBase {
 			);
 		}
 	}
+
 	public removeAllPush() {
 		this.pushRegistrations = [];
 
 		let updateQuery: { [k: string]: any } = {};
-		updateQuery[PushRegistrations] = [];
+		updateQuery[xGamePlayer.PushRegistrations] = [];
 
 		this.collection.updateOne(
 			{ _id: this._id },
@@ -94,4 +97,5 @@ export class xGamePlayer extends xPlayerBase {
 			}
 		);
 	}
+
 }
