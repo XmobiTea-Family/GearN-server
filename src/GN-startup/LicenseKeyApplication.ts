@@ -1,123 +1,19 @@
 import http from "http";
-import { GameApplication } from "./../GameApplication";
+import { GNServer } from "./../GNServer";
 import { Express } from "express";
 import express from "express";
-import axios from "axios";
 import { wrap } from "async-middleware";
 import { Debug } from "./../GN-library/xdebug/lib/xDebug";
 import fs from "fs";
-import { OperationCode } from "./../GN-common/constant/OperationCode";
-import { GNHashtable } from "./../GN-common/common/GNData";
-import { LoginParameterCode } from "./../GN-common/constant/parameterCode/LoginParameterCode";
-import { LoginType } from "./../GN-common/constant/enumType/LoginType";
 import { Md5Generate } from "./../GN-common/helper/Md5Generate";
-import { ReturnCode } from "./../GN-common/constant/ReturnCode";
 import { ParameterCode } from "./../GN-common/constant/parameterCode/ParameterCode";
+import { OperationCodeExtensions } from "./../GN-client-custom/common/constant/OperationCode.ext";
+import { VerifyServerApplicationParameterCode } from "./../GN-client-custom/common/constant/parameterCode/VerifyServerApplicationParameterCode";
+import { VerifyServerApplicationErrorCode } from "./../GN-client-custom/common/constant/errorCode/VerifyServerApplicationErrorCode";
 
-class VerifyApi {
-	private static readonly BaseUrl: string = "https://dev.xmobitea.com/gnserver";
-
-	private static authToken: string;
-
-	private static async send(subUri: string, postData: any): Promise<any[]> {
-		let headers: any = {
-			"Content-Type": "application/json",
-		};
-
-		if (this.authToken) {
-			headers["a"] = this.authToken as string;
-		}
-
-		let answer: [any];
-
-		try {
-			let result = await axios.post(this.BaseUrl + "/" + subUri, postData, {
-				headers: headers,
-			});
-			answer = result.data;
-		} catch (error) {
-			answer = [
-				ReturnCode.InternalServerError
-			];
-		}
-
-		return answer;
-	}
-
-	private static async sendRequestViaJson(code: number, postData: {}): Promise<any[]> {
-		return await this.send("api/0/" + code, postData);
-	}
-
-	public static async authentication(licenseKeyInfo: LicenseKeyInfo, callback: (authenticationSuccess: boolean) => void) {
-		let postData = new GNHashtable();
-		postData.add(LoginParameterCode.LoginType, LoginType.Account);
-		postData.add(LoginParameterCode.Username, licenseKeyInfo.ProductId);
-		postData.add(
-			LoginParameterCode.Password,
-			Md5Generate.getMd5(licenseKeyInfo.LicenseKey + licenseKeyInfo.UnformattedLicenseKey + "_" + licenseKeyInfo.ProductId)
-		);
-
-		let answer = await this.sendRequestViaJson(OperationCode.Login, postData.toData());
-		try {
-			let returnData = answer;
-			let returnCode = returnData[0] as number;
-			if (returnCode == ReturnCode.Ok) {
-				let parameters = returnData[1];
-
-				this.authToken = parameters[ParameterCode.AuthToken.toString()];
-				callback(true);
-			} else {
-				callback(false);
-			}
-		} catch (err) {
-			Debug.logError("authentication ", err);
-			callback(false);
-		}
-	}
-
-	public static async verifyServerApplication(
-		licenseKeyInfo: LicenseKeyInfo,
-		sessionId: string,
-		secretkey: string,
-		salt: string,
-		port: string,
-		callback: (gnHashtable: GNHashtable) => void
-	) {
-		let postData = new GNHashtable();
-
-		postData.add("1", sessionId);
-		postData.add("2", licenseKeyInfo.ProductId);
-		postData.add("3", licenseKeyInfo.UnformattedLicenseKey);
-		postData.add("4", licenseKeyInfo.LicenseKey);
-		postData.add("6", secretkey);
-		postData.add("7", salt);
-		postData.add("8", port);
-
-		let answer = await this.sendRequestViaJson(12, postData.toData());
-		try {
-			let gnHashtable = new GNHashtable();
-
-			let returnData = answer;
-			let returnCode = returnData[0] as number;
-			if (returnCode == ReturnCode.Ok) {
-				let parameters = returnData[1];
-
-				let keys = Object.keys(parameters);
-				for (let i = 0; i < keys.length; i++) {
-					let key = keys[i];
-					gnHashtable.add(key, parameters[key]);
-				}
-
-				callback(gnHashtable);
-			} else {
-				callback(gnHashtable);
-			}
-		} catch (err) {
-			Debug.logError("authentication ", err);
-			callback(null);
-		}
-	}
-}
+import { GNNetwork, GNServerSettings, OperationRequest, GNHashtable } from "@xmobitea/gn-typescript-client";
+import { ReturnCode } from "./../GN-common/constant/ReturnCode";
+import { decode } from "@msgpack/msgpack";
 
 interface LicenseKeyInfo {
 	ProjectName?: string;
@@ -136,7 +32,7 @@ export class LicenseKeyApplication {
 
 	private licenseKeyFilePath: string;
 	private server: http.Server;
-	private gameApplication: GameApplication;
+	private gnServer: GNServer;
 	private app: Express;
 
 	private static maxCCU: number = 20;
@@ -154,8 +50,8 @@ export class LicenseKeyApplication {
 		this.server = server;
 	}
 
-	public setGameApplication(gameApplication: GameApplication): void {
-		this.gameApplication = gameApplication;
+	public setGNServer(gnServer: GNServer): void {
+		this.gnServer = gnServer;
 	}
 
 	public setApp(app: Express): void {
@@ -182,7 +78,7 @@ export class LicenseKeyApplication {
 		this.port = port;
 	}
 
-	public static GetMaxCCU(): number {
+	public static getMaxCCU(): number {
 		return this.maxCCU;
 	}
 
@@ -190,6 +86,7 @@ export class LicenseKeyApplication {
 		const verifyRouter = express.Router();
 		verifyRouter.use(express.json());
 
+		this.verifyMinute = 0;
 		this.app.use(
 			"/manager",
 			wrap((req, res, next) => {
@@ -214,18 +111,29 @@ export class LicenseKeyApplication {
 			throw new Error("Server null");
 		}
 
-		if (!this.gameApplication) {
+		if (!this.gnServer) {
 			throw new Error("Game Application null");
 		}
+
+		this.initGNClientSdk();
 
 		if (!this.licenseKeyFilePath) {
 			// this is no license key
 			LicenseKeyApplication.maxCCU = 20;
 
 			setTimeout(() => {
-				this.debug(-1, LicenseKeyApplication.maxCCU);
+				this.debug(VerifyServerApplicationErrorCode.NoLicenseKey, LicenseKeyApplication.maxCCU);
 			}, 500);
+
+			setInterval(() => {
+				let newMaxCCU = 20;
+				if (LicenseKeyApplication.maxCCU != newMaxCCU) {
+					this.debug(VerifyServerApplicationErrorCode.NoLicenseKey, LicenseKeyApplication.maxCCU);
+				}
+			}, 30000);
 		} else {
+			LicenseKeyApplication.maxCCU = 50;
+
 			//let allLines = fs.readFileSync("D:/GN_GN-Dashboard.license", 'utf-8').split(/\r?\n/);
 			let allLines = fs.readFileSync(this.licenseKeyFilePath, 'utf-8').split(/\r?\n/);
 
@@ -237,66 +145,125 @@ export class LicenseKeyApplication {
 			};
 
 			setTimeout(() => {
-				this.authenticationApp();
+				this.validateApp(false);
+
+				this.gnServer.getTimerService().subscriberEveryMinute(() => {
+					this.validateApp(false);
+				});
 			}, 500);
 		}
 	}
 
-	private authenticationApp() {
-		VerifyApi.authentication(this.licenseKeyInfo, (authenticationSuccess) => {
-			if (authenticationSuccess) {
-				LicenseKeyApplication.maxCCU = 50;
+	private initGNClientSdk(): void {
+		let gnServerSettings = new GNServerSettings();
+		gnServerSettings.setServerAddress(decode([185, 100, 101, 118, 46, 120, 109, 111, 98, 105, 116, 101, 97, 46, 99, 111, 109, 47, 103, 110, 115, 101, 114, 118, 101, 114]) as string);
+		gnServerSettings.setServerPort(decode([255]) as number);
+		gnServerSettings.setUseSsl(true);
+		gnServerSettings.setUseHttp(true);
+		gnServerSettings.setCodeCanSendNotAuthorized(decode([145, 2]) as []);
+		gnServerSettings.setLogType(0);
 
-				this.validateApp();
-
-				this.gameApplication.getTimerService().subscriberEveryMinute(() => {
-					this.validateApp();
-				});
-			}
-			else {
-				setTimeout(() => {
-					this.debug(4, LicenseKeyApplication.maxCCU);
-				}, 500);
-
-				setTimeout(() => {
-					this.authenticationApp();
-				}, 5000);
-			}
-		});
+		GNNetwork.init(gnServerSettings);
 	}
 
-	private validateApp() {
-		this.verifyMinute -= 1;
-		if (this.verifyMinute > 0) return;
+	private totalServerRequestFailure = 0;
+	private validateApp(forceUse: boolean): void {
+		if (!forceUse) {
+			this.verifyMinute -= 1;
+			if (this.verifyMinute > 0) return;
+		}
 
 		this.verifyMinute = LicenseKeyApplication.VERIFY_MINUTE;
 
-		VerifyApi.verifyServerApplication(this.licenseKeyInfo, this.sessionId, this.secretkey, this.salt, this.port.toString(), (gnHashtable) => {
-			if (gnHashtable) {
-				let newMaxCCU = gnHashtable.getNumber(5, LicenseKeyApplication.maxCCU);
+		if (this.totalServerRequestFailure > 10) {
+			let newMaxCCU = 20;
+			if (LicenseKeyApplication.maxCCU != newMaxCCU) {
+				this.debug(VerifyServerApplicationErrorCode.NoLicenseKey, LicenseKeyApplication.maxCCU);
+			}
+		}
+		let thiz = this;
 
-				if (LicenseKeyApplication.maxCCU != newMaxCCU) {
-					let errorCode = gnHashtable.getNumber(0);
-					setTimeout(() => {
-						this.debug(errorCode, LicenseKeyApplication.maxCCU);
-					}, 500);
+		let authToken = GNNetwork.getAuthToken();
+		if (!authToken) {
+			let username = this.licenseKeyInfo.ProductId;
+			let password = Md5Generate.getMd5(this.licenseKeyInfo.LicenseKey + this.licenseKeyInfo.UnformattedLicenseKey + "_" + this.licenseKeyInfo.ProductId);
+			GNNetwork.accountLogin(username, password, {
+				invoke: function (loginOperationResponse) {
+					if (!loginOperationResponse.hasError()) {
+						thiz.validateApp(true);
+
+						thiz.totalServerRequestFailure = 0;
+					}
+					else {
+						setTimeout(() => {
+							thiz.debug(VerifyServerApplicationErrorCode.LicenseKeyExpire, LicenseKeyApplication.maxCCU);
+						}, 500);
+
+						setTimeout(() => {
+							thiz.validateApp(true);
+						}, 5000);
+
+						thiz.totalServerRequestFailure += 1;
+					}
 				}
+			});
 
-				LicenseKeyApplication.maxCCU = newMaxCCU;
+			return;
+		}
+
+		let parameters = new GNHashtable();
+		parameters.add(VerifyServerApplicationParameterCode.SessionId, this.sessionId);
+		parameters.add(VerifyServerApplicationParameterCode.ProductId, this.licenseKeyInfo.ProductId);
+		parameters.add(VerifyServerApplicationParameterCode.UnformattedLicenseKey, this.licenseKeyInfo.UnformattedLicenseKey);
+		parameters.add(VerifyServerApplicationParameterCode.LicenseKey, this.licenseKeyInfo.LicenseKey);
+		parameters.add(VerifyServerApplicationParameterCode.Secretkey, this.secretkey);
+		parameters.add(VerifyServerApplicationParameterCode.Salt, this.salt);
+		parameters.add(VerifyServerApplicationParameterCode.Port, this.port.toString());
+
+		let request = new OperationRequest(OperationCodeExtensions.VerifyServerApplication, true);
+		request.setParameters(parameters);
+
+		GNNetwork.sendViaHttp(request, {
+			invoke: function (operationResponse) {
+				if (!operationResponse.hasError()) {
+					let parameters = operationResponse.getParameters();
+
+					let newMaxCCU = parameters.getNumber(VerifyServerApplicationParameterCode.MaxCCU, LicenseKeyApplication.maxCCU);
+
+					if (LicenseKeyApplication.maxCCU != newMaxCCU) {
+						let errorCode = parameters.getNumber(ParameterCode.ErrorCode);
+						setTimeout(() => {
+							thiz.debug(errorCode, LicenseKeyApplication.maxCCU);
+						}, 500);
+					}
+
+					LicenseKeyApplication.maxCCU = newMaxCCU;
+
+					thiz.totalServerRequestFailure = 0;
+				}
+				else {
+					if (operationResponse.getReturnCode() == ReturnCode.OperationNotAuthorized) {
+						setTimeout(() => {
+							thiz.validateApp(true);
+						}, 5000);
+					}
+
+					thiz.totalServerRequestFailure += 1;
+				}
 			}
 		});
 	}
 
-	private debug(errorCode: number, ccu: number) {
-		if (errorCode == -1) {
+	private debug(errorCode: number, ccu: number): void {
+		if (errorCode == VerifyServerApplicationErrorCode.NoLicenseKey) {
 			Debug.log("[GN] No license Key found, maxCCU is " + ccu, "please try go https://gn.xmobitea.com to get free license key");
-		} else if (errorCode == 1) {
-			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " verify success, maxCCU is " + (ccu == -1) ? "unlimited" : ccu);
-		} else if (errorCode == 2) {
+		} else if (errorCode == VerifyServerApplicationErrorCode.Ok) {
+			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " verify success, maxCCU is " + ((ccu == -1) ? "unlimited" : ccu));
+		} else if (errorCode == VerifyServerApplicationErrorCode.OtherServerUseLicenseKey) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " invalid, maxCCU is " + ccu);
-		} else if (errorCode == 3) {
+		} else if (errorCode == VerifyServerApplicationErrorCode.LicenseKeyInvalid) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " expired, maxCCU is " + ccu);
-		} else if (errorCode == 4) {
+		} else if (errorCode == VerifyServerApplicationErrorCode.LicenseKeyExpire) {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " does authentication error, resend after 5 seconds, maxCCU is " + ccu);
 		} else {
 			Debug.log("[GN] License Key with id " + this.licenseKeyInfo.ProductId + " unknown error, maxCCU is " + ccu);

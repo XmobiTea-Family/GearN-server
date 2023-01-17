@@ -11,7 +11,7 @@ import { Express } from "express";
 import http from "http";
 import https from "https";
 import fs from "fs";
-import { GameApplication } from "./../GameApplication";
+import { GNServer } from "./../GNServer";
 import { MailSettings } from "./settings/MailSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { OtherSettings } from "./settings/OtherSettings";
@@ -24,10 +24,10 @@ import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
 import { LicenseKeyApplication } from "./LicenseKeyApplication";
 import { Md5Generate } from "./../GN-common/helper/Md5Generate";
-import { nanoid } from "nanoid";
 import { DdosSettings } from "./settings/DDosSettings";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 import { GoogleService } from "./../GN-app-api/service/GoogleService";
+import { StringUtility } from "./../GN-common/helper/StringUtility";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
@@ -137,7 +137,7 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 export class ServerApplication extends BuilderBase {
 	private httpApp: HttpApp;
 	private socketApp: SocketApp;
-	private gameApplication: GameApplication;
+	private gnServer: GNServer;
 	private apiMiddleware: ApiMiddleware;
 	private antiDdosMiddleware: AntiDdosMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
@@ -148,16 +148,37 @@ export class ServerApplication extends BuilderBase {
 	private secretId: string;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		let salt = nanoid(10);
-		this.sessionId = nanoid(15);
-		this.secretkey = nanoid(20);
+		let salt = StringUtility.generateRandomString(10);
+		this.sessionId = StringUtility.generateRandomString(15);
+		this.secretkey = StringUtility.generateRandomString(20);
 		this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
 
-		let fullLogPath = __dirname + "/../../../../" + this.getLogSettings().getLogPath();
+		let configFullLogPath = this.getLogSettings().getLogPath();
+		let fullLogPath = configFullLogPath;
+		if (fullLogPath) {
+			if (!fs.existsSync(fullLogPath)) {
+				fullLogPath = __dirname + "/../../../../" + configFullLogPath;
+			}
+		}
+
 		console.log("[GN] FullLogPath at: " + fullLogPath);
 
-		let licenseKeyFilePath = this.getApplicationSettings().getLicenseKeyFilePath() ? (__dirname + "/../../../../" + this.getApplicationSettings().getLicenseKeyFilePath()) : null;
+		let configLicenseKeyFilePath = this.getApplicationSettings().getLicenseKeyFilePath();
+		let licenseKeyFilePath = configLicenseKeyFilePath;
+		if (licenseKeyFilePath) {
+			if (!fs.existsSync(licenseKeyFilePath)) {
+				licenseKeyFilePath = __dirname + "/../../../../" + configLicenseKeyFilePath;
+
+				if (!fs.existsSync(licenseKeyFilePath)) {
+					licenseKeyFilePath = null;
+				}
+			}
+		}
+
 		if (licenseKeyFilePath) console.log("[GN] Found LicenseKeyFilePath at: " + licenseKeyFilePath);
+		else {
+			if (configLicenseKeyFilePath) console.log("[GN] LicenseKeyFilePath invalid, please recheck.");
+		}
 
 		Debug.init({
 			isLogToConsoleEnable: this.getLogSettings().getLogToConsoleEnable(),
@@ -196,8 +217,8 @@ export class ServerApplication extends BuilderBase {
 		this.antiDdosMiddleware.setMaxDownloadPendingRequest(this.getDdosSettings().getMaxDownloadPendingRequest());
 		this.antiDdosMiddleware.run();
 
-		this.gameApplication = this.newGameApplication();
-		this.gameApplication.setApiMiddleware(this.apiMiddleware);
+		this.gnServer = this.newGNServer();
+		this.gnServer.setApiMiddleware(this.apiMiddleware);
 
 		this.httpApp = this.newHttpApp();
 		this.httpApp.setApiMiddleware(this.apiMiddleware);
@@ -205,7 +226,7 @@ export class ServerApplication extends BuilderBase {
 		this.httpApp.setAppSettings(this.getHttpAppSettings());
 		this.httpApp.setUploadFileSettings(this.getUploadFileSettings());
 		this.httpApp.setApp(app);
-		this.httpApp.setGameApplication(this.gameApplication);
+		this.httpApp.setGNServer(this.gnServer);
 		this.httpApp.setSessionId(this.sessionId);
 		this.httpApp.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.httpApp.run();
@@ -217,10 +238,10 @@ export class ServerApplication extends BuilderBase {
 		this.socketApp.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.socketApp.run();
 
-		this.gameApplication.setHttpApp(this.httpApp);
-		this.gameApplication.setSocketApp(this.socketApp);
+		this.gnServer.setHttpApp(this.httpApp);
+		this.gnServer.setSocketApp(this.socketApp);
 
-		this.gameApplication.getDatabase().run(
+		this.gnServer.getDatabase().run(
 			() => {
 				Debug.log("[GN] Database run success");
 			},
@@ -230,46 +251,46 @@ export class ServerApplication extends BuilderBase {
 		);
 
 		if (this.mailSettings.getEnable()) {
-			this.gameApplication.getMail().run(() => {
+			this.gnServer.getMail().run(() => {
 				Debug.log("[GN] Send Grid Mail run success");
 			});
 		}
 
-		let authTokenCollection = this.gameApplication.getDatabase().systemCollection(this.getOtherSettings().getAuthTokenCollectionName());
+		let authTokenCollection = this.gnServer.getDatabase().systemCollection(this.getOtherSettings().getAuthTokenCollectionName());
 		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
 
-		let playerGameCollection = this.gameApplication.getDatabase().systemGameCollection("Player");
+		let playerGameCollection = this.gnServer.getDatabase().systemGameCollection("Player");
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
 		this.apiMiddleware.setExpiredToken(this.getApplicationSettings().getExpiredToken());
 		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 
-		let reportDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getReportDdosCollectionName());
+		let reportDdosCollection = this.gnServer.getDatabase().systemCollection(this.getDdosSettings().getReportDdosCollectionName());
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
-		let banDdosCollection = this.gameApplication.getDatabase().systemCollection(this.getDdosSettings().getBanDdosCollectionName());
+		let banDdosCollection = this.gnServer.getDatabase().systemCollection(this.getDdosSettings().getBanDdosCollectionName());
 		this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
-		let adapterEventCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
+		let adapterEventCollection = this.gnServer.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
 		this.socketApp.setEmitter(adapterEventCollection);
 
-		(this.gameApplication.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
-		(this.gameApplication.getGoogleService() as GoogleService).setGoogleClientId(this.getOtherSettings().getGoogleClientId());
+		(this.gnServer.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
+		(this.gnServer.getGoogleService() as GoogleService).setGoogleClientId(this.getOtherSettings().getGoogleClientId());
 
-		let configCollection = this.gameApplication.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
-		this.gameApplication.getConfigGame().setConfigCollection(configCollection);
-		this.gameApplication.getConfigGame().run(() => {
+		let configCollection = this.gnServer.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
+		this.gnServer.getConfigGame().setConfigCollection(configCollection);
+		this.gnServer.getConfigGame().run(() => {
 			Debug.log("[GN] Config Game run success");
 		});
 
-		let uploadFileInfoCollection = this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo");
-		this.gameApplication.getDatabase().createIndex("System." + this.gameApplication.getDatabase().getGameName() + "UploadFileInfo", { FileId: 1 });
-		this.gameApplication.getDatabase().createIndex("System." + this.gameApplication.getDatabase().getGameName() + "UploadFileInfo", { UserId: 1 });
+		let uploadFileInfoCollection = this.gnServer.getDatabase().systemGameCollection("UploadFileInfo");
+		this.gnServer.getDatabase().createIndex("System." + this.gnServer.getDatabase().getGameName() + "UploadFileInfo", { FileId: 1 });
+		this.gnServer.getDatabase().createIndex("System." + this.gnServer.getDatabase().getGameName() + "UploadFileInfo", { UserId: 1 });
 
 		this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
 		this.uploadFileMiddleware.setUploadFileInfoCollection(uploadFileInfoCollection);
 
-		this.gameApplication.init();
-		this.gameApplication.run(() => {
+		this.gnServer.init();
+		this.gnServer.run(() => {
 			Debug.log("[GN] Game Application run success");
 		});
 
@@ -277,7 +298,7 @@ export class ServerApplication extends BuilderBase {
 		this.licenseKeyApplication.setLicenseKeyFilePath(licenseKeyFilePath);
 		this.licenseKeyApplication.setServer(server);
 		this.licenseKeyApplication.setApp(app);
-		this.licenseKeyApplication.setGameApplication(this.gameApplication);
+		this.licenseKeyApplication.setGNServer(this.gnServer);
 		this.licenseKeyApplication.setSessionId(this.sessionId);
 		this.licenseKeyApplication.setSecretkey(this.secretkey);
 		this.licenseKeyApplication.setSecretId(this.secretId);
@@ -293,8 +314,8 @@ export class ServerApplication extends BuilderBase {
 		});
 	}
 
-	private newGameApplication(): GameApplication {
-		let gameApplication = new GameApplication();
+	private newGNServer(): GNServer {
+		let gnServer = new GNServer();
 
 		// settings database
 		{
@@ -303,7 +324,7 @@ export class ServerApplication extends BuilderBase {
 			let gameName = this.databaseSettings.getGameName();
 
 			let options = this.databaseSettings.getOptions();
-			gameApplication.getDatabase().init(connectionString, databaseName, gameName, options);
+			gnServer.getDatabase().init(connectionString, databaseName, gameName, options);
 		}
 
 		// setting mail
@@ -311,10 +332,10 @@ export class ServerApplication extends BuilderBase {
 			let sendGridApiKey = this.mailSettings.getSendGridApiKey();
 			let fromEmail = this.mailSettings.getFromEmail();
 
-			gameApplication.getMail().init(sendGridApiKey, fromEmail);
+			gnServer.getMail().init(sendGridApiKey, fromEmail);
 		}
 
-		return gameApplication;
+		return gnServer;
 	}
 
 	private newApiMiddleware(): ApiMiddleware {
@@ -332,8 +353,8 @@ export class ServerApplication extends BuilderBase {
 		return uploadFileMiddleware;
 	}
 
-	public getGameApplication(): GameApplication {
-		return this.gameApplication;
+	public getGNServer(): GNServer {
+		return this.gnServer;
 	}
 
 	private newHttpApp(): HttpApp {

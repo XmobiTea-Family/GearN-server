@@ -4,7 +4,7 @@ import { IWeb3Service } from "./IWeb3Service";
 import Web3 from "web3";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { Md5Generate } from "./../../GN-common/helper/Md5Generate";
-import { DisplayNameUltils } from "./../../GN-common/helper/DisplayNameUltils";
+import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { xRandom } from "./../../GN-library/xrandom/lib/xRandom";
 const web3Instance = new Web3();
 
@@ -13,7 +13,7 @@ generateRandomMessage();
 
 function generateRandomMessage() {
     for (let i = 0; i < MAX_RANDOM_MESSAGE_COUNT; i++) {
-        let name = DisplayNameUltils.generateRandomString(50);
+        let name = StringUtility.generateRandomString(50);
         let md5 = Md5Generate.getMd5(name);
         randomMessages.push(name + md5);
     }

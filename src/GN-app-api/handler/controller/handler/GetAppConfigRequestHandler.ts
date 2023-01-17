@@ -42,7 +42,7 @@ export class GetAppConfigRequestHandler extends RequestHandler {
 
 		let configNotUptodateLst: string[] = [];
 
-		let configGame = this.gameApplication.getConfigGame();
+		let configGame = this.gnServer.getConfigGame();
 
 		let configTypes = request.configTypes;
 

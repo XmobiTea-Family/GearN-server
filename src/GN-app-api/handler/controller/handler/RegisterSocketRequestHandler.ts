@@ -50,7 +50,7 @@ export class RegisterSocketRequestHandler extends RequestHandler {
 	}
 
 	private setAuthInfoSocket(sid: string, authInfo: AuthInfo): void {
-		let socket = this.gameApplication.getSocketApp().getIO().of("/").sockets.get(sid);
+		let socket = this.gnServer.getSocketApp().getIO().of("/").sockets.get(sid);
 		if (socket) {
 			socket.data.authInfo = authInfo;
 			socket.data.isAuthenticated = true;

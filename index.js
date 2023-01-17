@@ -1,3 +1,4 @@
+const { GNNetwork } = require("@xmobitea/gn-typescript-client");
 const fs = require("fs");
 
 const optionsPath = __dirname + "/./GNconfig.debug.json";
@@ -11,7 +12,7 @@ let applicationStartup = new ServerApplicationStartup();
 applicationStartup.config(options);
 applicationStartup.run();
 
-let gameApplication = applicationStartup.getGameApplication();
+let gnServer = applicationStartup.getGNServer();
 
 process.on("uncaughtException", (uncaughtException) => {
 	Debug.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);

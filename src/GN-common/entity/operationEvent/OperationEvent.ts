@@ -1,3 +1,4 @@
+import { CodeHelper } from "./../../helper/CodeHelper";
 import { GNHashtable } from "./../../common/GNData";
 
 export class OperationEvent {
@@ -40,7 +41,7 @@ export class OperationEvent {
 	}
 
 	public toString(): string {
-		return this.eventCode + " " + this.parameters.toString();
+		return "Code: " + CodeHelper.getEventCodeName(this.eventCode) + " (" + this.eventCode + ")" + + ", parameters " + this.parameters + ", encrypted " + this.encrypted;
 	}
 
 }

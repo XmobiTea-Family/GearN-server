@@ -3,12 +3,12 @@ import { OperationResponse } from "./../../../../../GN-common/entity/operationRe
 import { IRequestHandler, PostHandle } from "./IRequestHandler";
 
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { GameApplication } from "./../../../../../GameApplication";
+import { GNServer } from "./../../../../../GNServer";
 import { IRequestConverterService } from "./../../../../service/IRequestConverterService";
 import { OperationHelper } from "./../../../../../GN-common/entity/operationHelper/OperationHelper";
 
 export abstract class RequestHandler implements IRequestHandler {
-	protected gameApplication: GameApplication;
+	protected gnServer: GNServer;
 	protected postHandle: PostHandle;
 	protected requestConverterService: IRequestConverterService;
 
@@ -38,9 +38,9 @@ export abstract class RequestHandler implements IRequestHandler {
 		return OperationHelper.newOperationResponseInternalServerError(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
 	}
 
-	constructor(gameApplication: GameApplication) {
-		this.gameApplication = gameApplication;
-		this.requestConverterService = gameApplication.getRequestConverterService();
+	constructor(gnServer: GNServer) {
+		this.gnServer = gnServer;
+		this.requestConverterService = gnServer.getRequestConverterService();
 
 		this.init();
 	}

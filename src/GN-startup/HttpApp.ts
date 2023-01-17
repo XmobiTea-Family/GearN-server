@@ -7,7 +7,7 @@ import express from "express";
 import { Express } from "express";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
 import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
-import { GameApplication } from "./../GameApplication";
+import { GNServer } from "./../GNServer";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { CreateNewFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/CreateNewFileUploadInfoRequestHandler";
 import { GetFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/GetFileUploadInfoRequestHandler";
@@ -23,7 +23,7 @@ export class HttpApp {
 
 	private apiMiddleware: ApiMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
-	private gameApplication: GameApplication;
+	private gnServer: GNServer;
 
 	private sessionId: string;
 
@@ -59,8 +59,8 @@ export class HttpApp {
 		this.uploadFileSettings = uploadFileSettings;
 	}
 
-	public setGameApplication(gameApplication: GameApplication): void {
-		this.gameApplication = gameApplication;
+	public setGNServer(gnServer: GNServer): void {
+		this.gnServer = gnServer;
 	}
 
 	public setSessionId(sessionId: string): void {
@@ -82,10 +82,10 @@ export class HttpApp {
 			return res.send(
 				'<a href="https://xmobitea.com"><h1 style="text-align:center;">XmobiTea</h1></a>' +
 				'<h3 style="text-align:center;">-->==>>> [GN Server] <<<==<--</h3>' +
-				'<h4 style="text-align:center;"> Version: ' + GameApplication.getServerVersion() + '</h4>' +
+				'<h4 style="text-align:center;"> Version: ' + GNServer.getServerVersion() + '</h4>' +
 				'<h4 style="text-align:center;">Buy license at <a href="https://gn.xmobitea.com">XmobiTea GN Server</a></h4>' +
 				'<br>' +
-				'<h4 style="text-align:center;">©2022 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
+				'<h4 style="text-align:center;">©2023 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
 			);
 		});
 
@@ -121,7 +121,7 @@ export class HttpApp {
 		this.httpAppHandler.setRouter(this.app);
 		this.httpAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.httpAppHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);
-		this.httpAppHandler.setGameApplication(this.gameApplication);
+		this.httpAppHandler.setGNServer(this.gnServer);
 		this.httpAppHandler.setEnableSendAndReceiveDebug(this.appSettings.getEnableSendAndReceiveDebug());
 		this.httpAppHandler.setEnablePostViaMsgPack(this.appSettings.getEnablePostViaMsgPack());
 		this.httpAppHandler.setEnablePostViaJson(this.appSettings.getEnablePostViaJson());
@@ -141,8 +141,8 @@ export class HttpApp {
 		if (this.uploadFileSettings.getEnable()) {
 			this.uploadFileHandler.run();
 
-			this.gameApplication.addHandler(new CreateNewFileUploadInfoRequestHandler(this.gameApplication));
-			this.gameApplication.addHandler(new GetFileUploadInfoRequestHandler(this.gameApplication));
+			this.gnServer.addHandler(new CreateNewFileUploadInfoRequestHandler(this.gnServer));
+			this.gnServer.addHandler(new GetFileUploadInfoRequestHandler(this.gnServer));
 		}
 	}
 

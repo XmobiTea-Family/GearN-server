@@ -64,10 +64,10 @@ export class DebugRequestHandler extends RequestHandler {
 			let operationEvent = new OperationEvent(EventCode.OnDebug);
 			operationEvent.setParameters(operationResponse.getParameters());
 
-			this.gameApplication.sendEventTo(authInfo.getUserId(), operationEvent);
+			this.gnServer.sendEventTo(authInfo.getUserId(), operationEvent);
 		}
 
-		this.gameApplication.joinRoom(authInfo.getUserId(), "test");
+		this.gnServer.joinRoom(authInfo.getUserId(), "test");
 
 		return operationResponse;
 	}

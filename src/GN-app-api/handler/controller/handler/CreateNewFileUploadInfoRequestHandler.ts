@@ -7,11 +7,11 @@ import { OperationCode } from "./../../../../GN-common/constant/OperationCode";
 import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
-import { nanoid } from "nanoid";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { FileUploadInfoParameterCode } from "./../../../../GN-common/constant/parameterCode/FileUploadInfoParameterCode";
 import { FileUploadInfoErrorCode } from "./../../../../GN-common/constant/errorCode/FileUploadInfoErrorCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
+import { StringUtility } from "./../../../../GN-common/helper/StringUtility";
 
 class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
 	@StringDataMember({ code: FileUploadInfoParameterCode.OriginFileName, mustNonNull: true, minLength: 5, maxLength: 50 })
@@ -39,14 +39,14 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let doc = {
-			FileId: nanoid(),
+			FileId: StringUtility.generateRandomString(20),
 			UserId: authInfo.getUserId(),
 			OriginFileName: request.originFileName,
 			TsCreate: currentMilliseconds,
 			TsUploadExpire: currentMilliseconds + 15 * xDatetime.ONE_MINUTE_MILLISECOND,
 		};
 
-		this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo").insertOne(doc);
+		this.gnServer.getDatabase().systemGameCollection("UploadFileInfo").insertOne(doc);
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);

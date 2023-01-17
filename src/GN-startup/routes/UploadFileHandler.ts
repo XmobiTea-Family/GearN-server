@@ -7,7 +7,7 @@ import express from "express";
 import { wrap } from "async-middleware";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
-import { Commands } from "../../GN-common/constant/Commands";
+import { Commands } from "./../../GN-common/constant/Commands";
 
 export class UploadFileHandler {
 	private apiMiddleware: ApiMiddleware;
@@ -93,7 +93,13 @@ export class UploadFileHandler {
 		this.uploadRouter.use(express.urlencoded({ extended: false }));
 		// this.uploadRouter.use(msgpack());
 
-		let uploadPath = __dirname + "/../../../../" + this.uploadPath;
+		let configUploadPath = this.uploadPath;
+		let uploadPath = configUploadPath;
+		if (uploadPath) {
+			if (!fs.existsSync(uploadPath)) {
+				uploadPath = __dirname + "/../../../../" + this.uploadPath;
+			}
+		}
 
 		if (!fs.existsSync(uploadPath)) {
 			fs.mkdirSync(uploadPath, { mode: "0775" });
