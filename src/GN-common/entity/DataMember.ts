@@ -47,24 +47,20 @@ export const initGNObjectMetadata = <T extends GNObjectMetadata>(prototype: any)
 export const initGNObjectFieldMetadata = <T extends GNObjectFieldMetadata>(prototype: any, propertyKey: string): T => {
     let meta = initGNObjectMetadata<GNObjectMetadata>(prototype);
 
-    let field: GNObjectFieldMetadata = meta.fields.find((f) => f.name === propertyKey);
-    if (field == null) {
-        field = {
+    let fieldIndex = meta.fields.findIndex((f) => f.name === propertyKey);
+    if (fieldIndex < 0) {
+        const field: GNObjectFieldMetadata = {
             name: propertyKey,
             fieldType: getGNReflectedDataType(prototype, propertyKey),
-            description: "",
         };
-
         meta.fields.push(field);
+        return field as T;
+    } else {
+        //-- shadow clone the field
+        const field = { ...meta.fields[fieldIndex] };
+        meta.fields[fieldIndex] = field;
+        return field as T;
     }
-
-    let fieldClone: GNObjectFieldMetadata = {
-        name: field.name,
-        fieldType: field.fieldType,
-        description: field.description,
-    }
-
-    return fieldClone as T;
 };
 
 export const getGNObjectMetadata = <T extends GNObjectMetadata>(obj: AbstractConstructor<any>): T | undefined => {
