@@ -104,7 +104,7 @@ export enum GNFieldDataType {
 
 };
 
-export interface GNEnhancedObjectMedata extends GNObjectMetadata {
+export interface GNEnhancedObjectMetadata extends GNObjectMetadata {
     fields: GNEnhancedObjectFieldMetadata[];
 
 };

@@ -2,7 +2,7 @@ import { OperationRequest } from "./../../GN-common/entity/operationRequest/Oper
 import { IRequestConverterService, Constructor } from "./IRequestConverterService";
 import { Request } from "./../../GN-common/entity/operationRequest/base/Request";
 import { GNHashtable, GNArray, GNData } from "./../../GN-common/common/GNData";
-import { GNEnhancedObjectFieldMetadata, GNEnhancedObjectMedata, GNFieldDataType, getGNObjectMetadata } from "./../../GN-common/entity/DataMember";
+import { GNEnhancedObjectFieldMetadata, GNEnhancedObjectMetadata, GNFieldDataType, getGNObjectMetadata } from "./../../GN-common/entity/DataMember";
 import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
 import { CommonOperationRequest } from "./../../GN-common/entity/operationRequest/CommonOperationRequest";
 
@@ -12,7 +12,7 @@ export class RequestConverterService implements IRequestConverterService {
     public createTOperationRequest<T extends OperationRequest>(operationRequest: OperationRequest, cls: Constructor<T>): T {
         let declaredFields = this.declaredFieldsMap[cls.name];
         if (declaredFields == null) {
-            declaredFields = getGNObjectMetadata<GNEnhancedObjectMedata>(cls).fields;
+            declaredFields = getGNObjectMetadata<GNEnhancedObjectMetadata>(cls).fields;
             this.declaredFieldsMap[cls.name] = declaredFields;
         }
 
