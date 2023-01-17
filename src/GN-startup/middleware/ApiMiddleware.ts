@@ -2,7 +2,6 @@ import express from "express";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { Md5Generate } from "./../../GN-common/helper/Md5Generate";
-import { nanoid } from "nanoid";
 import * as mongoDB from "mongodb";
 import { Socket } from "socket.io";
 import { encode } from "@msgpack/msgpack";
@@ -10,6 +9,7 @@ import { LicenseKeyApplication } from "./../LicenseKeyApplication";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Commands } from "./../../GN-common/constant/Commands";
+import { StringUtility } from "./../../GN-common/helper/StringUtility";
 
 export class ApiMiddleware {
 	private static readonly FIVE_MINUTE_TS: number = 5 * 60 * 1000;
@@ -120,7 +120,7 @@ export class ApiMiddleware {
 
 	public generateAuthToken(info: AuthInfo) {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		let authToken = Md5Generate.getMd5(nanoid());
+		let authToken = Md5Generate.getMd5(StringUtility.generateRandomString(20));
 		let userId = info.getUserId();
 		let tsExpire = this.expiredToken == -1 ? -1 : (currentMilliseconds + this.expiredToken);
 

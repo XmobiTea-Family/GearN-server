@@ -78,8 +78,8 @@ export { PlatformType };
 import { UserRoleType } from "./GN-common/constant/enumType/UserRoleType";
 export { UserRoleType };
 
-import { DisplayNameUltils } from "./GN-common/helper/DisplayNameUltils";
-export { DisplayNameUltils };
+import { DisplayNameUtility } from "./GN-common/helper/DisplayNameUtility";
+export { DisplayNameUtility as DisplayNameUltils };
 
 import { Md5Generate } from "./GN-common/helper/Md5Generate";
 export { Md5Generate };
@@ -102,8 +102,8 @@ export { xRandom };
 import { Debug } from "./GN-library/xdebug/lib/xDebug";
 export { Debug };
 
-import { GameApplication } from "./GameApplication";
-export { GameApplication };
+import { GNServer } from "./GNServer";
+export { GNServer };
 
-import { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, FieldType } from "./GN-common/entity/DataMember";
-export { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, FieldType };
+import { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, GNFieldDataType } from "./GN-common/entity/DataMember";
+export { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, GNFieldDataType };

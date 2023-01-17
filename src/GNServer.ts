@@ -1,4 +1,4 @@
-const GN_VERSION = "1.0.7";
+const GN_VERSION = "1.0.9";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
@@ -46,7 +46,7 @@ interface CreateIndexesOptions {
 	expireAfterSeconds?: number;
 }
 
-export class GameApplication {
+export class GNServer {
 	public static getServerVersion(): string {
 		return GN_VERSION;
 	}

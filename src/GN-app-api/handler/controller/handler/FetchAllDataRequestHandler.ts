@@ -33,7 +33,7 @@ export class FetchAllDataRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let gamePlayer = await this.gameApplication.getDatabase().loadGamePlayer(authInfo.getUserId());
+		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayer(authInfo.getUserId());
 		if (!gamePlayer) {
 			return this.newOperationInternalServerError(request);
 		}

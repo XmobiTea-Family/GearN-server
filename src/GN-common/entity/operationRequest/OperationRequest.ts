@@ -1,4 +1,4 @@
-
+import { CodeHelper } from "./../../helper/CodeHelper";
 import { GNHashtable } from "./../../common/GNData";
 
 export class OperationRequest {
@@ -71,7 +71,7 @@ export class OperationRequest {
 	}
 
 	public toString(): string {
-		return this.operationCode + " " + this.requestId + " " + this.parameters.toString();
+		return "Code: " + CodeHelper.getOperationCodeName(this.operationCode) + " (" + this.operationCode + ")" + ", requestId: " + this.requestId + ", parameters " + this.parameters + ", encrypted " + this.encrypted;
 	}
 
 }

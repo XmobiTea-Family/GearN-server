@@ -2,7 +2,7 @@ import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { HttpAppSettings } from "./settings/HttpAppSettings";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { ServerApplication } from "./ServerApplication";
-import { GameApplication } from "./../GameApplication";
+import { GNServer } from "./../GNServer";
 import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
 import { MailSettings } from "./settings/MailSettings";
@@ -135,8 +135,8 @@ export class DefaultApplicationStartup {
 			.build();
 	}
 
-	public getGameApplication(): GameApplication {
-		return this.serverApplication.getGameApplication();
+	public getGNServer(): GNServer {
+		return this.serverApplication.getGNServer();
 	}
 
 }

@@ -34,7 +34,7 @@ export class FetchSparkPlayerRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayer(authInfo.getUserId());
+		let sparkPlayer = await this.gnServer.getDatabase().loadPlayer(authInfo.getUserId());
 		if (!sparkPlayer) {
 			return this.newOperationInternalServerError(request);
 		}

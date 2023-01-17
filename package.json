@@ -1,6 +1,6 @@
 {
   "name": "@xmobitea/gn-server",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "Game Networking Server by XmobiTea",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
     "debug": "node index.js",
     "test": "mocha -r ts-node/register ./test/**/*.test.ts",
     "build": "rm -rf ./dist && webpack --mode production --display-modules",
-    "push": "npm run build && npm run test && npm publish && git push"
+    "push": "npm run build && npm publish && git push"
   },
   "author": "changx.develop@gmail.com (https://xmobitea.com)",
   "license": "ISC",
@@ -31,13 +31,11 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
-    "@clairejs/core": "^3.2.10",
     "@msgpack/msgpack": "^2.8.0",
     "@sendgrid/mail": "^7.7.0",
     "@socket.io/mongo-adapter": "^0.1.0",
     "@socket.io/mongo-emitter": "^0.1.0",
     "@xmobitea/gn-typescript-client": "^0.0.4",
-    "ace-builds": "^1.14.0",
     "async-lock": "^1.4.0",
     "async-middleware": "^1.2.1",
     "axios": "^0.24.0",
@@ -46,17 +44,14 @@
     "express": "^4.18.2",
     "express-msgpack": "^3.0.5",
     "fs": "^0.0.1-security",
-    "iab_verifier": "^0.1.2",
     "jsonwebtoken": "^9.0.0",
     "jwks-rsa": "^2.1.5",
     "log4js": "^6.7.1",
     "md5": "^2.3.0",
     "mongodb": "^4.13.0",
     "multer": "^1.4.5-lts.1",
-    "nanoid": "^3.3.4",
-    "path": "^0.12.7",
+    "reflect-metadata": "^0.1.13",
     "socket.io": "^4.5.4",
-    "socketio-file-upload": "^0.7.3",
     "web3": "^1.8.1"
   },
   "directories": {

@@ -35,7 +35,7 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let doc = await this.gameApplication.getDatabase().systemGameCollection("UploadFileInfo").findOne({ FileId: request.fileId });
+		let doc = await this.gnServer.getDatabase().systemGameCollection("UploadFileInfo").findOne({ FileId: request.fileId });
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);

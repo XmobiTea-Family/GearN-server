@@ -5,7 +5,7 @@ import { Request } from "./../../GN-common/entity/operationRequest/base/Request"
 import express from "express";
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
-import { GameApplication } from "./../../GameApplication";
+import { GNServer } from "./../../GNServer";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import msgpack from "express-msgpack";
@@ -23,7 +23,7 @@ export class HttpAppHandler {
 	private apiMiddleware: ApiMiddleware;
 	private antiDdosMiddleware: AntiDdosMiddleware;
 
-	private gameApplication: GameApplication;
+	private gnServer: GNServer;
 	private enableSendAndReceiveDebug: boolean;
 	private enablePostViaMsgPack: boolean;
 	private enablePostViaJson: boolean;
@@ -44,8 +44,8 @@ export class HttpAppHandler {
 		this.antiDdosMiddleware = antiDdosMiddleware;
 	}
 
-	public setGameApplication(gameApplication: GameApplication): void {
-		this.gameApplication = gameApplication;
+	public setGNServer(gnServer: GNServer): void {
+		this.gnServer = gnServer;
 	}
 
 	public setOnHttpRequest(_onRequestCb: OnHttpRequest) {
@@ -67,10 +67,10 @@ export class HttpAppHandler {
 	public run(): void {
 		this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-
+			
 			let configName = req.params.configName;
 			if (configName != null) {
-				let configItem = this.gameApplication.getConfigGame().getConfig(configName);
+				let configItem = this.gnServer.getConfigGame().getConfig(configName);
 
 				if (configItem != null) return res.json([ReturnCode.Ok, { "1": configItem.toJson() }]);
 			}
@@ -97,7 +97,7 @@ export class HttpAppHandler {
 			this.apiJsonRouter.use(express.json());
 
 			apiRouter.use(
-				"/0",
+				"/" + Commands.RequestCmd_Json,
 				wrap((req, res, next) => {
 					return this.apiMiddleware.getIP(req, res, next);
 				}),
@@ -153,7 +153,7 @@ export class HttpAppHandler {
 
 			this.apiMsgPackRouter.use(msgpack());
 			apiRouter.use(
-				"/1",
+				"/" + Commands.RequestCmd_MsgPack,
 				wrap((req, res, next) => {
 					return this.apiMiddleware.getIP(req, res, next);
 				}),

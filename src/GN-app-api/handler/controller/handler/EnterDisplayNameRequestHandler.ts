@@ -11,7 +11,7 @@ import { EnterDisplayNameErrorCode } from "./../../../../GN-common/constant/erro
 import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 import { UserRoleType } from "./../../../../GN-common/constant/enumType/UserRoleType";
-import { DisplayNameUltils } from "./../../../../GN-common/helper/DisplayNameUltils";
+import { DisplayNameUtility } from "./../../../../GN-common/helper/DisplayNameUtility";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class EnterDisplayNameOperationRequest extends OperationRequest {
@@ -38,7 +38,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let gamePlayer = await this.gameApplication.getDatabase().loadGamePlayer(authInfo.getUserId());
+		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayer(authInfo.getUserId());
 		if (!gamePlayer) {
 			return this.newOperationInternalServerError(request);
 		}
@@ -47,12 +47,12 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 		operationResponse.setReturnCode(ReturnCode.Ok);
 		operationResponse.setScriptData(ParameterCode.ErrorCode, EnterDisplayNameErrorCode.Ok);
 
-		let displayNameNormalizeCollection = this.gameApplication.getDatabase().runtimeGameCollection("DisplayNameNormalizeCollection");
+		let displayNameNormalizeCollection = this.gnServer.getDatabase().runtimeGameCollection("DisplayNameNormalizeCollection");
 		displayNameNormalizeCollection.updateOne(
 			{ UserId: authInfo.getUserId() },
 			{
 				$set: {
-					DisplayName: DisplayNameUltils.normalizeString(request.displayName),
+					DisplayName: DisplayNameUtility.normalizeString(request.displayName),
 					Ts: xDatetime.getCurrentMilliseconds(),
 				},
 			},
@@ -68,7 +68,7 @@ export class EnterDisplayNameRequestHandler extends RequestHandler {
 			gamePlayer.setSegmentValue("UserRole", UserRoleType.User);
 
 			authInfo.setRole(UserRoleType.User);
-			this.gameApplication.getApiMiddleware().updateAuthInfo(authInfo);
+			this.gnServer.getApiMiddleware().updateAuthInfo(authInfo);
 		}
 
 		operationResponse.setScriptData(EnterDisplayNameParameterCode.UserRole, gamePlayer.getSegmentValue("UserRole"));

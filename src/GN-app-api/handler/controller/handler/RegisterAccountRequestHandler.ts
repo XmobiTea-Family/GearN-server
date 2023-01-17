@@ -40,12 +40,12 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (this.gameApplication.getLoginTypeEnables().indexOf(LoginType.Account) == -1) {
+		if (this.gnServer.getLoginTypeEnables().indexOf(LoginType.Account) == -1) {
 			return this.newOperationInvalid(request);
 		}
 
 		let username = request.username.toLowerCase();
-		let sparkPlayer = await this.gameApplication.getDatabase().loadPlayerByUsername(username);
+		let sparkPlayer = await this.gnServer.getDatabase().loadPlayerByUsername(username);
 
 		if (sparkPlayer) {
 			let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
@@ -58,7 +58,7 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 		let password = request.password;
 		let passwordHash = await bcrypt.hash(password, 10);
 
-		sparkPlayer = await this.gameApplication
+		sparkPlayer = await this.gnServer
 			.getDatabase()
 			.createPlayerByUsernameAndPassword(username, passwordHash, this.defaultSegments, (request as any).originRequest.getIP());
 		if (!sparkPlayer) return this.newOperationInternalServerError(request);

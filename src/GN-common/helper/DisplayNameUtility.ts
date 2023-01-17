@@ -1,8 +1,4 @@
-import { xRandom } from "./../../GN-library/xrandom/lib/xRandom";
-
-export class DisplayNameUltils {
-	private static readonly RandomCharacter: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
+export class DisplayNameUtility {
 	public static normalizeString(input: string): string {
 		if (!input) return "";
 
@@ -104,15 +100,4 @@ export class DisplayNameUltils {
 
 		return inputReturn;
 	}
-
-	public static generateRandomString(length: number): string {
-		let nameReturn = "";
-
-		while (nameReturn.length < length) {
-			nameReturn += DisplayNameUltils.RandomCharacter[xRandom.randomInt(0, DisplayNameUltils.RandomCharacter.length)];
-		}
-
-		return nameReturn;
-	}
-
 }

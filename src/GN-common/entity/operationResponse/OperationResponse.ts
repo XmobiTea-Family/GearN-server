@@ -1,3 +1,4 @@
+import { CodeHelper } from "./../../helper/CodeHelper";
 import { ReturnCode } from "./../../constant/ReturnCode";
 import { GNHashtable } from "./../../common/GNData";
 import { InvalidMember } from "./../InvalidMember";
@@ -83,7 +84,27 @@ export class OperationResponse {
 	}
 
 	public toString(): string {
-		return this.operationCode + " " + this.responseId + " " + this.parameters.toString();
+        let stringBuilder = "";
+
+        stringBuilder += "Code: " + CodeHelper.getOperationCodeName(this.operationCode) + " (" + this.operationCode + ")" +", responseId: " + this.responseId + ", returnCode " + CodeHelper.getReturnCodeName(this.returnCode);
+
+        if (this.returnCode == ReturnCode.Ok) stringBuilder += ", parameters " + this.parameters;
+        else if (this.returnCode == ReturnCode.InvalidRequestParameters) {
+            if (this.invalidMembers != null) {
+                let invalidStr = "";
+
+                this.invalidMembers.forEach(invalidMember => {
+                    invalidStr += invalidMember;
+                });
+                stringBuilder += ", invalidMembers " + invalidStr;
+            }
+            else stringBuilder += ", invalidMembers " + this.invalidMembers;
+        }
+        else stringBuilder += ", debugMessage " + this.debugMessage;
+        
+        stringBuilder += ", encrypted " + this.encrypted;
+
+        return stringBuilder;
 	}
 
 }

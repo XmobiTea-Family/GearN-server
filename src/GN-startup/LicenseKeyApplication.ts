@@ -1,5 +1,5 @@
 import http from "http";
-import { GameApplication } from "./../GameApplication";
+import { GNServer } from "./../GNServer";
 import { Express } from "express";
 import express from "express";
 import { wrap } from "async-middleware";
@@ -12,7 +12,7 @@ import { VerifyServerApplicationParameterCode } from "./../GN-client-custom/comm
 import { VerifyServerApplicationErrorCode } from "./../GN-client-custom/common/constant/errorCode/VerifyServerApplicationErrorCode";
 
 import { GNNetwork, GNServerSettings, OperationRequest, GNHashtable } from "@xmobitea/gn-typescript-client";
-import { ReturnCode } from "../GN-common/constant/ReturnCode";
+import { ReturnCode } from "./../GN-common/constant/ReturnCode";
 import { decode } from "@msgpack/msgpack";
 
 interface LicenseKeyInfo {
@@ -32,7 +32,7 @@ export class LicenseKeyApplication {
 
 	private licenseKeyFilePath: string;
 	private server: http.Server;
-	private gameApplication: GameApplication;
+	private gnServer: GNServer;
 	private app: Express;
 
 	private static maxCCU: number = 20;
@@ -50,8 +50,8 @@ export class LicenseKeyApplication {
 		this.server = server;
 	}
 
-	public setGameApplication(gameApplication: GameApplication): void {
-		this.gameApplication = gameApplication;
+	public setGNServer(gnServer: GNServer): void {
+		this.gnServer = gnServer;
 	}
 
 	public setApp(app: Express): void {
@@ -111,7 +111,7 @@ export class LicenseKeyApplication {
 			throw new Error("Server null");
 		}
 
-		if (!this.gameApplication) {
+		if (!this.gnServer) {
 			throw new Error("Game Application null");
 		}
 
@@ -147,7 +147,7 @@ export class LicenseKeyApplication {
 			setTimeout(() => {
 				this.validateApp(false);
 
-				this.gameApplication.getTimerService().subscriberEveryMinute(() => {
+				this.gnServer.getTimerService().subscriberEveryMinute(() => {
 					this.validateApp(false);
 				});
 			}, 500);
@@ -165,34 +165,6 @@ export class LicenseKeyApplication {
 
 		GNNetwork.init(gnServerSettings);
 	}
-
-	// private authenticationApp(): void {
-	// 	let thiz = this;
-	// 	let username = this.licenseKeyInfo.ProductId;
-	// 	let password = Md5Generate.getMd5(this.licenseKeyInfo.LicenseKey + this.licenseKeyInfo.UnformattedLicenseKey + "_" + this.licenseKeyInfo.ProductId);
-	// 	GNNetwork.accountLogin(username, password, {
-	// 		invoke: function (loginOperationResponse) {
-	// 			if (!loginOperationResponse.hasError()) {
-	// 				LicenseKeyApplication.maxCCU = 50;
-
-	// 				thiz.validateApp();
-
-	// 				thiz.gameApplication.getTimerService().subscriberEveryMinute(() => {
-	// 					thiz.validateApp();
-	// 				});
-	// 			}
-	// 			else {
-	// 				setTimeout(() => {
-	// 					thiz.debug(VerifyServerApplicationErrorCode.LicenseKeyExpire, LicenseKeyApplication.maxCCU);
-	// 				}, 500);
-
-	// 				setTimeout(() => {
-	// 					thiz.authenticationApp();
-	// 				}, 5000);
-	// 			}
-	// 		}
-	// 	});
-	// }
 
 	private totalServerRequestFailure = 0;
 	private validateApp(forceUse: boolean): void {
