@@ -22,12 +22,16 @@ class FetchAllDataOperationRequest extends OperationRequest {
 }
 
 export class FetchAllDataRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.FetchAllData;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, FetchAllDataOperationRequest);
+	public override getCommonOperationRequest() {
+		return FetchAllDataOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

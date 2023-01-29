@@ -27,12 +27,16 @@ class EnterDisplayNameOperationRequest extends OperationRequest {
 }
 
 export class EnterDisplayNameRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.EnterDisplayName;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, EnterDisplayNameOperationRequest);
+	public override getCommonOperationRequest() {
+		return EnterDisplayNameOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

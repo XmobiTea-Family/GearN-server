@@ -81,6 +81,9 @@ export { UserRoleType };
 import { DisplayNameUtility } from "./GN-common/helper/DisplayNameUtility";
 export { DisplayNameUtility as DisplayNameUltils };
 
+import { StringUtility } from "./GN-common/helper/StringUtility";
+export { StringUtility as StringUtility };
+
 import { Md5Generate } from "./GN-common/helper/Md5Generate";
 export { Md5Generate };
 

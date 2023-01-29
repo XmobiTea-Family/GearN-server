@@ -22,16 +22,19 @@ class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
 
 		return true;
 	}
-
 }
 
 export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.CreateNewFileUploadInfo;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, CreateNewFileUploadInfoOperationRequest);
+	public override getCommonOperationRequest() {
+		return CreateNewFileUploadInfoOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

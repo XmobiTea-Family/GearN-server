@@ -8,7 +8,11 @@ export class xDatetime {
 	public static readonly ONE_YEAR_MILLISECOND: number = this.ONE_DAY_MILLISECOND * 365;
 
 	public static getCurrentMilliseconds(): number {
-		return this.getMilliseconds(new Date());
+		return this.getMilliseconds(this.getCurrentDate());
+	}
+
+	public static getCurrentDate(): Date {
+		return new Date();
 	}
 
 	public static getMilliseconds(date: Date): number {

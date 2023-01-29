@@ -14,10 +14,10 @@ import { LoginType } from "./../../../../GN-common/constant/enumType/LoginType";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class RegisterAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: LoginParameterCode.Username, mustNonNull: true, minLength: 5, maxLength: 32 })
+	@StringDataMember({ code: LoginParameterCode.Username, mustNonNull: true, minLength: 6, maxLength: 32 })
 	username: string;
 
-	@StringDataMember({ code: LoginParameterCode.Password, mustNonNull: true, minLength: 8, maxLength: 64 })
+	@StringDataMember({ code: LoginParameterCode.Password, mustNonNull: true, minLength: 6, maxLength: 64 })
 	password: string;
 
 	public isValidRequest() {
@@ -29,12 +29,16 @@ class RegisterAccountOperationRequest extends OperationRequest {
 }
 
 export class RegisterAccountRequestHandler extends LoginRequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.RegisterAccount;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, RegisterAccountOperationRequest);
+	public override getCommonOperationRequest(): any {
+		return RegisterAccountOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -44,7 +48,7 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 			return this.newOperationInvalid(request);
 		}
 
-		let username = request.username.toLowerCase();
+		let username = (request as any).username.toLowerCase();
 		let sparkPlayer = await this.gnServer.getDatabase().loadPlayerByUsername(username);
 
 		if (sparkPlayer) {
@@ -55,7 +59,7 @@ export class RegisterAccountRequestHandler extends LoginRequestHandler {
 			return operationResponse;
 		}
 
-		let password = request.password;
+		let password = (request as any).password;
 		let passwordHash = await bcrypt.hash(password, 10);
 
 		sparkPlayer = await this.gnServer

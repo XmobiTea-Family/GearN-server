@@ -39,6 +39,9 @@ import { Web3Service } from "./GN-app-api/service/Web3Service";
 import { IGoogleService } from "./GN-app-api/service/IGoogleService";
 import { GoogleService } from "./GN-app-api/service/GoogleService";
 import { FetchSparkPlayerRequestHandler } from "./GN-app-api/handler/controller/handler/FetchSparkPlayerRequestHandler";
+import { CodeHelper } from "./GN-common/helper/CodeHelper";
+import { IAnalyticsService } from "./GN-app-api/service/IAnalyticsService";
+import { AnalyticsService } from "./GN-app-api/service/AnalyticsService";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -69,6 +72,7 @@ export class GNServer {
 	private timerService: ITimerService;
 	private lockService: ILockService;
 	private requestConverterService: IRequestConverterService;
+	private analyticsService: IAnalyticsService;
 
 	private loginTypeEnables: LoginType[] = [];
 
@@ -102,6 +106,8 @@ export class GNServer {
 		this.requestController.setRequestConverterService(this.requestConverterService);
 
 		(this.timerService as TimerService).run();
+
+		CodeHelper.init();
 	}
 
 	public init(): void {
@@ -127,6 +133,11 @@ export class GNServer {
 		this.socketApp.getSocketAppHandler().setOnSocketRequest((request: Request) => {
 			return this.handleOnRequest(request);
 		});
+
+		let tempAnalyticsService = new AnalyticsService();
+		tempAnalyticsService.setGNServer(this);
+		tempAnalyticsService.run();
+		this.analyticsService = tempAnalyticsService;
 
 		if (onRunSuccess != null) onRunSuccess();
 	}
@@ -216,6 +227,10 @@ export class GNServer {
 
 	public getLockService(): ILockService {
 		return this.lockService;
+	}
+
+	public getAnalyticsService(): IAnalyticsService {
+		return this.analyticsService;
 	}
 
 	public getRequestConverterService(): IRequestConverterService {

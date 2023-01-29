@@ -1,76 +1,96 @@
 {
 	"name": "debug",
 	"options": {
-		"port": 2202,
-		"useSsl": false,
-		"keyFilePath": "",
-		"certFilePath": "",
-		"licenseKeyFilePath": "",
-		"expiredTokenInMs": 172800000,
-
-		"httpAppEnable": true,
-		"httpAppAllowOrigin": "*",
-		"httpAppCredentials": true,
-		"httpAppAllowMethods": ["GET", "POST"],
-		"httpAppAllowHeaders": ["a", "content-type"],
-		"httpAppEnableSendAndReceiveDebug": true,
-		"httpAppEnablePostViaMsgPack": true,
-		"httpAppEnablePostViaJson": true,
-
-		"socketAppEnable": true,
-		"socketAppAllowOrigin": "*",
-		"socketAppCredentials": true,
-		"socketAppAllowMethods": ["GET"],
-		"socketAppAllowHeaders": [],
-		"socketAppEnableSendAndReceiveDebug": true,
-		"socketAppEnablePostViaMsgPack": true,
-		"socketAppEnablePostViaJson": true,
-		"socketAppPingInterval": 50000,
-		"socketAppPingTimeout": 5000,
-
-		"uploadFileEnable": true,
-		"uploadPath": "./file-upload",
-		"maxSizeUpload": 52428800,
-		"mimeTypeAccepts": ["image/png"],
-
-		"adapterEventCollectionName": "AdapterEventCollection",
-		"authInfoCollectionName": "AuthInfoCollection",
-		"configCollectionName": "Config",
-		"packageName": "com.xmobitea.GNServer",
-		"appleClientId": "com.xmobitea.GNServer",
-		"googleClientId": "gn-server",
-		"headerIP": "x-ip",
-		
-		"databaseConnectionString": "mongodb://127.0.0.1:27017/",
-		"databaseName": "XmobiTea",
-		"databaseGameName": "GN.",
-		"databaseOptions": {
+		"applicationSettings": {
+			"port": 2202,
+			"useSsl": false,
+			"keyFilePath": "",
+			"certFilePath": "",
+			"licenseKeyFilePath": "",
+			"expiredTokenInMs": 172800000
 		},
 
-		"mailEnable": false,
-		"mailSendFrom": "changx@xmobitea.com",
-		"mailSendGridApiKey": "SG.",
+		"httpAppSettings": {
+			"enable": true,
+			"allowOrigin": "*",
+			"credentials": true,
+			"allowMethods": ["GET", "POST"],
+			"allowHeaders": ["a", "content-type"],
+			"enableSendAndReceiveDebug": true,
+			"enablePostViaMsgPack": true,
+			"enablePostViaJson": true
+		},
 
-		"debugToolEnable": true,
-		"testToolEnable": true,
-		"logToolEnable": true,
-		"toolHashs": ["hashhere"],
+		"socketAppSettings": {
+			"enable": true,
+			"allowOrigin": "*",
+			"credentials": true,
+			"allowMethods": ["GET"],
+			"allowHeaders": [],
+			"enableSendAndReceiveDebug": true,
+			"enablePostViaMsgPack": true,
+			"enablePostViaJson": true,
+			"pingInterval": 50000,
+			"pingTimeout": 5000
+		},
 
-		"logToConsoleEnable": true,
-		"logToFileEnable": true,
-		"logPath": "./log/debug/Server.log",
+		"uploadFileSettings": {
+			"enable": true,
+			"uploadPath": "./file-upload",
+			"maxSizeUpload": 52428800,
+			"mimeTypeAccepts": ["image/png"]
+		},
 
-		"socketMaxRequestPerSecondPerIp": 50,
-		"socketMaxRequestPerSecondPerPeer": 20,
-		"socketMaxPendingRequest": 1000,
-		"socketMaxRequestSize": 1024,
-		"httpMaxRequestPerSecondPerIp": 50,
-		"httpMaxRequestPerSecondPerPeer": 20,
-		"httpMaxPendingRequest": 1000,
-		"httpMaxRequestSize": 1024,
-		"maxUploadPendingRequest": 200,
-		"maxDownloadPendingRequest": 200,
-		"reportDdosCollectionName": "ReportDdosCollection",
-		"banDdosCollectionName": "BanDdosCollection"
+		"databaseSettings": {
+			"connectionString": "mongodb://127.0.0.1:27017/",
+			"databaseName": "XmobiTea",
+			"databaseGameName": "GN",
+			"options": {
+			}
+		},
+
+		"otherSettings": {
+			"adapterEventCollectionName": "AdapterEventCollection",
+			"authInfoCollectionName": "AuthInfoCollection",
+			"configCollectionName": "Config",
+			"packageName": "com.xmobitea.GNServer",
+			"appleClientId": "com.xmobitea.GNServer",
+			"googleClientId": "gn-server",
+			"headerIP": "x-ip"
+		},
+		
+		"mailSettings": {
+			"enable": false,
+			"sendFrom": "changx@xmobitea.com",
+			"sendGridApiKey": "SG."
+		},
+
+		"adminViewSettings": {
+			"enable": true,
+			"debugViewEnable": true,
+			"logViewEnable": true,
+			"debugHashs": ["hashhere"]
+		},
+
+		"logSettings": {
+			"logToConsoleEnable": true,
+			"logToFileEnable": true,
+			"logPath": "./log/debug/Server.log"
+		},
+
+		"ddosSettings": {
+			"socketMaxRequestPerSecondPerIp": 50,
+			"socketMaxRequestPerSecondPerPeer": 20,
+			"socketMaxPendingRequest": 1000,
+			"socketMaxRequestSize": 1024,
+			"httpMaxRequestPerSecondPerIp": 50,
+			"httpMaxRequestPerSecondPerPeer": 20,
+			"httpMaxPendingRequest": 1000,
+			"httpMaxRequestSize": 1024,
+			"maxUploadPendingRequest": 200,
+			"maxDownloadPendingRequest": 200,
+			"reportDdosCollectionName": "ReportDdosCollection",
+			"banDdosCollectionName": "BanDdosCollection"
+		}
 	}
 }

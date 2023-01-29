@@ -9,16 +9,28 @@ import { CommonOperationRequest } from "./../../GN-common/entity/operationReques
 export class RequestConverterService implements IRequestConverterService {
     private declaredFieldsMap: { [k: string]: GNEnhancedObjectFieldMetadata[] };
 
-    public createTOperationRequest<T extends OperationRequest>(operationRequest: OperationRequest, cls: Constructor<T>): T {
+    public getGNEnhancedObjectFieldMetadata<T extends OperationRequest>(cls: Constructor<T>): GNEnhancedObjectFieldMetadata[] {
         let declaredFields = this.declaredFieldsMap[cls.name];
         if (declaredFields == null) {
             declaredFields = getGNObjectMetadata<GNEnhancedObjectMetadata>(cls).fields;
             this.declaredFieldsMap[cls.name] = declaredFields;
         }
 
+        return declaredFields;
+    }
+
+    public createTOperationRequest<T extends OperationRequest>(operationRequest: OperationRequest, cls: Constructor<T>): T {
+        let declaredFields = this.getGNEnhancedObjectFieldMetadata(cls);
+
         let answer = new cls();
         let answerAny = answer as any;
         answerAny.invalidMembers = [];
+
+        answerAny.setOriginRequest = (operationRequest as any).setOriginRequest;
+        answerAny.getOriginRequest = (operationRequest as any).getOriginRequest;
+        answerAny.addInvalidMember = (operationRequest as any).addInvalidMember;
+        answerAny.getInvalidMembers = (operationRequest as any).getInvalidMembers;
+
         let commonAnswer = answerAny as CommonOperationRequest;
 
         let isValidRequest = true;

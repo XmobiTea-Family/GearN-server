@@ -12,14 +12,25 @@ import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { CreateNewFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/CreateNewFileUploadInfoRequestHandler";
 import { GetFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/GetFileUploadInfoRequestHandler";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
+import { AdminViewSettings } from "./settings/AdminViewSettings";
+import { SocketAppSettings } from "./settings/SocketAppSettings";
+import { ApplicationSettings } from "./settings/ApplicationSettings";
+import { LogSettings } from "./settings/LogSettings";
+import { AdminAppHandler } from "./routes/AdminAppHandler";
 
 export class HttpApp {
+	private applicationSettings: ApplicationSettings;
 	private uploadFileSettings: UploadFileSettings;
 	private appSettings: HttpAppSettings;
+	private socketAppSettings: SocketAppSettings;
+	private adminViewSettings: AdminViewSettings;
 	private app: Express;
 	private httpAppHandler: HttpAppHandler;
 	private uploadFileHandler: UploadFileHandler;
+	private adminAppHandler: AdminAppHandler;
+
 	private antiDdosMiddleware: AntiDdosMiddleware;
+	private logSettings: LogSettings;
 
 	private apiMiddleware: ApiMiddleware;
 	private uploadFileMiddleware: UploadFileMiddleware;
@@ -39,6 +50,10 @@ export class HttpApp {
 		return this.httpAppHandler;
 	}
 
+	public getAdminAppHandler(): AdminAppHandler {
+		return this.adminAppHandler;
+	}
+
 	public getUploadFileHandler(): UploadFileHandler {
 		return this.uploadFileHandler;
 	}
@@ -51,8 +66,20 @@ export class HttpApp {
 		this.uploadFileMiddleware = uploadFileMiddleware;
 	}
 
+	public setApplicationSettings(applicationSettings: ApplicationSettings): void {
+		this.applicationSettings = applicationSettings;
+	}
+
 	public setAppSettings(appSettings: HttpAppSettings): void {
 		this.appSettings = appSettings;
+	}
+
+	public setSocketAppSettings(socketAppSettings: SocketAppSettings): void {
+		this.socketAppSettings = socketAppSettings;
+	}
+
+	public setDebugViewSettings(debugViewSettings: AdminViewSettings): void {
+		this.adminViewSettings = debugViewSettings;
 	}
 
 	public setUploadFileSettings(uploadFileSettings: UploadFileSettings): void {
@@ -71,6 +98,10 @@ export class HttpApp {
 		this.antiDdosMiddleware = antiDdosMiddleware;
 	}
 
+	public setLogSettings(logSettings: LogSettings): void {
+		this.logSettings = logSettings;
+	}
+
 	public run(): void {
 		this.app.use(express.urlencoded({ extended: false }));
 
@@ -78,32 +109,52 @@ export class HttpApp {
 			return res.sendStatus(403);
 		});
 
-		this.app.get("/", (req: express.Request, res: express.Response) => {
-			return res.send(
-				'<a href="https://xmobitea.com"><h1 style="text-align:center;">XmobiTea</h1></a>' +
-				'<h3 style="text-align:center;">-->==>>> [GN Server] <<<==<--</h3>' +
-				'<h4 style="text-align:center;"> Version: ' + GNServer.getServerVersion() + '</h4>' +
-				'<h4 style="text-align:center;">Buy license at <a href="https://gn.xmobitea.com">XmobiTea GN Server</a></h4>' +
-				'<br>' +
-				'<h4 style="text-align:center;">©2023 <a href="https://xmobitea.com">XmobiTea Family</a></h4>'
-			);
+		this.app.get("/index", (req: express.Request, res: express.Response) => {
+			return res.redirect("./");
 		});
 
-		this.app.get("/ping", async function (req: express.Request, res: express.Response) {
+		this.app.get("/", (req: express.Request, res: express.Response) => {
+			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/index.html");
+		});
+
+		this.app.get("/index-common.js", (req: express.Request, res: express.Response) => {
+			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/index-common.js");
+		});
+
+		this.app.get("/index-support.js", (req: express.Request, res: express.Response) => {
+			let stringBuilder = '';
+			stringBuilder += 'function initIndexSupport() {';
+			stringBuilder += '	gnVersion = "' + GNServer.getServerVersion() + '";';
+			stringBuilder += '}';
+
+			return res.send(stringBuilder);
+		});
+		
+		this.app.get("/ping", (req: express.Request, res: express.Response) => {
 			return res.sendStatus(200);
 		});
 
-		this.app.get("/stats", async function (req: express.Request, res: express.Response) {
-			let cpuUsage = process.cpuUsage();
-			let memoryUsage = process.memoryUsage();
-			let resourceUsage = process.resourceUsage();
-
-			return res.json({
-				"CpuUsage": cpuUsage,
-				"MemoryUsage": memoryUsage,
-				"ResourceUsage": resourceUsage
-			});
+		this.app.get("/favicon.png", (req: express.Request, res: express.Response) => {
+			return res.status(200).sendFile(__dirname + "/GN-startup/routes/www/favicon.png");
 		});
+
+		this.app.get("/favicon.ico", (req: express.Request, res: express.Response) => {
+			return res.status(200).sendFile(__dirname + "/GN-startup/routes/www/favicon.ico");
+		});
+
+		this.adminAppHandler = new AdminAppHandler();
+		this.adminAppHandler.setRouter(this.app);
+		this.adminAppHandler.setApiMiddleware(this.apiMiddleware);
+		this.adminAppHandler.setApplicationSettings(this.applicationSettings);
+		this.adminAppHandler.setGNServer(this.gnServer);
+		this.adminAppHandler.setAdminViewSettings(this.adminViewSettings);
+		this.adminAppHandler.setHttpAppSettings(this.appSettings);
+		this.adminAppHandler.setSocketAppSettings(this.socketAppSettings);
+		this.adminAppHandler.setLogSettings(this.logSettings);
+
+		if (this.adminViewSettings.getEnable()) {
+			this.adminAppHandler.run();
+		}
 
 		let allowedHeaders = this.appSettings.getAllowedHeaders();
 		allowedHeaders.push(this.sessionId);

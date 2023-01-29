@@ -1,7 +1,6 @@
 import { UploadFileMiddleware } from "./../middleware/UploadFileMiddleware";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import * as mongoDB from "mongodb";
-import { Router } from "express";
 import fs from "fs";
 import express from "express";
 import { wrap } from "async-middleware";
@@ -14,12 +13,12 @@ export class UploadFileHandler {
 	private uploadFileMiddleware: UploadFileMiddleware;
 	private antiDdosMiddleware: AntiDdosMiddleware;
 
-	private router: Router;
-	private uploadRouter: Router;
+	private router: express.Express;
+	private uploadRouter: express.Router;
 	private uploadPath: string;
 	private uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>;
 
-	public setRouter(router: Router): void {
+	public setRouter(router: express.Express): void {
 		this.router = router;
 	}
 

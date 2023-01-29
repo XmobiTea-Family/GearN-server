@@ -24,12 +24,16 @@ class GetFileUploadInfoOperationRequest extends OperationRequest {
 }
 
 export class GetFileUploadInfoRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.GetFileUploadInfo;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, GetFileUploadInfoOperationRequest);
+	public override getCommonOperationRequest() {
+		return GetFileUploadInfoOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

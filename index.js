@@ -1,4 +1,3 @@
-const { GNNetwork } = require("@xmobitea/gn-typescript-client");
 const fs = require("fs");
 
 const optionsPath = __dirname + "/./GNconfig.debug.json";

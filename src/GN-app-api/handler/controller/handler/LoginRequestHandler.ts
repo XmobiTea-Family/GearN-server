@@ -109,12 +109,16 @@ export class LoginOperationRequest extends OperationRequest {
 export class LoginRequestHandler extends RequestHandler {
 	protected defaultSegments = { UserRole: UserRoleType.UserNonActivate };
 
-	public getCode() {
+	public override getCode() {
 		return OperationCode.Login;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, LoginOperationRequest);
+	public override getCommonOperationRequest() {
+		return LoginOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

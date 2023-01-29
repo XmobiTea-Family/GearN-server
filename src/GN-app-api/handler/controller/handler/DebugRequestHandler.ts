@@ -15,14 +15,14 @@ import { EventCode } from "./../../../../GN-common/constant/EventCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 
 class DebugOperationRequest extends OperationRequest {
-	@BooleanDataMember({ code: DebugParameterCode.Boolean, isOptional: true })
-	booleanValue: boolean;
+	@StringDataMember({ code: DebugParameterCode.String, isOptional: true })
+	stringValue: string;
 
 	@NumberDataMember({ code: DebugParameterCode.Number, isOptional: true })
 	numberValue: number;
 
-	@StringDataMember({ code: DebugParameterCode.String, isOptional: true })
-	stringValue: string;
+	@BooleanDataMember({ code: DebugParameterCode.Boolean, isOptional: true })
+	booleanValue: boolean;
 
 	@GNHashtableDataMember({ code: DebugParameterCode.GNHashtable, isOptional: true })
 	gnHashtableValue: GNHashtable;
@@ -39,12 +39,16 @@ class DebugOperationRequest extends OperationRequest {
 }
 
 export class DebugRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.Debug;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, DebugOperationRequest);
+	public override getCommonOperationRequest() {
+		return DebugOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -66,8 +70,6 @@ export class DebugRequestHandler extends RequestHandler {
 
 			this.gnServer.sendEventTo(authInfo.getUserId(), operationEvent);
 		}
-
-		this.gnServer.joinRoom(authInfo.getUserId(), "test");
 
 		return operationResponse;
 	}

@@ -24,12 +24,16 @@ class RegisterSocketOperationRequest extends OperationRequest {
 }
 
 export class RegisterSocketRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.RegisterSocket;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, RegisterSocketOperationRequest);
+	public override getCommonOperationRequest() {
+		return RegisterSocketOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

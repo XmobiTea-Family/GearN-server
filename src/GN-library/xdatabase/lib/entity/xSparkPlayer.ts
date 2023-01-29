@@ -1,5 +1,6 @@
 import * as mongoDB from "mongodb";
 import { xPlayerBase } from "./xPlayerBase";
+import bcrypt from "bcrypt";
 
 export class xSparkPlayer extends xPlayerBase {
 	private static readonly Username: string = "Username";
@@ -72,14 +73,15 @@ export class xSparkPlayer extends xPlayerBase {
 		return this.password;
 	}
 
-	public setPassword(password: string) {
-		this.password = password;
+	public async setPassword(passwordNonHash: string) {
+		let passwordHash: string = await bcrypt.hash(passwordNonHash, 10);
+		this.password = passwordHash;
 
 		this.collection.updateOne(
 			{ _id: this._id },
 			{
 				$set: {
-					Password: password,
+					Password: passwordHash,
 				},
 			}
 		);

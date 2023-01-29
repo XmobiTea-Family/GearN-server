@@ -1,6 +1,5 @@
 import http from "http";
 import { GNServer } from "./../GNServer";
-import { Express } from "express";
 import express from "express";
 import { wrap } from "async-middleware";
 import { Debug } from "./../GN-library/xdebug/lib/xDebug";
@@ -11,7 +10,7 @@ import { OperationCodeExtensions } from "./../GN-client-custom/common/constant/O
 import { VerifyServerApplicationParameterCode } from "./../GN-client-custom/common/constant/parameterCode/VerifyServerApplicationParameterCode";
 import { VerifyServerApplicationErrorCode } from "./../GN-client-custom/common/constant/errorCode/VerifyServerApplicationErrorCode";
 
-import { GNNetwork, GNServerSettings, OperationRequest, GNHashtable } from "@xmobitea/gn-typescript-client";
+import { GNNetwork, GNServerSettings, OperationRequest, GNHashtable, OperationResponse, LoginOperationResponse } from "@xmobitea/gn-typescript-client";
 import { ReturnCode } from "./../GN-common/constant/ReturnCode";
 import { decode } from "@msgpack/msgpack";
 
@@ -33,7 +32,7 @@ export class LicenseKeyApplication {
 	private licenseKeyFilePath: string;
 	private server: http.Server;
 	private gnServer: GNServer;
-	private app: Express;
+	private app: express.Express;
 
 	private static maxCCU: number = 20;
 
@@ -54,7 +53,7 @@ export class LicenseKeyApplication {
 		this.gnServer = gnServer;
 	}
 
-	public setApp(app: Express): void {
+	public setApp(app: express.Express): void {
 		this.app = app;
 	}
 
@@ -98,13 +97,13 @@ export class LicenseKeyApplication {
 			verifyRouter
 		);
 
-		verifyRouter.post("/forcestop", async (req: express.Request, res: express.Response) => {
+		verifyRouter.post("/forcestop", (req: express.Request, res: express.Response) => {
 			this.server.emit("close");
 			this.server.close(() => {
 				Debug.log("[GN] Server force stopped");
 			});
 
-			res.sendStatus(200);
+			return res.sendStatus(200);
 		});
 
 		if (!this.server) {
@@ -188,7 +187,7 @@ export class LicenseKeyApplication {
 			let username = this.licenseKeyInfo.ProductId;
 			let password = Md5Generate.getMd5(this.licenseKeyInfo.LicenseKey + this.licenseKeyInfo.UnformattedLicenseKey + "_" + this.licenseKeyInfo.ProductId);
 			GNNetwork.accountLogin(username, password, {
-				invoke: function (loginOperationResponse) {
+				invoke: (loginOperationResponse: LoginOperationResponse) => {
 					if (!loginOperationResponse.hasError()) {
 						thiz.validateApp(true);
 
@@ -224,7 +223,7 @@ export class LicenseKeyApplication {
 		request.setParameters(parameters);
 
 		GNNetwork.sendViaHttp(request, {
-			invoke: function (operationResponse) {
+			invoke: (operationResponse: OperationResponse) => {
 				if (!operationResponse.hasError()) {
 					let parameters = operationResponse.getParameters();
 

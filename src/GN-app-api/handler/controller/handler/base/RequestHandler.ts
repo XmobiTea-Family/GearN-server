@@ -4,15 +4,17 @@ import { IRequestHandler, PostHandle } from "./IRequestHandler";
 
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { GNServer } from "./../../../../../GNServer";
-import { IRequestConverterService } from "./../../../../service/IRequestConverterService";
+import { Constructor, IRequestConverterService } from "./../../../../service/IRequestConverterService";
 import { OperationHelper } from "./../../../../../GN-common/entity/operationHelper/OperationHelper";
 
 export abstract class RequestHandler implements IRequestHandler {
 	protected gnServer: GNServer;
 	protected postHandle: PostHandle;
 	protected requestConverterService: IRequestConverterService;
-
+	
 	public abstract getCode(): number;
+	
+	public abstract getCommonOperationRequest(): Constructor<OperationRequest>;
 
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		return null;

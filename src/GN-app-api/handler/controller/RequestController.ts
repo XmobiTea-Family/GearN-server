@@ -17,6 +17,10 @@ export class RequestController {
 		this.requestConverterService = requestConverterService;
 	}
 
+	public getRequestUnAuthenticatedCodes(): number[] {
+		return this.requestUnAuthenticatedCodes;
+	}
+
 	public addHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
 		let code = requestHandler.getCode();
 		this.handlers[code] = requestHandler;
@@ -34,6 +38,10 @@ export class RequestController {
 
 	public getHandler(code: number): IRequestHandler {
 		return this.handlers[code];
+	}
+
+	public getAllHandlers(): IRequestHandler[] {
+		return Object.values(this.handlers);
 	}
 
 	public async handleRequest(request: Request): Promise<OperationResponse> {

@@ -10,6 +10,7 @@ import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { DdosSettings } from "./settings/DDosSettings";
+import { AdminViewSettings } from "./settings/AdminViewSettings";
 
 export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
@@ -41,6 +42,12 @@ export class DefaultApplicationStartup {
 			.setPingTimeout(5000)
 			.build();
 
+		let debugViewSettings = AdminViewSettings.Builder()
+			.setDebugHashs([])
+			.setDebugViewEnable(true)
+			.setLogViewEnable(true)
+			.build();
+			
 		let otherSettings = OtherSettings.Builder()
 			.setAdapterEventCollectionName("AdapterEventCollection")
 			.setAuthTokenCollectionName("AuthInfoCollection")
@@ -98,6 +105,7 @@ export class DefaultApplicationStartup {
 			applicationSettings,
 			httpAppSettings,
 			socketAppSettings,
+			debugViewSettings,
 			otherSettings,
 			databaseSettings,
 			mailSettings,
@@ -115,6 +123,7 @@ export class DefaultApplicationStartup {
 		applicationSettings: ApplicationSettings,
 		httpAppSettings: HttpAppSettings,
 		socketAppSettings: SocketAppSettings,
+		debugViewSettings: AdminViewSettings,
 		otherSettings: OtherSettings,
 		databaseSettings: DatabaseSettings,
 		mailSettings: MailSettings,
@@ -126,6 +135,7 @@ export class DefaultApplicationStartup {
 			.setApplicationSettings(applicationSettings)
 			.setHttpAppSettings(httpAppSettings)
 			.setSocketAppSettings(socketAppSettings)
+			.setDebugViewSettings(debugViewSettings)
 			.setOtherSettings(otherSettings)
 			.setDatabaseSettings(databaseSettings)
 			.setMailSettings(mailSettings)

@@ -1,5 +1,4 @@
 import { wrap } from "async-middleware";
-import { Router } from "express";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { Request } from "./../../GN-common/entity/operationRequest/base/Request";
 import express from "express";
@@ -28,11 +27,11 @@ export class HttpAppHandler {
 	private enablePostViaMsgPack: boolean;
 	private enablePostViaJson: boolean;
 
-	private router: Router;
-	private apiJsonRouter: Router;
-	private apiMsgPackRouter: Router;
+	private router: express.Express;
+	private apiJsonRouter: express.Router;
+	private apiMsgPackRouter: express.Router;
 
-	public setRouter(router: Router): void {
+	public setRouter(router: express.Express): void {
 		this.router = router;
 	}
 
@@ -67,7 +66,7 @@ export class HttpAppHandler {
 	public run(): void {
 		this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-			
+
 			let configName = req.params.configName;
 			if (configName != null) {
 				let configItem = this.gnServer.getConfigGame().getConfig(configName);
@@ -147,7 +146,7 @@ export class HttpAppHandler {
 		if (this.enablePostViaMsgPack) {
 			this.apiMsgPackRouter = express.Router();
 
-			this.apiJsonRouter.use(wrap((req, res, next) => {
+			this.apiMsgPackRouter.use(wrap((req, res, next) => {
 				return this.antiDdosMiddleware.checkRequestSizeBodyViaMsgPack(req, res, next);
 			}));
 
@@ -231,7 +230,11 @@ export class HttpAppHandler {
 		catch {
 			operationResponse = new OperationResponse(code, 0, request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.InternalServerError);
+
+			
 		}
+
+
 
 		return operationResponse;
 	}

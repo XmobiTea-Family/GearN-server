@@ -24,12 +24,16 @@ class TemplateOperationRequest extends OperationRequest {
 }
 
 export class TemplateRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.Debug;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, TemplateOperationRequest);
+	public override getCommonOperationRequest() {
+		return TemplateOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

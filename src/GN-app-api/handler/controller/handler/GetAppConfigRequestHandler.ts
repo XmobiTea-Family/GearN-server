@@ -25,12 +25,16 @@ class GetAppConfigOperationRequest extends OperationRequest {
 }
 
 export class GetAppConfigRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.GetAppConfig;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, GetAppConfigOperationRequest);
+	public override getCommonOperationRequest() {
+		return GetAppConfigOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

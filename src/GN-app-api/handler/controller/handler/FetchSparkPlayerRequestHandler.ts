@@ -23,12 +23,16 @@ class FetchSparkPlayerOperationRequest extends OperationRequest {
 }
 
 export class FetchSparkPlayerRequestHandler extends RequestHandler {
-	public getCode() {
+	public override getCode() {
 		return OperationCode.FetchSparkPlayer;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, FetchSparkPlayerOperationRequest);
+	public override getCommonOperationRequest() {
+		return FetchSparkPlayerOperationRequest;
+	}
+
+	public override async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

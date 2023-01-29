@@ -75,4 +75,11 @@ export class CodeHelper {
         }
     }
 
+    static getEventCodeDic(): { [k: number]: string } {
+        return this.eventCodeDic;
+    }
+
+    static getReturnCodeDic(): { [k: number]: string } {
+        return this.returnCodeDic;
+    }
 }

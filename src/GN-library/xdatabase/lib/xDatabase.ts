@@ -17,9 +17,10 @@ interface OnMongoRunError {
 }
 
 export class xDatabase {
-	private static readonly RUNTIME: string = "Runtime.";
-	private static readonly META: string = "Meta.";
-	private static readonly SYSTEM: string = "System.";
+	private static readonly DOT: string = ".";
+	private static readonly RUNTIME: string = "Runtime" + xDatabase.DOT;
+	private static readonly META: string = "Meta" + xDatabase.DOT;
+	private static readonly SYSTEM: string = "System" + xDatabase.DOT;
 
 	private client: mongoDB.MongoClient;
 	private db: mongoDB.Db;
@@ -63,15 +64,15 @@ export class xDatabase {
 	}
 
 	public runtimeGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.RUNTIME + this.gameName + collectionName);
+		return this.collection(xDatabase.RUNTIME + this.gameName + xDatabase.DOT + collectionName);
 	}
 
 	public metaGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.META + this.gameName + collectionName);
+		return this.collection(xDatabase.META + this.gameName + xDatabase.DOT + collectionName);
 	}
 
 	public systemGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.SYSTEM + this.gameName + collectionName);
+		return this.collection(xDatabase.SYSTEM + this.gameName + xDatabase.DOT + collectionName);
 	}
 
 	public collection(collectionName: string): mongoDB.Collection<mongoDB.Document> {

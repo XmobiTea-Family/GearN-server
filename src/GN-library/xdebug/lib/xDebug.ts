@@ -39,7 +39,7 @@ export class Debug {
 		}
 	}
 
-	public static logInfo(message: any, ...args: any[]) {
+	public static logInfo(message: any, ...args: any[]): void {
 		if (this.isLogToConsoleEnable) {
 			console.log("[INFO]: " + message, args);
 		}
@@ -49,7 +49,7 @@ export class Debug {
 		}
 	}
 
-	public static logError(message: any, ...args: any[]) {
+	public static logError(message: any, ...args: any[]): void {
 		if (this.isLogToConsoleEnable) {
 			console.log("[ERROR]: " + message, args);
 		}
@@ -59,7 +59,7 @@ export class Debug {
 		}
 	}
 
-	public static logWarning(message: any, ...args: any[]) {
+	public static logWarning(message: any, ...args: any[]): void {
 		if (this.isLogToConsoleEnable) {
 			console.log("[WARN]: " + message, args);
 		}
@@ -69,7 +69,7 @@ export class Debug {
 		}
 	}
 
-	public static logException(exception: Error) {
+	public static logException(exception: Error): void {
 		let message = exception.name + "\n" + exception.message + "\n" + exception.stack;
 
 		if (this.isLogToConsoleEnable) {

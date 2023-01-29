@@ -1,6 +1,7 @@
 import "reflect-metadata";
+import { Constructor } from "./../../GN-app-api/service/IRequestConverterService";
 import { GNArray, GNHashtable } from "./../common/GNData";
-import { AbstractConstructor, Constructor, FieldDataType, GNObjectFieldMetadata, GNObjectMetadata } from "./GNMetadata";
+import { AbstractConstructor, FieldDataType, GNObjectFieldMetadata, GNObjectMetadata } from "./GNMetadata";
 // Thanks special for athongintel @clairejs/core
 
 //@internal

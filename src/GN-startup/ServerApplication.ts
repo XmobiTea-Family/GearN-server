@@ -28,11 +28,13 @@ import { DdosSettings } from "./settings/DDosSettings";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 import { GoogleService } from "./../GN-app-api/service/GoogleService";
 import { StringUtility } from "./../GN-common/helper/StringUtility";
+import { AdminViewSettings } from "./settings/AdminViewSettings";
 
 abstract class BuilderBase {
 	protected applicationSettings: ApplicationSettings;
 	protected httpAppSettings: HttpAppSettings;
 	protected socketAppSettings: SocketAppSettings;
+	protected debugViewSettings: AdminViewSettings;
 	protected mailSettings: MailSettings;
 	protected databaseSettings: DatabaseSettings;
 	protected otherSettings: OtherSettings;
@@ -50,6 +52,10 @@ abstract class BuilderBase {
 
 	public getSocketAppSettings(): SocketAppSettings {
 		return this.socketAppSettings;
+	}
+
+	public getDebugViewSettings(): AdminViewSettings {
+		return this.debugViewSettings;
 	}
 
 	public getDatabaseSettings(): DatabaseSettings {
@@ -92,6 +98,11 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 
 	public setSocketAppSettings(socketAppSettings: SocketAppSettings): Builder {
 		this.socketAppSettings = socketAppSettings;
+		return this;
+	}
+
+	public setDebugViewSettings(debugViewSettings: AdminViewSettings): Builder {
+		this.debugViewSettings = debugViewSettings;
 		return this;
 	}
 
@@ -223,12 +234,16 @@ export class ServerApplication extends BuilderBase {
 		this.httpApp = this.newHttpApp();
 		this.httpApp.setApiMiddleware(this.apiMiddleware);
 		this.httpApp.setUploadFileMiddleware(this.uploadFileMiddleware);
+		this.httpApp.setApplicationSettings(this.applicationSettings);
 		this.httpApp.setAppSettings(this.getHttpAppSettings());
+		this.httpApp.setSocketAppSettings(this.getSocketAppSettings());
+		this.httpApp.setDebugViewSettings(this.getDebugViewSettings());
 		this.httpApp.setUploadFileSettings(this.getUploadFileSettings());
 		this.httpApp.setApp(app);
 		this.httpApp.setGNServer(this.gnServer);
 		this.httpApp.setSessionId(this.sessionId);
 		this.httpApp.setAntiDdosMiddleware(this.antiDdosMiddleware);
+		this.httpApp.setLogSettings(this.logSettings);
 		this.httpApp.run();
 
 		this.socketApp = this.newSocketApp();
@@ -249,6 +264,8 @@ export class ServerApplication extends BuilderBase {
 				Debug.logError("[GN] Database connect error " + err);
 			}
 		);
+
+		this.createEnsureIndex();
 
 		if (this.mailSettings.getEnable()) {
 			this.gnServer.getMail().run(() => {
@@ -283,9 +300,6 @@ export class ServerApplication extends BuilderBase {
 		});
 
 		let uploadFileInfoCollection = this.gnServer.getDatabase().systemGameCollection("UploadFileInfo");
-		this.gnServer.getDatabase().createIndex("System." + this.gnServer.getDatabase().getGameName() + "UploadFileInfo", { FileId: 1 });
-		this.gnServer.getDatabase().createIndex("System." + this.gnServer.getDatabase().getGameName() + "UploadFileInfo", { UserId: 1 });
-
 		this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
 		this.uploadFileMiddleware.setUploadFileInfoCollection(uploadFileInfoCollection);
 
@@ -378,12 +392,120 @@ export class ServerApplication extends BuilderBase {
 		}
 	}
 
+	private createEnsureIndex(): void {
+		let database = this.gnServer.getDatabase();
+
+		database.createIndex("System." + this.otherSettings.getAuthTokenCollectionName(), {
+			AuthToken: 1,
+		});
+		database.createIndex(
+			"System." + database.getGameName() + "." + this.otherSettings.getConfigGameCollectionName(),
+			{ ConfigName: 1 }
+		);
+
+		database.createIndex("System.Player", { Username: 1 });
+		database.createIndex("System.Player", { Username: 1, Password: 1 });
+		database.createIndex("System.Player", { TsCreate: -1 });
+		database.createIndex("System.Player", { TsLastSeen: -1 });
+
+		database.createIndex(
+			"System.Player",
+			{ "UserEmail.Value": 1, "UserEmail.IsConfirm": -1 },
+			{
+				sparse: true
+			}
+		);
+
+		database.createIndex(
+			"System.Player",
+			{ "UserExternal.FacebookId": 1 },
+			{
+				sparse: true
+			}
+		);
+		database.createIndex(
+			"System.Player",
+			{ "UserExternal.DeviceInfo": 1 },
+			{
+				sparse: true
+			}
+		);
+		database.createIndex(
+			"System.Player",
+			{ "UserExternal.CustomId": 1 },
+			{
+				sparse: true
+			}
+		);
+		database.createIndex(
+			"System.Player",
+			{ "UserExternal.PublicAddress": 1 },
+			{
+				sparse: true
+			}
+		);
+		database.createIndex(
+			"System.Player",
+			{ "UserExternal.AppleUserId": 1 },
+			{
+				sparse: true
+			}
+		);
+		database.createIndex(
+			"System.Player",
+			{ "UserExternal.GoogleUserId": 1 },
+			{
+				sparse: true
+			}
+		);
+
+		database.createIndex("System.ExternalFBAuthentication", { UserId: 1 });
+		database.createIndex("System.ExternalFBAuthentication", {
+			ExternalId: 1,
+			IsRemove: -1,
+		});
+
+		database.createIndex("System.ExternalAppleAuthentication", {
+			UserId: 1,
+		});
+		database.createIndex("System.ExternalAppleAuthentication", {
+			ExternalId: 1,
+			IsRemove: -1,
+		});
+
+		database.createIndex("System.ExternalGoogleAuthentication", {
+			UserId: 1,
+		});
+		database.createIndex("System.ExternalGoogleAuthentication", {
+			ExternalId: 1,
+			IsRemove: -1,
+		});
+
+		database.createIndex("System.Friend", { UserId: 1 });
+		database.createIndex(
+			"System." + database.getGameName() + ".Player",
+			{ UserId: 1 }
+		);
+		database.createIndex(
+			"System." + database.getGameName() + ".Player",
+			{ TsCreate: -1 }
+		);
+		database.createIndex(
+			"System." + database.getGameName() + ".Player",
+			{ TsLastSeen: -1 }
+		);
+
+		database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { FileId: 1 });
+		database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { UserId: 1 });
+	}
+
 	constructor(builder: BuilderBase) {
 		super();
 
 		this.applicationSettings = builder.getApplicationSettings();
 		this.httpAppSettings = builder.getHttpAppSettings();
 		this.socketAppSettings = builder.getSocketAppSettings();
+		this.debugViewSettings = builder.getDebugViewSettings();
 		this.databaseSettings = builder.getDatabaseSettings();
 		this.mailSettings = builder.getMailSettings();
 		this.otherSettings = builder.getOtherSettings();

@@ -245,7 +245,7 @@ export class ApiMiddleware {
 		return next();
 	}
 
-	private async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
+	public async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
 		let headers = req.headers;
 		let authToken = headers[Commands.RequestAuthTokenCmd] as string;
 
