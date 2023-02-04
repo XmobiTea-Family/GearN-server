@@ -1,0 +1,50 @@
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-table me-1"></i>
+        GN Log
+    </div>
+    <div class="card-body">
+
+        <div class="row mb-3">
+            <div class="col-12 col-md-3">
+                <input class="input-height form-control" style="height: 40px; width: 256px !important;" type="number"
+                    placeholder="Skip" id="skipField" value="0" />
+            </div>
+            <div class="col-12 col-md-3">
+                <input class="input-height form-control" style="height: 40px; width: 256px !important;" type="number"
+                    placeholder="Limit" id="limitField" value="100" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <button class="btn btn-success" style="width: 256px !important;"
+                onclick="refreshLog()">Refresh</button>
+        </div>
+
+        <table id="datatablesSimple">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col" style="width:95%">Log</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col" style="width:95%">Log</th>
+                </tr>
+            </tfoot>
+            <tbody id="panelLog">
+                <tr>
+                    <td>Tiger Nixon</td>
+                    <td>System Architect</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet">
+
+<script src="/admin/log-common.js"></script>

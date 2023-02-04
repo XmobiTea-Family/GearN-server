@@ -5,6 +5,8 @@ import { EnterDisplayNameParameterCode } from "./GN-common/constant/parameterCod
 import { FetchAllDataParameterCode } from "./GN-common/constant/parameterCode/FetchAllDataParameterCode";
 import { RegisterSocketParameterCode } from "./GN-common/constant/parameterCode/RegisterSocketParameterCode";
 import { FetchSparkPlayerParameterCode } from "./GN-common/constant/parameterCode/FetchSparkPlayerParameterCode";
+import { ChatParameterCode } from "./GN-common/constant/parameterCode/ChatParameterCode";
+import { FriendParameterCode } from "./GN-common/constant/parameterCode/FriendParameterCode";
 
 export { DebugParameterCode };
 export { GetAppConfigParameterCode };
@@ -13,6 +15,8 @@ export { EnterDisplayNameParameterCode };
 export { FetchAllDataParameterCode };
 export { RegisterSocketParameterCode };
 export { FetchSparkPlayerParameterCode };
+export { ChatParameterCode };
+export { FriendParameterCode };
 
 import { DebugErrorCode } from "./GN-common/constant/errorCode/DebugErrorCode";
 import { GetAppConfigErrorCode } from "./GN-common/constant/errorCode/GetAppConfigErrorCode";
@@ -21,6 +25,8 @@ import { EnterDisplayNameErrorCode } from "./GN-common/constant/errorCode/EnterD
 import { FetchAllDataErrorCode } from "./GN-common/constant/errorCode/FetchAllDataErrorCode";
 import { RegisterSocketErrorCode } from "./GN-common/constant/errorCode/RegisterSocketErrorCode";
 import { FetchSparkPlayerErrorCode } from "./GN-common/constant/errorCode/FetchSparkPlayerErrorCode";
+import { ChatErrorCode } from "./GN-common/constant/errorCode/ChatErrorCode";
+import { FriendErrorCode } from "./GN-common/constant/errorCode/FriendErrorCode";
 
 export { DebugErrorCode };
 export { GetAppConfigErrorCode };
@@ -29,6 +35,8 @@ export { EnterDisplayNameErrorCode };
 export { FetchAllDataErrorCode };
 export { RegisterSocketErrorCode };
 export { FetchSparkPlayerErrorCode };
+export { ChatErrorCode };
+export { FriendErrorCode };
 
 import { OperationRequest } from "./GN-common/entity/operationRequest/OperationRequest";
 export { OperationRequest };

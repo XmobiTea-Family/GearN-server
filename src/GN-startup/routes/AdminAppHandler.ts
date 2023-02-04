@@ -11,16 +11,18 @@ import { HttpAppSettings } from "./../settings/HttpAppSettings";
 import { LogSettings } from "./../settings/LogSettings";
 import session from "express-session";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
-import { ReturnCode } from "../../GN-common/constant/ReturnCode";
-import { UserRoleType } from "../../GN-common/constant/enumType/UserRoleType";
-import { OperationCode } from "../../GN-common/constant/OperationCode";
-import { OperationResponse } from "../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationRequest } from "../../GN-common/entity/operationRequest/OperationRequest";
-import { LoginParameterCode } from "../../GN-common/constant/parameterCode/LoginParameterCode";
-import { LoginType } from "../../GN-common/constant/enumType/LoginType";
-import { LoginErrorCode } from "../../GN-common/constant/errorCode/LoginErrorCode";
-import { ParameterCode } from "../../GN-common/constant/parameterCode/ParameterCode";
-import { InvalidMemberType } from "../../GN-common/constant/enumType/InvalidMemberType";
+import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
+import { UserRoleType } from "./../../GN-common/constant/enumType/UserRoleType";
+import { OperationCode } from "./../../GN-common/constant/OperationCode";
+import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationRequest } from "./../../GN-common/entity/operationRequest/OperationRequest";
+import { LoginParameterCode } from "./../../GN-common/constant/parameterCode/LoginParameterCode";
+import { LoginType } from "./../../GN-common/constant/enumType/LoginType";
+import { LoginErrorCode } from "./../../GN-common/constant/errorCode/LoginErrorCode";
+import { ParameterCode } from "./../../GN-common/constant/parameterCode/ParameterCode";
+import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
+import { LicenseKeyApplication } from "./../LicenseKeyApplication";
+import bcrypt from "bcrypt";
 
 export class AdminAppHandler {
 	private applicationSettings: ApplicationSettings;
@@ -68,11 +70,11 @@ export class AdminAppHandler {
 		this.logSettings = logSettings;
 	}
 
-	private async checkSigninStatus(req: express.Request, res: express.Response, next: Function) {
+	private async mustSignin(req: express.Request, res: express.Response, next: Function) {
 		let authToken = (req.session as any).authToken as string;
 
 		if (!authToken) {
-			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/signin.html");
+			return res.redirect("/admin/signin");
 		}
 
 		req.headers["a"] = authToken;
@@ -80,39 +82,66 @@ export class AdminAppHandler {
 		let returnCode = await this.apiMiddleware.getReturnCodeAuthenticate(req);
 
 		if (returnCode != ReturnCode.Ok || !(req as any).isAuthenticated) {
-			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/signin.html");
+			(req.session as any).authToken = null;
+			return res.redirect("/admin/signin");
 		}
 
 		if ((req as any).authInfo.getRole() > UserRoleType.GameMaster) {
-			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/permission-deny.html");
+			return res.redirect("/101");
+		}
+
+		return next();
+	}
+
+	private async mustNotSignin(req: express.Request, res: express.Response, next: Function) {
+		let authToken = (req.session as any).authToken as string;
+
+		if (authToken) {
+			return res.redirect("/admin");
 		}
 
 		return next();
 	}
 
 	public run(): void {
-		this.router.set("view engine", "ejs");
-		this.router.set("views", "./www/views");
-
 		this.adminRouter = express.Router();
 		this.router.use("/admin", this.adminRouter);
-		
-		this.adminApiRouter = express.Router();
-		this.router.use("/admin/api", this.adminApiRouter);
 
-		this.adminApiRouter.use(session({
-			resave: true,
-			saveUninitialized: true,
-			secret: StringUtility.generateRandomString(10),
-			cookie: { maxAge: 3600000, secure: true }
-		}));
+		this.adminRouter.use(
+			session({
+				secret: StringUtility.generateRandomString(10),
+				resave: false,
+				saveUninitialized: true,
+				cookie: {
+					maxAge: 3600000
+				},
+			})
+		);
 
-		this.setupAdminApiRouter();
+		this.adminRouter.use((req, res, next) => {
+			if ((req.session as any).messages) {
+				res.locals.messages = (req.session as any).messages;
+				(req.session as any).messages = {};
+			}
+
+			return next();
+		});
+
+		// this.adminApiRouter = express.Router();
+		// this.router.use("/admin/api", this.adminApiRouter);
+
+		// this.adminApiRouter.use(session({
+		// 	resave: true,
+		// 	saveUninitialized: true,
+		// 	secret: StringUtility.generateRandomString(10),
+		// 	cookie: { maxAge: 3600000, secure: true }
+		// }));
+
 		this.setupAdminRouter();
 	}
 
-	private setupAdminApiRouter(): void {
-		this.adminApiRouter.get("/get-stats", (req: express.Request, res: express.Response) => {
+	private setupAdminRouter(): void {
+		this.adminRouter.get("/get-stats", (req: express.Request, res: express.Response) => {
 			let cpuUsage = process.cpuUsage();
 			let memoryUsage = process.memoryUsage();
 			let resourceUsage = process.resourceUsage();
@@ -124,7 +153,7 @@ export class AdminAppHandler {
 			});
 		});
 
-		this.adminApiRouter.get("/get-analytics", async (req: express.Request, res: express.Response) => {
+		this.adminRouter.get("/get-analytics", async (req: express.Request, res: express.Response) => {
 			let query = req.query;
 			let tsDateStr = query.tsDate as string;
 
@@ -132,7 +161,7 @@ export class AdminAppHandler {
 			let analyticsItem = await analyticsService.getAnalyticsItem(!tsDateStr ? null : Number.parseInt(tsDateStr));
 
 			if (analyticsItem == null) {
-				return res.status(403);
+				return res.sendStatus(403);
 			}
 
 			return res.json({
@@ -154,55 +183,176 @@ export class AdminAppHandler {
 			});
 		});
 
-		this.adminApiRouter.post("/signin", async (req: express.Request, res: express.Response) => {
-			let body = req.body;
-			let username = body.username;
-			let password = body.password;
-
-			let loginRequestHandler = this.gnServer.getRequestController().getHandler(OperationCode.Login);
-			let loginOperationRequest = new OperationRequest(OperationCode.Login, false);
-			loginOperationRequest.setScriptData(LoginParameterCode.LoginType, LoginType.Account);
-			loginOperationRequest.setScriptData(LoginParameterCode.Username, username);
-			loginOperationRequest.setScriptData(LoginParameterCode.Password, password);
-
-			let operationResponse: OperationResponse = await loginRequestHandler.handle(null, loginOperationRequest);
-			if (operationResponse.getReturnCode() != ReturnCode.Ok) {
-				return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/signin-error.html");
-			}
-
-			let parameters = operationResponse.getParameters();
-			let errorCode = <LoginErrorCode>parameters.getNumber(ParameterCode.ErrorCode);
-			if (errorCode != LoginErrorCode.Ok) {
-				return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/signin-error.html");
-			}
-			else {
-				let authToken = parameters.getString(ParameterCode.AuthToken);
-				(req.session as any).authToken = authToken;
-			}
-
-			return res.redirect("/");
-		});
-
-		this.adminApiRouter.post("/signout", async (req: express.Request, res: express.Response) => {
-			(req.session as any).authToken = null;
-
-			return res.redirect("./");
-		});
-	}
-
-	private setupAdminRouter(): void {
 		this.adminRouter.get("/", wrap((req, res, next) => {
-			return this.checkSigninStatus(req, res, next);
+			return this.mustSignin(req, res, next);
 		}), (req: express.Request, res: express.Response) => {
-			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/admin.html");
+			let packageJsonPath = __dirname + "/../../../../package.json";
+
+			let packageJsonStr = fs.readFileSync(packageJsonPath).toString();
+			let packageJson = JSON.parse(packageJsonStr);
+			let description: string = packageJson.description || "";
+			let name: string = packageJson.name || "";
+			let version: string = packageJson.version || "";
+			let userId: string = (req as any).authInfo.getUserId();
+			let gnVersion: string = GNServer.getServerVersion();
+
+			let maxCCU: any = LicenseKeyApplication.getMaxCCU();
+			if (maxCCU == -1) maxCCU = "Unlimited";
+
+			res.locals.data = {
+				description: description,
+				name: name,
+				version: version,
+				userId: userId,
+				gnVersion: gnVersion,
+				maxCCU: maxCCU
+			}
+
+			res.render("admin/index");
 		});
 
-		if (this.adminViewSettings.getDebugViewEnable()) {
-			this.adminRouter.get("/debug", (req: express.Request, res: express.Response) => {
-				return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/debug.html");
+		{
+			this.adminRouter.get("/change-password", wrap((req, res, next) => {
+				return this.mustSignin(req, res, next);
+			}), (req: express.Request, res: express.Response) => {
+				res.render("admin/change-password");
 			});
 
-			this.adminRouter.get("/debug-support.js", (req: express.Request, res: express.Response) => {
+			this.adminRouter.post("/change-password", wrap((req, res, next) => {
+				return this.mustSignin(req, res, next);
+			}), async (req: express.Request, res: express.Response) => {
+				let body = req.body;
+				let repassword = body.repassword;
+				let newpassword = body.newpassword;
+				let password = body.password;
+
+				if (newpassword != repassword) {
+					(req.session as any).messages = {
+						"errors": {
+							"msg": "repassword wroong"
+						}
+					}
+
+					return res.redirect("/admin/change-password");
+				}
+
+				if (newpassword.length < 5) {
+					(req.session as any).messages = {
+						"errors": {
+							"msg": "password length need at least 6 chars."
+						}
+					}
+
+					return res.redirect("/admin/change-password");
+				}
+
+				if (newpassword == password) {
+					(req.session as any).messages = {
+						"errors": {
+							"msg": "current password is look like new password"
+						}
+					}
+
+					return res.redirect("/admin/change-password");
+				}
+
+				let userId: string = (req as any).authInfo.getUserId();
+				let sparkPlayer = await this.gnServer.getDatabase().loadPlayer(userId);
+
+				let isMatch = await bcrypt.compare(password, sparkPlayer.getPassword());
+				if (!isMatch) {
+					(req.session as any).messages = {
+						"errors": {
+							"msg": "current password wroong."
+						}
+					}
+
+					return res.redirect("/admin/change-password");
+				}
+
+				sparkPlayer.setPassword(newpassword);
+
+				return res.redirect("/admin");
+			});
+		}
+
+		{
+			this.adminRouter.get("/signin", wrap((req, res, next) => {
+				return this.mustNotSignin(req, res, next);
+			}), (req: express.Request, res: express.Response) => {
+				res.render("admin/signin");
+			});
+
+			this.adminRouter.post("/signin", async (req: express.Request, res: express.Response) => {
+				let body = req.body;
+				let username = body.username;
+				let password = body.password;
+
+				let loginRequestHandler = this.gnServer.getRequestController().getHandler(OperationCode.Login);
+				let loginOperationRequest = new OperationRequest(OperationCode.Login, false);
+				loginOperationRequest.setScriptData(LoginParameterCode.LoginType, LoginType.Account);
+				loginOperationRequest.setScriptData(LoginParameterCode.Username, username);
+				loginOperationRequest.setScriptData(LoginParameterCode.Password, password);
+
+				let operationResponse: OperationResponse = await loginRequestHandler.handle(null, loginOperationRequest);
+				if (operationResponse.getReturnCode() != ReturnCode.Ok) {
+					(req.session as any).messages = {
+						"errors": {
+							"ReturnCode": CodeHelper.getReturnCodeName(operationResponse.getReturnCode())
+						}
+					}
+
+					return res.redirect("/admin/signin");
+				}
+
+				let parameters = operationResponse.getParameters();
+				let errorCode = <LoginErrorCode>parameters.getNumber(ParameterCode.ErrorCode);
+				if (errorCode != LoginErrorCode.Ok) {
+					let errorCodeStr = Object.keys(LoginErrorCode)[<number>errorCode - 1];
+
+					(req.session as any).messages = {
+						"errors": {
+							"ErrorCode": errorCodeStr
+						}
+					}
+
+					return res.redirect("/admin/signin");
+				}
+				else {
+					let authToken = parameters.getString(ParameterCode.AuthToken);
+					(req.session as any).authToken = authToken;
+				}
+
+				if (password == "gnadmin") {
+					return res.redirect("/admin/change-password");
+				}
+
+				return res.redirect("/admin");
+			});
+
+			this.adminRouter.post("/signout", (req: express.Request, res: express.Response) => {
+				(req.session as any).authToken = null;
+
+				return res.redirect("/admin");
+			});
+		}
+
+		if (this.adminViewSettings.getDebugViewEnable()) {
+			this.adminRouter.get("/debug", wrap((req, res, next) => {
+				return this.mustSignin(req, res, next);
+			}), (req: express.Request, res: express.Response) => {
+				let userId: string = (req as any).authInfo.getUserId();
+				
+				res.locals.data = {
+					userId: userId,
+				}
+
+				res.render("admin/debug");
+			});
+
+			this.adminRouter.get("/debug-support.js", wrap((req, res, next) => {
+				return this.mustSignin(req, res, next);
+			}), (req: express.Request, res: express.Response) => {
 				let requestController = this.gnServer.getRequestController();
 				let requestConverterService = this.gnServer.getRequestConverterService();
 
@@ -286,28 +436,24 @@ export class AdminAppHandler {
 				for (let i = 0; i < gnInvalidMemberTypeKeys.length; i++) {
 					stringBuilder += '	gnInvalidMemberTypeDict["' + gnInvalidMemberTypeKeys[i] + '"] = "' + gnInvalidMemberTypeValues[i] + '";';
 				}
-				
+
 				stringBuilder += '}';
 
 				return res.send(stringBuilder);
 			});
-
-			this.adminRouter.get("/gn-js-client.min.js", (req: express.Request, res: express.Response) => {
-				return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/gn-js-client.min.js");
-			});
-
-			this.adminRouter.get("/debug-common.js", (req: express.Request, res: express.Response) => {
-				return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/debug-common.js");
-			});
 		}
 
 		if (this.adminViewSettings.getLogViewEnable()) {
-			this.adminRouter.get("/log", (req: express.Request, res: express.Response) => {
-				return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/log.html");
-			});
+			this.adminRouter.get("/log", wrap((req, res, next) => {
+				return this.mustSignin(req, res, next);
+			}), (req: express.Request, res: express.Response) => {
+				let userId: string = (req as any).authInfo.getUserId();
 
-			this.adminRouter.get("/log-common.js", (req: express.Request, res: express.Response) => {
-				return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/log-common.js");
+				res.locals.data = {
+					userId: userId,
+				}
+
+				res.render("admin/log");
 			});
 
 			this.adminRouter.get("/get-log", async (req: express.Request, res: express.Response) => {

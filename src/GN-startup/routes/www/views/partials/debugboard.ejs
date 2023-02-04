@@ -1,0 +1,90 @@
+<h4 class="mb-5"></h4>
+
+<div id="panelSocket">
+    <div id="panelSocketDisconnected" class="mb-3">
+        <button class="btn btn-success" style="width: 256px !important;" onclick="gnConnectSocket()">Connect
+            Socket</button>
+    </div>
+
+    <div id="panelSocketConnected" class="mb-3">
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <button class="btn btn-danger" style="width: 256px !important;"
+                    onclick="gnDisconnectSocket()">Disconnect
+                    Socket</button>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="form-floating">
+                    <input class="form-control" style="height: 40px;" type="text" id="socketIdField" disabled>
+                    <label for="socketIdField" style="margin: -10px;">Socket Id</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h5>OperationRequest</h5>
+<div class="input-form d-flex flex-column mt-3">
+    <div class="row mb-2">
+        <div class="col-12 col-md-12">
+            <select class="form-select" style="height: 40px;" id="operationCodeDropdown"
+                onchange="onOperationCodeDropdownValueChange()">
+            </select>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-12 col-md-6">
+            <div class="form-floating">
+                <input class="form-control" style="height: 40px;" type="text" id="authTokenField" />
+                <label for="authTokenField" style="margin: -10px;">Auth Token</label>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center checkbox-container mb-4">
+        <input type="checkbox" name="isEncrypted" style="height: 26px; width: 26px;" id="isEncryptedToggle" />
+        <label style="margin-left: 8px;" for="isEncrypted">Is Encrypted</label>
+    </div>
+
+    <div class="mt-5 mb-5">
+        <h5>Parameters</h5>
+        <button class="btn btn-outline-success mt-1 btn-sm" onclick="clearParameters()">Clear
+            Parameters</button>
+    </div>
+
+
+    <div id="panelParameters">
+
+    </div>
+</div>
+
+<div class="mt-5 mb-5">
+    <div class="row">
+        <div class="col-12 col-md-2" id="panelHttpButton">
+            <button class="btn btn-primary" id="sendViaHttpBtn" onclick="sendViaHttp()">Send Via Http</button>
+        </div>
+        <div class="col-12 col-md-2" id="panelSocketButton">
+            <button class="btn btn-primary" id="sendViaSocketBtn" onclick="sendViaSocket()">Send Via
+                Socket</button>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5 mb-5">
+    <h5>OperationResponse</h5>
+    <button class="btn btn-outline-success mt-1 btn-sm" onclick="clearOperationResponse()">Clear Operation
+        Response</button>
+    <div id="panelOperationResponse" class="mt-2 mb-5">
+
+    </div>
+
+    <h5 class="mt-2">OperationEvent</h5>
+    <button class="btn btn-outline-success mt-1 btn-sm" onclick="clearOperationEvent()">Clear Operation
+        Event</button>
+    <div id="panelOperationEvent" class="mt-2">
+
+    </div>
+</div>
+
+<script src="/gn-js-client.min.js"></script>
+<script src="/admin/debug-common.js"></script>
+<script src="/admin/debug-support.js"></script>

@@ -92,7 +92,7 @@ export class LicenseKeyApplication {
 				let secretId = req.headers[this.sessionId];
 
 				if (this.secretId === secretId) return next();
-				return res.status(403);
+				return res.sendStatus(403);
 			}),
 			verifyRouter
 		);

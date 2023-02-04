@@ -1,0 +1,40 @@
+<div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+            <div class="nav">
+                <div class="sb-sidenav-menu-heading">Core</div>
+                <a class="nav-link" href="/admin">
+                    <div class="sb-nav-link-icon"><i class="fas fas fa-line-chart"></i></div>
+                    Homepage
+                </a>
+                <a class="nav-link" href="/admin/debug">
+                    <div class="sb-nav-link-icon"><i class="fas fa-television"></i></div>
+                    Debug Tool
+                </a>
+                <a class="nav-link" href="/admin/log">
+                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    Log Tool
+                </a>
+                <a class="nav-link" href="/admin/database">
+                    <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                    Database
+                </a>
+                <div class="sb-sidenav-menu-heading">More</div>
+                <a class="nav-link" href="https://xmobitea.com/gnserver/docs">
+                    <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
+                    Learn more
+                </a>
+                <a class="nav-link" href="https://gn.xmobitea.com/">
+                    <div class="sb-nav-link-icon"><i class="fas fa-plus"></i></div>
+                    Buy license key
+                </a>
+            </div>
+        </div>
+        <div class="sb-sidenav-footer">
+            <div class="small">Logged in as:</div>
+            <% if (locals.data) { %>
+                <%= data.userId %>
+            <% } %>
+        </div>
+    </nav>
+</div>

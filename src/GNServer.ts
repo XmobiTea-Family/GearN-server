@@ -42,6 +42,22 @@ import { FetchSparkPlayerRequestHandler } from "./GN-app-api/handler/controller/
 import { CodeHelper } from "./GN-common/helper/CodeHelper";
 import { IAnalyticsService } from "./GN-app-api/service/IAnalyticsService";
 import { AnalyticsService } from "./GN-app-api/service/AnalyticsService";
+import { IChatService } from "./GN-app-api/service/IChatService";
+import { ChatService } from "./GN-app-api/service/ChatService";
+import { AddFriendRequestHandler } from "./GN-app-api/handler/controller/handler/AddFriendRequestHandler";
+import { RemoveFriendRequestHandler } from "./GN-app-api/handler/controller/handler/RemoveFriendRequestHandler";
+import { GetFriendsRequestHandler } from "./GN-app-api/handler/controller/handler/GetFriendsRequestHandler";
+import { FindPlayerRequestHandler } from "./GN-app-api/handler/controller/handler/FindPlayerRequestHandler";
+import { SendChatToUserRequestHandler } from "./GN-app-api/handler/controller/handler/SendChatToUserRequestHandler";
+import { SendChatToChannelRequestHandler } from "./GN-app-api/handler/controller/handler/SendChatToChannelRequestHandler";
+import { JoinChatChannelRequestHandler } from "./GN-app-api/handler/controller/handler/JoinChatChannelRequestHandler";
+import { LeaveChatChannelRequestHandler } from "./GN-app-api/handler/controller/handler/LeaveChatChannelRequestHandler";
+import { GetChatInfoChannelRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatInfoChannelRequestHandler";
+import { GetChatMessageChannelRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatMessageChannelRequestHandler";
+import { GetChatMemberChannelRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatMemberChannelRequestHandler";
+import { EditChatChannelRequestHandler } from "./GN-app-api/handler/controller/handler/EditChatInfoChannelRequestHandler";
+import { EditChatMessageChannelRequestHandler } from "./GN-app-api/handler/controller/handler/EditChatMessageChannelRequestHandler";
+import { GetChatMessageUserRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatMessageUserRequestHandler";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -73,6 +89,7 @@ export class GNServer {
 	private lockService: ILockService;
 	private requestConverterService: IRequestConverterService;
 	private analyticsService: IAnalyticsService;
+	private chatService: IChatService;
 
 	private loginTypeEnables: LoginType[] = [];
 
@@ -119,6 +136,21 @@ export class GNServer {
 		this.requestController.addHandler(new RegisterSocketRequestHandler(this));
 		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
 		this.requestController.addHandler(new FetchSparkPlayerRequestHandler(this));
+
+		this.requestController.addHandler(new AddFriendRequestHandler(this));
+		this.requestController.addHandler(new RemoveFriendRequestHandler(this));
+		this.requestController.addHandler(new GetFriendsRequestHandler(this));
+		this.requestController.addHandler(new FindPlayerRequestHandler(this));
+		this.requestController.addHandler(new SendChatToUserRequestHandler(this));
+		this.requestController.addHandler(new GetChatMessageUserRequestHandler(this));
+		this.requestController.addHandler(new SendChatToChannelRequestHandler(this));
+		this.requestController.addHandler(new JoinChatChannelRequestHandler(this));
+		this.requestController.addHandler(new LeaveChatChannelRequestHandler(this));
+		this.requestController.addHandler(new GetChatInfoChannelRequestHandler(this));
+		this.requestController.addHandler(new GetChatMessageChannelRequestHandler(this));
+		this.requestController.addHandler(new GetChatMemberChannelRequestHandler(this));
+		this.requestController.addHandler(new EditChatChannelRequestHandler(this));
+		this.requestController.addHandler(new EditChatMessageChannelRequestHandler(this));
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {
@@ -138,6 +170,11 @@ export class GNServer {
 		tempAnalyticsService.setGNServer(this);
 		tempAnalyticsService.run();
 		this.analyticsService = tempAnalyticsService;
+
+		let tempChatService = new ChatService();
+		tempChatService.setGNServer(this);
+		tempChatService.run();
+		this.chatService = tempChatService;
 
 		if (onRunSuccess != null) onRunSuccess();
 	}
@@ -227,6 +264,10 @@ export class GNServer {
 
 	public getLockService(): ILockService {
 		return this.lockService;
+	}
+
+	public getChatService(): IChatService {
+		return this.chatService;
 	}
 
 	public getAnalyticsService(): IAnalyticsService {

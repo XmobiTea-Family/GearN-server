@@ -26,6 +26,8 @@ export class OperationEvent {
 	}
 
 	public setScriptData(k: string, value: any): OperationEvent {
+		if (this.parameters == null) this.parameters = new GNHashtable();
+		
 		this.parameters.add(k, value);
 		return this;
 	}

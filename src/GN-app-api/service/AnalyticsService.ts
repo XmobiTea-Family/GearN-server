@@ -51,7 +51,6 @@ export class AnalyticsService implements IAnalyticsService {
             let analyticsCollection = this.gnServer.getDatabase().systemGameCollection("Analytics");
 
             let result = await analyticsCollection.findOne({ "TsCreate": tsDate });
-
             if (result == null) return null;
 
             let answer: AnalyticsItem = {

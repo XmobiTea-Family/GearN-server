@@ -17,6 +17,7 @@ import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { LogSettings } from "./settings/LogSettings";
 import { AdminAppHandler } from "./routes/AdminAppHandler";
+import expressLayouts from "express-ejs-layouts";
 
 export class HttpApp {
 	private applicationSettings: ApplicationSettings;
@@ -103,43 +104,43 @@ export class HttpApp {
 	}
 
 	public run(): void {
+		this.app.set("view engine", "ejs");
+		this.app.set("views", __dirname + "/GN-startup/routes/www/views");
+		this.app.use(express.static(__dirname + '/GN-startup/routes/www/public'));
+		this.app.use(expressLayouts);
+
 		this.app.use(express.urlencoded({ extended: false }));
 
 		this.app.post("/", (req: express.Request, res: express.Response) => {
 			return res.sendStatus(403);
 		});
 
-		this.app.get("/index", (req: express.Request, res: express.Response) => {
-			return res.redirect("./");
-		});
-
 		this.app.get("/", (req: express.Request, res: express.Response) => {
-			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/index.html");
-		});
-
-		this.app.get("/index-common.js", (req: express.Request, res: express.Response) => {
-			return res.sendFile(__dirname + "/GN-startup/routes/www/adminViews/index-common.js");
-		});
-
-		this.app.get("/index-support.js", (req: express.Request, res: express.Response) => {
-			let stringBuilder = '';
-			stringBuilder += 'function initIndexSupport() {';
-			stringBuilder += '	gnVersion = "' + GNServer.getServerVersion() + '";';
-			stringBuilder += '}';
-
-			return res.send(stringBuilder);
+			return res.sendStatus(403);
 		});
 		
+		this.app.get("/101", (req: express.Request, res: express.Response) => {
+			res.render("101");
+		});
+
+		this.app.get("/401", (req: express.Request, res: express.Response) => {
+			res.render("401");
+		});
+
+		this.app.get("/403", (req: express.Request, res: express.Response) => {
+			res.render("403");
+		});
+
+		this.app.get("/404", (req: express.Request, res: express.Response) => {
+			res.render("404");
+		});
+
+		this.app.get("/500", (req: express.Request, res: express.Response) => {
+			res.render("500");
+		});
+
 		this.app.get("/ping", (req: express.Request, res: express.Response) => {
 			return res.sendStatus(200);
-		});
-
-		this.app.get("/favicon.png", (req: express.Request, res: express.Response) => {
-			return res.status(200).sendFile(__dirname + "/GN-startup/routes/www/favicon.png");
-		});
-
-		this.app.get("/favicon.ico", (req: express.Request, res: express.Response) => {
-			return res.status(200).sendFile(__dirname + "/GN-startup/routes/www/favicon.ico");
 		});
 
 		this.adminAppHandler = new AdminAppHandler();

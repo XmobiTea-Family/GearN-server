@@ -1,0 +1,19 @@
+<body>
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-center vh-100">
+            <div class="text-center">
+                <h1 class="display-1 fw-bold">403</h1>
+                <p class="fs-3"> <span class="text-danger">Opps!</span> Forbidden error!</p>
+                <p class="lead">
+                    Your content not found!
+                </p>
+
+                <form action="/admin" method="get" id="signoutForm">
+                    <button class="w-100 btn btn-lg btn-primary mb-3" type="submit" form="signoutForm">Home</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include('./partials/common/footer'); -%>
+</body>

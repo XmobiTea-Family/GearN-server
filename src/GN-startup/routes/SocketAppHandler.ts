@@ -303,7 +303,7 @@ export class SocketAppHandler {
 
 	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
-		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] " + userId + " %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
 			this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, encode(socketData));
@@ -313,7 +313,7 @@ export class SocketAppHandler {
 
 	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
-		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] %O", JSON.stringify(socketData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] " + roomId + " %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
 			this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, encode(socketData));

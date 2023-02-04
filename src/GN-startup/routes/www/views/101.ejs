@@ -1,0 +1,19 @@
+<body>
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-center vh-100">
+            <div class="text-center">
+                <h1 class="display-1 fw-bold">101</h1>
+                <p class="fs-3"> <span class="text-danger">Opps!</span> Permission deny!</p>
+                <p class="lead">
+                    You dont have permission to access here, please try contact to admin!
+                </p>
+
+                <form action="/admin/signout" method="post" id="signoutForm">
+                    <button class="w-100 btn btn-lg btn-primary mb-3" type="submit" form="signoutForm">Sign out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include('./partials/common/footer'); -%>
+</body>

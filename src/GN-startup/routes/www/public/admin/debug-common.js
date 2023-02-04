@@ -710,7 +710,7 @@ function checkGNSocketStatus() {
         panelSocketConnected.style = "";
 
         let socketIdField = document.getElementById("socketIdField");
-        socketIdField.value = "SocketId: " + GN.GNNetwork.getSocketSId();
+        socketIdField.value = GN.GNNetwork.getSocketSId();
 
         sendViaSocketBtn.style = "";
     }

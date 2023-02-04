@@ -392,7 +392,7 @@ export class ServerApplication extends BuilderBase {
 		}
 	}
 
-	private createEnsureIndex(): void {
+	private async createEnsureIndex(): Promise<void> {
 		let database = this.gnServer.getDatabase();
 
 		database.createIndex("System." + this.otherSettings.getAuthTokenCollectionName(), {
@@ -497,6 +497,18 @@ export class ServerApplication extends BuilderBase {
 
 		database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { FileId: 1 });
 		database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { UserId: 1 });
+		database.createIndex("System." + database.getGameName() + ".Analytics", { TsCreate: -1 });
+
+		let playerCount = await database.systemCollection("Player").countDocuments();
+		if (playerCount == 0) {
+			database.createPlayerByUsernameAndPassword("gnadmin", "gnadmin", {
+				UserRole: 0
+			}, "127.0.0.1");
+		}
+
+		database.createIndex("System." + database.getGameName() + ".FriendCollection", { UserId: 1 });
+
+		
 	}
 
 	constructor(builder: BuilderBase) {
