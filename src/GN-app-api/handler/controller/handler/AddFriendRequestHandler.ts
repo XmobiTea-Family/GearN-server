@@ -20,8 +20,8 @@ class AddFriendOperationRequest extends OperationRequest {
     @StringDataMember({ code: FriendParameterCode.FriendId, mustNonNull: true, minLength: 24, maxLength: 24 })
     friendId: string;
 
-    @BooleanDataMember({ code: FriendParameterCode.ForceAddFriend })
-    forceAddFriend: boolean;
+    @BooleanDataMember({ code: FriendParameterCode.ForceAcceptFriend, isOptional: true, defaultValue: false })
+    forceAcceptFriend: boolean;
 
     public isValidRequest() {
         if (!super.isValidRequest()) return false;
@@ -78,9 +78,9 @@ export class AddFriendRequestHandler extends RequestHandler {
                 friends.push(friend);
             }
 
-            friend["TsUpdate"] = currentMilliseconds;
+            friend["TsLastUpdate"] = currentMilliseconds;
 
-            if (request.forceAddFriend) {
+            if (request.forceAcceptFriend) {
                 friend["Status"] = <number>FriendStatus.WaitingAccept;
             }
 
@@ -105,7 +105,7 @@ export class AddFriendRequestHandler extends RequestHandler {
             let gsFriend = new GNHashtable();
             gsFriend.add(FriendParameterCode.FriendId, friend["UserId"]);
             gsFriend.add(FriendParameterCode.FriendStatus, friend["Status"]);
-            gsFriend.add(FriendParameterCode.TsUpdate, friend["TsUpdate"]);
+            gsFriend.add(FriendParameterCode.TsLastUpdate, friend["TsLastUpdate"]);
             gsFriendLst.add(gsFriend);
             friendUpdateOperationEvent.setScriptData(FriendParameterCode.FriendLst, gsFriendLst);
             this.gnServer.sendEventTo(userId, friendUpdateOperationEvent);
@@ -131,9 +131,9 @@ export class AddFriendRequestHandler extends RequestHandler {
                 friends.push(friend);
             }
 
-            friend["TsUpdate"] = currentMilliseconds;
+            friend["TsLastUpdate"] = currentMilliseconds;
 
-            if (request.forceAddFriend) {
+            if (request.forceAcceptFriend) {
                 friend["Status"] = <number>FriendStatus.SentRequestAndWaitingAccept;
             }
 
@@ -158,7 +158,7 @@ export class AddFriendRequestHandler extends RequestHandler {
             let gsFriend = new GNHashtable();
             gsFriend.add(FriendParameterCode.FriendId, friend["UserId"]);
             gsFriend.add(FriendParameterCode.FriendStatus, friend["Status"]);
-            gsFriend.add(FriendParameterCode.TsUpdate, friend["TsUpdate"]);
+            gsFriend.add(FriendParameterCode.TsLastUpdate, friend["TsLastUpdate"]);
             gsFriendLst.add(gsFriend);
             friendUpdateOperationEvent.setScriptData(FriendParameterCode.FriendLst, gsFriendLst);
 
@@ -172,6 +172,10 @@ export class AddFriendRequestHandler extends RequestHandler {
                 upsert: true
             });
         }
+
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, request, operationResponse);
+		}
 
         return operationResponse;
     }

@@ -26,7 +26,7 @@ export class EditChatMessage {
 export class ChatMessage extends EditChatMessage {
     channel: string;
     tsLastUpdate: number;
-    messageEdited: EditChatMessage[];
+    messageEditeds: EditChatMessage[];
     senderId: string;
     isDelete: boolean;
 }

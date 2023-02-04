@@ -14,10 +14,10 @@ class FindPlayerOperationRequest extends OperationRequest {
     @StringDataMember({ code: FriendParameterCode.Keyword, minLength: 3, maxLength: 64, mustNonNull: true })
     keyword: string;
 
-    @NumberDataMember({ code: FriendParameterCode.Skip })
+    @NumberDataMember({ code: FriendParameterCode.Skip, minValue: 0, maxValue: 50})
     skip: number;
 
-    @NumberDataMember({ code: FriendParameterCode.Limit })
+    @NumberDataMember({ code: FriendParameterCode.Limit, minValue: 0, maxValue: 50 })
     limit: number;
 
     public isValidRequest() {
@@ -52,7 +52,7 @@ export class FindPlayerRequestHandler extends RequestHandler {
 
         let userId = authInfo.getUserId();
 
-        let tempFriendLst: string[] = [];
+        let tempPlayerLst: string[] = [];
 
         let displayNameNormalizeCollection = this.gnServer.getDatabase().runtimeGameCollection("DisplayNameNormalizeCollection");
 
@@ -69,8 +69,8 @@ export class FindPlayerRequestHandler extends RequestHandler {
 
         for (let i = 0; i < results.length; i++) {
             let friendId = results[i]["UserId"];
-            if (friendId != userId && tempFriendLst.indexOf(friendId) == -1) {
-                tempFriendLst.push(friendId);
+            if (friendId != userId && tempPlayerLst.indexOf(friendId) == -1) {
+                tempPlayerLst.push(friendId);
             }
         }
 
@@ -79,7 +79,11 @@ export class FindPlayerRequestHandler extends RequestHandler {
         operationResponse.setReturnCode(ReturnCode.Ok);
         operationResponse.setScriptData(ParameterCode.ErrorCode, FriendErrorCode.Ok);
 
-        operationResponse.setScriptData(FriendParameterCode.FriendLst, tempFriendLst);
+        operationResponse.setScriptData(FriendParameterCode.PlayerLst, tempPlayerLst);
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse);
+        }
 
         return operationResponse;
     }

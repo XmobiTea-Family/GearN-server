@@ -12,12 +12,11 @@ export class ChatParameterCode {
 	public static readonly UserCount: string = "11";
 	public static readonly ChannelInfo: string = "12";
 	public static readonly Value: string = "13";
-	public static readonly MessageEdited: string = "14";
+	public static readonly MessageEditeds: string = "14";
 	public static readonly IsDelete: string = "15";
 	public static readonly TsLastUpdate: string = "16";
 	public static readonly Skip: string = "17";
 	public static readonly Limit: string = "18";
 	public static readonly TsJoin: string = "19";
 	public static readonly Members: string = "20";
-	public static readonly ChatMessage: string = "21";
 }

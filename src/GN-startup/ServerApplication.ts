@@ -508,7 +508,17 @@ export class ServerApplication extends BuilderBase {
 
 		database.createIndex("System." + database.getGameName() + ".FriendCollection", { UserId: 1 });
 
-		
+		database.createIndex("Runtime." + database.getGameName() + ".UserMessageCollection", { "HashId": 1, "TsCreate": -1 });
+		database.createIndex("Runtime." + database.getGameName() + ".UserMessageCollection", { "HashId": 1 });
+
+		database.createIndex("Runtime." + database.getGameName() + ".ChannelInfoCollection", { "Channel": 1 });
+		database.createIndex("Runtime." + database.getGameName() + ".ChannelInfoCollection", { "TsCreate": -1 });
+
+		database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "Channel": 1 });
+		database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "Channel": 1, "TsCreate": -1 });
+		database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "TsCreate": -1 });
+
+
 	}
 
 	constructor(builder: BuilderBase) {

@@ -54,8 +54,6 @@ export class EditChatMessageChannelRequestHandler extends RequestHandler {
             return this.newInvalidRequestParameters(request);
         }
 
-        // let gamePlayer = await this.gnServer.getDatabase().loadGamePlayer(authInfo.getUserId());
-
         let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 
         operationResponse.setReturnCode(ReturnCode.Ok);
@@ -68,26 +66,29 @@ export class EditChatMessageChannelRequestHandler extends RequestHandler {
         else {
             operationResponse.setScriptData(ParameterCode.ErrorCode, ChatErrorCode.Ok);
 
-            let chatOperationEvent = new OperationEvent(EventCode.OnChannelChat, new GNHashtable());
+            let channelOperationEvent = new OperationEvent(EventCode.OnChannelChat, new GNHashtable());
 
             let gsChatMessage = new GNHashtable();
-            gsChatMessage.add(ChatParameterCode.Channel, chatMessage.channel);
             gsChatMessage.add(ChatParameterCode.TsCreate, chatMessage.tsCreate);
 
             if (request.message != null) {
                 gsChatMessage.add(ChatParameterCode.Message, chatMessage.message);
 
+                let messageEditeds = chatMessage.messageEditeds;
+
                 let gsMessageEditeds = new GNArray();
-                {
+                for (let j = 0; j < messageEditeds.length; j++) {
+                    let messageEdited = messageEditeds[j];
+
                     let gsMessageEdited = new GNHashtable();
 
-                    gsMessageEdited.add(ChatParameterCode.Message, request.message);
-                    gsMessageEdited.add(ChatParameterCode.TsCreate, xDatetime.getCurrentMilliseconds());
+                    gsMessageEdited.add(ChatParameterCode.Message, messageEdited.message);
+                    gsMessageEdited.add(ChatParameterCode.TsCreate, messageEdited.tsCreate);
 
                     gsMessageEditeds.add(gsMessageEdited);
                 }
 
-                gsChatMessage.add(ChatParameterCode.MessageEdited, gsMessageEditeds);
+                gsChatMessage.add(ChatParameterCode.MessageEditeds, gsMessageEditeds);
             }
 
             if (request.isDelete != null) {
@@ -96,9 +97,19 @@ export class EditChatMessageChannelRequestHandler extends RequestHandler {
 
             gsChatMessage.add(ChatParameterCode.TsLastUpdate, chatMessage.tsLastUpdate);
 
-            chatOperationEvent.setScriptData(ChatParameterCode.ChatMessage, gsChatMessage);
+            let gsChatMessageLst = new GNArray();
+            gsChatMessageLst.add(gsChatMessage);
 
-            this.gnServer.sendEventToRoom(request.channel, chatOperationEvent);
+            let gsChannelInfo = new GNHashtable();
+            gsChannelInfo.add(ChatParameterCode.Channel, chatMessage.channel);
+            gsChannelInfo.add(ChatParameterCode.ChatMessageLst, gsChatMessageLst);
+            channelOperationEvent.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
+
+            if (this.postHandle != null) {
+                await this.postHandle(authInfo, request, operationResponse, chatMessage, channelOperationEvent);
+            }
+
+            this.gnServer.sendEventToRoom(request.channel, channelOperationEvent);
         }
 
         return operationResponse;

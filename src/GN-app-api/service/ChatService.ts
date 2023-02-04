@@ -95,7 +95,7 @@ export class ChatService implements IChatService {
         message.message = msg;
         message.tsLastUpdate = currentMilliseconds;
         message.tsCreate = currentMilliseconds;
-        message.messageEdited = [];
+        message.messageEditeds = [];
         message.senderId = userId;
         message.isDelete = false;
         messages.push(message);
@@ -105,7 +105,7 @@ export class ChatService implements IChatService {
             "Message": message.message,
             "TsLastUpdate": message.tsLastUpdate,
             "TsCreate": message.tsCreate,
-            "MessageEdited": message.messageEdited,
+            "MessageEditeds": message.messageEditeds,
             "SenderId": message.senderId,
             "IsDelete": message.isDelete
         }
@@ -131,22 +131,22 @@ export class ChatService implements IChatService {
                 let editChatMessage = new EditChatMessage();
                 editChatMessage.message = message.message;
                 editChatMessage.tsCreate = currentMilliseconds;
-                message.messageEdited.push(editChatMessage);
+                message.messageEditeds.push(editChatMessage);
     
                 message.message = msg;
 
-                let messageEdited = [];
-                for (let i = 0; i < message.messageEdited.length; i++) {
-                    let messageEdited2 = message.messageEdited[i];
+                let messageEditeds = [];
+                for (let i = 0; i < message.messageEditeds.length; i++) {
+                    let messageEdited = message.messageEditeds[i];
     
-                    messageEdited.push({
-                        "Messsage": messageEdited2.message,
-                        "TsCreate": messageEdited2.tsCreate
+                    messageEditeds.push({
+                        "Messsage": messageEdited.message,
+                        "TsCreate": messageEdited.tsCreate
                     });
                 }
 
                 setData["Message"] = msg;
-                setData["MessageEdited"] = messageEdited;
+                setData["MessageEditeds"] = messageEditeds;
             }
 
             if (isDelete != null) {
@@ -173,14 +173,14 @@ export class ChatService implements IChatService {
                 setData["TsLastUpdate"] = currentMilliseconds;
 
                 if (msg != null) {
-                    let messageEdited = result.messageEdited;
-                    messageEdited.push({
+                    let messageEditeds = result["MessageEditeds"];
+                    messageEditeds.push({
                         "Messsage": result.Message,
                         "TsCreate": currentMilliseconds
                     });
 
                     setData["Message"] = msg;
-                    setData["MessageEdited"] = messageEdited;
+                    setData["MessageEditeds"] = messageEditeds;
                 }
 
                 if (isDelete != null) {
@@ -309,35 +309,38 @@ export class ChatService implements IChatService {
                 this.channelDict[channel] = thisChannel;
             }
 
-            let messages = thisChannel.messages;
             let messageResults = await this.channelMessageCollection.find({ "Channel": channel }).sort({"TsCreate": -1}).skip(0).limit(ChatService.MAX_CHAT_COUNT).toArray();
-            for (let i = messageResults.length - 1; i >= 0; i--) {
-                let messageResult = messageResults[i];
-                let chatMessage = new ChatMessage();
-                
-                chatMessage.channel = thisChannel.channel;
-                chatMessage.isDelete = messageResult["IsDelete"];
-                chatMessage.message = messageResult["Message"];
-                chatMessage.senderId = messageResult["SenderId"];
-                chatMessage.tsCreate = messageResult["TsCreate"];
-                chatMessage.tsLastUpdate = messageResult["TsLastUpdate"];
+            if (messageResults != null) {
+                let messages = thisChannel.messages;
 
-                let messageEditeds = messageResult["MessageEdited"];
-
-                chatMessage.messageEdited = [];
-                let originMessageEdited = chatMessage.messageEdited;
-
-                for (let j = 0; j < messageEditeds.length; j++) {
-                    let messageEdited = messageEditeds[j];
-
-                    let messageChannel = new EditChatMessage();
-                    messageChannel.message = messageEdited["Message"];
-                    messageChannel.tsCreate = messageEdited["TsCreate"];
-
-                    originMessageEdited.push(messageChannel);
+                for (let i = messageResults.length - 1; i >= 0; i--) {
+                    let messageResult = messageResults[i];
+                    let chatMessage = new ChatMessage();
+                    
+                    chatMessage.channel = thisChannel.channel;
+                    chatMessage.isDelete = messageResult["IsDelete"];
+                    chatMessage.message = messageResult["Message"];
+                    chatMessage.senderId = messageResult["SenderId"];
+                    chatMessage.tsCreate = messageResult["TsCreate"];
+                    chatMessage.tsLastUpdate = messageResult["TsLastUpdate"];
+    
+                    let messageEditeds = messageResult["MessageEditeds"];
+    
+                    chatMessage.messageEditeds = [];
+                    let originMessageEdited = chatMessage.messageEditeds;
+    
+                    for (let j = 0; j < messageEditeds.length; j++) {
+                        let messageEdited = messageEditeds[j];
+    
+                        let messageChannel = new EditChatMessage();
+                        messageChannel.message = messageEdited["Message"];
+                        messageChannel.tsCreate = messageEdited["TsCreate"];
+    
+                        originMessageEdited.push(messageChannel);
+                    }
+    
+                    messages.push(chatMessage);
                 }
-
-                messages.push(chatMessage);
             }
         }
 

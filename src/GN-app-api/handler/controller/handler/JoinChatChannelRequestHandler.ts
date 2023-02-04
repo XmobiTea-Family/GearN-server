@@ -46,7 +46,11 @@ export class JoinChatChannelRequestHandler extends RequestHandler {
 
         this.gnServer.getChatService().subscriberChannelAsync(authInfo.getUserId(), request.channel);
 
-        this.gnServer.joinRoom(authInfo.getUserId(), request.channel);
+        this.gnServer.joinRoom(request.channel, request.channel);
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse);
+        }
 
         return operationResponse;
     }

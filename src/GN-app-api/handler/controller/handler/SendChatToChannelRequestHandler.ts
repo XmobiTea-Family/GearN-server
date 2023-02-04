@@ -59,14 +59,20 @@ export class SendChatToChannelRequestHandler extends RequestHandler {
         let chatOperationEvent = new OperationEvent(EventCode.OnChannelChat, new GNHashtable());
 
         let gsChatMessage = new GNHashtable();
-        gsChatMessage.add(ChatParameterCode.Channel, chatMessage.channel);
         gsChatMessage.add(ChatParameterCode.Message, chatMessage.message);
         gsChatMessage.add(ChatParameterCode.TsCreate, chatMessage.tsCreate);
         gsChatMessage.add(ChatParameterCode.UserId, chatMessage.senderId);
         let gsChatMessageLst = new GNArray();
         gsChatMessageLst.add(gsChatMessage);
 
-        chatOperationEvent.setScriptData(ChatParameterCode.ChatMessageLst, gsChatMessageLst);
+        let gsChannelInfo = new GNHashtable();
+        gsChannelInfo.add(ChatParameterCode.Channel, chatMessage.channel);
+        gsChannelInfo.add(ChatParameterCode.ChatMessageLst, gsChatMessageLst);
+        chatOperationEvent.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse, chatMessage, chatOperationEvent);
+        }
 
         this.gnServer.sendEventToRoom(request.channel, chatOperationEvent);
 

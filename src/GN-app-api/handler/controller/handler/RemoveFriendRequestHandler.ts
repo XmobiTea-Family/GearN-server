@@ -14,7 +14,6 @@ import { FriendStatus } from "./../../../../GN-common/constant/enumType/FriendSt
 import { OperationEvent } from "./../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../GN-common/constant/EventCode";
 import { GNArray, GNHashtable } from "./../../../../GN-common/common/GNData";
-import { xDatetime } from "./../../../../GN-library/xdatetime/lib/xDatetime";
 
 class RemoveFriendOperationRequest extends OperationRequest {
     @StringDataMember({ code: FriendParameterCode.FriendId, mustNonNull: true, minLength: 24, maxLength: 24 })
@@ -63,8 +62,6 @@ export class RemoveFriendRequestHandler extends RequestHandler {
         if (!gameFriends) gameFriends = { "UserId": userId, "Friends": [] };
         if (!gameFriends2) gameFriends2 = { "UserId": friendId, "Friends": [] };
 
-        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-
         {
             let friends = gameFriends["Friends"] as any[];
             let friend = friends.find(x => x["UserId"] == friendId);
@@ -73,7 +70,7 @@ export class RemoveFriendRequestHandler extends RequestHandler {
             let gsFriendLst = new GNArray();
             let gsFriend = new GNHashtable();
             gsFriend.add(FriendParameterCode.FriendId, friendId);
-            gsFriend.add(FriendParameterCode.FriendStatus, FriendStatus.Unknown);
+            gsFriend.add(FriendParameterCode.FriendStatus, <number>FriendStatus.Unknown);
             gsFriendLst.add(gsFriend);
             friendUpdateOperationEvent.setScriptData(FriendParameterCode.FriendLst, gsFriendLst);
             this.gnServer.sendEventTo(userId, friendUpdateOperationEvent);
@@ -117,6 +114,10 @@ export class RemoveFriendRequestHandler extends RequestHandler {
                     upsert: true
                 });
             }
+        }
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse);
         }
 
         return operationResponse;

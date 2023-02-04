@@ -145,7 +145,7 @@ export class GNHashtableBuilder {
 }
 
 export class GNHashtable extends GNData {
-	private dict: { [k: string]: GNDataType } = {};
+	dict: { [k: string]: GNDataType } = {};
 
 	public override clear(): void {
 		this.dict = {};

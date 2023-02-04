@@ -71,6 +71,10 @@ export class DebugRequestHandler extends RequestHandler {
 			this.gnServer.sendEventTo(authInfo.getUserId(), operationEvent);
 		}
 
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, request, operationResponse);
+		}
+
 		return operationResponse;
 	}
 

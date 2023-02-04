@@ -44,9 +44,6 @@ init() {
     init_create_gitignore
     init_create_projectIndexJs
     init_create_GNConfigDebugJson
-    init_create_testDataIndexTs
-    init_create_debugDataIndexTs
-    init_create_logDataIndexTs
     init_create_indexTs
     init_create_postIndexTs
     init_create_srcAppApiHandlerDir
@@ -92,539 +89,100 @@ init_create_GNConfigDebugJson() {
     echo '{
     "name": "debug",
     "options": {
-        "port": 2202,
-        "useSsl": false,
-        "keyFilePath": "",
-        "certFilePath": "",
-		"licenseKeyFilePath": "",
-		"expiredTokenInMs": 172800000,
+        "applicationSettings": {
+			"port": 2202,
+			"useSsl": false,
+			"keyFilePath": "",
+			"certFilePath": "",
+			"licenseKeyFilePath": "",
+			"expiredTokenInMs": 172800000
+		},
 
-        "httpAppEnable": true,
-        "httpAppAllowOrigin": "*",
-        "httpAppCredentials": true,
-        "httpAppAllowMethods": ["GET", "POST"],
-        "httpAppAllowHeaders": ["a", "content-type"],
-		"httpAppEnableSendAndReceiveDebug": true,
-		"httpAppEnablePostViaMsgPack": true,
-        "httpAppEnablePostViaJson": true,
-		
-		"socketAppEnable": true,
-		"socketAppAllowOrigin": "*",
-		"socketAppCredentials": true,
-		"socketAppAllowMethods": ["GET"],
-		"socketAppAllowHeaders": [],
-		"socketAppEnableSendAndReceiveDebug": true,
-		"socketAppEnablePostViaMsgPack": true,
-		"socketAppEnablePostViaJson": true,
-		"socketAppPingInterval": 50000,
-		"socketAppPingTimeout": 5000,
-		
-		"uploadFileEnable": true,
-        "uploadPath": "./file-upload",
-        "maxSizeUpload": 52428800,
-        "mimeTypeAccepts": ["image/png"],
-		
-        "adapterEventCollectionName": "AdapterEventCollection",
-        "authInfoCollectionName": "AuthInfoCollection",
-        "configCollectionName": "Config",
-        "packageName": "com.xmobitea.GNServer",
-        "appleClientId": "com.xmobitea.GNServer",
-		"googleClientId": "gn-server",
-				
-        "databaseConnectionString": "mongodb://localhost:27017/?replicaSet=rs0",
-        "databaseName": "XmobiTea",
-        "databaseGameName": "GN.",
-        "databaseOptions": {
-            "minPoolSize": 5,
-            "maxPoolSize": 100
-        },
+		"httpAppSettings": {
+			"enable": true,
+			"allowOrigin": "*",
+			"credentials": true,
+			"allowMethods": ["GET", "POST"],
+			"allowHeaders": ["a", "content-type"],
+			"enableSendAndReceiveDebug": true,
+			"enablePostViaMsgPack": true,
+			"enablePostViaJson": true
+		},
 
-        "mailEnable": false,
-        "mailSendFrom": "changx@xmobitea.com",
-        "mailSendGridApiKey": "SG.",
+		"socketAppSettings": {
+			"enable": true,
+			"allowOrigin": "*",
+			"credentials": true,
+			"allowMethods": ["GET"],
+			"allowHeaders": [],
+			"enableSendAndReceiveDebug": true,
+			"enablePostViaMsgPack": true,
+			"enablePostViaJson": true,
+			"pingInterval": 50000,
+			"pingTimeout": 5000
+		},
 
-		"debugToolEnable": true,
-		"testToolEnable": true,
-        "logToolEnable": true,
-		"toolHashs": ["hashToolHere"],
+		"uploadFileSettings": {
+			"enable": true,
+			"uploadPath": "./file-upload",
+			"maxSizeUpload": 52428800,
+			"mimeTypeAccepts": ["image/png"]
+		},
 
-		"logToConsoleEnable": true,
-		"logToFileEnable": true,
-		"logPath": "./log/debug/Server.log",
+		"databaseSettings": {
+			"connectionString": "mongodb://127.0.0.1:27017/",
+			"databaseName": "XmobiTea",
+			"databaseGameName": "GN",
+			"options": {
+			}
+		},
+
+		"otherSettings": {
+			"adapterEventCollectionName": "AdapterEventCollection",
+			"authInfoCollectionName": "AuthInfoCollection",
+			"configCollectionName": "Config",
+			"packageName": "com.xmobitea.GNServer",
+			"appleClientId": "com.xmobitea.GNServer",
+			"googleClientId": "gn-server",
+			"headerIP": "x-ip"
+		},
 		
-		"socketMaxRequestPerSecondPerIp": 50,
-		"socketMaxRequestPerSecondPerPeer": 20,
-		"socketMaxPendingRequest": 1000,
-		"socketMaxRequestSize": 1024,
-		"httpMaxRequestPerSecondPerIp": 50,
-		"httpMaxRequestPerSecondPerPeer": 20,
-		"httpMaxPendingRequest": 1000,
-		"httpMaxRequestSize": 1024,
-		"maxUploadPendingRequest": 200,
-		"maxDownloadPendingRequest": 200,
-		"reportDdosCollectionName": "ReportDdosCollection",
-		"banDdosCollectionName": "BanDdosCollection"
+		"mailSettings": {
+			"enable": false,
+			"sendFrom": "changx@xmobitea.com",
+			"sendGridApiKey": "SG."
+		},
+
+		"adminViewSettings": {
+			"enable": true,
+			"debugViewEnable": true,
+			"logViewEnable": true,
+			"debugHashs": ["hashhere"]
+		},
+
+		"logSettings": {
+			"logToConsoleEnable": true,
+			"logToFileEnable": true,
+			"logPath": "./log/debug/Server.log"
+		},
+
+		"ddosSettings": {
+			"socketMaxRequestPerSecondPerIp": 50,
+			"socketMaxRequestPerSecondPerPeer": 20,
+			"socketMaxPendingRequest": 1000,
+			"socketMaxRequestSize": 1024,
+			"httpMaxRequestPerSecondPerIp": 50,
+			"httpMaxRequestPerSecondPerPeer": 20,
+			"httpMaxPendingRequest": 1000,
+			"httpMaxRequestSize": 1024,
+			"maxUploadPendingRequest": 200,
+			"maxDownloadPendingRequest": 200,
+			"reportDdosCollectionName": "ReportDdosCollection",
+			"banDdosCollectionName": "BanDdosCollection"
+		}
     }
 }' >GNconfig.debug.json
     echo 'create GNconfig.debug.json file success'
-
-    return
-}
-
-init_create_testDataIndexTs() {
-    echo 'import express from "express";
-
-import { OperationCodeExtensions } from "./src/common/constant/OperationCode.ext";
-import { OperationCode } from "@xmobitea/gn-server";
-
-const router = express.Router();
-
-router.get("/", (req, res) => {
-    let html =
-        "<!DOCTYPE html>" +
-        "<html lang=\"en\">" +
-        "<head>" +
-        "   <style>" +
-        "       #lastContentTxt { white-space: pre; font-family: monospace; }" +
-        "   </style>" +
-        "   <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3\" crossorigin=\"anonymous\">" +
-        "</head>" +
-        "<body>" +
-        "   <div class=\"bd-intro ps-lg-4\">" +
-        "        <h1>[GN SERVER] TEST SEND DATA TOOL</h1><br><br>" +
-        "        <div class=\"operationCodeDropdown\">" +
-        "            <select class=\"form-select form-select-lg mb-3\" name=\"operationCodeDropdown\" id=\"operationCodeDropdown\">";
-
-        let keys0 = Object.keys(OperationCode) as Array<string>;
-        let values0 = Object.values(OperationCode) as Array<number>;
-        
-        let keys1 = Object.keys(OperationCodeExtensions) as Array<string>;
-        let values1 = Object.values(OperationCodeExtensions) as Array<number>;
-
-        for (let i = 0; i < keys0.length; i++) {
-            html +=
-            "                <option value=\"" + values0[i] + "\">" + keys0[i] + " " + values0[i] + "</option>";
-        }
-
-        for (let i = 0; i < keys1.length; i++) {
-            html +=
-            "                <option value=\"" + values1[i] + "\">" + keys1[i] + " " + values1[i] + "</option>";
-        }
-
-        html +=
-        "            </select>" +
-        "        </div>" +
-        "        <div class=\"form-floating mb-3\">" +
-		"	         <input type=\"text\" class=\"form-control\" id=\"authTokenField\">" +
-		"	         <label for=\"authTokenField\">Parse AuthToken here</label>" +
-		"        </div>" +
-		"        <div class=\"form-floating mb-3\">" +
-		"	         <input type=\"text\" class=\"form-control\" id=\"parametersDataField\" value=\"{}\">" +
-		"	         <label for=\"parametersDataField\">Parse parameters data here</label>" +
-		"        </div>" +
-		"        <button type=\"button\" class=\"btn btn-success\" onclick=\"sendRequest()\">SEND REQUEST</button>" +
-		"   <div>" +
-        "       <b><p id=\"lastContentTxt\"></p></b>" +
-		"   </div>";
-
-        html +=
-        "   <script>" +
-        "        const authTokenField = document.getElementById(\"authTokenField\");" +
-        "        const parametersDataField = document.getElementById(\"parametersDataField\");" +
-        "        const operationCodeDropdown = document.getElementById(\"operationCodeDropdown\");" +
-        "        const lastContentTxt = document.getElementById(\"lastContentTxt\");" +
-                
-        "        function sendRequest() {" +
-        "            let parametersData = parametersDataField.value;" +
-                    
-        "            let xhr = new XMLHttpRequest();" +
-        "            xhr.open(\"POST\", \"/api/0/\" + operationCodeDropdown.options[operationCodeDropdown.selectedIndex].value, true);" +
-        "            xhr.setRequestHeader(\"Content-Type\", \"application/json\");" +
-        "            if (authTokenField.value != null) xhr.setRequestHeader(\"a\", authTokenField.value);" +
-
-        "            xhr.onload = () => {" +
-        "                if (xhr.status == 200) {" +
-        "                    lastContentTxt.textContent = xhr.responseText;" +
-        "                } else {" +
-        "                    lastContentTxt.textContent = \"error: \" + xhr.statusText;" +
-        "                }" +
-        "            };" +
-
-        "            xhr.onerror = (e) => {" +
-        "                lastContentTxt.textContent = e.toString();" +
-        "            };" +
-
-        "            xhr.send(parametersData);" +
-        "       };" +
-        "   </script>" +
-        "</body>" +
-        "</html>";
-
-
-    res.send(html);
-});
-
-module.exports = router;' >testData.index.ts
-    echo 'create testData.index.ts file success'
-
-    return
-}
-
-init_create_debugDataIndexTs() {
-    echo 'import express from "express";
-
-import { ParameterCode, DebugParameterCode, GetAppConfigParameterCode, LoginParameterCode, EnterDisplayNameParameterCode, FetchAllDataParameterCode, RegisterSocketParameterCode } from "@xmobitea/gn-server";
-import { DebugErrorCode, GetAppConfigErrorCode, LoginErrorCode, EnterDisplayNameErrorCode, FetchAllDataErrorCode, RegisterSocketErrorCode } from "@xmobitea/gn-server";
-
-import { TestErrorCode } from "./src/common/constant/errorCode/TestErrorCode";
-import { TestParameterCode } from "./src/common/constant/parameterCode/TestParameterCode";
-
-let allParameterCodes: any[] = [];
-allParameterCodes.push(ParameterCode);
-allParameterCodes.push(DebugParameterCode);
-allParameterCodes.push(GetAppConfigParameterCode);
-allParameterCodes.push(LoginParameterCode);
-allParameterCodes.push(EnterDisplayNameParameterCode);
-allParameterCodes.push(FetchAllDataParameterCode);
-allParameterCodes.push(RegisterSocketParameterCode);
-allParameterCodes.push(TestParameterCode);
-
-let allErrorCodes: any[] = [];
-allErrorCodes.push(DebugErrorCode);
-allErrorCodes.push(GetAppConfigErrorCode);
-allErrorCodes.push(LoginErrorCode);
-allErrorCodes.push(EnterDisplayNameErrorCode);
-allErrorCodes.push(FetchAllDataErrorCode);
-allErrorCodes.push(RegisterSocketErrorCode);
-allErrorCodes.push(TestErrorCode);
-
-let allParameterCodeDic = {} as any;
-for (let i = 0; i < allParameterCodes.length; i++) {
-    let parameterCodes = {} as any;
-    
-    let parameterCode = allParameterCodes[i];
-    
-    let keys = Object.keys(parameterCode) as Array<string>;
-    let values = Object.values(parameterCode) as Array<string>;
-
-    for (let j = 0; j < keys.length; j++) {
-        let value = values[j];
-        let key = keys[j];
-        parameterCodes[value] = key;
-    }
-
-    allParameterCodeDic[parameterCode.name] = parameterCodes;
-}
-
-let allErrorCodeDic = {} as any;
-for (let i = 0; i < allErrorCodes.length; i++) {
-    let errorCodes = {} as any;
-    
-    let errorCode = allErrorCodes[i];
-    
-    let keys = Object.keys(errorCode) as Array<string>;
-    let values = Object.values(errorCode) as Array<number>;
-
-    for (let j = 0; j < keys.length; j++) {
-        let value = values[j];
-        let key = keys[j];
-        errorCodes[value.toString()] = key;
-    }
-
-    allErrorCodeDic[errorCode.name] = errorCodes;
-}
-
-const router = express.Router();
-
-router.get("/", (req, res) => {
-    let html =
-        "<!DOCTYPE html>" +
-        "<html lang=\"en\">" +
-        "<head>" +
-        "   <style>" +
-        "       #lastContentTxt { white-space: pre; font-family: monospace; }" +
-        "   </style>" +
-		"	<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3\" crossorigin=\"anonymous\">" +
-        "</head>" +
-        "<body>" +
-		"	<div class=\"bd-intro ps-lg-4\">" +
-        "   <h1>[GN SERVER] DEBUG DATA TOOL</h1><br><br>" +
-
-        "   <div class=\"form-floating mb-3\">" +
-        "       <input type=\"text\" class=\"form-control\" id=\"debugDataField\">" +
-		"		<label for=\"debugDataField\">Parse return data here</label>" +
-        "   </div>" +
-        "   <br>" +
-        "   <div class=\"parameterCodeDropdown\">" +
-        "       <select name=\"parameterCodeDropdown\" class=\"form-select form-select-lg mb-3\" id=\"parameterCodeDropdown\" onchange=\"onChangeParameterCode()\">";
-
-        for (let i = 0; i < allParameterCodes.length; i++) {
-            let parameterCode = allParameterCodes[i];
-            html += "           <option value=\"" + parameterCode.name + "\">" + parameterCode.name + "</option>";
-        }
-
-        html +=
-        "       </select>" +
-        "   </div>" +
-
-        "   <div class=\"errorCodeDropdown\">" +
-        "       <select name=\"errorCodeDropdown\" class=\"form-select form-select-lg mb-3\" id=\"errorCodeDropdown\" onchange=\"onChangeErrorCode()\">";
-
-        for (let i = 0; i < allErrorCodes.length; i++) {
-            let errorCode = allErrorCodes[i];
-            html += "           <option value=\"" + errorCode.name + "\">" + errorCode.name + "</option>";
-        }
-
-        html +=
-        "       </select>" +
-        "   </div>" +
-        "   <br>" +
-        "   <div>" +
-        "       <b><p id=\"lastContentTxt\"></p></b>" +
-        "   </div>" +
-		"	</div>" +
-        "   <script>" +
-        "        const allParameterCodeDic = {};" +
-        "        const allErrorCodeDic = {};";
-
-        let allParameterCodeKeys = Object.keys(allParameterCodeDic);
-        for (let i = 0; i < allParameterCodeKeys.length; i++) {
-            let parameterCode = allParameterCodeKeys[i];
-            let parameterCodes = allParameterCodeDic[parameterCode];
-            
-            html += "        allParameterCodeDic[\"" + parameterCode + "\"] = {};";
-
-            let parameterCodeKeys = Object.keys(parameterCodes);
-            for (let j = 0; j < parameterCodeKeys.length; j++) {
-                let parameterCodeKey = parameterCodeKeys[j];
-                html += "        allParameterCodeDic[\"" + parameterCode + "\"][\"" + parameterCodeKey + "\"] = \"" + parameterCodes[parameterCodeKey] + "\";";
-            }
-        }
-
-        let allErrorCodeKeys = Object.keys(allErrorCodeDic);
-        for (let i = 0; i < allErrorCodeKeys.length; i++) {
-            let errorCode = allErrorCodeKeys[i];
-            let errorCodes = allErrorCodeDic[errorCode];
-            
-            html += "        allErrorCodeDic[\"" + errorCode + "\"] = {};";
-
-            let errorCodeKeys = Object.keys(errorCodes);
-            for (let j = 0; j < errorCodeKeys.length; j++) {
-                let errorCodeKey = errorCodeKeys[j];
-                html += "        allErrorCodeDic[\"" + errorCode + "\"][\"" + errorCodeKey + "\"] = \"" + errorCodes[errorCodeKey] + "\";";
-            }
-        }
-
-        html +=
-        "        const debugDataField = document.getElementById(\"debugDataField\");" +
-        "        const parameterCodeDropdown = document.getElementById(\"parameterCodeDropdown\");" +
-        "        const errorCodeDropdown = document.getElementById(\"errorCodeDropdown\");" +
-        "        const lastContentTxt = document.getElementById(\"lastContentTxt\");" +
-
-        "        function onChangeParameterCode() {" +
-        "            handler();" +
-        "        };" +
-
-        "        function onChangeErrorCode() {" +
-        "            handler();" +
-        "        };" +
-
-        "        debugDataField.onkeyup = function() {" +
-        "            handler();" +
-        "        };" +
-            
-        "        function handler() {" +
-        "            let value = debugDataField.value;" +
-        "            if (!value) {" +
-        "                lastContentTxt.textContent =\"\";" +
-        "                return;" +
-        "            }" +
-                    
-        "            try {" +
-        "                let parameterCode = parameterCodeDropdown.options[parameterCodeDropdown.selectedIndex].value;" +                
-        "                let errorCode = errorCodeDropdown.options[errorCodeDropdown.selectedIndex].value;" +
-
-        "                let returnObj = getReturnObj(parameterCode, errorCode, value);" +
-        "                lastContentTxt.textContent = JSON.stringify(returnObj, null, 4);" +
-        "            }" +
-        "            catch (err) {" + 
-        "                lastContentTxt.textContent = err.toString();" +
-        "            }" +
-        "        };" +
-
-        "function getReturnObj(parameterCode, errorCode, str) {" +
-        "    let jsonObj = JSON.parse(str);" +
-        "    let returnObj = (Array.isArray(jsonObj)) ? getArrayObj(parameterCode, errorCode, jsonObj) : getJsonObj(parameterCode, errorCode, jsonObj);" +
-            
-        "    return returnObj;" +
-        "};" +
-
-        "function getJsonObj(parameterCode, errorCode, jsonObj0) {" +
-        "    let returnObj = {};" +
-        
-        "    let jsonObj0Keys = Object.keys(jsonObj0);" +
-        
-        "   for (let j = 0; j < jsonObj0Keys.length; j++) {" +
-        "        let key = jsonObj0Keys[j];" +
-        "        let value = jsonObj0[key];" +
-        
-        "        if (key == \"0\") {" +
-        "            let value0 = allErrorCodeDic[errorCode][value];" +
-        "            if (value0 == null) value0 = value;" +
-        "            else value0 = errorCode + \"_\" + value0;" +
-
-        "            returnObj[\"ErrorCode\"] = value0;" +
-        "        }" +
-        "        else {" +
-        "            let key0 = allParameterCodeDic[parameterCode][key];" +
-        "            if (key0 == null) key0 = key;" +
-        "            else key0 = parameterCode + \"_\" + key0;" +
-        "            if (value == null) {" +
-        "                returnObj[key0] = null;" +
-        
-        "                continue;" +
-        "            }" +
-        
-        "            let typeOfValue = typeof value;" +
-        
-        "            if (typeOfValue == \"string\" || typeOfValue == \"number\" || typeOfValue == \"boolean\" || typeOfValue == \"bigint\") {" +
-        "                returnObj[key0] = value;" +
-        "            }" +
-        "            else if (typeOfValue == \"object\") {" +
-        "                if (Array.isArray(value)) returnObj[key0] = getArrayObj(parameterCode, errorCode, value);" +
-        "                else returnObj[key0] = getJsonObj(parameterCode, errorCode, value);" +
-        "            }" +
-        "            else returnObj[key0] = value;" +
-        "        }" +
-        "    }" +
-        
-        "    return returnObj;" +
-        "};" +
-
-        "function getArrayObj(parameterCode, errorCode, arrayObj0) {" +
-        "    let returnObj = [];" +
-        
-        "    for (let j = 0; j < arrayObj0.length; j++) {" +
-        "        let value = arrayObj0[j];" +
-        
-        "        if (value == null) {" +
-        "            returnObj.push(null);" +
-        
-        "            continue;" +
-        "        }" +
-        
-        "        let typeOfValue = typeof value;" +
-        
-        "        if (typeOfValue == \"string\" || typeOfValue == \"number\" || typeOfValue == \"boolean\" || typeOfValue == \"bigint\") {" +
-        "            returnObj.push(value);" +
-        "        }" +
-        "        else if (typeOfValue == \"object\") {" +
-        "            if (Array.isArray(value)) returnObj.push(getArrayObj(parameterCode, errorCode, value));" +
-        "            else returnObj.push(getJsonObj(parameterCode, errorCode, value));" +
-        "        }" +
-        "        else returnObj.push(value);" +
-        "    }" + 
-        
-        "    return returnObj;" +
-        "};" +
-
-        "   </script>" +
-        
-        "</body>" +
-        "</html>";
-
-
-    res.send(html);
-});
-
-module.exports = router;' >debugData.index.ts
-    echo 'create debugData.index.ts file success'
-
-    return
-}
-
-init_create_logDataIndexTs() {
-    echo 'import fs from "fs";
-let ENVIROMENT = process.env.ENVIROMENT || "debug";
-const optionsPath = __dirname + "/./GNconfig." + ENVIROMENT + ".json";
-
-import express from "express";
-
-const router = express.Router();
-
-router.get("/:hash", async (req, res): Promise<any> => {
-	let optionStr = fs.readFileSync(optionsPath).toString();
-	let fullOptions = JSON.parse(optionStr);
-	let options = fullOptions.options;
-	let toolHashs = options.toolHashs;
-
-	let fullLogPath = __dirname + "/" + options.logPath;
-
-    let hash = req.params.hash;
-    if (!hash) return res.sendStatus(403);
-    if (toolHashs.indexOf(hash) == -1) return res.sendStatus(403);
-	
-    let query = req.query;
-
-    let skip = query["skip"] as any;
-    if (skip == null) skip = 0;
-
-    let limit = query["limit"] as any;
-    if (limit == null) limit = 100;
-
-    fs.readFile(fullLogPath, "utf-8" , (err, data) => {
-        if (err) {
-            return res.sendStatus(500);
-        }
-
-        let arr = data.replace(/\r\n/g,"\n").split("\n");
-
-        let returnData = [];
-
-        let startI = arr.length - 1 - skip;
-        if (startI > arr.length - 1) startI = arr.length - 1;
-        let endI = startI - limit;
-        if (endI < 0) endI = 0;
-        else if (endI > startI) endI = startI;
-
-        for (let i = startI - 1; i >= endI; i--) returnData.push(arr[i]);
-
-        let html =
-        "<!DOCTYPE html>" +
-        "<html lang=\"en\">" +
-        "<head>" +
-        "   <style>" +
-        "       #lastContentTxt { white-space: pre; font-family: monospace; }" +
-        "   </style>" +
-        "   <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3\" crossorigin=\"anonymous\">" +
-        "</head>" +
-        "<body>" +
-		"   <h1>[GN SERVER] LOG { skip : " + skip + " , limit :" + limit + " }</h1><br><br>" +
-        "   <table class=\"table\">" +
-        "       <thead>" +
-        "           <tr>" +
-        "               <th scope=\"col\">#</th>" +
-        "               <th scope=\"col\">LOG</th>" +
-        "           </tr>" +
-        "       </thead>" +
-        "       <tbody>";
-        for (let i = 0; i < returnData.length; i++) {
-            html += 
-                "<tr>" +
-                "<th scope=\"row\">" + i + "</th>" +
-                "<td>" + returnData[i] + "</td>" +
-                "</tr>";
-        }
-        html += "</tbody></table>" +
-        "</body>" +
-        "</html>";
-
-        return res.send(html);
-    });
-});
-
-module.exports = router;' >logData.index.ts
-    echo 'create logData.index.ts file success'
 
     return
 }
@@ -652,20 +210,6 @@ applicationStartup.run(() => {
 });
 
 let gnServer = applicationStartup.getGNServer();
-if (options.debugToolEnable) {
-    const debugRouter = require("./debugData.index");
-    gnServer.getHttpApp().getApp().use("/debug", debugRouter);
-}
-
-if (options.testToolEnable) {
-	const testRouter = require("./testData.index");
-    gnServer.getHttpApp().getApp().use("/test", testRouter);
-}
-
-if (options.logToolEnable) {
-	const logRouter = require("./logData.index");
-    gnServer.getHttpApp().getApp().use("/log", logRouter);
-}
 
 gnServer.addHandler(new TestRequestHandler(gnServer));
 

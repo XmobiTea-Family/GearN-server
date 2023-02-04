@@ -2,20 +2,10 @@ import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 abstract class BuilderBase {
 	protected enable: boolean;
-	protected debugViewEnable: boolean;
-	protected logViewEnable: boolean;
 	protected debugHashs: string[];
     
 	public getEnable(): boolean {
 		return this.enable;
-	}
-
-	public getDebugViewEnable(): boolean {
-		return this.debugViewEnable;
-	}
-
-	public getLogViewEnable(): boolean {
-		return this.logViewEnable;
 	}
 
 	public getDebugHashs(): string[] {
@@ -32,16 +22,6 @@ class Builder extends BuilderBase implements IBuilder<AdminViewSettings> {
 		return this;
 	}
 
-	public setDebugViewEnable(debugViewEnable: boolean): Builder {
-		this.debugViewEnable = debugViewEnable;
-		return this;
-	}
-
-	public setLogViewEnable(logViewEnable: boolean): Builder {
-		this.logViewEnable = logViewEnable;
-		return this;
-	}
-
 	public setDebugHashs(debugHashs: string[]): Builder {
 		this.debugHashs = debugHashs;
 		return this;
@@ -50,8 +30,6 @@ class Builder extends BuilderBase implements IBuilder<AdminViewSettings> {
 	constructor() {
 		super();
 
-		this.debugViewEnable = false;
-		this.logViewEnable = false;
 		this.debugHashs = [];
 	}
 
@@ -66,8 +44,6 @@ export class AdminViewSettings extends BuilderBase {
 		super();
 
 		this.enable = builder.getEnable();
-		this.debugViewEnable = builder.getDebugViewEnable();
-		this.logViewEnable = builder.getLogViewEnable();
 		this.debugHashs = builder.getDebugHashs();
 	}
 

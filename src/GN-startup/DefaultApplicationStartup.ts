@@ -44,8 +44,7 @@ export class DefaultApplicationStartup {
 
 		let debugViewSettings = AdminViewSettings.Builder()
 			.setDebugHashs([])
-			.setDebugViewEnable(true)
-			.setLogViewEnable(true)
+			.setEnable(true)
 			.build();
 			
 		let otherSettings = OtherSettings.Builder()

@@ -1,16 +1,16 @@
-import { GNHashtable } from "../../../../GN-common/common/GNData";
-import { ChatErrorCode } from "../../../../GN-common/constant/errorCode/ChatErrorCode";
-import { EventCode } from "../../../../GN-common/constant/EventCode";
-import { OperationCode } from "../../../../GN-common/constant/OperationCode";
-import { ChatParameterCode } from "../../../../GN-common/constant/parameterCode/ChatParameterCode";
-import { ParameterCode } from "../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../GN-common/constant/ReturnCode";
-import { AuthInfo } from "../../../../GN-common/entity/AuthInfo";
-import { OperationEvent } from "../../../../GN-common/entity/operationEvent/OperationEvent";
-import { OperationRequest } from "../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../GN-common/entity/operationResponse/OperationResponse";
-import { AvatarChannel } from "../../../service/IChatService";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "../../../../GN-common/entity/DataMember";
+import { GNHashtable } from "./../../../../GN-common/common/GNData";
+import { ChatErrorCode } from "./../../../../GN-common/constant/errorCode/ChatErrorCode";
+import { EventCode } from "./../../../../GN-common/constant/EventCode";
+import { OperationCode } from "./../../../../GN-common/constant/OperationCode";
+import { ChatParameterCode } from "./../../../../GN-common/constant/parameterCode/ChatParameterCode";
+import { ParameterCode } from "./../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../GN-common/constant/ReturnCode";
+import { AuthInfo } from "./../../../../GN-common/entity/AuthInfo";
+import { OperationEvent } from "./../../../../GN-common/entity/operationEvent/OperationEvent";
+import { OperationRequest } from "./../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../GN-common/entity/operationResponse/OperationResponse";
+import { AvatarChannel } from "./../../../service/IChatService";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../GN-common/entity/DataMember";
 import { RequestHandler } from "./base/RequestHandler";
 
 class EditChatChannelOperationRequest extends OperationRequest {
@@ -69,7 +69,7 @@ export class EditChatChannelRequestHandler extends RequestHandler {
 
         let chatChannel = await this.gnServer.getChatService().editChatChannelAsync(request.channel, request.name, avatarChannel, request.channelType);
         if (chatChannel != null) {
-            let channelOperationEvent = new OperationEvent(EventCode.OnUpdateChannel, new GNHashtable());
+            let channelOperationEvent = new OperationEvent(EventCode.OnChannelChat, new GNHashtable());
 
             let gsChannelInfo = new GNHashtable();
             gsChannelInfo.add(ChatParameterCode.Channel, chatChannel.channel);
@@ -92,6 +92,11 @@ export class EditChatChannelRequestHandler extends RequestHandler {
             }
 
             channelOperationEvent.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
+
+            if (this.postHandle != null) {
+                await this.postHandle(authInfo, request, operationResponse, chatChannel, channelOperationEvent);
+            }
+
             this.gnServer.sendEventToRoom(request.channel, channelOperationEvent);
         }
 

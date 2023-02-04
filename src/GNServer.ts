@@ -136,7 +136,6 @@ export class GNServer {
 		this.requestController.addHandler(new RegisterSocketRequestHandler(this));
 		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
 		this.requestController.addHandler(new FetchSparkPlayerRequestHandler(this));
-
 		this.requestController.addHandler(new AddFriendRequestHandler(this));
 		this.requestController.addHandler(new RemoveFriendRequestHandler(this));
 		this.requestController.addHandler(new GetFriendsRequestHandler(this));

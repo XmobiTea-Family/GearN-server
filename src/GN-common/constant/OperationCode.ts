@@ -24,4 +24,5 @@ export class OperationCode {
 	public static readonly GetChatMemberChannel: number = 21;
 	public static readonly EditChatInfoChannel: number = 22;
 	public static readonly EditChatMessageChannel: number = 23;
+	public static readonly EditChatMessageUser: number = 24;
 }

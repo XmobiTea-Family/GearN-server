@@ -65,6 +65,11 @@ export class GetChatMemberChannelRequestHandler extends RequestHandler {
         gsChannelInfo.add(ChatParameterCode.Members, gsUsers);
 
         operationResponse.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse);
+        }
+
         return operationResponse;
     }
 }

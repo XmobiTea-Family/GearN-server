@@ -61,6 +61,10 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 		operationResponse.setScriptData(FileUploadInfoParameterCode.TsUploadExpire, doc["TsUploadExpire"]);
 		operationResponse.setScriptData(FileUploadInfoParameterCode.UserId, doc["UserId"]);
 
+		if (this.postHandle != null) {
+			await this.postHandle(authInfo, request, operationResponse);
+		}
+
 		return operationResponse;
 	}
 

@@ -88,7 +88,7 @@ export class GetFriendsRequestHandler extends RequestHandler {
                     gsFriend.add(FriendParameterCode.FriendId, friendUserId);
                     let friendStatus = friend["Status"];
                     gsFriend.add(FriendParameterCode.FriendStatus, friendStatus);
-                    gsFriend.add(FriendParameterCode.TsUpdate, friend["TsUpdate"]);
+                    gsFriend.add(FriendParameterCode.TsLastUpdate, friend["TsLastUpdate"]);
 
                     gsFriendLst.add(gsFriend);
                 }
@@ -96,6 +96,10 @@ export class GetFriendsRequestHandler extends RequestHandler {
         }
 
         operationResponse.setScriptData(FriendParameterCode.FriendLst, gsFriendLst);
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse);
+        }
 
         return operationResponse;
     }

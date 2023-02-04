@@ -46,7 +46,11 @@ export class LeaveChatChannelRequestHandler extends RequestHandler {
 
         this.gnServer.getChatService().unSubscriberChannelAsync(authInfo.getUserId(), request.channel);
 
-        this.gnServer.leaveRoom(authInfo.getUserId(), request.channel);
+        this.gnServer.leaveRoom(request.channel, request.channel);
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse);
+        }
 
         return operationResponse;
     }

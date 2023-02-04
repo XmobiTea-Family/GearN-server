@@ -69,7 +69,7 @@ export class GetChatMessageChannelRequestHandler extends RequestHandler {
             gsMessage.add(ChatParameterCode.TsLastUpdate, message.tsLastUpdate);
             gsMessage.add(ChatParameterCode.TsCreate, message.tsCreate);
 
-            let messageEditeds = message.messageEdited;
+            let messageEditeds = message.messageEditeds;
             if (messageEditeds.length != 0) {
                 let gsMessageEditeds = new GNArray();
                 for (let j = 0; j < messageEditeds.length; j++) {
@@ -83,7 +83,7 @@ export class GetChatMessageChannelRequestHandler extends RequestHandler {
                     gsMessageEditeds.add(gsMessageEdited);
                 }
 
-                gsMessage.add(ChatParameterCode.MessageEdited, gsMessageEditeds);
+                gsMessage.add(ChatParameterCode.MessageEditeds, gsMessageEditeds);
             }
 
             gsMessage.add(ChatParameterCode.UserId, message.senderId);
@@ -92,7 +92,14 @@ export class GetChatMessageChannelRequestHandler extends RequestHandler {
             gsMessages.add(gsMessage);
         }
 
-        operationResponse.setScriptData(ChatParameterCode.ChatMessageLst, gsMessages);
+        let gsChannelInfo = new GNHashtable();
+        gsChannelInfo.add(ChatParameterCode.ChatMessageLst, gsMessages);
+
+        operationResponse.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
+
+        if (this.postHandle != null) {
+            await this.postHandle(authInfo, request, operationResponse);
+        }
 
         return operationResponse;
     }

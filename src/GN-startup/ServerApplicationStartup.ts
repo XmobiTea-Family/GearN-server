@@ -89,14 +89,11 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 
 		let gnAdminViewSettings = this.gnConfig["adminViewSettings"];
 		if (gnAdminViewSettings == null) gnAdminViewSettings = {
-			"debugViewEnable": true,
-			"logViewEnable": true,
+			"enable": true,
 			"debugHashs": ["hashhere"]
 		}
 		let adminViewSettings = AdminViewSettings.Builder()
 			.setEnable(gnAdminViewSettings["enable"] || true)
-			.setDebugViewEnable(gnAdminViewSettings["debugViewEnable"] || true)
-			.setLogViewEnable(gnAdminViewSettings["logViewEnable"] || true)
 			.setDebugHashs(gnAdminViewSettings["debugHashs"] || ["hashhere"])
 			.build();
 

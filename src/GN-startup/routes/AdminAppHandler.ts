@@ -127,16 +127,6 @@ export class AdminAppHandler {
 			return next();
 		});
 
-		// this.adminApiRouter = express.Router();
-		// this.router.use("/admin/api", this.adminApiRouter);
-
-		// this.adminApiRouter.use(session({
-		// 	resave: true,
-		// 	saveUninitialized: true,
-		// 	secret: StringUtility.generateRandomString(10),
-		// 	cookie: { maxAge: 3600000, secure: true }
-		// }));
-
 		this.setupAdminRouter();
 	}
 
@@ -285,8 +275,37 @@ export class AdminAppHandler {
 
 			this.adminRouter.post("/signin", async (req: express.Request, res: express.Response) => {
 				let body = req.body;
+				let debugHash = body.debugHash;
+
+				let settingsDebugHashs = this.adminViewSettings.getDebugHashs();
+				if (settingsDebugHashs.length != 0) {
+					if (!debugHash || settingsDebugHashs.indexOf(debugHash) == -1) {
+						let errorCodeStr = "Hash wroong";
+
+						(req.session as any).messages = {
+							"errors": {
+								"ErrorCode": errorCodeStr
+							}
+						}
+
+						return res.redirect("/admin/signin");
+					}
+				}
+
 				let username = body.username;
 				let password = body.password;
+
+				if (!username || !password) {
+					let errorCodeStr = "UserDoesNotExists";
+
+					(req.session as any).messages = {
+						"errors": {
+							"ErrorCode": errorCodeStr
+						}
+					}
+
+					return res.redirect("/admin/signin");
+				}
 
 				let loginRequestHandler = this.gnServer.getRequestController().getHandler(OperationCode.Login);
 				let loginOperationRequest = new OperationRequest(OperationCode.Login, false);
@@ -337,12 +356,12 @@ export class AdminAppHandler {
 			});
 		}
 
-		if (this.adminViewSettings.getDebugViewEnable()) {
+		{
 			this.adminRouter.get("/debug", wrap((req, res, next) => {
 				return this.mustSignin(req, res, next);
 			}), (req: express.Request, res: express.Response) => {
 				let userId: string = (req as any).authInfo.getUserId();
-				
+
 				res.locals.data = {
 					userId: userId,
 				}
@@ -443,7 +462,7 @@ export class AdminAppHandler {
 			});
 		}
 
-		if (this.adminViewSettings.getLogViewEnable()) {
+		{
 			this.adminRouter.get("/log", wrap((req, res, next) => {
 				return this.mustSignin(req, res, next);
 			}), (req: express.Request, res: express.Response) => {
