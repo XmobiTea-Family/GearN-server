@@ -1,0 +1,179 @@
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { PushNotificationItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/PushNotificationItem";
+import { StringUtility } from "../../../../../GN-common/helper/StringUtility";
+
+class AddPushNotificationOperationRequest extends OperationRequest {
+    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    userId?: string;
+
+    @StringDataMember({ code: GNParameterCode.Token, minLength: 10, maxLength: 256, mustNonNull: true })
+    token: string;
+
+    @NumberDataMember({ code: GNParameterCode.PlatformType, minValue: 1 })
+    platformType: number;
+
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
+
+        return true;
+    }
+}
+
+class ServerAddPushNotificationOperationRequest extends AddPushNotificationOperationRequest {
+    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    declare userId: string;
+
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
+
+        return true;
+    }
+}
+
+class AdminAddPushNotificationOperationRequest extends ServerAddPushNotificationOperationRequest {
+
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
+
+        return true;
+    }
+}
+
+export class AddPushNotificationRequestHandler extends MasterPlayerBaseRequestHandler {
+
+    public override getCode() {
+        return OperationCode.AddPushNotification;
+    }
+
+    public override getCommonOperationRequest() {
+        return AddPushNotificationOperationRequest;
+    }
+
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
+
+        if (!request.userId) {
+            if (!secretInfo.getPermission().masterPlayer.addPushNotification.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+
+            request.userId = authInfo.getUserId();
+        }
+        else if (request.userId != authInfo.getUserId()) {
+            if (!secretInfo.getPermission().masterPlayer.addPushNotification.otherSelfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
+        else {
+            if (!secretInfo.getPermission().masterPlayer.addPushNotification.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
+
+        return this.execute({
+            userId: request.userId,
+            token: request.token,
+            platformType: request.platformType,
+        }, secretInfo, operationRequest);
+    }
+
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerAddPushNotificationOperationRequest);
+
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.addPushNotification.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
+
+        return this.execute({
+            userId: request.userId,
+            token: request.token,
+            platformType: request.platformType,
+        }, secretInfo, operationRequest);
+    }
+
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminAddPushNotificationOperationRequest);
+
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.addPushNotification.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
+
+        return this.execute({
+            userId: request.userId,
+            token: request.token,
+            platformType: request.platformType,
+        }, secretInfo, operationRequest);
+    }
+
+    private async execute(request: { userId: string, token: string, platformType: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_AddPushNotification", request, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
+
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse.setReturnCode(ReturnCode.Ok);
+
+        let masterPlayerFindOptions: MasterPlayerFindOptions = {
+            pushNotifications: true,
+        }
+
+        let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+
+        if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+            return operationResponse;
+        }
+
+        let pushId: string;
+        let oldPushNotification = masterPlayer.getAllPushNotifications().find(x => x.token == request.token && x.platformType == request.platformType);
+        if (oldPushNotification == null) {
+            pushId = StringUtility.generateRandomString(8, 0);
+            let pushNotification: PushNotificationItem = {
+                pushId: pushId,
+                token: request.token,
+                platformType: request.platformType,
+            }
+    
+            masterPlayer.setPushNotification(pushId, pushNotification);
+            masterPlayer.saveAsync();
+        }
+        else {
+            pushId = oldPushNotification.pushId;
+        }
+
+        operationResponse.setParameter(GNParameterCode.PushId, pushId);
+
+        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_AddPushNotification", request, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
+    }
+}
