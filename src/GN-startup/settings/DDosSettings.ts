@@ -14,8 +14,7 @@ abstract class BuilderBase {
 	protected maxUploadPendingRequest: number;
 	protected maxDownloadPendingRequest: number;
 
-	protected reportDdosCollectionName: string;
-	protected banDdosCollectionName: string;
+	protected ipWhiteList: string[];
 
 	public getSocketMaxRequestPerSecondPerIp(): number {
 		return this.socketMaxRequestPerSecondPerIp;
@@ -57,12 +56,8 @@ abstract class BuilderBase {
 		return this.maxDownloadPendingRequest;
 	}
 
-	public getReportDdosCollectionName(): string {
-		return this.reportDdosCollectionName;
-	}
-
-	public getBanDdosCollectionName(): string {
-		return this.banDdosCollectionName;
+	public getIPWhiteList(): string[] {
+		return this.ipWhiteList;
 	}
 
 	constructor() { }
@@ -120,13 +115,8 @@ class Builder extends BuilderBase implements IBuilder<DdosSettings> {
 		return this;
 	}
 
-	public setReportDdosCollectionName(reportDdosCollectionName: string): Builder {
-		this.reportDdosCollectionName = reportDdosCollectionName;
-		return this;
-	}
-
-	public setBanDdosCollectionName(banDdosCollectionName: string): Builder {
-		this.banDdosCollectionName = banDdosCollectionName;
+	public setIPWhiteList(ipWhiteList: string[]): Builder {
+		this.ipWhiteList = ipWhiteList;
 		return this;
 	}
 
@@ -146,8 +136,7 @@ class Builder extends BuilderBase implements IBuilder<DdosSettings> {
 		this.maxUploadPendingRequest = 0;
 		this.maxDownloadPendingRequest = 0;
 
-		this.reportDdosCollectionName = "";
-		this.banDdosCollectionName = "";
+		this.ipWhiteList = [];
 	}
 
 	public build() {
@@ -173,8 +162,7 @@ export class DdosSettings extends BuilderBase {
 		this.maxUploadPendingRequest = builder.getMaxUploadPendingRequest();
 		this.maxDownloadPendingRequest = builder.getMaxDownloadPendingRequest();
 
-		this.reportDdosCollectionName = builder.getReportDdosCollectionName();
-		this.banDdosCollectionName = builder.getBanDdosCollectionName();
+		this.ipWhiteList = builder.getIPWhiteList();
 	}
 
 	public static Builder(): Builder {

@@ -2,16 +2,21 @@ import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 abstract class BuilderBase {
 	protected port: number;
+	protected socketPort: number;
 	protected useSSL: boolean;
 
 	protected keyFilePath: string;
 	protected certFilePath: string;
 
-	protected licenseKeyFilePath: string;
 	protected expiredToken: number;
+	protected privateKeyToken: string;
 
 	public getPort(): number {
 		return this.port;
+	}
+
+	public getSocketPort(): number {
+		return this.socketPort;
 	}
 
 	public getUseSSL(): boolean {
@@ -26,12 +31,12 @@ abstract class BuilderBase {
 		return this.certFilePath;
 	}
 
-	public getLicenseKeyFilePath(): string {
-		return this.licenseKeyFilePath;
-	}
-
 	public getExpiredToken(): number {
 		return this.expiredToken;
+	}
+
+	public getPrivateKeyToken(): string {
+		return this.privateKeyToken;
 	}
 
 	constructor() { }
@@ -41,6 +46,11 @@ abstract class BuilderBase {
 class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 	public setPort(port: number): Builder {
 		this.port = port;
+		return this;
+	}
+
+	public setSocketPort(socketPort: number): Builder {
+		this.socketPort = socketPort;
 		return this;
 	}
 
@@ -59,13 +69,13 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 		return this;
 	}
 
-	public setLicenseKeyFilePath(licenseKeyFilePath: string): Builder {
-		this.licenseKeyFilePath = licenseKeyFilePath;
+	public setExpiredToken(expiredToken: number): Builder {
+		this.expiredToken = expiredToken;
 		return this;
 	}
 
-	public setExpiredToken(expiredToken: number): Builder {
-		this.expiredToken = expiredToken;
+	public setPrivateKeyToken(privateKeyToken: string): Builder {
+		this.privateKeyToken = privateKeyToken;
 		return this;
 	}
 
@@ -73,11 +83,12 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 		super();
 
 		this.port = 0;
+		this.socketPort = 0;
 		this.useSSL = false;
 		this.keyFilePath = "";
 		this.certFilePath = "";
-		this.licenseKeyFilePath = "";
 		this.expiredToken = 0;
+		this.privateKeyToken = "";
 	}
 
 	public build() {
@@ -91,11 +102,12 @@ export class ApplicationSettings extends BuilderBase {
 		super();
 
 		this.port = builder.getPort();
+		this.socketPort = builder.getSocketPort();
 		this.useSSL = builder.getUseSSL();
 		this.keyFilePath = builder.getKeyFilePath();
 		this.certFilePath = builder.getCertFilePath();
-		this.licenseKeyFilePath = builder.getLicenseKeyFilePath();
 		this.expiredToken = builder.getExpiredToken();
+		this.privateKeyToken = builder.getPrivateKeyToken();
 	}
 
 	public static Builder(): Builder {

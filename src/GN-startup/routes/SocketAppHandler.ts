@@ -8,9 +8,9 @@ import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
-import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
 import { Commands } from "./../../GN-common/constant/Commands";
+import { xDatabase } from "./../../GN-library/xdatabase/lib/xDatabase";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -35,6 +35,8 @@ export class SocketAppHandler {
 
 	private server: Server;
 	private emitter: Emitter;
+
+	private xDatabase: xDatabase;
 
 	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): void {
 		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
@@ -62,6 +64,10 @@ export class SocketAppHandler {
 
 	public setEmitter(emitter: Emitter) {
 		this.emitter = emitter;
+	}
+
+	public setDatabase(database: xDatabase) {
+		this.xDatabase = database;
 	}
 
 	public setOnSocketRequest(_onRequestCb: OnSocketRequest) {
@@ -100,7 +106,7 @@ export class SocketAppHandler {
 									let operationResponse = await this.onSocketRequestMsgPack(socket, data, returnCode);
 
 									if (operationResponse != null) {
-										this.sendResponseForSocket(socket, operationResponse);
+										this.sendResponseForSocket(socket, operationResponse, true);
 									}
 
 									this.antiDdosMiddleware.removePendingRequestViaSocket(socket, data);
@@ -122,7 +128,7 @@ export class SocketAppHandler {
 									let operationResponse = await this.onSocketRequestJson(socket, data, returnCode);
 
 									if (operationResponse != null) {
-										this.sendResponseForSocket(socket, operationResponse);
+										this.sendResponseForSocket(socket, operationResponse, false);
 									}
 
 									this.antiDdosMiddleware.removePendingRequestViaSocket(socket, data);
@@ -166,8 +172,16 @@ export class SocketAppHandler {
 				socket.data.authInfo = null;
 			}
 
+			if (socket.data.isSecreted) {
+				socket.data.isSecreted = false;
+				socket.data.secretInfo = null;
+			}
+
 			return;
 		}
+
+		let secretKey = data[1] as string;
+		socket.data.secretKey = secretKey;
 
 		let authToken = data[0] as string;
 		if (!authToken) {
@@ -177,20 +191,73 @@ export class SocketAppHandler {
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 			}
+		}
+		else {
+			let tokenPayload = this.apiMiddleware.verifyAuthToken(authToken);
+			if (tokenPayload == null) {
+				if (socket.data.isAuthenticated === true) {
+					socket.rooms.forEach(room => socket.leave(room));
 
-			return;
+					socket.data.isAuthenticated = false;
+					socket.data.authInfo = null;
+				}
+			}
+			else {
+				let gnToken: string = tokenPayload.gnToken;
+
+				let authInfo = await this.apiMiddleware.getAuthInfoByGNTokenInDatabase(gnToken);
+
+				if (authInfo != null) {
+					if (!secretKey) {
+						secretKey = authInfo.getSecretKey();
+					}
+
+					socket.data.isAuthenticated = true;
+					socket.data.authInfo = authInfo;
+
+					socket.join(authInfo.getUserId());
+					socket.join(await this.getRooms(authInfo.getUserId()));
+				}
+			}
 		}
 
-		let authInfo = await this.apiMiddleware.getAuthInfoByAuthTokenInDatabase(authToken);
+		if (!secretKey) {
+			socket.data.isSecreted = false;
+			socket.data.secretInfo = null;
+		}
+		else {
+			let secretInfo = await this.apiMiddleware.getSecretInfoBySecretKeyInDatabase(secretKey);
 
-		if (authInfo != null) {
-			socket.data.isAuthenticated = true;
-			socket.data.authInfo = authInfo;
+			if (secretInfo != null && secretInfo.getIsOnlyMasterAdmin()) {
+				if (!socket.data.isAuthenticated || socket.data.authInfo.getSecretKey() != secretKey) {
+					secretInfo = null;
+				}
+			}
 
-			socket.join(authInfo.getUserId());
-			socket.join(authInfo.getSocketRoomIds());
+			if (secretInfo != null) {
+				socket.data.isSecreted = true;
+				socket.data.secretInfo = secretInfo;
 
-			authInfo.setSocketId(socket.id);
+				if (socket.data.isAuthenticated === true) {
+					let gamePlayer = await this.xDatabase.loadGamePlayerAsync(socket.data.authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
+
+					if (gamePlayer != null && socket != null) {
+						let playerGroups = gamePlayer.getAllPlayerGroups();
+
+						for (let i = 0; i < playerGroups.length; i++) {
+							let playerGroup = playerGroups[i];
+
+							if (playerGroup.status == 0) {	// 0 is member
+								socket.join(playerGroup.groupId);
+							}
+						}
+					}
+				}
+			}
+			else {
+				socket.data.isSecreted = false;
+				socket.data.secretInfo = null;
+			}
 		}
 	}
 
@@ -237,10 +304,12 @@ export class SocketAppHandler {
 
 	private async onSocketResponse(socket: Socket, requestData: any, returnCode: number, encrypted: boolean): Promise<OperationResponse> {
 		let code = requestData[0] as number;
-		let params = requestData.length > 1 ? (requestData[1] as {}) : {};
-		let requestId = requestData.length > 2 ? (requestData[2] as number) : -1;
+		let type = requestData[1] as number;
+		let role = requestData[2] as number;
+		let params = requestData.length > 3 ? (requestData[3] as {}) : {};
+		let requestId = requestData.length > 4 ? (requestData[4] as number) : -1;
 
-		let request = new Request(code);
+		let request = new Request(code, type, role);
 		request.setIP(socket.data.IPAddress);
 		request.setParameters(params);
 		request.setRequestId(requestId);
@@ -248,6 +317,9 @@ export class SocketAppHandler {
 
 		let isAuthenticated = socket.data.isAuthenticated;
 		if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
+
+		let isSecreted = socket.data.isSecreted;
+		if (isSecreted === true) request.setSecretInfo(socket.data.secretInfo);
 
 		if (this.enableSendAndReceiveDebug) {
 			Debug.log("[SOCKET RECV] %O", request);
@@ -281,131 +353,170 @@ export class SocketAppHandler {
 		if (this._onDisconnectCb != null) this._onDisconnectCb(socket, data);
 	}
 
-	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse) {
+	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse, useMsgPack: boolean) {
 		let socketData = OperationHelper.toResponseSocketData(operationResponse);
 		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(socketData));
 
-		if (operationResponse.isEncrypted())
-			socket.emit(Commands.ResponseCmd_MsgPack, encode(socketData));
-		else
-			socket.emit(Commands.ResponseCmd_Json, socketData);
+		if (operationResponse.isEncrypted()) {
+            // TODO Encrypt data
+		}
+
+        if (useMsgPack) {
+            let socketDataMsgPack = encode(socketData);
+
+            socket.emit(Commands.ResponseCmd_MsgPack, socketDataMsgPack);
+        }
+        else {
+            socket.emit(Commands.ResponseCmd_Json, socketData);
+        }
 	}
 
-	private sendEventForSocket(socket: Socket, operationEvent: OperationEvent) {
-		let socketData = OperationHelper.toEventSocketData(operationEvent);
-		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
+	// private sendEventForSocket(socket: Socket, operationEvent: OperationEvent) {
+	// 	let socketData = OperationHelper.toEventSocketData(operationEvent);
+	// 	if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
 
-		if (operationEvent.isEncrypted())
-			socket.emit(Commands.EventCmd_MsgPack, encode(socketData));
-		else
-			socket.emit(Commands.EventCmd_Json, socketData);
-	}
+	// 	if (operationEvent.isEncrypted())
+	// 	{
+	// 		let socketDataMsgPack = encode(socketData);
 
-	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
+	// 		socket.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+	// 	}
+	// 	else
+	// 	{
+	// 		socket.emit(Commands.EventCmd_Json, socketData);
+	// 	}
+	// }
+
+	public sendEventTo(userId: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] " + userId + " %O", JSON.stringify(socketData));
 
-		if (operationEvent.isEncrypted())
-			this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, encode(socketData));
-		else
-			this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
+		if (operationEvent.isEncrypted()) {
+			// TODO Encrypt data
+		}
+
+        if (useMsgPack) {
+            let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+        }
+        else {
+            if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
+			else this.server.to(userId).emit(Commands.EventCmd_Json, socketData);
+        }
 	}
 
-	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
+	public sendEventToRoom(roomId: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] " + roomId + " %O", JSON.stringify(socketData));
 
-		if (operationEvent.isEncrypted())
-			this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, encode(socketData));
-		else
-			this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
+		if (operationEvent.isEncrypted()) {
+			// TODO Encrypt data
+		}
+
+        if (useMsgPack) {
+            let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+        }
+        else {
+            if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
+			else this.server.to(roomId).emit(Commands.EventCmd_Json, socketData);
+        }
 	}
 
-	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
+	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO MORE USER] %O", JSON.stringify(socketData));
 
-		if (operationEvent.isEncrypted()) {
+        if (operationEvent.isEncrypted()) {
+			// TODO Encrypt data
+		}
+
+		if (useMsgPack) {
 			let socketDataMsgPack = encode(socketData);
 
-			for (let i = 0; i < userIds.length; i++) {
-				let userId = userIds[i];
-				this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-			}
+			if (this.emitter != null) this.emitter.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 		}
 		else {
-			for (let i = 0; i < userIds.length; i++) {
-				let userId = userIds[i];
-				this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
-			}
+			if (this.emitter != null) this.emitter.to(userIds).emit(Commands.EventCmd_Json, socketData);
+			else this.server.to(userIds).emit(Commands.EventCmd_Json, socketData);
 		}
 	}
 
-	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
+	public sendEventToAllPlayer(operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ALL PLAYER] %O", JSON.stringify(socketData));
 
-		if (operationEvent.isEncrypted())
-			this.emitter.of("/").emit(Commands.EventCmd_MsgPack, encode(socketData));
+        if (operationEvent.isEncrypted()) {
+			// TODO Encrypt data
+		}
+
+		if (useMsgPack)
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+		}
 		else
-			this.emitter.of("/").emit(Commands.EventCmd_Json, socketData);
+		{
+			if (this.emitter != null) this.emitter.emit(Commands.EventCmd_Json, socketData);
+			else this.server.emit(Commands.EventCmd_Json, socketData);
+		}
 	}
 
-	public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
+	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
-			this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, encode(socketData));
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+		}
 		else
-			this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
-	}
-
-	public getSocketViaUserId(userId: string): Socket {
-		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
-		return this.getSocketViaAuthInfo(authInfo);
-	}
-
-	public getSocketViaAuthToken(authToken: string): Socket {
-		let authInfo = this.apiMiddleware.getAuthInfoByAuthToken(authToken);
-		return this.getSocketViaAuthInfo(authInfo);
+		{
+			if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
+			else this.server.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
+		}
 	}
 
 	public getSocketViaSocketId(socketId: string): Socket {
 		return socketId ? this.server.of("/").sockets.get(socketId) : null;
 	}
 
-	public getSocketViaAuthInfo(authInfo: AuthInfo) {
-		return authInfo ? this.getSocketViaSocketId(authInfo.getSocketId()) : null;
+	public getSockets(userId: string) {
+		return this.server.in(userId);
 	}
 
-	public async joinRoom(userId: string, roomId: string): Promise<void> {
-		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
-		let socket = this.getSocketViaAuthInfo(authInfo);
-
-		if (socket) {
-			authInfo.addSocketRoomId(roomId);
-			await socket.join(roomId);
-		}
+	public joinRoom(userId: string, roomId: string): void {
+		this.getSockets(userId).socketsJoin(roomId);
 	}
 
-	public async leaveRoom(userId: string, roomId: string): Promise<void> {
-		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
-		let socket = this.getSocketViaAuthInfo(authInfo);
-
-		if (socket) {
-			authInfo.removeSocketRoomId(roomId);
-			await socket.leave(roomId);
-		}
+	public leaveRoom(userId: string, roomId: string): void {
+		this.getSockets(userId).socketsLeave(roomId);
 	}
 
-	public getRooms(userId: string): Set<string> {
-		let socket = this.getSocketViaUserId(userId);
-		if (socket) {
-			return socket.rooms;
+	public async getRooms(userId: string): Promise<string[]> {
+		let answer: string[] = [];
+
+		let sockets = await this.getSockets(userId).fetchSockets();
+
+		for (let i = 0; i < sockets.length; i++) {
+			let socket = sockets[i];
+
+			socket.rooms.forEach(room => {
+				if (!answer.includes(room)) answer.push(room);
+			});
 		}
 
-		return null;
+		return answer;
 	}
 
 }
