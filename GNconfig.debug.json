@@ -50,9 +50,6 @@
 		},
 
 		"otherSettings": {
-			"adapterEventCollectionName": "AdapterEventCollection",
-			"authInfoCollectionName": "AuthInfoCollection",
-			"configCollectionName": "Config",
 			"packageName": "com.xmobitea.GNServer",
 			"appleClientId": "com.xmobitea.GNServer",
 			"googleClientId": "gn-server",
@@ -67,8 +64,6 @@
 
 		"adminViewSettings": {
 			"enable": true,
-			"debugViewEnable": true,
-			"logViewEnable": true,
 			"debugHashs": ["hashhere"]
 		},
 
@@ -88,9 +83,7 @@
 			"httpMaxPendingRequest": 1000,
 			"httpMaxRequestSize": 1024,
 			"maxUploadPendingRequest": 200,
-			"maxDownloadPendingRequest": 200,
-			"reportDdosCollectionName": "ReportDdosCollection",
-			"banDdosCollectionName": "BanDdosCollection"
+			"maxDownloadPendingRequest": 200
 		}
 	}
 }

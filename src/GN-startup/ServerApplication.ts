@@ -273,7 +273,7 @@ export class ServerApplication extends BuilderBase {
 			});
 		}
 
-		let authTokenCollection = this.gnServer.getDatabase().systemCollection(this.getOtherSettings().getAuthTokenCollectionName());
+		let authTokenCollection = this.gnServer.getDatabase().systemCollection("AuthInfoCollection");
 		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
 
 		let playerGameCollection = this.gnServer.getDatabase().systemGameCollection("Player");
@@ -281,19 +281,19 @@ export class ServerApplication extends BuilderBase {
 		this.apiMiddleware.setExpiredToken(this.getApplicationSettings().getExpiredToken());
 		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 
-		let reportDdosCollection = this.gnServer.getDatabase().systemCollection(this.getDdosSettings().getReportDdosCollectionName());
+		let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdosCollection");
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
-		let banDdosCollection = this.gnServer.getDatabase().systemCollection(this.getDdosSettings().getBanDdosCollectionName());
+		let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdosCollection");
 		this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
-		let adapterEventCollection = this.gnServer.getDatabase().systemGameCollection(this.getOtherSettings().getAdapterEventCollectionName());
+		let adapterEventCollection = this.gnServer.getDatabase().systemGameCollection("AdapterEventCollection");
 		this.socketApp.setEmitter(adapterEventCollection);
 
 		(this.gnServer.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
 		(this.gnServer.getGoogleService() as GoogleService).setGoogleClientId(this.getOtherSettings().getGoogleClientId());
 
-		let configCollection = this.gnServer.getDatabase().systemGameCollection(this.getOtherSettings().getConfigGameCollectionName());
+		let configCollection = this.gnServer.getDatabase().systemGameCollection("Config");
 		this.gnServer.getConfigGame().setConfigCollection(configCollection);
 		this.gnServer.getConfigGame().run(() => {
 			Debug.log("[GN] Config Game run success");
@@ -395,11 +395,11 @@ export class ServerApplication extends BuilderBase {
 	private async createEnsureIndex(): Promise<void> {
 		let database = this.gnServer.getDatabase();
 
-		database.createIndex("System." + this.otherSettings.getAuthTokenCollectionName(), {
+		database.createIndex("System.AuthInfoCollection", {
 			AuthToken: 1,
 		});
 		database.createIndex(
-			"System." + database.getGameName() + "." + this.otherSettings.getConfigGameCollectionName(),
+			"System." + database.getGameName() + "." + "Config",
 			{ ConfigName: 1 }
 		);
 
@@ -499,11 +499,15 @@ export class ServerApplication extends BuilderBase {
 		database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { UserId: 1 });
 		database.createIndex("System." + database.getGameName() + ".Analytics", { TsCreate: -1 });
 
-		let playerCount = await database.systemCollection("Player").countDocuments();
-		if (playerCount == 0) {
+		let oldAdminPlayerCount = await database.systemCollection("Player").countDocuments();
+		if (oldAdminPlayerCount == 0) {
 			database.createPlayerByUsernameAndPassword("gnadmin", "gnadmin", {
 				UserRole: 0
-			}, "127.0.0.1");
+			}, "127.0.0.1").then(xSparkPlayer => {
+				database.loadGamePlayer(xSparkPlayer.getUserId());
+			}).catch(err => {
+				console.error(err);
+			});
 		}
 
 		database.createIndex("System." + database.getGameName() + ".FriendCollection", { UserId: 1 });

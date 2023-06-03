@@ -28,7 +28,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"keyFilePath": "",
 			"certFilePath": "",
 			"licenseKeyFilePath": "",
-			"expiredTokenInMs": 172800000
+			"expiredTokenInMs": 172800000,
 		}
 		let applicationSettings = ApplicationSettings.Builder()
 			.setUseSSL(gnApplicationSettings["useSsl"] || false)
@@ -48,7 +48,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"allowHeaders": ["a", "content-type"],
 			"enableSendAndReceiveDebug": true,
 			"enablePostViaMsgPack": true,
-			"enablePostViaJson": true
+			"enablePostViaJson": true,
 		}
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(gnHttpAppSettings["enable"] || true)
@@ -72,7 +72,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true,
 			"pingInterval": 50000,
-			"pingTimeout": 5000
+			"pingTimeout": 5000,
 		}
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(gnSocketAppSettings["enable"] || true)
@@ -90,7 +90,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		let gnAdminViewSettings = this.gnConfig["adminViewSettings"];
 		if (gnAdminViewSettings == null) gnAdminViewSettings = {
 			"enable": true,
-			"debugHashs": ["hashhere"]
+			"debugHashs": ["hashhere"],
 		}
 		let adminViewSettings = AdminViewSettings.Builder()
 			.setEnable(gnAdminViewSettings["enable"] || true)
@@ -99,18 +99,12 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 
 		let gnOtherSettings = this.gnConfig["otherSettings"];
 		if (gnOtherSettings == null) gnOtherSettings = {
-			"adapterEventCollectionName": "AdapterEventCollection",
-			"authInfoCollectionName": "AuthInfoCollection",
-			"configCollectionName": "Config",
 			"packageName": "com.xmobitea.GNServer",
 			"appleClientId": "com.xmobitea.GNServer",
 			"googleClientId": "gn-server",
-			"headerIP": "x-ip"
+			"headerIP": "x-ip",
 		}
 		let otherSettings = OtherSettings.Builder()
-			.setAdapterEventCollectionName(gnOtherSettings["adapterEventCollectionName"] || "AdapterEventCollection")
-			.setAuthTokenCollectionName(gnOtherSettings["authInfoCollectionName"] || "AuthInfoCollection")
-			.setConfigGameCollectionName(gnOtherSettings["configCollectionName"] || "Config")
 			.setPackageName(gnOtherSettings["packageName"] || "com.xmobitea.GNServer")
 			.setAppleClientId(gnOtherSettings["appleClientId"] || "com.xmobitea.GNServer")
 			.setGoogleClientId(gnOtherSettings["googleClientId"] || "gn-server")
@@ -123,7 +117,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"databaseName": "XmobiTea",
 			"databaseGameName": "GN.",
 			"options": {
-			}
+			},
 		}
 		let databaseSettings = DatabaseSettings.Builder()
 			.setConnectionString(gnDatabaseSettings["connectionString"] || "mongodb://127.0.0.1:27017/")
@@ -136,7 +130,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		if (gnMailSettings == null) gnMailSettings = {
 			"enable": false,
 			"sendFrom": "changx@xmobitea.com",
-			"sendGridApiKey": "SG."
+			"sendGridApiKey": "SG.",
 		}
 		let mailSettings = MailSettings.Builder()
 			.setEnable(gnMailSettings["enable"] || false)
@@ -148,7 +142,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		if (gnLogSettings == null) gnLogSettings = {
 			"logToConsoleEnable": true,
 			"logToFileEnable": true,
-			"logPath": "./log/debug/Server.log"
+			"logPath": "./log/debug/Server.log",
 		}
 		let logSettings = LogSettings.Builder()
 			.setLogToFileEnable(gnLogSettings["logToFileEnable"] || true)
@@ -161,7 +155,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"enable": true,
 			"uploadPath": "./file-upload",
 			"maxSizeUpload": 52428800,
-			"mimeTypeAccepts": ["image/png"]
+			"mimeTypeAccepts": ["image/png"],
 		}
 		let uploadFileSettings = UploadFileSettings.Builder()
 			.setEnable(gnUploadFileSettings["enable"] || true)
@@ -182,8 +176,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"httpMaxRequestSize": 1024,
 			"maxUploadPendingRequest": 200,
 			"maxDownloadPendingRequest": 200,
-			"reportDdosCollectionName": "ReportDdosCollection",
-			"banDdosCollectionName": "BanDdosCollection"
 		}
 		let ddosSettings = DdosSettings.Builder()
 			.setSocketMaxRequestPerSecondPerIp(gnDdosSettings["socketMaxRequestPerSecondPerIp"] || 50)
@@ -196,8 +188,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setHttpMaxRequestSize(gnDdosSettings["httpMaxRequestSize"] || 1024)
 			.setMaxUploadPendingRequest(gnDdosSettings["maxUploadPendingRequest"] || 200)
 			.setMaxDownloadPendingRequest(gnDdosSettings["maxDownloadPendingRequest"] || 200)
-			.setReportDdosCollectionName(gnDdosSettings["reportDdosCollectionName"] || "ReportDdosCollection")
-			.setBanDdosCollectionName(gnDdosSettings["banDdosCollectionName"] || "BanDdosCollection")
 			.build();
 
 		this.serverApplication = this.newServerApplication(

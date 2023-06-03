@@ -48,9 +48,6 @@ export class DefaultApplicationStartup {
 			.build();
 			
 		let otherSettings = OtherSettings.Builder()
-			.setAdapterEventCollectionName("AdapterEventCollection")
-			.setAuthTokenCollectionName("AuthInfoCollection")
-			.setConfigGameCollectionName("ConfigGame")
 			.setPackageName("com.xmobitea.GNServer")
 			.setAppleClientId("com.xmobitea.GNServer")
 			.setGoogleClientId("gn-server")
@@ -96,8 +93,6 @@ export class DefaultApplicationStartup {
 			.setHttpMaxRequestSize(1024)
 			.setMaxUploadPendingRequest(50)
 			.setMaxDownloadPendingRequest(50)
-			.setReportDdosCollectionName("ReportDdosCollection")
-			.setBanDdosCollectionName("BanDdosCollection")
 			.build();
 
 		this.serverApplication = this.newServerApplication(

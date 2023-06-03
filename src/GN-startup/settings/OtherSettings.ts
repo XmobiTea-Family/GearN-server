@@ -1,25 +1,10 @@
 import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 abstract class BuilderBase {
-	protected authTokenCollectionName: string;
-	protected adapterEventCollectionName: string;
-	protected configGameCollectionName: string;
 	protected packageName: string;
 	protected appleClientId: string;
 	protected googleClientId: string;
 	protected headerIP: string;
-
-	public getAuthTokenCollectionName(): string {
-		return this.authTokenCollectionName;
-	}
-
-	public getAdapterEventCollectionName(): string {
-		return this.adapterEventCollectionName;
-	}
-
-	public getConfigGameCollectionName(): string {
-		return this.configGameCollectionName;
-	}
 
 	public getPackageName(): string {
 		return this.packageName;
@@ -42,20 +27,6 @@ abstract class BuilderBase {
 }
 
 class Builder extends BuilderBase implements IBuilder<OtherSettings> {
-	public setAuthTokenCollectionName(authTokenCollectionName: string): Builder {
-		this.authTokenCollectionName = authTokenCollectionName;
-		return this;
-	}
-
-	public setAdapterEventCollectionName(adapterEventCollectionName: string): Builder {
-		this.adapterEventCollectionName = adapterEventCollectionName;
-		return this;
-	}
-
-	public setConfigGameCollectionName(configGameCollectionName: string): Builder {
-		this.configGameCollectionName = configGameCollectionName;
-		return this;
-	}
 
 	public setPackageName(packageName: string): Builder {
 		this.packageName = packageName;
@@ -80,9 +51,6 @@ class Builder extends BuilderBase implements IBuilder<OtherSettings> {
 	constructor() {
 		super();
 
-		this.authTokenCollectionName = "";
-		this.adapterEventCollectionName = "";
-		this.configGameCollectionName = "";
 		this.packageName = "";
 		this.appleClientId = "";
 		this.googleClientId = "";
@@ -99,9 +67,6 @@ export class OtherSettings extends BuilderBase {
 	constructor(builder: Builder) {
 		super();
 
-		this.authTokenCollectionName = builder.getAuthTokenCollectionName();
-		this.adapterEventCollectionName = builder.getAdapterEventCollectionName();
-		this.configGameCollectionName = builder.getConfigGameCollectionName();
 		this.packageName = builder.getPackageName();
 		this.appleClientId = builder.getAppleClientId();
 		this.googleClientId = builder.getGoogleClientId();
