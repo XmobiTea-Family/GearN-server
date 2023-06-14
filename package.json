@@ -1,7 +1,7 @@
 {
-  "name": "@xmobitea/gn-server",
-  "version": "1.0.9",
-  "description": "Game Networking Server by XmobiTea",
+  "name": "@xmobitea/gn-server-pro",
+  "version": "0.0.1",
+  "description": "Game Networking Server by XmobiTea (Pro)",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "scripts": {
@@ -65,15 +65,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/XmobiTea-Family/GN-Server.git"
+    "url": "git+https://github.com/XmobiTea-Family/GN-Server-Pro.git"
   },
   "keywords": [
     "GN",
     "Server",
+	"Pro",
     "XmobiTea"
   ],
   "bugs": {
-    "url": "https://github.com/XmobiTea-Family/GN-Server/issues"
+    "url": "https://github.com/XmobiTea-Family/GN-Server-Pro/issues"
   },
-  "homepage": "https://github.com/XmobiTea-Family/GN-Server#readme"
+  "homepage": "https://github.com/XmobiTea-Family/GN-Server-Pro#readme"
 }

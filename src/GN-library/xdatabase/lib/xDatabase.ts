@@ -1,16 +1,14 @@
-export const SparkCollectionName = {
-	Player: "Player",
-	Friend: "Friend",
-	ExternalFBAuthentication: "ExternalFBAuthentication",
-	ExternalAppleAuthentication: "ExternalAppleAuthentication",
-	ExternalGoogleAuthentication: "ExternalGoogleAuthentication",
-};
-
 import * as mongoDB from "mongodb";
+
 import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
-import { xDatetime } from "./../../xdatetime/lib/xDatetime";
-import { xGamePlayer } from "./entity/xGamePlayer";
-import { xSparkPlayer } from "./entity/xSparkPlayer";
+import { MasterPlayer } from "./entity/pro/MasterPlayer";
+import { GamePlayer } from "./entity/pro/GamePlayer";
+import { CharacterPlayer } from "./entity/pro/CharacterPlayer";
+import { MasterPlayerFindOptions } from "./entity/pro/findOptions/MasterPlayerFindOptions";
+import { GamePlayerFindOptions } from "./entity/pro/findOptions/GamePlayerFindOptions";
+import { CharacterPlayerFindOptions } from "./entity/pro/findOptions/CharacterPlayerFindOptions";
+import { Group } from "./entity/pro/Group";
+import { Inventory } from "./entity/pro/Inventory";
 
 interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
@@ -24,21 +22,15 @@ export class xDatabase {
 
 	private client: mongoDB.MongoClient;
 	private db: mongoDB.Db;
-	private gameName: string;
-
-	public getGameName(): string {
-		return this.gameName;
-	}
 
 	public getDb(): mongoDB.Db {
 		return this.db;
 	}
 
-	public init(url: string, dbName: string, gameName: string, options?: mongoDB.MongoClientOptions): void {
+	public init(url: string, dbName: string, options?: mongoDB.MongoClientOptions): void {
 		this.client = new mongoDB.MongoClient(url, options);
 
 		this.db = this.client.db(dbName);
-		this.gameName = gameName;
 	}
 
 	public run(onMongoRunSuccess?: OnRunSuccess, onMongoRunError?: OnMongoRunError): void {
@@ -63,495 +55,315 @@ export class xDatabase {
 		return this.collection(xDatabase.SYSTEM + collectionName);
 	}
 
-	public runtimeGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.RUNTIME + this.gameName + xDatabase.DOT + collectionName);
+	public runtimeGameCollection(collectionName: string, gameName: string): mongoDB.Collection<mongoDB.Document> {
+		return this.collection(xDatabase.RUNTIME + gameName + xDatabase.DOT + collectionName);
 	}
 
-	public metaGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.META + this.gameName + xDatabase.DOT + collectionName);
+	public metaGameCollection(collectionName: string, gameName: string): mongoDB.Collection<mongoDB.Document> {
+		return this.collection(xDatabase.META + gameName + xDatabase.DOT + collectionName);
 	}
 
-	public systemGameCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.SYSTEM + this.gameName + xDatabase.DOT + collectionName);
+	public systemGameCollection(collectionName: string, gameName: string): mongoDB.Collection<mongoDB.Document> {
+		return this.collection(xDatabase.SYSTEM + gameName + xDatabase.DOT + collectionName);
 	}
 
-	public collection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(collectionName);
+	public collection(fullCollectionName: string): mongoDB.Collection<mongoDB.Document> {
+		return this.db.collection(fullCollectionName);
 	}
 
-	public createIndex(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }, cb?: (error?: Error, result?: string) => void): void {
-		let collection = this.collection(collectionName);
-
-		let createIndexesOptions = {
-			background: true,
-		};
-
-		if (options != null) {
-			let createIndexesOptionsAny = createIndexesOptions as any;
-
-			if (options.expireAfterSeconds != null) createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
-			if (options.sparse != null) createIndexesOptionsAny.sparse = options.sparse;
-			if (options.unique != null) createIndexesOptionsAny.unique = options.unique;
+	private async convertToMasterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<MasterPlayer>> {
+		let answer: Array<MasterPlayer> = [];
+		
+		while (await results.hasNext()) {
+			answer.push(new MasterPlayer(await results.next(), collection));
 		}
 
-		collection.createIndex(index, createIndexesOptions, cb);
+		return answer;
 	}
 
-	public async loadPlayer(userId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ _id: new mongoDB.ObjectId(userId) });
+	public async loadMasterPlayersBySegment(segment: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ "segments": { $elementMatch: segment }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersByTag(key: string, value: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersByStatistics(key: string, value: string, direction: number, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.aggregate([{ $match: {"playerStatistics.key": key}}], masterPlayerFindOptions as any).sort({"playerStatistics": {"key": -1}}).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayerAsync(userId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let result = await collection.findOne({ "_id": new mongoDB.ObjectId(userId) }, masterPlayerFindOptions as any);
 		if (result) {
-			let thisPlayer = new xSparkPlayer(result, collection);
+			let thisPlayer = new MasterPlayer(result, collection);
 			return thisPlayer;
 		}
 
 		return null;
 	}
 
-	public async loadPlayerByUsernameAndPassword(username: string, password: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ Username: username, Password: password });
+	public async loadMasterPlayerByCustomDeviceIdAsync(customDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.customDeviceId": customDeviceId }, masterPlayerFindOptions as any);
 		if (result) {
-			let thisPlayer = new xSparkPlayer(result, collection);
-			return thisPlayer;
-		}
-
-		return null;
-	}
-
-	public async loadPlayerByUsername(username: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ Username: username });
-		if (result) {
-			return new xSparkPlayer(result, collection);
+			return new MasterPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async loadPlayerByEmail(email: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ "UserEmail.Value": email, "UserEmail.IsConfirm": true });
+	public async loadMasterPlayerByAndroidDeviceIdAsync(androidDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.androidDeviceId": androidDeviceId }, masterPlayerFindOptions as any);
 		if (result) {
-			return new xSparkPlayer(result, collection);
+			return new MasterPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async loadPlayerByDeviceInfo(deviceInfo: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ "UserExternal.DeviceInfo": deviceInfo });
+	public async loadMasterPlayerByIOSDeviceIdAsync(iOSDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.iOSDeviceId": iOSDeviceId }, masterPlayerFindOptions as any);
 		if (result) {
-			return new xSparkPlayer(result, collection);
+			return new MasterPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async createPlayerByDeviceInfo(deviceInfo: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		let result = {
-			Username: "",
-			Password: "",
-			Fullname: "",
-			UserExternal: {
-				DeviceInfo: deviceInfo,
-			},
-			UserBan: {},
-			UserEmail: {},
-			UserNumberPhone: {},
-			UserAddress: {},
-			UserPassport: {},
-			Location: {},
-			TsBirthday: 0,
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			IPAddressCreate: ipAddressCreate,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
-		await collection.insertOne(result);
-		return new xSparkPlayer(result, collection);
-	}
-
-	public async loadPlayerByCustomId(customId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ "UserExternal.CustomId": customId });
+	public async loadMasterPlayerByWindowsPhoneDeviceIdAsync(windowsPhoneDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.windowsPhoneDeviceId": windowsPhoneDeviceId }, masterPlayerFindOptions as any);
 		if (result) {
-			return new xSparkPlayer(result, collection);
+			return new MasterPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async createPlayerByCustomId(customId: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		let result = {
-			Username: "",
-			Password: "",
-			Fullname: "",
-			UserExternal: {
-				CustomId: customId,
-			},
-			UserBan: {},
-			UserEmail: {},
-			UserNumberPhone: {},
-			UserAddress: {},
-			UserPassport: {},
-			Location: {},
-			TsBirthday: 0,
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			IPAddressCreate: ipAddressCreate,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
-		await collection.insertOne(result);
-		return new xSparkPlayer(result, collection);
-	}
-
-	public async loadPlayerByPublicAddress(publicAddress: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ "UserExternal.PublicAddress": publicAddress });
+	public async loadMasterPlayerByWindowsDeviceIdAsync(windowsDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.windowsDeviceId": windowsDeviceId }, masterPlayerFindOptions as any);
 		if (result) {
-			return new xSparkPlayer(result, collection);
+			return new MasterPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async createPlayerByPublicAddress(publicAddress: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		let result = {
-			Username: "",
-			Password: "",
-			Fullname: "",
-			UserExternal: {
-				PublicAddress: publicAddress,
-			},
-			UserBan: {},
-			UserEmail: {},
-			UserNumberPhone: {},
-			UserAddress: {},
-			UserPassport: {},
-			Location: {},
-			TsBirthday: 0,
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			IPAddressCreate: ipAddressCreate,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
-		await collection.insertOne(result);
-		return new xSparkPlayer(result, collection);
-	}
-
-	public async createPlayerByUsernameAndPassword(username: string, password: string, segments: {}, ipAddressCreate: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		let result = {
-			Username: username,
-			Password: password,
-			Fullname: "",
-			UserExternal: {},
-			UserBan: {},
-			UserEmail: {},
-			UserNumberPhone: {},
-			UserAddress: {},
-			UserPassport: {},
-			Location: {},
-			TsBirthday: 0,
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			IPAddressCreate: ipAddressCreate,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
-		await collection.insertOne(result);
-		return new xSparkPlayer(result, collection);
-	}
-
-	public async loadPlayerByFacebookId(facebookId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ "UserExternal.FacebookId": facebookId });
+	public async loadMasterPlayerByLinuxDeviceIdAsync(linuxDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.linuxDeviceId": linuxDeviceId }, masterPlayerFindOptions as any);
 		if (result) {
-			return new xSparkPlayer(result, collection);
+			return new MasterPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async createPlayerByFacebookId(facebookId: string, segments: {}, ipAddressCreate: string, email: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+	public async loadMasterPlayerByMacOSDeviceIdAsync(macOSDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.macOSDeviceId": macOSDeviceId }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async loadMasterPlayerByEditorDeviceIdAsync(editorDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.device.editorDeviceId": editorDeviceId }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async loadMasterPlayerByUsernameAsync(username: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.account.username": username }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async loadMasterPlayerByCustomIdAsync(customId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.custom.customId": customId }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async loadMasterPlayerByAppleAsync(appleId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.apple.appleId": appleId }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async loadMasterPlayerByGoogleAsync(googleId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.google.googleId": googleId }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async loadMasterPlayerByFacebookAsync(facebookId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.facebook.facebookId": facebookId }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async loadMasterPlayerByGenericServiceAsync(serviceName: string, userId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+		let result = await collection.findOne({ "external.genericService.genericServices": {$elemMatch: { "serviceName": serviceName, "userId": userId }} }, masterPlayerFindOptions as any);
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+		return null;
+	}
+
+	public async createMasterPlayerAsync(masterPlayer: MasterPlayer): Promise<MasterPlayer> {
+		let collection = this.systemCollection("GamePlayer");
 
 		let result = {
-			Username: "",
-			Password: "",
-			Fullname: "",
-			UserExternal: {
-				FacebookId: facebookId,
-			},
-			UserBan: {},
-			UserEmail: {},
-			UserNumberPhone: {},
-			UserAddress: {},
-			UserPassport: {},
-			Location: {},
-			TsBirthday: 0,
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			IPAddressCreate: ipAddressCreate,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
-
-		if (email)
-			result["UserEmail"] = {
-				Value: email,
-				IsConfirm: true,
-			};
+			external: masterPlayer.getExternal(),
+			segments: masterPlayer.getAllSegments(),
+			scriptData: masterPlayer.getAllScriptData(),
+			privateData: masterPlayer.getAllPrivateData(),
+			displayName: masterPlayer.getDisplayName(),
+			avatar: masterPlayer.getAvatar(),
+			tsCreate: masterPlayer.getTsCreate(),
+			tags: masterPlayer.getAllTags(),
+			role: masterPlayer.getRole(),
+			playerBan: masterPlayer.getPlayerBan(),
+			playerDatas: masterPlayer.getAllPlayerDatas(),
+			playerCurrencies: masterPlayer.getAllPlayerCurrencies(),
+			playerStatistics: masterPlayer.getAllPlayerStatistics(),
+			playerCharacters: masterPlayer.getAllPlayerCharacters(),
+			playerInventories: masterPlayer.getAllPlayerInventories(),
+			playerGroups: masterPlayer.getAllPlayerGroups(),
+			playerFriends: masterPlayer.getAllPlayerFriends(),
+			tsLastLogin: masterPlayer.getTsLastLogin(),
+			ipAddressCreate: masterPlayer.getIpAddressCreate(),
+			countryCode: masterPlayer.getCountryCode(),
+		} as any;
 
 		await collection.insertOne(result);
-		return new xSparkPlayer(result, collection);
+
+		return new MasterPlayer(result, collection);
 	}
 
-	public async loadPlayerByAppleUserId(appleUserId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ "UserExternal.AppleUserId": appleUserId });
+	public async loadGamePlayerAsync(userId: string, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+		let result = await collection.findOne({ UserId: userId }, gamePlayerFindOptions as any);
 		if (result) {
-			return new xSparkPlayer(result, collection);
+			return new GamePlayer(result, collection);
 		}
+
 		return null;
 	}
 
-	public async createPlayerByAppleUserId(appleUserId: string, segments: {}, ipAddressCreate: string, email: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+	public async createGamePlayerAsync(gamePlayer: GamePlayer, gameId: string): Promise<GamePlayer> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
 
 		let result = {
-			Username: "",
-			Password: "",
-			Fullname: "",
-			UserExternal: {
-				AppleUserId: appleUserId,
-			},
-			UserBan: {},
-			UserEmail: {},
-			UserNumberPhone: {},
-			UserAddress: {},
-			UserPassport: {},
-			Location: {},
-			TsBirthday: 0,
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			IPAddressCreate: ipAddressCreate,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
+			userId: gamePlayer.getUserId(),
+			socketId: gamePlayer.getSocketId(),
+			segments: gamePlayer.getAllSegments(),
+			scriptData: gamePlayer.getAllScriptData(),
+			privateData: gamePlayer.getAllPrivateData(),
+			displayName: gamePlayer.getDisplayName(),
+			avatar: gamePlayer.getAvatar(),
+			tsCreate: gamePlayer.getTsCreate(),
+			tags: gamePlayer.getAllTags(),
+			role: gamePlayer.getRole(),
+			playerBan: gamePlayer.getPlayerBan(),
+			playerDatas: gamePlayer.getAllPlayerDatas(),
+			playerCurrencies: gamePlayer.getAllPlayerCurrencies(),
+			playerStatistics: gamePlayer.getAllPlayerStatistics(),
+			playerCharacters: gamePlayer.getAllPlayerCharacters(),
+			playerInventories: gamePlayer.getAllPlayerInventories(),
+			playerGroups: gamePlayer.getAllPlayerGroups(),
+			playerFriends: gamePlayer.getAllPlayerFriends(),
+			tsLastLogin: gamePlayer.getTsLastLogin(),
+			ipAddressCreate: gamePlayer.getIpAddressCreate(),
+			countryCode: gamePlayer.getCountryCode(),
+		} as any;
 
-		if (email)
-			result["UserEmail"] = {
-				Value: email,
-				IsConfirm: true,
-			};
+		await collection.insertOne(gamePlayer as any);
+		let thisPlayer = new GamePlayer(result, collection);
 
-		await collection.insertOne(result);
-		return new xSparkPlayer(result, collection);
-	}
-
-	public async loadPlayerByGoogleUserId(googleUserId: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ "UserExternal.GoogleUserId": googleUserId });
-		if (result) {
-			return new xSparkPlayer(result, collection);
-		}
-		return null;
-	}
-
-	public async createPlayerByGoogleUserId(googleUserId: string, segments: {}, ipAddressCreate: string, email: string): Promise<xSparkPlayer> {
-		let collection = this.systemCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-
-		let result = {
-			Username: "",
-			Password: "",
-			Fullname: "",
-			UserExternal: {
-				GoogleUserId: googleUserId,
-			},
-			UserBan: {},
-			UserEmail: {},
-			UserNumberPhone: {},
-			UserAddress: {},
-			UserPassport: {},
-			Location: {},
-			TsBirthday: 0,
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			IPAddressCreate: ipAddressCreate,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
-
-		if (email)
-			result["UserEmail"] = {
-				Value: email,
-				IsConfirm: true,
-			};
-
-		await collection.insertOne(result);
-		return new xSparkPlayer(result, collection);
-	}
-
-	public async saveFBExternal(userId: string, facebookId: string, facebookName: string, facebookEmail: string, facebookToken: string, result: any): Promise<void> {
-		await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).updateOne(
-			{ UserId: userId },
-			{
-				$set: {
-					ExternalId: facebookId,
-					ExternalDisplayName: facebookName,
-					ExternalEmail: facebookEmail,
-					Token: facebookToken,
-					TsUpdate: xDatetime.getCurrentMilliseconds(),
-					Result: result,
-					IsRemove: false,
-				},
-			},
-			{
-				upsert: true,
-			}
-		);
-	}
-
-	public async loadFBExternal(facebookId: string) {
-		return await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).findOne({ ExternalId: facebookId, IsRemove: false });
-	}
-
-	public async unConnectFBExternal(facebookId: string) {
-		await this.systemCollection(SparkCollectionName.ExternalFBAuthentication).updateOne(
-			{ ExternalId: facebookId, IsRemove: false },
-			{
-				$set: {
-					IsRemove: true,
-				}
-			}
-		);
-	}
-
-	public async saveAppleExternal(userId: string, appleUserId: string, appleDisplayName: string, appleId: string, appleToken: string, result: any) {
-		await this.systemCollection(SparkCollectionName.ExternalAppleAuthentication).updateOne(
-			{ UserId: userId },
-			{
-				$set: {
-					ExternalId: appleUserId,
-					ExternalDisplayName: appleDisplayName,
-					ExternalEmail: appleId,
-					Token: appleToken,
-					TsUpdate: xDatetime.getCurrentMilliseconds(),
-					Result: result,
-					IsRemove: false,
-				},
-			},
-			{
-				upsert: true,
-			}
-		);
-	}
-
-	public async unConnectAppleExternal(appleUserId: string) {
-		await this.systemCollection(SparkCollectionName.ExternalAppleAuthentication).updateOne(
-			{ ExternalId: appleUserId, IsRemove: false },
-			{
-				$set: {
-					IsRemove: true,
-				}
-			}
-		);
-	}
-
-	public async saveGoogleExternal(userId: string, googleUserId: string, googleDisplayName: string, email: string, googleToken: string, result: any) {
-		await this.systemCollection(SparkCollectionName.ExternalGoogleAuthentication).updateOne(
-			{ UserId: userId },
-			{
-				$set: {
-					ExternalId: googleUserId,
-					ExternalDisplayName: googleDisplayName,
-					ExternalEmail: email,
-					Token: googleToken,
-					TsUpdate: xDatetime.getCurrentMilliseconds(),
-					Result: result,
-					IsRemove: false,
-				},
-			},
-			{
-				upsert: true,
-			}
-		);
-	}
-
-	public async unConnectGoogleExternal(googleUserId: string) {
-		await this.systemCollection(SparkCollectionName.ExternalGoogleAuthentication).updateOne(
-			{ ExternalId: googleUserId, IsRemove: false },
-			{
-				$set: {
-					IsRemove: true,
-				}
-			}
-		);
-	}
-
-	public async loadFriend(userId: string) {
-		return await this.systemCollection(SparkCollectionName.Friend).findOne({ UserId: userId });
-	}
-
-	public async saveFriend(userId: string, doc: {}) {
-		await this.systemCollection(SparkCollectionName.Friend).updateOne(
-			{ UserId: userId },
-			{
-				$set: doc,
-			},
-			{
-				upsert: true,
-			}
-		);
-	}
-
-	public async loadGamePlayer(userId: string): Promise<xGamePlayer> {
-		let collection = this.systemGameCollection(SparkCollectionName.Player);
-		let result = await collection.findOne({ UserId: userId });
-		if (result) {
-			return new xGamePlayer(result, collection);
-		}
-
-		return await this.createGamePlayer(userId, { UserRole: 101 });
-	}
-
-	private async createGamePlayer(userId: string, segments: {}): Promise<xGamePlayer> {
-		let collection = this.systemGameCollection(SparkCollectionName.Player);
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		let pushRegistrations: any[] = [];
-
-		let result = {
-			UserId: userId,
-			DisplayName: "",
-			UserBan: {},
-			PushRegistrations: pushRegistrations,
-			Location: {},
-			TsCreate: currentMilliseconds,
-			TsLastSeen: currentMilliseconds,
-			Segments: segments,
-			ScriptData: {},
-			PrivateData: {},
-		};
-		await collection.insertOne(result);
-		let thisPlayer = new xGamePlayer(result, collection);
 		return thisPlayer;
 	}
 
+	public async loadCharacterPlayerAsync(characterId: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<CharacterPlayer> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+		let result = await collection.findOne({ CharacterId: characterId }, characterPlayerFindOptions as any);
+		if (result) {
+			return new CharacterPlayer(result, collection);
+		}
+
+		return null;
+	}
+
+	public async createCharacterPlayerAsync(characterPlayer: CharacterPlayer, gameId: string): Promise<CharacterPlayer> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let result = {
+			characterId: characterPlayer.getCharacterId(),
+			characterCatalogId: characterPlayer.getCharacterCatalogId(),
+			owner: characterPlayer.getOwner(),
+			removeStatus: characterPlayer.getRemoveStatus(),
+			segments: characterPlayer.getAllSegments(),
+			scriptData: characterPlayer.getAllScriptData(),
+			privateData: characterPlayer.getAllPrivateData(),
+			displayName: characterPlayer.getDisplayName(),
+			avatar: characterPlayer.getAvatar(),
+			tsCreate: characterPlayer.getTsCreate(),
+			tags: characterPlayer.getAllTags(),
+			role: characterPlayer.getRole(),
+			playerBan: characterPlayer.getPlayerBan(),
+			playerDatas: characterPlayer.getAllPlayerDatas(),
+			playerCurrencies: characterPlayer.getAllPlayerCurrencies(),
+			playerStatistics: characterPlayer.getAllPlayerStatistics(),
+			playerCharacters: characterPlayer.getAllPlayerCharacters(),
+			playerInventories: characterPlayer.getAllPlayerInventories(),
+			playerGroups: characterPlayer.getAllPlayerGroups(),
+			playerFriends: characterPlayer.getAllPlayerFriends(),
+			tsLastLogin: characterPlayer.getTsLastLogin(),
+			ipAddressCreate: characterPlayer.getIpAddressCreate(),
+			countryCode: characterPlayer.getCountryCode(),
+		} as any;
+
+		await collection.insertOne(characterPlayer as any);
+		let thisPlayer = new CharacterPlayer(result, collection);
+
+		return thisPlayer;
+	}
+
+	public async loadGroupAsync(groupId: string): Promise<Group> {
+
+	}
+
+	public async loadInventoryAsync(itemId: string): Promise<Inventory> {
+
+	}
 }
