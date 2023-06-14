@@ -7,6 +7,7 @@ export class Commands {
     public static readonly APPLICATION_MSGPACK: string = "application/msgpack";
 
     public static readonly RequestAuthTokenCmd: string = "a";
+    public static readonly RequestSecretCmd: string = "s";
 
     public static readonly RequestCmd_MsgPack: string = "r";
     public static readonly ResponseCmd_MsgPack: string = "r";

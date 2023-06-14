@@ -1,8 +1,8 @@
 export enum UserRoleType {
 	Administrator = 0,
 	GameMaster = 1,
-	SuperModerazor = 2,
-	Moderazor = 3,
+	SuperModerator = 2,
+	Moderator = 3,
 	User = 100,
 	UserNonActivate = 101,
 }

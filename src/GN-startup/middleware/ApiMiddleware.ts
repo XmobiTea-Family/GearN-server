@@ -10,15 +10,19 @@ import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Commands } from "./../../GN-common/constant/Commands";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
+import { SecretInfo } from "../../GN-common/entity/SecretInfo";
 
 export class ApiMiddleware {
 	private static readonly FIVE_MINUTE_TS: number = 5 * 60 * 1000;
 	private static readonly TS_REMOVE_AUTH_INFO_DIC: number = 1000 * 60 * 60 * 12;
 
-	private authInfoDic: { [k: string]: AuthInfo };
-	private authInfoViaUserIdDic: { [k: string]: AuthInfo };
+	private authInfoDict: Map<string, AuthInfo>;
+	private authInfoViaUserIdDict: Map<string, AuthInfo>;
 
 	private authTokenCollection: mongoDB.Collection<mongoDB.Document>;
+
+	private secretInfoDict: Map<string, SecretInfo>;
+	private secretKeyCollection: mongoDB.Collection<mongoDB.Document>;
 
 	private playerGameCollection: mongoDB.Collection<mongoDB.Document>
 
@@ -29,6 +33,10 @@ export class ApiMiddleware {
 	private dauLast30Min: Array<string>;
 
 	private maxCCU: number;
+
+	public setSecretKeyCollection(secretKeyCollection: mongoDB.Collection<mongoDB.Document>) {
+		this.secretKeyCollection = secretKeyCollection;
+	}
 
 	public setAuthTokenCollection(authTokenCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.authTokenCollection = authTokenCollection;
@@ -80,14 +88,14 @@ export class ApiMiddleware {
 		}
 	}
 
-	private async checkAndRemoveDict() {
+	private async checkAndRemoveDict(): Promise<void> {
 		try {
 			let removeCount = 0;
 
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 			let tsRemove = currentMilliseconds - ApiMiddleware.TS_REMOVE_AUTH_INFO_DIC;
 
-			let authInfoLst = Object.values(this.authInfoDic);
+			let authInfoLst = Object.values(this.authInfoDict);
 
 			for (let i = 0; i < authInfoLst.length; i++) {
 				let authInfo = authInfoLst[i];
@@ -97,15 +105,15 @@ export class ApiMiddleware {
 						let authToken = authInfo.getAuthToken();
 						let userId = authInfo.getUserId();
 
-						let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+						let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
 
 						if (authInfoViaUserId != null) {
 							if (authInfoViaUserId.getAuthToken() == authToken) {
-								delete this.authInfoViaUserIdDic[userId];
+								this.authInfoViaUserIdDict.delete(userId);
 							}
 						}
 
-						delete this.authInfoDic[authToken];
+						this.authInfoDict.delete(authToken);
 						removeCount++;
 					}
 				}
@@ -118,7 +126,7 @@ export class ApiMiddleware {
 		}
 	}
 
-	public generateAuthToken(info: AuthInfo) {
+	public generateAuthToken(info: AuthInfo): AuthInfo {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let authToken = Md5Generate.getMd5(StringUtility.generateRandomString(20));
 		let userId = info.getUserId();
@@ -137,19 +145,44 @@ export class ApiMiddleware {
 			.setTsCreate(currentMilliseconds)
 			.build();
 
-		this.authInfoDic[authToken] = authInfo;
-		this.authInfoViaUserIdDic[userId] = authInfo;
+		this.authInfoDict.set(authToken, authInfo);
+		this.authInfoViaUserIdDict.set(userId, authInfo);
 		this.authTokenCollection.insertOne(authInfo.toDocumentData());
 
 		return authInfo;
 	}
 
-	public getAuthInfoByUserId(userId: string) {
-		return this.authInfoViaUserIdDic[userId];
+	public getAuthInfoByUserId(userId: string): AuthInfo {
+		return this.authInfoViaUserIdDict.get(userId);
 	}
 
-	public getAuthInfoByAuthToken(authToken: string) {
-		return this.authInfoDic[authToken];
+	public getAuthInfoByAuthToken(authToken: string): AuthInfo {
+		return this.authInfoDict.get(authToken);
+	}
+
+	public getSecretInfoBySecretKey(secretKey: string): SecretInfo {
+		return this.secretInfoDict.get(secretKey);
+	}
+
+	public async getSecretInfoBySecretKeyInDatabase(secretKey: string): Promise<SecretInfo> {
+		let secretInfo = this.getSecretInfoBySecretKey(secretKey);
+		if (secretInfo == null) {
+			let secretInfoTemp = await this.secretKeyCollection.findOne({ secretKey: secretKey });
+
+			if (secretInfoTemp != null) {
+				secretInfo = SecretInfo.Builder()
+					.setSecretKey(secretInfoTemp["secretKey"])
+					// .setOtherData("RoomId", null)
+					.setIsRemove(secretInfoTemp["isRemove"])
+					.setRole(secretInfoTemp["role"])
+					.setTsExpire(secretInfoTemp["tsExpire"])
+					.build();
+
+				this.secretInfoDict.set(secretKey, secretInfo);
+			}
+		}
+
+		return secretInfo;
 	}
 
 	public async getAuthInfoByAuthTokenInDatabase(authToken: string): Promise<AuthInfo> {
@@ -173,13 +206,13 @@ export class ApiMiddleware {
 					.setTsCreate(authInfoTemp["TsCreate"])
 					.build();
 
-				this.authInfoDic[authToken] = authInfo;
+				this.authInfoDict.set(authToken, authInfo);
 
-				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
-				if (authInfoViaUserId == null) this.authInfoViaUserIdDic[userId] = authInfo;
+				let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
+				if (authInfoViaUserId == null) this.authInfoViaUserIdDict.set(userId, authInfo);
 				else {
 					if (authInfoViaUserId.getTsCreate() < authInfo.getTsCreate())
-						this.authInfoViaUserIdDic[userId] = authInfo;
+						this.authInfoViaUserIdDict.set(userId, authInfo);
 				}
 			}
 		}
@@ -187,10 +220,14 @@ export class ApiMiddleware {
 		return authInfo;
 	}
 
+	public updateSecretInfo(secretInfo: SecretInfo) {
+		
+	}
+
 	public updateAuthInfo(authInfo: AuthInfo) {
 		let authToken = authInfo.getAuthToken();
 
-		this.authInfoDic[authToken] = authInfo;
+		this.authInfoDict.set(authToken, authInfo);
 		this.authTokenCollection.updateOne({ AuthToken: authToken }, { $set: authInfo.toDocumentData() });
 	}
 
@@ -248,8 +285,16 @@ export class ApiMiddleware {
 	public async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
 		let headers = req.headers;
 		let authToken = headers[Commands.RequestAuthTokenCmd] as string;
-
+		let secretKey = headers[Commands.RequestSecretCmd] as string;
+		
 		let reqAny = req as any;
+
+		if (!secretKey) {
+			reqAny.secretPermission = ;
+		}
+		else {
+			reqAny.secretKey = secretKey;
+		}
 
 		if (!authToken) {
 			reqAny.isAuthenticated = false;
@@ -263,34 +308,34 @@ export class ApiMiddleware {
 				let userId = authInfo.getUserId();
 
 				if (authInfo.getOtherUserLogin()) {
-					delete this.authInfoDic[authToken];
+					this.authInfoDict.delete(authToken);
 
-					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+					let authInfoViaUserId = this.authInfoViaUserIdDict[userId];
 					if (authInfoViaUserId) {
 						if (authInfoViaUserId.getAuthToken() == authToken) {
-							delete this.authInfoViaUserIdDic[userId];
+							this.authInfoViaUserIdDict.delete(userId);
 						}
 					}
 
 					return ReturnCode.OperationNotAuthorized;
 				} else if (authInfo.isRemove()) {
-					delete this.authInfoDic[authToken];
+					this.authInfoDict.delete(authToken);
 
-					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+					let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
 					if (authInfoViaUserId) {
 						if (authInfoViaUserId.getAuthToken() == authToken) {
-							delete this.authInfoViaUserIdDic[userId];
+							this.authInfoViaUserIdDict.delete(userId);
 						}
 					}
 
 					reqAny.isAuthenticated = false;
 				} else if (authInfo.getTsExpire() != -1 && authInfo.getTsExpire() < currentMilliseconds) {
-					delete this.authInfoDic[authToken];
+					this.authInfoDict.delete(authToken);
 
-					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+					let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
 					if (authInfoViaUserId) {
 						if (authInfoViaUserId.getAuthToken() == authToken) {
-							delete this.authInfoViaUserIdDic[userId];
+							this.authInfoViaUserIdDict.delete(userId);
 						}
 					}
 
@@ -299,13 +344,13 @@ export class ApiMiddleware {
 					reqAny.isAuthenticated = true;
 					reqAny.authInfo = authInfo;
 
-					this.authInfoDic[authToken] = authInfo;
+					this.authInfoDict.set(authToken, authInfo);
 
-					let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
-					if (authInfoViaUserId == null) this.authInfoViaUserIdDic[userId] = authInfo;
+					let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
+					if (authInfoViaUserId == null) this.authInfoViaUserIdDict.set(userId, authInfo);
 					else {
 						if (authInfoViaUserId.getTsCreate() < authInfo.getTsCreate())
-							this.authInfoViaUserIdDic[userId] = authInfo;
+							this.authInfoViaUserIdDict.set(userId, authInfo);
 					}
 
 					authInfo.setTsLastUpdate(currentMilliseconds);
@@ -326,7 +371,7 @@ export class ApiMiddleware {
 		return ReturnCode.Ok;
 	}
 
-	public async socketAuthenticateToken(socket: Socket, next: (returnCode: number) => void) {
+	public async socketAuthenticateToken(socket: Socket, next: (returnCode: number) => void): Promise<void> {
 		if (socket.data.isAuthenticated === true) {
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
@@ -335,12 +380,12 @@ export class ApiMiddleware {
 			let userId = authInfo.getUserId();
 
 			if (authInfo.getOtherUserLogin()) {
-				delete this.authInfoDic[authToken];
+				this.authInfoDict.delete(authToken);
 
-				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+				let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
 				if (authInfoViaUserId) {
 					if (authInfoViaUserId.getAuthToken() == authToken) {
-						delete this.authInfoViaUserIdDic[userId];
+						this.authInfoViaUserIdDict.delete(userId);
 					}
 				}
 
@@ -351,12 +396,12 @@ export class ApiMiddleware {
 
 				return next(ReturnCode.OperationNotAuthorized);
 			} else if (authInfo.isRemove()) {
-				delete this.authInfoDic[authToken];
+				this.authInfoDict.delete(authToken);
 
-				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+				let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
 				if (authInfoViaUserId) {
 					if (authInfoViaUserId.getAuthToken() == authToken) {
-						delete this.authInfoViaUserIdDic[userId];
+						this.authInfoViaUserIdDict.delete(userId);
 					}
 				}
 
@@ -365,12 +410,12 @@ export class ApiMiddleware {
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 			} else if (authInfo.getTsExpire() < currentMilliseconds) {
-				delete this.authInfoDic[authToken];
+				this.authInfoDict.delete(authToken);
 
-				let authInfoViaUserId = this.authInfoViaUserIdDic[userId];
+				let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
 				if (authInfoViaUserId) {
 					if (authInfoViaUserId.getAuthToken() == authToken) {
-						delete this.authInfoViaUserIdDic[userId];
+						this.authInfoViaUserIdDict.delete(userId);
 					}
 				}
 
@@ -406,8 +451,8 @@ export class ApiMiddleware {
 	}
 
 	constructor() {
-		this.authInfoDic = {};
-		this.authInfoViaUserIdDic = {};
+		this.authInfoDict = new Map<string, AuthInfo>();
+		this.authInfoViaUserIdDict = new Map<string, AuthInfo>();
 	}
 
 }

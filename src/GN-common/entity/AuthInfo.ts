@@ -207,16 +207,16 @@ export class AuthInfo extends BuilderBase {
 
 	public toDocumentData() {
 		return {
-			"AuthToken": this.authToken,
-			"UserId": this.userId,
-			"Role": this.role,
-			"IsRemove": this.remove,
-			"TsExpire": this.tsExpire,
-			"OtherUserLogin": this.otherUserLogin,
-			"OtherDatas": this.otherDatas,
-			"SocketId": this.socketId,
-			"SocketRoomIds": this.socketRoomIds,
-			"TsCreate": this.tsCreate
+			"authToken": this.authToken,
+			"userId": this.userId,
+			"role": this.role,
+			"isRemove": this.remove,
+			"tsExpire": this.tsExpire,
+			"otherUserLogin": this.otherUserLogin,
+			"otherDatas": this.otherDatas,
+			"socketId": this.socketId,
+			"socketRoomIds": this.socketRoomIds,
+			"tsCreate": this.tsCreate
 		}
 	}
 
