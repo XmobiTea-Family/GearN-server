@@ -70,10 +70,6 @@ export class SendChatToChannelRequestHandler extends RequestHandler {
         gsChannelInfo.add(ChatParameterCode.ChatMessageLst, gsChatMessageLst);
         chatOperationEvent.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
 
-        if (this.postHandle != null) {
-            await this.postHandle(authInfo, request, operationResponse, chatMessage, chatOperationEvent);
-        }
-
         this.gnServer.sendEventToRoom(request.channel, chatOperationEvent);
 
         return operationResponse;

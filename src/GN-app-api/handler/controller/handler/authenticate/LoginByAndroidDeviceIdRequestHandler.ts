@@ -15,7 +15,7 @@ import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
 
 class LoginByAndroidDeviceIdOperationRequest extends OperationRequest {
-	@StringDataMember({ code: AuthenticateParameterCode.AndroidDeviceId, minLength: 6, maxLength: 256, mustNonNull: true })
+	@StringDataMember({ code: AuthenticateParameterCode.AndroidDeviceId, minLength: 8, maxLength: 64, mustNonNull: true })
 	androidDeviceId: string;
 
 	@BooleanDataMember({ code: AuthenticateParameterCode.CreatePlayerIfNotExists })
@@ -33,7 +33,7 @@ class LoginByAndroidDeviceIdOperationRequest extends OperationRequest {
 
 export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandler {
 	public override getCode() {
-		return OperationCode.LoginByAccount;
+		return OperationCode.LoginByAndroidDeviceId;
 	}
 
 	public override getCommonOperationRequest() {
@@ -48,20 +48,25 @@ export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandle
 		}
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAndroidDeviceIdAsync(request.androidDeviceId);
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAndroidDeviceIdAsync(request.androidDeviceId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
             if (!request.createPlayerIfNotExists) {
-                operationResponse.setReturnCode(ReturnCode.Ok);
                 operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.PlayerDoesNotExists);
     
                 return operationResponse;
             }
             else {
-                masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(this.generateNewMasterPlayerResult((request as any).originRequest.getIP()));
+				let newMasterPlayerResult = this.generateNewMasterPlayerResult((request as any).originRequest.getIP());
+				newMasterPlayerResult["external"]["device"] = {
+					"androidDeviceId": request.androidDeviceId
+				}
+
+                masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
                 operationResponse.setParameter(AuthenticateParameterCode.NewlyCreated, true);
             }
 		}
@@ -69,6 +74,8 @@ export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandle
 			masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
 			masterPlayer.saveAsync();
 		}
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.Ok);
 
         operationResponse.setParameter(AuthenticateParameterCode.UserId, masterPlayer.getUserId());
         operationResponse.setParameter(AuthenticateParameterCode.InfoGetParameters, this.generateMasterPlayerOperationResponse(masterPlayer, masterPlayerFindOptions, request.infoGetParameters));
@@ -78,5 +85,3 @@ export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandle
 		return operationResponse;
 	}
 }
-
-

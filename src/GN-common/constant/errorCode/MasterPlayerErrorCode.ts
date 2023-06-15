@@ -1,0 +1,6 @@
+export class MasterPlayerErrorCode {
+	public static readonly Ok: number = 1;
+	public static readonly PlayerNotLinked: number = 2;
+	public static readonly ExternalLinkedOtherPlayer: number = 3;
+	public static readonly ExternalLinked: number = 3;
+}

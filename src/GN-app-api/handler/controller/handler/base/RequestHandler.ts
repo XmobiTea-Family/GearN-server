@@ -1,31 +1,35 @@
 import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { IRequestHandler, PostHandle } from "./IRequestHandler";
+import { IRequestHandler } from "./IRequestHandler";
 
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { GNServer } from "./../../../../../GNServer";
 import { Constructor, IRequestConverterService } from "./../../../../service/IRequestConverterService";
 import { OperationHelper } from "./../../../../../GN-common/entity/operationHelper/OperationHelper";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 
 export abstract class RequestHandler implements IRequestHandler {
 	protected gnServer: GNServer;
-	protected postHandle: PostHandle;
 	protected requestConverterService: IRequestConverterService;
 	
 	public abstract getCode(): number;
 	
 	public abstract getCommonOperationRequest(): Constructor<OperationRequest>;
 
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		return this.newOperationInvalid(operationRequest);
+	}
+
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		return this.newOperationInvalid(operationRequest);
+	}
+	
 	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		return null;
+		return this.newOperationInvalid(operationRequest);
 	}
 
 	protected init(): void {
 
-	}
-
-	public setPostHandle(postHandle: PostHandle) {
-		this.postHandle = postHandle;
 	}
 
 	protected newInvalidRequestParameters(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {

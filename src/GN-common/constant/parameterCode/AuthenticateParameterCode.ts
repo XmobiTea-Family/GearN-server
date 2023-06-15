@@ -35,9 +35,9 @@ export class AuthenticateParameterCode {
 	public static readonly IpAddressCreate: string = "33";
 	public static readonly CountryCode: string = "34";
 
-	public static readonly DataKeys: string = 35;
-	public static readonly CurrencyKeys: string = 36;
-	public static readonly StatisticsKeys: string = 37;
+	public static readonly DataKeys: string = "35";
+	public static readonly CurrencyKeys: string = "36";
+	public static readonly StatisticsKeys: string = "37";
 
 	public static readonly Type: string = "38";
 	public static readonly Value: string = "39";
@@ -48,4 +48,14 @@ export class AuthenticateParameterCode {
 	public static readonly Permission: string = "44";
 
 	public static readonly NewlyCreated: string = "45";
+	public static readonly Token: string = "46";
+
+	public static readonly Device: string = "47";
+	public static readonly Account: string = "48";
+	public static readonly Custom: string = "49";
+	public static readonly Apple: string = "50";
+	public static readonly Google: string = "51";
+	public static readonly Facebook: string = "52";
+	public static readonly GenericService: string = "53";
+	public static readonly ServiceId: string = "54";
 }

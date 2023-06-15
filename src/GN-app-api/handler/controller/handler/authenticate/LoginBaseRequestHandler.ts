@@ -12,7 +12,6 @@ import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 import { UserRoleType } from "../../../../../GN-common/constant/enumType/UserRoleType";
 import { CountryCodeType } from "../../../../../GN-common/constant/enumType/CountryCodeType";
 import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { AuthenticateErrorCode } from "../../../../../GN-common/constant/errorCode/AuthenticateErrorCode";
 import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
 import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
 
@@ -78,8 +77,88 @@ export class LoginBaseRequestHandler extends RequestHandler {
     protected generateMasterPlayerOperationResponse(masterPlayer: MasterPlayer, masterPlayerFindOptions: MasterPlayerFindOptions, infoGetParameters: GNHashtable): GNHashtable {
 		let answer = new GNHashtable();
 
+        if (masterPlayerFindOptions == null || masterPlayerFindOptions.external) {
+            let gnExternal = new GNHashtable();
+
+            let externalItem = masterPlayer.getExternal();
+
+            if (externalItem.device != null) {
+                let gnDevice = new GNHashtable();
+
+                if (externalItem.device.customDeviceId != null) gnDevice.add(AuthenticateParameterCode.CustomDeviceId, externalItem.device.customDeviceId);
+                if (externalItem.device.androidDeviceId != null) gnDevice.add(AuthenticateParameterCode.AndroidDeviceId, externalItem.device.androidDeviceId);
+                if (externalItem.device.iOSDeviceId != null) gnDevice.add(AuthenticateParameterCode.iOSDeviceId, externalItem.device.iOSDeviceId);
+                if (externalItem.device.windowsPhoneDeviceId != null) gnDevice.add(AuthenticateParameterCode.WindowsPhoneDeviceId, externalItem.device.windowsPhoneDeviceId);
+                if (externalItem.device.windowsDeviceId != null) gnDevice.add(AuthenticateParameterCode.WindowsDeviceId, externalItem.device.windowsDeviceId);
+                if (externalItem.device.linuxDeviceId != null) gnDevice.add(AuthenticateParameterCode.LinuxDeviceId, externalItem.device.linuxDeviceId);
+                if (externalItem.device.macOSDeviceId != null) gnDevice.add(AuthenticateParameterCode.MacOSDeviceId, externalItem.device.macOSDeviceId);
+                if (externalItem.device.editorDeviceId != null) gnDevice.add(AuthenticateParameterCode.EditorDeviceId, externalItem.device.editorDeviceId);
+
+                gnExternal.add(AuthenticateParameterCode.Device, gnDevice);
+            }
+            
+            if (externalItem.account != null) {
+                let gnAccount = new GNHashtable();
+
+                if (externalItem.account.username != null) gnAccount.add(AuthenticateParameterCode.Username, externalItem.account.username);
+
+                gnExternal.add(AuthenticateParameterCode.Account, gnAccount);
+            }
+
+            if (externalItem.custom != null) {
+                let gnCustom = new GNHashtable();
+
+                if (externalItem.custom.customId != null) gnCustom.add(AuthenticateParameterCode.CustomId, externalItem.custom.customId);
+
+                gnExternal.add(AuthenticateParameterCode.Custom, gnCustom);
+            }
+
+            if (externalItem.apple != null) {
+                let gnApple = new GNHashtable();
+
+                if (externalItem.apple.appleId != null) gnApple.add(AuthenticateParameterCode.AppleId, externalItem.apple.appleId);
+
+                gnExternal.add(AuthenticateParameterCode.Apple, gnApple);
+            }
+
+            if (externalItem.google != null) {
+                let gnGoogle = new GNHashtable();
+
+                if (externalItem.google.googleId != null) gnGoogle.add(AuthenticateParameterCode.GoogleId, externalItem.google.googleId);
+
+                gnExternal.add(AuthenticateParameterCode.Custom, gnGoogle);
+            }
+
+            if (externalItem.facebook != null) {
+                let gnFacebook = new GNHashtable();
+
+                if (externalItem.facebook.facebookId != null) gnFacebook.add(AuthenticateParameterCode.FacebookId, externalItem.facebook.facebookId);
+
+                gnExternal.add(AuthenticateParameterCode.Facebook, gnFacebook);
+            }
+
+            if (externalItem.genericService != null) {
+                let gnGenericServices = new GNArray();
+
+                if (externalItem.genericService.genericServices != null) {
+
+                    externalItem.genericService.genericServices.forEach((value, key: string) => {
+                        let gnGenericService = new GNHashtable();
+                        gnGenericService.add(AuthenticateParameterCode.ServiceName, key);
+                        gnGenericService.add(AuthenticateParameterCode.ServiceId, value.userId);
+
+                        gnGenericServices.add(gnGenericService);
+                    });
+                }
+
+                gnExternal.add(AuthenticateParameterCode.GenericService, gnGenericServices);
+            }
+
+            answer.add(AuthenticateParameterCode.External, gnExternal);
+        }
+
         if (masterPlayerFindOptions == null || masterPlayerFindOptions.segments)
-        answer.add(AuthenticateParameterCode.Segments, masterPlayer.getAllSegments());
+            answer.add(AuthenticateParameterCode.Segments, masterPlayer.getAllSegments());
 
         if (masterPlayerFindOptions == null || masterPlayerFindOptions.scriptData)
             answer.add(AuthenticateParameterCode.ScriptData, masterPlayer.getAllScriptData());
@@ -224,7 +303,6 @@ export class LoginBaseRequestHandler extends RequestHandler {
 			.build();
 		let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthToken(newAuth);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.Ok);
 		operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
 	}
 
@@ -234,6 +312,7 @@ export class LoginBaseRequestHandler extends RequestHandler {
         let answer = {} as any;
 
         answer["userId"] = this.getUserId();
+        answer["external"] = {};
         answer["segments"] = [];
         answer["scriptData"] = {};
         answer["privateData"] = {};
