@@ -1,5 +1,3 @@
-import { DataValueType } from "./type/DataValueType";
-
 export interface FriendItem {
 	friendId: string;
 	friendCatalogId: string;

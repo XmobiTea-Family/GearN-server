@@ -31,12 +31,11 @@ interface ExternalFacebookItem {
 }
 
 interface GenericServiceIdItem {
-	serviceName: string;
 	userId: string;
 }
 
 interface ExternalGenericServiceItem {
-	genericServices: Array<GenericServiceIdItem>;
+	genericServices: Map<string, GenericServiceIdItem>;
 }
 
 export interface ExternalItem {

@@ -9,6 +9,8 @@ import { GamePlayerFindOptions } from "./entity/pro/findOptions/GamePlayerFindOp
 import { CharacterPlayerFindOptions } from "./entity/pro/findOptions/CharacterPlayerFindOptions";
 import { Group } from "./entity/pro/Group";
 import { Inventory } from "./entity/pro/Inventory";
+import { GroupFindOptions } from "./entity/pro/findOptions/GroupFindOptions";
+import { InventoryFindOptions } from "./entity/pro/findOptions/InventoryFindOptions";
 
 interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
@@ -81,31 +83,105 @@ export class xDatabase {
 		return answer;
 	}
 
-	public async loadMasterPlayersBySegment(segment: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithGoogleAsync(googleIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ "external.google.googleId": { $in: googleIds }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersWithSegmentAsync(segment: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
 		let results = await collection.find({ "segments": { $elementMatch: segment }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersByTag(key: string, value: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithTagAsync(key: string, value: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
 		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersByStatistics(key: string, value: string, direction: number, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.aggregate([{ $match: {"playerStatistics.key": key}}], masterPlayerFindOptions as any).sort({"playerStatistics": {"key": -1}}).skip(skip).limit(limit);
+		let $sort = {} as any;
+		$sort["playerStatistics." + key] = {
+			value: -1,
+			tsLastUpdate: -1
+		};
+
+		let results = await collection.find({}, masterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let $sort = {} as any;
+		$sort["playerCurrencies." + key + ".value"] = -1;
+
+		let results = await collection.find({}, masterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadPositionMasterPlayerLeaderboardWithStatisticsAsync(key: string, userId: string): Promise<number> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let options = {} as any;
+		options["playerStatistics." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerStatistics = thisPlayer["playerStatistics"];
+		if (playerStatistics == null) return -1;
+
+		let score = playerStatistics.value;
+		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let filter = {} as any;
+		filter["playerStatistics." + key] = {
+			$and: [{
+				$gt: {
+					value: score,
+				},
+				$lt: {
+					tsLastUpdate: tsLastUpdate
+				}
+			}],
+		}
+		return await collection.countDocuments(filter);
+	}
+
+	public async loadPositionMasterPlayerLeaderboardWithCurrencies(key: string, userId: string): Promise<number> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let options = {} as any;
+		options["playerCurrencies." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerCurrencies = thisPlayer["playerCurrencies"];
+		if (playerCurrencies == null) return -1;
+
+		let score = playerCurrencies.value;
+		let filter = {} as any;
+
+		filter["playerCurrencies." + key] = {
+			$gt: {
+				value: score,
+			}
+		}
+		return await collection.countDocuments(filter);
 	}
 
 	public async loadMasterPlayerAsync(userId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let result = await collection.findOne({ "_id": new mongoDB.ObjectId(userId) }, masterPlayerFindOptions as any);
+		let result = await collection.findOne({ "userId": userId }, masterPlayerFindOptions as any);
 		if (result) {
 			let thisPlayer = new MasterPlayer(result, collection);
 			return thisPlayer;
@@ -132,7 +208,7 @@ export class xDatabase {
 		return null;
 	}
 
-	public async loadMasterPlayerByIOSDeviceIdAsync(iOSDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+	public async loadMasterPlayerByiOSDeviceIdAsync(iOSDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
 		let result = await collection.findOne({ "external.device.iOSDeviceId": iOSDeviceId }, masterPlayerFindOptions as any);
 		if (result) {
@@ -186,7 +262,7 @@ export class xDatabase {
 		return null;
 	}
 
-	public async loadMasterPlayerByUsernameAsync(username: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+	public async loadMasterPlayerByAccountUsernameAsync(username: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
 		let result = await collection.findOne({ "external.account.username": username }, masterPlayerFindOptions as any);
 		if (result) {
@@ -233,47 +309,125 @@ export class xDatabase {
 
 	public async loadMasterPlayerByGenericServiceAsync(serviceName: string, userId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.genericService.genericServices": {$elemMatch: { "serviceName": serviceName, "userId": userId }} }, masterPlayerFindOptions as any);
+
+		let filter = {} as any;
+		filter["external.genericService.genericServices." + serviceName + ".userId"] = userId;
+
+		let result = await collection.findOne(filter, masterPlayerFindOptions as any);
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
 		return null;
 	}
 
-	public async createMasterPlayerAsync(masterPlayer: MasterPlayer): Promise<MasterPlayer> {
+	public async createMasterPlayerAsync(result: any): Promise<MasterPlayer> {
 		let collection = this.systemCollection("GamePlayer");
 
-		let result = {
-			external: masterPlayer.getExternal(),
-			segments: masterPlayer.getAllSegments(),
-			scriptData: masterPlayer.getAllScriptData(),
-			privateData: masterPlayer.getAllPrivateData(),
-			displayName: masterPlayer.getDisplayName(),
-			avatar: masterPlayer.getAvatar(),
-			tsCreate: masterPlayer.getTsCreate(),
-			tags: masterPlayer.getAllTags(),
-			role: masterPlayer.getRole(),
-			playerBan: masterPlayer.getPlayerBan(),
-			playerDatas: masterPlayer.getAllPlayerDatas(),
-			playerCurrencies: masterPlayer.getAllPlayerCurrencies(),
-			playerStatistics: masterPlayer.getAllPlayerStatistics(),
-			playerCharacters: masterPlayer.getAllPlayerCharacters(),
-			playerInventories: masterPlayer.getAllPlayerInventories(),
-			playerGroups: masterPlayer.getAllPlayerGroups(),
-			playerFriends: masterPlayer.getAllPlayerFriends(),
-			tsLastLogin: masterPlayer.getTsLastLogin(),
-			ipAddressCreate: masterPlayer.getIpAddressCreate(),
-			countryCode: masterPlayer.getCountryCode(),
-		} as any;
-
 		await collection.insertOne(result);
-
 		return new MasterPlayer(result, collection);
+	}
+
+	private async convertToGamePlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<GamePlayer>> {
+		let answer: Array<GamePlayer> = [];
+		
+		while (await results.hasNext()) {
+			answer.push(new GamePlayer(await results.next(), collection));
+		}
+
+		return answer;
+	}
+
+	public async loadGamePlayersWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let results = await collection.find({ "segments": { $elementMatch: segment }}, gamePlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadGamePlayersWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, gamePlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadGamePlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["playerStatistics." + key] = {
+			value: -1,
+			tsLastUpdate: -1
+		};
+
+		let results = await collection.find({}, gamePlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadGamePlayersLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["playerCurrencies." + key + ".value"] = -1;
+
+		let results = await collection.find({}, gamePlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadPositionGamePlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let options = {} as any;
+		options["playerStatistics." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerStatistics = thisPlayer["playerStatistics"];
+		if (playerStatistics == null) return -1;
+
+		let score = playerStatistics.value;
+		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let filter = {} as any;
+		filter["playerStatistics." + key] = {
+			$and: [{
+				$gt: {
+					value: score,
+				},
+				$lt: {
+					tsLastUpdate: tsLastUpdate
+				}
+			}],
+		}
+		return await collection.countDocuments(filter);
+	}
+
+	public async loadPositionGamePlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let options = {} as any;
+		options["playerCurrencies." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerCurrencies = thisPlayer["playerCurrencies"];
+		if (playerCurrencies == null) return -1;
+
+		let score = playerCurrencies.value;
+		let filter = {} as any;
+
+		filter["playerCurrencies." + key] = {
+			$gt: {
+				value: score,
+			}
+		}
+		return await collection.countDocuments(filter);
 	}
 
 	public async loadGamePlayerAsync(userId: string, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
-		let result = await collection.findOne({ UserId: userId }, gamePlayerFindOptions as any);
+		let result = await collection.findOne({ "userId": userId }, gamePlayerFindOptions as any);
 		if (result) {
 			return new GamePlayer(result, collection);
 		}
@@ -281,42 +435,114 @@ export class xDatabase {
 		return null;
 	}
 
-	public async createGamePlayerAsync(gamePlayer: GamePlayer, gameId: string): Promise<GamePlayer> {
+	public async createGamePlayerAsync(result: any, gameId: string): Promise<GamePlayer> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
-		let result = {
-			userId: gamePlayer.getUserId(),
-			socketId: gamePlayer.getSocketId(),
-			segments: gamePlayer.getAllSegments(),
-			scriptData: gamePlayer.getAllScriptData(),
-			privateData: gamePlayer.getAllPrivateData(),
-			displayName: gamePlayer.getDisplayName(),
-			avatar: gamePlayer.getAvatar(),
-			tsCreate: gamePlayer.getTsCreate(),
-			tags: gamePlayer.getAllTags(),
-			role: gamePlayer.getRole(),
-			playerBan: gamePlayer.getPlayerBan(),
-			playerDatas: gamePlayer.getAllPlayerDatas(),
-			playerCurrencies: gamePlayer.getAllPlayerCurrencies(),
-			playerStatistics: gamePlayer.getAllPlayerStatistics(),
-			playerCharacters: gamePlayer.getAllPlayerCharacters(),
-			playerInventories: gamePlayer.getAllPlayerInventories(),
-			playerGroups: gamePlayer.getAllPlayerGroups(),
-			playerFriends: gamePlayer.getAllPlayerFriends(),
-			tsLastLogin: gamePlayer.getTsLastLogin(),
-			ipAddressCreate: gamePlayer.getIpAddressCreate(),
-			countryCode: gamePlayer.getCountryCode(),
-		} as any;
+		await collection.insertOne(result);
+		return new GamePlayer(result, collection);
+	}
 
-		await collection.insertOne(gamePlayer as any);
-		let thisPlayer = new GamePlayer(result, collection);
+	private async convertToCharacterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<CharacterPlayer>> {
+		let answer: Array<CharacterPlayer> = [];
+		
+		while (await results.hasNext()) {
+			answer.push(new CharacterPlayer(await results.next(), collection));
+		}
 
-		return thisPlayer;
+		return answer;
+	}
+
+	public async loadCharacterPlayersWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let results = await collection.find({ "segments": { $elementMatch: segment }}, characterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadCharacterPlayersWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, characterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadCharacterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["playerStatistics." + key] = {
+			value: -1,
+			tsLastUpdate: -1
+		};
+
+		let results = await collection.find({}, characterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadCharacterPlayersLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["playerCurrencies." + key + ".value"] = -1;
+
+		let results = await collection.find({}, characterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadPositionCharacterPlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let options = {} as any;
+		options["playerStatistics." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerStatistics = thisPlayer["playerStatistics"];
+		if (playerStatistics == null) return -1;
+
+		let score = playerStatistics.value;
+		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let filter = {} as any;
+		filter["playerStatistics." + key] = {
+			$and: [{
+				$gt: {
+					value: score,
+				},
+				$lt: {
+					tsLastUpdate: tsLastUpdate
+				}
+			}],
+		}
+		return await collection.countDocuments(filter);
+	}
+
+	public async loadPositionCharacterPlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let options = {} as any;
+		options["playerCurrencies." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerCurrencies = thisPlayer["playerCurrencies"];
+		if (playerCurrencies == null) return -1;
+
+		let score = playerCurrencies.value;
+		let filter = {} as any;
+
+		filter["playerCurrencies." + key] = {
+			$gt: {
+				value: score,
+			}
+		}
+		return await collection.countDocuments(filter);
 	}
 
 	public async loadCharacterPlayerAsync(characterId: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<CharacterPlayer> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
-		let result = await collection.findOne({ CharacterId: characterId }, characterPlayerFindOptions as any);
+		let result = await collection.findOne({ "characterId": characterId }, characterPlayerFindOptions as any);
 		if (result) {
 			return new CharacterPlayer(result, collection);
 		}
@@ -324,46 +550,240 @@ export class xDatabase {
 		return null;
 	}
 
-	public async createCharacterPlayerAsync(characterPlayer: CharacterPlayer, gameId: string): Promise<CharacterPlayer> {
+	public async createCharacterPlayerAsync(result: any, gameId: string): Promise<CharacterPlayer> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		let result = {
-			characterId: characterPlayer.getCharacterId(),
-			characterCatalogId: characterPlayer.getCharacterCatalogId(),
-			owner: characterPlayer.getOwner(),
-			removeStatus: characterPlayer.getRemoveStatus(),
-			segments: characterPlayer.getAllSegments(),
-			scriptData: characterPlayer.getAllScriptData(),
-			privateData: characterPlayer.getAllPrivateData(),
-			displayName: characterPlayer.getDisplayName(),
-			avatar: characterPlayer.getAvatar(),
-			tsCreate: characterPlayer.getTsCreate(),
-			tags: characterPlayer.getAllTags(),
-			role: characterPlayer.getRole(),
-			playerBan: characterPlayer.getPlayerBan(),
-			playerDatas: characterPlayer.getAllPlayerDatas(),
-			playerCurrencies: characterPlayer.getAllPlayerCurrencies(),
-			playerStatistics: characterPlayer.getAllPlayerStatistics(),
-			playerCharacters: characterPlayer.getAllPlayerCharacters(),
-			playerInventories: characterPlayer.getAllPlayerInventories(),
-			playerGroups: characterPlayer.getAllPlayerGroups(),
-			playerFriends: characterPlayer.getAllPlayerFriends(),
-			tsLastLogin: characterPlayer.getTsLastLogin(),
-			ipAddressCreate: characterPlayer.getIpAddressCreate(),
-			countryCode: characterPlayer.getCountryCode(),
-		} as any;
-
-		await collection.insertOne(characterPlayer as any);
-		let thisPlayer = new CharacterPlayer(result, collection);
-
-		return thisPlayer;
+		await collection.insertOne(result);
+		return new CharacterPlayer(result, collection);
 	}
 
-	public async loadGroupAsync(groupId: string): Promise<Group> {
+	private async convertToGroups(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<Group>> {
+		let answer: Array<Group> = [];
+		
+		while (await results.hasNext()) {
+			answer.push(new Group(await results.next(), collection));
+		}
 
+		return answer;
 	}
 
-	public async loadInventoryAsync(itemId: string): Promise<Inventory> {
+	public async loadGroupsWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+		let collection = this.systemGameCollection("Group", gameId);
 
+		let results = await collection.find({ "segments": { $elementMatch: segment }}, groupFindOptions as any).skip(skip).limit(limit);
+		return this.convertToGroups(results, collection);
+	}
+
+	public async loadGroupsWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, groupFindOptions as any).skip(skip).limit(limit);
+		return this.convertToGroups(results, collection);
+	}
+
+	public async loadGroupsLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let $sort = {} as any;
+		$sort["groupStatistics." + key] = {
+			value: -1,
+			tsLastUpdate: -1
+		};
+
+		let results = await collection.find({}, groupFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToGroups(results, collection);
+	}
+
+	public async loadGroupsLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let $sort = {} as any;
+		$sort["groupCurrencies." + key + ".value"] = -1;
+
+		let results = await collection.find({}, groupFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToGroups(results, collection);
+	}
+
+	public async loadPositionGroupLeaderboardWithStatisticsAsync(key: string, groupId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let options = {} as any;
+		options["groupStatistics." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "groupId": groupId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerStatistics = thisPlayer["playerStatistics"];
+		if (playerStatistics == null) return -1;
+
+		let score = playerStatistics.value;
+		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let filter = {} as any;
+		filter["groupStatistics." + key] = {
+			$and: [{
+				$gt: {
+					value: score,
+				},
+				$lt: {
+					tsLastUpdate: tsLastUpdate
+				}
+			}],
+		}
+		return await collection.countDocuments(filter);
+	}
+
+	public async loadPositionGroupLeaderboardWithCurrenciesAsync(key: string, groupId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let options = {} as any;
+		options["groupCurrencies." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "groupId": groupId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerCurrencies = thisPlayer["groupCurrencies"];
+		if (playerCurrencies == null) return -1;
+
+		let score = playerCurrencies.value;
+		let filter = {} as any;
+
+		filter["groupCurrencies." + key] = {
+			$gt: {
+				value: score,
+			}
+		}
+		return await collection.countDocuments(filter);
+	}
+
+	public async loadGroupAsync(groupId: string, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Group> {
+		let collection = this.systemGameCollection("Group", gameId);
+		let result = await collection.findOne({ "groupId": groupId }, groupFindOptions as any);
+		if (result) {
+			return new Group(result, collection);
+		}
+
+		return null;
+	}
+
+	public async createGroupAsync(result: any, gameId: string): Promise<Group> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		await collection.insertOne(result);
+		return new Group(result, collection);
+	}
+
+	private async convertToInventories(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<Inventory>> {
+		let answer: Array<Inventory> = [];
+		
+		while (await results.hasNext()) {
+			answer.push(new Inventory(await results.next(), collection));
+		}
+
+		return answer;
+	}
+
+	public async loadInventoriesWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let results = await collection.find({ "segments": { $elementMatch: segment }}, inventoryFindOptions as any).skip(skip).limit(limit);
+		return this.convertToInventories(results, collection);
+	}
+
+	public async loadInventoriesWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, inventoryFindOptions as any).skip(skip).limit(limit);
+		return this.convertToInventories(results, collection);
+	}
+
+	public async loadInventoriesLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let $sort = {} as any;
+		$sort["itemStatistics." + key] = {
+			value: -1,
+			tsLastUpdate: -1
+		};
+
+		let results = await collection.find({}, inventoryFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToInventories(results, collection);
+	}
+
+	public async loadInventoriesLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let $sort = {} as any;
+		$sort["itemCurrencies." + key + ".value"] = -1;
+
+		let results = await collection.find({}, inventoryFindOptions as any).sort($sort).skip(skip).limit(limit);
+		return this.convertToInventories(results, collection);
+	}
+
+	public async loadPositionInventoryLeaderboardWithStatisticsAsync(key: string, itemId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let options = {} as any;
+		options["itemStatistics." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "itemId": itemId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerStatistics = thisPlayer["playerStatistics"];
+		if (playerStatistics == null) return -1;
+
+		let score = playerStatistics.value;
+		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let filter = {} as any;
+		filter["itemStatistics." + key] = {
+			$and: [{
+				$gt: {
+					value: score,
+				},
+				$lt: {
+					tsLastUpdate: tsLastUpdate
+				}
+			}],
+		}
+		return await collection.countDocuments(filter);
+	}
+
+	public async loadPositionInventoryLeaderboardWithCurrenciesAsync(key: string, itemId: string, gameId: string): Promise<number> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let options = {} as any;
+		options["itemCurrencies." + key] = true;
+
+		let thisPlayer = await collection.findOne({ "itemId": itemId }, options);
+		if (thisPlayer == null) return -1;
+
+		let playerCurrencies = thisPlayer["groupCurrencies"];
+		if (playerCurrencies == null) return -1;
+
+		let score = playerCurrencies.value;
+		let filter = {} as any;
+
+		filter["itemCurrencies." + key] = {
+			$gt: {
+				value: score,
+			}
+		}
+		return await collection.countDocuments(filter);
+	}
+
+	public async loadInventoryAsync(itemId: string, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Inventory> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+		let result = await collection.findOne({ "itemId": itemId }, inventoryFindOptions as any);
+		if (result) {
+			return new Inventory(result, collection);
+		}
+
+		return null;
+	}
+
+	public async createInventoryAsync(result: any, gameId: string): Promise<Inventory> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		await collection.insertOne(result);
+		return new Inventory(result, collection);
 	}
 }

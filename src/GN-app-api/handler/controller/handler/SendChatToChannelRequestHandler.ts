@@ -52,7 +52,7 @@ export class SendChatToChannelRequestHandler extends RequestHandler {
         let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 
         operationResponse.setReturnCode(ReturnCode.Ok);
-        operationResponse.setScriptData(ParameterCode.ErrorCode, ChatErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ChatErrorCode.Ok);
 
         let chatMessage = await this.gnServer.getChatService().addChatMessageAsync(authInfo.getUserId(), request.channel, request.message);
 

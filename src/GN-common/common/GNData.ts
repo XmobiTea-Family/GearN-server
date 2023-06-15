@@ -242,6 +242,10 @@ export class GNArray extends GNData {
 		this.array = [];
 	}
 
+	public indexOf(item: GNDataType): number {
+		return this.array.indexOf(item);
+	}
+	
 	public override remove(k: number): boolean {
 		if (k < 0 || k >= this.array.length) return false;
 

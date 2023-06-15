@@ -63,7 +63,7 @@ export class OperationResponse {
 		return this;
 	}
 
-	public setScriptData(k: string, value: any): OperationResponse {
+	public setParameter(k: string, value: any): OperationResponse {
 		this.parameters.add(k, value);
 		return this;
 	}

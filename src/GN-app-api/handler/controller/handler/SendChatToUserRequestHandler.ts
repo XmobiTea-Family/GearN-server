@@ -62,7 +62,7 @@ export class SendChatToUserRequestHandler extends RequestHandler {
         let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 
         operationResponse.setReturnCode(ReturnCode.Ok);
-        operationResponse.setScriptData(ParameterCode.ErrorCode, ChatErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ChatErrorCode.Ok);
 
         let receiveId = request.userId;
         let senderId = authInfo.getUserId();

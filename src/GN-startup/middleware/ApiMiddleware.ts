@@ -22,7 +22,7 @@ export class ApiMiddleware {
 	private authTokenCollection: mongoDB.Collection<mongoDB.Document>;
 
 	private secretInfoDict: Map<string, SecretInfo>;
-	private secretKeyCollection: mongoDB.Collection<mongoDB.Document>;
+	private secretInfoCollection: mongoDB.Collection<mongoDB.Document>;
 
 	private playerGameCollection: mongoDB.Collection<mongoDB.Document>
 
@@ -34,12 +34,12 @@ export class ApiMiddleware {
 
 	private maxCCU: number;
 
-	public setSecretKeyCollection(secretKeyCollection: mongoDB.Collection<mongoDB.Document>) {
-		this.secretKeyCollection = secretKeyCollection;
+	public setSecretInfoCollection(secretInfoCollection: mongoDB.Collection<mongoDB.Document>) {
+		this.secretInfoCollection = secretInfoCollection;
 	}
 
-	public setAuthTokenCollection(authTokenCollection: mongoDB.Collection<mongoDB.Document>) {
-		this.authTokenCollection = authTokenCollection;
+	public setAuthInfoCollection(authInfoCollection: mongoDB.Collection<mongoDB.Document>) {
+		this.authTokenCollection = authInfoCollection;
 	}
 
 	public setPlayerGameCollection(playerGameCollection: mongoDB.Collection<mongoDB.Document>) {
@@ -75,7 +75,7 @@ export class ApiMiddleware {
 			this.dauLast30Min.length = 0;
 
 			try {
-				let playerLast30Mins = await this.playerGameCollection.find({}).sort({ TsLastSeen: -1 }).limit(50).toArray();
+				let playerLast30Mins = await this.playerGameCollection.find({}).sort({ tsLastSeen: -1 }).limit(50).toArray();
 
 				for (let i = 0; i < playerLast30Mins.length; i++) {
 					let playerLast30Min = playerLast30Mins[i];
@@ -167,7 +167,7 @@ export class ApiMiddleware {
 	public async getSecretInfoBySecretKeyInDatabase(secretKey: string): Promise<SecretInfo> {
 		let secretInfo = this.getSecretInfoBySecretKey(secretKey);
 		if (secretInfo == null) {
-			let secretInfoTemp = await this.secretKeyCollection.findOne({ secretKey: secretKey });
+			let secretInfoTemp = await this.secretInfoCollection.findOne({ secretKey: secretKey });
 
 			if (secretInfoTemp != null) {
 				secretInfo = SecretInfo.Builder()
@@ -191,19 +191,19 @@ export class ApiMiddleware {
 			let authInfoTemp = await this.authTokenCollection.findOne({ AuthToken: authToken });
 
 			if (authInfoTemp != null) {
-				let userId = authInfoTemp["UserId"];
+				let userId = authInfoTemp["userId"];
 				authInfo = AuthInfo.Builder()
-					.setAuthToken(authInfoTemp["AuthToken"])
+					.setAuthToken(authInfoTemp["authToken"])
 					// .setOtherData("RoomId", null)
-					.setIsRemove(authInfoTemp["IsRemove"])
-					.setOtherUserLogin(authInfoTemp["OtherUserLogin"])
-					.setRole(authInfoTemp["Role"])
-					.setTsExpire(authInfoTemp["TsExpire"])
+					.setIsRemove(authInfoTemp["isRemove"])
+					.setOtherUserLogin(authInfoTemp["otherUserLogin"])
+					.setRole(authInfoTemp["role"])
+					.setTsExpire(authInfoTemp["tsExpire"])
 					.setUserId(userId)
-					.setOtherDatas(authInfoTemp["OtherDatas"])
-					.setSocketId(authInfoTemp["SocketId"])
-					.setSocketRoomIds(authInfoTemp["SocketRoomIds"])
-					.setTsCreate(authInfoTemp["TsCreate"])
+					.setOtherDatas(authInfoTemp["otherDatas"])
+					.setSocketId(authInfoTemp["socketId"])
+					.setSocketRoomIds(authInfoTemp["socketRoomIds"])
+					.setTsCreate(authInfoTemp["tsCreate"])
 					.build();
 
 				this.authInfoDict.set(authToken, authInfo);
@@ -221,14 +221,17 @@ export class ApiMiddleware {
 	}
 
 	public updateSecretInfo(secretInfo: SecretInfo) {
-		
+		let secretKey = secretInfo.getSecretKey();
+
+		this.secretInfoDict.set(secretKey, secretInfo);
+		this.secretInfoCollection.updateOne({ secretKey: secretKey }, { $set: secretInfo.toDocumentData() });
 	}
 
 	public updateAuthInfo(authInfo: AuthInfo) {
 		let authToken = authInfo.getAuthToken();
 
 		this.authInfoDict.set(authToken, authInfo);
-		this.authTokenCollection.updateOne({ AuthToken: authToken }, { $set: authInfo.toDocumentData() });
+		this.authTokenCollection.updateOne({ authToken: authToken }, { $set: authInfo.toDocumentData() });
 	}
 
 	public async authenticateTokenViaJson(req: express.Request, res: express.Response, next: Function) {
@@ -285,16 +288,8 @@ export class ApiMiddleware {
 	public async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
 		let headers = req.headers;
 		let authToken = headers[Commands.RequestAuthTokenCmd] as string;
-		let secretKey = headers[Commands.RequestSecretCmd] as string;
-		
-		let reqAny = req as any;
 
-		if (!secretKey) {
-			reqAny.secretPermission = ;
-		}
-		else {
-			reqAny.secretKey = secretKey;
-		}
+		let reqAny = req as any;
 
 		if (!authToken) {
 			reqAny.isAuthenticated = false;
@@ -310,7 +305,7 @@ export class ApiMiddleware {
 				if (authInfo.getOtherUserLogin()) {
 					this.authInfoDict.delete(authToken);
 
-					let authInfoViaUserId = this.authInfoViaUserIdDict[userId];
+					let authInfoViaUserId = this.authInfoViaUserIdDict.get(userId);
 					if (authInfoViaUserId) {
 						if (authInfoViaUserId.getAuthToken() == authToken) {
 							this.authInfoViaUserIdDict.delete(userId);
@@ -365,6 +360,22 @@ export class ApiMiddleware {
 				if (!reqAny.isAuthenticated || !dauLast30Min.includes((reqAny.authInfo as AuthInfo).getUserId())) {
 					return ReturnCode.MaxCCUReject;
 				}
+			}
+		}
+
+		let secretKey = headers[Commands.RequestSecretCmd] as string;
+		if (!secretKey) {
+			reqAny.isSecreted = false;
+		}
+		else {
+			let secretInfo = await this.getSecretInfoBySecretKeyInDatabase(secretKey);
+
+			if (secretInfo == null) {
+				reqAny.isSecreted = false;
+			}
+			else {
+				reqAny.isSecreted = true;
+				reqAny.secretInfo = secretInfo;
 			}
 		}
 

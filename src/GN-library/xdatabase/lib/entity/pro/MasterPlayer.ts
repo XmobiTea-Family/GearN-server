@@ -1,17 +1,18 @@
 import * as mongoDB from "mongodb";
 
 import { ExternalItem } from "./ExternalItem";
-import { MasterPlayerBase } from "./MasterPlayerBase";
+import { PlayerBase } from "./PlayerBase";
 
-export class MasterPlayer extends MasterPlayerBase {
+export class MasterPlayer extends PlayerBase {
 	private static readonly _external: string = "external";
+	private static readonly _userId: string = "userId";
 
 	private readonly userId: string;
 	private external: ExternalItem;
 
 	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
 		super(result, collection);
-		this.userId = this._id.toString();
+		this.userId = result[MasterPlayer._userId];
 
 		this.setDocumentMasterPlayer(result);
 	}
@@ -22,6 +23,10 @@ export class MasterPlayer extends MasterPlayerBase {
 
 	public getUserId(): string {
 		return this.userId;
+	}
+
+	public getPassword(): string {
+		return this.external.account.password;
 	}
 
 	public getExternal(): ExternalItem {

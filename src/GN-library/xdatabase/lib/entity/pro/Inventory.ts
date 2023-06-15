@@ -28,7 +28,7 @@ export class Inventory extends DataObjectBase {
 	private owner: OwnerItem;
 
 	private itemDatas: Array<DataItem>;
-	private itemStatistics: Array<StatisticsItem>;
+	private itemStatistics: Map<string, StatisticsItem>;
 
 	private removeStatus: RemoveStatusItem;
 
@@ -141,46 +141,35 @@ export class Inventory extends DataObjectBase {
 		throw Error("can not found the key to remove");
     }
 
-	public getAllItemStatistics(): Array<StatisticsItem> {
+	public getAllItemStatistics(): Map<string, StatisticsItem> {
         return this.itemStatistics;
     }
 
     public hasItemStatistics(key: string): boolean {
-		return this.getItemStatistics(key) != null;
+		return this.itemStatistics.has(key);
 	}
 
     public getItemStatistics(key: string): StatisticsItem {
-		return this.itemStatistics.find(x => x.key == key);
+		return this.itemStatistics.get(key);
 	}
 
     public setItemStatistics(key: string, value: number, tsLastUpdate: number): void {
-        let itemStatisticsItem = this.itemStatistics.find(x => x.key == key);
-		if (itemStatisticsItem == null) {
-			itemStatisticsItem = {
-				key: key,
-				value: value,
-				tsLastUpdate: tsLastUpdate
-			}
-
-			this.itemStatistics.push(itemStatisticsItem);
-		}
-		else {
-			itemStatisticsItem.value = value;
-			itemStatisticsItem.tsLastUpdate = tsLastUpdate;
-		}
+        this.itemStatistics.set(key, {
+			tsLastUpdate: tsLastUpdate,
+			value: value
+		});
 		
-		this.set(Inventory._itemStatistics, this.itemStatistics);
+		this.set(Inventory._itemStatistics + DataObjectBase.DOT + key, {
+			tsLastUpdate: tsLastUpdate,
+			value: value
+		});
 	}
 
     public removeItemStatistics(key: string): void {
-        let itemStatisticsItem = this.itemStatistics.find(x => x.key == key);
-		if (itemStatisticsItem != null) {
-			let indexOf = this.itemStatistics.indexOf(itemStatisticsItem);
-			if (indexOf != -1) {
-				this.itemStatistics.splice(indexOf, 1);
-		
-				return this.set(Inventory._itemStatistics, this.itemStatistics);
-			}
+        if (this.itemStatistics.has(key)) {
+			this.itemStatistics.delete(key);
+
+			return this.unset(Inventory._itemStatistics + DataObjectBase.DOT + key);
 		}
 
 		throw Error("can not found the key to remove");

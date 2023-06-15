@@ -1,10 +1,10 @@
 import * as mongoDB from "mongodb";
 
-import { MasterPlayerBase } from "./MasterPlayerBase";
+import { GamePlayerBase } from "./GamePlayerBase";
 import { OwnerItem } from "./OwnerItem";
 import { RemoveStatusItem } from "./RemoveStatusItem";
 
-export class CharacterPlayer extends MasterPlayerBase {
+export class CharacterPlayer extends GamePlayerBase {
 	private static readonly _characterId: string = "characterId";
 	private static readonly _characterCatalogId: string = "characterCatalogId";
 	private static readonly _owner: string = "owner";

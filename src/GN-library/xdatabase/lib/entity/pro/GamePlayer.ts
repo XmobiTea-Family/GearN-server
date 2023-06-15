@@ -1,11 +1,10 @@
 import * as mongoDB from "mongodb";
 
-import { MasterPlayerBase } from "./MasterPlayerBase";
+import { GamePlayerBase } from "./GamePlayerBase";
 
-export class GamePlayer extends MasterPlayerBase {
+export class GamePlayer extends GamePlayerBase {
 	private static readonly _userId: string = "userId";
 	private static readonly _socketId: string = "socketId";
-	// private static readonly _playerPushs: string = "playerPushs";
 
 	private readonly userId: string;
 

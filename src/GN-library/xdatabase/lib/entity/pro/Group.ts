@@ -9,7 +9,6 @@ import { InventoryItem } from "./InventoryItem";
 import { RemoveStatusItem } from "./RemoveStatusItem";
 import { DataValueType } from "./type/DataValueType";
 
-
 export class Group extends DataObjectBase {
 	private static readonly _groupId: string = "groupId";
 
@@ -29,9 +28,9 @@ export class Group extends DataObjectBase {
 	private maxMembers: number;
 	private members: Array<MemberItem>;
 
+	private groupCurrencies: Map<string, CurrencyItem>;
+	private groupStatistics: Map<string, StatisticsItem>;
 	private groupDatas: Array<DataItem>;
-	private groupCurrencies: Array<CurrencyItem>;
-	private groupStatistics: Array<StatisticsItem>;
 	private groupInventories: Array<InventoryItem>;
 
 	private removeStatus: RemoveStatusItem;
@@ -125,44 +124,33 @@ export class Group extends DataObjectBase {
 		throw Error("can not found the member id to remove");
 	}
 
-	public getAllGroupCurrencies(): Array<CurrencyItem> {
+	public getAllGroupCurrencies(): Map<string, CurrencyItem> {
         return this.groupCurrencies;
     }
 
     public hasGroupCurrency(key: string): boolean {
-		return this.getGroupCurrency(key) != null;
+		return this.groupCurrencies.has(key);
 	}
 
     public getGroupCurrency(key: string): CurrencyItem {
-		return this.groupCurrencies.find(x => x.key == key);
+		return this.groupCurrencies.get(key);
 	}
 
     public setGroupCurrency(key: string, value: number): void {
-        let groupCurrencyItem = this.groupCurrencies.find(x => x.key == key);
-		if (groupCurrencyItem == null) {
-			groupCurrencyItem = {
-				key: key,
-				value: value
-			}
-
-			this.groupCurrencies.push(groupCurrencyItem);
-		}
-		else {
-			groupCurrencyItem.value = value;
-		}
+		this.groupCurrencies.set(key, {
+			value: value
+		});
 		
-		this.set(Group._groupCurrencies, this.groupCurrencies);
+		this.set(Group._groupCurrencies + DataObjectBase.DOT + key, {
+			value: value
+		});
 	}
 
     public removeGroupCurrency(key: string): void {
-        let groupCurrencyItem = this.groupCurrencies.find(x => x.key == key);
-		if (groupCurrencyItem != null) {
-			let indexOf = this.groupCurrencies.indexOf(groupCurrencyItem);
-			if (indexOf != -1) {
-				this.groupCurrencies.splice(indexOf, 1);
-		
-				return this.set(Group._groupCurrencies, this.groupCurrencies);
-			}
+		if (this.groupCurrencies.has(key)) {
+			this.groupCurrencies.delete(key);
+
+			return this.unset(Group._groupCurrencies + DataObjectBase.DOT + key);
 		}
 
 		throw Error("can not found the key to remove");
@@ -213,46 +201,35 @@ export class Group extends DataObjectBase {
 		throw Error("can not found the key to remove");
     }
 
-	public getAllGroupStatistics(): Array<StatisticsItem> {
+	public getAllGroupStatistics(): Map<string, StatisticsItem> {
         return this.groupStatistics;
     }
 
     public hasGroupStatistics(key: string): boolean {
-		return this.getGroupStatistics(key) != null;
+		return this.groupStatistics.has(key);
 	}
 
     public getGroupStatistics(key: string): StatisticsItem {
-		return this.groupStatistics.find(x => x.key == key);
+		return this.groupStatistics.get(key);
 	}
 
     public setGroupStatistics(key: string, value: number, tsLastUpdate: number): void {
-        let groupStatisticsItem = this.groupStatistics.find(x => x.key == key);
-		if (groupStatisticsItem == null) {
-			groupStatisticsItem = {
-				key: key,
-				value: value,
-				tsLastUpdate: tsLastUpdate
-			}
-
-			this.groupStatistics.push(groupStatisticsItem);
-		}
-		else {
-			groupStatisticsItem.value = value;
-			groupStatisticsItem.tsLastUpdate = tsLastUpdate;
-		}
+		this.groupStatistics.set(key, {
+			tsLastUpdate: tsLastUpdate,
+			value: value
+		});
 		
-		this.set(Group._groupStatistics, this.groupStatistics);
+		this.set(Group._groupStatistics + DataObjectBase.DOT + key, {
+			tsLastUpdate: tsLastUpdate,
+			value: value
+		});
 	}
 
     public removeGroupStatistics(key: string): void {
-        let groupStatisticsItem = this.groupStatistics.find(x => x.key == key);
-		if (groupStatisticsItem != null) {
-			let indexOf = this.groupStatistics.indexOf(groupStatisticsItem);
-			if (indexOf != -1) {
-				this.groupStatistics.splice(indexOf, 1);
-		
-				return this.set(Group._groupStatistics, this.groupStatistics);
-			}
+		if (this.groupStatistics.has(key)) {
+			this.groupStatistics.delete(key);
+
+			return this.unset(Group._groupStatistics + DataObjectBase.DOT + key);
 		}
 
 		throw Error("can not found the key to remove");

@@ -274,7 +274,7 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		let authTokenCollection = this.gnServer.getDatabase().systemCollection("AuthInfoCollection");
-		this.apiMiddleware.setAuthTokenCollection(authTokenCollection);
+		this.apiMiddleware.setAuthInfoCollection(authTokenCollection);
 
 		let playerGameCollection = this.gnServer.getDatabase().systemGameCollection("Player");
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
