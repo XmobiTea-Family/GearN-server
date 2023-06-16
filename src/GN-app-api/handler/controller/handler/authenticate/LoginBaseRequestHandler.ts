@@ -35,7 +35,8 @@ export class LoginBaseRequestHandler extends RequestHandler {
 		if (infoGetParameters.count() == 0) return null;
 
 		let answer: MasterPlayerFindOptions = {};
-
+        answer.userId = true;
+        
 		let external = infoGetParameters.getBoolean(AuthenticateParameterCode.External);
 		let segments = infoGetParameters.getBoolean(AuthenticateParameterCode.Segments);
 		let scriptData = infoGetParameters.getBoolean(AuthenticateParameterCode.ScriptData);
@@ -185,7 +186,7 @@ export class LoginBaseRequestHandler extends RequestHandler {
             tags.forEach((value: string | number | boolean, key: string) => {
                 let gnTag = new GNHashtable();
 
-                gnTag.add(AuthenticateParameterCode.Name, key);
+                gnTag.add(AuthenticateParameterCode.Key, key);
                 gnTag.add(AuthenticateParameterCode.Value, value);
 
                 gnTags.add(gnTag);

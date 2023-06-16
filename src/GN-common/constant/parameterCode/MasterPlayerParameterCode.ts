@@ -3,7 +3,9 @@ export class MasterPlayerParameterCode {
 	public static readonly Password: string = "2";
 	public static readonly AndroidDeviceId: string = "3";
 	public static readonly AppleId: string = "4";
+	public static readonly AppleIds: string = "4";
 	public static readonly GoogleId: string = "5";
+	public static readonly GoogleIds: string = "5";
 	public static readonly CustomDeviceId: string = "6";
 	public static readonly CustomId: string = "7";
 	public static readonly EditorDeviceId: string = "8";
@@ -38,6 +40,9 @@ export class MasterPlayerParameterCode {
 	public static readonly DataKeys: string = "35";
 	public static readonly CurrencyKeys: string = "36";
 	public static readonly StatisticsKeys: string = "37";
+	public static readonly TagKeys: string = "54";
+	public static readonly PrivateDataKeys: string = "54";
+	public static readonly ScriptDataKeys: string = "54";
 
 	public static readonly Type: string = "38";
 	public static readonly Value: string = "39";
@@ -58,4 +63,12 @@ export class MasterPlayerParameterCode {
 	public static readonly Facebook: string = "52";
 	public static readonly GenericService: string = "53";
 	public static readonly ServiceId: string = "54";
+	public static readonly StatisticsAggregationMethod: string = "54";
+	public static readonly MaximumValue: string = "54";
+	public static readonly MinimumValue: string = "54";
+	public static readonly Skip: string = "54";
+	public static readonly Limit: string = "54";
+
+	public static readonly Results: string = "";
+	public static readonly FacebookIds: string = "";
 }

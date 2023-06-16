@@ -15,8 +15,11 @@ import { RequestHandler } from "../base/RequestHandler";
 import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 
 class SetTagOperationRequest extends OperationRequest {
-	@StringDataMember({ code: MasterPlayerParameterCode.Value, minLength: 6, maxLength: 32, mustNonNull: true })
-	value: string;
+	@StringDataMember({ code: MasterPlayerParameterCode.Key, minLength: 1, maxLength: 32, mustNonNull: true })
+	key: string;
+
+	@DataMember({ code: MasterPlayerParameterCode.Value })
+	value: string | number | boolean;
 
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -46,7 +49,7 @@ class AdminSetTagOperationRequest extends ServerSetTagOperationRequest {
 
 export class SetTagRequestHandler extends RequestHandler {
 	public override getCode() {
-		return OperationCode.LinkAccount;
+		return OperationCode.SetTag;
 	}
 
 	public override getCommonOperationRequest() {
@@ -60,7 +63,11 @@ export class SetTagRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        return this.execute(authInfo.getUserId(), request.value, operationRequest);
+		if (!secretInfo.getPermission().masterPlayer.setTag.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+        return this.execute(authInfo.getUserId(), request.key, request.value, operationRequest);
 	}
 
     public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -70,7 +77,11 @@ export class SetTagRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        return this.execute(request.userId, request.value, operationRequest);
+		if (!secretInfo.getPermission().masterPlayer.setTag.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+        return this.execute(request.userId, request.key, request.value, operationRequest);
     }
 
     public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -80,12 +91,16 @@ export class SetTagRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        return this.execute(request.userId, request.value, operationRequest);
+		if (!secretInfo.getPermission().masterPlayer.setTag.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+        return this.execute(request.userId, request.key, request.value, operationRequest);
     }
 
-    private async execute(userId: string, segment: string, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(userId: string, key: string, value: string | number | boolean, operationRequest: OperationRequest): Promise<OperationResponse> {
         let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            segments: true
+            tags: true
         }
 
 		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
@@ -98,11 +113,8 @@ export class SetTagRequestHandler extends RequestHandler {
             return operationResponse;
 		}
 
-        if (!masterPlayer.hasSegment(segment)) {
-            masterPlayer.addSegment(segment);
-
-            masterPlayer.saveAsync();
-        }
+		masterPlayer.setTag(key, value);
+		masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
 		return operationResponse;

@@ -1,33 +1,4 @@
 export class OperationCode {
-	// public static readonly Logout: number = -10;
-	// public static readonly Debug: number = -1;
-	// public static readonly GetAppConfig: number = 1;
-	// public static readonly Login: number = 2;
-	// public static readonly RegisterAccount: number = 3;
-	// public static readonly EnterDisplayName: number = 4;
-	// public static readonly RegisterSocket: number = 5;
-	// public static readonly FetchAllData: number = 6;
-	// public static readonly CreateNewFileUploadInfo: number = 7;
-	// public static readonly GetFileUploadInfo: number = 8;
-	// public static readonly FetchSparkPlayer: number = 9;
-	// public static readonly AddFriend: number = 10;
-	// public static readonly RemoveFriend: number = 11;
-	// public static readonly GetFriends: number = 12;
-	// public static readonly FindPlayer: number = 13;
-	// public static readonly SendChatToUser: number = 14;
-	// public static readonly GetChatMessageUser: number = 15;
-	// public static readonly SendChatToChannel: number = 16;
-	// public static readonly JoinChatChannel: number = 17;
-	// public static readonly LeaveChatChannel: number = 18;
-	// public static readonly GetChatInfoChannel: number = 19;
-	// public static readonly GetChatMessageChannel: number = 20;
-	// public static readonly GetChatMemberChannel: number = 21;
-	// public static readonly EditChatInfoChannel: number = 22;
-	// public static readonly EditChatMessageChannel: number = 23;
-	// public static readonly EditChatMessageUser: number = 24;
-
-
-
 	public static readonly LoginByAccount: number = 24;
 	public static readonly LoginByAndroidDeviceId: number = 24;
 	public static readonly LoginByApple: number = 24;
@@ -78,12 +49,36 @@ export class OperationCode {
 	public static readonly RemoveSegment: number = 24;
 	public static readonly GetSegment: number = 24;
 
+	public static readonly SetTag: number = 24;
+	public static readonly GetTag: number = 24;
+
+	public static readonly SetDisplayName: number = 24;
 	public static readonly GetDisplayName: number = 24;
+
 	public static readonly GetTsCreate: number = 24;
+	
 	public static readonly GetIpAddressCreate: number = 24;
 	public static readonly GetTsLastLogin: number = 24;
 	public static readonly GetCountryCode: number = 24;
-	public static readonly GetTag: number = 24;
 
 	public static readonly ChangeAccountPassword: number = 24;
+	public static readonly GetAvatar: number = 24;
+	public static readonly GetPlayerBan: number = 24;
+	public static readonly SetCountryCode: number = 24;
+	public static readonly GetPlayerCurrency: number = 24;
+	public static readonly GetPlayerStatistics: number = 24;
+	public static readonly SetAvatar: number = 24;
+	public static readonly ResetAccountPassword: number = 24;
+
+	public static readonly SetScriptData: number = 24;
+	public static readonly SetPrivateData: number = 24;
+	public static readonly SetPlayerStatistics: number = 24;
+	public static readonly SetPlayerData: number = 24;
+	public static readonly SetPlayerCurrency: number = 24;
+	public static readonly SetPlayerBan: number = 24;
+	public static readonly GetPrivateData: number = 24;
+	public static readonly GetScriptData: number = 24;
+	public static readonly GetPlayersWithApple: number = 24;
+	public static readonly GetPlayersWithFacebook: number = 24;
+	public static readonly GetPlayersWithGoogle: number = 24;
 }

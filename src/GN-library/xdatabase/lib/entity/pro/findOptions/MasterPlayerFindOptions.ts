@@ -1,4 +1,5 @@
 export interface MasterPlayerFindOptions {
+    userId?: boolean,
     external?: boolean,
     segments?: boolean,
     scriptData?: boolean,

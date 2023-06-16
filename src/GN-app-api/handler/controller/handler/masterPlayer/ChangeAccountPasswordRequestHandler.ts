@@ -10,9 +10,11 @@ import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/p
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
 
+import bcrypt from "bcrypt";
 import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { RequestHandler } from "../base/RequestHandler";
 import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class ChangeAccountPasswordOperationRequest extends OperationRequest {
 	@StringDataMember({ code: MasterPlayerParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
@@ -44,7 +46,7 @@ export class ChangeAccountPasswordRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.addSegment.selfEnable) {
+        if (!secretInfo.getPermission().masterPlayer.changeAccountPassword.selfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
@@ -62,14 +64,24 @@ export class ChangeAccountPasswordRequestHandler extends RequestHandler {
             return operationResponse;
 		}
 
-        // Change nao
-        
+		let external = masterPlayer.getExternal();
+		if (external.account == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotLinked);
+            return operationResponse;
+		}
+		
+        let isMatch = await bcrypt.compare(request.oldPassword, masterPlayer.getPassword());
 
-        if (!masterPlayer.hasSegment(segment)) {
-            masterPlayer.addSegment(segment);
+		if (!isMatch) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.AccountPasswordWrong);
 
-            masterPlayer.saveAsync();
-        }
+			return operationResponse;
+		}
+
+		external.account.password = await bcrypt.hash(request.password, 10);
+
+		masterPlayer.setExternal(external);
+        masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
 		return operationResponse;

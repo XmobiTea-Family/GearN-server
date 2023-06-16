@@ -83,47 +83,47 @@ export class xDatabase {
 		return answer;
 	}
 
-	public async loadMasterPlayersWithGoogleAsync(googleIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithGoogleAsync(googleIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.google": { $in: { "googleId": googleIds } }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ "external.google": { $in: { "googleId": googleIds } }}, masterPlayerFindOptions as any);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithFacebookAsync(facebookIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithFacebookAsync(facebookIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.facebook": { $in: { "facebookId": facebookIds } }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ "external.facebook": { $in: { "facebookId": facebookIds } }}, masterPlayerFindOptions as any);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithAppleAsync(appleIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithAppleAsync(appleIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.apple": { $in: { "appleId": appleIds } }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ "external.apple": { $in: { "appleId": appleIds } }}, masterPlayerFindOptions as any);
 		return this.convertToMasterPlayers(results, collection);
 	}
 	
-	public async loadMasterPlayersWithGenericServiceAsync(genericService: string, genericIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithGenericServiceAsync(genericService: string, genericIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 		let filter = {} as any;
 		filter["external.genericService.genericServices." + genericService] = { $in: { "genericId": genericIds } };
 
-		let results = await collection.find(filter, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find(filter, masterPlayerFindOptions as any);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithSegmentAsync(segment: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithSegmentAsync(segment: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "segments": { $elementMatch: segment }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ "segments": { $elementMatch: segment }}, masterPlayerFindOptions as any);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithTagAsync(key: string, value: string | boolean | number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any);
 		return this.convertToMasterPlayers(results, collection);
 	}
 

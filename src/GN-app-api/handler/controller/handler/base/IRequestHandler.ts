@@ -13,6 +13,6 @@ export interface IRequestHandler {
 
 	serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
 
-	handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
+	handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
 
 }

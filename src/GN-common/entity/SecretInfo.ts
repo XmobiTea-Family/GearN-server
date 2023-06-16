@@ -77,6 +77,29 @@ export interface SecretPermissionItem {
 		getTsLastLogin: SecretMasterPlayerPermissionItem,
 		getCountryCode: SecretMasterPlayerPermissionItem,
 		getTag: SecretMasterPlayerPermissionItem,
+		getAvatar: SecretMasterPlayerPermissionItem,
+		getPlayerBan: SecretMasterPlayerPermissionItem,
+		setCountryCode: SecretMasterPlayerPermissionItem,
+		setDisplayName: SecretMasterPlayerPermissionItem,
+
+		getPlayerCurrency: SecretMasterPlayerPermissionItem,
+		getPlayerStatistics: SecretMasterPlayerPermissionItem,
+		setAvatar: SecretMasterPlayerPermissionItem,
+		changeAccountPassword: SecretMasterPlayerPermissionItem,
+		resetAccountPassword: SecretMasterPlayerPermissionItem,
+		setTag: SecretMasterPlayerPermissionItem,
+
+		setPrivateData: SecretMasterPlayerPermissionItem,
+		setScriptData: SecretMasterPlayerPermissionItem,
+		setPlayerStatistics: SecretMasterPlayerPermissionItem,
+		setPlayerData: SecretMasterPlayerPermissionItem,
+		setPlayerCurrency: SecretMasterPlayerPermissionItem,
+		setPlayerBan: SecretMasterPlayerPermissionItem,
+		getPrivateData: SecretMasterPlayerPermissionItem,
+		getScriptData: SecretMasterPlayerPermissionItem,
+		getPlayersWithApple: SecretMasterPlayerPermissionItem,
+		getExternal: SecretMasterPlayerPermissionItem,
+		getPlayersWithGoogle: SecretMasterPlayerPermissionItem,
 	}
 }
 
