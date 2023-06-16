@@ -14,9 +14,10 @@ import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib
 import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
 import { GoogleLoginType } from "../../../../../GN-common/constant/enumType/GoogleLoginType";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 
 class LoginByGoogleOperationRequest extends OperationRequest {
-	@StringDataMember({ code: AuthenticateParameterCode.Token, maxLength: 1500, minLength: 100, mustNonNull: true })
+	@StringDataMember({ code: AuthenticateParameterCode.Token, maxLength: 512, minLength: 32, mustNonNull: true })
 	token: string;
 
 	@NumberDataMember({ code: AuthenticateParameterCode.Type, minValue: 1, maxValue: 2 })
@@ -44,11 +45,15 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 		return LoginByGoogleOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().authenticate.loginByGoogle.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());

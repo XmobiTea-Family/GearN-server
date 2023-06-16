@@ -9,7 +9,6 @@ import { MasterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro
 import { CurrencyItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/CurrencyItem";
 import { StatisticsItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/StatisticsItem";
 import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
-import { UserRoleType } from "../../../../../GN-common/constant/enumType/UserRoleType";
 import { CountryCodeType } from "../../../../../GN-common/constant/enumType/CountryCodeType";
 import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
@@ -45,7 +44,6 @@ export class LoginBaseRequestHandler extends RequestHandler {
 		let avatar = infoGetParameters.getBoolean(AuthenticateParameterCode.Avatar);
 		let tsCreate = infoGetParameters.getBoolean(AuthenticateParameterCode.TsCreate);
 		let tags = infoGetParameters.getBoolean(AuthenticateParameterCode.Tags);
-		let role = infoGetParameters.getBoolean(AuthenticateParameterCode.Role);
 		let playerBan = infoGetParameters.getBoolean(AuthenticateParameterCode.PlayerBan);
 		let playerDatas = infoGetParameters.getBoolean(AuthenticateParameterCode.PlayerDatas);
 		let playerCurrencies = infoGetParameters.getBoolean(AuthenticateParameterCode.PlayerCurrencies);
@@ -62,7 +60,6 @@ export class LoginBaseRequestHandler extends RequestHandler {
 		if (avatar) answer.avatar = true;
 		if (tsCreate) answer.tsCreate = true;
 		if (tags) answer.tags = true;
-		if (role) answer.role = true;
 		if (playerBan) answer.playerBan = true;
 		if (playerDatas) answer.playerDatas = true;
 		if (playerCurrencies) answer.playerCurrencies = true;
@@ -145,7 +142,7 @@ export class LoginBaseRequestHandler extends RequestHandler {
                     externalItem.genericService.genericServices.forEach((value, key: string) => {
                         let gnGenericService = new GNHashtable();
                         gnGenericService.add(AuthenticateParameterCode.ServiceName, key);
-                        gnGenericService.add(AuthenticateParameterCode.ServiceId, value.userId);
+                        gnGenericService.add(AuthenticateParameterCode.ServiceId, value.serviceId);
 
                         gnGenericServices.add(gnGenericService);
                     });
@@ -195,9 +192,6 @@ export class LoginBaseRequestHandler extends RequestHandler {
             });
             answer.add(AuthenticateParameterCode.Tags, gnTags);
         }
-
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.role)
-            answer.add(AuthenticateParameterCode.Role, masterPlayer.getRole());
 
         if (masterPlayerFindOptions == null || masterPlayerFindOptions.playerBan) {
             let playerBan = masterPlayer.getPlayerBan();
@@ -297,7 +291,6 @@ export class LoginBaseRequestHandler extends RequestHandler {
 
 		let newAuth = AuthInfo.Builder()
 			.setUserId(userId)
-			.setRole(masterPlayer.getRole())
 			.setSocketId('')
 			.setSocketRoomIds([])
 			.build();
@@ -320,7 +313,6 @@ export class LoginBaseRequestHandler extends RequestHandler {
         answer["avatar"] = { "type": 0, "value": "0"};
         answer["tsCreate"] = currentMilliseconds;
         answer["tags"] = [];
-        answer["role"] = <number>UserRoleType.UserNonActivate;
         answer["playerBan"] = {"tsExpire": 0, "reason": ""};
         answer["playerDatas"] = [];
         answer["playerCurrencies"] = {};

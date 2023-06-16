@@ -7,7 +7,6 @@ export interface MasterPlayerFindOptions {
     avatar?: boolean,
     tsCreate?: boolean,
     tags?: boolean,
-    role?: boolean,
     playerBan?: boolean,
     playerDatas?: boolean,
     playerCurrencies?: boolean,

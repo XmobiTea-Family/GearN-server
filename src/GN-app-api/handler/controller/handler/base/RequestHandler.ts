@@ -24,7 +24,7 @@ export abstract class RequestHandler implements IRequestHandler {
 		return this.newOperationInvalid(operationRequest);
 	}
 	
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		return this.newOperationInvalid(operationRequest);
 	}
 
@@ -42,6 +42,10 @@ export abstract class RequestHandler implements IRequestHandler {
 
 	protected newOperationInternalServerError(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
 		return OperationHelper.newOperationResponseInternalServerError(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
+	}
+
+	protected newOperationNotAllowError(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
+		return OperationHelper.newOperationNotAllowError(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
 	}
 
 	constructor(gnServer: GNServer) {

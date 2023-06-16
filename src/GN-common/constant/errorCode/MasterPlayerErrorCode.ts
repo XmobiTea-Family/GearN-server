@@ -3,4 +3,6 @@ export class MasterPlayerErrorCode {
 	public static readonly PlayerNotLinked: number = 2;
 	public static readonly ExternalLinkedOtherPlayer: number = 3;
 	public static readonly ExternalLinked: number = 3;
+	public static readonly PlayerNotFound: number = 4;
+	public static readonly VerifyTokenError: number = 5;
 }

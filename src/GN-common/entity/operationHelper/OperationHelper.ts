@@ -69,6 +69,15 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
+	public static newOperationNotAllowError(operationCode: number, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
+		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
+
+		operationInvalid.setReturnCode(ReturnCode.OperationNotAllow);
+		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
+
+		return operationInvalid;
+	}
+
 	public static toEventSocketData(operationEvent: OperationEvent): [number, {}] {
 		return [operationEvent.getEventCode(), operationEvent.getParameters() == null ? null : operationEvent.getParameters().toData()];
 	}

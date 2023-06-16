@@ -44,7 +44,7 @@ class AdminLinkCustomIdOperationRequest extends ServerLinkCustomIdOperationReque
 	}
 }
 
-export class LinkAccountRequestHandler extends RequestHandler {
+export class LinkCustomIdRequestHandler extends RequestHandler {
 	public override getCode() {
 		return OperationCode.LinkCustomId;
 	}
@@ -53,11 +53,15 @@ export class LinkAccountRequestHandler extends RequestHandler {
 		return LinkCustomIdOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().masterPlayer.linkCustomId.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
         return this.execute(authInfo.getUserId(), request.customId, operationRequest);
@@ -70,6 +74,10 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.linkCustomId.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.customId, operationRequest);
     }
 
@@ -80,6 +88,10 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.linkCustomId.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.customId, operationRequest);
     }
 
@@ -88,14 +100,15 @@ export class LinkAccountRequestHandler extends RequestHandler {
             external: true
         }
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByCustomIdAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            return this.newOperationInternalServerError(operationRequest);
-		}
-
 		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
+            return operationResponse;
+		}
 
         let external = masterPlayer.getExternal();
         if (external.custom != null && external.custom.customId != null) {
@@ -109,9 +122,9 @@ export class LinkAccountRequestHandler extends RequestHandler {
             return operationResponse;
         }
 
-        if (external.device == null) external.device = {};
-
-        external.custom.customId = customId;
+		external.custom = {
+			customId: customId
+		};
         masterPlayer.setExternal(external);
         masterPlayer.saveAsync();
 

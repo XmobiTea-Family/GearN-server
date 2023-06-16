@@ -13,9 +13,10 @@ import { AuthenticateErrorCode } from "../../../../../GN-common/constant/errorCo
 import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 
 class LoginByFacebookOperationRequest extends OperationRequest {
-	@StringDataMember({ code: AuthenticateParameterCode.Token, minLength: 6, maxLength: 512, mustNonNull: true })
+	@StringDataMember({ code: AuthenticateParameterCode.Token, minLength: 32, maxLength: 512, mustNonNull: true })
 	token: string;
 
 	@BooleanDataMember({ code: AuthenticateParameterCode.CreatePlayerIfNotExists })
@@ -40,11 +41,15 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
 		return LoginByFacebookOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().authenticate.loginByFacebook.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());

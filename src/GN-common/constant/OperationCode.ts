@@ -73,4 +73,15 @@ export class OperationCode {
 	public static readonly UnlinkMacOSDeviceId: number = 24;
 	public static readonly UnlinkWindowsDeviceId: number = 24;
 	public static readonly UnlinkWindowsPhoneDeviceId: number = 24;
+
+	public static readonly AddSegment: number = 24;
+	public static readonly RemoveSegment: number = 24;
+	public static readonly GetSegment: number = 24;
+
+	public static readonly GetDisplayName: number = 24;
+	public static readonly GetTsCreate: number = 24;
+	public static readonly GetIpAddressCreate: number = 24;
+	public static readonly GetTsLastLogin: number = 24;
+	public static readonly GetCountryCode: number = 24;
+	public static readonly GetTag: number = 24;
 }

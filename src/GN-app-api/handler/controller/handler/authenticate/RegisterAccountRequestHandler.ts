@@ -13,6 +13,7 @@ import { AuthenticateErrorCode } from "../../../../../GN-common/constant/errorCo
 import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 
 import bcrypt from "bcrypt";
 
@@ -42,11 +43,15 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 		return RegisterAccountOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().authenticate.registerAccount.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());

@@ -53,11 +53,15 @@ export class UnlinkFacebookRequestHandler extends RequestHandler {
 		return UnlinkFacebookOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().masterPlayer.unlinkFacebook.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
         return this.execute(authInfo.getUserId(), request.facebookId, operationRequest);
@@ -70,6 +74,10 @@ export class UnlinkFacebookRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.unlinkFacebook.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.facebookId, operationRequest);
     }
 
@@ -80,6 +88,10 @@ export class UnlinkFacebookRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.unlinkFacebook.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.facebookId, operationRequest);
     }
 
@@ -88,14 +100,15 @@ export class UnlinkFacebookRequestHandler extends RequestHandler {
             external: true
         }
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByCustomIdAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            return this.newOperationInternalServerError(operationRequest);
-		}
-
 		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
+            return operationResponse;
+		}
 
         let external = masterPlayer.getExternal();
         if (external.facebook == null || external.facebook.facebookId != facebookId) {

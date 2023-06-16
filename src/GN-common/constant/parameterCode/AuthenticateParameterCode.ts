@@ -26,7 +26,6 @@ export class AuthenticateParameterCode {
 	public static readonly Avatar: string = "24";
 	public static readonly TsCreate: string = "25";
 	public static readonly Tags: string = "26";
-	public static readonly Role: string = "27";
 	public static readonly PlayerBan: string = "28";
 	public static readonly PlayerDatas: string = "29";
 	public static readonly PlayerCurrencies: string = "30";

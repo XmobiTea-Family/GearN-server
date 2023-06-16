@@ -128,28 +128,28 @@ export class GNServer {
 	}
 
 	public init(): void {
-		this.requestController.addHandler(new DebugRequestHandler(this), false);
-		this.requestController.addHandler(new GetAppConfigRequestHandler(this), false);
-		this.requestController.addHandler(new LoginRequestHandler(this), false);
-		this.requestController.addHandler(new RegisterAccountRequestHandler(this), false);
-		this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
-		this.requestController.addHandler(new RegisterSocketRequestHandler(this));
-		this.requestController.addHandler(new FetchAllDataRequestHandler(this));
-		this.requestController.addHandler(new FetchSparkPlayerRequestHandler(this));
-		this.requestController.addHandler(new AddFriendRequestHandler(this));
-		this.requestController.addHandler(new RemoveFriendRequestHandler(this));
-		this.requestController.addHandler(new GetFriendsRequestHandler(this));
-		this.requestController.addHandler(new FindPlayerRequestHandler(this));
-		this.requestController.addHandler(new SendChatToUserRequestHandler(this));
-		this.requestController.addHandler(new GetChatMessageUserRequestHandler(this));
-		this.requestController.addHandler(new SendChatToChannelRequestHandler(this));
-		this.requestController.addHandler(new JoinChatChannelRequestHandler(this));
-		this.requestController.addHandler(new LeaveChatChannelRequestHandler(this));
-		this.requestController.addHandler(new GetChatInfoChannelRequestHandler(this));
-		this.requestController.addHandler(new GetChatMessageChannelRequestHandler(this));
-		this.requestController.addHandler(new GetChatMemberChannelRequestHandler(this));
-		this.requestController.addHandler(new EditChatChannelRequestHandler(this));
-		this.requestController.addHandler(new EditChatMessageChannelRequestHandler(this));
+		// this.requestController.addHandler(new DebugRequestHandler(this), false);
+		// this.requestController.addHandler(new GetAppConfigRequestHandler(this), false);
+		// this.requestController.addHandler(new LoginRequestHandler(this), false);
+		// this.requestController.addHandler(new RegisterAccountRequestHandler(this), false);
+		// this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
+		// this.requestController.addHandler(new RegisterSocketRequestHandler(this));
+		// this.requestController.addHandler(new FetchAllDataRequestHandler(this));
+		// this.requestController.addHandler(new FetchSparkPlayerRequestHandler(this));
+		// this.requestController.addHandler(new AddFriendRequestHandler(this));
+		// this.requestController.addHandler(new RemoveFriendRequestHandler(this));
+		// this.requestController.addHandler(new GetFriendsRequestHandler(this));
+		// this.requestController.addHandler(new FindPlayerRequestHandler(this));
+		// this.requestController.addHandler(new SendChatToUserRequestHandler(this));
+		// this.requestController.addHandler(new GetChatMessageUserRequestHandler(this));
+		// this.requestController.addHandler(new SendChatToChannelRequestHandler(this));
+		// this.requestController.addHandler(new JoinChatChannelRequestHandler(this));
+		// this.requestController.addHandler(new LeaveChatChannelRequestHandler(this));
+		// this.requestController.addHandler(new GetChatInfoChannelRequestHandler(this));
+		// this.requestController.addHandler(new GetChatMessageChannelRequestHandler(this));
+		// this.requestController.addHandler(new GetChatMemberChannelRequestHandler(this));
+		// this.requestController.addHandler(new EditChatChannelRequestHandler(this));
+		// this.requestController.addHandler(new EditChatMessageChannelRequestHandler(this));
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {
@@ -211,10 +211,10 @@ export class GNServer {
 	}
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
-		this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
-			if (error != null) Debug.logError("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
-			else Debug.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
-		});
+		// this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
+		// 	if (error != null) Debug.logError("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
+		// 	else Debug.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
+		// });
 	}
 
 	public getHandler(code: number): IRequestHandler {

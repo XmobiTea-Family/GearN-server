@@ -3,7 +3,6 @@ import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 abstract class BuilderBase {
 	protected authToken: string;
 	protected userId: string;
-	protected role: number;
 	protected remove: boolean;
 	protected tsExpire: number;
 	protected otherUserLogin: boolean;
@@ -19,10 +18,6 @@ abstract class BuilderBase {
 
 	public getUserId(): string {
 		return this.userId;
-	}
-
-	public getRole(): number {
-		return this.role;
 	}
 
 	public isRemove(): boolean {
@@ -95,10 +90,6 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
-	public setRole(role: number): Builder {
-		return this as Builder;
-	}
-
 	public setIsRemove(remove: boolean): Builder {
 		this.remove = remove;
 		return this as Builder;
@@ -160,11 +151,6 @@ class Builder extends BuilderBase implements IBuilder<AuthInfo> {
 		return this;
 	}
 
-	public setRole(role: number): Builder {
-		this.role = role;
-		return this;
-	}
-
 	public setTsExpire(tsExpire: number): Builder {
 		this.tsExpire = tsExpire;
 		return this;
@@ -194,7 +180,6 @@ export class AuthInfo extends BuilderBase {
 
 		this.authToken = builder.getAuthToken();
 		this.userId = builder.getUserId();
-		this.role = builder.getRole();
 		this.remove = builder.isRemove();
 		this.tsExpire = builder.getTsExpire();
 		this.otherUserLogin = builder.getOtherUserLogin();
@@ -209,7 +194,6 @@ export class AuthInfo extends BuilderBase {
 		return {
 			"authToken": this.authToken,
 			"userId": this.userId,
-			"role": this.role,
 			"isRemove": this.remove,
 			"tsExpire": this.tsExpire,
 			"otherUserLogin": this.otherUserLogin,

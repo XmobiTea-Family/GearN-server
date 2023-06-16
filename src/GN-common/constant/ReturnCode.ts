@@ -7,6 +7,7 @@ export class ReturnCode {
 	public static readonly InvalidRequestParameters: number = -6;
 	public static readonly OperationInvalid: number = -3;
 	public static readonly InternalServerError: number = -2;
+	public static readonly OperationNotAllow: number = -11;
 	public static readonly OperationTimeout: number = -1;
 
 	public static readonly UnknownError: number = 0;

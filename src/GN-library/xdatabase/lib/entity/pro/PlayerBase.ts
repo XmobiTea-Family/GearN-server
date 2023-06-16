@@ -8,7 +8,6 @@ import { StatisticsItem } from "./StatisticsItem";
 import { DataValueType } from "./type/DataValueType";
 
 export class PlayerBase extends DataObjectBase {
-	private static readonly _role: string = "role";
 	private static readonly _playerBan: string = "playerBan";
 
 	private static readonly _playerCurrencies: string = "playerCurrencies";
@@ -20,7 +19,6 @@ export class PlayerBase extends DataObjectBase {
 
 	private static readonly _tsLastLogin: string = "tsLastLogin";
 	
-	private role: number;
 	private playerBan: BanItem;
 
 	private playerCurrencies: Map<string, CurrencyItem>;
@@ -39,7 +37,6 @@ export class PlayerBase extends DataObjectBase {
 	}
 
 	private setDocumentPlayerBase(result: mongoDB.WithId<mongoDB.Document>): void {
-		this.role = result[PlayerBase._role];
 		this.playerBan = result[PlayerBase._playerBan];
 
 		this.playerCurrencies = result[PlayerBase._playerCurrencies];
@@ -51,16 +48,6 @@ export class PlayerBase extends DataObjectBase {
 		this.countryCode = result[PlayerBase._countryCode];
 
 		this.tsLastLogin = result[PlayerBase._tsLastLogin];
-	}
-
-	public getRole(): number {
-		return this.role;
-	}
-
-	public setRole(role: number): void {
-		this.role = role;
-
-		this.set(PlayerBase._role, this.role);
 	}
 
     public getPlayerBan(): BanItem {

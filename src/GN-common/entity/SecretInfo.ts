@@ -6,14 +6,93 @@ export enum SecretRole {
     Player,
 }
 
+interface SecretAuthenticatePermissionItem {
+	selfEnable: boolean;
+}
+
+interface SecretMasterPlayerPermissionItem {
+	selfEnable: boolean;
+	otherSelfEnable: boolean;
+	adminSelfEnable: boolean;
+	serverSelfEnable: boolean;
+}
+
+export interface SecretPermissionItem {
+	authenticate: {
+		loginByAccount: SecretAuthenticatePermissionItem,
+		loginByAndroidDeviceId: SecretAuthenticatePermissionItem,
+		loginByApple: SecretAuthenticatePermissionItem,
+		loginByCustomDeviceId: SecretAuthenticatePermissionItem,
+		loginByCustomId: SecretAuthenticatePermissionItem,
+		loginByEditorDeviceId: SecretAuthenticatePermissionItem,
+		loginByFacebook: SecretAuthenticatePermissionItem,
+		loginByGenericService: SecretAuthenticatePermissionItem,
+		loginByGoogle: SecretAuthenticatePermissionItem,
+		loginByiOSDeviceId: SecretAuthenticatePermissionItem,
+		loginByLinuxDeviceId: SecretAuthenticatePermissionItem,
+		loginByMacOSDeviceId: SecretAuthenticatePermissionItem,
+		loginByWindowsDeviceId: SecretAuthenticatePermissionItem,
+		loginByWindowsPhoneDeviceId: SecretAuthenticatePermissionItem,
+		registerAccount: SecretAuthenticatePermissionItem,
+
+	},
+	masterPlayer: {
+		linkAccount: SecretMasterPlayerPermissionItem,
+		linkAndroidDeviceId: SecretMasterPlayerPermissionItem,
+		linkApple: SecretMasterPlayerPermissionItem,
+		linkCustomDeviceId: SecretMasterPlayerPermissionItem,
+		linkCustomId: SecretMasterPlayerPermissionItem,
+		linkEditorDeviceId: SecretMasterPlayerPermissionItem,
+		linkFacebook: SecretMasterPlayerPermissionItem,
+		linkGenericService: SecretMasterPlayerPermissionItem,
+		linkGoogle: SecretMasterPlayerPermissionItem,
+		linkiOSDeviceId: SecretMasterPlayerPermissionItem,
+		linkLinuxDeviceId: SecretMasterPlayerPermissionItem,
+		linkMacOSDeviceId: SecretMasterPlayerPermissionItem,
+		linkWindowsDeviceId: SecretMasterPlayerPermissionItem,
+		linkWindowsPhoneDeviceId: SecretMasterPlayerPermissionItem,
+
+		unlinkAccount: SecretMasterPlayerPermissionItem,
+		unlinkAndroidDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkApple: SecretMasterPlayerPermissionItem,
+		unlinkCustomDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkCustomId: SecretMasterPlayerPermissionItem,
+		unlinkEditorDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkFacebook: SecretMasterPlayerPermissionItem,
+		unlinkGenericService: SecretMasterPlayerPermissionItem,
+		unlinkGoogle: SecretMasterPlayerPermissionItem,
+		unlinkiOSDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkLinuxDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkMacOSDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkWindowsDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkWindowsPhoneDeviceId: SecretMasterPlayerPermissionItem,
+
+		addSegment: SecretMasterPlayerPermissionItem,
+		removeSegment: SecretMasterPlayerPermissionItem,
+		getSegment: SecretMasterPlayerPermissionItem,
+
+		getDisplayName: SecretMasterPlayerPermissionItem,
+		getTsCreate: SecretMasterPlayerPermissionItem,
+		getIpAddressCreate: SecretMasterPlayerPermissionItem,
+		getTsLastLogin: SecretMasterPlayerPermissionItem,
+		getCountryCode: SecretMasterPlayerPermissionItem,
+		getTag: SecretMasterPlayerPermissionItem,
+	}
+}
+
 abstract class BuilderBase {
 	protected secretKey: string;
     protected role: number;
 	protected remove: boolean;
 	protected tsExpire: number;
+	protected permission: SecretPermissionItem;
 
 	public getSecretKey(): string {
 		return this.secretKey;
+	}
+
+	public getPermission(): SecretPermissionItem {
+		return this.permission;
 	}
 
 	public getRole(): number {
@@ -32,6 +111,10 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
+	public setPermission(permission: SecretPermissionItem): Builder {
+		return this as Builder;
+	}
+
 	public setRole(role: number): Builder {
 		return this as Builder;
 	}
@@ -46,7 +129,7 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
-	public build(): AuthInfo {
+	public build(): SecretInfo {
 		return null;
 	}
 
@@ -72,6 +155,11 @@ class Builder extends BuilderBase implements IBuilder<SecretInfo> {
 		return this;
 	}
 
+	public setPermission(permission: SecretPermissionItem): Builder {
+		this.permission = permission;
+		return this;
+	}
+
 	public build(): SecretInfo {
 		return new SecretInfo(this);
 	}
@@ -90,6 +178,7 @@ export class SecretInfo extends BuilderBase {
 		this.role = builder.getRole();
 		this.remove = builder.isRemove();
 		this.tsExpire = builder.getTsExpire();
+		this.permission = builder.getPermission();
 	}
 
 	public toDocumentData() {
@@ -98,6 +187,7 @@ export class SecretInfo extends BuilderBase {
 			"role": this.role,
 			"isRemove": this.remove,
 			"tsExpire": this.tsExpire,
+			"permission": this.permission,
 		}
 	}
 

@@ -1,13 +1,13 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
+import { MasterPlayerParameterCode } from "../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
 import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
 
 import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
@@ -44,7 +44,7 @@ class AdminLinkiOSDeviceIdOperationRequest extends ServerLinkiOSDeviceIdOperatio
 	}
 }
 
-export class LinkAccountRequestHandler extends RequestHandler {
+export class LinkiOSDeviceIdRequestHandler extends RequestHandler {
 	public override getCode() {
 		return OperationCode.LinkiOSDeviceId;
 	}
@@ -53,11 +53,15 @@ export class LinkAccountRequestHandler extends RequestHandler {
 		return LinkiOSDeviceIdOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().masterPlayer.linkiOSDeviceId.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
         return this.execute(authInfo.getUserId(), request.iOSDeviceId, operationRequest);
@@ -70,6 +74,10 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.linkiOSDeviceId.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.iOSDeviceId, operationRequest);
     }
 
@@ -80,6 +88,10 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.linkiOSDeviceId.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.iOSDeviceId, operationRequest);
     }
 
@@ -88,14 +100,15 @@ export class LinkAccountRequestHandler extends RequestHandler {
             external: true
         }
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByCustomIdAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            return this.newOperationInternalServerError(operationRequest);
-		}
-
 		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
+            return operationResponse;
+		}
 
         let external = masterPlayer.getExternal();
         if (external.device != null && external.device.iOSDeviceId != null) {

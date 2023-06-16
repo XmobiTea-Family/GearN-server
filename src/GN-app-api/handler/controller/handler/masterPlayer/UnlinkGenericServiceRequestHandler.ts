@@ -56,11 +56,15 @@ export class UnlinkGenericServiceRequestHandler extends RequestHandler {
 		return UnlinkGenericServiceOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().masterPlayer.unlinkGenericService.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
         return this.execute(authInfo.getUserId(), request.serviceName, request.serviceId, operationRequest);
@@ -73,6 +77,10 @@ export class UnlinkGenericServiceRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.unlinkGenericService.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.serviceName, request.serviceId, operationRequest);
     }
 
@@ -83,6 +91,10 @@ export class UnlinkGenericServiceRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.unlinkGenericService.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.serviceName, request.serviceId, operationRequest);
     }
 
@@ -91,22 +103,27 @@ export class UnlinkGenericServiceRequestHandler extends RequestHandler {
             external: true
         }
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByCustomIdAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            return this.newOperationInternalServerError(operationRequest);
-		}
-
 		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
+            return operationResponse;
+		}
+
         let external = masterPlayer.getExternal();
-        if (external.genericService == null || (external.genericService.genericServices.has(serviceName) != null && external.genericService.genericServices.get(serviceName).userId != serviceId)) {
+        if (external.genericService == null || (external.genericService.genericServices.has(serviceName) && external.genericService.genericServices.get(serviceName).serviceId != serviceId)) {
             operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotLinked);
             return operationResponse;
         }
 
-        external.account = null;
+        external.genericService.genericServices.delete(serviceName);
+		if (external.genericService.genericServices.size == 0) {
+			external.genericService = null;
+		}
+
         masterPlayer.setExternal(external);
         masterPlayer.saveAsync();
 

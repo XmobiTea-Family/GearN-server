@@ -44,7 +44,7 @@ class AdminLinkLinuxDeviceIdOperationRequest extends ServerLinkLinuxDeviceIdOper
 	}
 }
 
-export class LinkAccountRequestHandler extends RequestHandler {
+export class LinkLinuxDeviceIdRequestHandler extends RequestHandler {
 	public override getCode() {
 		return OperationCode.LinkLinuxDeviceId;
 	}
@@ -53,11 +53,15 @@ export class LinkAccountRequestHandler extends RequestHandler {
 		return LinkLinuxDeviceIdOperationRequest;
 	}
 
-	public async handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().masterPlayer.linkLinuxDeviceId.selfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
         return this.execute(authInfo.getUserId(), request.linuxDeviceId, operationRequest);
@@ -70,6 +74,10 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.linkLinuxDeviceId.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.linuxDeviceId, operationRequest);
     }
 
@@ -80,6 +88,10 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (!secretInfo.getPermission().masterPlayer.linkLinuxDeviceId.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
         return this.execute(request.userId, request.linuxDeviceId, operationRequest);
     }
 
@@ -88,14 +100,15 @@ export class LinkAccountRequestHandler extends RequestHandler {
             external: true
         }
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByCustomIdAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            return this.newOperationInternalServerError(operationRequest);
-		}
-
 		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
+            return operationResponse;
+		}
 
         let external = masterPlayer.getExternal();
         if (external.device != null && external.device.linuxDeviceId != null) {

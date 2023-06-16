@@ -86,7 +86,30 @@ export class xDatabase {
 	public async loadMasterPlayersWithGoogleAsync(googleIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.google.googleId": { $in: googleIds }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ "external.google": { $in: { "googleId": googleIds } }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersWithFacebookAsync(facebookIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ "external.facebook": { $in: { "facebookId": facebookIds } }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersWithAppleAsync(appleIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ "external.apple": { $in: { "appleId": appleIds } }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+	
+	public async loadMasterPlayersWithGenericServiceAsync(genericService: string, genericIds: string[], skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+		let filter = {} as any;
+		filter["external.genericService.genericServices." + genericService] = { $in: { "genericId": genericIds } };
+
+		let results = await collection.find(filter, masterPlayerFindOptions as any).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
@@ -97,7 +120,7 @@ export class xDatabase {
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithTagAsync(key: string, value: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
 		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any).skip(skip).limit(limit);
@@ -307,11 +330,11 @@ export class xDatabase {
 		return null;
 	}
 
-	public async loadMasterPlayerByGenericServiceAsync(serviceName: string, userId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+	public async loadMasterPlayerByGenericServiceAsync(serviceName: string, serviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
 
 		let filter = {} as any;
-		filter["external.genericService.genericServices." + serviceName + ".userId"] = userId;
+		filter["external.genericService.genericServices." + serviceName + ".serviceId"] = serviceId;
 
 		let result = await collection.findOne(filter, masterPlayerFindOptions as any);
 		if (result) {
@@ -344,7 +367,7 @@ export class xDatabase {
 		return this.convertToGamePlayers(results, collection);
 	}
 
-	public async loadGamePlayersWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+	public async loadGamePlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
 		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, gamePlayerFindOptions as any).skip(skip).limit(limit);
@@ -459,7 +482,7 @@ export class xDatabase {
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadCharacterPlayersWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+	public async loadCharacterPlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, characterPlayerFindOptions as any).skip(skip).limit(limit);
@@ -574,7 +597,7 @@ export class xDatabase {
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadGroupsWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+	public async loadGroupsWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, groupFindOptions as any).skip(skip).limit(limit);
@@ -689,7 +712,7 @@ export class xDatabase {
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadInventoriesWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+	public async loadInventoriesWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, inventoryFindOptions as any).skip(skip).limit(limit);
