@@ -84,4 +84,6 @@ export class OperationCode {
 	public static readonly GetTsLastLogin: number = 24;
 	public static readonly GetCountryCode: number = 24;
 	public static readonly GetTag: number = 24;
+
+	public static readonly ChangeAccountPassword: number = 24;
 }
