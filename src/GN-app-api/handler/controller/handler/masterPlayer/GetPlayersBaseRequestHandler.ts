@@ -15,6 +15,7 @@ import { RequestHandler } from "../base/RequestHandler";
 import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 import { StatisticsItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/StatisticsItem";
 import { MasterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
+import { CurrencyItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/CurrencyItem";
 
 class GetPlayersBaseOperationRequest extends OperationRequest {
 	public isValidRequest() {

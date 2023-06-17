@@ -71,35 +71,55 @@ export interface SecretPermissionItem {
 		removeSegment: SecretMasterPlayerPermissionItem,
 		getSegment: SecretMasterPlayerPermissionItem,
 
+		setTag: SecretMasterPlayerPermissionItem,
+		getTag: SecretMasterPlayerPermissionItem,
+
 		getDisplayName: SecretMasterPlayerPermissionItem,
+		setDisplayName: SecretMasterPlayerPermissionItem,
+
 		getTsCreate: SecretMasterPlayerPermissionItem,
 		getIpAddressCreate: SecretMasterPlayerPermissionItem,
 		getTsLastLogin: SecretMasterPlayerPermissionItem,
-		getCountryCode: SecretMasterPlayerPermissionItem,
-		getTag: SecretMasterPlayerPermissionItem,
-		getAvatar: SecretMasterPlayerPermissionItem,
-		getPlayerBan: SecretMasterPlayerPermissionItem,
-		setCountryCode: SecretMasterPlayerPermissionItem,
-		setDisplayName: SecretMasterPlayerPermissionItem,
 
-		getPlayerCurrency: SecretMasterPlayerPermissionItem,
-		getPlayerStatistics: SecretMasterPlayerPermissionItem,
-		setAvatar: SecretMasterPlayerPermissionItem,
+		setPlayerBan: SecretMasterPlayerPermissionItem,
+		getPlayerBan: SecretMasterPlayerPermissionItem,
+
+		setCountryCode: SecretMasterPlayerPermissionItem,
+		getCountryCode: SecretMasterPlayerPermissionItem,
+
 		changeAccountPassword: SecretMasterPlayerPermissionItem,
 		resetAccountPassword: SecretMasterPlayerPermissionItem,
-		setTag: SecretMasterPlayerPermissionItem,
+
+		setAvatar: SecretMasterPlayerPermissionItem,
+		getAvatar: SecretMasterPlayerPermissionItem,
+
+		setPlayerCurrency: SecretMasterPlayerPermissionItem,
+		getPlayerCurrency: SecretMasterPlayerPermissionItem,
+		
+		setPlayerStatistics: SecretMasterPlayerPermissionItem,
+		getPlayerStatistics: SecretMasterPlayerPermissionItem,
+
+		getStatisticsLeaderboard: SecretMasterPlayerPermissionItem,
+		getStatisticsLeaderboardAroundPlayer: SecretMasterPlayerPermissionItem,
+
+		getScriptData: SecretMasterPlayerPermissionItem,
+		setScriptData: SecretMasterPlayerPermissionItem,
 
 		setPrivateData: SecretMasterPlayerPermissionItem,
-		setScriptData: SecretMasterPlayerPermissionItem,
-		setPlayerStatistics: SecretMasterPlayerPermissionItem,
-		setPlayerData: SecretMasterPlayerPermissionItem,
-		setPlayerCurrency: SecretMasterPlayerPermissionItem,
-		setPlayerBan: SecretMasterPlayerPermissionItem,
 		getPrivateData: SecretMasterPlayerPermissionItem,
-		getScriptData: SecretMasterPlayerPermissionItem,
+
+		setPlayerData: SecretMasterPlayerPermissionItem,
+		getPlayerData: SecretMasterPlayerPermissionItem,
+
+		getPlayerInformation: SecretMasterPlayerPermissionItem,
+
 		getPlayersWithApple: SecretMasterPlayerPermissionItem,
-		getExternal: SecretMasterPlayerPermissionItem,
+		getPlayersWithFacebook: SecretMasterPlayerPermissionItem,
 		getPlayersWithGoogle: SecretMasterPlayerPermissionItem,
+		getPlayersWithGenericService: SecretMasterPlayerPermissionItem,
+		getPlayersWithSegment: SecretMasterPlayerPermissionItem,
+		getPlayersWithTag: SecretMasterPlayerPermissionItem,
+		getExternal: SecretMasterPlayerPermissionItem,
 	}
 }
 

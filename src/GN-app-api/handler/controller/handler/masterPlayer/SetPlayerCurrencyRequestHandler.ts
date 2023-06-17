@@ -13,8 +13,6 @@ import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCo
 import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { RequestHandler } from "../base/RequestHandler";
 import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
-import { StatisticsAggregationMethod } from "../../../../../GN-library/xdatabase/lib/entity/pro/StatisticsAggregationMethod";
 
 class SetPlayerCurrenciesOperationRequest extends OperationRequest {
     @StringDataMember({ code: MasterPlayerParameterCode.Key, minLength: 2, maxLength: 10 })

@@ -14,7 +14,6 @@ import bcrypt from "bcrypt";
 import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { RequestHandler } from "../base/RequestHandler";
 import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class ChangeAccountPasswordOperationRequest extends OperationRequest {
 	@StringDataMember({ code: MasterPlayerParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
@@ -51,7 +50,7 @@ export class ChangeAccountPasswordRequestHandler extends RequestHandler {
         }
 
         let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            segments: true
+            external: true
         }
 
 		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());

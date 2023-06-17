@@ -75,7 +75,7 @@ export class ResetAccountPasswordRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.addSegment.serverSelfEnable) {
+        if (!secretInfo.getPermission().masterPlayer.resetAccountPassword.serverSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
@@ -89,7 +89,7 @@ export class ResetAccountPasswordRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.addSegment.adminSelfEnable) {
+        if (!secretInfo.getPermission().masterPlayer.resetAccountPassword.adminSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 

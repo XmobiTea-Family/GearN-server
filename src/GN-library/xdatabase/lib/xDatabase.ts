@@ -11,6 +11,7 @@ import { Group } from "./entity/pro/Group";
 import { Inventory } from "./entity/pro/Inventory";
 import { GroupFindOptions } from "./entity/pro/findOptions/GroupFindOptions";
 import { InventoryFindOptions } from "./entity/pro/findOptions/InventoryFindOptions";
+import { xDatetime } from "../../xdatetime/lib/xDatetime";
 
 interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
@@ -113,17 +114,17 @@ export class xDatabase {
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithSegmentAsync(segment: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithSegmentAsync(segment: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "segments": { $elementMatch: segment }}, masterPlayerFindOptions as any);
+		let results = await collection.find({ "segments": { $elementMatch: segment }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithTagAsync(key: string, value: string | boolean | number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any);
+		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
@@ -154,16 +155,20 @@ export class xDatabase {
 		let collection = this.systemCollection("MasterPlayer");
 
 		let options = {} as any;
-		options["playerStatistics." + key] = true;
+		options["playerStatistics"] = true;
 
-		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		let thisPlayer = await this.loadMasterPlayerAsync(userId, options);
 		if (thisPlayer == null) return -1;
 
-		let playerStatistics = thisPlayer["playerStatistics"];
-		if (playerStatistics == null) return -1;
+		let score = 0;
+		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
-		let score = playerStatistics.value;
-		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let playerStatistics = thisPlayer.getPlayerStatistics(key);
+		if (playerStatistics != null) {
+			score = playerStatistics.value;
+			tsLastUpdate = playerStatistics.tsLastUpdate;
+		}
+		
 		let filter = {} as any;
 		filter["playerStatistics." + key] = {
 			$and: [{
@@ -182,15 +187,18 @@ export class xDatabase {
 		let collection = this.systemCollection("MasterPlayer");
 
 		let options = {} as any;
-		options["playerCurrencies." + key] = true;
+		options["playerCurrencies"] = true;
 
-		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		let thisPlayer = await this.loadMasterPlayerAsync(userId, options);
 		if (thisPlayer == null) return -1;
+		
+		let score = 0;
 
-		let playerCurrencies = thisPlayer["playerCurrencies"];
-		if (playerCurrencies == null) return -1;
+		let playerCurrencies = thisPlayer.getPlayerCurrency(key);
+		if (playerCurrencies != null) {
+			score = playerCurrencies.value;
+		}
 
-		let score = playerCurrencies.value;
 		let filter = {} as any;
 
 		filter["playerCurrencies." + key] = {
@@ -401,16 +409,20 @@ export class xDatabase {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
 		let options = {} as any;
-		options["playerStatistics." + key] = true;
+		options["playerStatistics"] = true;
 
-		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, options);
 		if (thisPlayer == null) return -1;
 
-		let playerStatistics = thisPlayer["playerStatistics"];
-		if (playerStatistics == null) return -1;
+		let score = 0;
+		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
-		let score = playerStatistics.value;
-		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let playerStatistics = thisPlayer.getPlayerStatistics(key);
+		if (playerStatistics != null) {
+			score = playerStatistics.value;
+			tsLastUpdate = playerStatistics.tsLastUpdate;
+		}
+
 		let filter = {} as any;
 		filter["playerStatistics." + key] = {
 			$and: [{
@@ -429,15 +441,17 @@ export class xDatabase {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
 		let options = {} as any;
-		options["playerCurrencies." + key] = true;
+		options["playerCurrencies"] = true;
 
-		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, options);
 		if (thisPlayer == null) return -1;
 
-		let playerCurrencies = thisPlayer["playerCurrencies"];
-		if (playerCurrencies == null) return -1;
+		let score = 0;
+		let playerCurrencies = thisPlayer.getPlayerCurrency(key);
+		if (playerCurrencies != null) {
+			score = playerCurrencies.value;
+		}
 
-		let score = playerCurrencies.value;
 		let filter = {} as any;
 
 		filter["playerCurrencies." + key] = {
@@ -516,16 +530,20 @@ export class xDatabase {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let options = {} as any;
-		options["playerStatistics." + key] = true;
+		options["playerStatistics"] = true;
 
-		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, options);
 		if (thisPlayer == null) return -1;
 
-		let playerStatistics = thisPlayer["playerStatistics"];
-		if (playerStatistics == null) return -1;
+		let score = 0;
+		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
-		let score = playerStatistics.value;
-		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let playerStatistics = thisPlayer.getPlayerStatistics(key);
+		if (playerStatistics != null) {
+			score = playerStatistics.value;
+			tsLastUpdate = playerStatistics.tsLastUpdate;
+		}
+
 		let filter = {} as any;
 		filter["playerStatistics." + key] = {
 			$and: [{
@@ -544,15 +562,18 @@ export class xDatabase {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let options = {} as any;
-		options["playerCurrencies." + key] = true;
+		options["playerCurrencies"] = true;
 
-		let thisPlayer = await collection.findOne({ "userId": userId }, options);
+		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, options);
 		if (thisPlayer == null) return -1;
 
-		let playerCurrencies = thisPlayer["playerCurrencies"];
-		if (playerCurrencies == null) return -1;
+		let score = 0;
 
-		let score = playerCurrencies.value;
+		let playerCurrencies = thisPlayer.getPlayerCurrency(key);
+		if (playerCurrencies != null) {
+			score = playerCurrencies.value;
+		}
+
 		let filter = {} as any;
 
 		filter["playerCurrencies." + key] = {
@@ -631,16 +652,20 @@ export class xDatabase {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let options = {} as any;
-		options["groupStatistics." + key] = true;
+		options["groupStatistics"] = true;
 
-		let thisPlayer = await collection.findOne({ "groupId": groupId }, options);
-		if (thisPlayer == null) return -1;
+		let thisGroup = await this.loadGroupAsync(groupId, gameId, options);
+		if (thisGroup == null) return -1;
 
-		let playerStatistics = thisPlayer["playerStatistics"];
-		if (playerStatistics == null) return -1;
+		let score = 0;
+		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
-		let score = playerStatistics.value;
-		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let playerStatistics = thisGroup.getGroupStatistics(key);
+		if (playerStatistics != null) {
+			score = playerStatistics.value;
+			tsLastUpdate = playerStatistics.tsLastUpdate;
+		}
+
 		let filter = {} as any;
 		filter["groupStatistics." + key] = {
 			$and: [{
@@ -659,15 +684,18 @@ export class xDatabase {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let options = {} as any;
-		options["groupCurrencies." + key] = true;
+		options["groupCurrencies"] = true;
 
-		let thisPlayer = await collection.findOne({ "groupId": groupId }, options);
-		if (thisPlayer == null) return -1;
+		let thisGroup = await this.loadGroupAsync(groupId, gameId, options);
+		if (thisGroup == null) return -1;
 
-		let playerCurrencies = thisPlayer["groupCurrencies"];
-		if (playerCurrencies == null) return -1;
+		let score = 0;
 
-		let score = playerCurrencies.value;
+		let groupCurrency = thisGroup.getGroupCurrency(key);
+		if (groupCurrency != null) {
+			score = groupCurrency.value;
+		}
+
 		let filter = {} as any;
 
 		filter["groupCurrencies." + key] = {
@@ -732,30 +760,24 @@ export class xDatabase {
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadInventoriesLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
-		let collection = this.systemGameCollection("Inventory", gameId);
-
-		let $sort = {} as any;
-		$sort["itemCurrencies." + key + ".value"] = -1;
-
-		let results = await collection.find({}, inventoryFindOptions as any).sort($sort).skip(skip).limit(limit);
-		return this.convertToInventories(results, collection);
-	}
-
 	public async loadPositionInventoryLeaderboardWithStatisticsAsync(key: string, itemId: string, gameId: string): Promise<number> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let options = {} as any;
-		options["itemStatistics." + key] = true;
+		options["itemStatistics"] = true;
 
-		let thisPlayer = await collection.findOne({ "itemId": itemId }, options);
-		if (thisPlayer == null) return -1;
+		let thisInventory = await this.loadInventoryAsync(itemId, options);
+		if (thisInventory == null) return -1;
 
-		let playerStatistics = thisPlayer["playerStatistics"];
-		if (playerStatistics == null) return -1;
+		let score = 0;
+		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
-		let score = playerStatistics.value;
-		let tsLastUpdate = playerStatistics.tsLastUpdate;
+		let itemStatistics = thisInventory.getItemStatistics(key);
+		if (itemStatistics != null) {
+			score = 0;
+			tsLastUpdate = itemStatistics.tsLastUpdate;
+		}
+
 		let filter = {} as any;
 		filter["itemStatistics." + key] = {
 			$and: [{
@@ -766,29 +788,6 @@ export class xDatabase {
 					tsLastUpdate: tsLastUpdate
 				}
 			}],
-		}
-		return await collection.countDocuments(filter);
-	}
-
-	public async loadPositionInventoryLeaderboardWithCurrenciesAsync(key: string, itemId: string, gameId: string): Promise<number> {
-		let collection = this.systemGameCollection("Inventory", gameId);
-
-		let options = {} as any;
-		options["itemCurrencies." + key] = true;
-
-		let thisPlayer = await collection.findOne({ "itemId": itemId }, options);
-		if (thisPlayer == null) return -1;
-
-		let playerCurrencies = thisPlayer["groupCurrencies"];
-		if (playerCurrencies == null) return -1;
-
-		let score = playerCurrencies.value;
-		let filter = {} as any;
-
-		filter["itemCurrencies." + key] = {
-			$gt: {
-				value: score,
-			}
 		}
 		return await collection.countDocuments(filter);
 	}
