@@ -1,6 +1,6 @@
 export interface CharacterPlayerFindOptions {
     characterId?: boolean,
-    characterCatalogId?: boolean,
+    categoryId?: boolean,
     owner?: boolean,
     removeStatus?: boolean,
     socketId?: boolean,

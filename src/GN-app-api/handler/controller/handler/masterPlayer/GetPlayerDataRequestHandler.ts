@@ -13,7 +13,6 @@ import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCo
 import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { RequestHandler } from "../base/RequestHandler";
 import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { DataItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/DataItem";
 import { PermissionDataItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/PermissionDataItem";
 
 class GetPlayerDataOperationRequest extends OperationRequest {

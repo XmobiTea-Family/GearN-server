@@ -120,6 +120,178 @@ export interface SecretPermissionItem {
 		getPlayersWithSegment: SecretMasterPlayerPermissionItem,
 		getPlayersWithTag: SecretMasterPlayerPermissionItem,
 		getExternal: SecretMasterPlayerPermissionItem,
+	},
+	gamePlayer: {
+		linkAccount: SecretMasterPlayerPermissionItem,
+		linkAndroidDeviceId: SecretMasterPlayerPermissionItem,
+		linkApple: SecretMasterPlayerPermissionItem,
+		linkCustomDeviceId: SecretMasterPlayerPermissionItem,
+		linkCustomId: SecretMasterPlayerPermissionItem,
+		linkEditorDeviceId: SecretMasterPlayerPermissionItem,
+		linkFacebook: SecretMasterPlayerPermissionItem,
+		linkGenericService: SecretMasterPlayerPermissionItem,
+		linkGoogle: SecretMasterPlayerPermissionItem,
+		linkiOSDeviceId: SecretMasterPlayerPermissionItem,
+		linkLinuxDeviceId: SecretMasterPlayerPermissionItem,
+		linkMacOSDeviceId: SecretMasterPlayerPermissionItem,
+		linkWindowsDeviceId: SecretMasterPlayerPermissionItem,
+		linkWindowsPhoneDeviceId: SecretMasterPlayerPermissionItem,
+
+		unlinkAccount: SecretMasterPlayerPermissionItem,
+		unlinkAndroidDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkApple: SecretMasterPlayerPermissionItem,
+		unlinkCustomDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkCustomId: SecretMasterPlayerPermissionItem,
+		unlinkEditorDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkFacebook: SecretMasterPlayerPermissionItem,
+		unlinkGenericService: SecretMasterPlayerPermissionItem,
+		unlinkGoogle: SecretMasterPlayerPermissionItem,
+		unlinkiOSDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkLinuxDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkMacOSDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkWindowsDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkWindowsPhoneDeviceId: SecretMasterPlayerPermissionItem,
+
+		addSegment: SecretMasterPlayerPermissionItem,
+		removeSegment: SecretMasterPlayerPermissionItem,
+		getSegment: SecretMasterPlayerPermissionItem,
+
+		setTag: SecretMasterPlayerPermissionItem,
+		getTag: SecretMasterPlayerPermissionItem,
+
+		getDisplayName: SecretMasterPlayerPermissionItem,
+		setDisplayName: SecretMasterPlayerPermissionItem,
+
+		getTsCreate: SecretMasterPlayerPermissionItem,
+		getIpAddressCreate: SecretMasterPlayerPermissionItem,
+		getTsLastLogin: SecretMasterPlayerPermissionItem,
+
+		setPlayerBan: SecretMasterPlayerPermissionItem,
+		getPlayerBan: SecretMasterPlayerPermissionItem,
+
+		setCountryCode: SecretMasterPlayerPermissionItem,
+		getCountryCode: SecretMasterPlayerPermissionItem,
+
+		changeAccountPassword: SecretMasterPlayerPermissionItem,
+		resetAccountPassword: SecretMasterPlayerPermissionItem,
+
+		setAvatar: SecretMasterPlayerPermissionItem,
+		getAvatar: SecretMasterPlayerPermissionItem,
+
+		setPlayerCurrency: SecretMasterPlayerPermissionItem,
+		getPlayerCurrency: SecretMasterPlayerPermissionItem,
+		
+		setPlayerStatistics: SecretMasterPlayerPermissionItem,
+		getPlayerStatistics: SecretMasterPlayerPermissionItem,
+
+		getStatisticsLeaderboard: SecretMasterPlayerPermissionItem,
+		getStatisticsLeaderboardAroundPlayer: SecretMasterPlayerPermissionItem,
+
+		getScriptData: SecretMasterPlayerPermissionItem,
+		setScriptData: SecretMasterPlayerPermissionItem,
+
+		setPrivateData: SecretMasterPlayerPermissionItem,
+		getPrivateData: SecretMasterPlayerPermissionItem,
+
+		setPlayerData: SecretMasterPlayerPermissionItem,
+		getPlayerData: SecretMasterPlayerPermissionItem,
+
+		getPlayerInformation: SecretMasterPlayerPermissionItem,
+
+		getPlayersWithApple: SecretMasterPlayerPermissionItem,
+		getPlayersWithFacebook: SecretMasterPlayerPermissionItem,
+		getPlayersWithGoogle: SecretMasterPlayerPermissionItem,
+		getPlayersWithGenericService: SecretMasterPlayerPermissionItem,
+		getPlayersWithSegment: SecretMasterPlayerPermissionItem,
+		getPlayersWithTag: SecretMasterPlayerPermissionItem,
+		getExternal: SecretMasterPlayerPermissionItem,
+	},
+	characterPlayer: {
+		linkAccount: SecretMasterPlayerPermissionItem,
+		linkAndroidDeviceId: SecretMasterPlayerPermissionItem,
+		linkApple: SecretMasterPlayerPermissionItem,
+		linkCustomDeviceId: SecretMasterPlayerPermissionItem,
+		linkCustomId: SecretMasterPlayerPermissionItem,
+		linkEditorDeviceId: SecretMasterPlayerPermissionItem,
+		linkFacebook: SecretMasterPlayerPermissionItem,
+		linkGenericService: SecretMasterPlayerPermissionItem,
+		linkGoogle: SecretMasterPlayerPermissionItem,
+		linkiOSDeviceId: SecretMasterPlayerPermissionItem,
+		linkLinuxDeviceId: SecretMasterPlayerPermissionItem,
+		linkMacOSDeviceId: SecretMasterPlayerPermissionItem,
+		linkWindowsDeviceId: SecretMasterPlayerPermissionItem,
+		linkWindowsPhoneDeviceId: SecretMasterPlayerPermissionItem,
+
+		unlinkAccount: SecretMasterPlayerPermissionItem,
+		unlinkAndroidDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkApple: SecretMasterPlayerPermissionItem,
+		unlinkCustomDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkCustomId: SecretMasterPlayerPermissionItem,
+		unlinkEditorDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkFacebook: SecretMasterPlayerPermissionItem,
+		unlinkGenericService: SecretMasterPlayerPermissionItem,
+		unlinkGoogle: SecretMasterPlayerPermissionItem,
+		unlinkiOSDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkLinuxDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkMacOSDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkWindowsDeviceId: SecretMasterPlayerPermissionItem,
+		unlinkWindowsPhoneDeviceId: SecretMasterPlayerPermissionItem,
+
+		addSegment: SecretMasterPlayerPermissionItem,
+		removeSegment: SecretMasterPlayerPermissionItem,
+		getSegment: SecretMasterPlayerPermissionItem,
+
+		setTag: SecretMasterPlayerPermissionItem,
+		getTag: SecretMasterPlayerPermissionItem,
+
+		getDisplayName: SecretMasterPlayerPermissionItem,
+		setDisplayName: SecretMasterPlayerPermissionItem,
+
+		getTsCreate: SecretMasterPlayerPermissionItem,
+		getIpAddressCreate: SecretMasterPlayerPermissionItem,
+		getTsLastLogin: SecretMasterPlayerPermissionItem,
+
+		setPlayerBan: SecretMasterPlayerPermissionItem,
+		getPlayerBan: SecretMasterPlayerPermissionItem,
+
+		setCountryCode: SecretMasterPlayerPermissionItem,
+		getCountryCode: SecretMasterPlayerPermissionItem,
+
+		changeAccountPassword: SecretMasterPlayerPermissionItem,
+		resetAccountPassword: SecretMasterPlayerPermissionItem,
+
+		setAvatar: SecretMasterPlayerPermissionItem,
+		getAvatar: SecretMasterPlayerPermissionItem,
+
+		setPlayerCurrency: SecretMasterPlayerPermissionItem,
+		getPlayerCurrency: SecretMasterPlayerPermissionItem,
+		
+		setPlayerStatistics: SecretMasterPlayerPermissionItem,
+		getPlayerStatistics: SecretMasterPlayerPermissionItem,
+
+		getStatisticsLeaderboard: SecretMasterPlayerPermissionItem,
+		getStatisticsLeaderboardAroundPlayer: SecretMasterPlayerPermissionItem,
+
+		getScriptData: SecretMasterPlayerPermissionItem,
+		setScriptData: SecretMasterPlayerPermissionItem,
+
+		setPrivateData: SecretMasterPlayerPermissionItem,
+		getPrivateData: SecretMasterPlayerPermissionItem,
+
+		setPlayerData: SecretMasterPlayerPermissionItem,
+		getPlayerData: SecretMasterPlayerPermissionItem,
+
+		getPlayerInformation: SecretMasterPlayerPermissionItem,
+
+		getPlayersWithApple: SecretMasterPlayerPermissionItem,
+		getPlayersWithFacebook: SecretMasterPlayerPermissionItem,
+		getPlayersWithGoogle: SecretMasterPlayerPermissionItem,
+		getPlayersWithGenericService: SecretMasterPlayerPermissionItem,
+		getPlayersWithSegment: SecretMasterPlayerPermissionItem,
+		getPlayersWithTag: SecretMasterPlayerPermissionItem,
+		getExternal: SecretMasterPlayerPermissionItem,
+
+		getCategoryId: SecretMasterPlayerPermissionItem,
 	}
 }
 
@@ -129,6 +301,7 @@ abstract class BuilderBase {
 	protected remove: boolean;
 	protected tsExpire: number;
 	protected permission: SecretPermissionItem;
+	protected gameId: string;
 
 	public getSecretKey(): string {
 		return this.secretKey;
@@ -150,11 +323,19 @@ abstract class BuilderBase {
 		return this.tsExpire;
 	}
 
+	public getGameId(): string {
+		return this.gameId;
+	}
+
 	public setSecretKey(secretKey: string): Builder {
 		return this as Builder;
 	}
 
 	public setPermission(permission: SecretPermissionItem): Builder {
+		return this as Builder;
+	}
+
+	public setGameId(gameId: string): Builder {
 		return this as Builder;
 	}
 
@@ -203,6 +384,11 @@ class Builder extends BuilderBase implements IBuilder<SecretInfo> {
 		return this;
 	}
 
+	public setGameId(gameId: string): Builder {
+		this.gameId = gameId;
+		return this as Builder;
+	}
+
 	public build(): SecretInfo {
 		return new SecretInfo(this);
 	}
@@ -222,6 +408,7 @@ export class SecretInfo extends BuilderBase {
 		this.remove = builder.isRemove();
 		this.tsExpire = builder.getTsExpire();
 		this.permission = builder.getPermission();
+		this.gameId = builder.getGameId();
 	}
 
 	public toDocumentData() {
@@ -231,6 +418,7 @@ export class SecretInfo extends BuilderBase {
 			"isRemove": this.remove,
 			"tsExpire": this.tsExpire,
 			"permission": this.permission,
+			"gameId": this.gameId,
 		}
 	}
 
