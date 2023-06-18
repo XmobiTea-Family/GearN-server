@@ -64,18 +64,18 @@ export class HttpAppHandler {
 	}
 
 	public run(): void {
-		this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
-			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+		// this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
+		// 	res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
-			let configName = req.params.configName;
-			if (configName != null) {
-				let configItem = this.gnServer.getConfigGame().getConfig(configName);
+		// 	let configName = req.params.configName;
+		// 	if (configName != null) {
+		// 		let configItem = this.gnServer.getConfigGame().getConfig(configName);
 
-				if (configItem != null) return res.json([ReturnCode.Ok, { "1": configItem.toJson() }]);
-			}
+		// 		if (configItem != null) return res.json([ReturnCode.Ok, { "1": configItem.toJson() }]);
+		// 	}
 
-			return res.json([ReturnCode.OperationInvalid]);
-		});
+		// 	return res.json([ReturnCode.OperationInvalid]);
+		// });
 
 		this.router.get("/ts", (req: express.Request, res: express.Response) => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
@@ -115,7 +115,7 @@ export class HttpAppHandler {
 				this.apiJsonRouter
 			);
 
-			this.apiJsonRouter.post("/:code", async (req: express.Request, res: express.Response) => {
+			this.apiJsonRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response) => {
 				let operationResponse = await this.onHttpRequest(req, false);
 
 				this.antiDdosMiddleware.removePendingRequest(req, res);
@@ -171,7 +171,7 @@ export class HttpAppHandler {
 				this.apiMsgPackRouter
 			);
 
-			this.apiMsgPackRouter.post("/:code", async (req: express.Request, res: express.Response) => {
+			this.apiMsgPackRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response) => {
 				let operationResponse = await this.onHttpRequest(req, true);
 
 				this.antiDdosMiddleware.removePendingRequest(req, res);
@@ -205,18 +205,23 @@ export class HttpAppHandler {
 
 	private async onHttpRequest(req: express.Request, encrypted: boolean): Promise<OperationResponse> {
 		let codeStr = req.params.code;
-		if (isNaN(codeStr as any)) return null;
+		let typeStr = req.params.type;
+		let roleStr = req.params.role;
+		if (isNaN(codeStr as any) || isNaN(typeStr as any) || isNaN(roleStr as any)) return null;
 
 		let code = Number.parseInt(codeStr);
+		let type = Number.parseInt(typeStr);
+		let role = Number.parseInt(roleStr);
 		let operationResponse: OperationResponse;
 		let reqAny = req as any;
 		let parameters = req.body;
 		let ip = reqAny.xip;
-		let request = new Request(code);
+		let request = new Request(code, type, role);
 		request.setRequestId(0);
 		request.setIP(ip);
 		request.setParameters(!parameters ? {} : parameters);
 		request.setAuthenticate(reqAny.authInfo);
+		request.setSecretInfo(reqAny.secretInfo);
 		request.setEncrypted(encrypted);
 
 		if (this.enableSendAndReceiveDebug) {
@@ -230,11 +235,7 @@ export class HttpAppHandler {
 		catch {
 			operationResponse = new OperationResponse(code, 0, request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.InternalServerError);
-
-			
 		}
-
-
 
 		return operationResponse;
 	}

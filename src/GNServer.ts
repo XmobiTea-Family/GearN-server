@@ -2,7 +2,6 @@ const GN_VERSION = "1.0.9";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
-import { DebugRequestHandler } from "./GN-app-api/handler/controller/handler/DebugRequestHandler";
 import { Socket } from "socket.io";
 import { xConfig } from "./GN-library/xconfig/lib/xConfig";
 import { xDatabase } from "./GN-library/xdatabase/lib/xDatabase";
@@ -13,12 +12,7 @@ import { IRequestHandler } from "./GN-app-api/handler/controller/handler/base/IR
 // import { AuthInfo } from "./GN-common/entity/AuthInfo";
 import { OperationResponse } from "./GN-common/entity/operationResponse/OperationResponse";
 import { Request } from "./GN-common/entity/operationRequest/base/Request";
-import { EnterDisplayNameRequestHandler } from "./GN-app-api/handler/controller/handler/EnterDisplayNameRequestHandler";
-import { FetchAllDataRequestHandler } from "./GN-app-api/handler/controller/handler/FetchAllDataRequestHandler";
-import { GetAppConfigRequestHandler } from "./GN-app-api/handler/controller/handler/GetAppConfigRequestHandler";
-import { LoginRequestHandler } from "./GN-app-api/handler/controller/handler/LoginRequestHandler";
-import { RegisterAccountRequestHandler } from "./GN-app-api/handler/controller/handler/RegisterAccountRequestHandler";
-import { RegisterSocketRequestHandler } from "./GN-app-api/handler/controller/handler/RegisterSocketRequestHandler";
+
 import { AppleService } from "./GN-app-api/service/AppleService";
 import { xMail } from "./GN-library/xmail/lib/xMail";
 import { TimerService } from "./GN-app-api/service/TimerService";
@@ -29,35 +23,18 @@ import { OnRunSuccess } from "./GN-library/xbuilder/lib/OnRunSuccess";
 import { ILockService } from "./GN-app-api/service/ILockService";
 import { LockService } from "./GN-app-api/service/LockService";
 import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
-import { LoginType } from "./GN-common/constant/enumType/LoginType";
 import { ApiMiddleware } from "./GN-startup/middleware/ApiMiddleware";
-import { Debug } from "./GN-library/xdebug/lib/xDebug";
 import { IRequestConverterService } from "./GN-app-api/service/IRequestConverterService";
 import { RequestConverterService } from "./GN-app-api/service/RequestConverterService";
 import { IWeb3Service } from "./GN-app-api/service/IWeb3Service";
 import { Web3Service } from "./GN-app-api/service/Web3Service";
 import { IGoogleService } from "./GN-app-api/service/IGoogleService";
 import { GoogleService } from "./GN-app-api/service/GoogleService";
-import { FetchSparkPlayerRequestHandler } from "./GN-app-api/handler/controller/handler/FetchSparkPlayerRequestHandler";
 import { CodeHelper } from "./GN-common/helper/CodeHelper";
 import { IAnalyticsService } from "./GN-app-api/service/IAnalyticsService";
 import { AnalyticsService } from "./GN-app-api/service/AnalyticsService";
 import { IChatService } from "./GN-app-api/service/IChatService";
 import { ChatService } from "./GN-app-api/service/ChatService";
-import { AddFriendRequestHandler } from "./GN-app-api/handler/controller/handler/AddFriendRequestHandler";
-import { RemoveFriendRequestHandler } from "./GN-app-api/handler/controller/handler/RemoveFriendRequestHandler";
-import { GetFriendsRequestHandler } from "./GN-app-api/handler/controller/handler/GetFriendsRequestHandler";
-import { FindPlayerRequestHandler } from "./GN-app-api/handler/controller/handler/FindPlayerRequestHandler";
-import { SendChatToUserRequestHandler } from "./GN-app-api/handler/controller/handler/SendChatToUserRequestHandler";
-import { SendChatToChannelRequestHandler } from "./GN-app-api/handler/controller/handler/SendChatToChannelRequestHandler";
-import { JoinChatChannelRequestHandler } from "./GN-app-api/handler/controller/handler/JoinChatChannelRequestHandler";
-import { LeaveChatChannelRequestHandler } from "./GN-app-api/handler/controller/handler/LeaveChatChannelRequestHandler";
-import { GetChatInfoChannelRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatInfoChannelRequestHandler";
-import { GetChatMessageChannelRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatMessageChannelRequestHandler";
-import { GetChatMemberChannelRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatMemberChannelRequestHandler";
-import { EditChatChannelRequestHandler } from "./GN-app-api/handler/controller/handler/EditChatInfoChannelRequestHandler";
-import { EditChatMessageChannelRequestHandler } from "./GN-app-api/handler/controller/handler/EditChatMessageChannelRequestHandler";
-import { GetChatMessageUserRequestHandler } from "./GN-app-api/handler/controller/handler/GetChatMessageUserRequestHandler";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -91,20 +68,7 @@ export class GNServer {
 	private analyticsService: IAnalyticsService;
 	private chatService: IChatService;
 
-	private loginTypeEnables: LoginType[] = [];
-
 	constructor() {
-		this.loginTypeEnables = [
-			LoginType.Account,
-			LoginType.Device,
-			LoginType.Facebook,
-			LoginType.Google,
-			LoginType.Apple,
-			LoginType.UserId,
-			LoginType.PublicAddress,
-			LoginType.CustomId,
-		];
-
 		this.facebookService = new FacebookService();
 		this.appleService = new AppleService();
 		this.web3Service = new Web3Service();
@@ -128,28 +92,7 @@ export class GNServer {
 	}
 
 	public init(): void {
-		// this.requestController.addHandler(new DebugRequestHandler(this), false);
-		// this.requestController.addHandler(new GetAppConfigRequestHandler(this), false);
-		// this.requestController.addHandler(new LoginRequestHandler(this), false);
-		// this.requestController.addHandler(new RegisterAccountRequestHandler(this), false);
-		// this.requestController.addHandler(new EnterDisplayNameRequestHandler(this));
-		// this.requestController.addHandler(new RegisterSocketRequestHandler(this));
-		// this.requestController.addHandler(new FetchAllDataRequestHandler(this));
-		// this.requestController.addHandler(new FetchSparkPlayerRequestHandler(this));
-		// this.requestController.addHandler(new AddFriendRequestHandler(this));
-		// this.requestController.addHandler(new RemoveFriendRequestHandler(this));
-		// this.requestController.addHandler(new GetFriendsRequestHandler(this));
-		// this.requestController.addHandler(new FindPlayerRequestHandler(this));
-		// this.requestController.addHandler(new SendChatToUserRequestHandler(this));
-		// this.requestController.addHandler(new GetChatMessageUserRequestHandler(this));
-		// this.requestController.addHandler(new SendChatToChannelRequestHandler(this));
-		// this.requestController.addHandler(new JoinChatChannelRequestHandler(this));
-		// this.requestController.addHandler(new LeaveChatChannelRequestHandler(this));
-		// this.requestController.addHandler(new GetChatInfoChannelRequestHandler(this));
-		// this.requestController.addHandler(new GetChatMessageChannelRequestHandler(this));
-		// this.requestController.addHandler(new GetChatMemberChannelRequestHandler(this));
-		// this.requestController.addHandler(new EditChatChannelRequestHandler(this));
-		// this.requestController.addHandler(new EditChatMessageChannelRequestHandler(this));
+		
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {
@@ -206,8 +149,8 @@ export class GNServer {
 		return this.requestController;
 	}
 
-	public addHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true): void {
-		this.requestController.addHandler(requestHandler, onlyAuthenticated);
+	public addHandler(type: number, requestHandler: IRequestHandler, onlyAuthenticated: boolean = true): void {
+		this.requestController.addHandler(type, requestHandler, onlyAuthenticated);
 	}
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
@@ -217,12 +160,12 @@ export class GNServer {
 		// });
 	}
 
-	public getHandler(code: number): IRequestHandler {
-		return this.requestController.getHandler(code);
+	public getHandler(type: number, code: number): IRequestHandler {
+		return this.requestController.getHandler(type, code);
 	}
 
-	public removeHandler(code: number): void {
-		return this.requestController.removeHandler(code);
+	public removeHandler(type: number, code: number): void {
+		return this.requestController.removeHandler(type, code);
 	}
 
 	public getConfigGame(): xConfig {
@@ -275,14 +218,6 @@ export class GNServer {
 
 	public getRequestConverterService(): IRequestConverterService {
 		return this.requestConverterService;
-	}
-
-	public getLoginTypeEnables(): LoginType[] {
-		return this.loginTypeEnables;
-	}
-
-	public setLoginTypeEnables(loginTypeEnables: LoginType[]): void {
-		this.loginTypeEnables = loginTypeEnables;
 	}
 
 	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {

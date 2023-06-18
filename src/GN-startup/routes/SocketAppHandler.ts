@@ -237,10 +237,12 @@ export class SocketAppHandler {
 
 	private async onSocketResponse(socket: Socket, requestData: any, returnCode: number, encrypted: boolean): Promise<OperationResponse> {
 		let code = requestData[0] as number;
-		let params = requestData.length > 1 ? (requestData[1] as {}) : {};
-		let requestId = requestData.length > 2 ? (requestData[2] as number) : -1;
+		let type = requestData[1] as number;
+		let role = requestData[2] as number;
+		let params = requestData.length > 3 ? (requestData[3] as {}) : {};
+		let requestId = requestData.length > 4 ? (requestData[4] as number) : -1;
 
-		let request = new Request(code);
+		let request = new Request(code, type, role);
 		request.setIP(socket.data.IPAddress);
 		request.setParameters(params);
 		request.setRequestId(requestId);
@@ -248,6 +250,9 @@ export class SocketAppHandler {
 
 		let isAuthenticated = socket.data.isAuthenticated;
 		if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
+
+		let isSecreted = socket.data.isSecreted;
+		if (isSecreted === true) request.setSecretInfo(socket.data.secretInfo);
 
 		if (this.enableSendAndReceiveDebug) {
 			Debug.log("[SOCKET RECV] %O", request);

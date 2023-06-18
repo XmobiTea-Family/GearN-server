@@ -1,13 +1,20 @@
+
+
 export class Request {
 	private code: number;
+	private type: number;
+	private role: number;
 	private requestId: number = -1;
 	private authInfo: any = null;
+	private secretInfo: any = null;
 	private ip: string;
 	private parameters: { [k: string]: any } = {};
 	private encrypted: boolean;
 
-	constructor(code: number) {
+	constructor(code: number, type: number, role: number) {
 		this.code = code;
+		this.type = type;
+		this.role = role;
 	}
 
 	public setRequestId(requestId: number) {
@@ -16,6 +23,10 @@ export class Request {
 
 	public setAuthenticate(authInfo: any) {
 		this.authInfo = authInfo;
+	}
+
+	public setSecretInfo(secretInfo: any) {
+		this.secretInfo = secretInfo;
 	}
 
 	public setIP(ip: string) {
@@ -34,6 +45,14 @@ export class Request {
 		return this.code;
 	}
 
+	public getType(): number {
+		return this.type;
+	}
+
+	public getRole(): number {
+		return this.role;
+	}
+
 	public getRequestId(): number {
 		return this.requestId;
 	}
@@ -42,8 +61,16 @@ export class Request {
 		return this.authInfo != null;
 	}
 
+	public isSecreted(): boolean {
+		return this.secretInfo != null;
+	}
+
 	public getAuthInfo(): any {
 		return this.authInfo;
+	}
+
+	public getSecretInfo(): any {
+		return this.secretInfo;
 	}
 
 	public getIP(): string {

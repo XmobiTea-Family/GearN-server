@@ -135,7 +135,6 @@ export class ApiMiddleware {
 		let authInfo = AuthInfo.Builder()
 			.setAuthToken(authToken)
 			.setUserId(info.getUserId())
-			.setRole(info.getRole())
 			.setIsRemove(false)
 			.setTsExpire(tsExpire)
 			.setOtherUserLogin(false)
@@ -172,10 +171,10 @@ export class ApiMiddleware {
 			if (secretInfoTemp != null) {
 				secretInfo = SecretInfo.Builder()
 					.setSecretKey(secretInfoTemp["secretKey"])
-					// .setOtherData("RoomId", null)
 					.setIsRemove(secretInfoTemp["isRemove"])
 					.setRole(secretInfoTemp["role"])
 					.setTsExpire(secretInfoTemp["tsExpire"])
+					.setGameId(secretInfoTemp["gameId"])
 					.build();
 
 				this.secretInfoDict.set(secretKey, secretInfo);
@@ -197,7 +196,6 @@ export class ApiMiddleware {
 					// .setOtherData("RoomId", null)
 					.setIsRemove(authInfoTemp["isRemove"])
 					.setOtherUserLogin(authInfoTemp["otherUserLogin"])
-					.setRole(authInfoTemp["role"])
 					.setTsExpire(authInfoTemp["tsExpire"])
 					.setUserId(userId)
 					.setOtherDatas(authInfoTemp["otherDatas"])
@@ -291,6 +289,8 @@ export class ApiMiddleware {
 
 		let reqAny = req as any;
 
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
 		if (!authToken) {
 			reqAny.isAuthenticated = false;
 		} else {
@@ -299,7 +299,6 @@ export class ApiMiddleware {
 			if (authInfo == null) {
 				reqAny.isAuthenticated = false;
 			} else {
-				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 				let userId = authInfo.getUserId();
 
 				if (authInfo.getOtherUserLogin()) {
@@ -374,8 +373,15 @@ export class ApiMiddleware {
 				reqAny.isSecreted = false;
 			}
 			else {
-				reqAny.isSecreted = true;
-				reqAny.secretInfo = secretInfo;
+				if (secretInfo.getTsExpire() != -1 && secretInfo.getTsExpire() < currentMilliseconds) {
+					this.secretInfoDict.delete(secretKey);
+
+					reqAny.isSecreted = false;
+				}
+				else {
+					reqAny.isSecreted = true;
+					reqAny.secretInfo = secretInfo;
+				}
 			}
 		}
 
@@ -383,9 +389,9 @@ export class ApiMiddleware {
 	}
 
 	public async socketAuthenticateToken(socket: Socket, next: (returnCode: number) => void): Promise<void> {
-		if (socket.data.isAuthenticated === true) {
-			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
+		if (socket.data.isAuthenticated === true) {
 			let authInfo = socket.data.authInfo as AuthInfo;
 			let authToken = authInfo.getAuthToken();
 			let userId = authInfo.getUserId();
@@ -447,6 +453,18 @@ export class ApiMiddleware {
 				if (!socket.data.isAuthenticated || !dauLast30Min.includes((socket.data.authInfo as AuthInfo).getUserId())) {
 					return next(ReturnCode.MaxCCUReject);
 				}
+			}
+		}
+
+		if (socket.data.isSecreted === true) {
+			let secretInfo = socket.data.secretInfo as SecretInfo;
+			let secretKey = secretInfo.getSecretKey();
+
+			if (secretInfo.getTsExpire() != -1 && secretInfo.getTsExpire() < currentMilliseconds) {
+				this.secretInfoDict.delete(secretKey);
+
+				socket.data.isSecreted = false;
+				socket.data.secretInfo = null;
 			}
 		}
 

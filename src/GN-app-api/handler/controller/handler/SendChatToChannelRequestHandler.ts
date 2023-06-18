@@ -30,48 +30,48 @@ class SendChatToChannelOperationRequest extends OperationRequest {
 
 export class SendChatToChannelRequestHandler extends RequestHandler {
     public getCode() {
-        return OperationCode.SendChatToChannel;
+        return 0;
     }
 
     public override getCommonOperationRequest() {
         return SendChatToChannelOperationRequest;
     }
 
-    public async handle(
-        authInfo: AuthInfo,
-        operationRequest: OperationRequest
-    ): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+    // public async handle(
+    //     authInfo: AuthInfo,
+    //     operationRequest: OperationRequest
+    // ): Promise<OperationResponse> {
+    //     let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+    //     if (!request.isValidRequest()) {
+    //         return this.newInvalidRequestParameters(request);
+    //     }
 
-        // let gamePlayer = await this.gnServer.getDatabase().loadGamePlayer(authInfo.getUserId());
+    //     // let gamePlayer = await this.gnServer.getDatabase().loadGamePlayer(authInfo.getUserId());
 
-        let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
+    //     let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 
-        operationResponse.setReturnCode(ReturnCode.Ok);
-        operationResponse.setParameter(ParameterCode.ErrorCode, ChatErrorCode.Ok);
+    //     operationResponse.setReturnCode(ReturnCode.Ok);
+    //     operationResponse.setParameter(ParameterCode.ErrorCode, ChatErrorCode.Ok);
 
-        let chatMessage = await this.gnServer.getChatService().addChatMessageAsync(authInfo.getUserId(), request.channel, request.message);
+    //     let chatMessage = await this.gnServer.getChatService().addChatMessageAsync(authInfo.getUserId(), request.channel, request.message);
 
-        let chatOperationEvent = new OperationEvent(EventCode.OnChannelChat, new GNHashtable());
+    //     let chatOperationEvent = new OperationEvent(EventCode.OnChannelChat, new GNHashtable());
 
-        let gsChatMessage = new GNHashtable();
-        gsChatMessage.add(ChatParameterCode.Message, chatMessage.message);
-        gsChatMessage.add(ChatParameterCode.TsCreate, chatMessage.tsCreate);
-        gsChatMessage.add(ChatParameterCode.UserId, chatMessage.senderId);
-        let gsChatMessageLst = new GNArray();
-        gsChatMessageLst.add(gsChatMessage);
+    //     let gsChatMessage = new GNHashtable();
+    //     gsChatMessage.add(ChatParameterCode.Message, chatMessage.message);
+    //     gsChatMessage.add(ChatParameterCode.TsCreate, chatMessage.tsCreate);
+    //     gsChatMessage.add(ChatParameterCode.UserId, chatMessage.senderId);
+    //     let gsChatMessageLst = new GNArray();
+    //     gsChatMessageLst.add(gsChatMessage);
 
-        let gsChannelInfo = new GNHashtable();
-        gsChannelInfo.add(ChatParameterCode.Channel, chatMessage.channel);
-        gsChannelInfo.add(ChatParameterCode.ChatMessageLst, gsChatMessageLst);
-        chatOperationEvent.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
+    //     let gsChannelInfo = new GNHashtable();
+    //     gsChannelInfo.add(ChatParameterCode.Channel, chatMessage.channel);
+    //     gsChannelInfo.add(ChatParameterCode.ChatMessageLst, gsChatMessageLst);
+    //     chatOperationEvent.setScriptData(ChatParameterCode.ChannelInfo, gsChannelInfo);
 
-        this.gnServer.sendEventToRoom(request.channel, chatOperationEvent);
+    //     this.gnServer.sendEventToRoom(request.channel, chatOperationEvent);
 
-        return operationResponse;
-    }
+    //     return operationResponse;
+    // }
 }

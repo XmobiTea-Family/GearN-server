@@ -6,7 +6,9 @@ import { OperationHelper } from "./../../../GN-common/entity/operationHelper/Ope
 
 export class RequestController {
 	private handlers: {
-		[k: number]: IRequestHandler;
+		[k: number]: {
+			[k: number]: IRequestHandler;
+		}
 	};
 
 	private requestUnAuthenticatedCodes: number[];
@@ -21,33 +23,58 @@ export class RequestController {
 		return this.requestUnAuthenticatedCodes;
 	}
 
-	public addHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
+	public addHandler(type: number, requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
+		if (this.handlers[type] == null) {
+			this.handlers[type] = {};
+		}
+
+		let allHandler = this.handlers[type];
+
 		let code = requestHandler.getCode();
-		this.handlers[code] = requestHandler;
+		allHandler[code] = requestHandler;
 
 		if (!onlyAuthenticated) this.requestUnAuthenticatedCodes.push(code);
 	}
 
-	public removeHandler(code: number) {
-		delete this.handlers[code];
+	public removeHandler(type: number, code: number) {
+		if (this.handlers[type] == null) {
+			this.handlers[type] = {};
+		}
+
+		let allHandler = this.handlers[type];
+
+		delete allHandler[code];
 	}
 
 	public removeAllHandlers() {
 		this.handlers = {};
 	}
 
-	public getHandler(code: number): IRequestHandler {
-		return this.handlers[code];
+	public getHandler(type: number, code: number): IRequestHandler {
+		if (this.handlers[type] == null) {
+			this.handlers[type] = {};
+		}
+
+		let allHandler = this.handlers[type];
+
+		return allHandler[code];
 	}
 
-	public getAllHandlers(): IRequestHandler[] {
-		return Object.values(this.handlers);
+	public getAllHandlers(type: number): IRequestHandler[] {
+		if (this.handlers[type] == null) {
+			this.handlers[type] = {};
+		}
+
+		let allHandler = this.handlers[type];
+		return Object.values(allHandler);
 	}
 
 	public async handleRequest(request: Request): Promise<OperationResponse> {
 		let code = request.getCode();
+		let role = request.getRole();
+
 		let isAuthenticated = request.isAuthenticated();
-		if (!isAuthenticated) {
+		if (!isAuthenticated && role != 1 && role != 2) {
 			// if the user not authentication
 			// and this request not in unAthenticated
 			if (this.requestUnAuthenticatedCodes.indexOf(code) == -1) {
@@ -55,11 +82,20 @@ export class RequestController {
 			}
 		}
 
-		let operationRequest = this.requestConverterService.newOperationRequest(request);
-
-		let handler = this.handlers[operationRequest.getOperationCode()];
+		let type = request.getType();
+		let handler = this.getHandler(type, code);
 		if (handler != null) {
-			return handler.handle(request.getAuthInfo(), operationRequest);
+			let operationRequest = this.requestConverterService.newOperationRequest(request);
+
+			if (role == 1) {
+				return handler.adminHandle(request.getSecretInfo(), operationRequest);
+			}
+			else if (role == 2) {
+				return handler.serverHandle(request.getSecretInfo(), operationRequest);
+			}
+			else if (role == 3) {
+				return handler.handle(request.getAuthInfo(), request.getSecretInfo(), operationRequest);
+			}
 		}
 
 		return null;
