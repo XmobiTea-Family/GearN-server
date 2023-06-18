@@ -48,7 +48,7 @@ export class AnalyticsService implements IAnalyticsService {
             return answer;
         }
         else {
-            let analyticsCollection = this.gnServer.getDatabase().systemGameCollection("Analytics");
+            let analyticsCollection = this.gnServer.getDatabase().systemCollection("Analytics");
 
             let result = await analyticsCollection.findOne({ "TsCreate": tsDate });
             if (result == null) return null;
@@ -93,7 +93,7 @@ export class AnalyticsService implements IAnalyticsService {
     private async getAnalytics(): Promise<void> {
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
         let millisecondsSince0h = xDatetime.getToday0hMilliseconds();
-        let playerCollection = this.gnServer.getDatabase().systemGameCollection("Player");
+        let playerCollection = this.gnServer.getDatabase().systemCollection("Player");
 
         // CCU
         {
@@ -211,7 +211,7 @@ export class AnalyticsService implements IAnalyticsService {
     }
 
     private async saveAnalytics(): Promise<void> {
-        let analyticsCollection = this.gnServer.getDatabase().systemGameCollection("Analytics");
+        let analyticsCollection = this.gnServer.getDatabase().systemCollection("Analytics");
 
         let currentDate = xDatetime.getCurrentDate();
         currentDate.setMinutes(Math.floor(currentDate.getMinutes() / 15) * 15);

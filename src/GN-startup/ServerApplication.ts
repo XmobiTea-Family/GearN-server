@@ -276,8 +276,6 @@ export class ServerApplication extends BuilderBase {
 		let authTokenCollection = this.gnServer.getDatabase().systemCollection("AuthInfoCollection");
 		this.apiMiddleware.setAuthInfoCollection(authTokenCollection);
 
-		let playerGameCollection = this.gnServer.getDatabase().systemGameCollection("Player");
-		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
 		this.apiMiddleware.setExpiredToken(this.getApplicationSettings().getExpiredToken());
 		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 
@@ -287,21 +285,21 @@ export class ServerApplication extends BuilderBase {
 		let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdosCollection");
 		this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
-		let adapterEventCollection = this.gnServer.getDatabase().systemGameCollection("AdapterEventCollection");
+		let adapterEventCollection = this.gnServer.getDatabase().systemGameCollection("AdapterEventCollection", "main");
 		this.socketApp.setEmitter(adapterEventCollection);
 
 		(this.gnServer.getAppleService() as AppleService).setAppleClientId(this.getOtherSettings().getAppleClientId());
 		(this.gnServer.getGoogleService() as GoogleService).setGoogleClientId(this.getOtherSettings().getGoogleClientId());
 
-		let configCollection = this.gnServer.getDatabase().systemGameCollection("Config");
-		this.gnServer.getConfigGame().setConfigCollection(configCollection);
-		this.gnServer.getConfigGame().run(() => {
-			Debug.log("[GN] Config Game run success");
-		});
+		// let configCollection = this.gnServer.getDatabase().systemGameCollection("Config");
+		// this.gnServer.getConfigGame().setConfigCollection(configCollection);
+		// this.gnServer.getConfigGame().run(() => {
+		// 	Debug.log("[GN] Config Game run success");
+		// });
 
-		let uploadFileInfoCollection = this.gnServer.getDatabase().systemGameCollection("UploadFileInfo");
-		this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
-		this.uploadFileMiddleware.setUploadFileInfoCollection(uploadFileInfoCollection);
+		// let uploadFileInfoCollection = this.gnServer.getDatabase().systemGameCollection("UploadFileInfo");
+		// this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
+		// this.uploadFileMiddleware.setUploadFileInfoCollection(uploadFileInfoCollection);
 
 		this.gnServer.init();
 		this.gnServer.run(() => {
@@ -335,10 +333,9 @@ export class ServerApplication extends BuilderBase {
 		{
 			let connectionString = this.databaseSettings.getConnectionString();
 			let databaseName = this.databaseSettings.getDatabaseName();
-			let gameName = this.databaseSettings.getGameName();
 
 			let options = this.databaseSettings.getOptions();
-			gnServer.getDatabase().init(connectionString, databaseName, gameName, options);
+			gnServer.getDatabase().init(connectionString, databaseName, options);
 		}
 
 		// setting mail
@@ -393,134 +390,134 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	private async createEnsureIndex(): Promise<void> {
-		let database = this.gnServer.getDatabase();
+		// let database = this.gnServer.getDatabase();
 
-		database.createIndex("System.AuthInfoCollection", {
-			AuthToken: 1,
-		});
-		database.createIndex(
-			"System." + database.getGameName() + "." + "Config",
-			{ ConfigName: 1 }
-		);
+		// database.createIndex("System.AuthInfoCollection", {
+		// 	AuthToken: 1,
+		// });
+		// database.createIndex(
+		// 	"System." + database.getGameName() + "." + "Config",
+		// 	{ ConfigName: 1 }
+		// );
 
-		database.createIndex("System.Player", { Username: 1 });
-		database.createIndex("System.Player", { Username: 1, Password: 1 });
-		database.createIndex("System.Player", { TsCreate: -1 });
-		database.createIndex("System.Player", { TsLastSeen: -1 });
+		// database.createIndex("System.Player", { Username: 1 });
+		// database.createIndex("System.Player", { Username: 1, Password: 1 });
+		// database.createIndex("System.Player", { TsCreate: -1 });
+		// database.createIndex("System.Player", { TsLastSeen: -1 });
 
-		database.createIndex(
-			"System.Player",
-			{ "UserEmail.Value": 1, "UserEmail.IsConfirm": -1 },
-			{
-				sparse: true
-			}
-		);
+		// database.createIndex(
+		// 	"System.Player",
+		// 	{ "UserEmail.Value": 1, "UserEmail.IsConfirm": -1 },
+		// 	{
+		// 		sparse: true
+		// 	}
+		// );
 
-		database.createIndex(
-			"System.Player",
-			{ "UserExternal.FacebookId": 1 },
-			{
-				sparse: true
-			}
-		);
-		database.createIndex(
-			"System.Player",
-			{ "UserExternal.DeviceInfo": 1 },
-			{
-				sparse: true
-			}
-		);
-		database.createIndex(
-			"System.Player",
-			{ "UserExternal.CustomId": 1 },
-			{
-				sparse: true
-			}
-		);
-		database.createIndex(
-			"System.Player",
-			{ "UserExternal.PublicAddress": 1 },
-			{
-				sparse: true
-			}
-		);
-		database.createIndex(
-			"System.Player",
-			{ "UserExternal.AppleUserId": 1 },
-			{
-				sparse: true
-			}
-		);
-		database.createIndex(
-			"System.Player",
-			{ "UserExternal.GoogleUserId": 1 },
-			{
-				sparse: true
-			}
-		);
+		// database.createIndex(
+		// 	"System.Player",
+		// 	{ "UserExternal.FacebookId": 1 },
+		// 	{
+		// 		sparse: true
+		// 	}
+		// );
+		// database.createIndex(
+		// 	"System.Player",
+		// 	{ "UserExternal.DeviceInfo": 1 },
+		// 	{
+		// 		sparse: true
+		// 	}
+		// );
+		// database.createIndex(
+		// 	"System.Player",
+		// 	{ "UserExternal.CustomId": 1 },
+		// 	{
+		// 		sparse: true
+		// 	}
+		// );
+		// database.createIndex(
+		// 	"System.Player",
+		// 	{ "UserExternal.PublicAddress": 1 },
+		// 	{
+		// 		sparse: true
+		// 	}
+		// );
+		// database.createIndex(
+		// 	"System.Player",
+		// 	{ "UserExternal.AppleUserId": 1 },
+		// 	{
+		// 		sparse: true
+		// 	}
+		// );
+		// database.createIndex(
+		// 	"System.Player",
+		// 	{ "UserExternal.GoogleUserId": 1 },
+		// 	{
+		// 		sparse: true
+		// 	}
+		// );
 
-		database.createIndex("System.ExternalFBAuthentication", { UserId: 1 });
-		database.createIndex("System.ExternalFBAuthentication", {
-			ExternalId: 1,
-			IsRemove: -1,
-		});
+		// database.createIndex("System.ExternalFBAuthentication", { UserId: 1 });
+		// database.createIndex("System.ExternalFBAuthentication", {
+		// 	ExternalId: 1,
+		// 	IsRemove: -1,
+		// });
 
-		database.createIndex("System.ExternalAppleAuthentication", {
-			UserId: 1,
-		});
-		database.createIndex("System.ExternalAppleAuthentication", {
-			ExternalId: 1,
-			IsRemove: -1,
-		});
+		// database.createIndex("System.ExternalAppleAuthentication", {
+		// 	UserId: 1,
+		// });
+		// database.createIndex("System.ExternalAppleAuthentication", {
+		// 	ExternalId: 1,
+		// 	IsRemove: -1,
+		// });
 
-		database.createIndex("System.ExternalGoogleAuthentication", {
-			UserId: 1,
-		});
-		database.createIndex("System.ExternalGoogleAuthentication", {
-			ExternalId: 1,
-			IsRemove: -1,
-		});
+		// database.createIndex("System.ExternalGoogleAuthentication", {
+		// 	UserId: 1,
+		// });
+		// database.createIndex("System.ExternalGoogleAuthentication", {
+		// 	ExternalId: 1,
+		// 	IsRemove: -1,
+		// });
 
-		database.createIndex("System.Friend", { UserId: 1 });
-		database.createIndex(
-			"System." + database.getGameName() + ".Player",
-			{ UserId: 1 }
-		);
-		database.createIndex(
-			"System." + database.getGameName() + ".Player",
-			{ TsCreate: -1 }
-		);
-		database.createIndex(
-			"System." + database.getGameName() + ".Player",
-			{ TsLastSeen: -1 }
-		);
+		// database.createIndex("System.Friend", { UserId: 1 });
+		// database.createIndex(
+		// 	"System." + database.getGameName() + ".Player",
+		// 	{ UserId: 1 }
+		// );
+		// database.createIndex(
+		// 	"System." + database.getGameName() + ".Player",
+		// 	{ TsCreate: -1 }
+		// );
+		// database.createIndex(
+		// 	"System." + database.getGameName() + ".Player",
+		// 	{ TsLastSeen: -1 }
+		// );
 
-		database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { FileId: 1 });
-		database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { UserId: 1 });
-		database.createIndex("System." + database.getGameName() + ".Analytics", { TsCreate: -1 });
+		// database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { FileId: 1 });
+		// database.createIndex("System." + database.getGameName() + ".UploadFileInfo", { UserId: 1 });
+		// database.createIndex("System." + database.getGameName() + ".Analytics", { TsCreate: -1 });
 
-		let oldAdminPlayerCount = await database.systemCollection("Player").countDocuments();
-		if (oldAdminPlayerCount == 0) {
-			database.createPlayerByUsernameAndPassword("gnadmin", "gnadmin", {
-				UserRole: 0
-			}, "127.0.0.1").then(xSparkPlayer => {
-				database.loadGamePlayer(xSparkPlayer.getUserId());
-			}).catch(err => {
-				console.error(err);
-			});
-		}
+		// let oldAdminPlayerCount = await database.systemCollection("Player").countDocuments();
+		// if (oldAdminPlayerCount == 0) {
+		// 	database.createPlayerByUsernameAndPassword("gnadmin", "gnadmin", {
+		// 		UserRole: 0
+		// 	}, "127.0.0.1").then(xSparkPlayer => {
+		// 		database.loadGamePlayer(xSparkPlayer.getUserId());
+		// 	}).catch(err => {
+		// 		console.error(err);
+		// 	});
+		// }
 
-		database.createIndex("System." + database.getGameName() + ".FriendCollection", { UserId: 1 });
+		// database.createIndex("System." + database.getGameName() + ".FriendCollection", { UserId: 1 });
 
-		database.createIndex("Runtime." + database.getGameName() + ".UserMessageCollection", { "HashId": 1, "TsCreate": -1 });
-		database.createIndex("Runtime." + database.getGameName() + ".UserMessageCollection", { "HashId": 1 });
+		// database.createIndex("Runtime." + database.getGameName() + ".UserMessageCollection", { "HashId": 1, "TsCreate": -1 });
+		// database.createIndex("Runtime." + database.getGameName() + ".UserMessageCollection", { "HashId": 1 });
 
-		database.createIndex("Runtime." + database.getGameName() + ".ChannelInfoCollection", { "Channel": 1 });
-		database.createIndex("Runtime." + database.getGameName() + ".ChannelInfoCollection", { "TsCreate": -1 });
+		// database.createIndex("Runtime." + database.getGameName() + ".ChannelInfoCollection", { "Channel": 1 });
+		// database.createIndex("Runtime." + database.getGameName() + ".ChannelInfoCollection", { "TsCreate": -1 });
 
-		database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "Channel": 1 });
-		database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "Channel": 1, "TsCreate": -1 });
-		database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "TsCreate": -1 });
+		// database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "Channel": 1 });
+		// database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "Channel": 1, "TsCreate": -1 });
+		// database.createIndex("Runtime." + database.getGameName() + ".ChannelMessageCollection", { "TsCreate": -1 });
 
 
 	}

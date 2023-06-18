@@ -74,6 +74,24 @@ export class xDatabase {
 		return this.db.collection(fullCollectionName);
 	}
 
+	public createIndex(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }, cb?: (error?: Error, result?: string) => void): void {
+		let collection = this.collection(collectionName);
+
+		let createIndexesOptions = {
+			background: true,
+		};
+
+		if (options != null) {
+			let createIndexesOptionsAny = createIndexesOptions as any;
+
+			if (options.expireAfterSeconds != null) createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
+			if (options.sparse != null) createIndexesOptionsAny.sparse = options.sparse;
+			if (options.unique != null) createIndexesOptionsAny.unique = options.unique;
+		}
+
+		collection.createIndex(index, createIndexesOptions, cb);
+	}
+
 	private async convertToMasterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<MasterPlayer>> {
 		let answer: Array<MasterPlayer> = [];
 		

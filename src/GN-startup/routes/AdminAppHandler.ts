@@ -13,13 +13,6 @@
 // import { StringUtility } from "./../../GN-common/helper/StringUtility";
 // import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 // import { UserRoleType } from "./../../GN-common/constant/enumType/UserRoleType";
-// import { OperationCode } from "./../../GN-common/constant/OperationCode";
-// import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
-// import { OperationRequest } from "./../../GN-common/entity/operationRequest/OperationRequest";
-// import { LoginParameterCode } from "./../../GN-common/constant/parameterCode/LoginParameterCode";
-// import { LoginType } from "./../../GN-common/constant/enumType/LoginType";
-// import { LoginErrorCode } from "./../../GN-common/constant/errorCode/LoginErrorCode";
-// import { ParameterCode } from "./../../GN-common/constant/parameterCode/ParameterCode";
 // import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
 // import { LicenseKeyApplication } from "./../LicenseKeyApplication";
 // import bcrypt from "bcrypt";
