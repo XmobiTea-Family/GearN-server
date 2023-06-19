@@ -15,7 +15,7 @@ import { RequestHandler } from "../base/RequestHandler";
 import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 
 class GetSegmentOperationRequest extends OperationRequest {
-    @StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, isOptional: true })
+    @StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, mustNonNull: true })
 	characterId: string;
 
 	public isValidRequest() {
@@ -25,10 +25,7 @@ class GetSegmentOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetSegmentOperationRequest extends OperationRequest {
-    @StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, mustNonNull: true })
-	characterId: string;
-
+class ServerGetSegmentOperationRequest extends GetSegmentOperationRequest {
     public isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
