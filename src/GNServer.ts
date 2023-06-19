@@ -35,6 +35,31 @@ import { IAnalyticsService } from "./GN-app-api/service/IAnalyticsService";
 import { AnalyticsService } from "./GN-app-api/service/AnalyticsService";
 import { Debug } from "./GN-library/xdebug/lib/xDebug";
 
+import { LoginByAccountRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByAccountRequestHandler";
+import { LoginByAndroidDeviceIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByAndroidDeviceIdRequestHandler";
+import { LoginByAppleRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByAppleRequestHandler";
+import { LoginByCustomDeviceIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByCustomDeviceIdRequestHandler";
+import { LoginByCustomIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByCustomIdRequestHandler";
+import { LoginByEditorDeviceIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByEditorDeviceIdRequestHandler";
+import { LoginByFacebookRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByFacebookRequestHandler";
+import { LoginByGenericServiceRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByGenericServiceRequestHandler";
+import { LoginByGoogleRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByGoogleRequestHandler";
+import { LoginByiOSDeviceIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByiOSDeviceIdRequestHandler";
+import { LoginByMacOSDeviceIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByMacOSDeviceIdRequestHandler";
+import { LoginByWindowsDeviceIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByWindowsDeviceIdRequestHandler";
+import { LoginByWindowsPhoneDeviceIdRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/LoginByWindowsPhoneDeviceIdRequestHandler";
+import { RegisterAccountRequestHandler } from "./GN-app-api/handler/controller/handler/authenticate/RegisterAccountRequestHandler";
+
+import { AddSegmentRequestHandler as AddSegmentRequestHandlerMasterPlayer } from "./GN-app-api/handler/controller/handler/masterPlayer/AddSegmentRequestHandler";
+import { ChangeAccountPasswordRequestHandler as ChangeAccountPasswordRequestHandlerMasterPlayer } from "./GN-app-api/handler/controller/handler/masterPlayer/ChangeAccountPasswordRequestHandler";
+import { GetAvatarRequestHandler as GetAvatarRequestHandlerMasterPlayer } from "./GN-app-api/handler/controller/handler/masterPlayer/GetAvatarRequestHandler";
+import { AddSegmentRequestHandler as AddSegmentRequestHandlerMasterPlayer } from "./GN-app-api/handler/controller/handler/masterPlayer/AddSegmentRequestHandler";
+import { AddSegmentRequestHandler as AddSegmentRequestHandlerMasterPlayer } from "./GN-app-api/handler/controller/handler/masterPlayer/AddSegmentRequestHandler";
+
+
+
+import { RequestType } from "./GN-common/constant/enumType/RequestType";
+
 interface CreateIndexesOptions {
 	unique?: boolean;
 	sparse?: boolean;
@@ -90,6 +115,43 @@ export class GNServer {
 	}
 
 	public init(): void {
+		{
+			let requestTypeValue = <number>RequestType.Authenticate;
+
+			this.requestController.addHandler(requestTypeValue, new LoginByAccountRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByAndroidDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByAppleRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByCustomDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByCustomIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByEditorDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByFacebookRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByGenericServiceRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByGoogleRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByiOSDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByMacOSDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByWindowsDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByWindowsPhoneDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new RegisterAccountRequestHandler(this), false);
+		}
+
+		{
+			let requestTypeValue = <number>RequestType.MasterPlayer;
+
+			this.requestController.addHandler(requestTypeValue, new LoginByAccountRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByAndroidDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByAppleRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByCustomDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByCustomIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByEditorDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByFacebookRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByGenericServiceRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByGoogleRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByiOSDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByMacOSDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByWindowsDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new LoginByWindowsPhoneDeviceIdRequestHandler(this), false);
+			this.requestController.addHandler(requestTypeValue, new RegisterAccountRequestHandler(this), false);
+		}
 
 	}
 
