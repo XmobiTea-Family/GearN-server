@@ -33,8 +33,7 @@ import { GoogleService } from "./GN-app-api/service/GoogleService";
 import { CodeHelper } from "./GN-common/helper/CodeHelper";
 import { IAnalyticsService } from "./GN-app-api/service/IAnalyticsService";
 import { AnalyticsService } from "./GN-app-api/service/AnalyticsService";
-import { IChatService } from "./GN-app-api/service/IChatService";
-import { ChatService } from "./GN-app-api/service/ChatService";
+import { Debug } from "./GN-library/xdebug/lib/xDebug";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -66,7 +65,6 @@ export class GNServer {
 	private lockService: ILockService;
 	private requestConverterService: IRequestConverterService;
 	private analyticsService: IAnalyticsService;
-	private chatService: IChatService;
 
 	constructor() {
 		this.facebookService = new FacebookService();
@@ -92,7 +90,7 @@ export class GNServer {
 	}
 
 	public init(): void {
-		
+
 	}
 
 	public run(onRunSuccess?: OnRunSuccess) {
@@ -112,11 +110,6 @@ export class GNServer {
 		tempAnalyticsService.setGNServer(this);
 		tempAnalyticsService.run();
 		this.analyticsService = tempAnalyticsService;
-
-		let tempChatService = new ChatService();
-		tempChatService.setGNServer(this);
-		tempChatService.run();
-		this.chatService = tempChatService;
 
 		if (onRunSuccess != null) onRunSuccess();
 	}
@@ -154,10 +147,10 @@ export class GNServer {
 	}
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
-		// this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
-		// 	if (error != null) Debug.logError("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
-		// 	else Debug.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
-		// });
+		this.xDatabase.createIndex(collectionName, index, options, (error?: Error, result?: string) => {
+			if (error != null) Debug.logError("Create index FAILED at collection " + collectionName + ", index: " + JSON.stringify(index) + ", error: " + error);
+			else Debug.log("Create index success at collection " + collectionName + ", index: " + JSON.stringify(index) + ", name: " + result);
+		});
 	}
 
 	public getHandler(type: number, code: number): IRequestHandler {
@@ -206,10 +199,6 @@ export class GNServer {
 
 	public getLockService(): ILockService {
 		return this.lockService;
-	}
-
-	public getChatService(): IChatService {
-		return this.chatService;
 	}
 
 	public getAnalyticsService(): IAnalyticsService {

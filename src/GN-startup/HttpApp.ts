@@ -9,14 +9,14 @@ import { ApiMiddleware } from "./middleware/ApiMiddleware";
 import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
 import { GNServer } from "./../GNServer";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
-import { CreateNewFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/CreateNewFileUploadInfoRequestHandler";
-import { GetFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/GetFileUploadInfoRequestHandler";
+// import { CreateNewFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/CreateNewFileUploadInfoRequestHandler";
+// import { GetFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/GetFileUploadInfoRequestHandler";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 import { AdminViewSettings } from "./settings/AdminViewSettings";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { LogSettings } from "./settings/LogSettings";
-import { AdminAppHandler } from "./routes/AdminAppHandler";
+// import { AdminAppHandler } from "./routes/AdminAppHandler";
 import expressLayouts from "express-ejs-layouts";
 
 export class HttpApp {
@@ -28,7 +28,7 @@ export class HttpApp {
 	private app: Express;
 	private httpAppHandler: HttpAppHandler;
 	private uploadFileHandler: UploadFileHandler;
-	private adminAppHandler: AdminAppHandler;
+	// private adminAppHandler: AdminAppHandler;
 
 	private antiDdosMiddleware: AntiDdosMiddleware;
 	private logSettings: LogSettings;
@@ -51,9 +51,9 @@ export class HttpApp {
 		return this.httpAppHandler;
 	}
 
-	public getAdminAppHandler(): AdminAppHandler {
-		return this.adminAppHandler;
-	}
+	// public getAdminAppHandler(): AdminAppHandler {
+	// 	return this.adminAppHandler;
+	// }
 
 	public getUploadFileHandler(): UploadFileHandler {
 		return this.uploadFileHandler;
@@ -143,19 +143,19 @@ export class HttpApp {
 			return res.sendStatus(200);
 		});
 
-		this.adminAppHandler = new AdminAppHandler();
-		this.adminAppHandler.setRouter(this.app);
-		this.adminAppHandler.setApiMiddleware(this.apiMiddleware);
-		this.adminAppHandler.setApplicationSettings(this.applicationSettings);
-		this.adminAppHandler.setGNServer(this.gnServer);
-		this.adminAppHandler.setAdminViewSettings(this.adminViewSettings);
-		this.adminAppHandler.setHttpAppSettings(this.appSettings);
-		this.adminAppHandler.setSocketAppSettings(this.socketAppSettings);
-		this.adminAppHandler.setLogSettings(this.logSettings);
+		// this.adminAppHandler = new AdminAppHandler();
+		// this.adminAppHandler.setRouter(this.app);
+		// this.adminAppHandler.setApiMiddleware(this.apiMiddleware);
+		// this.adminAppHandler.setApplicationSettings(this.applicationSettings);
+		// this.adminAppHandler.setGNServer(this.gnServer);
+		// this.adminAppHandler.setAdminViewSettings(this.adminViewSettings);
+		// this.adminAppHandler.setHttpAppSettings(this.appSettings);
+		// this.adminAppHandler.setSocketAppSettings(this.socketAppSettings);
+		// this.adminAppHandler.setLogSettings(this.logSettings);
 
-		if (this.adminViewSettings.getEnable()) {
-			this.adminAppHandler.run();
-		}
+		// if (this.adminViewSettings.getEnable()) {
+		// 	this.adminAppHandler.run();
+		// }
 
 		let allowedHeaders = this.appSettings.getAllowedHeaders();
 		allowedHeaders.push(this.sessionId);
@@ -193,8 +193,8 @@ export class HttpApp {
 		if (this.uploadFileSettings.getEnable()) {
 			this.uploadFileHandler.run();
 
-			this.gnServer.addHandler(new CreateNewFileUploadInfoRequestHandler(this.gnServer));
-			this.gnServer.addHandler(new GetFileUploadInfoRequestHandler(this.gnServer));
+			// this.gnServer.addHandler(new CreateNewFileUploadInfoRequestHandler(this.gnServer));
+			// this.gnServer.addHandler(new GetFileUploadInfoRequestHandler(this.gnServer));
 		}
 	}
 

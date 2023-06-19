@@ -186,24 +186,24 @@ export class LicenseKeyApplication {
 		if (!authToken) {
 			let username = this.licenseKeyInfo.ProductId;
 			let password = Md5Generate.getMd5(this.licenseKeyInfo.LicenseKey + this.licenseKeyInfo.UnformattedLicenseKey + "_" + this.licenseKeyInfo.ProductId);
-			GNNetwork.accountLogin(username, password, (loginOperationResponse: LoginOperationResponse) => {
-				if (!loginOperationResponse.hasError()) {
-					thiz.validateApp(true);
+			// GNNetwork.accountLogin(username, password, (loginOperationResponse: LoginOperationResponse) => {
+			// 	if (!loginOperationResponse.hasError()) {
+			// 		thiz.validateApp(true);
 
-					thiz.totalServerRequestFailure = 0;
-				}
-				else {
-					setTimeout(() => {
-						thiz.debug(VerifyServerApplicationErrorCode.LicenseKeyExpire, LicenseKeyApplication.maxCCU);
-					}, 500);
+			// 		thiz.totalServerRequestFailure = 0;
+			// 	}
+			// 	else {
+			// 		setTimeout(() => {
+			// 			thiz.debug(VerifyServerApplicationErrorCode.LicenseKeyExpire, LicenseKeyApplication.maxCCU);
+			// 		}, 500);
 
-					setTimeout(() => {
-						thiz.validateApp(true);
-					}, 5000);
+			// 		setTimeout(() => {
+			// 			thiz.validateApp(true);
+			// 		}, 5000);
 
-					thiz.totalServerRequestFailure += 1;
-				}
-			});
+			// 		thiz.totalServerRequestFailure += 1;
+			// 	}
+			// });
 
 			return;
 		}
@@ -220,33 +220,33 @@ export class LicenseKeyApplication {
 		let request = new OperationRequest(OperationCodeExtensions.VerifyServerApplication, true);
 		request.setParameters(parameters);
 
-		GNNetwork.sendViaHttp(request, (operationResponse: OperationResponse) => {
-			if (!operationResponse.hasError()) {
-				let parameters = operationResponse.getParameters();
+		// GNNetwork.sendViaHttp(request, (operationResponse: OperationResponse) => {
+		// 	if (!operationResponse.hasError()) {
+		// 		let parameters = operationResponse.getParameters();
 
-				let newMaxCCU = parameters.getNumber(VerifyServerApplicationParameterCode.MaxCCU, LicenseKeyApplication.maxCCU);
+		// 		let newMaxCCU = parameters.getNumber(VerifyServerApplicationParameterCode.MaxCCU, LicenseKeyApplication.maxCCU);
 
-				if (LicenseKeyApplication.maxCCU != newMaxCCU) {
-					let errorCode = parameters.getNumber(ParameterCode.ErrorCode);
-					setTimeout(() => {
-						thiz.debug(errorCode, LicenseKeyApplication.maxCCU);
-					}, 500);
-				}
+		// 		if (LicenseKeyApplication.maxCCU != newMaxCCU) {
+		// 			let errorCode = parameters.getNumber(ParameterCode.ErrorCode);
+		// 			setTimeout(() => {
+		// 				thiz.debug(errorCode, LicenseKeyApplication.maxCCU);
+		// 			}, 500);
+		// 		}
 
-				LicenseKeyApplication.maxCCU = newMaxCCU;
+		// 		LicenseKeyApplication.maxCCU = newMaxCCU;
 
-				thiz.totalServerRequestFailure = 0;
-			}
-			else {
-				if (operationResponse.getReturnCode() == ReturnCode.OperationNotAuthorized) {
-					setTimeout(() => {
-						thiz.validateApp(true);
-					}, 5000);
-				}
+		// 		thiz.totalServerRequestFailure = 0;
+		// 	}
+		// 	else {
+		// 		if (operationResponse.getReturnCode() == ReturnCode.OperationNotAuthorized) {
+		// 			setTimeout(() => {
+		// 				thiz.validateApp(true);
+		// 			}, 5000);
+		// 		}
 
-				thiz.totalServerRequestFailure += 1;
-			}
-		});
+		// 		thiz.totalServerRequestFailure += 1;
+		// 	}
+		// });
 	}
 
 	private debug(errorCode: number, ccu: number): void {

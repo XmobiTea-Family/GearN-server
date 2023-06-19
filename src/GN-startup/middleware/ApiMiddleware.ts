@@ -42,10 +42,6 @@ export class ApiMiddleware {
 		this.authTokenCollection = authInfoCollection;
 	}
 
-	public setPlayerGameCollection(playerGameCollection: mongoDB.Collection<mongoDB.Document>) {
-		this.playerGameCollection = playerGameCollection;
-	}
-
 	public setExpiredToken(expiredToken: number) {
 		this.expiredToken = expiredToken;
 	}

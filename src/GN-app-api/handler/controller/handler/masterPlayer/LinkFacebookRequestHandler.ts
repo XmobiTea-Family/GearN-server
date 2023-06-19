@@ -18,6 +18,9 @@ class LinkFacebookOperationRequest extends OperationRequest {
 	@StringDataMember({ code: MasterPlayerParameterCode.Token, minLength: 64, maxLength: 512, mustNonNull: true })
 	token: string;
 
+	@BooleanDataMember({ code: MasterPlayerParameterCode.ForceLink, isOptional: true, defaultValue: false })
+	forceLink: boolean;
+
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -64,7 +67,7 @@ export class LinkFacebookRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(authInfo.getUserId(), request.token, operationRequest);
+        return this.execute(authInfo.getUserId(), request.token, request.forceLink, operationRequest);
 	}
 
     public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -78,7 +81,7 @@ export class LinkFacebookRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.token, operationRequest);
+        return this.execute(request.userId, request.token, request.forceLink, operationRequest);
     }
 
     public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -92,10 +95,10 @@ export class LinkFacebookRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.token, operationRequest);
+        return this.execute(request.userId, request.token, request.forceLink, operationRequest);
     }
 
-    private async execute(userId: string, token: string, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(userId: string, token: string, forceLink: boolean, operationRequest: OperationRequest): Promise<OperationResponse> {
         let masterPlayerFindOptions: MasterPlayerFindOptions = {
             external: true
         }
@@ -127,8 +130,16 @@ export class LinkFacebookRequestHandler extends RequestHandler {
 
         let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByFacebookAsync(facebookId, masterPlayerFindOptions);
         if (otherMasterPlayer != null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinkedOtherPlayer);
-            return operationResponse;
+			if (!forceLink) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinkedOtherPlayer);
+				return operationResponse;
+			}
+
+			let otherExternal = otherMasterPlayer.getExternal();
+			otherExternal.facebook = null;
+
+			otherMasterPlayer.setExternal(otherExternal);
+			otherMasterPlayer.saveAsync();
         }
 
         external.facebook = {
