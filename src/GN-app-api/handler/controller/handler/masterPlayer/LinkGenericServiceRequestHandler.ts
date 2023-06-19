@@ -21,6 +21,9 @@ class LinkGenericServiceOperationRequest extends OperationRequest {
 	@StringDataMember({ code: MasterPlayerParameterCode.ServiceId, minLength: 8, maxLength: 64, mustNonNull: true })
 	serviceId: string;
 
+	@BooleanDataMember({ code: MasterPlayerParameterCode.ForceLink, isOptional: true, defaultValue: false })
+	forceLink: boolean;
+
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -67,7 +70,7 @@ export class LinkGenericServiceRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(authInfo.getUserId(), request.serviceName, request.serviceId, operationRequest);
+        return this.execute(authInfo.getUserId(), request.serviceName, request.serviceId, request.forceLink, operationRequest);
 	}
 
     public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -81,7 +84,7 @@ export class LinkGenericServiceRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.serviceName, request.serviceId, operationRequest);
+        return this.execute(request.userId, request.serviceName, request.serviceId, request.forceLink, operationRequest);
     }
 
     public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -95,10 +98,10 @@ export class LinkGenericServiceRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.serviceName, request.serviceId, operationRequest);
+        return this.execute(request.userId, request.serviceName, request.serviceId, request.forceLink, operationRequest);
     }
 
-    private async execute(userId: string, serviceName: string, serviceId: string, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(userId: string, serviceName: string, serviceId: string, forceLink: boolean, operationRequest: OperationRequest): Promise<OperationResponse> {
         let masterPlayerFindOptions: MasterPlayerFindOptions = {
             external: true
         }
@@ -121,8 +124,16 @@ export class LinkGenericServiceRequestHandler extends RequestHandler {
 
         let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGenericServiceAsync(serviceName, serviceId);
         if (otherMasterPlayer != null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinkedOtherPlayer);
-            return operationResponse;
+			if (!forceLink) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinkedOtherPlayer);
+				return operationResponse;
+			}
+
+			let otherExternal = otherMasterPlayer.getExternal();
+			otherExternal.genericService.genericServices.delete(serviceName);
+
+			otherMasterPlayer.setExternal(otherExternal);
+			otherMasterPlayer.saveAsync();
         }
 
         if (external.genericService == null) external.genericService = {

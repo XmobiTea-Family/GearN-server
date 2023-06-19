@@ -16,7 +16,7 @@ import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 import { PermissionDataItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/PermissionDataItem";
 
 class GetPlayerDataOperationRequest extends OperationRequest {
-    @StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, isOptional: true })
+    @StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, mustNonNull: true })
 	characterId: string;
 
     @GNArrayDataMember({ code: CharacterPlayerParameterCode.DataKeys, isOptional: true })
@@ -29,13 +29,7 @@ class GetPlayerDataOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetPlayerDataOperationRequest extends OperationRequest {
-    @StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, mustNonNull: true })
-	characterId: string;
-
-    @GNArrayDataMember({ code: CharacterPlayerParameterCode.DataKeys, isOptional: true })
-	dataKeys: GNArray;
-
+class ServerGetPlayerDataOperationRequest extends GetPlayerDataOperationRequest {
     public isValidRequest() {
 		if (!super.isValidRequest()) return false;
 

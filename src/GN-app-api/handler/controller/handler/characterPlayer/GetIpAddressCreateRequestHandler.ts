@@ -57,17 +57,8 @@ export class GetIpAddressCreateRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!request.characterId) {
-            if (!secretInfo.getPermission().characterPlayer.getIpAddressCreate.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-
-            request.characterId = authInfo.getUserId();
-        }
-		else if (request.characterId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().characterPlayer.getIpAddressCreate.otherSelfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
+		if (!secretInfo.getPermission().characterPlayer.getIpAddressCreate.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
 		}
 
         return this.execute(request.characterId, secretInfo.getGameId(), operationRequest);

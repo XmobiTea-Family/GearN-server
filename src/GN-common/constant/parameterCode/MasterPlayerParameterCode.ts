@@ -72,4 +72,5 @@ export class MasterPlayerParameterCode {
 	public static readonly Results: string = "";
 	public static readonly FacebookIds: string = "";
 	public static readonly GenericIds: string = "";
+	public static readonly ForceLink: string = "";
 }
