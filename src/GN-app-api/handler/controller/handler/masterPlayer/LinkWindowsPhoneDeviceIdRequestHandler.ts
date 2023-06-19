@@ -18,6 +18,9 @@ class LinkWindowsPhoneDeviceIdOperationRequest extends OperationRequest {
 	@StringDataMember({ code: MasterPlayerParameterCode.WindowsPhoneDeviceId, minLength: 8, maxLength: 64, mustNonNull: true })
 	windowsPhoneDeviceId: string;
 
+	@BooleanDataMember({ code: MasterPlayerParameterCode.ForceLink, isOptional: true, defaultValue: false })
+	forceLink: boolean;
+
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -64,7 +67,7 @@ export class LinkWindowsPhoneDeviceIdRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(authInfo.getUserId(), request.windowsPhoneDeviceId, operationRequest);
+        return this.execute(authInfo.getUserId(), request.windowsPhoneDeviceId, request.forceLink, operationRequest);
 	}
 
     public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -78,7 +81,7 @@ export class LinkWindowsPhoneDeviceIdRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.windowsPhoneDeviceId, operationRequest);
+        return this.execute(request.userId, request.windowsPhoneDeviceId, request.forceLink, operationRequest);
     }
 
     public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -92,10 +95,10 @@ export class LinkWindowsPhoneDeviceIdRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.windowsPhoneDeviceId, operationRequest);
+        return this.execute(request.userId, request.windowsPhoneDeviceId, request.forceLink, operationRequest);
     }
 
-    private async execute(userId: string, windowsPhoneDeviceId: string, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(userId: string, windowsPhoneDeviceId: string, forceLink: boolean, operationRequest: OperationRequest): Promise<OperationResponse> {
         let masterPlayerFindOptions: MasterPlayerFindOptions = {
             external: true
         }
@@ -118,8 +121,16 @@ export class LinkWindowsPhoneDeviceIdRequestHandler extends RequestHandler {
 
         let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByWindowsPhoneDeviceIdAsync(windowsPhoneDeviceId, masterPlayerFindOptions);
         if (otherMasterPlayer != null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinkedOtherPlayer);
-            return operationResponse;
+			if (!forceLink) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinkedOtherPlayer);
+				return operationResponse;
+			}
+
+			let otherExternal = otherMasterPlayer.getExternal();
+			otherExternal.device.windowsPhoneDeviceId = null;
+
+			otherMasterPlayer.setExternal(otherExternal);
+			otherMasterPlayer.saveAsync();
         }
 
         if (external.device == null) external.device = {};
