@@ -15,6 +15,7 @@ import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib
 import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
 import { SecretInfo, SecretRole } from "../../../../../GN-common/entity/SecretInfo";
+import { InfoGetParameter } from "./model/InfoGetParameters";
 
 class LoginByAccountOperationRequest extends OperationRequest {
 	@StringDataMember({ code: AuthenticateParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
@@ -24,7 +25,7 @@ class LoginByAccountOperationRequest extends OperationRequest {
 	password: string;
 
 	@GNHashtableDataMember({ code: AuthenticateParameterCode.InfoGetParameters, mustNonNull: true })
-	infoGetParameters: GNHashtable;
+	infoGetParameters: InfoGetParameter;
 
 	public isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -54,6 +55,39 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		}
 
 		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
+		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
+
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.PlayerDoesNotExists);
+			return operationResponse;
+		}
+
+		let isMatch = await bcrypt.compare(request.password, masterPlayer.getPassword());
+
+		if (!isMatch) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.AccountPasswordWrong);
+
+			return operationResponse;
+		}
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.Ok);
+        operationResponse.setParameter(AuthenticateParameterCode.UserId, masterPlayer.getUserId());
+        operationResponse.setParameter(AuthenticateParameterCode.InfoGetParameters, this.generateMasterPlayerOperationResponse(masterPlayer, masterPlayerFindOptions, request.infoGetParameters));
+        
+        masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
+        masterPlayer.saveAsync();
+
+		this.setupAuthInfo(operationResponse, masterPlayer);
+
+		return operationResponse;
+	}
+
+	public async execute(request: { username: string, password: string, infoGetParameters: GNHashtable }, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);

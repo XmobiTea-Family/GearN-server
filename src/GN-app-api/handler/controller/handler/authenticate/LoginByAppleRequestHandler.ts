@@ -63,6 +63,7 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 		}
 
 		let appleUserId = result["sub"];
+		let email = result["email"] || "";
 
         let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
 
@@ -77,7 +78,8 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
             else {
 				let newMasterPlayerResult = this.generateNewMasterPlayerResult((request as any).originRequest.getIP());
 				newMasterPlayerResult["external"]["apple"] = {
-					"appleId": appleUserId
+					"appleId": appleUserId,
+					"email": email,
 				}
 
                 masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
@@ -85,6 +87,10 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
             }
 		}
 		else {
+			let external = masterPlayer.getExternal();
+			external.apple.email = email;
+			masterPlayer.setExternal(external);
+
 			masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
 			masterPlayer.saveAsync();
 		}

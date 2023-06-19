@@ -73,7 +73,6 @@ export class ChangeAccountPasswordRequestHandler extends RequestHandler {
 
 		if (!isMatch) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.AccountPasswordWrong);
-
 			return operationResponse;
 		}
 

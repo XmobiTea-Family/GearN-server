@@ -9,10 +9,10 @@ export interface MasterPlayerFindOptions {
     tsCreate?: boolean,
     tags?: boolean,
     playerBan?: boolean,
-    playerDatas?: boolean,
     playerCurrencies?: boolean,
     playerStatistics?: boolean,
-    tsLastLogin?: boolean,
+    playerDatas?: boolean,
     ipAddressCreate?: boolean,
     countryCode?: boolean,
+    tsLastLogin?: boolean,
 }

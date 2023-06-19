@@ -7,13 +7,13 @@ import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMe
 import { CommonOperationRequest } from "./../../GN-common/entity/operationRequest/CommonOperationRequest";
 
 export class RequestConverterService implements IRequestConverterService {
-    private declaredFieldsMap: { [k: string]: GNEnhancedObjectFieldMetadata[] };
+    private declaredFieldsMap: Map<any, GNEnhancedObjectFieldMetadata[]>;
 
-    public getGNEnhancedObjectFieldMetadata<T extends OperationRequest>(cls: Constructor<T>): GNEnhancedObjectFieldMetadata[] {
-        let declaredFields = this.declaredFieldsMap[cls.name];
+    public getGNEnhancedObjectFieldMetadata<T>(cls: Constructor<T>): GNEnhancedObjectFieldMetadata[] {
+        let declaredFields = this.declaredFieldsMap.get(cls);
         if (declaredFields == null) {
             declaredFields = getGNObjectMetadata<GNEnhancedObjectMetadata>(cls).fields;
-            this.declaredFieldsMap[cls.name] = declaredFields;
+            this.declaredFieldsMap.set(cls, declaredFields);
         }
 
         return declaredFields;
@@ -663,6 +663,687 @@ export class RequestConverterService implements IRequestConverterService {
         return answer as any as T;
     }
 
+    public createTObject<T>(gnHashtable: GNHashtable, cls: Constructor<T>): T {
+        let declaredFields = this.getGNEnhancedObjectFieldMetadata(cls);
+
+        let answer = new cls();
+        let invalidMembers = [];
+
+        let isValidRequest = true;
+
+        for (let i = 0; i < declaredFields.length; i++) {
+            let field = declaredFields[i];
+            let gnFieldType = field.gnFieldType;
+
+            let containsKey = gnHashtable.containsKey(field.code);
+            let value = gnHashtable.getObject(field.code);
+
+            if (field.isOptional) {
+                if (containsKey && value != null) {
+                    if (gnFieldType == GNFieldDataType.GNHashtable) {
+                        if (value instanceof GNHashtable) {
+                            let lastValue = value as GNHashtable;
+
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNHashtableNull
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            if (lastValue != null) {
+                                if (lastValue.count() < field.minLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.count() > field.maxLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                        if (value instanceof GNArray) {
+                            let lastValue = value as GNArray;
+
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNArrayNull
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            if (lastValue != null) {
+                                if (lastValue.count() < field.minLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.count() > field.maxLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                        if (typeof value === "boolean") {
+                            let lastValue: boolean = value as any as boolean;
+
+                            if (lastValue == null) {
+                                lastValue = false;
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.Number) {
+                        if (typeof value === "number") {
+                            let lastValue: number = value as any as number;
+
+                            if (lastValue == null) {
+                                lastValue = 0;
+                            }
+
+                            if (field.activeConditionValid) {
+                                if (field.mustInt === true) {
+                                    if (!this.isInteger(lastValue)) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.NumberMustInt
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+
+                                if (lastValue < field.minValue) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.NumberMinValue
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue > field.maxValue) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.NumberMaxValue
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.String) {
+                        if (typeof value === "string") {
+                            let lastValue: string = value as any as string;
+
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringNull
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+
+                                if (lastValue != null) {
+                                    if (lastValue.length < field.minLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMinLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.length > field.maxLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMaxLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.Other) {
+                        let lastValue = value;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    if (gnFieldType == GNFieldDataType.Object) {
+                        if (value instanceof GNHashtable) {
+                            let lastValue = value as GNHashtable;
+
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNHashtableNull
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            if (lastValue != null) {
+                                if (lastValue.count() < field.minLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.count() > field.maxLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    if (gnFieldType == GNFieldDataType.GNHashtable || gnFieldType == GNFieldDataType.GNArray) {
+                        let lastValue: GNData = field.defaultValue;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                        let lastValue: boolean = field.defaultValue;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    else if (gnFieldType == GNFieldDataType.Number) {
+                        let lastValue: number = field.defaultValue;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    else if (gnFieldType == GNFieldDataType.String) {
+                        let lastValue: string = field.defaultValue;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    else if (gnFieldType == GNFieldDataType.Other) {
+                        let lastValue = field.defaultValue;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                }
+            }
+            else {
+                if (!containsKey) {
+                    invalidMembers.addInvalidMember({
+                        code: field.code,
+                        invalidMemberType: InvalidMemberType.DataRequired
+                    });
+
+                    isValidRequest = false;
+                    break;
+                }
+
+                if (value != null) {
+                    if (gnFieldType == GNFieldDataType.GNHashtable) {
+                        if (value instanceof GNHashtable) {
+                            let lastValue = value as GNHashtable;
+
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNHashtableNull
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+
+                                if (lastValue != null) {
+                                    if (lastValue.count() < field.minLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.count() > field.maxLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                        if (value instanceof GNArray) {
+                            let lastValue = value as GNArray;
+
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNArrayNull
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+
+                                if (lastValue != null) {
+                                    if (lastValue.count() < field.minLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.count() > field.maxLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                        if (typeof value === "boolean") {
+                            let lastValue: boolean = value as any as boolean;
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.Number) {
+                        if (typeof value === "number") {
+                            let lastValue: number = value as any as number;
+
+                            if (field.activeConditionValid) {
+                                if (field.mustInt === true) {
+                                    if (!this.isInteger(lastValue)) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.NumberMustInt
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+
+                                if (lastValue < field.minValue) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.NumberMinValue
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue > field.maxValue) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.NumberMaxValue
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.String) {
+                        if (typeof value === "string") {
+                            let lastValue: string = value as any as string;
+
+                            if (field.activeConditionValid) {
+                                if (field.mustNonNull) {
+                                    if (lastValue == null) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringNull
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+
+                                if (lastValue != null) {
+                                    if (lastValue.length < field.minLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMinLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                    else if (lastValue.length > field.maxLength) {
+                                        invalidMembers.addInvalidMember({
+                                            code: field.code,
+                                            invalidMemberType: InvalidMemberType.StringMaxLength
+                                        });
+
+                                        isValidRequest = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            answerAny[field.name] = lastValue;
+                        }
+                        else {
+                            invalidMembers.addInvalidMember({
+                                code: field.code,
+                                invalidMemberType: InvalidMemberType.TypeInvalid
+                            });
+
+                            isValidRequest = false;
+                            break;
+                        }
+                    }
+                    else if (gnFieldType == GNFieldDataType.Other) {
+                        let lastValue = value;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                }
+                else {
+                    if (gnFieldType == GNFieldDataType.GNHashtable || gnFieldType == GNFieldDataType.GNArray) {
+                        let lastValue: GNData = null;
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
+
+                        if (field.activeConditionValid) {
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    let invalidMemberType = gnFieldType == GNFieldDataType.GNHashtable ? InvalidMemberType.GNHashtableNull : InvalidMemberType.GNArrayNull;
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            if (lastValue != null) {
+                                if (lastValue.count() < field.minLength) {
+                                    let invalidMemberType = gnFieldType == GNFieldDataType.GNHashtable ? InvalidMemberType.GNHashtableMinLength : InvalidMemberType.GNArrayMinLength;
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.count() > field.maxLength) {
+                                    let invalidMemberType = gnFieldType == GNFieldDataType.GNHashtable ? InvalidMemberType.GNHashtableMaxLength : InvalidMemberType.GNArrayMaxLength;
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: invalidMemberType
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                        invalidMembers.addInvalidMember({
+                            code: field.code,
+                            invalidMemberType: InvalidMemberType.TypeInvalid
+                        });
+
+                        isValidRequest = false;
+                        break;
+                    }
+                    else if (gnFieldType == GNFieldDataType.Number) {
+                        invalidMembers.addInvalidMember({
+                            code: field.code,
+                            invalidMemberType: InvalidMemberType.TypeInvalid
+                        });
+
+                        isValidRequest = false;
+                        break;
+                    }
+                    else if (gnFieldType == GNFieldDataType.String) {
+                        let lastValue: string = null;
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
+
+                        if (field.activeConditionValid) {
+                            if (field.mustNonNull) {
+                                if (lastValue == null) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringNull
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+
+                            if (lastValue != null) {
+                                if (lastValue.length < field.minLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringMinLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                                else if (lastValue.length > field.maxLength) {
+                                    invalidMembers.addInvalidMember({
+                                        code: field.code,
+                                        invalidMemberType: InvalidMemberType.StringMaxLength
+                                    });
+
+                                    isValidRequest = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        answerAny[field.name] = lastValue;
+                    }
+                    else if (gnFieldType == GNFieldDataType.Other) {
+                        let lastValue = null;
+                        if (field.defaultValue != null) lastValue = field.defaultValue;
+
+                        answerAny[field.name] = lastValue;
+                    }
+                }
+            }
+        }
+
+        answerAny.isValid = isValidRequest;
+
+        return answer as any as T;
+    }
+    
+    public createTArray<T>(gnArray: GNArray, cls: Constructor<T>): T {
+
+    }
+
     public newOperationRequest(request: Request): OperationRequest {
         let answer = new CommonOperationRequest(request.getCode(), request.isEncrypted());
         answer.setOriginRequest(request);
@@ -686,7 +1367,7 @@ export class RequestConverterService implements IRequestConverterService {
     }
 
     constructor() {
-        this.declaredFieldsMap = {};
+        this.declaredFieldsMap = new Map<any, GNEnhancedObjectFieldMetadata[]>;
     }
 
 }

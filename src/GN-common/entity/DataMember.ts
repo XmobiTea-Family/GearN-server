@@ -98,6 +98,8 @@ export enum GNFieldDataType {
     Boolean = 3,
     GNHashtable = 4,
     GNArray = 5,
+    Object = 6,
+    Array = 7,
 
 };
 
@@ -153,6 +155,20 @@ interface GNHashtableDataMemberArgs extends OtherDataMemberArgs {
 
 interface GNArrayDataMemberArgs extends OtherDataMemberArgs {
     defaultValue?: GNArray;
+    mustNonNull?: boolean;
+    minLength?: number;
+    maxLength?: number;
+
+};
+
+interface ObjectDataMemberArgs extends OtherDataMemberArgs {
+    defaultValue?: object;
+    mustNonNull?: boolean;
+
+};
+
+interface ArrayDataMemberArgs extends OtherDataMemberArgs {
+    defaultValue?: object;
     mustNonNull?: boolean;
     minLength?: number;
     maxLength?: number;
@@ -294,5 +310,53 @@ export const NumberDataMember = (args: NumberDataMemberArgs) => (prototype: any,
     field.minValue = args.minValue;
     field.maxValue = args.maxValue;
     field.mustInt = args.mustInt;
+
+};
+
+export const ObjectDataMember = (args: ObjectDataMemberArgs) => (prototype: any, propertyKey: string) => {
+    let field = initGNObjectFieldMetadata<GNEnhancedObjectFieldMetadata>(prototype, propertyKey);
+    field.code = args.code;
+    field.isOptional = args.isOptional == null ? false : args.isOptional;
+    field.defaultValue = args.defaultValue;
+    field.gnFieldType = GNFieldDataType.Object;
+
+    if (args.mustNonNull != null) {
+        field.activeConditionValid = true;
+
+        if (args.mustNonNull == null) {
+            args.mustNonNull = false;
+        }
+    }
+
+    field.mustNonNull = args.mustNonNull;
+
+};
+
+export const ArrayDataMember = (args: ArrayDataMemberArgs) => (prototype: any, propertyKey: string) => {
+    let field = initGNObjectFieldMetadata<GNEnhancedObjectFieldMetadata>(prototype, propertyKey);
+    field.code = args.code;
+    field.isOptional = args.isOptional == null ? false : args.isOptional;
+    field.defaultValue = args.defaultValue;
+    field.gnFieldType = GNFieldDataType.Array;
+
+    if (args.mustNonNull != null || args.minLength != null || args.maxLength != null) {
+        field.activeConditionValid = true;
+
+        if (args.mustNonNull == null) {
+            args.mustNonNull = false;
+        }
+
+        if (args.minLength == null) {
+            args.minLength = 0;
+        }
+
+        if (args.maxLength == null) {
+            args.maxLength = 256;
+        }
+    }
+
+    field.mustNonNull = args.mustNonNull;
+    field.minLength = args.minLength;
+    field.maxLength = args.maxLength;
 
 };

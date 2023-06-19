@@ -18,12 +18,17 @@ export interface ExternalItem {
 	}
 	apple?: {
 		appleId: string;
+		email: string;
 	};
 	google?: {
 		googleId: string;
+		displayName: string;
+		email: string;
 	};
 	facebook?: {
 		facebookId: string;
+		displayName: string;
+		email: string;
 	};
 	genericService?: {
 		genericServices: Map<string, {

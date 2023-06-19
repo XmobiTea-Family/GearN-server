@@ -99,4 +99,5 @@ export class OperationCode {
 	public static readonly GetPlayersWithTag: number = 80;
 	public static readonly GetExternal: number = 81;
 	public static readonly GetCategoryId: number = 82;
+	public static readonly GetOwnerInfo: number = 82;
 }

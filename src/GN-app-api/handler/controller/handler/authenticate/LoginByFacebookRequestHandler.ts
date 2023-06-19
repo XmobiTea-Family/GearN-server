@@ -63,6 +63,8 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
 		}
 
 		let facebookId = result["id"];
+		let displayName = result["name"] || "";
+		let email = result["email"] || "";
 
         let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
 
@@ -77,7 +79,9 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
             else {
 				let newMasterPlayerResult = this.generateNewMasterPlayerResult((request as any).originRequest.getIP());
 				newMasterPlayerResult["external"]["facebook"] = {
-					"facebookId": facebookId
+					"facebookId": facebookId,
+					"displayName": displayName,
+					"email": email,
 				}
 
                 masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
@@ -85,6 +89,11 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
             }
 		}
 		else {
+			let external = masterPlayer.getExternal();
+			external.facebook.displayName = displayName;
+			external.facebook.email = email;
+			masterPlayer.setExternal(external);
+
 			masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
 			masterPlayer.saveAsync();
 		}

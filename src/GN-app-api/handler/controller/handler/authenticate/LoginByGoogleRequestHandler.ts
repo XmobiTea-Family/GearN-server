@@ -69,6 +69,8 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 		}
 
 		let googleUserId = result["sub"];
+		let displayName = result["name"] || "";
+		let email = result["email"] || "";
 
         let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
 
@@ -83,7 +85,9 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
             else {
 				let newMasterPlayerResult = this.generateNewMasterPlayerResult((request as any).originRequest.getIP());
 				newMasterPlayerResult["external"]["google"] = {
-					"googleId": googleUserId
+					"googleId": googleUserId,
+					"displayName": displayName,
+					"email": email,
 				}
 
                 masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
@@ -91,6 +95,11 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
             }
 		}
 		else {
+			let external = masterPlayer.getExternal();
+			external.google.displayName = displayName;
+			external.google.email = email;
+			masterPlayer.setExternal(external);
+
 			masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
 			masterPlayer.saveAsync();
 		}

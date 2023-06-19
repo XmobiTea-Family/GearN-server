@@ -204,7 +204,7 @@ export class GNHashtable extends GNData {
 }
 
 export class GNArrayBuilder {
-	private array: Array<any> = [];
+	private array: Array<any>;
 
 	public add(value: any): GNArrayBuilder {
 		this.array.push(value);
@@ -267,6 +267,7 @@ export class GNArray extends GNData {
 	}
 
 	public add(value: any) {
+
 		this.array.push(GNData.createUseDataFromOriginData(value));
 	}
 
