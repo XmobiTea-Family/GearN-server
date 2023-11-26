@@ -6,25 +6,25 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { CharacterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/CharacterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { CharacterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/CharacterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { CharacterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class SetAvatarOperationRequest extends OperationRequest {
-    @NumberDataMember({ code: CharacterPlayerParameterCode.Type })
-	type: number;
-
-    @NumberDataMember({ code: CharacterPlayerParameterCode.Value })
-	value: string;
-
-	@StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	characterId: string;
 
-    public isValidRequest() {
+	@NumberDataMember({ code: GNParameterCode.Type, mustInt: true })
+	type: number;
+
+	@StringDataMember({ code: GNParameterCode.Value, minLength: 1, maxLength: 128, mustNonNull: true })
+	value: string;
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -32,7 +32,8 @@ class SetAvatarOperationRequest extends OperationRequest {
 }
 
 class ServerGetAvatarOperationRequest extends SetAvatarOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -40,14 +41,14 @@ class ServerGetAvatarOperationRequest extends SetAvatarOperationRequest {
 }
 
 class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class SetAvatarRequestHandler extends RequestHandler {
+export class SetAvatarRequestHandler extends CharacterPlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.SetAvatar;
 	}
@@ -63,60 +64,82 @@ export class SetAvatarRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().characterPlayer.setAvatar.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setAvatar);
 
-        return this.execute(request.characterId, secretInfo.getGameId(), request.type, request.value, operationRequest);
+		if (!allowMethod) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		return this.execute({
+			characterId: request.characterId,
+			type: request.type,
+			value: request.value
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().characterPlayer.setAvatar.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().characterPlayer.setAvatar.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.characterId, secretInfo.getGameId(), request.type, request.value, operationRequest);
-    }
+		return this.execute({
+			characterId: request.characterId,
+			type: request.type,
+			value: request.value
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().characterPlayer.setAvatar.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().characterPlayer.setAvatar.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.characterId, secretInfo.getGameId(), request.type, request.value, operationRequest);
-    }
+		return this.execute({
+			characterId: request.characterId,
+			type: request.type,
+			value: request.value
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(characterId: string, gameId: string, type: number, value: string, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-            avatar: true
-        }
+	private async execute(request: { characterId: string, type: number, value: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetAvatar", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(characterId, gameId, characterPlayerFindOptions);
-
-		if (characterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, CharacterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+			avatar: true,
 		}
 
-        characterPlayer.setAvatar(type, value);
-        characterPlayer.saveAsync();
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, CharacterPlayerErrorCode.Ok);
+		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+
+		if (characterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.CharacterPlayerNotFound);
+			return operationResponse;
+		}
+
+		characterPlayer.setAvatar(request.type, request.value);
+		characterPlayer.saveAsync();
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_SetAvatar", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

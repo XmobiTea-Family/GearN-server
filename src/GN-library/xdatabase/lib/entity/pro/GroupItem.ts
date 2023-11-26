@@ -1,6 +1,6 @@
 export interface GroupItem {
 	groupId: string;
-	groupCatalogId: string;
+	catalogId: string;
 	status: number;		// GroupStatus
 	tsLastStatusUpdate: number;
 }

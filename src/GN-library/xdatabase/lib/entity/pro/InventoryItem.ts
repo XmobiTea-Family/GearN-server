@@ -1,4 +1,5 @@
 export interface InventoryItem {
 	itemId: string;
-	itemCatalogId: string;
+	catalogId: string;
+	classId: string;
 }

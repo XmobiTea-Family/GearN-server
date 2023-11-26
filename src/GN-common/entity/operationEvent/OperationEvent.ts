@@ -25,9 +25,9 @@ export class OperationEvent {
 		return this.encrypted;
 	}
 
-	public setScriptData(k: string, value: any): OperationEvent {
+	public setParameter(k: string, value: any): OperationEvent {
 		if (this.parameters == null) this.parameters = new GNHashtable();
-		
+
 		this.parameters.add(k, value);
 		return this;
 	}

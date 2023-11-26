@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=1.0.9
+VERSION=2.0
 
 COMMAND=$1
 DIR="$(pwd)"
@@ -79,7 +79,7 @@ GNconfig.release.json' > .gitignore
 
 init_create_projectIndexJs() {
     echo 'process.env.ENVIROMENT = "debug";
-require("./index");' > "$PROJECT_NAME"'.index.js'
+require("./dist/index");' > "$PROJECT_NAME"'.index.js'
     echo 'create '"$PROJECT_NAME"'.index.js file success'
 
     return
@@ -94,8 +94,8 @@ init_create_GNConfigDebugJson() {
 			"useSsl": false,
 			"keyFilePath": "",
 			"certFilePath": "",
-			"licenseKeyFilePath": "",
-			"expiredTokenInMs": 172800000
+			"expiredTokenInMs": 172800000,
+            "privateKeyToken": "privateKeyDefault"
 		},
 
 		"httpAppSettings": {
@@ -103,7 +103,7 @@ init_create_GNConfigDebugJson() {
 			"allowOrigin": "*",
 			"credentials": true,
 			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["a", "content-type"],
+			"allowHeaders": ["a", "content-type", "s", "g", "content-length", "user-agent"],
 			"enableSendAndReceiveDebug": true,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true
@@ -132,27 +132,20 @@ init_create_GNConfigDebugJson() {
 		"databaseSettings": {
 			"connectionString": "mongodb://127.0.0.1:27017/",
 			"databaseName": "XmobiTea",
-			"databaseGameName": "GN",
 			"options": {
 			}
 		},
 
 		"otherSettings": {
-			"packageName": "com.xmobitea.GNServer",
-			"appleClientId": "com.xmobitea.GNServer",
-			"googleClientId": "gn-server",
-			"headerIP": "x-ip"
+			"headerIP": "x-ip",
+			"idTypeCase": 0,
+			"ipApiUrl": "http://127.0.0.1:2555/json"
 		},
 		
 		"mailSettings": {
 			"enable": false,
 			"sendFrom": "changx@xmobitea.com",
 			"sendGridApiKey": "SG."
-		},
-
-		"adminViewSettings": {
-			"enable": true,
-			"debugHashs": ["hashhere"]
 		},
 
 		"logSettings": {
@@ -188,7 +181,7 @@ import { TestRequestHandler } from "./src/app-api/handler/TestRequestHandler";
 import { PostIndex } from "./PostIndex";
 
 let ENVIROMENT = process.env.ENVIROMENT || "debug";
-const optionsPath = __dirname + "/./GNconfig." + ENVIROMENT + ".json";
+const optionsPath = __dirname + "/./../GNconfig." + ENVIROMENT + ".json";
 console.log("[GN Server] ENVIROMENT [" + ENVIROMENT + "], load the config at " + optionsPath);
 let optionStr = fs.readFileSync(optionsPath).toString();
 let fullOptions = JSON.parse(optionStr);
@@ -204,7 +197,7 @@ applicationStartup.run(() => {
 
 let gnServer = applicationStartup.getGNServer();
 
-gnServer.addHandler(new TestRequestHandler(gnServer));
+gnServer.addCustomHandler(new TestRequestHandler(gnServer), false);
 
 postIndex.setOptions(options);
 postIndex.setGNServer(gnServer);
@@ -290,6 +283,7 @@ init_create_srcAppApiHandlerDir() {
     StringDataMember,
     GNHashtableDataMember,
     GNArrayDataMember,
+    SecretInfo,
 
 } from "@xmobitea/gn-server";
 import { TestErrorCode } from "./../../common/constant/errorCode/TestErrorCode";
@@ -298,21 +292,21 @@ import { TestParameterCode } from "./../../common/constant/parameterCode/TestPar
 
 class TestOperationRequest extends OperationRequest {
     @BooleanDataMember({ code: TestParameterCode.Boolean, isOptional: true })
-    booleanValue: boolean;
+    booleanValue?: boolean;
 	
     @NumberDataMember({ code: TestParameterCode.Number, isOptional: true })
-    numberValue: number;
+    numberValue?: number;
 	
     @StringDataMember({ code: TestParameterCode.String, isOptional: true })
-    stringValue: string;
+    stringValue?: string;
 	
     @GNHashtableDataMember({ code: TestParameterCode.GNHashtable, isOptional: true })
-    gnHashtableValue: GNHashtable;
+    gnHashtableValue?: GNHashtable;
 	
     @GNArrayDataMember({ code: TestParameterCode.GNArray, isOptional: true })
-    gnArrayValue: GNArray;
+    gnArrayValue?: GNArray;
 
-    public isValidRequest() {
+    public override isValidRequest() {
         return true;
     }
 }
@@ -328,6 +322,7 @@ export class TestRequestHandler extends RequestHandler {
 
     public async handle(
         authInfo: AuthInfo,
+        secretInfo: SecretInfo,
         operationRequest: OperationRequest
     ): Promise<OperationResponse> {
         let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
@@ -336,39 +331,46 @@ export class TestRequestHandler extends RequestHandler {
             return this.newInvalidRequestParameters(request);
         }
 
-        let operationResponse = new OperationResponse(
-            request.getOperationCode(),
-            request.getRequestId()
-        );
+        return this.execute({
+            booleanValue: request.booleanValue,
+            numberValue: request.numberValue,
+            stringValue: request.stringValue,
+            gnHashtableValue: request.gnHashtableValue,
+            gnArrayValue: request.gnArrayValue,
+        }, secretInfo, operationRequest);
+    }
+
+    private async execute(request: { booleanValue: boolean, numberValue: number, stringValue: string, gnHashtableValue: GNHashtable, gnArrayValue: GNArray }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
-        operationResponse.setScriptData(
+        operationResponse.setParameter(
             ParameterCode.ErrorCode,
             TestErrorCode.Ok
         );
 
-        operationResponse.setScriptData(
+        operationResponse.setParameter(
             TestParameterCode.Boolean,
             request.booleanValue
         );
-        operationResponse.setScriptData(
+        operationResponse.setParameter(
             TestParameterCode.Number,
             request.numberValue
         );
-        operationResponse.setScriptData(
+        operationResponse.setParameter(
             TestParameterCode.String,
             request.stringValue
         );
-        operationResponse.setScriptData(
+        operationResponse.setParameter(
             TestParameterCode.GNHashtable,
             request.gnHashtableValue
         );
-        operationResponse.setScriptData(
+        operationResponse.setParameter(
             TestParameterCode.GNArray,
             request.gnArrayValue
         );
 
         return operationResponse;
-    }
+	}
 }' > TestRequestHandler.ts
     echo 'create TestRequestHandler.ts file success'
 
@@ -502,7 +504,8 @@ init_create_tsconfigJson() {
         "allowSyntheticDefaultImports": true,
         "stripInternal": true,
         "skipLibCheck": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+        "outDir": "./dist",
     },
     "exclude": ["node_modules"]
 }' > tsconfig.json
@@ -638,7 +641,7 @@ class '$REQUEST_NAME'OperationRequest extends OperationRequest {
     @DataMember({ code: '$REQUEST_NAME'ParameterCode.Var1, isOptional: true })
     var1: number;
 
-    public isValidRequest() {
+    public override isValidRequest() {
         return true;
     }
 }

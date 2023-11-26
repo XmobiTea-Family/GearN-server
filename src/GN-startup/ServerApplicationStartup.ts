@@ -10,7 +10,6 @@ import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { DdosSettings } from "./settings/DDosSettings";
-import { AdminViewSettings } from "./settings/AdminViewSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
 	private gnConfig: { [k: string]: any };
@@ -27,16 +26,15 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"useSsl": false,
 			"keyFilePath": "",
 			"certFilePath": "",
-			"licenseKeyFilePath": "",
 			"expiredTokenInMs": 172800000,
 		}
 		let applicationSettings = ApplicationSettings.Builder()
-			.setUseSSL(gnApplicationSettings["useSsl"] || false)
-			.setCertFilePath(gnApplicationSettings["keyFilePath"] || "")
-			.setKeyFilePath(gnApplicationSettings["certFilePath"] || "")
-			.setPort(gnApplicationSettings["port"] || 2202)
-			.setLicenseKeyFilePath(gnApplicationSettings["licenseKeyFilePath"] || "")
-			.setExpiredToken(gnApplicationSettings["expiredTokenInMs"] || 172800000)
+			.setUseSSL(gnApplicationSettings["useSsl"] ?? false)
+			.setCertFilePath(gnApplicationSettings["keyFilePath"] ?? "")
+			.setKeyFilePath(gnApplicationSettings["certFilePath"] ?? "")
+			.setPort(gnApplicationSettings["port"] ?? 2202)
+			.setExpiredToken(gnApplicationSettings["expiredTokenInMs"] ?? 172800000)
+			.setPrivateKeyToken(gnApplicationSettings["privateKeyToken"] ?? "")
 			.build();
 
 		let gnHttpAppSettings = this.gnConfig["httpAppSettings"];
@@ -51,14 +49,14 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"enablePostViaJson": true,
 		}
 		let httpAppSettings = HttpAppSettings.Builder()
-			.setEnable(gnHttpAppSettings["enable"] || true)
-			.setOrigins(gnHttpAppSettings["allowOrigin"] || "*")
-			.addMethods(gnHttpAppSettings["allowMethods"] || ["GET", "POST"])
-			.setCredentials(gnHttpAppSettings["credentials"] || true)
-			.addAllowedHeaders(gnHttpAppSettings["allowHeaders"] || ["a", "content-type"])
-			.setEnableSendAndReceiveDebug(gnHttpAppSettings["enableSendAndReceiveDebug"] || true)
-			.setEnablePostViaMsgPack(gnHttpAppSettings["enablePostViaMsgPack"] || true)
-			.setEnablePostViaJson(gnHttpAppSettings["enablePostViaJson"] || true)
+			.setEnable(gnHttpAppSettings["enable"] ?? true)
+			.setOrigins(gnHttpAppSettings["allowOrigin"] ?? "*")
+			.addMethods(gnHttpAppSettings["allowMethods"] ?? ["GET", "POST"])
+			.setCredentials(gnHttpAppSettings["credentials"] ?? true)
+			.addAllowedHeaders(gnHttpAppSettings["allowHeaders"] ?? ["a", "content-type"])
+			.setEnableSendAndReceiveDebug(gnHttpAppSettings["enableSendAndReceiveDebug"] ?? true)
+			.setEnablePostViaMsgPack(gnHttpAppSettings["enablePostViaMsgPack"] ?? true)
+			.setEnablePostViaJson(gnHttpAppSettings["enablePostViaJson"] ?? true)
 			.build();
 
 		let gnSocketAppSettings = this.gnConfig["socketAppSettings"];
@@ -75,55 +73,40 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"pingTimeout": 5000,
 		}
 		let socketAppSettings = SocketAppSettings.Builder()
-			.setEnable(gnSocketAppSettings["enable"] || true)
-			.setOrigins(gnSocketAppSettings["allowOrigin"] || "*")
-			.addMethods(gnSocketAppSettings["allowMethods"] || ["GET"])
-			.setCredentials(gnSocketAppSettings["credentials"] || true)
-			.setEnablePostViaMsgPack(gnSocketAppSettings["enablePostViaMsgPack"] || true)
-			.setEnablePostViaJson(gnSocketAppSettings["enablePostViaJson"] || true)
-			.addAllowedHeaders(gnSocketAppSettings["allowHeaders"] || [])
-			.setPingInterval(gnSocketAppSettings["pingInterval"] || 50000)
-			.setPingTimeout(gnSocketAppSettings["pingTimeout"] || 5000)
-			.setEnableSendAndReceiveDebug(gnSocketAppSettings["enableSendAndReceiveDebug"] || true)
-			.build();
-
-		let gnAdminViewSettings = this.gnConfig["adminViewSettings"];
-		if (gnAdminViewSettings == null) gnAdminViewSettings = {
-			"enable": true,
-			"debugHashs": ["hashhere"],
-		}
-		let adminViewSettings = AdminViewSettings.Builder()
-			.setEnable(gnAdminViewSettings["enable"] || true)
-			.setDebugHashs(gnAdminViewSettings["debugHashs"] || ["hashhere"])
+			.setEnable(gnSocketAppSettings["enable"] ?? true)
+			.setOrigins(gnSocketAppSettings["allowOrigin"] ?? "*")
+			.addMethods(gnSocketAppSettings["allowMethods"] ?? ["GET"])
+			.setCredentials(gnSocketAppSettings["credentials"] ?? true)
+			.setEnablePostViaMsgPack(gnSocketAppSettings["enablePostViaMsgPack"] ?? true)
+			.setEnablePostViaJson(gnSocketAppSettings["enablePostViaJson"] ?? true)
+			.addAllowedHeaders(gnSocketAppSettings["allowHeaders"] ?? [])
+			.setPingInterval(gnSocketAppSettings["pingInterval"] ?? 50000)
+			.setPingTimeout(gnSocketAppSettings["pingTimeout"] ?? 5000)
+			.setEnableSendAndReceiveDebug(gnSocketAppSettings["enableSendAndReceiveDebug"] ?? true)
 			.build();
 
 		let gnOtherSettings = this.gnConfig["otherSettings"];
 		if (gnOtherSettings == null) gnOtherSettings = {
-			"packageName": "com.xmobitea.GNServer",
-			"appleClientId": "com.xmobitea.GNServer",
-			"googleClientId": "gn-server",
 			"headerIP": "x-ip",
 		}
 		let otherSettings = OtherSettings.Builder()
-			.setPackageName(gnOtherSettings["packageName"] || "com.xmobitea.GNServer")
-			.setAppleClientId(gnOtherSettings["appleClientId"] || "com.xmobitea.GNServer")
-			.setGoogleClientId(gnOtherSettings["googleClientId"] || "gn-server")
-			.setHeaderIP(gnOtherSettings["headerIP"] || "x-ip")
+			.setHeaderIP(gnOtherSettings["headerIP"] ?? "x-ip")
+			.setIdTypeCase(gnOtherSettings["idTypeCase"] ?? 0)
+			.setIPApiUrl(gnOtherSettings["ipApiUrl"])
 			.build();
 
 		let gnDatabaseSettings = this.gnConfig["databaseSettings"];
 		if (gnDatabaseSettings == null) gnDatabaseSettings = {
 			"connectionString": "mongodb://127.0.0.1:27017/",
 			"databaseName": "XmobiTea",
-			"databaseGameName": "GN.",
 			"options": {
 			},
 		}
+
 		let databaseSettings = DatabaseSettings.Builder()
-			.setConnectionString(gnDatabaseSettings["connectionString"] || "mongodb://127.0.0.1:27017/")
-			.setDatabaseName(gnDatabaseSettings["databaseName"] || "XmobiTea")
-			.setGameName(gnDatabaseSettings["databaseGameName"] || "GN.")
-			.setOptions(gnDatabaseSettings["options"] || {})
+			.setConnectionString(gnDatabaseSettings["connectionString"] ?? "mongodb://127.0.0.1:27017/")
+			.setDatabaseName(gnDatabaseSettings["databaseName"] ?? "XmobiTea")
+			.setOptions(gnDatabaseSettings["options"] ?? {})
 			.build();
 
 		let gnMailSettings = this.gnConfig["mailSettings"];
@@ -133,9 +116,9 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"sendGridApiKey": "SG.",
 		}
 		let mailSettings = MailSettings.Builder()
-			.setEnable(gnMailSettings["enable"] || false)
-			.setFromEmail(gnMailSettings["sendFrom"] || "changx@xmobitea.com")
-			.setSendGridApiKey(gnMailSettings["sendGridApiKey"] || "SG.")
+			.setEnable(gnMailSettings["enable"] ?? false)
+			.setFromEmail(gnMailSettings["sendFrom"] ?? "changx@xmobitea.com")
+			.setSendGridApiKey(gnMailSettings["sendGridApiKey"] ?? "SG.")
 			.build();
 
 		let gnLogSettings = this.gnConfig["logSettings"];
@@ -145,9 +128,9 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"logPath": "./log/debug/Server.log",
 		}
 		let logSettings = LogSettings.Builder()
-			.setLogToFileEnable(gnLogSettings["logToFileEnable"] || true)
-			.setLogToConsoleEnable(gnLogSettings["logToConsoleEnable"] || true)
-			.setLogPath(gnLogSettings["logPath"] || "./log/debug/Server.log")
+			.setLogToFileEnable(gnLogSettings["logToFileEnable"] ?? true)
+			.setLogToConsoleEnable(gnLogSettings["logToConsoleEnable"] ?? true)
+			.setLogPath(gnLogSettings["logPath"] ?? "./log/debug/Server.log")
 			.build();
 
 		let gnUploadFileSettings = this.gnConfig["uploadFileSettings"];
@@ -158,10 +141,10 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"mimeTypeAccepts": ["image/png"],
 		}
 		let uploadFileSettings = UploadFileSettings.Builder()
-			.setEnable(gnUploadFileSettings["enable"] || true)
-			.setUploadPath(gnUploadFileSettings["uploadPath"] || "./file-upload")
-			.setMaxSizeUpload(gnUploadFileSettings["maxSizeUpload"] || 52428800)
-			.setMimeTypeAccepts(gnUploadFileSettings["mimeTypeAccepts"] || ["image/png"])
+			.setEnable(gnUploadFileSettings["enable"] ?? true)
+			.setUploadPath(gnUploadFileSettings["uploadPath"] ?? "./file-upload")
+			.setMaxSizeUpload(gnUploadFileSettings["maxSizeUpload"] ?? 52428800)
+			.setMimeTypeAccepts(gnUploadFileSettings["mimeTypeAccepts"] ?? ["image/png"])
 			.build();
 
 		let gnDdosSettings = this.gnConfig["ddosSettings"];
@@ -178,23 +161,22 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"maxDownloadPendingRequest": 200,
 		}
 		let ddosSettings = DdosSettings.Builder()
-			.setSocketMaxRequestPerSecondPerIp(gnDdosSettings["socketMaxRequestPerSecondPerIp"] || 50)
-			.setSocketMaxRequestPerSecondPerPeer(gnDdosSettings["socketMaxRequestPerSecondPerPeer"] || 20)
-			.setSocketMaxPendingRequest(gnDdosSettings["socketMaxPendingRequest"] || 1000)
-			.setSocketMaxRequestSize(gnDdosSettings["socketMaxRequestSize"] || 1024)
-			.setHttpMaxRequestPerSecondPerIp(gnDdosSettings["httpMaxRequestPerSecondPerIp"] || 50)
-			.setHttpMaxRequestPerSecondPerPeer(gnDdosSettings["httpMaxRequestPerSecondPerPeer"] || 20)
-			.setHttpMaxPendingRequest(gnDdosSettings["httpMaxPendingRequest"] || 1000)
-			.setHttpMaxRequestSize(gnDdosSettings["httpMaxRequestSize"] || 1024)
-			.setMaxUploadPendingRequest(gnDdosSettings["maxUploadPendingRequest"] || 200)
-			.setMaxDownloadPendingRequest(gnDdosSettings["maxDownloadPendingRequest"] || 200)
+			.setSocketMaxRequestPerSecondPerIp(gnDdosSettings["socketMaxRequestPerSecondPerIp"] ?? 50)
+			.setSocketMaxRequestPerSecondPerPeer(gnDdosSettings["socketMaxRequestPerSecondPerPeer"] ?? 20)
+			.setSocketMaxPendingRequest(gnDdosSettings["socketMaxPendingRequest"] ?? 1000)
+			.setSocketMaxRequestSize(gnDdosSettings["socketMaxRequestSize"] ?? 1024)
+			.setHttpMaxRequestPerSecondPerIp(gnDdosSettings["httpMaxRequestPerSecondPerIp"] ?? 50)
+			.setHttpMaxRequestPerSecondPerPeer(gnDdosSettings["httpMaxRequestPerSecondPerPeer"] ?? 20)
+			.setHttpMaxPendingRequest(gnDdosSettings["httpMaxPendingRequest"] ?? 1000)
+			.setHttpMaxRequestSize(gnDdosSettings["httpMaxRequestSize"] ?? 1024)
+			.setMaxUploadPendingRequest(gnDdosSettings["maxUploadPendingRequest"] ?? 200)
+			.setMaxDownloadPendingRequest(gnDdosSettings["maxDownloadPendingRequest"] ?? 200)
 			.build();
 
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
 			httpAppSettings,
 			socketAppSettings,
-			adminViewSettings,
 			otherSettings,
 			databaseSettings,
 			mailSettings,

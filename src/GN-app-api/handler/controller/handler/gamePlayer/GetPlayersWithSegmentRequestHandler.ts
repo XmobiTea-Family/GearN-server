@@ -1,32 +1,33 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { GamePlayerParameterCode } from "../../../../../GN-common/constant/parameterCode/GamePlayerParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { GamePlayerErrorCode } from "../../../../../GN-common/constant/errorCode/GamePlayerErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { GetPlayersBaseRequestHandler } from "./GetPlayersBaseRequestHandler";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
+import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithSegmentOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GamePlayerParameterCode.Value, minLength: 6, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Value, minLength: 2, maxLength: 32, mustNonNull: true })
 	value: string;
 
-	@GNHashtableDataMember({ code: GamePlayerParameterCode.InfoGetParameters, mustNonNull: true })
-	infoGetParameters: GNHashtable;
+	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	infoRequestParam: InfoRequestParam;
 
-    @NumberDataMember({ code: GamePlayerParameterCode.Skip, defaultValue: 0, isOptional: true })
-	skip: number;
+	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	skip?: number;
 
-    @NumberDataMember({ code: GamePlayerParameterCode.Limit, defaultValue: 10, isOptional: true })
-	limit: number;
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	limit?: number;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -34,7 +35,8 @@ class GetPlayersWithSegmentOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayersWithSegmentOperationRequest extends GetPlayersWithSegmentOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -42,14 +44,15 @@ class ServerGetPlayersWithSegmentOperationRequest extends GetPlayersWithSegmentO
 }
 
 class AdminGetPlayersWithSegmentOperationRequest extends ServerGetPlayersWithSegmentOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class GetPlayersWithSegmentRequestHandler extends GetPlayersBaseRequestHandler {
+export class GetPlayersWithSegmentRequestHandler extends GamePlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.GetPlayersWithSegment;
 	}
@@ -65,66 +68,95 @@ export class GetPlayersWithSegmentRequestHandler extends GetPlayersBaseRequestHa
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().gamePlayer.getPlayersWithSegment.selfEnable) {
+		if (!secretInfo.getPermission().gamePlayer.getPlayersWithSegment.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.value, request.skip, request.limit, secretInfo.getGameId(), request.infoGetParameters, operationRequest, secretInfo);
+		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+
+		return this.execute({
+			segment: request.value,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayersWithSegmentOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayersWithSegmentOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().gamePlayer.getPlayersWithSegment.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().gamePlayer.getPlayersWithSegment.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.value, request.skip, request.limit, secretInfo.getGameId(), request.infoGetParameters, operationRequest, secretInfo);
-    }
+		this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayersWithSegmentOperationRequest);
+		return this.execute({
+			segment: request.value,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
+	}
+
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayersWithSegmentOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().gamePlayer.getPlayersWithSegment.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().gamePlayer.getPlayersWithSegment.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.value, request.skip, request.limit, secretInfo.getGameId(), request.infoGetParameters, operationRequest, secretInfo);
-    }
+		this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-    private async execute(segment: string, skip: number, limit: number, gameId: string, infoGetParameters: GNHashtable, operationRequest: OperationRequest, secretInfo: SecretInfo): Promise<OperationResponse> {
-		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(infoGetParameters);
+		return this.execute({
+			segment: request.value,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
+	}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+	private async execute(request: { segment: string, skip: number, limit: number, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayersWithSegment", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
 
 		let gnResults = new GNArray();
 
-		let gamePlayers = await this.gnServer.getDatabase().loadGamePlayersWithSegmentAsync(segment, skip, limit, gameId, gamePlayerFindOptions);
+		let gamePlayers = await this.gnServer.getDatabase().loadGamePlayersWithSegmentAsync(request.segment, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		for (let i = 0; i < gamePlayers.length; i++) {
 			let gamePlayer = gamePlayers[i];
 
 			let gnResult = new GNHashtable();
 
-			gnResult.add(GamePlayerParameterCode.UserId, gamePlayer.getUserId());
+			gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
 
-			gnResult.add(GamePlayerParameterCode.InfoGetParameters, this.generateGamePlayerOperationResponse(gamePlayer, gamePlayerFindOptions, infoGetParameters, secretInfo));
+			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
 
 			gnResults.add(gnResult);
 		}
 
-        operationResponse.setParameter(GamePlayerParameterCode.Results, gnResults);
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, GamePlayerErrorCode.Ok);
+		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayersWithSegment", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

@@ -6,30 +6,30 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class GetDisplayNameOperationRequest extends OperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId: string;
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-class ServerGetDisplayNameOperationRequest extends OperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+class ServerGetDisplayNameOperationRequest extends GetDisplayNameOperationRequest {
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	userId: string;
 
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -37,14 +37,16 @@ class ServerGetDisplayNameOperationRequest extends OperationRequest {
 }
 
 class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class GetDisplayNameRequestHandler extends RequestHandler {
+export class GetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetDisplayName;
 	}
@@ -61,70 +63,89 @@ export class GetDisplayNameRequestHandler extends RequestHandler {
 		}
 
 		if (!request.userId) {
-            if (!secretInfo.getPermission().masterPlayer.getDisplayName.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
+			if (!secretInfo.getPermission().masterPlayer.getDisplayName.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 
-            request.userId = authInfo.getUserId();
-        }
+			request.userId = authInfo.getUserId();
+		}
 		else if (request.userId != authInfo.getUserId()) {
 			if (!secretInfo.getPermission().masterPlayer.getDisplayName.otherSelfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.getDisplayName.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-        return this.execute(request.userId, operationRequest);
+		return this.execute({
+			userId: request.userId,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetDisplayNameOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getDisplayName.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getDisplayName.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetDisplayNameOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getDisplayName.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getDisplayName.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(userId: string, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            displayName: true
-        }
+	private async execute(request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetDisplayName", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			displayName: true,
 		}
 
-		let gnInfoGetParameters = new GNHashtable();
-		gnInfoGetParameters.add(MasterPlayerParameterCode.DisplayName, masterPlayer.getDisplayName());
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
-        operationResponse.setParameter(MasterPlayerParameterCode.InfoGetParameters, gnInfoGetParameters);
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			return operationResponse;
+		}
+
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(GNParameterCode.DisplayName, this.generateDisplayName(masterPlayer));
+
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetDisplayName", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

@@ -1,331 +1,532 @@
 import { RequestHandler } from "./../base/RequestHandler";
 
 import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { AuthenticateParameterCode } from "./../../../../../GN-common/constant/parameterCode/AuthenticateParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { MasterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
-import { CurrencyItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/CurrencyItem";
-import { StatisticsItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/StatisticsItem";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
-import { CountryCodeType } from "../../../../../GN-common/constant/enumType/CountryCodeType";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { MasterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { InfoRequestParam } from "./model/InfoRequestParam";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
 class LoginBaseOperationRequest extends OperationRequest {
-	public isValidRequest() {
-		if (!super.isValidRequest()) return false;
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-		return true;
-	}
+        return true;
+    }
 }
 
 export class LoginBaseRequestHandler extends RequestHandler {
     public override getCode() {
-		return 0;
-	}
+        return 0;
+    }
 
-	public override getCommonOperationRequest() {
-		return LoginBaseOperationRequest;
-	}
+    public override getCommonOperationRequest() {
+        return LoginBaseOperationRequest;
+    }
 
-    protected convertToMasterPlayerFindOptions(infoGetParameters: GNHashtable): MasterPlayerFindOptions {
-		if (infoGetParameters.count() == 0) return null;
+    private isGetAll(infoRequestParam: InfoRequestParam): boolean {
+        return infoRequestParam.external
+            && infoRequestParam.segments
+            && infoRequestParam.customDatas
+            && infoRequestParam.displayName
+            && infoRequestParam.avatar
+            && infoRequestParam.tsCreate
+            && infoRequestParam.tags
+            && infoRequestParam.playerBan
+            && infoRequestParam.playerDatas
+            && infoRequestParam.playerCurrencies
+            && infoRequestParam.playerStatistics
+            && infoRequestParam.tsLastLogin
+            && infoRequestParam.ipAddressCreate
+            && infoRequestParam.countryCode
+            && infoRequestParam.email;
+    }
 
-		let answer: MasterPlayerFindOptions = {};
+    protected convertToMasterPlayerFindOptions(infoRequestParam: InfoRequestParam): MasterPlayerFindOptions {
+        if (this.isGetAll(infoRequestParam)) return null;
+
+        let answer: MasterPlayerFindOptions = {};
         answer.userId = true;
-        
-		let external = infoGetParameters.getBoolean(AuthenticateParameterCode.External);
-		let segments = infoGetParameters.getBoolean(AuthenticateParameterCode.Segments);
-		let scriptData = infoGetParameters.getBoolean(AuthenticateParameterCode.ScriptData);
-		let privateData = infoGetParameters.getBoolean(AuthenticateParameterCode.PrivateData);
-		let displayName = infoGetParameters.getBoolean(AuthenticateParameterCode.DisplayName);
-		let avatar = infoGetParameters.getBoolean(AuthenticateParameterCode.Avatar);
-		let tsCreate = infoGetParameters.getBoolean(AuthenticateParameterCode.TsCreate);
-		let tags = infoGetParameters.getBoolean(AuthenticateParameterCode.Tags);
-		let playerBan = infoGetParameters.getBoolean(AuthenticateParameterCode.PlayerBan);
-		let playerDatas = infoGetParameters.getBoolean(AuthenticateParameterCode.PlayerDatas);
-		let playerCurrencies = infoGetParameters.getBoolean(AuthenticateParameterCode.PlayerCurrencies);
-		let playerStatistics = infoGetParameters.getBoolean(AuthenticateParameterCode.PlayerStatistics);
-		let tsLastLogin = infoGetParameters.getBoolean(AuthenticateParameterCode.TsLastLogin);
-		let ipAddressCreate = infoGetParameters.getBoolean(AuthenticateParameterCode.IpAddressCreate);
-		let countryCode = infoGetParameters.getBoolean(AuthenticateParameterCode.CountryCode);
+        answer.lastIPDetail = true;
 
-		if (external) answer.external = true;
-		if (segments) answer.segments = true;
-		if (scriptData) answer.scriptData = true;
-		if (privateData) answer.privateData = true;
-		if (displayName) answer.displayName = true;
-		if (avatar) answer.avatar = true;
-		if (tsCreate) answer.tsCreate = true;
-		if (tags) answer.tags = true;
-		if (playerBan) answer.playerBan = true;
-		if (playerDatas) answer.playerDatas = true;
-		if (playerCurrencies) answer.playerCurrencies = true;
-		if (playerStatistics) answer.playerStatistics = true;
-		if (tsLastLogin) answer.tsLastLogin = true;
-		if (ipAddressCreate) answer.ipAddressCreate = true;
-		if (countryCode) answer.countryCode = true;
+        if (infoRequestParam.external) answer.external = infoRequestParam.external;
+        if (infoRequestParam.segments) answer.segments = infoRequestParam.segments;
+        if (infoRequestParam.customDatas) answer.customDatas = infoRequestParam.customDatas;
+        if (infoRequestParam.displayName) answer.displayName = infoRequestParam.displayName;
+        if (infoRequestParam.avatar) answer.avatar = infoRequestParam.avatar;
+        if (infoRequestParam.tsCreate) answer.tsCreate = infoRequestParam.tsCreate;
+        if (infoRequestParam.tags) answer.tags = infoRequestParam.tags;
+        if (infoRequestParam.playerBan) answer.playerBan = infoRequestParam.playerBan;
+        if (infoRequestParam.playerDatas) answer.playerDatas = infoRequestParam.playerDatas;
+        if (infoRequestParam.playerCurrencies) answer.playerCurrencies = infoRequestParam.playerCurrencies;
+        if (infoRequestParam.playerStatistics) answer.playerStatistics = infoRequestParam.playerStatistics;
+        if (infoRequestParam.tsLastLogin) answer.tsLastLogin = infoRequestParam.tsLastLogin;
+        if (infoRequestParam.ipAddressCreate) answer.ipAddressCreate = infoRequestParam.ipAddressCreate;
+        if (infoRequestParam.countryCode) answer.countryCode = infoRequestParam.countryCode;
+        if (infoRequestParam.email) answer.email = infoRequestParam.email;
 
-		return answer;
-	}
+        answer.playerBan = true;
 
-    protected generateMasterPlayerOperationResponse(masterPlayer: MasterPlayer, masterPlayerFindOptions: MasterPlayerFindOptions, infoGetParameters: GNHashtable): GNHashtable {
-		let answer = new GNHashtable();
+        return answer;
+    }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.external) {
-            let gnExternal = new GNHashtable();
+    protected generateInfoRequestParamForOwner(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
-            let externalItem = masterPlayer.getExternal();
+        if (!secretInfo.getPermission().masterPlayer.getSegment.selfEnable) {
+            infoRequestParam.segments = false;
+        }
 
-            if (externalItem.device != null) {
-                let gnDevice = new GNHashtable();
+        if (!secretInfo.getPermission().masterPlayer.getTag.selfEnable) {
+            infoRequestParam.tags = false;
+        }
 
-                if (externalItem.device.customDeviceId != null) gnDevice.add(AuthenticateParameterCode.CustomDeviceId, externalItem.device.customDeviceId);
-                if (externalItem.device.androidDeviceId != null) gnDevice.add(AuthenticateParameterCode.AndroidDeviceId, externalItem.device.androidDeviceId);
-                if (externalItem.device.iOSDeviceId != null) gnDevice.add(AuthenticateParameterCode.iOSDeviceId, externalItem.device.iOSDeviceId);
-                if (externalItem.device.windowsPhoneDeviceId != null) gnDevice.add(AuthenticateParameterCode.WindowsPhoneDeviceId, externalItem.device.windowsPhoneDeviceId);
-                if (externalItem.device.windowsDeviceId != null) gnDevice.add(AuthenticateParameterCode.WindowsDeviceId, externalItem.device.windowsDeviceId);
-                if (externalItem.device.linuxDeviceId != null) gnDevice.add(AuthenticateParameterCode.LinuxDeviceId, externalItem.device.linuxDeviceId);
-                if (externalItem.device.macOSDeviceId != null) gnDevice.add(AuthenticateParameterCode.MacOSDeviceId, externalItem.device.macOSDeviceId);
-                if (externalItem.device.editorDeviceId != null) gnDevice.add(AuthenticateParameterCode.EditorDeviceId, externalItem.device.editorDeviceId);
+        if (!secretInfo.getPermission().masterPlayer.getDisplayName.selfEnable) {
+            infoRequestParam.displayName = false;
+        }
 
-                gnExternal.add(AuthenticateParameterCode.Device, gnDevice);
+        if (!secretInfo.getPermission().masterPlayer.getTsCreate.selfEnable) {
+            infoRequestParam.tsCreate = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getIpAddressCreate.selfEnable) {
+            infoRequestParam.ipAddressCreate = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getTsLastLogin.selfEnable) {
+            infoRequestParam.tsLastLogin = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getPlayerBan.selfEnable) {
+            infoRequestParam.playerBan = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getCountryCode.selfEnable) {
+            infoRequestParam.countryCode = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getEmail.selfEnable) {
+            infoRequestParam.email = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getAvatar.selfEnable) {
+            infoRequestParam.avatar = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getPlayerCurrency.selfEnable) {
+            infoRequestParam.playerCurrencies = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getPlayerStatistics.selfEnable) {
+            infoRequestParam.playerStatistics = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getCustomData.selfEnable) {
+            infoRequestParam.customDatas = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getPlayerData.selfEnable) {
+            infoRequestParam.playerDatas = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getExternal.selfEnable) {
+            infoRequestParam.external = false;
+        }
+    }
+
+    protected generateInfoResponseParameters(masterPlayer: MasterPlayer, infoRequestParam: InfoRequestParam): GNHashtable {
+        let answer = new GNHashtable();
+
+        if (infoRequestParam.external)
+            answer.add(GNParameterCode.External, this.generateExternal(masterPlayer));
+
+        if (infoRequestParam.segments)
+            answer.add(GNParameterCode.Segments, this.generateSegments(masterPlayer));
+
+        if (infoRequestParam.customDatas)
+            answer.add(GNParameterCode.CustomDatas, this.generateCustomDatas(masterPlayer, infoRequestParam.customDataKeys));
+
+        if (infoRequestParam.displayName)
+            answer.add(GNParameterCode.DisplayName, this.generateDisplayName(masterPlayer));
+
+        if (infoRequestParam.avatar)
+            answer.add(GNParameterCode.Avatar, this.generateAvatar(masterPlayer));
+
+        if (infoRequestParam.tsCreate)
+            answer.add(GNParameterCode.TsCreate, this.generateTsCreate(masterPlayer));
+
+        if (infoRequestParam.tags)
+            answer.add(GNParameterCode.Tags, this.generateTags(masterPlayer, infoRequestParam.tagKeys));
+
+        if (infoRequestParam.playerBan)
+            answer.add(GNParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
+
+        if (infoRequestParam.playerDatas)
+            answer.add(GNParameterCode.PlayerDatas, this.generatePlayerDatas(masterPlayer, infoRequestParam.playerDataKeys));
+
+        if (infoRequestParam.playerCurrencies)
+            answer.add(GNParameterCode.PlayerCurrencies, this.generatePlayerCurrencies(masterPlayer, infoRequestParam.playerCurrencyKeys));
+
+        if (infoRequestParam.playerStatistics)
+            answer.add(GNParameterCode.PlayerStatistics, this.generatePlayerStatistics(masterPlayer, infoRequestParam.playerStatisticsKeys));
+
+        if (infoRequestParam.tsLastLogin)
+            answer.add(GNParameterCode.TsLastLogin, this.generateTsLastLogin(masterPlayer));
+
+        if (infoRequestParam.ipAddressCreate)
+            answer.add(GNParameterCode.IpAddressCreate, this.generateIpAddressCreate(masterPlayer));
+
+        if (infoRequestParam.countryCode)
+            answer.add(GNParameterCode.CountryCode, this.generateCountryCode(masterPlayer));
+
+        if (infoRequestParam.email)
+            answer.add(GNParameterCode.Email, this.generateEmail(masterPlayer));
+
+        return answer;
+    }
+
+    protected generateExternal(masterPlayer: MasterPlayer): GNHashtable {
+        let gnExternal = new GNHashtable();
+
+        let externalItem = masterPlayer.getExternal();
+
+        if (externalItem.device != null) {
+            let gnDevice = new GNHashtable();
+
+            if (externalItem.device.customDeviceId != null) gnDevice.add(GNParameterCode.CustomDeviceId, externalItem.device.customDeviceId);
+            if (externalItem.device.androidDeviceId != null) gnDevice.add(GNParameterCode.AndroidDeviceId, externalItem.device.androidDeviceId);
+            if (externalItem.device.iOSDeviceId != null) gnDevice.add(GNParameterCode.iOSDeviceId, externalItem.device.iOSDeviceId);
+            if (externalItem.device.windowsPhoneDeviceId != null) gnDevice.add(GNParameterCode.WindowsPhoneDeviceId, externalItem.device.windowsPhoneDeviceId);
+            if (externalItem.device.windowsDeviceId != null) gnDevice.add(GNParameterCode.WindowsDeviceId, externalItem.device.windowsDeviceId);
+            if (externalItem.device.linuxDeviceId != null) gnDevice.add(GNParameterCode.LinuxDeviceId, externalItem.device.linuxDeviceId);
+            if (externalItem.device.macOSDeviceId != null) gnDevice.add(GNParameterCode.MacOSDeviceId, externalItem.device.macOSDeviceId);
+            if (externalItem.device.editorDeviceId != null) gnDevice.add(GNParameterCode.EditorDeviceId, externalItem.device.editorDeviceId);
+
+            gnExternal.add(GNParameterCode.Device, gnDevice);
+        }
+
+        if (externalItem.account != null) {
+            let gnAccount = new GNHashtable();
+
+            if (externalItem.account.username != null) gnAccount.add(GNParameterCode.Username, externalItem.account.username);
+
+            gnExternal.add(GNParameterCode.Account, gnAccount);
+        }
+
+        if (externalItem.custom != null) {
+            let gnCustom = new GNHashtable();
+
+            if (externalItem.custom.customId != null) gnCustom.add(GNParameterCode.CustomId, externalItem.custom.customId);
+
+            gnExternal.add(GNParameterCode.Custom, gnCustom);
+        }
+
+        if (externalItem.apple != null) {
+            let gnApple = new GNHashtable();
+
+            gnApple.add(GNParameterCode.AppleId, externalItem.apple.appleId);
+            gnApple.add(GNParameterCode.Email, externalItem.apple.email);
+
+            gnExternal.add(GNParameterCode.Apple, gnApple);
+        }
+
+        if (externalItem.google != null) {
+            let gnGoogle = new GNHashtable();
+
+            gnGoogle.add(GNParameterCode.GoogleId, externalItem.google.googleId);
+            gnGoogle.add(GNParameterCode.DisplayName, externalItem.google.displayName);
+            gnGoogle.add(GNParameterCode.Email, externalItem.google.email);
+
+            gnExternal.add(GNParameterCode.Google, gnGoogle);
+        }
+
+        if (externalItem.facebook != null) {
+            let gnFacebook = new GNHashtable();
+
+            gnFacebook.add(GNParameterCode.FacebookId, externalItem.facebook.facebookId);
+            gnFacebook.add(GNParameterCode.DisplayName, externalItem.facebook.displayName);
+            gnFacebook.add(GNParameterCode.Email, externalItem.facebook.email);
+
+            gnExternal.add(GNParameterCode.Facebook, gnFacebook);
+        }
+
+        if (externalItem.genericService != null) {
+            let gnGenericServices = new GNArray();
+
+            if (externalItem.genericService.genericServices != null) {
+
+                externalItem.genericService.genericServices.forEach((value, key: string) => {
+                    let gnGenericService = new GNHashtable();
+                    gnGenericService.add(GNParameterCode.ServiceName, key);
+                    gnGenericService.add(GNParameterCode.ServiceId, value.serviceId);
+
+                    gnGenericServices.add(gnGenericService);
+                });
             }
-            
-            if (externalItem.account != null) {
-                let gnAccount = new GNHashtable();
 
-                if (externalItem.account.username != null) gnAccount.add(AuthenticateParameterCode.Username, externalItem.account.username);
+            gnExternal.add(GNParameterCode.GenericService, gnGenericServices);
+        }
 
-                gnExternal.add(AuthenticateParameterCode.Account, gnAccount);
-            }
+        if (externalItem.googlePlayGameService != null) {
+            let gnGooglePlayGameService = new GNHashtable();
 
-            if (externalItem.custom != null) {
-                let gnCustom = new GNHashtable();
+            gnGooglePlayGameService.add(GNParameterCode.PlayerId, externalItem.googlePlayGameService.playerId);
+            gnGooglePlayGameService.add(GNParameterCode.DisplayName, externalItem.googlePlayGameService.displayName);
+            gnGooglePlayGameService.add(GNParameterCode.Email, externalItem.googlePlayGameService.email);
 
-                if (externalItem.custom.customId != null) gnCustom.add(AuthenticateParameterCode.CustomId, externalItem.custom.customId);
+            gnExternal.add(GNParameterCode.GooglePlayGameService, gnGooglePlayGameService);
+        }
 
-                gnExternal.add(AuthenticateParameterCode.Custom, gnCustom);
-            }
+        if (externalItem.gameCenter != null) {
+            let gnGameCenter = new GNHashtable();
 
-            if (externalItem.apple != null) {
-                let gnApple = new GNHashtable();
+            gnGameCenter.add(GNParameterCode.PlayerId, externalItem.gameCenter.playerId);
+            gnGameCenter.add(GNParameterCode.DisplayName, externalItem.gameCenter.displayName);
+            gnGameCenter.add(GNParameterCode.Email, externalItem.gameCenter.email);
 
-                if (externalItem.apple.appleId != null) gnApple.add(AuthenticateParameterCode.AppleId, externalItem.apple.appleId);
+            gnExternal.add(GNParameterCode.GameCenter, gnGameCenter);
+        }
 
-                gnExternal.add(AuthenticateParameterCode.Apple, gnApple);
-            }
+        return gnExternal;
+    }
 
-            if (externalItem.google != null) {
-                let gnGoogle = new GNHashtable();
+    protected generateSegments(masterPlayer: MasterPlayer): string[] {
+        return masterPlayer.getAllSegments();
+    }
 
-                if (externalItem.google.googleId != null) gnGoogle.add(AuthenticateParameterCode.GoogleId, externalItem.google.googleId);
+    protected generateCustomDatas(masterPlayer: MasterPlayer, customDataKeys: Array<string>): GNArray {
+        let gnCustomDatas = new GNArray();
 
-                gnExternal.add(AuthenticateParameterCode.Custom, gnGoogle);
-            }
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-            if (externalItem.facebook != null) {
-                let gnFacebook = new GNHashtable();
+        for (let i = 0; i < masterPlayerSettings.customDatasSettings.length; i++) {
+            let customDatasSettingsItem = masterPlayerSettings.customDatasSettings[i];
 
-                if (externalItem.facebook.facebookId != null) gnFacebook.add(AuthenticateParameterCode.FacebookId, externalItem.facebook.facebookId);
+            if (customDataKeys == null || customDataKeys.indexOf(customDatasSettingsItem.key) != -1) {
+                let value = masterPlayer.getCustomData(customDatasSettingsItem.key);
 
-                gnExternal.add(AuthenticateParameterCode.Facebook, gnFacebook);
-            }
+                if (value != null) {
+                    let gnCustomData = new GNHashtable();
 
-            if (externalItem.genericService != null) {
-                let gnGenericServices = new GNArray();
+                    gnCustomData.add(GNParameterCode.Key, customDatasSettingsItem.key);
+                    gnCustomData.add(GNParameterCode.Value, value);
 
-                if (externalItem.genericService.genericServices != null) {
-
-                    externalItem.genericService.genericServices.forEach((value, key: string) => {
-                        let gnGenericService = new GNHashtable();
-                        gnGenericService.add(AuthenticateParameterCode.ServiceName, key);
-                        gnGenericService.add(AuthenticateParameterCode.ServiceId, value.serviceId);
-
-                        gnGenericServices.add(gnGenericService);
-                    });
+                    gnCustomDatas.add(gnCustomData);
                 }
-
-                gnExternal.add(AuthenticateParameterCode.GenericService, gnGenericServices);
             }
-
-            answer.add(AuthenticateParameterCode.External, gnExternal);
         }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.segments)
-            answer.add(AuthenticateParameterCode.Segments, masterPlayer.getAllSegments());
+        return gnCustomDatas;
+    }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.scriptData)
-            answer.add(AuthenticateParameterCode.ScriptData, masterPlayer.getAllScriptData());
+    protected generateDisplayName(masterPlayer: MasterPlayer): string {
+        return masterPlayer.getDisplayName();
+    }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.privateData)
-            answer.add(AuthenticateParameterCode.PrivateData, masterPlayer.getAllPrivateData());
+    protected generateAvatar(masterPlayer: MasterPlayer): GNHashtable {
+        let gnAvatar = new GNHashtable();
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.displayName)
-            answer.add(AuthenticateParameterCode.DisplayName, masterPlayer.getDisplayName());
+        let avatar = masterPlayer.getAvatar();
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.avatar) {
-            let avatar = masterPlayer.getAvatar();
+        gnAvatar.add(GNParameterCode.Type, avatar.type);
+        gnAvatar.add(GNParameterCode.Value, avatar.value);
 
-            let gnAvatar = new GNHashtable();
-            gnAvatar.add(AuthenticateParameterCode.Type, avatar.type);
-            gnAvatar.add(AuthenticateParameterCode.Value, avatar.value);
+        return gnAvatar;
+    }
 
-            answer.add(AuthenticateParameterCode.Avatar, gnAvatar);
+    protected generateTsCreate(masterPlayer: MasterPlayer): number {
+        return masterPlayer.getTsCreate();
+    }
+
+    protected generateTags(masterPlayer: MasterPlayer, tagKeys: Array<string>): GNArray {
+        let gnTags = new GNArray();
+
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
+
+        for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
+            let tagsSettingsItem = masterPlayerSettings.tagsSettings[i];
+
+            if (tagKeys == null || tagKeys.indexOf(tagsSettingsItem.key) != -1) {
+                let value = masterPlayer.getTag(tagsSettingsItem.key);
+
+                if (value != null) {
+                    let gnTag = new GNHashtable();
+
+                    gnTag.add(GNParameterCode.Key, tagsSettingsItem.key);
+                    gnTag.add(GNParameterCode.Value, value);
+
+                    gnTags.add(gnTag);
+                }
+            }
         }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.tsCreate)
-            answer.add(AuthenticateParameterCode.TsCreate, masterPlayer.getTsCreate());
+        return gnTags;
+    }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.tags) {
-            let tags = masterPlayer.getAllTags();
-            let gnTags = new GNArray();
-            tags.forEach((value: string | number | boolean, key: string) => {
-                let gnTag = new GNHashtable();
+    protected generatePlayerBan(masterPlayer: MasterPlayer): GNHashtable {
+        let gnPlayerBan = new GNHashtable();
 
-                gnTag.add(AuthenticateParameterCode.Key, key);
-                gnTag.add(AuthenticateParameterCode.Value, value);
+        let playerBan = masterPlayer.getPlayerBan();
 
-                gnTags.add(gnTag);
-            });
-            answer.add(AuthenticateParameterCode.Tags, gnTags);
-        }
+        gnPlayerBan.add(GNParameterCode.TsExpire, playerBan.tsExpire);
+        gnPlayerBan.add(GNParameterCode.Reason, playerBan.reason);
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.playerBan) {
-            let playerBan = masterPlayer.getPlayerBan();
-            let gnPlayerBan = new GNHashtable();
-            gnPlayerBan.add(AuthenticateParameterCode.TsExpire, playerBan.tsExpire);
+        return gnPlayerBan;
+    }
 
-            if (playerBan.reason != null) gnPlayerBan.add(AuthenticateParameterCode.Reason, playerBan.reason);
-            answer.add(AuthenticateParameterCode.PlayerBan, gnPlayerBan);
-        }
+    protected generatePlayerDatas(masterPlayer: MasterPlayer, playerDataKeys: Array<string>): GNArray {
+        let gnPlayerDatas = new GNArray();
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.playerDatas) {
-            let playerDatas = masterPlayer.getAllPlayerDatas();
-            let gnInfoGetParameterDataKey = infoGetParameters.getGNArray(AuthenticateParameterCode.DataKeys);
-            let gnPlayerDatas = new GNArray();
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-            for (let i = 0; i < playerDatas.length; i++) {
-                let playerData = playerDatas[i];
+        for (let i = 0; i < masterPlayerSettings.playerDatasSettings.length; i++) {
+            let playerDatasSettingsItem = masterPlayerSettings.playerDatasSettings[i];
 
-                if (gnInfoGetParameterDataKey == null || gnInfoGetParameterDataKey.indexOf(playerData.key) != -1) {
+            if (playerDataKeys == null || playerDataKeys.indexOf(playerDatasSettingsItem.key) != -1) {
+                let playerData = masterPlayer.getPlayerData(playerDatasSettingsItem.key);
+
+                if (playerData != null) {
                     let gnPlayerData = new GNHashtable();
 
-                    gnPlayerData.add(AuthenticateParameterCode.Key, playerData.key);
-                    gnPlayerData.add(AuthenticateParameterCode.Value, playerData.value);
-                    gnPlayerData.add(AuthenticateParameterCode.Permission, playerData.permission);
+                    gnPlayerData.add(GNParameterCode.Key, playerData.key);
+                    gnPlayerData.add(GNParameterCode.Value, playerData.value);
 
                     gnPlayerDatas.add(gnPlayerData);
                 }
             }
-
-            answer.add(AuthenticateParameterCode.PlayerDatas, gnPlayerDatas);
         }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.playerCurrencies) {
-            let playerCurrencies = masterPlayer.getAllPlayerCurrencies();
-            let gnInfoGetParameterCurrencyKey = infoGetParameters.getGNArray(AuthenticateParameterCode.CurrencyKeys);
+        return gnPlayerDatas;
+    }
 
-            let gnPlayerCurrencies = new GNArray();
+    protected generatePlayerCurrencies(masterPlayer: MasterPlayer, playerCurrencyKeys: Array<string>): GNArray {
+        let gnPlayerCurrencies = new GNArray();
 
-            playerCurrencies.forEach((value: CurrencyItem, key: string) => {
-                if (gnInfoGetParameterCurrencyKey == null || gnInfoGetParameterCurrencyKey.indexOf(key) != -1) {
-                    let gnPlayerCurrency = new GNHashtable();
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-                    gnPlayerCurrency.add(AuthenticateParameterCode.Key, key);
-                    gnPlayerCurrency.add(AuthenticateParameterCode.Value, value.value);
+        for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
+            let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings[i];
 
-                    gnPlayerCurrencies.add(gnPlayerCurrency);
-                }
-            });
+            if (playerCurrencyKeys == null || playerCurrencyKeys.indexOf(playerCurrencySettingsItem.key) != -1) {
+                let playerCurrency = masterPlayer.getPlayerCurrency(playerCurrencySettingsItem.key);
 
-            answer.add(AuthenticateParameterCode.PlayerCurrencies, gnPlayerCurrencies);
+                let gnPlayerCurrency = new GNHashtable();
+                gnPlayerCurrency.add(GNParameterCode.Key, playerCurrencySettingsItem.key);
+
+                if (playerCurrency != null) gnPlayerCurrency.add(GNParameterCode.Value, playerCurrency.value);
+                else gnPlayerCurrency.add(GNParameterCode.Value, playerCurrencySettingsItem.initialValue);
+
+                gnPlayerCurrencies.add(gnPlayerCurrency);
+            }
         }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.playerStatistics) {
-            let playerStatistics = masterPlayer.getAllPlayerStatistics();
-            let gnInfoGetParameterStatisticsKey = infoGetParameters.getGNArray(AuthenticateParameterCode.StatisticsKeys);
+        return gnPlayerCurrencies;
+    }
 
-            let gnPlayerStatistics = new GNArray();
+    protected generatePlayerStatistics(masterPlayer: MasterPlayer, playerStatisticsKeys: Array<string>): GNArray {
+        let gnPlayerStatistics = new GNArray();
 
-            playerStatistics.forEach((value: StatisticsItem, key: string) => {
-                if (gnInfoGetParameterStatisticsKey == null || gnInfoGetParameterStatisticsKey.indexOf(key) != -1) {
-                    let gnPlayerStatistic = new GNHashtable();
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-                    gnPlayerStatistic.add(AuthenticateParameterCode.Key, key);
-                    gnPlayerStatistic.add(AuthenticateParameterCode.Value, value.value);
+        for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
+            let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings[i];
 
-                    gnPlayerStatistics.add(gnPlayerStatistic);
-                }
-            });
+            if (playerStatisticsKeys == null || playerStatisticsKeys.indexOf(playerStatisticsSettingsItem.key) != -1) {
+                let playerStatistics = masterPlayer.getPlayerStatistics(playerStatisticsSettingsItem.key);
 
-            answer.add(AuthenticateParameterCode.PlayerStatistics, gnPlayerStatistics);
+                let gnPlayerStatistic = new GNHashtable();
+                gnPlayerStatistic.add(GNParameterCode.Key, playerStatisticsSettingsItem.key);
+
+                if (playerStatistics != null) gnPlayerStatistic.add(GNParameterCode.Value, playerStatistics.value);
+                else gnPlayerStatistic.add(GNParameterCode.Value, playerStatisticsSettingsItem.initialValue);
+
+                gnPlayerStatistics.add(gnPlayerStatistic);
+            }
         }
-        
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.tsLastLogin)
-            answer.add(AuthenticateParameterCode.TsLastLogin, masterPlayer.getTsLastLogin());
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.ipAddressCreate)
-            answer.add(AuthenticateParameterCode.IpAddressCreate, masterPlayer.getIpAddressCreate());
+        return gnPlayerStatistics;
+    }
 
-        if (masterPlayerFindOptions == null || masterPlayerFindOptions.countryCode)
-            answer.add(AuthenticateParameterCode.CountryCode, masterPlayer.getCountryCode());
+    protected generateTsLastLogin(masterPlayer: MasterPlayer): number {
+        return masterPlayer.getTsLastLogin();
+    }
 
-		return answer;
-	}
+    protected generateIpAddressCreate(masterPlayer: MasterPlayer): string {
+        return masterPlayer.getIpAddressCreate();
+    }
 
-    protected setupAuthInfo(operationResponse: OperationResponse, masterPlayer: MasterPlayer) {
+    protected generateCountryCode(masterPlayer: MasterPlayer): string {
+        return masterPlayer.getCountryCode();
+    }
+
+    protected generateEmail(masterPlayer: MasterPlayer): string {
+        return masterPlayer.getEmail();
+    }
+
+    protected setupAuthInfo(operationResponse: OperationResponse, masterPlayer: MasterPlayer, secretInfo: SecretInfo) {
         let userId = masterPlayer.getUserId();
+        operationResponse.setParameter(ParameterCode.UserId, userId);
 
-        masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-        masterPlayer.saveAsync();
+        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		let oldAuthInfo = this.gnServer.getApiMiddleware().getAuthInfoByUserId(userId);
+        let playerBan = masterPlayer.getPlayerBan();
 
-		if (oldAuthInfo) {
-			oldAuthInfo.setOtherUserLogin(true);
-			this.gnServer.getApiMiddleware().updateAuthInfo(oldAuthInfo);
-		}
+        if (playerBan.tsExpire != 0) {
+            if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 
-		let newAuth = AuthInfo.Builder()
-			.setUserId(userId)
-			.setSocketId('')
-			.setSocketRoomIds([])
-			.build();
-		let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthToken(newAuth);
+                operationResponse.setParameter(GNParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
+                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.PlayerBan);
 
-		operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
-	}
+                return;
+            }
+        }
+
+        let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
+            userId: userId,
+            secretKey: secretInfo.getSecretKey(),
+            gnToken: null
+        });
+
+        operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
+    }
 
     protected generateNewMasterPlayerResult(ipAddressCreate: string) {
 
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
         let answer = {} as any;
 
-        answer["userId"] = this.getUserId();
+        answer["userId"] = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
         answer["external"] = {};
         answer["segments"] = [];
-        answer["scriptData"] = {};
-        answer["privateData"] = {};
+        answer["customDatas"] = {};
         answer["displayName"] = "";
-        answer["avatar"] = { "type": 0, "value": "0"};
+        answer["displayNameNormalize"] = "";
+        answer["avatar"] = { "type": 0, "value": "0" };
         answer["tsCreate"] = currentMilliseconds;
-        answer["tags"] = [];
-        answer["playerBan"] = {"tsExpire": 0, "reason": ""};
+        answer["tags"] = {};
+        answer["playerBan"] = { "tsExpire": 0, "reason": "" };
         answer["playerDatas"] = [];
         answer["playerCurrencies"] = {};
         answer["playerStatistics"] = {};
         answer["tsLastLogin"] = currentMilliseconds;
         answer["ipAddressCreate"] = ipAddressCreate;
-        answer["countryCode"] = <number>CountryCodeType.Unknown;
+        answer["lastIPDetail"] = {
+            "ipAddress": ipAddressCreate,
+            "countryCode": "Unknown",
+            "regionCode": "Unknown",
+        };
+        answer["countryCode"] = "";
+        answer["email"] = "";
 
         return answer;
     }
 
-    private getUserId(): string {
-        return "";
-    }
+     
 }

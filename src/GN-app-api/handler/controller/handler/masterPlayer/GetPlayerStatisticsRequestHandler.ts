@@ -6,37 +6,33 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { StatisticsItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/StatisticsItem";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class GetPlayerStatisticsOperationRequest extends OperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId: string;
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
 
-    @GNArrayDataMember({ code: MasterPlayerParameterCode.StatisticsKeys, isOptional: true })
-	statisticsKeys: GNArray;
+	@GNArrayDataMember({ code: GNParameterCode.PlayerStatisticsKeys, isOptional: true, elementCls: String })
+	playerStatisticsKeys?: Array<string>;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-class ServerGetPlayerStatisticsOperationRequest extends OperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+class ServerGetPlayerStatisticsOperationRequest extends GetPlayerStatisticsOperationRequest {
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	userId: string;
 
-    @GNArrayDataMember({ code: MasterPlayerParameterCode.StatisticsKeys, isOptional: true })
-	statisticsKeys: GNArray;
-
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -44,14 +40,15 @@ class ServerGetPlayerStatisticsOperationRequest extends OperationRequest {
 }
 
 class AdminGetPlayerStatisticsOperationRequest extends ServerGetPlayerStatisticsOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class GetPlayerStatisticsRequestHandler extends RequestHandler {
+export class GetPlayerStatisticsRequestHandler extends MasterPlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.GetPlayerStatistics;
 	}
@@ -79,71 +76,81 @@ export class GetPlayerStatisticsRequestHandler extends RequestHandler {
 				return this.newOperationNotAllowError(request);
 			}
 		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.getPlayerStatistics.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-        return this.execute(request.userId, request.statisticsKeys, operationRequest);
+		return this.execute({
+			userId: request.userId,
+			playerStatisticsKeys: request.playerStatisticsKeys,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerStatisticsOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getPlayerStatistics.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getPlayerStatistics.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, request.statisticsKeys, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			playerStatisticsKeys: request.playerStatisticsKeys,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerStatisticsOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getPlayerStatistics.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getPlayerStatistics.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, request.statisticsKeys, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			playerStatisticsKeys: request.playerStatisticsKeys,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(userId: string, statisticsKeys: GNArray, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            playerStatistics: true
-        }
+	private async execute(request: { userId: string, playerStatisticsKeys: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetPlayerStatistics", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			playerStatistics: true,
 		}
 
-		let gnInfoGetParameters = new GNHashtable();
-        let playerStatisticss = masterPlayer.getAllPlayerStatistics();
-        let gnPlayerStatistics = new GNArray();
-        playerStatisticss.forEach((value: StatisticsItem, key: string) => {
-            if (statisticsKeys == null || statisticsKeys.indexOf(key) != -1) {
-                let gnPlayerStatistic = new GNHashtable();
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
-                gnPlayerStatistic.add(MasterPlayerParameterCode.Key, key);
-                gnPlayerStatistic.add(MasterPlayerParameterCode.Value, value);
-    
-                gnPlayerStatistics.add(gnPlayerStatistic);
-            }
-        });
-        gnInfoGetParameters.add(MasterPlayerParameterCode.PlayerStatistics, gnPlayerStatistics);
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			return operationResponse;
+		}
 
-        operationResponse.setParameter(MasterPlayerParameterCode.InfoGetParameters, gnInfoGetParameters);
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(GNParameterCode.PlayerStatistics, this.generatePlayerStatistics(masterPlayer, request.playerStatisticsKeys));
+
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetPlayerStatistics", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

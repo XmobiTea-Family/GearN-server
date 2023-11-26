@@ -1,16 +1,7 @@
 type GNDataType = string | number | boolean | null | GNArray | GNHashtable;
 
 interface IGNData {
-	clear(): void;
-	remove(k: string | number): boolean;
-	count(): string | number;
-
-	getObject(k: string | number, def?: object): object;
-	getBoolean(k: string | number, def?: boolean): boolean;
-	getString(k: string | number, def?: string): string;
-	getNumber(k: string | number, def?: number): number;
-	getGNHashtable(k: string | number, def?: GNHashtable): GNHashtable;
-	getGNArray(k: string | number, def?: GNArray): GNArray;
+	toData(): any;
 }
 
 export abstract class GNData implements IGNData {
@@ -20,7 +11,7 @@ export abstract class GNData implements IGNData {
 
 	public abstract clear(): void;
 	public abstract remove(k: string | number): boolean;
-	public abstract count(): string | number;
+	public abstract count(): number;
 
 	public getBoolean(k: string | number, def?: boolean): boolean {
 		return this.get(k, def);
@@ -95,12 +86,8 @@ export abstract class GNData implements IGNData {
 	protected static createDataFromUseData(value: GNDataType): any {
 		if (value == null) return null;
 
-		if (value instanceof GNArray) {
-			return (<GNArray>value).toData();
-		}
-
-		if (value instanceof GNHashtable) {
-			return (<GNHashtable>value).toData();
+		if (value instanceof GNData) {
+			return value.toData();
 		}
 
 		return value;
@@ -145,7 +132,7 @@ export class GNHashtableBuilder {
 }
 
 export class GNHashtable extends GNData {
-	dict: { [k: string]: GNDataType } = {};
+	private dict: { [k: string]: GNDataType } = {};
 
 	public override clear(): void {
 		this.dict = {};
@@ -198,7 +185,7 @@ export class GNHashtable extends GNData {
 		return new GNHashtableBuilder();
 	}
 
-	public toString(): string {
+	public override toString(): string {
 		return JSON.stringify(this.dict);
 	}
 }
@@ -245,7 +232,7 @@ export class GNArray extends GNData {
 	public indexOf(item: GNDataType): number {
 		return this.array.indexOf(item);
 	}
-	
+
 	public override remove(k: number): boolean {
 		if (k < 0 || k >= this.array.length) return false;
 

@@ -2,7 +2,6 @@
 // import express from "express";
 // import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 // import { GNServer } from "./../../GNServer";
-// import { AdminViewSettings } from "./../settings/AdminViewSettings";
 // import { CodeHelper } from "./../../GN-common/helper/CodeHelper";
 // import fs from "fs";
 // import { ApplicationSettings } from "./../settings/ApplicationSettings";
@@ -10,17 +9,18 @@
 // import { HttpAppSettings } from "./../settings/HttpAppSettings";
 // import { LogSettings } from "./../settings/LogSettings";
 // import session from "express-session";
+// import cookieParser from "cookie-parser";
+
 // import { StringUtility } from "./../../GN-common/helper/StringUtility";
 // import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
-// import { UserRoleType } from "./../../GN-common/constant/enumType/UserRoleType";
 // import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
-// import { LicenseKeyApplication } from "./../LicenseKeyApplication";
-// import bcrypt from "bcrypt";
+// import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
+// import { DashboardModels, GNNetwork, GNServerSettings, GNServerSettingsOptions, LogType } from "@xmobitea/gn-typescript-client";
+// import { GNErrorCode } from "./../../GN-common/constant/errorCode/GNErrorCode";
 
 // export class AdminAppHandler {
 // 	private applicationSettings: ApplicationSettings;
 // 	private apiMiddleware: ApiMiddleware;
-// 	private adminViewSettings: AdminViewSettings;
 
 // 	private gnServer: GNServer;
 
@@ -43,10 +43,6 @@
 // 		this.gnServer = gnServer;
 // 	}
 
-// 	public setAdminViewSettings(adminViewSettings: AdminViewSettings) {
-// 		this.adminViewSettings = adminViewSettings;
-// 	}
-
 // 	public setApplicationSettings(applicationSettings: ApplicationSettings): void {
 // 		this.applicationSettings = applicationSettings;
 // 	}
@@ -64,7 +60,7 @@
 // 	}
 
 // 	private async mustSignin(req: express.Request, res: express.Response, next: Function) {
-// 		let authToken = (req.session as any).authToken as string;
+// 		let authToken = req.cookies.authToken as string;
 
 // 		if (!authToken) {
 // 			return res.redirect("/admin/signin");
@@ -74,20 +70,17 @@
 
 // 		let returnCode = await this.apiMiddleware.getReturnCodeAuthenticate(req);
 
-// 		if (returnCode != ReturnCode.Ok || !(req as any).isAuthenticated) {
-// 			(req.session as any).authToken = null;
-// 			return res.redirect("/admin/signin");
-// 		}
+// 		if (returnCode != ReturnCode.Ok || !req.isAuthenticated) {
+// 			res.clearCookie("authToken");
 
-// 		if ((req as any).authInfo.getRole() > UserRoleType.GameMaster) {
-// 			return res.redirect("/101");
+// 			return res.redirect("/admin/signin");
 // 		}
 
 // 		return next();
 // 	}
 
 // 	private async mustNotSignin(req: express.Request, res: express.Response, next: Function) {
-// 		let authToken = (req.session as any).authToken as string;
+// 		let authToken = req.cookies.authToken as string;
 
 // 		if (authToken) {
 // 			return res.redirect("/admin");
@@ -106,9 +99,10 @@
 // 				resave: false,
 // 				saveUninitialized: true,
 // 				cookie: {
-// 					maxAge: 3600000
+// 					maxAge: 3600
 // 				},
-// 			})
+// 			}),
+// 			cookieParser("secret")
 // 		);
 
 // 		this.adminRouter.use((req, res, next) => {
@@ -123,21 +117,29 @@
 // 		this.setupAdminRouter();
 // 	}
 
+// 	public runGNNetworkSdk(gnServerSettingsOptions: GNServerSettingsOptions) {
+// 		let gnServerSettings = new GNServerSettings();
+// 		gnServerSettings.config(gnServerSettingsOptions);
+
+// 		GNNetwork.init(gnServerSettings);
+// 	}
+
 // 	private setupAdminRouter(): void {
-// 		this.adminRouter.get("/get-stats", (req: express.Request, res: express.Response) => {
+// 		this.adminRouter.get("/get-stats", (req: express.Request, res: express.Response): any => {
 // 			let cpuUsage = process.cpuUsage();
 // 			let memoryUsage = process.memoryUsage();
 // 			let resourceUsage = process.resourceUsage();
 
-// 			return res.json({
+// 			return res.status(200).json({
 // 				"CpuUsage": cpuUsage,
 // 				"MemoryUsage": memoryUsage,
 // 				"ResourceUsage": resourceUsage
 // 			});
 // 		});
 
-// 		this.adminRouter.get("/get-analytics", async (req: express.Request, res: express.Response) => {
+// 		this.adminRouter.get("/get-analytics", async (req: express.Request, res: express.Response): Promise<any> => {
 // 			let query = req.query;
+
 // 			let tsDateStr = query.tsDate as string;
 
 // 			let analyticsService = this.gnServer.getAnalyticsService();
@@ -147,7 +149,7 @@
 // 				return res.sendStatus(403);
 // 			}
 
-// 			return res.json({
+// 			return res.status(200).json({
 // 				"CCU": analyticsItem.CCU,
 
 // 				"DAU": analyticsItem.DAU,
@@ -171,25 +173,35 @@
 // 		}), (req: express.Request, res: express.Response) => {
 // 			let packageJsonPath = __dirname + "/../../../../package.json";
 
-// 			let packageJsonStr = fs.readFileSync(packageJsonPath).toString();
-// 			let packageJson = JSON.parse(packageJsonStr);
-// 			let description: string = packageJson.description || "";
-// 			let name: string = packageJson.name || "";
-// 			let version: string = packageJson.version || "";
-// 			let userId: string = (req as any).authInfo.getUserId();
+// 			if (fs.existsSync(packageJsonPath)) {
+// 				let packageJsonStr = fs.readFileSync(packageJsonPath).toString();
+// 				let packageJson = JSON.parse(packageJsonStr);
+// 				let description: string = packageJson.description ?? "";
+// 				let name: string = packageJson.name ?? "";
+// 				let version: string = packageJson.version ?? "";
+
+// 				res.locals.data = {
+// 					description: description,
+// 					name: name,
+// 					version: version,
+// 				}
+// 			}
+// 			else {
+// 				res.locals.data = {
+// 					description: "gn description",
+// 					name: "GN Server",
+// 					version: "2.0",
+// 				}
+// 			}
+
+// 			let username: string = req.authInfo.getOtherData("username");
+// 			let userId: string = req.authInfo.getUserId();
 // 			let gnVersion: string = GNServer.getServerVersion();
 
-// 			let maxCCU: any = LicenseKeyApplication.getMaxCCU();
-// 			if (maxCCU == -1) maxCCU = "Unlimited";
-
-// 			res.locals.data = {
-// 				description: description,
-// 				name: name,
-// 				version: version,
-// 				userId: userId,
-// 				gnVersion: gnVersion,
-// 				maxCCU: maxCCU
-// 			}
+// 			res.locals.data.username = username;
+// 			res.locals.data.userId = userId;
+// 			res.locals.data.gnVersion = gnVersion;
+// 			res.locals.data.maxCCU = -1;
 
 // 			res.render("admin/index");
 // 		});
@@ -239,121 +251,124 @@
 // 					return res.redirect("/admin/change-password");
 // 				}
 
-// 				let userId: string = (req as any).authInfo.getUserId();
-// 				let sparkPlayer = await this.gnServer.getDatabase().loadPlayer(userId);
+// 				let requestData = new DashboardModels.ChangePasswordAdminAccountRequestData();
+// 				requestData.currentPassword = password;
+// 				requestData.password = newpassword;
 
-// 				let isMatch = await bcrypt.compare(password, sparkPlayer.getPassword());
-// 				if (!isMatch) {
+// 				GNNetwork.dashboard.changePasswordAdminAccount(requestData, response => {
+// 					if (response.hasReturnCodeError()) {
+// 						let errorCodeStr = CodeHelper.getReturnCodeName(response.returnCode);
+
+// 						(req.session as any).messages = {
+// 							"errors": {
+// 								"ErrorCode": errorCodeStr
+// 							}
+// 						}
+
+// 						return res.redirect("/admin/change-password");
+// 					}
+// 					else {
+// 						let errorCode = <GNErrorCode>response.errorCode;
+// 						if (errorCode != GNErrorCode.Ok) {
+// 							let errorCodeStr = "GNErrorCode " + errorCode;
+
+// 							(req.session as any).messages = {
+// 								"errors": {
+// 									"ErrorCode": errorCodeStr
+// 								}
+// 							}
+
+// 							return res.redirect("/admin/change-password");
+// 						}
+// 						else {
+// 							return res.redirect("/admin");
+// 						}
+// 					}
+// 				});
+// 			});
+// 		}
+
+// 		{
+// 			this.adminRouter.get("/signin", wrap((req, res, next) => {
+// 				return this.mustNotSignin(req, res, next);
+// 			}), (req: express.Request, res: express.Response) => {
+// 				res.render("admin/signin");
+// 			});
+
+// 			this.adminRouter.post("/signin", async (req: express.Request, res: express.Response) => {
+// 				let body = req.body;
+
+// 				let username = body.username;
+// 				let password = body.password;
+
+// 				if (!username || !password) {
+// 					let errorCodeStr = "UserDoesNotExists";
+
 // 					(req.session as any).messages = {
 // 						"errors": {
-// 							"msg": "current password wroong."
+// 							"ErrorCode": errorCodeStr
 // 						}
 // 					}
 
-// 					return res.redirect("/admin/change-password");
+// 					return res.redirect("/admin/signin");
 // 				}
 
-// 				sparkPlayer.setPassword(newpassword);
+// 				let requestData = new DashboardModels.LoginByAdminAccountRequestData();
+// 				requestData.username = username;
+// 				requestData.password = password;
+
+// 				GNNetwork.dashboard.loginByAdminAccount(requestData, response => {
+// 					if (response.hasReturnCodeError()) {
+// 						let errorCodeStr = CodeHelper.getReturnCodeName(response.returnCode);
+
+// 						(req.session as any).messages = {
+// 							"errors": {
+// 								"ErrorCode": errorCodeStr
+// 							}
+// 						}
+
+// 						return res.redirect("/admin/signin");
+// 					}
+// 					else {
+// 						let errorCode = <GNErrorCode>response.errorCode;
+// 						if (errorCode != GNErrorCode.Ok) {
+// 							let errorCodeStr = "ErrorCode " + errorCode;
+
+// 							(req.session as any).messages = {
+// 								"errors": {
+// 									"GNErrorCode": errorCodeStr
+// 								}
+// 							}
+
+// 							return res.redirect("/admin/signin");
+// 						}
+// 						else {
+// 							res.cookie("authToken", response.responseData.authToken, {
+// 								maxAge: 3600000
+// 							});
+
+// 							if (password == "gnadmin") {
+// 								return res.redirect("/admin/change-password");
+// 							}
+
+// 							return res.redirect("/admin");
+// 						}
+// 					}
+// 				});
+// 			});
+
+// 			this.adminRouter.post("/signout", (req: express.Request, res: express.Response) => {
+// 				res.clearCookie("authToken");
 
 // 				return res.redirect("/admin");
 // 			});
 // 		}
 
-// 		// {
-// 		// 	this.adminRouter.get("/signin", wrap((req, res, next) => {
-// 		// 		return this.mustNotSignin(req, res, next);
-// 		// 	}), (req: express.Request, res: express.Response) => {
-// 		// 		res.render("admin/signin");
-// 		// 	});
-
-// 		// 	this.adminRouter.post("/signin", async (req: express.Request, res: express.Response) => {
-// 		// 		let body = req.body;
-// 		// 		let debugHash = body.debugHash;
-
-// 		// 		let settingsDebugHashs = this.adminViewSettings.getDebugHashs();
-// 		// 		if (settingsDebugHashs.length != 0) {
-// 		// 			if (!debugHash || settingsDebugHashs.indexOf(debugHash) == -1) {
-// 		// 				let errorCodeStr = "Hash wroong";
-
-// 		// 				(req.session as any).messages = {
-// 		// 					"errors": {
-// 		// 						"ErrorCode": errorCodeStr
-// 		// 					}
-// 		// 				}
-
-// 		// 				return res.redirect("/admin/signin");
-// 		// 			}
-// 		// 		}
-
-// 		// 		let username = body.username;
-// 		// 		let password = body.password;
-
-// 		// 		if (!username || !password) {
-// 		// 			let errorCodeStr = "UserDoesNotExists";
-
-// 		// 			(req.session as any).messages = {
-// 		// 				"errors": {
-// 		// 					"ErrorCode": errorCodeStr
-// 		// 				}
-// 		// 			}
-
-// 		// 			return res.redirect("/admin/signin");
-// 		// 		}
-
-// 		// 		let loginRequestHandler = this.gnServer.getRequestController().getHandler(OperationCode.Login);
-// 		// 		let loginOperationRequest = new OperationRequest(OperationCode.Login, false);
-// 		// 		loginOperationRequest.setScriptData(LoginParameterCode.LoginType, LoginType.Account);
-// 		// 		loginOperationRequest.setScriptData(LoginParameterCode.Username, username);
-// 		// 		loginOperationRequest.setScriptData(LoginParameterCode.Password, password);
-
-// 		// 		let operationResponse: OperationResponse = await loginRequestHandler.handle(null, loginOperationRequest);
-// 		// 		if (operationResponse.getReturnCode() != ReturnCode.Ok) {
-// 		// 			(req.session as any).messages = {
-// 		// 				"errors": {
-// 		// 					"ReturnCode": CodeHelper.getReturnCodeName(operationResponse.getReturnCode())
-// 		// 				}
-// 		// 			}
-
-// 		// 			return res.redirect("/admin/signin");
-// 		// 		}
-
-// 		// 		let parameters = operationResponse.getParameters();
-// 		// 		let errorCode = <LoginErrorCode>parameters.getNumber(ParameterCode.ErrorCode);
-// 		// 		if (errorCode != LoginErrorCode.Ok) {
-// 		// 			let errorCodeStr = Object.keys(LoginErrorCode)[<number>errorCode - 1];
-
-// 		// 			(req.session as any).messages = {
-// 		// 				"errors": {
-// 		// 					"ErrorCode": errorCodeStr
-// 		// 				}
-// 		// 			}
-
-// 		// 			return res.redirect("/admin/signin");
-// 		// 		}
-// 		// 		else {
-// 		// 			let authToken = parameters.getString(ParameterCode.AuthToken);
-// 		// 			(req.session as any).authToken = authToken;
-// 		// 		}
-
-// 		// 		if (password == "gnadmin") {
-// 		// 			return res.redirect("/admin/change-password");
-// 		// 		}
-
-// 		// 		return res.redirect("/admin");
-// 		// 	});
-
-// 		// 	this.adminRouter.post("/signout", (req: express.Request, res: express.Response) => {
-// 		// 		(req.session as any).authToken = null;
-
-// 		// 		return res.redirect("/admin");
-// 		// 	});
-// 		// }
-
 // 		{
 // 			this.adminRouter.get("/debug", wrap((req, res, next) => {
 // 				return this.mustSignin(req, res, next);
 // 			}), (req: express.Request, res: express.Response) => {
-// 				let userId: string = (req as any).authInfo.getUserId();
+// 				let userId: string = req.authInfo.getUserId();
 
 // 				res.locals.data = {
 // 					userId: userId,
@@ -364,11 +379,11 @@
 
 // 			this.adminRouter.get("/debug-support.js", wrap((req, res, next) => {
 // 				return this.mustSignin(req, res, next);
-// 			}), (req: express.Request, res: express.Response) => {
+// 			}), (req: express.Request, res: express.Response): any => {
 // 				let requestController = this.gnServer.getRequestController();
 // 				let requestConverterService = this.gnServer.getRequestConverterService();
 
-// 				let allHandlers = requestController.getAllHandlers();
+// 				let allHandlers = requestController.getAllHandlers(<number>RequestType.Authenticate);
 // 				allHandlers = allHandlers.sort((a, b) => a.getCode() - b.getCode());
 
 // 				let serverAddress: string = "127.0.0.1";
@@ -380,7 +395,6 @@
 // 				let reconnectDelay: number = 5000;
 // 				let pingInterval: number = this.socketAppSettings.getPingInterval() - 50;
 // 				let pingTimeout: number = this.socketAppSettings.getPingTimeout() - 50;
-// 				let codeCanSendNotAuthorized: number[] = requestController.getRequestUnAuthenticatedCodes();
 
 // 				let stringBuilder = '';
 // 				stringBuilder += 'function initDebugSupport() {';
@@ -393,7 +407,6 @@
 // 				stringBuilder += '	gnServerSettings.reconnectDelay = ' + reconnectDelay + ';';
 // 				stringBuilder += '	gnServerSettings.pingInterval = ' + pingInterval + ';';
 // 				stringBuilder += '	gnServerSettings.pingTimeout = ' + pingTimeout + ';';
-// 				stringBuilder += '	gnServerSettings.codeCanSendNotAuthorized = ' + JSON.stringify(codeCanSendNotAuthorized) + ';';
 // 				stringBuilder += '	gnServerSettings.logType = GN.LogType.All;';
 
 // 				for (let i = 0; i < allHandlers.length; i++) {
@@ -459,7 +472,7 @@
 // 			this.adminRouter.get("/log", wrap((req, res, next) => {
 // 				return this.mustSignin(req, res, next);
 // 			}), (req: express.Request, res: express.Response) => {
-// 				let userId: string = (req as any).authInfo.getUserId();
+// 				let userId: string = req.authInfo.getUserId();
 
 // 				res.locals.data = {
 // 					userId: userId,
@@ -498,7 +511,7 @@
 
 // 					for (let i = startI - 1; i >= endI; i--) returnData.push(arr[i]);
 
-// 					return res.json(returnData);
+// 					return res.status(200).json(returnData);
 // 				});
 // 			});
 // 		}

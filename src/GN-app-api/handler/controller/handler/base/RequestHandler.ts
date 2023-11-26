@@ -6,14 +6,14 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { GNServer } from "./../../../../../GNServer";
 import { Constructor, IRequestConverterService } from "./../../../../service/IRequestConverterService";
 import { OperationHelper } from "./../../../../../GN-common/entity/operationHelper/OperationHelper";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 export abstract class RequestHandler implements IRequestHandler {
 	protected gnServer: GNServer;
 	protected requestConverterService: IRequestConverterService;
-	
+
 	public abstract getCode(): number;
-	
+
 	public abstract getCommonOperationRequest(): Constructor<OperationRequest>;
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -23,7 +23,7 @@ export abstract class RequestHandler implements IRequestHandler {
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		return this.newOperationInvalid(operationRequest);
 	}
-	
+
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		return this.newOperationInvalid(operationRequest);
 	}
@@ -32,8 +32,8 @@ export abstract class RequestHandler implements IRequestHandler {
 
 	}
 
-	protected newInvalidRequestParameters(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationHelper.newOperationResponseInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), (operationRequest as any).invalidMembers, operationRequest.isEncrypted(), debugMessage);
+	protected newInvalidRequestParameters(operationRequest: OperationRequest): OperationResponse {
+		return OperationHelper.newOperationResponseInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), (operationRequest as any).invalidMembers, operationRequest.isEncrypted());
 	}
 
 	protected newOperationInvalid(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {

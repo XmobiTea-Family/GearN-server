@@ -6,36 +6,33 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class GetTagOperationRequest extends OperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId: string;
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
 
-    @GNArrayDataMember({ code: MasterPlayerParameterCode.TagKeys })
-	tagKeys: GNArray;
+	@GNArrayDataMember({ code: GNParameterCode.TagKeys, elementCls: String })
+	tagKeys: Array<string>;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-class ServerGetTagOperationRequest extends OperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+class ServerGetTagOperationRequest extends GetTagOperationRequest {
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	userId: string;
 
-    @GNArrayDataMember({ code: MasterPlayerParameterCode.TagKeys })
-	tagKeys: GNArray;
-
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -43,14 +40,15 @@ class ServerGetTagOperationRequest extends OperationRequest {
 }
 
 class AdminGetTagOperationRequest extends ServerGetTagOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class GetTagRequestHandler extends RequestHandler {
+export class GetTagRequestHandler extends MasterPlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.GetTag;
 	}
@@ -78,71 +76,81 @@ export class GetTagRequestHandler extends RequestHandler {
 				return this.newOperationNotAllowError(request);
 			}
 		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.getTag.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-        return this.execute(request.userId, request.tagKeys, operationRequest);
+		return this.execute({
+			userId: request.userId,
+			tagKeys: request.tagKeys
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetTagOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetTagOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getTag.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getTag.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, request.tagKeys, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			tagKeys: request.tagKeys
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetTagOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetTagOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getTag.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getTag.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, request.tagKeys, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			tagKeys: request.tagKeys
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(userId: string, tagKeys: GNArray, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            tags: true
-        }
+	private async execute(request: { userId: string, tagKeys: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetTag", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			tags: true,
 		}
 
-		let gnInfoGetParameters = new GNHashtable();
-        let tags = masterPlayer.getAllTags();
-        let gnTags = new GNArray();
-        tags.forEach((value: string | number | boolean, key: string) => {
-            if (tagKeys.indexOf(key) != -1) {
-                let gnTag = new GNHashtable();
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
-                gnTag.add(MasterPlayerParameterCode.Key, key);
-                gnTag.add(MasterPlayerParameterCode.Value, value);
-    
-                gnTags.add(gnTag);
-            }
-        });
-        gnInfoGetParameters.add(MasterPlayerParameterCode.Tags, gnTags);
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			return operationResponse;
+		}
 
-        operationResponse.setParameter(MasterPlayerParameterCode.InfoGetParameters, gnInfoGetParameters);
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(GNParameterCode.Tags, this.generateTags(masterPlayer, request.tagKeys));
+
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetTag", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

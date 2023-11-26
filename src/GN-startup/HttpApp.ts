@@ -3,32 +3,24 @@ import { HttpAppHandler } from "./routes/HttpAppHandler";
 import { UploadFileHandler } from "./routes/UploadFileHandler";
 
 import cors from "cors";
-import express from "express";
-import { Express } from "express";
+import express, { Express } from "express";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
 import { UploadFileMiddleware } from "./middleware/UploadFileMiddleware";
 import { GNServer } from "./../GNServer";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
-// import { CreateNewFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/CreateNewFileUploadInfoRequestHandler";
-// import { GetFileUploadInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/GetFileUploadInfoRequestHandler";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
-import { AdminViewSettings } from "./settings/AdminViewSettings";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { LogSettings } from "./settings/LogSettings";
-// import { AdminAppHandler } from "./routes/AdminAppHandler";
-import expressLayouts from "express-ejs-layouts";
 
 export class HttpApp {
 	private applicationSettings: ApplicationSettings;
 	private uploadFileSettings: UploadFileSettings;
 	private appSettings: HttpAppSettings;
 	private socketAppSettings: SocketAppSettings;
-	private adminViewSettings: AdminViewSettings;
 	private app: Express;
 	private httpAppHandler: HttpAppHandler;
 	private uploadFileHandler: UploadFileHandler;
-	// private adminAppHandler: AdminAppHandler;
 
 	private antiDdosMiddleware: AntiDdosMiddleware;
 	private logSettings: LogSettings;
@@ -50,10 +42,6 @@ export class HttpApp {
 	public getHttpAppHandler(): HttpAppHandler {
 		return this.httpAppHandler;
 	}
-
-	// public getAdminAppHandler(): AdminAppHandler {
-	// 	return this.adminAppHandler;
-	// }
 
 	public getUploadFileHandler(): UploadFileHandler {
 		return this.uploadFileHandler;
@@ -79,10 +67,6 @@ export class HttpApp {
 		this.socketAppSettings = socketAppSettings;
 	}
 
-	public setDebugViewSettings(debugViewSettings: AdminViewSettings): void {
-		this.adminViewSettings = debugViewSettings;
-	}
-
 	public setUploadFileSettings(uploadFileSettings: UploadFileSettings): void {
 		this.uploadFileSettings = uploadFileSettings;
 	}
@@ -104,58 +88,19 @@ export class HttpApp {
 	}
 
 	public run(): void {
-		this.app.set("view engine", "ejs");
-		this.app.set("views", __dirname + "/GN-startup/routes/www/views");
-		this.app.use(express.static(__dirname + '/GN-startup/routes/www/public'));
-		this.app.use(expressLayouts);
-
 		this.app.use(express.urlencoded({ extended: false }));
 
-		this.app.post("/", (req: express.Request, res: express.Response) => {
+		this.app.post("/", (req: express.Request, res: express.Response): any => {
 			return res.sendStatus(403);
 		});
 
-		this.app.get("/", (req: express.Request, res: express.Response) => {
+		this.app.get("/", (req: express.Request, res: express.Response): any => {
 			return res.sendStatus(403);
 		});
-		
-		this.app.get("/101", (req: express.Request, res: express.Response) => {
-			res.render("101");
-		});
 
-		this.app.get("/401", (req: express.Request, res: express.Response) => {
-			res.render("401");
-		});
-
-		this.app.get("/403", (req: express.Request, res: express.Response) => {
-			res.render("403");
-		});
-
-		this.app.get("/404", (req: express.Request, res: express.Response) => {
-			res.render("404");
-		});
-
-		this.app.get("/500", (req: express.Request, res: express.Response) => {
-			res.render("500");
-		});
-
-		this.app.get("/ping", (req: express.Request, res: express.Response) => {
+		this.app.get("/ping", (req: express.Request, res: express.Response): any => {
 			return res.sendStatus(200);
 		});
-
-		// this.adminAppHandler = new AdminAppHandler();
-		// this.adminAppHandler.setRouter(this.app);
-		// this.adminAppHandler.setApiMiddleware(this.apiMiddleware);
-		// this.adminAppHandler.setApplicationSettings(this.applicationSettings);
-		// this.adminAppHandler.setGNServer(this.gnServer);
-		// this.adminAppHandler.setAdminViewSettings(this.adminViewSettings);
-		// this.adminAppHandler.setHttpAppSettings(this.appSettings);
-		// this.adminAppHandler.setSocketAppSettings(this.socketAppSettings);
-		// this.adminAppHandler.setLogSettings(this.logSettings);
-
-		// if (this.adminViewSettings.getEnable()) {
-		// 	this.adminAppHandler.run();
-		// }
 
 		let allowedHeaders = this.appSettings.getAllowedHeaders();
 		allowedHeaders.push(this.sessionId);
@@ -192,12 +137,8 @@ export class HttpApp {
 		this.uploadFileHandler.init();
 		if (this.uploadFileSettings.getEnable()) {
 			this.uploadFileHandler.run();
-
-			// this.gnServer.addHandler(new CreateNewFileUploadInfoRequestHandler(this.gnServer));
-			// this.gnServer.addHandler(new GetFileUploadInfoRequestHandler(this.gnServer));
 		}
 	}
 
 	constructor() { }
-
 }

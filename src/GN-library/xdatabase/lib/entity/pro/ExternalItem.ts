@@ -35,4 +35,14 @@ export interface ExternalItem {
 			serviceId: string
 		}>;
 	};
+	googlePlayGameService?: {
+		playerId: string,
+		email: string,
+		displayName: string,
+	};
+	gameCenter?: {
+		playerId: string,
+		email: string,
+		displayName: string,
+	};
 }

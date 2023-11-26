@@ -1,13 +1,13 @@
 {
-	"name": "debug",
-	"options": {
-		"applicationSettings": {
+    "name": "debug",
+    "options": {
+        "applicationSettings": {
 			"port": 2202,
 			"useSsl": false,
 			"keyFilePath": "",
 			"certFilePath": "",
-			"licenseKeyFilePath": "",
-			"expiredTokenInMs": 172800000
+			"expiredTokenInMs": 172800000,
+            "privateKeyToken": "privateKeyDefault"
 		},
 
 		"httpAppSettings": {
@@ -15,8 +15,8 @@
 			"allowOrigin": "*",
 			"credentials": true,
 			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["a", "content-type"],
-			"enableSendAndReceiveDebug": true,
+			"allowHeaders": ["a", "s", "g", "content-type", "content-length", "user-agent"],
+			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true
 		},
@@ -27,7 +27,7 @@
 			"credentials": true,
 			"allowMethods": ["GET"],
 			"allowHeaders": [],
-			"enableSendAndReceiveDebug": true,
+			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true,
 			"pingInterval": 50000,
@@ -42,29 +42,22 @@
 		},
 
 		"databaseSettings": {
-			"connectionString": "mongodb://127.0.0.1:27017/",
-			"databaseName": "XmobiTea",
-			"databaseGameName": "GN",
+			"connectionString": "mongodb://gnserver:BA5NfnWPrH8dMfX4@127.0.0.1:27017/gnserver",
+			"databaseName": "gnserver",
 			"options": {
 			}
 		},
 
 		"otherSettings": {
-			"packageName": "com.xmobitea.GNServer",
-			"appleClientId": "com.xmobitea.GNServer",
-			"googleClientId": "gn-server",
-			"headerIP": "x-ip"
+			"headerIP": "x-ip",
+			"idTypeCase": 1,
+			"ipApiUrl": "https://ipdetail.changx.dev/json"
 		},
 		
 		"mailSettings": {
 			"enable": false,
 			"sendFrom": "changx@xmobitea.com",
 			"sendGridApiKey": "SG."
-		},
-
-		"adminViewSettings": {
-			"enable": true,
-			"debugHashs": ["hashhere"]
 		},
 
 		"logSettings": {
@@ -81,9 +74,9 @@
 			"httpMaxRequestPerSecondPerIp": 50,
 			"httpMaxRequestPerSecondPerPeer": 20,
 			"httpMaxPendingRequest": 1000,
-			"httpMaxRequestSize": 1024,
+			"httpMaxRequestSize": 102400,
 			"maxUploadPendingRequest": 200,
 			"maxDownloadPendingRequest": 200
 		}
-	}
+    }
 }

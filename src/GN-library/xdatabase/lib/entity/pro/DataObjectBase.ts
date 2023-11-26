@@ -3,30 +3,29 @@ import * as mongoDB from "mongodb";
 import { AvatarItem } from "./AvatarItem";
 import { MongoObject } from "./MongoObject";
 import { DataValueType } from "./type/DataValueType";
-import { TagValueType } from "./type/TagValueType";
+import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 
 export class DataObjectBase extends MongoObject {
 	private static readonly _segments: string = "segments";
-	private static readonly _scriptData: string = "scriptData";
-	private static readonly _privateData: string = "privateData";
+	private static readonly _customDatas: string = "customDatas";
 
 	private static readonly _tsCreate: string = "tsCreate";
 
 	private static readonly _displayName: string = "displayName";
+	private static readonly _displayNameNormalize: string = "displayNameNormalize";
 	private static readonly _avatar: string = "avatar";
 	private static readonly _tags: string = "tags";
-	
-	protected static readonly DOT: string = ".";
+
+	static readonly DOT: string = ".";
 
 	private segments: Array<string>;
-	private scriptData: Map<string, DataValueType>;
-	private privateData: Map<string, DataValueType>;
+	private customDatas: Map<string, DataValueType>;
 
 	private displayName: string;
 	private avatar: AvatarItem;
 
 	private tsCreate: number;
-	private tags: Map<string, TagValueType>;
+	private tags: Map<string, string>;
 
 	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
 		super(result, collection);
@@ -36,16 +35,15 @@ export class DataObjectBase extends MongoObject {
 
 	private setDocumentDataObjectBase(result: mongoDB.WithId<mongoDB.Document>): void {
 		this.segments = result[DataObjectBase._segments];
-		this.scriptData = result[DataObjectBase._scriptData];
-		this.privateData = result[DataObjectBase._privateData];
+		this.customDatas = result[DataObjectBase._customDatas] != null ? new Map(Object.entries(result[DataObjectBase._customDatas])) : null;
 
 		this.displayName = result[DataObjectBase._displayName];
 		this.avatar = result[DataObjectBase._avatar];
 
 		this.tsCreate = result[DataObjectBase._tsCreate];
-		this.tags = result[DataObjectBase._tags];
+		this.tags = result[DataObjectBase._tags] != null ? new Map(Object.entries(result[DataObjectBase._tags])) : null;
 	}
-	
+
 	public getAllSegments(): Array<string> {
 		return this.segments;
 	}
@@ -76,52 +74,29 @@ export class DataObjectBase extends MongoObject {
 		this.set(DataObjectBase._segments, this.segments);
 	}
 
-	public getAllScriptData(): Map<string, DataValueType> {
-		return this.scriptData;
+	public getAllCustomDatas(): Map<string, DataValueType> {
+		return this.customDatas;
 	}
 
-	public hasScriptData(key: string): boolean {
-		return this.scriptData.has(key);
+	public hasCustomData(key: string): boolean {
+		return this.customDatas.has(key);
 	}
 
-	public getScriptData(key: string): DataValueType {
-		return this.scriptData.get(key);
+	public getCustomData(key: string): DataValueType {
+		return this.customDatas.get(key);
 	}
 
-	public setScriptData(key: string, value: DataValueType) {
-		this.scriptData.set(key, value);
+	public setCustomData(key: string, value: DataValueType) {
+		this.customDatas.set(key, value);
 
-		this.set(DataObjectBase._scriptData + DataObjectBase.DOT + key, value);
+		this.removeSet(DataObjectBase._customDatas);
+		this.set(DataObjectBase._customDatas + DataObjectBase.DOT + key, value);
 	}
 
-	public removeScriptData(key: string): void {
-		this.scriptData.delete(key);
+	public removeCustomData(key: string): void {
+		this.customDatas.delete(key);
 
-		this.unset(DataObjectBase._scriptData + DataObjectBase.DOT + key);
-	}
-
-	public getAllPrivateData(): Map<string, DataValueType> {
-		return this.privateData;
-	}
-
-	public hasPrivateData(key: string): boolean {
-		return this.privateData.has(key);
-	}
-
-	public getPrivateData(key: string): DataValueType {
-		return this.privateData.get(key);
-	}
-
-	public setPrivateData(key: string, value: DataValueType): void {
-		this.privateData.set(key, value);
-
-		this.set(DataObjectBase._privateData + DataObjectBase.DOT + key, value);
-	}
-
-	public removePrivateData(key: string): void {
-		this.privateData.delete(key);
-
-		this.unset(DataObjectBase._privateData + DataObjectBase.DOT + key);
+		this.unset(DataObjectBase._customDatas + DataObjectBase.DOT + key);
 	}
 
 	public getDisplayName(): string {
@@ -132,6 +107,7 @@ export class DataObjectBase extends MongoObject {
 		this.displayName = displayName;
 
 		this.set(DataObjectBase._displayName, this.displayName);
+		this.set(DataObjectBase._displayNameNormalize, DisplayNameUtility.normalizeString(displayName));
 	}
 
 	public getAvatar(): AvatarItem {
@@ -157,22 +133,28 @@ export class DataObjectBase extends MongoObject {
 		this.set(DataObjectBase._tsCreate, this.tsCreate);
 	}
 
-
-	public getAllTags(): Map<string, string | boolean | number> {
+	public getAllTags(): Map<string, string> {
 		return this.tags;
+	}
+
+	public clearTags(): void {
+		this.tags.clear();
+
+		this.set(DataObjectBase._tags, {});
 	}
 
 	public hasTag(key: string): boolean {
 		return this.tags.has(key);
 	}
 
-	public getTag(key: string): TagValueType {
+	public getTag(key: string): string {
 		return this.tags.get(key);
 	}
 
-	public setTag(key: string, value: TagValueType): void {
+	public setTag(key: string, value: string): void {
 		this.tags.set(key, value);
 
+		this.removeSet(DataObjectBase._tags);
 		this.set(DataObjectBase._tags + DataObjectBase.DOT + key, value);
 	}
 

@@ -77,10 +77,68 @@ export class HttpAppHandler {
 		// 	return res.json([ReturnCode.OperationInvalid]);
 		// });
 
-		this.router.get("/ts", (req: express.Request, res: express.Response) => {
+		this.router.get("/ts", (req: express.Request, res: express.Response): any => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
-			return res.json([ReturnCode.Ok, { "1": xDatetime.getCurrentMilliseconds() }]);
+			return res.status(200).json([ReturnCode.Ok, { "1": xDatetime.getCurrentMilliseconds() }]);
+		});
+
+		this.router.post("/getAuthInfo", async (req: express.Request, res: express.Response): Promise<any> => {
+			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+
+			let authToken = req.body.authToken;
+
+			if (!authToken) {
+				return res.status(200).json({
+					"error": "missing authToken in body"
+				});
+			}
+
+			let tokenPayload = this.apiMiddleware.verifyAuthToken(authToken);
+			if (tokenPayload == null) {
+				return res.status(200).json({
+					"error": "authToken expired or invalid"
+				});
+			}
+
+			let authInfo = await this.apiMiddleware.getAuthInfoByGNTokenInDatabase(tokenPayload.gnToken);
+			if (authInfo == null) {
+				return res.status(200).json({
+					"error": "authInfo not found"
+				});
+			}
+
+			return res.status(200).json({
+				"data": authInfo.toDocumentData()
+			});
+		});
+
+		this.router.get("/getAuthInfo", async (req: express.Request, res: express.Response): Promise<any> => {
+			let authToken = req.query.authToken as string;
+
+			if (!authToken) {
+				return res.status(200).json({
+					"error": "missing authToken in body"
+				});
+			}
+
+			let tokenPayload = this.apiMiddleware.verifyAuthToken(authToken);
+			if (tokenPayload == null) {
+				return res.status(200).json({
+					"error": "authToken expired or invalid"
+				});
+			}
+
+			let authInfo = await this.apiMiddleware.getAuthInfoByGNTokenInDatabase(tokenPayload.gnToken);
+			if (authInfo == null) {
+				return res.status(200).json({
+					"error": "authInfo not found"
+				});
+			}
+
+			return res.status(200).json({
+				"data": authInfo.toDocumentData()
+			});
 		});
 
 		const apiRouter = express.Router();
@@ -88,12 +146,6 @@ export class HttpAppHandler {
 
 		if (this.enablePostViaJson) {
 			this.apiJsonRouter = express.Router();
-
-			this.apiJsonRouter.use(wrap((req, res, next) => {
-				return this.antiDdosMiddleware.checkRequestSizeBodyViaJson(req, res, next);
-			}));
-
-			this.apiJsonRouter.use(express.json());
 
 			apiRouter.use(
 				"/" + Commands.RequestCmd_Json,
@@ -103,6 +155,10 @@ export class HttpAppHandler {
 				wrap((req, res, next) => {
 					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaJson(req, res, next);
 				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkRequestSizeBodyViaJson(req, res, next);
+				}),
+				express.json(),
 				wrap((req, res, next) => {
 					return this.apiMiddleware.authenticateTokenViaJson(req, res, next);
 				}),
@@ -115,7 +171,7 @@ export class HttpAppHandler {
 				this.apiJsonRouter
 			);
 
-			this.apiJsonRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response) => {
+			this.apiJsonRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response): Promise<any> => {
 				let operationResponse = await this.onHttpRequest(req, false);
 
 				this.antiDdosMiddleware.removePendingRequest(req, res);
@@ -137,7 +193,7 @@ export class HttpAppHandler {
 						return res.send(httpData);
 					}
 				}
-
+				
 				res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 				return res.send([ReturnCode.OperationInvalid]);
 			});
@@ -145,12 +201,7 @@ export class HttpAppHandler {
 
 		if (this.enablePostViaMsgPack) {
 			this.apiMsgPackRouter = express.Router();
-
-			this.apiMsgPackRouter.use(wrap((req, res, next) => {
-				return this.antiDdosMiddleware.checkRequestSizeBodyViaMsgPack(req, res, next);
-			}));
-
-			this.apiMsgPackRouter.use(msgpack());
+			
 			apiRouter.use(
 				"/" + Commands.RequestCmd_MsgPack,
 				wrap((req, res, next) => {
@@ -159,6 +210,10 @@ export class HttpAppHandler {
 				wrap((req, res, next) => {
 					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaMsgPack(req, res, next);
 				}),
+				wrap((req, res, next) => {
+					return this.antiDdosMiddleware.checkRequestSizeBodyViaMsgPack(req, res, next);
+				}),
+				msgpack(),
 				wrap((req, res, next) => {
 					return this.apiMiddleware.authenticateTokenViaMsgPack(req, res, next);
 				}),
@@ -171,7 +226,7 @@ export class HttpAppHandler {
 				this.apiMsgPackRouter
 			);
 
-			this.apiMsgPackRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response) => {
+			this.apiMsgPackRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response): Promise<any> => {
 				let operationResponse = await this.onHttpRequest(req, true);
 
 				this.antiDdosMiddleware.removePendingRequest(req, res);
@@ -213,15 +268,15 @@ export class HttpAppHandler {
 		let type = Number.parseInt(typeStr);
 		let role = Number.parseInt(roleStr);
 		let operationResponse: OperationResponse;
-		let reqAny = req as any;
+
 		let parameters = req.body;
-		let ip = reqAny.xip;
+		let ip = req.xip;
 		let request = new Request(code, type, role);
 		request.setRequestId(0);
 		request.setIP(ip);
 		request.setParameters(!parameters ? {} : parameters);
-		request.setAuthenticate(reqAny.authInfo);
-		request.setSecretInfo(reqAny.secretInfo);
+		request.setAuthenticate(req.authInfo);
+		request.setSecretInfo(req.secretInfo);
 		request.setEncrypted(encrypted);
 
 		if (this.enableSendAndReceiveDebug) {
@@ -232,9 +287,11 @@ export class HttpAppHandler {
 		try {
 			operationResponse = await this._onRequestCb(request);
 		}
-		catch {
+		catch (err) {
 			operationResponse = new OperationResponse(code, 0, request.isEncrypted());
 			operationResponse.setReturnCode(ReturnCode.InternalServerError);
+
+			Debug.logException(err);
 		}
 
 		return operationResponse;

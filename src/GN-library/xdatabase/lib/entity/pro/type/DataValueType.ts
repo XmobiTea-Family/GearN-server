@@ -1,2 +1,2 @@
 
-export type DataValueType = string | number | boolean | null | Map<string, DataValueType> | Array<DataValueType>;
+export type DataValueType = string | number | boolean | null | { [k: string]: DataValueType } | Array<DataValueType>;

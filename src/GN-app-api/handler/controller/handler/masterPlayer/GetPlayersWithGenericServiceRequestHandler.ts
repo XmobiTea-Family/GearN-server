@@ -1,29 +1,30 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { GetPlayersBaseRequestHandler } from "./GetPlayersBaseRequestHandler";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithGenericServiceOperationRequest extends OperationRequest {
-	@StringDataMember({ code: MasterPlayerParameterCode.ServiceName, minLength: 1, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.ServiceName, minLength: 2, maxLength: 32, mustNonNull: true })
 	serviceName: string;
 
-    @GNArrayDataMember({ code: MasterPlayerParameterCode.GenericIds, mustNonNull: true })
-	genericIds: GNArray;
+	@GNArrayDataMember({ code: GNParameterCode.GenericIds, mustNonNull: true, elementCls: String })
+	genericIds: Array<string>;
 
-	@GNHashtableDataMember({ code: MasterPlayerParameterCode.InfoGetParameters, mustNonNull: true })
-	infoGetParameters: GNHashtable;
+	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	infoRequestParam: InfoRequestParam;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -31,7 +32,8 @@ class GetPlayersWithGenericServiceOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayersWithGenericServiceOperationRequest extends GetPlayersWithGenericServiceOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -39,14 +41,15 @@ class ServerGetPlayersWithGenericServiceOperationRequest extends GetPlayersWithG
 }
 
 class AdminGetPlayersWithGenericServiceOperationRequest extends ServerGetPlayersWithGenericServiceOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class GetPlayersWithGenericServiceRequestHandler extends GetPlayersBaseRequestHandler {
+export class GetPlayersWithGenericServiceRequestHandler extends MasterPlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.GetPlayersWithGenericService;
 	}
@@ -62,66 +65,94 @@ export class GetPlayersWithGenericServiceRequestHandler extends GetPlayersBaseRe
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.getPlayersWithGenericService.selfEnable) {
+		if (!secretInfo.getPermission().masterPlayer.getPlayersWithGenericService.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.serviceName, request.genericIds, request.infoGetParameters, operationRequest, secretInfo);
+		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+
+		return this.execute({
+			serviceName: request.serviceName,
+			genericIds: request.genericIds,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayersWithGenericServiceOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayersWithGenericServiceOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getPlayersWithGenericService.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getPlayersWithGenericService.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.serviceName, request.genericIds, request.infoGetParameters, operationRequest, secretInfo);
-    }
+		this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayersWithGenericServiceOperationRequest);
+		return this.execute({
+			serviceName: request.serviceName,
+			genericIds: request.genericIds,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
+	}
+
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayersWithGenericServiceOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getPlayersWithGenericService.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getPlayersWithGenericService.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.serviceName, request.genericIds, request.infoGetParameters, operationRequest, secretInfo);
-    }
+		this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-    private async execute(genericServiceName: string, genericIds: GNArray, infoGetParameters: GNHashtable, operationRequest: OperationRequest, secretInfo: SecretInfo): Promise<OperationResponse> {
-		let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(infoGetParameters);
+		return this.execute({
+			serviceName: request.serviceName,
+			genericIds: request.genericIds,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
+	}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+	private async execute(request: { serviceName: string, genericIds: Array<string>, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetPlayersWithGenericService", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) masterPlayerFindOptions.external = true;
 
 		let gnResults = new GNArray();
 
-		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersWithGenericServiceAsync(genericServiceName, (<any>genericIds).array, masterPlayerFindOptions);
+		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersWithGenericServiceAsync(request.serviceName, request.genericIds, masterPlayerFindOptions);
 
 		for (let i = 0; i < masterPlayers.length; i++) {
 			let masterPlayer = masterPlayers[i];
 
 			let gnResult = new GNHashtable();
 
-			gnResult.add(MasterPlayerParameterCode.UserId, masterPlayer.getUserId());
+			gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+			gnResult.add(GNParameterCode.ServiceId, masterPlayer.getExternal().genericService.genericServices.get(request.serviceName).serviceId);
 
-			gnResult.add(MasterPlayerParameterCode.InfoGetParameters, this.generateMasterPlayerOperationResponse(masterPlayer, masterPlayerFindOptions, infoGetParameters, secretInfo));
+			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 			gnResults.add(gnResult);
 		}
 
-        operationResponse.setParameter(MasterPlayerParameterCode.Results, gnResults);
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetPlayersWithGenericService", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

@@ -1,6 +1,6 @@
 export interface FriendItem {
 	friendId: string;
-	friendCatalogId: string;
+	catalogId: string;
 	status: number;	// FriendStatus
 	tsLastStatusUpdate: number;
 }

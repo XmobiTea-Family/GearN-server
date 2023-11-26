@@ -1,12 +1,13 @@
-
+import { AuthInfo } from "./../../AuthInfo";
+import { SecretInfo } from "./../../SecretInfo";
 
 export class Request {
 	private code: number;
 	private type: number;
 	private role: number;
 	private requestId: number = -1;
-	private authInfo: any = null;
-	private secretInfo: any = null;
+	private authInfo: AuthInfo = null;
+	private secretInfo: SecretInfo = null;
 	private ip: string;
 	private parameters: { [k: string]: any } = {};
 	private encrypted: boolean;
@@ -21,11 +22,11 @@ export class Request {
 		this.requestId = requestId;
 	}
 
-	public setAuthenticate(authInfo: any) {
+	public setAuthenticate(authInfo: AuthInfo) {
 		this.authInfo = authInfo;
 	}
 
-	public setSecretInfo(secretInfo: any) {
+	public setSecretInfo(secretInfo: SecretInfo) {
 		this.secretInfo = secretInfo;
 	}
 
@@ -65,11 +66,11 @@ export class Request {
 		return this.secretInfo != null;
 	}
 
-	public getAuthInfo(): any {
+	public getAuthInfo(): AuthInfo {
 		return this.authInfo;
 	}
 
-	public getSecretInfo(): any {
+	public getSecretInfo(): SecretInfo {
 		return this.secretInfo;
 	}
 

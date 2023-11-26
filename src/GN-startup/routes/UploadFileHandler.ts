@@ -17,6 +17,7 @@ export class UploadFileHandler {
 	private uploadRouter: express.Router;
 	private uploadPath: string;
 	private uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>;
+	private downloadFileSessionCollection: mongoDB.Collection<mongoDB.Document>;
 
 	public setRouter(router: express.Express): void {
 		this.router = router;
@@ -42,6 +43,10 @@ export class UploadFileHandler {
 		this.uploadFileInfoCollection = uploadFileInfoCollection;
 	}
 
+	public setDownloadFileSessionCollection(downloadFileSessionCollection: mongoDB.Collection<mongoDB.Document>): void {
+		this.downloadFileSessionCollection = downloadFileSessionCollection;
+	}
+
 	public init(): void {
 		this.uploadRouter = express.Router();
 		this.router.use(
@@ -61,19 +66,27 @@ export class UploadFileHandler {
 			this.uploadRouter
 		);
 
-		this.uploadRouter.get("/:fileId",
+		this.uploadRouter.get("/:downloadToken",
 			wrap((req, res, next) => {
 				return this.antiDdosMiddleware.addPendingDownloadRequest(req, res, next);
 			}),
 
 			async (req: express.Request, res: express.Response): Promise<any> => {
-				let fileId = req.params.fileId;
-				if (!fileId) return res.sendStatus(400);
+				let downloadToken = req.params.downloadToken;
+				if (!downloadToken) return res.sendStatus(400);
 
-				let fileDoc = await this.uploadFileInfoCollection.findOne({ FileId: fileId });
+				let downloadFileSessionResult = await this.downloadFileSessionCollection.findOne({ downloadToken: downloadToken, isValid: true });
+				if (!downloadFileSessionResult) return res.sendStatus(404);
+
+				let fileId = downloadFileSessionResult["fileId"];
+
+				let fileDoc = await this.uploadFileInfoCollection.findOne({ fileId: fileId });
 				if (!fileDoc) return res.sendStatus(404);
 
-				let fullPath = fileDoc["FullPath"];
+				let fileUpload = fileDoc["fileUpload"];
+				if (!fileUpload) return res.sendStatus(404);
+
+				let fullPath = fileUpload["fullPath"];
 				fs.readFile(fullPath, (err, data) => {
 					this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
 
@@ -81,7 +94,13 @@ export class UploadFileHandler {
 						return res.status(404).send(err.message);
 					}
 
-					res.writeHead(200, { "Content-type": fileDoc["MimeType"] });
+					res.writeHead(200, { "Content-type": fileUpload["mimeType"] });
+
+					this.downloadFileSessionCollection.updateOne({ downloadToken: downloadToken }, {
+						$set: {
+							isValid: false
+						}
+					});
 					return res.end(data);
 				});
 			});
@@ -96,7 +115,7 @@ export class UploadFileHandler {
 		let uploadPath = configUploadPath;
 		if (uploadPath) {
 			if (!fs.existsSync(uploadPath)) {
-				uploadPath = __dirname + "/../../../../" + this.uploadPath;
+				uploadPath = process.cwd() + this.uploadPath;
 			}
 		}
 
@@ -123,19 +142,19 @@ export class UploadFileHandler {
 
 				let fileId = req.params.fileId;
 
-				let fileDocUpdate = {
-					MimeType: file.mimetype,
-					Size: file.size,
-					FolderFileName: file.filename,
-					FullPath: file.path,
-					ShortPath: this.uploadPath + "/" + file.filename,
-					TsUploadFile: xDatetime.getCurrentMilliseconds(),
-				};
-
 				this.uploadFileInfoCollection.updateOne(
-					{ FileId: fileId },
+					{ fileId: fileId },
 					{
-						$set: fileDocUpdate,
+						$set: {
+							fileUpload: {
+								mimeType: file.mimetype,
+								size: file.size,
+								folderFileName: file.filename,
+								fullPath: file.path,
+								shortPath: this.uploadPath + "/" + file.filename,
+								tsUploadFile: xDatetime.getCurrentMilliseconds(),
+							}
+						}
 					}
 				);
 

@@ -6,30 +6,34 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
 import bcrypt from "bcrypt";
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class ChangeAccountPasswordOperationRequest extends OperationRequest {
-	@StringDataMember({ code: MasterPlayerParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
-	oldPassword: string;
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
 
-	@StringDataMember({ code: MasterPlayerParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.CurrentPassword, minLength: 6, maxLength: 64, mustNonNull: true })
+	currentPassword: string;
+
+	@StringDataMember({ code: GNParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class ChangeAccountPasswordRequestHandler extends RequestHandler {
+export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.ChangeAccountPassword;
 	}
@@ -45,43 +49,73 @@ export class ChangeAccountPasswordRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.changeAccountPassword.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.userId) {
+			if (!secretInfo.getPermission().masterPlayer.changeAccountPassword.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 
-        let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            external: true
-        }
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().masterPlayer.changeAccountPassword.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.changeAccountPassword.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		return this.execute({
+			userId: request.userId,
+			currentPassword: request.currentPassword,
+			password: request.password,
+		}, secretInfo, operationRequest);
+	}
+
+	private async execute(request: { userId: string, currentPassword: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_ChangeAccountPassword", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(authInfo.getUserId(), masterPlayerFindOptions);
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			external: true,
+		}
+
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			return operationResponse;
 		}
 
 		let external = masterPlayer.getExternal();
 		if (external.account == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotLinked);
-            return operationResponse;
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalNotLinked);
+			return operationResponse;
 		}
-		
-        let isMatch = await bcrypt.compare(request.oldPassword, masterPlayer.getPassword());
+
+		let isMatch = await bcrypt.compare(request.currentPassword, masterPlayer.getPassword());
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.AccountPasswordWrong);
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountPasswordWrong);
 			return operationResponse;
 		}
 
 		external.account.password = await bcrypt.hash(request.password, 10);
 
 		masterPlayer.setExternal(external);
-        masterPlayer.saveAsync();
+		masterPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_ChangeAccountPassword", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
 	}
 }

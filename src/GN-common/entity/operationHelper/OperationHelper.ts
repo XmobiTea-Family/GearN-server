@@ -1,7 +1,15 @@
 import { InvalidMember } from "./../InvalidMember";
 import { ReturnCode } from "./../../constant/ReturnCode";
 import { OperationResponse } from "./../operationResponse/OperationResponse";
+import { OperationRequest } from "./../operationRequest/OperationRequest";
 import { OperationEvent } from "./../operationEvent/OperationEvent";
+import { CodeHelper } from "./../../helper/CodeHelper";
+import { Request } from "./../operationRequest/base/Request";
+import { RequestType } from "./../../constant/enumType/RequestType";
+import { RequestRole } from "./../../constant/enumType/RequestRole";
+import { SecretInfo } from "./../SecretInfo";
+import { AuthInfo } from "./../AuthInfo";
+import { GNHashtable } from "./../../common/GNData";
 
 export class OperationHelper {
 
@@ -25,6 +33,60 @@ export class OperationHelper {
 
 	public static toResponseHttpData(operationResponse: OperationResponse): [number, any] {
 		return [operationResponse.getReturnCode(), operationResponse.getReturnCode() == ReturnCode.Ok ? operationResponse.getParameters().toData() : operationResponse.getReturnCode() == ReturnCode.InvalidRequestParameters ? OperationHelper.invalidMemberData(operationResponse) : operationResponse.getDebugMessage()];
+	}
+
+	public static toDataGNHashtable(gnHashtable: GNHashtable) {
+		if (gnHashtable == null) return null;
+
+		return gnHashtable.toData();
+	}
+
+	public static toDataOperationResponse(operationResponse: OperationResponse) {
+		return {
+			operationCode: CodeHelper.getOperationCodeName(operationResponse.getOperationCode()),
+			encrypted: operationResponse.isEncrypted(),
+			responseId: operationResponse.getResponseId(),
+			parameters: OperationHelper.toDataGNHashtable(operationResponse.getParameters()),
+			debugMessage: operationResponse.getDebugMessage(),
+			returnCode: CodeHelper.getReturnCodeName(operationResponse.getReturnCode()),
+		};
+	}
+
+	public static toDataOperationRequest(operationRequest: OperationRequest) {
+		return {
+			operationCode: CodeHelper.getOperationCodeName(operationRequest.getOperationCode()),
+			encrypted: operationRequest.isEncrypted(),
+			requestId: operationRequest.getRequestId(),
+			parameters: OperationHelper.toDataGNHashtable(operationRequest.getParameters())
+		};
+	}
+
+	public static toDataFromRequest(request: Request) {
+		return {
+			code: CodeHelper.getOperationCodeName(request.getCode()),
+			type: RequestType[<RequestType>request.getType()],
+			role: RequestRole[<RequestRole>request.getRole()],
+			ip: request.getIP(),
+			secretInfo: OperationHelper.toDataSecretInfo(request.getSecretInfo()),
+			authInfo: OperationHelper.toAuthInfo(request.getAuthInfo()),
+		}
+	}
+
+	private static toDataSecretInfo(secretInfo: SecretInfo) {
+		if (secretInfo == null) return null;
+
+		return {
+			role: RequestRole[<RequestRole>secretInfo.getRole()],
+			gameId: secretInfo.getGameId(),
+		}
+	}
+
+	private static toAuthInfo(authInfo: AuthInfo) {
+		if (authInfo == null) return null;
+
+		return {
+			userId: authInfo.getUserId(),
+		}
 	}
 
 	public static newOperationResponse(operationCode: number, responseId: number, encrypted: boolean): OperationResponse {

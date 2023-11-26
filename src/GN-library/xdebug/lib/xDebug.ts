@@ -18,6 +18,10 @@ export class Debug {
 		this.logPath = config.logPath;
 	}
 
+	public static getLogPath(): string {
+		return this.logPath;
+	}
+
 	public static run(): void {
 		if (this.isLogToFileEnable) {
 			log4js.configure({
@@ -80,5 +84,4 @@ export class Debug {
 			this.logger.fatal(message);
 		}
 	}
-
 }

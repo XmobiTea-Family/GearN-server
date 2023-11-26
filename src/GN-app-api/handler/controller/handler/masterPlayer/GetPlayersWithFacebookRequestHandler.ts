@@ -1,26 +1,27 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { GetPlayersBaseRequestHandler } from "./GetPlayersBaseRequestHandler";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithFacebookOperationRequest extends OperationRequest {
-    @GNArrayDataMember({ code: MasterPlayerParameterCode.FacebookIds, mustNonNull: true })
-	facebookIds: GNArray;
+	@GNArrayDataMember({ code: GNParameterCode.FacebookIds, mustNonNull: true, elementCls: String })
+	facebookIds: Array<string>;
 
-	@GNHashtableDataMember({ code: MasterPlayerParameterCode.InfoGetParameters, mustNonNull: true })
-	infoGetParameters: GNHashtable;
+	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	infoRequestParam: InfoRequestParam;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -28,7 +29,8 @@ class GetPlayersWithFacebookOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayersWithFacebookOperationRequest extends GetPlayersWithFacebookOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -36,14 +38,15 @@ class ServerGetPlayersWithFacebookOperationRequest extends GetPlayersWithFaceboo
 }
 
 class AdminGetPlayersWithFacebookOperationRequest extends ServerGetPlayersWithFacebookOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class GetPlayersWithFacebookRequestHandler extends GetPlayersBaseRequestHandler {
+export class GetPlayersWithFacebookRequestHandler extends MasterPlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.GetPlayersWithFacebook;
 	}
@@ -59,66 +62,91 @@ export class GetPlayersWithFacebookRequestHandler extends GetPlayersBaseRequestH
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.getPlayersWithFacebook.selfEnable) {
+		if (!secretInfo.getPermission().masterPlayer.getPlayersWithFacebook.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.facebookIds, request.infoGetParameters, operationRequest, secretInfo);
+		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+
+		return this.execute({
+			facebookIds: request.facebookIds,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayersWithFacebookOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayersWithFacebookOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getPlayersWithFacebook.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getPlayersWithFacebook.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.facebookIds, request.infoGetParameters, operationRequest, secretInfo);
-    }
+		this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayersWithFacebookOperationRequest);
+		return this.execute({
+			facebookIds: request.facebookIds,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
+	}
+
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayersWithFacebookOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().masterPlayer.getPlayersWithFacebook.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getPlayersWithFacebook.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.facebookIds, request.infoGetParameters, operationRequest, secretInfo);
-    }
+		this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-    private async execute(facebookIds: GNArray, infoGetParameters: GNHashtable, operationRequest: OperationRequest, secretInfo: SecretInfo): Promise<OperationResponse> {
-		let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(infoGetParameters);
+		return this.execute({
+			facebookIds: request.facebookIds,
+			infoRequestParam: request.infoRequestParam,
+		}, secretInfo, operationRequest);
+	}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+	private async execute(request: { facebookIds: Array<string>, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetPlayersWithFacebook", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) masterPlayerFindOptions.external = true;
 
 		let gnResults = new GNArray();
 
-		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersWithFacebookAsync((<any>facebookIds).array, masterPlayerFindOptions);
+		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersWithFacebookAsync(request.facebookIds, masterPlayerFindOptions);
 
 		for (let i = 0; i < masterPlayers.length; i++) {
 			let masterPlayer = masterPlayers[i];
 
 			let gnResult = new GNHashtable();
 
-			gnResult.add(MasterPlayerParameterCode.UserId, masterPlayer.getUserId());
+			gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+			gnResult.add(GNParameterCode.FacebookId, masterPlayer.getExternal().facebook.facebookId);
 
-			gnResult.add(MasterPlayerParameterCode.InfoGetParameters, this.generateMasterPlayerOperationResponse(masterPlayer, masterPlayerFindOptions, infoGetParameters, secretInfo));
+			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 			gnResults.add(gnResult);
 		}
 
-        operationResponse.setParameter(MasterPlayerParameterCode.Results, gnResults);
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetPlayersWithFacebook", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

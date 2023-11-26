@@ -3,6 +3,7 @@ import { Request } from "./../../../GN-common/entity/operationRequest/base/Reque
 import { IRequestHandler } from "./handler/base/IRequestHandler";
 import { IRequestConverterService } from "./../../service/IRequestConverterService";
 import { OperationHelper } from "./../../../GN-common/entity/operationHelper/OperationHelper";
+import { RequestRole } from "./../../../GN-common/constant/enumType/RequestRole";
 
 export class RequestController {
 	private handlers: {
@@ -71,10 +72,10 @@ export class RequestController {
 
 	public async handleRequest(request: Request): Promise<OperationResponse> {
 		let code = request.getCode();
-		let role = request.getRole();
+		let role = <RequestRole>request.getRole();
 
 		let isAuthenticated = request.isAuthenticated();
-		if (!isAuthenticated && role != 1 && role != 2) {
+		if (!isAuthenticated && role != RequestRole.Admin && role != RequestRole.Server) {
 			// if the user not authentication
 			// and this request not in unAthenticated
 			if (this.requestUnAuthenticatedCodes.indexOf(code) == -1) {
@@ -87,13 +88,13 @@ export class RequestController {
 		if (handler != null) {
 			let operationRequest = this.requestConverterService.newOperationRequest(request);
 
-			if (role == 1) {
+			if (role == RequestRole.Admin) {
 				return handler.adminHandle(request.getSecretInfo(), operationRequest);
 			}
-			else if (role == 2) {
+			else if (role == RequestRole.Server) {
 				return handler.serverHandle(request.getSecretInfo(), operationRequest);
 			}
-			else if (role == 3) {
+			else if (role == RequestRole.Client) {
 				return handler.handle(request.getAuthInfo(), request.getSecretInfo(), operationRequest);
 			}
 		}

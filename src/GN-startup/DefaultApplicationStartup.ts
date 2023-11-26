@@ -10,13 +10,12 @@ import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { DdosSettings } from "./settings/DDosSettings";
-import { AdminViewSettings } from "./settings/AdminViewSettings";
 
 export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).setExpiredToken(2 * 24 * 60 * 60 * 1000).setLicenseKeyFilePath("./gnserver.licensekey").build();
+		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).setExpiredToken(2 * 24 * 60 * 60 * 1000).setPrivateKeyToken("defaultApplicationStartup").build();
 
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(true)
@@ -42,22 +41,15 @@ export class DefaultApplicationStartup {
 			.setPingTimeout(5000)
 			.build();
 
-		let debugViewSettings = AdminViewSettings.Builder()
-			.setDebugHashs([])
-			.setEnable(true)
-			.build();
-			
 		let otherSettings = OtherSettings.Builder()
-			.setPackageName("com.xmobitea.GNServer")
-			.setAppleClientId("com.xmobitea.GNServer")
-			.setGoogleClientId("gn-server")
 			.setHeaderIP("x-ip")
+			.setIdTypeCase(0)
+			.setIPApiUrl("http://127.0.0.1:2555/json")
 			.build();
 
 		let databaseSettings = DatabaseSettings.Builder()
-			.setConnectionString("mongodb://admin:assmin@127.0.0.1:27017/?replicaSet=rs0")
+			.setConnectionString("mongodb://rootuser:rootpass@127.0.10.21:27017,127.0.10.22:27017,127.0.10.23:27017/?retryWrites=false&replicaSet=rs0&readPreference=primaryPreferred&serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-256")
 			.setDatabaseName("XmobiTea")
-			.setGameName("GN.")
 			.setOptions({
 				"minPoolSize": 5,
 				"maxPoolSize": 100
@@ -99,7 +91,6 @@ export class DefaultApplicationStartup {
 			applicationSettings,
 			httpAppSettings,
 			socketAppSettings,
-			debugViewSettings,
 			otherSettings,
 			databaseSettings,
 			mailSettings,
@@ -117,7 +108,6 @@ export class DefaultApplicationStartup {
 		applicationSettings: ApplicationSettings,
 		httpAppSettings: HttpAppSettings,
 		socketAppSettings: SocketAppSettings,
-		debugViewSettings: AdminViewSettings,
 		otherSettings: OtherSettings,
 		databaseSettings: DatabaseSettings,
 		mailSettings: MailSettings,
@@ -129,7 +119,6 @@ export class DefaultApplicationStartup {
 			.setApplicationSettings(applicationSettings)
 			.setHttpAppSettings(httpAppSettings)
 			.setSocketAppSettings(socketAppSettings)
-			.setDebugViewSettings(debugViewSettings)
 			.setOtherSettings(otherSettings)
 			.setDatabaseSettings(databaseSettings)
 			.setMailSettings(mailSettings)

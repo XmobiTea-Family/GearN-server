@@ -1,0 +1,233 @@
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
+import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
+import { InfoRequestParam } from "./model/InfoRequestParam";
+import { CharacterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/CharacterPlayer";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+
+class GetCreateLeaderboardOperationRequest extends OperationRequest {
+	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	infoRequestParam: InfoRequestParam;
+
+	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	skip?: number;
+
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	limit?: number;
+
+	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	loadFromCache?: boolean;
+
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
+}
+
+class ServerGetCreateLeaderboardOperationRequest extends GetCreateLeaderboardOperationRequest {
+
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
+}
+
+class AdminGetCreateLeaderboardOperationRequest extends ServerGetCreateLeaderboardOperationRequest {
+
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
+}
+
+export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseRequestHandler {
+	protected override init(): void {
+		this.gnServer.getCacheData
+	}
+
+	public override getCode() {
+		return OperationCode.GetCreateLeaderboard;
+	}
+
+	public override getCommonOperationRequest() {
+		return GetCreateLeaderboardOperationRequest;
+	}
+
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().characterPlayer.getCreateLeaderboard.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+
+		return this.execute({
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+		}, secretInfo, operationRequest);
+	}
+
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCreateLeaderboardOperationRequest);
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().characterPlayer.getCreateLeaderboard.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
+
+		return this.execute({
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+		}, secretInfo, operationRequest);
+	}
+
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCreateLeaderboardOperationRequest);
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().characterPlayer.getCreateLeaderboard.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
+
+		return this.execute({
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+		}, secretInfo, operationRequest);
+	}
+
+	private async execute(request: { skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetCreateLeaderboard", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
+
+		let cacheKey = "characterPlayerCreateLeaderboard";
+
+		if (request.loadFromCache) {
+			if (request.skip + request.limit > 100) {
+				request.loadFromCache = false;
+			}
+		}
+
+		if (request.loadFromCache) {
+			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+				request.loadFromCache = false;
+			}
+		}
+
+		let gnResults = new GNArray();
+
+		let characterPlayers: CharacterPlayer[];
+
+		if (request.loadFromCache) {
+			characterPlayers = this.gnServer.getCacheData().getData(cacheKey);
+
+			for (let i = request.skip; i < request.skip + request.limit; i++) {
+				if (i >= characterPlayers.length) break;
+
+				let characterPlayer = characterPlayers[i];
+
+				let gnResult = new GNHashtable();
+
+				gnResult.add(GNParameterCode.Position, i);
+
+				gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
+
+				gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
+
+				gnResults.add(gnResult);
+			}
+		}
+		else {
+			if (request.skip + request.limit <= 100) {
+				characterPlayerFindOptions = null;
+
+				characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithCreateAsync(0, 100, secretInfo.getGameId(), characterPlayerFindOptions);
+
+				for (let i = request.skip; i < request.skip + request.limit; i++) {
+					if (i >= characterPlayers.length) break;
+
+					let characterPlayer = characterPlayers[i];
+
+					let gnResult = new GNHashtable();
+
+					gnResult.add(GNParameterCode.Position, i);
+
+					gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
+
+					gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
+
+					gnResults.add(gnResult);
+				}
+
+				this.gnServer.getCacheData().setData(cacheKey, characterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+			}
+			else {
+				characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithCreateAsync(request.skip, request.limit, secretInfo.getGameId(), characterPlayerFindOptions);
+
+				for (let i = 0; i < characterPlayers.length; i++) {
+
+					let characterPlayer = characterPlayers[i];
+
+					let gnResult = new GNHashtable();
+
+					gnResult.add(GNParameterCode.Position, i + request.skip);
+
+					gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
+
+					gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
+
+					gnResults.add(gnResult);
+				}
+			}
+		}
+
+		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetCreateLeaderboard", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
+}

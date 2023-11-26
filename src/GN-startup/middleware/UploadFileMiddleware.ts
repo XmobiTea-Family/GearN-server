@@ -1,6 +1,5 @@
 import multer from "multer";
 import * as mongoDB from "mongodb";
-import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import express from "express";
 import fs from "fs";
@@ -34,7 +33,7 @@ export class UploadFileMiddleware {
 		let uploadPath = configUploadPath;
 		if (uploadPath) {
 			if (!fs.existsSync(uploadPath)) {
-				uploadPath = __dirname + "/../../../../" + this.uploadPath;
+				uploadPath = process.cwd() + this.uploadPath;
 			}
 		}
 
@@ -74,20 +73,15 @@ export class UploadFileMiddleware {
 		if (!fileId) return res.sendStatus(400);
 
 		let reqAny = req as any;
-		if (reqAny.isAuthenticated === true) {
-			let doc = await this.uploadFileInfoCollection.findOne({ FileId: fileId });
+		if (req.isAuthenticated === true) {
+			let doc = await this.uploadFileInfoCollection.findOne({ fileId: fileId });
 			if (doc == null) return res.sendStatus(404);
 
-			if (doc["TsUploadFile"] != null) return res.sendStatus(400);
-			if (doc["TsUploadExpire"] < xDatetime.getCurrentMilliseconds()) return res.sendStatus(408);
+			if (doc["fileUpload"] != null) return res.sendStatus(400);
+			if (doc["tsUploadExpire"] < xDatetime.getCurrentMilliseconds()) return res.sendStatus(408);
 
-			let authInfo = reqAny.authInfo as AuthInfo;
-			if (doc["UserId"] != authInfo.getUserId()) {
-				return res.sendStatus(401);
-			}
-
-			let originFileName = doc["OriginFileName"];
-			reqAny.originFileName = originFileName;
+			let fileName = doc["fileName"];
+			reqAny.fileName = fileName;
 
 			return next();
 		}

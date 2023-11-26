@@ -6,25 +6,25 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { CharacterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/CharacterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { CharacterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/CharacterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { CharacterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class SetTagOperationRequest extends OperationRequest {
-	@StringDataMember({ code: CharacterPlayerParameterCode.Key, minLength: 1, maxLength: 32, mustNonNull: true })
-	key: string;
-
-	@DataMember({ code: CharacterPlayerParameterCode.Value })
-	value: string | number | boolean;
-
-	@StringDataMember({ code: CharacterPlayerParameterCode.CharacterId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	characterId: string;
 
-    public isValidRequest() {
+	@StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	key: string;
+
+	@StringDataMember({ code: GNParameterCode.Value, minLength: 2, maxLength: 32, mustNonNull: true })
+	value: string;
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -32,7 +32,8 @@ class SetTagOperationRequest extends OperationRequest {
 }
 
 class ServerSetTagOperationRequest extends SetTagOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -40,14 +41,14 @@ class ServerSetTagOperationRequest extends SetTagOperationRequest {
 }
 
 class AdminSetTagOperationRequest extends ServerSetTagOperationRequest {
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class SetTagRequestHandler extends RequestHandler {
+export class SetTagRequestHandler extends CharacterPlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.SetTag;
 	}
@@ -63,15 +64,21 @@ export class SetTagRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().characterPlayer.setTag.selfEnable) {
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setTag);
+
+		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.characterId, secretInfo.getGameId(), request.key, request.value, operationRequest);
+		return this.execute({
+			characterId: request.characterId,
+			key: request.key,
+			value: request.value,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetTagOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetTagOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -81,11 +88,15 @@ export class SetTagRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.characterId, secretInfo.getGameId(), request.key, request.value, operationRequest);
-    }
+		return this.execute({
+			characterId: request.characterId,
+			key: request.key,
+			value: request.value,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetTagOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetTagOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -95,28 +106,48 @@ export class SetTagRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.characterId, secretInfo.getGameId(), request.key, request.value, operationRequest);
-    }
+		return this.execute({
+			characterId: request.characterId,
+			key: request.key,
+			value: request.value,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(characterId: string, gameId: string, key: string, value: string | number | boolean, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-            tags: true
-        }
-
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-		operationResponse.setReturnCode(ReturnCode.Ok);
-
-		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(characterId, gameId, characterPlayerFindOptions);
-
-		if (characterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, CharacterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+	private async execute(request: { characterId: string, key: string, value: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetTag", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
 		}
 
-		characterPlayer.setTag(key, value);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+			tags: true,
+		}
+
+		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+
+		let tagsSettingsItem = characterPlayerSettings.tagsSettings.find(x => x.key == request.key);
+		if (tagsSettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
+			return operationResponse;
+		}
+
+		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+
+		if (characterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.CharacterPlayerNotFound);
+			return operationResponse;
+		}
+
+		characterPlayer.setTag(request.key, request.value);
 		characterPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, CharacterPlayerErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_SetTag", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

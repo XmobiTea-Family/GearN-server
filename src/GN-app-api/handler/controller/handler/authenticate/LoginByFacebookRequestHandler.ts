@@ -6,26 +6,27 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { AuthenticateParameterCode } from "./../../../../../GN-common/constant/parameterCode/AuthenticateParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { AuthenticateErrorCode } from "../../../../../GN-common/constant/errorCode/AuthenticateErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByFacebookOperationRequest extends OperationRequest {
-	@StringDataMember({ code: AuthenticateParameterCode.Token, minLength: 32, maxLength: 512, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Token, minLength: 32, maxLength: 512, mustNonNull: true })
 	token: string;
 
-	@BooleanDataMember({ code: AuthenticateParameterCode.CreatePlayerIfNotExists })
-	createPlayerIfNotExists: boolean;
+	@BooleanDataMember({ code: GNParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
+	createPlayerIfNotExists?: boolean;
 
-	@GNHashtableDataMember({ code: AuthenticateParameterCode.InfoGetParameters, mustNonNull: true })
-	infoGetParameters: GNHashtable;
+	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	infoRequestParam: InfoRequestParam;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -52,43 +53,87 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
+		this.generateInfoRequestParamForOwner(secretInfo, request.infoRequestParam);
+
+		return this.execute({
+			token: request.token,
+			createPlayerIfNotExists: request.createPlayerIfNotExists,
+			infoRequestParam: request.infoRequestParam,
+			ipAddress: (request as any).originRequest.getIP(),
+		}, secretInfo, operationRequest);
+	}
+
+	private async execute(request: { token: string, createPlayerIfNotExists: boolean, infoRequestParam: InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByFacebook", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let result = await this.gnServer.getFacebookService().getBasicInfoByAccessToken(request.token);
+		let result = await this.gnServer.getFacebookService().getBasicInfoByAccessToken(request.token);
 
 		if (result["error"] != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.VerifyTokenError);
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.VerifyTokenError);
 			return operationResponse;
 		}
 
 		let facebookId = result["id"];
-		let displayName = result["name"] || "";
-		let email = result["email"] || "";
+		let displayName = result["name"] ?? "";
+		let email = result["email"] ?? "";
 
-        let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
+		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByFacebookAsync(facebookId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-            if (!request.createPlayerIfNotExists) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.PlayerDoesNotExists);
-    
-                return operationResponse;
-            }
-            else {
-				let newMasterPlayerResult = this.generateNewMasterPlayerResult((request as any).originRequest.getIP());
+			if (!request.createPlayerIfNotExists) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+
+				return operationResponse;
+			}
+			else {
+				let newMasterPlayerResult = this.generateNewMasterPlayerResult(request.ipAddress);
 				newMasterPlayerResult["external"]["facebook"] = {
 					"facebookId": facebookId,
 					"displayName": displayName,
 					"email": email,
 				}
 
-                masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
-                operationResponse.setParameter(AuthenticateParameterCode.NewlyCreated, true);
-            }
+				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
+				if (ipDetailResponse.statusCode == "Ok") {
+					if (ipDetailResponse.detail.countryCode) {
+						newMasterPlayerResult["countryCode"] = ipDetailResponse.detail.countryCode;
+					}
+
+					let lastIPDetail = newMasterPlayerResult["lastIPDetail"];
+					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
+					lastIPDetail.regionCode = ipDetailResponse.detail.regionCode ?? "Unknown";
+
+					this.gnServer.getCountryIPDetailService().updateUserIP(newMasterPlayerResult["userId"], request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
+				}
+
+				masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
+				operationResponse.setParameter(GNParameterCode.NewlyCreated, true);
+			}
 		}
 		else {
+			let lastIPDetail = masterPlayer.getLastIPDetail();
+			if (lastIPDetail.ipAddress != request.ipAddress) {
+				lastIPDetail.ipAddress = lastIPDetail.ipAddress;
+
+				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
+				if (ipDetailResponse.statusCode == "Ok") {
+					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
+					lastIPDetail.regionCode = ipDetailResponse.detail.regionCode ?? "Unknown";
+
+					this.gnServer.getCountryIPDetailService().updateUserIP(masterPlayer.getUserId(), request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
+				}
+
+				masterPlayer.setLastIPDetail(lastIPDetail);
+			}
+
 			let external = masterPlayer.getExternal();
 			external.facebook.displayName = displayName;
 			external.facebook.email = email;
@@ -98,12 +143,14 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
 			masterPlayer.saveAsync();
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 
-        operationResponse.setParameter(AuthenticateParameterCode.UserId, masterPlayer.getUserId());
-        operationResponse.setParameter(AuthenticateParameterCode.InfoGetParameters, this.generateMasterPlayerOperationResponse(masterPlayer, masterPlayerFindOptions, request.infoGetParameters));
-        
-		this.setupAuthInfo(operationResponse, masterPlayer);
+		operationResponse.setParameter(GNParameterCode.UserId, masterPlayer.getUserId());
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+
+		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByFacebook", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

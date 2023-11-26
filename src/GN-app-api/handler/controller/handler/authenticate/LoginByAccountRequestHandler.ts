@@ -6,28 +6,28 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { AuthenticateParameterCode } from "./../../../../../GN-common/constant/parameterCode/AuthenticateParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { AuthenticateErrorCode } from "../../../../../GN-common/constant/errorCode/AuthenticateErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
 import bcrypt from "bcrypt";
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
-import { SecretInfo, SecretRole } from "../../../../../GN-common/entity/SecretInfo";
-import { InfoGetParameter } from "./model/InfoGetParameters";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
+import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: AuthenticateParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	username: string;
 
-	@StringDataMember({ code: AuthenticateParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
-	@GNHashtableDataMember({ code: AuthenticateParameterCode.InfoGetParameters, mustNonNull: true })
-	infoGetParameters: InfoGetParameter;
+	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	infoRequestParam: InfoRequestParam;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -47,74 +47,76 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
+			return this.newInvalidRequestParameters(operationRequest);
 		}
 
 		if (!secretInfo.getPermission().authenticate.loginByAccount.selfEnable) {
-			return this.newOperationNotAllowError(request);
+			return this.newOperationNotAllowError(operationRequest);
 		}
 
-		let operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+		this.generateInfoRequestParamForOwner(secretInfo, request.infoRequestParam);
 
-		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
-
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.PlayerDoesNotExists);
-			return operationResponse;
-		}
-
-		let isMatch = await bcrypt.compare(request.password, masterPlayer.getPassword());
-
-		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.AccountPasswordWrong);
-
-			return operationResponse;
-		}
-
-		operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.Ok);
-        operationResponse.setParameter(AuthenticateParameterCode.UserId, masterPlayer.getUserId());
-        operationResponse.setParameter(AuthenticateParameterCode.InfoGetParameters, this.generateMasterPlayerOperationResponse(masterPlayer, masterPlayerFindOptions, request.infoGetParameters));
-        
-        masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-        masterPlayer.saveAsync();
-
-		this.setupAuthInfo(operationResponse, masterPlayer);
-
-		return operationResponse;
+		return this.execute({
+			username: request.username,
+			password: request.password,
+			infoRequestParam: request.infoRequestParam,
+			ipAddress: (request as any).originRequest.getIP(),
+		}, secretInfo, operationRequest);
 	}
 
-	public async execute(request: { username: string, password: string, infoGetParameters: GNHashtable }, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+	private async execute(request: { username: string, password: string, infoRequestParam: InfoRequestParam, ipAddress: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByAccount", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoGetParameters);
+		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.PlayerDoesNotExists);
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
 			return operationResponse;
+		}
+		else {
+			let lastIPDetail = masterPlayer.getLastIPDetail();
+			if (lastIPDetail.ipAddress != request.ipAddress) {
+				lastIPDetail.ipAddress = lastIPDetail.ipAddress;
+
+				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
+				if (ipDetailResponse.statusCode == "Ok") {
+					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
+					lastIPDetail.regionCode = ipDetailResponse.detail.regionCode ?? "Unknown";
+
+					this.gnServer.getCountryIPDetailService().updateUserIP(masterPlayer.getUserId(), request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
+				}
+
+				masterPlayer.setLastIPDetail(lastIPDetail);
+			}
+
+			masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
+			masterPlayer.saveAsync();
 		}
 
 		let isMatch = await bcrypt.compare(request.password, masterPlayer.getPassword());
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.AccountPasswordWrong);
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountPasswordWrong);
 
 			return operationResponse;
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, AuthenticateErrorCode.Ok);
-        operationResponse.setParameter(AuthenticateParameterCode.UserId, masterPlayer.getUserId());
-        operationResponse.setParameter(AuthenticateParameterCode.InfoGetParameters, this.generateMasterPlayerOperationResponse(masterPlayer, masterPlayerFindOptions, request.infoGetParameters));
-        
-        masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-        masterPlayer.saveAsync();
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 
-		this.setupAuthInfo(operationResponse, masterPlayer);
+		operationResponse.setParameter(GNParameterCode.UserId, masterPlayer.getUserId());
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+
+		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByAccount", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

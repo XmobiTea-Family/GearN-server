@@ -11,7 +11,10 @@ import { Group } from "./entity/pro/Group";
 import { Inventory } from "./entity/pro/Inventory";
 import { GroupFindOptions } from "./entity/pro/findOptions/GroupFindOptions";
 import { InventoryFindOptions } from "./entity/pro/findOptions/InventoryFindOptions";
-import { xDatetime } from "../../xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../xdatetime/lib/xDatetime";
+import { StoreInventoryFindOptions } from "./entity/pro/findOptions/StoreInventoryFindOptions";
+import { StoreInventory } from "./entity/pro/StoreInventory";
+import { UploadFileInfo } from "./entity/pro/UploadFileInfo";
 
 interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
@@ -37,12 +40,10 @@ export class xDatabase {
 	}
 
 	public run(onMongoRunSuccess?: OnRunSuccess, onMongoRunError?: OnMongoRunError): void {
-		this.client.connect((err, result) => {
-			if (err) {
-				if (onMongoRunError != null) onMongoRunError(err);
-			} else {
-				if (onMongoRunSuccess != null) onMongoRunSuccess();
-			}
+		this.client.connect().then(result => {
+			if (onMongoRunSuccess != null) onMongoRunSuccess();
+		}).catch(err => {
+			if (onMongoRunError != null) onMongoRunError(err);
 		});
 	}
 
@@ -58,43 +59,45 @@ export class xDatabase {
 		return this.collection(xDatabase.SYSTEM + collectionName);
 	}
 
-	public runtimeGameCollection(collectionName: string, gameName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.RUNTIME + gameName + xDatabase.DOT + collectionName);
+	public runtimeGameCollection(collectionName: string, gameId: string): mongoDB.Collection<mongoDB.Document> {
+		return this.collection(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
 	}
 
-	public metaGameCollection(collectionName: string, gameName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.META + gameName + xDatabase.DOT + collectionName);
+	public metaGameCollection(collectionName: string, gameId: string): mongoDB.Collection<mongoDB.Document> {
+		return this.collection(xDatabase.META + gameId + xDatabase.DOT + collectionName);
 	}
 
-	public systemGameCollection(collectionName: string, gameName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.SYSTEM + gameName + xDatabase.DOT + collectionName);
+	public systemGameCollection(collectionName: string, gameId: string): mongoDB.Collection<mongoDB.Document> {
+		return this.collection(xDatabase.SYSTEM + gameId + xDatabase.DOT + collectionName);
 	}
 
 	public collection(fullCollectionName: string): mongoDB.Collection<mongoDB.Document> {
 		return this.db.collection(fullCollectionName);
 	}
 
-	public createIndex(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }, cb?: (error?: Error, result?: string) => void): void {
+	public createCollection(collectionName: string, options?: mongoDB.CreateCollectionOptions) {
+		return this.db.createCollection(collectionName, options)
+	}
+
+	public createIndex(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
 		let collection = this.collection(collectionName);
 
-		let createIndexesOptions = {
+		let createIndexesOptions: mongoDB.CreateIndexesOptions = {
 			background: true,
 		};
 
 		if (options != null) {
-			let createIndexesOptionsAny = createIndexesOptions as any;
-
-			if (options.expireAfterSeconds != null) createIndexesOptionsAny.expireAfterSeconds = options.expireAfterSeconds;
-			if (options.sparse != null) createIndexesOptionsAny.sparse = options.sparse;
-			if (options.unique != null) createIndexesOptionsAny.unique = options.unique;
+			if (options.expireAfterSeconds != null) createIndexesOptions.expireAfterSeconds = options.expireAfterSeconds;
+			if (options.sparse != null) createIndexesOptions.sparse = options.sparse;
+			if (options.unique != null) createIndexesOptions.unique = options.unique;
 		}
 
-		collection.createIndex(index, createIndexesOptions, cb);
+		collection.createIndex(index, createIndexesOptions);
 	}
 
 	private async convertToMasterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<MasterPlayer>> {
 		let answer: Array<MasterPlayer> = [];
-		
+
 		while (await results.hasNext()) {
 			answer.push(new MasterPlayer(await results.next(), collection));
 		}
@@ -105,57 +108,127 @@ export class xDatabase {
 	public async loadMasterPlayersWithGoogleAsync(googleIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.google": { $in: { "googleId": googleIds } }}, masterPlayerFindOptions as any);
+		let results = await collection.find({ "external.google": { $in: { "googleId": googleIds } } }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersWithGooglePlayGameServiceAsync(playerIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ "external.googlePlayGameService": { $in: { "playerId": playerIds } } }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersWithGameCenterAsync(playerIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ "external.gameCenter": { $in: { "playerId": playerIds } } }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
 		return this.convertToMasterPlayers(results, collection);
 	}
 
 	public async loadMasterPlayersWithFacebookAsync(facebookIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.facebook": { $in: { "facebookId": facebookIds } }}, masterPlayerFindOptions as any);
+		let results = await collection.find({ "external.facebook": { $in: { "facebookId": facebookIds } } }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
 		return this.convertToMasterPlayers(results, collection);
 	}
 
 	public async loadMasterPlayersWithAppleAsync(appleIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.apple": { $in: { "appleId": appleIds } }}, masterPlayerFindOptions as any);
+		let results = await collection.find({ "external.apple": { $in: { "appleId": appleIds } } }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
 		return this.convertToMasterPlayers(results, collection);
 	}
-	
+
 	public async loadMasterPlayersWithGenericServiceAsync(genericService: string, genericIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 		let filter = {} as any;
 		filter["external.genericService.genericServices." + genericService] = { $in: { "genericId": genericIds } };
 
-		let results = await collection.find(filter, masterPlayerFindOptions as any);
+		let results = await collection.find(filter, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
 		return this.convertToMasterPlayers(results, collection);
 	}
 
 	public async loadMasterPlayersWithSegmentAsync(segment: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "segments": { $elementMatch: segment }}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ segments: segment }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithTagAsync(key: string, value: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, masterPlayerFindOptions as any).skip(skip).limit(limit);
+		let $filter = {} as any;
+		$filter["tags." + key] = value;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+	public async loadMasterPlayersWithDisplayNameAsync(keyword: string, skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayerWithDisplayNameAsync(displayName: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let result = await collection.findOne({ displayNameNormalize: displayName }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+		
+		if (!result) return null;
+		
+		return new MasterPlayer(result, collection);
+	}
+
+	public async loadMasterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, direction: -1 | 1, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
 		let $sort = {} as any;
-		$sort["playerStatistics." + key] = {
-			value: -1,
-			tsLastUpdate: -1
-		};
+		$sort["playerStatistics." + key + ".value"] = direction;
+		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, masterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersLeaderboardWithStatisticsAllAsync(key: string, direction: -1 | 1, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let $filter = {} as any;
+		$filter["playerStatistics." + key + ".value"] = { $ne: null };
+
+		let $sort = {} as any;
+		$sort["playerStatistics." + key + ".value"] = direction;
+		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
+
+		let results = await collection.find({$filter}, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).sort($sort);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
@@ -165,51 +238,92 @@ export class xDatabase {
 		let $sort = {} as any;
 		$sort["playerCurrencies." + key + ".value"] = -1;
 
-		let results = await collection.find({}, masterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadPositionMasterPlayerLeaderboardWithStatisticsAsync(key: string, userId: string): Promise<number> {
+	public async loadMasterPlayersLeaderboardWithLastLoginAsync(skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let options = {} as any;
-		options["playerStatistics"] = true;
+		let $sort = {} as any;
+		$sort["tsLastLogin"] = -1;
 
-		let thisPlayer = await this.loadMasterPlayerAsync(userId, options);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadMasterPlayersLeaderboardWithCreateAsync(skip: number, limit: number, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let $sort = {} as any;
+		$sort["_id"] = -1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToMasterPlayers(results, collection);
+	}
+
+	public async loadPositionMasterPlayerLeaderboardWithStatisticsAsync(key: string, userId: string, initialValue: number, direction: -1 | 1): Promise<number> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			playerStatistics: true
+		};
+
+		let thisPlayer = await this.loadMasterPlayerAsync(userId, masterPlayerFindOptions);
 		if (thisPlayer == null) return -1;
 
-		let score = 0;
-		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
+		let score = initialValue;
 
 		let playerStatistics = thisPlayer.getPlayerStatistics(key);
+		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
+
 		if (playerStatistics != null) {
 			score = playerStatistics.value;
 			tsLastUpdate = playerStatistics.tsLastUpdate;
 		}
-		
+
 		let filter = {} as any;
-		filter["playerStatistics." + key] = {
-			$and: [{
-				$gt: {
-					value: score,
-				},
-				$lt: {
-					tsLastUpdate: tsLastUpdate
-				}
-			}],
+
+		if (direction == -1) {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["playerStatistics." + key + ".value"] = { $gt: score };
+			condition2["playerStatistics." + key + ".value"] = score;
+			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
 		}
+		else {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["playerStatistics." + key + ".value"] = { $lt: score };
+			condition2["playerStatistics." + key + ".value"] = score;
+			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
+		}
+		
 		return await collection.countDocuments(filter);
 	}
 
 	public async loadPositionMasterPlayerLeaderboardWithCurrencies(key: string, userId: string): Promise<number> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let options = {} as any;
-		options["playerCurrencies"] = true;
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			playerCurrencies: true
+		};
 
-		let thisPlayer = await this.loadMasterPlayerAsync(userId, options);
+		let thisPlayer = await this.loadMasterPlayerAsync(userId, masterPlayerFindOptions);
 		if (thisPlayer == null) return -1;
-		
+
 		let score = 0;
 
 		let playerCurrencies = thisPlayer.getPlayerCurrency(key);
@@ -230,7 +344,10 @@ export class xDatabase {
 	public async loadMasterPlayerAsync(userId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let result = await collection.findOne({ "userId": userId }, masterPlayerFindOptions as any);
+		let result = await collection.findOne({ userId: userId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			let thisPlayer = new MasterPlayer(result, collection);
 			return thisPlayer;
@@ -241,118 +358,211 @@ export class xDatabase {
 
 	public async loadMasterPlayerByCustomDeviceIdAsync(customDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.customDeviceId": customDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.customDeviceId": customDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByAndroidDeviceIdAsync(androidDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.androidDeviceId": androidDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.androidDeviceId": androidDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByiOSDeviceIdAsync(iOSDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.iOSDeviceId": iOSDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.iOSDeviceId": iOSDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByWindowsPhoneDeviceIdAsync(windowsPhoneDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.windowsPhoneDeviceId": windowsPhoneDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.windowsPhoneDeviceId": windowsPhoneDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByWindowsDeviceIdAsync(windowsDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.windowsDeviceId": windowsDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.windowsDeviceId": windowsDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByLinuxDeviceIdAsync(linuxDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.linuxDeviceId": linuxDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.linuxDeviceId": linuxDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByMacOSDeviceIdAsync(macOSDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.macOSDeviceId": macOSDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.macOSDeviceId": macOSDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByEditorDeviceIdAsync(editorDeviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.device.editorDeviceId": editorDeviceId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.device.editorDeviceId": editorDeviceId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByAccountUsernameAsync(username: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.account.username": username }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.account.username": username }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByCustomIdAsync(customId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.custom.customId": customId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.custom.customId": customId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByAppleAsync(appleId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.apple.appleId": appleId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.apple.appleId": appleId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByGoogleAsync(googleId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.google.googleId": googleId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.google.googleId": googleId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
+		return null;
+	}
+
+	public async loadMasterPlayerByGooglePlayGameServiceAsync(playerId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let result = await collection.findOne({ "external.googlePlayGameService.playerId": playerId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+
+		return null;
+	}
+
+	public async loadMasterPlayerByGameCenterAsync(playerId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+		let collection = this.systemCollection("MasterPlayer");
+
+		let result = await collection.findOne({ "external.gameCenter.playerId": playerId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
+		if (result) {
+			return new MasterPlayer(result, collection);
+		}
+
 		return null;
 	}
 
 	public async loadMasterPlayerByFacebookAsync(facebookId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
-		let result = await collection.findOne({ "external.facebook.facebookId": facebookId }, masterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ "external.facebook.facebookId": facebookId }, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
@@ -362,15 +572,19 @@ export class xDatabase {
 		let filter = {} as any;
 		filter["external.genericService.genericServices." + serviceName + ".serviceId"] = serviceId;
 
-		let result = await collection.findOne(filter, masterPlayerFindOptions as any);
+		let result = await collection.findOne(filter, {
+			projection: this.getFindOptions(masterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new MasterPlayer(result, collection);
 		}
+
 		return null;
 	}
 
 	public async createMasterPlayerAsync(result: any): Promise<MasterPlayer> {
-		let collection = this.systemCollection("GamePlayer");
+		let collection = this.systemCollection("MasterPlayer");
 
 		await collection.insertOne(result);
 		return new MasterPlayer(result, collection);
@@ -378,7 +592,7 @@ export class xDatabase {
 
 	private async convertToGamePlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<GamePlayer>> {
 		let answer: Array<GamePlayer> = [];
-		
+
 		while (await results.hasNext()) {
 			answer.push(new GamePlayer(await results.next(), collection));
 		}
@@ -389,28 +603,101 @@ export class xDatabase {
 	public async loadGamePlayersWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
-		let results = await collection.find({ "segments": { $elementMatch: segment }}, gamePlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ segments: segment }, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToGamePlayers(results, collection);
 	}
 
-	public async loadGamePlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+	public async loadGamePlayersWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
-		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, gamePlayerFindOptions as any).skip(skip).limit(limit);
+		let $filter = {} as any;
+		$filter["tags." + key] = value;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToGamePlayers(results, collection);
 	}
 
-	public async loadGamePlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+	public async loadGamePlayersWithDisplayNameAsync(keyword: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).skip(skip).limit(limit);
+		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadGamePlayerWithDisplayNameAsync(displayName: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
+		let collection = this.systemCollection("GamePlayer");
+
+		let result = await collection.findOne({ displayNameNormalize: displayName }, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		});
+
+		if (!result) return null;
+		
+		return new GamePlayer(result, collection);
+	}
+
+	public async loadGamePlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
 		let $sort = {} as any;
-		$sort["playerStatistics." + key] = {
-			value: -1,
-			tsLastUpdate: -1
-		};
+		$sort["playerStatistics." + key + ".value"] = direction;
+		$sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
 
-		let results = await collection.find({}, gamePlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadGamePlayersLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let $filter = {} as any;
+		$filter["playerStatistics." + key + ".value"] = { $ne: null };
+
+		let $sort = {} as any;
+		$sort["playerStatistics." + key + ".value"] = direction;
+		$sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).sort($sort);
+		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadGamePlayersLeaderboardWithCreateAsync(skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["_id"] = -1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToGamePlayers(results, collection);
+	}
+
+	public async loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds: string[], gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let results = await collection.find({ userId: { $in: friendIds }}, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		});
+
+		let answer: GamePlayer[] = [];
+
+		while (await results.hasNext()) {
+			let result = await results.next();
+			answer.push(new GamePlayer(result, collection));
+		}
+
+		return answer;
 	}
 
 	public async loadGamePlayersLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
@@ -419,20 +706,23 @@ export class xDatabase {
 		let $sort = {} as any;
 		$sort["playerCurrencies." + key + ".value"] = -1;
 
-		let results = await collection.find({}, gamePlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToGamePlayers(results, collection);
 	}
 
-	public async loadPositionGamePlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string): Promise<number> {
+	public async loadPositionGamePlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
-		let options = {} as any;
-		options["playerStatistics"] = true;
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			playerStatistics: true
+		};
 
-		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, options);
+		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, masterPlayerFindOptions);
 		if (thisPlayer == null) return -1;
 
-		let score = 0;
+		let score = initialValue;
 		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
 		let playerStatistics = thisPlayer.getPlayerStatistics(key);
@@ -442,26 +732,38 @@ export class xDatabase {
 		}
 
 		let filter = {} as any;
-		filter["playerStatistics." + key] = {
-			$and: [{
-				$gt: {
-					value: score,
-				},
-				$lt: {
-					tsLastUpdate: tsLastUpdate
-				}
-			}],
+		if (direction == -1) {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["playerStatistics." + key + ".value"] = { $gt: score };
+			condition2["playerStatistics." + key + ".value"] = score;
+			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
 		}
+		else {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["playerStatistics." + key + ".value"] = { $lt: score };
+			condition2["playerStatistics." + key + ".value"] = score;
+			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
+		}
+		
 		return await collection.countDocuments(filter);
 	}
 
 	public async loadPositionGamePlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, gameId: string): Promise<number> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
-		let options = {} as any;
-		options["playerCurrencies"] = true;
+		let gamePlayerFindOptions: GamePlayerFindOptions = {
+			playerCurrencies: true
+		};
 
-		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, options);
+		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, gamePlayerFindOptions);
 		if (thisPlayer == null) return -1;
 
 		let score = 0;
@@ -482,7 +784,11 @@ export class xDatabase {
 
 	public async loadGamePlayerAsync(userId: string, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
-		let result = await collection.findOne({ "userId": userId }, gamePlayerFindOptions as any);
+
+		let result = await collection.findOne({ userId: userId }, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		});
+
 		if (result) {
 			return new GamePlayer(result, collection);
 		}
@@ -497,9 +803,101 @@ export class xDatabase {
 		return new GamePlayer(result, collection);
 	}
 
+	public async insertMasterPlayerStatisticsLogAsync(userId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeCollection("MasterPlayer.StatisticsLog");
+
+		await collection.insertOne({
+			userId: userId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async insertMasterPlayerCurrencyLogAsync(userId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeCollection("MasterPlayer.CurrencyLog");
+
+		await collection.insertOne({
+			userId: userId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async insertMasterPlayerStatisticsLogsAsync(requests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[]): Promise<void> {
+		let collection = this.runtimeCollection("MasterPlayer.StatisticsLog");
+
+		await collection.insertMany(requests);
+	}
+
+	public async loadMasterPlayerStatisticsLogAsync($filter: {}, limit: number) {
+		let collection = this.runtimeCollection("MasterPlayer.StatisticsLog");
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	public async loadMasterPlayerCurrencyLogAsync($filter: {}, limit: number) {
+		let collection = this.runtimeCollection("MasterPlayer.CurrencyLog");
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	public async insertGamePlayerStatisticsLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+
+		await collection.insertOne({
+			userId: userId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async insertGamePlayerStatisticsLogsAsync(requests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
+		let collection = this.runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+
+		await collection.insertMany(requests);
+	}
+
+	public async insertGamePlayerCurrencyLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+
+		await collection.insertOne({
+			userId: userId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async loadGamePlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	public async loadGamePlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
 	private async convertToCharacterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<CharacterPlayer>> {
 		let answer: Array<CharacterPlayer> = [];
-		
+
 		while (await results.hasNext()) {
 			answer.push(new CharacterPlayer(await results.next(), collection));
 		}
@@ -510,27 +908,71 @@ export class xDatabase {
 	public async loadCharacterPlayersWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		let results = await collection.find({ "segments": { $elementMatch: segment }}, characterPlayerFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ segments: segment }, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadCharacterPlayersWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+	public async loadCharacterPlayersWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, characterPlayerFindOptions as any).skip(skip).limit(limit);
+		let $filter = {} as any;
+		$filter["tags." + key] = value;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadCharacterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+	public async loadCharacterPlayersWithDisplayNameAsync(keyword: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).skip(skip).limit(limit);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadCharacterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let $sort = {} as any;
-		$sort["playerStatistics." + key] = {
-			value: -1,
-			tsLastUpdate: -1
-		};
+		$sort["playerStatistics." + key + ".value"] = direction;
+		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, characterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadCharacterPlayersLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+		
+		let $filter = {} as any;
+		$filter["playerStatistics." + key + ".value"] = { $ne: null };
+
+		let $sort = {} as any;
+		$sort["playerStatistics." + key + ".value"] = direction;
+		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).sort($sort);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadCharacterPlayersLeaderboardWithCreateAsync(skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["_id"] = -1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
@@ -540,20 +982,23 @@ export class xDatabase {
 		let $sort = {} as any;
 		$sort["playerCurrencies." + key + ".value"] = -1;
 
-		let results = await collection.find({}, characterPlayerFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadPositionCharacterPlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string): Promise<number> {
+	public async loadPositionCharacterPlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		let options = {} as any;
-		options["playerStatistics"] = true;
+		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+			playerStatistics: true
+		};
 
-		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, options);
+		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, characterPlayerFindOptions);
 		if (thisPlayer == null) return -1;
 
-		let score = 0;
+		let score = initialValue;
 		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
 		let playerStatistics = thisPlayer.getPlayerStatistics(key);
@@ -563,26 +1008,38 @@ export class xDatabase {
 		}
 
 		let filter = {} as any;
-		filter["playerStatistics." + key] = {
-			$and: [{
-				$gt: {
-					value: score,
-				},
-				$lt: {
-					tsLastUpdate: tsLastUpdate
-				}
-			}],
+		if (direction == -1) {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["playerStatistics." + key + ".value"] = { $gt: score };
+			condition2["playerStatistics." + key + ".value"] = score;
+			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
 		}
+		else {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["playerStatistics." + key + ".value"] = { $lt: score };
+			condition2["playerStatistics." + key + ".value"] = score;
+			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
+		}
+		
 		return await collection.countDocuments(filter);
 	}
 
 	public async loadPositionCharacterPlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, gameId: string): Promise<number> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		let options = {} as any;
-		options["playerCurrencies"] = true;
+		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+			playerCurrencies: true
+		};
 
-		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, options);
+		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, characterPlayerFindOptions);
 		if (thisPlayer == null) return -1;
 
 		let score = 0;
@@ -602,9 +1059,30 @@ export class xDatabase {
 		return await collection.countDocuments(filter);
 	}
 
+	public async loadFriendCharacterPlayersLeaderboardWithStatisticsAsync(friendIds: string[], gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let results = await collection.find({ userId: { $in: friendIds }}, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		});
+
+		let answer: CharacterPlayer[] = [];
+
+		while (await results.hasNext()) {
+			let result = await results.next();
+			answer.push(new CharacterPlayer(result, collection));
+		}
+
+		return answer;
+	}
+
 	public async loadCharacterPlayerAsync(characterId: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<CharacterPlayer> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
-		let result = await collection.findOne({ "characterId": characterId }, characterPlayerFindOptions as any);
+
+		let result = await collection.findOne({ characterId: characterId }, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		});
+
 		if (result) {
 			return new CharacterPlayer(result, collection);
 		}
@@ -619,9 +1097,90 @@ export class xDatabase {
 		return new CharacterPlayer(result, collection);
 	}
 
+	public async insertCharacterPlayerStatisticsLogAsync(characterId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+
+		await collection.insertOne({
+			characterId: characterId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async insertCharacterPlayerStatisticsLogsAsync(requests: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
+		let collection = this.runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+
+		await collection.insertMany(requests);
+	}
+
+	public async insertCharacterPlayerCurrencyLogAsync(characterId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+
+		await collection.insertOne({
+			characterId: characterId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async insertStoreInventoryLogAsync(storeId: string, gameId: string, id: string, type: number,
+		priceCurrencyStartValues: { key: string, value: number }[],
+		priceCurrencyAmountValues: { key: string, value: number }[],
+		priceCurrencyFinalValues: { key: string, value: number }[],
+		storeCurrencyStartValues: { key: string, value: number }[],
+		storeCurrencyAmountValues: { key: string, value: number }[],
+		storeCurrencyFinalValues: { key: string, value: number }[],
+		storeItemFinalValues: { catalogId: string, classId: string, itemId: string }[],
+		transactionId: string, storeReceiveType: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("StoreInventory.StoreLog", gameId);
+
+		await collection.insertOne({
+			storeId: storeId,
+			id: id,
+			type: type,
+			priceCurrencyStartValues: priceCurrencyStartValues,
+			priceCurrencyAmountValues: priceCurrencyAmountValues,
+			priceCurrencyFinalValues: priceCurrencyFinalValues,
+			storeCurrencyStartValues: storeCurrencyStartValues,
+			storeCurrencyAmountValues: storeCurrencyAmountValues,
+			storeCurrencyFinalValues: storeCurrencyFinalValues,
+			storeItemFinalValues: storeItemFinalValues,
+			transactionId: transactionId,
+			storeReceiveType: storeReceiveType,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async getStoreInventoryLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("StoreInventory.StoreLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	public async loadCharacterPlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	public async loadCharacterPlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
 	private async convertToGroups(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<Group>> {
 		let answer: Array<Group> = [];
-		
+
 		while (await results.hasNext()) {
 			answer.push(new Group(await results.next(), collection));
 		}
@@ -632,27 +1191,71 @@ export class xDatabase {
 	public async loadGroupsWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
 		let collection = this.systemGameCollection("Group", gameId);
 
-		let results = await collection.find({ "segments": { $elementMatch: segment }}, groupFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ segments: segment }, {
+			projection: this.getFindOptions(groupFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadGroupsWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+	public async loadGroupsWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
 		let collection = this.systemGameCollection("Group", gameId);
 
-		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, groupFindOptions as any).skip(skip).limit(limit);
+		let $filter = {} as any;
+		$filter["tags." + key] = value;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(groupFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadGroupsLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+	public async loadGroupsWithDisplayNameAsync(keyword: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
+			projection: this.getFindOptions(groupFindOptions)
+		}).skip(skip).limit(limit);
+		return this.convertToGroups(results, collection);
+	}
+
+	public async loadGroupsLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let $sort = {} as any;
-		$sort["groupStatistics." + key] = {
-			value: -1,
-			tsLastUpdate: -1
-		};
+		$sort["groupStatistics." + key + ".value"] = direction;
+		$sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, groupFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(groupFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToGroups(results, collection);
+	}
+
+	public async loadGroupsLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let $filter = {} as any;
+		$filter["groupStatistics." + key + ".value"] = { $ne: null };
+		
+		let $sort = {} as any;
+		$sort["groupStatistics." + key + ".value"] = direction;
+		$sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(groupFindOptions)
+		}).sort($sort);
+		return this.convertToGroups(results, collection);
+	}
+
+	public async loadGroupsLeaderboardWithCreateAsync(skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+		let collection = this.systemGameCollection("Group", gameId);
+
+		let $sort = {} as any;
+		$sort["_id"] = -1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(groupFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
 
@@ -662,49 +1265,64 @@ export class xDatabase {
 		let $sort = {} as any;
 		$sort["groupCurrencies." + key + ".value"] = -1;
 
-		let results = await collection.find({}, groupFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(groupFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadPositionGroupLeaderboardWithStatisticsAsync(key: string, groupId: string, gameId: string): Promise<number> {
+	public async loadPositionGroupLeaderboardWithStatisticsAsync(key: string, groupId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
 		let collection = this.systemGameCollection("Group", gameId);
 
-		let options = {} as any;
-		options["groupStatistics"] = true;
+		let groupFindOptions: GroupFindOptions = {
+			groupStatistics: true
+		};
 
-		let thisGroup = await this.loadGroupAsync(groupId, gameId, options);
+		let thisGroup = await this.loadGroupAsync(groupId, gameId, groupFindOptions);
 		if (thisGroup == null) return -1;
 
-		let score = 0;
+		let score = initialValue;
 		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
-		let playerStatistics = thisGroup.getGroupStatistics(key);
-		if (playerStatistics != null) {
-			score = playerStatistics.value;
-			tsLastUpdate = playerStatistics.tsLastUpdate;
+		let groupStatistics = thisGroup.getGroupStatistics(key);
+		if (groupStatistics != null) {
+			score = groupStatistics.value;
+			tsLastUpdate = groupStatistics.tsLastUpdate;
 		}
 
 		let filter = {} as any;
-		filter["groupStatistics." + key] = {
-			$and: [{
-				$gt: {
-					value: score,
-				},
-				$lt: {
-					tsLastUpdate: tsLastUpdate
-				}
-			}],
+		if (direction == -1) {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["groupStatistics." + key + ".value"] = { $gt: score };
+			condition2["groupStatistics." + key + ".value"] = score;
+			condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
 		}
+		else {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["groupStatistics." + key + ".value"] = { $lt: score };
+			condition2["groupStatistics." + key + ".value"] = score;
+			condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
+		}
+		
 		return await collection.countDocuments(filter);
 	}
 
 	public async loadPositionGroupLeaderboardWithCurrenciesAsync(key: string, groupId: string, gameId: string): Promise<number> {
 		let collection = this.systemGameCollection("Group", gameId);
 
-		let options = {} as any;
-		options["groupCurrencies"] = true;
+		let groupFindOptions: GroupFindOptions = {
+			groupCurrencies: true
+		};
 
-		let thisGroup = await this.loadGroupAsync(groupId, gameId, options);
+		let thisGroup = await this.loadGroupAsync(groupId, gameId, groupFindOptions);
 		if (thisGroup == null) return -1;
 
 		let score = 0;
@@ -726,7 +1344,11 @@ export class xDatabase {
 
 	public async loadGroupAsync(groupId: string, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Group> {
 		let collection = this.systemGameCollection("Group", gameId);
-		let result = await collection.findOne({ "groupId": groupId }, groupFindOptions as any);
+
+		let result = await collection.findOne({ groupId: groupId }, {
+			projection: this.getFindOptions(groupFindOptions)
+		});
+
 		if (result) {
 			return new Group(result, collection);
 		}
@@ -743,7 +1365,7 @@ export class xDatabase {
 
 	private async convertToInventories(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<Inventory>> {
 		let answer: Array<Inventory> = [];
-		
+
 		while (await results.hasNext()) {
 			answer.push(new Inventory(await results.next(), collection));
 		}
@@ -754,65 +1376,125 @@ export class xDatabase {
 	public async loadInventoriesWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
-		let results = await collection.find({ "segments": { $elementMatch: segment }}, inventoryFindOptions as any).skip(skip).limit(limit);
+		let results = await collection.find({ segments: segment }, {
+			projection: this.getFindOptions(inventoryFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadInventoriesWithTagAsync(key: string, value: string | boolean | number, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+	public async loadInventoriesWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
-		let results = await collection.find({ "tags": { $elementMatch: { key: key, value: value }}}, inventoryFindOptions as any).skip(skip).limit(limit);
+		let $filter = {} as any;
+		$filter["tags." + key] = value;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(inventoryFindOptions)
+		}).skip(skip).limit(limit);
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadInventoriesLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+	public async loadInventoriesWithDisplayNameAsync(keyword: string, skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
+			projection: this.getFindOptions(inventoryFindOptions)
+		}).skip(skip).limit(limit);
+		return this.convertToInventories(results, collection);
+	}
+
+	public async loadInventoriesLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let $sort = {} as any;
-		$sort["itemStatistics." + key] = {
-			value: -1,
-			tsLastUpdate: -1
-		};
+		$sort["itemStatistics." + key + ".value"] = direction;
+		$sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, inventoryFindOptions as any).sort($sort).skip(skip).limit(limit);
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(inventoryFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadPositionInventoryLeaderboardWithStatisticsAsync(key: string, itemId: string, gameId: string): Promise<number> {
+	public async loadInventoriesLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
-		let options = {} as any;
-		options["itemStatistics"] = true;
+		let $filter = {} as any;
+		$filter["itemStatistics." + key + ".value"] = { $ne: null };
 
-		let thisInventory = await this.loadInventoryAsync(itemId, options);
+		let $sort = {} as any;
+		$sort["itemStatistics." + key + ".value"] = direction;
+		$sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(inventoryFindOptions)
+		}).sort($sort);
+		return this.convertToInventories(results, collection);
+	}
+
+	public async loadInventoriesLeaderboardWithCreateAsync(skip: number, limit: number, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let $sort = {} as any;
+		$sort["_id"] = -1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(inventoryFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToInventories(results, collection);
+	}
+
+	public async loadPositionInventoryLeaderboardWithStatisticsAsync(key: string, itemId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
+		let collection = this.systemGameCollection("Inventory", gameId);
+
+		let inventoryFindOptions: InventoryFindOptions = {
+			itemStatistics: true
+		};
+
+		let thisInventory = await this.loadInventoryAsync(itemId, gameId, inventoryFindOptions);
 		if (thisInventory == null) return -1;
 
-		let score = 0;
+		let score = initialValue;
 		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
 
 		let itemStatistics = thisInventory.getItemStatistics(key);
 		if (itemStatistics != null) {
-			score = 0;
+			score = itemStatistics.value;
 			tsLastUpdate = itemStatistics.tsLastUpdate;
 		}
 
 		let filter = {} as any;
-		filter["itemStatistics." + key] = {
-			$and: [{
-				$gt: {
-					value: score,
-				},
-				$lt: {
-					tsLastUpdate: tsLastUpdate
-				}
-			}],
+		if (direction == -1) {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["itemStatistics." + key + ".value"] = { $gt: score };
+			condition2["itemStatistics." + key + ".value"] = score;
+			condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
 		}
+		else {
+			let condition1 = {} as any;
+			let condition2 = {} as any;
+
+			condition1["itemStatistics." + key + ".value"] = { $lt: score };
+			condition2["itemStatistics." + key + ".value"] = score;
+			condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+
+			filter.$or = [condition1, condition2];
+		}
+		
 		return await collection.countDocuments(filter);
 	}
 
 	public async loadInventoryAsync(itemId: string, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Inventory> {
 		let collection = this.systemGameCollection("Inventory", gameId);
-		let result = await collection.findOne({ "itemId": itemId }, inventoryFindOptions as any);
+
+		let result = await collection.findOne({ itemId: itemId }, {
+			projection: this.getFindOptions(inventoryFindOptions)
+		});
+
 		if (result) {
 			return new Inventory(result, collection);
 		}
@@ -825,5 +1507,228 @@ export class xDatabase {
 
 		await collection.insertOne(result);
 		return new Inventory(result, collection);
+	}
+
+	public async insertInventoryStatisticsLogAsync(itemId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("Inventory.StatisticsLog", gameId);
+
+		await collection.insertOne({
+			itemId: itemId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async insertInventoryStatisticsLogsAsync(requests: { itemId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
+		let collection = this.runtimeGameCollection("Inventory.StatisticsLog", gameId);
+
+		await collection.insertMany(requests);
+	}
+
+	public async loadInventoryStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("Inventory.StatisticsLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	private async convertToStoreInventories(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<StoreInventory>> {
+		let answer: Array<StoreInventory> = [];
+
+		while (await results.hasNext()) {
+			answer.push(new StoreInventory(await results.next(), collection));
+		}
+
+		return answer;
+	}
+
+	public async loadStoreInventoryAsync(storeId: string, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<StoreInventory> {
+		let collection = this.systemGameCollection("StoreInventory", gameId);
+
+		let result = await collection.findOne({ storeId: storeId }, {
+			projection: this.getFindOptions(storeInventoryFindOptions)
+		});
+
+		if (result) {
+			return new StoreInventory(result, collection);
+		}
+
+		return null;
+	}
+
+	public async loadStoreInventoryByFacebookStoreAsync(productId: string, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<StoreInventory> {
+		let collection = this.systemGameCollection("StoreInventory", gameId);
+
+		let result = await collection.findOne({ "inAppPurchase.facebookStoreId": productId }, {
+			projection: this.getFindOptions(storeInventoryFindOptions)
+		});
+
+		if (result) {
+			return new StoreInventory(result, collection);
+		}
+
+		return null;
+	}
+
+	public async loadStoreInventoryByAppleAppStoreAsync(productId: string, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<StoreInventory> {
+		let collection = this.systemGameCollection("StoreInventory", gameId);
+
+		let result = await collection.findOne({ "inAppPurchase.appleAppStoreId": productId }, {
+			projection: this.getFindOptions(storeInventoryFindOptions)
+		});
+
+		if (result) {
+			return new StoreInventory(result, collection);
+		}
+
+		return null;
+	}
+
+	public async loadStoreInventoryByGooglePlayStoreAsync(productId: string, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<StoreInventory> {
+		let collection = this.systemGameCollection("StoreInventory", gameId);
+
+		let result = await collection.findOne({ "inAppPurchase.googlePlayStoreId": productId }, {
+			projection: this.getFindOptions(storeInventoryFindOptions)
+		});
+		
+		if (result) {
+			return new StoreInventory(result, collection);
+		}
+
+		return null;
+	}
+
+	public async loadStoreInventoriesWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<Array<StoreInventory>> {
+		let collection = this.systemGameCollection("StoreInventory", gameId);
+
+		let $filter = {} as any;
+		$filter["tags." + key] = value;
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(storeInventoryFindOptions)
+		}).skip(skip).limit(limit);
+		return this.convertToStoreInventories(results, collection);
+	}
+
+	public async loadStoreInventoriesLeaderboardWithCreateAsync(skip: number, limit: number, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<Array<StoreInventory>> {
+		let collection = this.systemGameCollection("StoreInventory", gameId);
+
+		let $sort = {} as any;
+		$sort["_id"] = -1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(storeInventoryFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToStoreInventories(results, collection);
+	}
+
+	public async createStoreInventoryAsync(result: any, gameId: string): Promise<StoreInventory> {
+		let collection = this.systemGameCollection("StoreInventory", gameId);
+
+		await collection.insertOne(result);
+		return new StoreInventory(result, collection);
+	}
+
+	public async loadGroupMessagesAsync(groupId: string, gameId: string, skip: number, limit: number): Promise<mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>> {
+		let collection = this.runtimeGameCollection("Group.Message", gameId);
+
+		return collection.find({
+			groupId: groupId,
+		}).sort({
+			tsCreate: -1
+		}).skip(skip).limit(limit);
+	}
+
+	public async createGroupMessageAsync(groupId: string, gameId: string, senderId: string, senderType: number, message: string, tsCreate: number): Promise<mongoDB.Document> {
+		let collection = this.runtimeGameCollection("Group.Message", gameId);
+
+		return collection.insertOne({
+			groupId: groupId,
+			senderId: senderId,
+			senderType: senderType,
+			message: message,
+			tsCreate: tsCreate,
+		});
+	}
+
+	public async insertGroupStatisticsLogAsync(groupId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("Group.StatisticsLog", gameId);
+
+		await collection.insertOne({
+			groupId: groupId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async insertGroupStatisticsLogsAsync(requests: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
+		let collection = this.runtimeGameCollection("Group.StatisticsLog", gameId);
+
+		await collection.insertMany(requests);
+	}
+
+	public async insertGroupCurrencyLogAsync(groupId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+		let collection = this.runtimeGameCollection("Group.CurrencyLog", gameId);
+
+		await collection.insertOne({
+			groupId: groupId,
+			key: key,
+			amount: amount,
+			startValue: startValue,
+			finalValue: finalValue,
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			log: log,
+		});
+	}
+
+	public async loadGroupStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("Group.StatisticsLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	public async loadGroupCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
+		let collection = this.runtimeGameCollection("Group.CurrencyLog", gameId);
+
+		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+	}
+
+	public async loadUploadFileInfoAsync(fileId: string): Promise<UploadFileInfo> {
+		let collection = this.systemCollection("UploadFileInfo");
+
+		let result = await collection.findOne({ fileId: fileId });
+
+		if (result) {
+			return new UploadFileInfo(result, collection);
+		}
+
+		return null;
+	}
+
+	public async createUploadFileInfoAsync(result: any): Promise<UploadFileInfo> {
+		let collection = this.systemCollection("UploadFileInfo");
+
+		await collection.insertOne(result);
+		return new UploadFileInfo(result, collection);
+	}
+
+	private getFindOptions(findOptions: any): { [k: string]: boolean } {
+		if (findOptions == null) return null;
+
+		let answer: { [k: string]: boolean } = {};
+
+		let keys = Object.keys(findOptions);
+		keys.forEach((key: string) => {
+			if (findOptions[key] == true) answer[key] = true;
+		});
+
+		return answer;
 	}
 }

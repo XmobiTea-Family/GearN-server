@@ -2,7 +2,7 @@ import { OperationRequest } from "./../../../../../GN-common/entity/operationReq
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { Constructor } from "./../../../../service/IRequestConverterService";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 export interface IRequestHandler {
 	getCode(): number;

@@ -47,7 +47,7 @@ export class OperationRequest {
 		return this;
 	}
 
-	public setScriptData(key: string, value: any): OperationRequest {
+	public setParameter(key: string, value: any): OperationRequest {
 		if (this.parameters == null) this.parameters = new GNHashtable();
 
 		this.parameters.add(key, value);

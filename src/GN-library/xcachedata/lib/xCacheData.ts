@@ -1,23 +1,40 @@
+import { xCacheItem } from "./xCacheItem";
+
 export class xCacheData {
-	private dataDic: { [k: string]: any } = {};
+	private dataDic: Map<string, xCacheItem>;
 
-	public getData<T>(k: string): T {
-		let value = this.dataDic[k];
-
-		if (value == null) return null;
-		return <T>value;
+	public hasData(key: string): boolean {
+		return this.dataDic.has(key);
 	}
 
-	public setData(key: string, value: any) {
-		this.dataDic[key] = value;
+	public getData<T>(key: string): T {
+		if (!this.dataDic.has(key)) return null;
+
+		return <T>this.dataDic.get(key).getData();
 	}
 
-	public removeData(key: string) {
-		delete this.dataDic[key];
+	public setData<T>(key: string, tData: T, expireAfterMs: number): void {
+		if (!this.dataDic.has(key)) this.dataDic.set(key, new xCacheItem(tData, expireAfterMs));
+		else {
+			this.dataDic.get(key).setData(tData, expireAfterMs);
+		}
 	}
 
-	constructor(dataDic?: { [k: string]: any }) {
-		this.dataDic = dataDic != null ? dataDic : {};
+	public removeData(key: string): boolean {
+		return this.dataDic.delete(key);
+	}
+
+	public isValid(key: string) {
+		if (!this.dataDic.has(key)) return false;
+
+		let cacheItem = this.dataDic.get(key);
+		if (cacheItem.isExpired()) return false;
+
+		return true;
+	}
+
+	constructor() {
+		this.dataDic = new Map();
 	}
 
 }

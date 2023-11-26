@@ -11,6 +11,7 @@ import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
 import { Commands } from "./../../GN-common/constant/Commands";
+import { xDatabase } from "./../../GN-library/xdatabase/lib/xDatabase";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -35,6 +36,8 @@ export class SocketAppHandler {
 
 	private server: Server;
 	private emitter: Emitter;
+
+	private xDatabase: xDatabase;
 
 	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): void {
 		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
@@ -62,6 +65,10 @@ export class SocketAppHandler {
 
 	public setEmitter(emitter: Emitter) {
 		this.emitter = emitter;
+	}
+
+	public setDatabase(database: xDatabase) {
+		this.xDatabase = database;
 	}
 
 	public setOnSocketRequest(_onRequestCb: OnSocketRequest) {
@@ -166,8 +173,16 @@ export class SocketAppHandler {
 				socket.data.authInfo = null;
 			}
 
+			if (socket.data.isSecreted) {
+				socket.data.isSecreted = false;
+				socket.data.secretInfo = null;
+			}
+
 			return;
 		}
+
+		let secretKey = data[1] as string;
+		socket.data.secretKey = secretKey;
 
 		let authToken = data[0] as string;
 		if (!authToken) {
@@ -177,20 +192,73 @@ export class SocketAppHandler {
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 			}
+		}
+		else {
+			let tokenPayload = this.apiMiddleware.verifyAuthToken(authToken);
+			if (tokenPayload == null) {
+				if (socket.data.isAuthenticated === true) {
+					socket.rooms.forEach(room => socket.leave(room));
 
-			return;
+					socket.data.isAuthenticated = false;
+					socket.data.authInfo = null;
+				}
+			}
+			else {
+				let gnToken: string = tokenPayload.gnToken;
+
+				let authInfo = await this.apiMiddleware.getAuthInfoByGNTokenInDatabase(gnToken);
+
+				if (authInfo != null) {
+					if (!secretKey) {
+						secretKey = authInfo.getSecretKey();
+					}
+
+					socket.data.isAuthenticated = true;
+					socket.data.authInfo = authInfo;
+
+					socket.join(authInfo.getUserId());
+					socket.join(await this.getRooms(authInfo.getUserId()));
+				}
+			}
 		}
 
-		let authInfo = await this.apiMiddleware.getAuthInfoByAuthTokenInDatabase(authToken);
+		if (!secretKey) {
+			socket.data.isSecreted = false;
+			socket.data.secretInfo = null;
+		}
+		else {
+			let secretInfo = await this.apiMiddleware.getSecretInfoBySecretKeyInDatabase(secretKey);
 
-		if (authInfo != null) {
-			socket.data.isAuthenticated = true;
-			socket.data.authInfo = authInfo;
+			if (secretInfo != null && secretInfo.getIsOnlyMasterAdmin()) {
+				if (!socket.data.isAuthenticated || socket.data.authInfo.getSecretKey() != secretKey) {
+					secretInfo = null;
+				}
+			}
 
-			socket.join(authInfo.getUserId());
-			socket.join(authInfo.getSocketRoomIds());
+			if (secretInfo != null) {
+				socket.data.isSecreted = true;
+				socket.data.secretInfo = secretInfo;
 
-			authInfo.setSocketId(socket.id);
+				if (socket.data.isAuthenticated === true) {
+					let gamePlayer = await this.xDatabase.loadGamePlayerAsync(socket.data.authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
+
+					if (gamePlayer != null && socket != null) {
+						let playerGroups = gamePlayer.getAllPlayerGroups();
+
+						for (let i = 0; i < playerGroups.length; i++) {
+							let playerGroup = playerGroups[i];
+
+							if (playerGroup.status == 0) {	// 0 is member
+								socket.join(playerGroup.groupId);
+							}
+						}
+					}
+				}
+			}
+			else {
+				socket.data.isSecreted = false;
+				socket.data.secretInfo = null;
+			}
 		}
 	}
 
@@ -366,51 +434,36 @@ export class SocketAppHandler {
 			this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
 	}
 
-	public getSocketViaUserId(userId: string): Socket {
-		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
-		return this.getSocketViaAuthInfo(authInfo);
-	}
-
-	public getSocketViaAuthToken(authToken: string): Socket {
-		let authInfo = this.apiMiddleware.getAuthInfoByAuthToken(authToken);
-		return this.getSocketViaAuthInfo(authInfo);
-	}
-
 	public getSocketViaSocketId(socketId: string): Socket {
 		return socketId ? this.server.of("/").sockets.get(socketId) : null;
 	}
 
-	public getSocketViaAuthInfo(authInfo: AuthInfo) {
-		return authInfo ? this.getSocketViaSocketId(authInfo.getSocketId()) : null;
+	public getSockets(userId: string) {
+		return this.server.in(userId);
 	}
 
 	public async joinRoom(userId: string, roomId: string): Promise<void> {
-		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
-		let socket = this.getSocketViaAuthInfo(authInfo);
-
-		if (socket) {
-			authInfo.addSocketRoomId(roomId);
-			await socket.join(roomId);
-		}
+		this.getSockets(userId).socketsJoin(roomId);
 	}
 
 	public async leaveRoom(userId: string, roomId: string): Promise<void> {
-		let authInfo = this.apiMiddleware.getAuthInfoByUserId(userId);
-		let socket = this.getSocketViaAuthInfo(authInfo);
-
-		if (socket) {
-			authInfo.removeSocketRoomId(roomId);
-			await socket.leave(roomId);
-		}
+		this.getSockets(userId).socketsLeave(roomId);
 	}
 
-	public getRooms(userId: string): Set<string> {
-		let socket = this.getSocketViaUserId(userId);
-		if (socket) {
-			return socket.rooms;
+	public async getRooms(userId: string): Promise<string[]> {
+		let answer: string[] = [];
+
+		let sockets = await this.getSockets(userId).fetchSockets();
+
+		for (let i = 0; i < sockets.length; i++) {
+			let socket = sockets[i];
+
+			socket.rooms.forEach(room => {
+				if (!answer.includes(room)) answer.push(room);
+			});
 		}
 
-		return null;
+		return answer;
 	}
 
 }

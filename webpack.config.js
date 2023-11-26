@@ -24,9 +24,12 @@ module.exports = {
 		filename: "index.js",
 		path: path.resolve(__dirname, "dist"),
 		libraryTarget: "commonjs",
+		environment: {
+			arrowFunction: true,
+		},
 	},
 	optimization: {
-		minimize: true,
+		minimize: false,
 		minimizer: [
 			new TerserPlugin({
 				terserOptions: {

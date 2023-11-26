@@ -1,9 +1,9 @@
 export interface MasterPlayerFindOptions {
     userId?: boolean,
+    lastIPDetail?: boolean,
     external?: boolean,
     segments?: boolean,
-    scriptData?: boolean,
-    privateData?: boolean,
+    customDatas?: boolean,
     displayName?: boolean,
     avatar?: boolean,
     tsCreate?: boolean,
@@ -15,4 +15,5 @@ export interface MasterPlayerFindOptions {
     ipAddressCreate?: boolean,
     countryCode?: boolean,
     tsLastLogin?: boolean,
+    email?: boolean,
 }

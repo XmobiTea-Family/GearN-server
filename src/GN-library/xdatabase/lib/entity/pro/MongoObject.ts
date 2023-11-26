@@ -1,14 +1,14 @@
 import * as mongoDB from "mongodb";
 
 interface UpdateFilter {
-	$inc?: { [k: string]: number};
-	$min?: { [k: string]: any};
-	$max?: { [k: string]: any};
-	$mul?: { [k: string]: number};
-	$rename?: { [k: string]: string};
+	$inc?: { [k: string]: number };
+	$min?: { [k: string]: any };
+	$max?: { [k: string]: any };
+	$mul?: { [k: string]: number };
+	$rename?: { [k: string]: string };
 	$set?: { [k: string]: any };
 	$setOnInsert?: { [k: string]: any };
-	$unset?: { [k: string]: string};
+	$unset?: { [k: string]: string };
 }
 
 export class MongoObject {
@@ -61,6 +61,13 @@ export class MongoObject {
 		this.updateFilter.$set[field] = value;
 	}
 
+	protected removeSet(field: string) {
+		if (this.updateFilter != null && this.updateFilter.$set != null) {
+			if (this.updateFilter.$set[field])
+				delete this.updateFilter.$set[field];
+		}
+	}
+
 	protected setOnInsert(field: string, value: any) {
 		if (this.updateFilter == null) this.updateFilter = {};
 		if (this.updateFilter.$setOnInsert == null) this.updateFilter.$setOnInsert = {};
@@ -99,6 +106,10 @@ export class MongoObject {
 	// 	if (this.updateFilter == null) this.updateFilter = {};
 	// 	this.updateFilter.$pullAll = $pullAll;
 	// }
+
+	public getObjectId(): mongoDB.ObjectId {
+		return this._id;
+	}
 
 	public async saveAsync(): Promise<mongoDB.UpdateResult> {
 		if (this.updateFilter == null) {

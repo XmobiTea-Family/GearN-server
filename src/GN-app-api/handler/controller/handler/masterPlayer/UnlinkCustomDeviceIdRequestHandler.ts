@@ -6,19 +6,22 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class UnlinkCustomDeviceIdOperationRequest extends OperationRequest {
-	@StringDataMember({ code: MasterPlayerParameterCode.CustomDeviceId, minLength: 8, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
+
+	@StringDataMember({ code: GNParameterCode.CustomDeviceId, minLength: 6, maxLength: 64, mustNonNull: true })
 	customDeviceId: string;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -26,10 +29,10 @@ class UnlinkCustomDeviceIdOperationRequest extends OperationRequest {
 }
 
 class ServerUnlinkCustomDeviceIdOperationRequest extends UnlinkCustomDeviceIdOperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	userId: string;
 
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -37,14 +40,16 @@ class ServerUnlinkCustomDeviceIdOperationRequest extends UnlinkCustomDeviceIdOpe
 }
 
 class AdminUnlinkCustomDeviceIdOperationRequest extends ServerUnlinkCustomDeviceIdOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class UnlinkCustomDeviceIdRequestHandler extends RequestHandler {
+export class UnlinkCustomDeviceIdRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.UnlinkCustomDeviceId;
 	}
@@ -60,15 +65,32 @@ export class UnlinkCustomDeviceIdRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.unlinkCustomDeviceId.selfEnable) {
-			return this.newOperationNotAllowError(request);
+		if (!request.userId) {
+			if (!secretInfo.getPermission().masterPlayer.unlinkCustomDeviceId.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().masterPlayer.unlinkCustomDeviceId.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.unlinkCustomDeviceId.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 		}
 
-        return this.execute(authInfo.getUserId(), request.customDeviceId, operationRequest);
+		return this.execute({
+			userId: request.userId,
+			customDeviceId: request.customDeviceId,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerUnlinkCustomDeviceIdOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerUnlinkCustomDeviceIdOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -78,11 +100,14 @@ export class UnlinkCustomDeviceIdRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.customDeviceId, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			customDeviceId: request.customDeviceId,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminUnlinkCustomDeviceIdOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminUnlinkCustomDeviceIdOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -92,35 +117,46 @@ export class UnlinkCustomDeviceIdRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.customDeviceId, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			customDeviceId: request.customDeviceId,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(userId: string, customDeviceId: string, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            external: true
-        }
-
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-		operationResponse.setReturnCode(ReturnCode.Ok);
-
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+	private async execute(request: { userId: string, customDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_UnlinkCustomDeviceId", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
 		}
 
-        let external = masterPlayer.getExternal();
-        if (external.device == null || external.device.customDeviceId != customDeviceId) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotLinked);
-            return operationResponse;
-        }
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        external.device.customDeviceId = null;
-        masterPlayer.setExternal(external);
-        masterPlayer.saveAsync();
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			external: true,
+		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			return operationResponse;
+		}
+
+		let external = masterPlayer.getExternal();
+		if (external.device == null || external.device.customDeviceId != request.customDeviceId) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalNotLinked);
+			return operationResponse;
+		}
+
+		external.device.customDeviceId = null;
+		masterPlayer.setExternal(external);
+		masterPlayer.saveAsync();
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_UnlinkCustomDeviceId", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

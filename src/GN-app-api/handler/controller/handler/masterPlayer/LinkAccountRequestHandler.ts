@@ -6,26 +6,30 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { MasterPlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/MasterPlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { MasterPlayerErrorCode } from "../../../../../GN-common/constant/errorCode/MasterPlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 import bcrypt from "bcrypt";
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: MasterPlayerParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
+
+	@StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	username: string;
 
-    @StringDataMember({ code: MasterPlayerParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
-	@BooleanDataMember({ code: MasterPlayerParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink: boolean;
-	
-	public isValidRequest() {
+	@BooleanDataMember({ code: GNParameterCode.ForceLink, isOptional: true, defaultValue: false })
+	forceLink?: boolean;
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -33,10 +37,10 @@ class LinkAccountOperationRequest extends OperationRequest {
 }
 
 class ServerLinkAccountOperationRequest extends LinkAccountOperationRequest {
-    @StringDataMember({ code: MasterPlayerParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	userId: string;
 
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -44,14 +48,14 @@ class ServerLinkAccountOperationRequest extends LinkAccountOperationRequest {
 }
 
 class AdminLinkAccountOperationRequest extends ServerLinkAccountOperationRequest {
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class LinkAccountRequestHandler extends RequestHandler {
+export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 	public override getCode() {
 		return OperationCode.LinkAccount;
 	}
@@ -67,15 +71,34 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.linkAccount.selfEnable) {
-			return this.newOperationNotAllowError(request);
+		if (!request.userId) {
+			if (!secretInfo.getPermission().masterPlayer.linkAccount.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().masterPlayer.linkAccount.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.linkAccount.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 		}
 
-        return this.execute(authInfo.getUserId(), request.username, request.password, request.forceLink, operationRequest);
+		return this.execute({
+			userId: request.userId,
+			username: request.username,
+			password: request.password,
+			forceLink: request.forceLink
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLinkAccountOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLinkAccountOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -85,11 +108,16 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.username, request.password, request.forceLink, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			username: request.username,
+			password: request.password,
+			forceLink: request.forceLink
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLinkAccountOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLinkAccountOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -99,34 +127,44 @@ export class LinkAccountRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-        return this.execute(request.userId, request.username, request.password, request.forceLink, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			username: request.username,
+			password: request.password,
+			forceLink: request.forceLink
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(userId: string, username: string, password: string, forceLink: boolean, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            external: true
-        }
-
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-		operationResponse.setReturnCode(ReturnCode.Ok);
-
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(userId, masterPlayerFindOptions);
-
-		if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+	private async execute(request: { userId: string, username: string, password: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkAccount", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
 		}
 
-        let external = masterPlayer.getExternal();
-        if (external.account != null && external.account.username != null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinked);
-            return operationResponse;
-        }
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(username.toLowerCase(), masterPlayerFindOptions);
-        if (otherMasterPlayer != null) {
-			if (!forceLink) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.ExternalLinkedOtherPlayer);
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			external: true,
+		}
+
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			return operationResponse;
+		}
+
+		let external = masterPlayer.getExternal();
+		if (external.account != null && !request.forceLink) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalLinkedOtherValue);
+			return operationResponse;
+		}
+
+		let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
+		if (otherMasterPlayer != null && otherMasterPlayer.getUserId() != masterPlayer.getUserId()) {
+			if (!request.forceLink) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalLinkedOtherAccount);
 				return operationResponse;
 			}
 
@@ -135,18 +173,21 @@ export class LinkAccountRequestHandler extends RequestHandler {
 
 			otherMasterPlayer.setExternal(otherExternal);
 			otherMasterPlayer.saveAsync();
-        }
+		}
 
-		let passwordHash = await bcrypt.hash(password, 10);
+		let passwordHash = await bcrypt.hash(request.password, 10);
 
-        external.account = {
-            username: username.toLowerCase(),
-            password: passwordHash
-        };
-        masterPlayer.setExternal(external);
-        masterPlayer.saveAsync();
+		external.account = {
+			username: request.username.toLowerCase(),
+			password: passwordHash
+		}
+		masterPlayer.setExternal(external);
+		masterPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, MasterPlayerErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkAccount", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }

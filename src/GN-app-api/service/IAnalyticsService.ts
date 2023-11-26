@@ -1,4 +1,4 @@
-export interface AnalyticsItem {
+export interface BigAnalyticsItem {
     CCU: number;
 
     DAU: number;
@@ -14,8 +14,21 @@ export interface AnalyticsItem {
     MNUSince0h1: number;
     MRT: number;
     MRTSince0h1: number;
+
+    analyticsPrice: number;
+
+    country: {
+        countryCode: string,
+        regions: {
+            regionCode: string,
+            regionName: string,
+            ccu: number,
+            latidute: number,
+            longitude: number,
+        }[]
+    }[];
 }
 
 export interface IAnalyticsService {
-    getAnalyticsItem(tsDate?: number): Promise<AnalyticsItem>;
+    getBigAnalyticsItem(tsDate?: number): Promise<BigAnalyticsItem>;
 }

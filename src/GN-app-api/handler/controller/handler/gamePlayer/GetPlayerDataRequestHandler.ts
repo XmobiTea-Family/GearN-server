@@ -6,37 +6,33 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GamePlayerParameterCode } from "./../../../../../GN-common/constant/parameterCode/GamePlayerParameterCode";
+import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GamePlayerErrorCode } from "../../../../../GN-common/constant/errorCode/GamePlayerErrorCode";
+import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
-import { GamePlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
-import { RequestHandler } from "../base/RequestHandler";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { PermissionDataItem } from "../../../../../GN-library/xdatabase/lib/entity/pro/PermissionDataItem";
+import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class GetPlayerDataOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GamePlayerParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId: string;
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
 
-    @GNArrayDataMember({ code: GamePlayerParameterCode.DataKeys, isOptional: true })
-	dataKeys: GNArray;
+	@GNArrayDataMember({ code: GNParameterCode.PlayerDataKeys, isOptional: true })
+	playerDataKeys?: Array<string>;
 
-	public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-class ServerGetPlayerDataOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GamePlayerParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+class ServerGetPlayerDataOperationRequest extends GetPlayerDataOperationRequest {
+	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	userId: string;
 
-    @GNArrayDataMember({ code: GamePlayerParameterCode.DataKeys, isOptional: true })
-	dataKeys: GNArray;
-
-    public isValidRequest() {
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
@@ -44,14 +40,16 @@ class ServerGetPlayerDataOperationRequest extends OperationRequest {
 }
 
 class AdminGetPlayerDataOperationRequest extends ServerGetPlayerDataOperationRequest {
-    public isValidRequest() {
+
+	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
 		return true;
 	}
 }
 
-export class GetPlayerDataRequestHandler extends RequestHandler {
+export class GetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetPlayerData;
 	}
@@ -79,82 +77,82 @@ export class GetPlayerDataRequestHandler extends RequestHandler {
 				return this.newOperationNotAllowError(request);
 			}
 		}
+		else {
+			if (!secretInfo.getPermission().gamePlayer.getPlayerData.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-        return this.execute(request.userId, secretInfo.getGameId(), request.userId == authInfo.getUserId(), request.dataKeys, operationRequest);
+		return this.execute({
+			userId: request.userId,
+			playerDataKeys: request.playerDataKeys,
+		}, secretInfo, operationRequest);
 	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerDataOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerDataOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().gamePlayer.getPlayerData.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().gamePlayer.getPlayerData.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, secretInfo.getGameId(), true, request.dataKeys, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			playerDataKeys: request.playerDataKeys,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerDataOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerDataOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-        if (!secretInfo.getPermission().gamePlayer.getPlayerData.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().gamePlayer.getPlayerData.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(request.userId, secretInfo.getGameId(), true, request.dataKeys, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			playerDataKeys: request.playerDataKeys,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(userId: string, gameId: string, isMine: boolean, dataKeys: GNArray, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let gamePlayerFindOptions: GamePlayerFindOptions = {
-            playerDatas: true
-        }
+	private async execute(request: { userId: string, playerDataKeys: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayerData", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, gamePlayerFindOptions);
-
-		if (gamePlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GamePlayerErrorCode.PlayerNotFound);
-            return operationResponse;
+		let gamePlayerFindOptions: GamePlayerFindOptions = {
+			playerDatas: true,
 		}
 
-		let gnInfoGetParameters = new GNHashtable();
-        let playerDatas = gamePlayer.getAllPlayerDatas();
-        let gnPlayerDatas = new GNArray();
+		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
-        for (let i = 0; i < playerDatas.length; i++) {
-            let playerData = playerDatas[i];
-            let key = playerData.key;
-            
-            if (dataKeys == null || dataKeys.indexOf(key) != -1) {
-                let permissionDataItem = <PermissionDataItem>playerData.permission;
-                if (isMine || permissionDataItem == PermissionDataItem.Public || permissionDataItem == PermissionDataItem.ReadOnlyPublic) {
-                    let value = playerData.value;
+		if (gamePlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
+			return operationResponse;
+		}
 
-                    let gnPlayerData = new GNHashtable();
-    
-                    gnPlayerData.add(GamePlayerParameterCode.Key, key);
-                    gnPlayerData.add(GamePlayerParameterCode.Value, value);
-                    gnPlayerData.add(GamePlayerParameterCode.Permission, <number>permissionDataItem);
-        
-                    gnPlayerDatas.add(gnPlayerData);
-                }
-            }
-        }
+		let gnInfoResponseParameters = new GNHashtable();
 
-        gnInfoGetParameters.add(GamePlayerParameterCode.PlayerDatas, gnPlayerDatas);
+		gnInfoResponseParameters.add(GNParameterCode.PlayerDatas, this.generatePlayerDatas(gamePlayer, request.playerDataKeys, secretInfo.getGameId()));
 
-        operationResponse.setParameter(GamePlayerParameterCode.InfoGetParameters, gnInfoGetParameters);
-        
-		operationResponse.setParameter(ParameterCode.ErrorCode, GamePlayerErrorCode.Ok);
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayerData", request, secretInfo, operationRequest, operationResponse);
+
 		return operationResponse;
-    }
+	}
 }
