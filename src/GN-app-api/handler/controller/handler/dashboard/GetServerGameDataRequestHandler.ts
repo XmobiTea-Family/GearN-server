@@ -58,7 +58,7 @@ export interface ServerGameDataRequestParams {
     groupCount: boolean;
     country: boolean;
     version: boolean;
-    
+
 }
 
 export class GetServerGameDataRequestHandler extends RequestHandler {
@@ -161,7 +161,7 @@ export class GetServerGameDataRequestHandler extends RequestHandler {
                 gnCountry.add(GNParameterCode.CountryCode, result["countryCode"]);
 
                 let gnRegions = new GNArray();
-                
+
                 let regionKeys = Object.keys(regions);
 
                 for (let i = 0; i < regionKeys.length; i++) {

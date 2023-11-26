@@ -58,7 +58,7 @@ class AdvancedSettingsParam {
 
     @GNHashtableDataMember({ code: GNParameterCode.CustomExpansions, isOptional: true })
     customExpansions?: CustomExpansionsParam;
-    
+
 }
 
 class RuleParam {

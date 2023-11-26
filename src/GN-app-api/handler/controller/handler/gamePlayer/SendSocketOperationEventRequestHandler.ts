@@ -18,14 +18,14 @@ class SendSocketOperationEventOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10 })
     userId: string;
 
-    @NumberDataMember({ code: GNParameterCode.EventCode, minValue: 1000, mustInt: true})
+    @NumberDataMember({ code: GNParameterCode.EventCode, minValue: 1000, mustInt: true })
     eventCode: number;
 
     @GNHashtableDataMember({ code: GNParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })
     eventParameters?: GNHashtable;
 
     @BooleanDataMember({ code: GNParameterCode.EventEncrypted, isOptional: true, defaultValue: false })
-	eventEncrypted?: boolean;
+    eventEncrypted?: boolean;
 
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;

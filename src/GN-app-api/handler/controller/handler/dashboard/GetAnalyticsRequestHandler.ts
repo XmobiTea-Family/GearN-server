@@ -14,77 +14,77 @@ import { GNArray, GNHashtable, GNHashtableBuilder } from "./../../../../../GN-co
 import { BooleanDataMember, NumberDataMember } from "../../../../../GN-common/entity/DataMember";
 
 class GetAnalyticsOperationRequest extends OperationRequest {
-	@NumberDataMember({ code: GNParameterCode.Timestamp, minValue: 0, isOptional: true })
-	timestamp?: number;
+    @NumberDataMember({ code: GNParameterCode.Timestamp, minValue: 0, isOptional: true })
+    timestamp?: number;
 
-	@BooleanDataMember({ code: GNParameterCode.AnalyticsItem, isOptional: true })
-	analyticsItem?: boolean;
+    @BooleanDataMember({ code: GNParameterCode.AnalyticsItem, isOptional: true })
+    analyticsItem?: boolean;
 
-	@BooleanDataMember({ code: GNParameterCode.Country, isOptional: true })
-	country?: boolean;
+    @BooleanDataMember({ code: GNParameterCode.Country, isOptional: true })
+    country?: boolean;
 
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-		return true;
-	}
+        return true;
+    }
 }
 
 export interface AnalyticsRequestParams {
     analyticsItem: boolean;
     country: boolean;
-    
+
 }
 
 export class GetAnalyticsRequestHandler extends RequestHandler {
-	public override getCode() {
-		return OperationCode.GetAnalytics;
-	}
+    public override getCode() {
+        return OperationCode.GetAnalytics;
+    }
 
-	public override getCommonOperationRequest() {
-		return GetAnalyticsOperationRequest;
-	}
+    public override getCommonOperationRequest() {
+        return GetAnalyticsOperationRequest;
+    }
 
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(operationRequest);
-		}
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(operationRequest);
+        }
 
-		if (!secretInfo.getPermission().masterAdmin.getAnalytics.selfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        if (!secretInfo.getPermission().masterAdmin.getAnalytics.selfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		return this.execute(
-			{
-				timestamp: request.timestamp,
+        return this.execute(
+            {
+                timestamp: request.timestamp,
                 requestParams: {
                     analyticsItem: request.analyticsItem,
                     country: request.country,
                 }
-			},
-			secretInfo,
-			operationRequest
-		);
-	}
+            },
+            secretInfo,
+            operationRequest
+        );
+    }
 
-	private async execute(request: { timestamp: number, requestParams: AnalyticsRequestParams }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+    private async execute(request: { timestamp: number, requestParams: AnalyticsRequestParams }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let analyticsService = this.gnServer.getAnalyticsService();
-		let bigAnalyticsItem = await analyticsService.getBigAnalyticsItem(request.timestamp);
+        let analyticsService = this.gnServer.getAnalyticsService();
+        let bigAnalyticsItem = await analyticsService.getBigAnalyticsItem(request.timestamp);
 
-		if (bigAnalyticsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
-			return operationResponse;
-		}
+        if (bigAnalyticsItem == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+            return operationResponse;
+        }
 
         if (request.requestParams.analyticsItem) {
             let gnAnalyticsItem = new GNHashtable();
@@ -113,41 +113,41 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
             if (bigAnalyticsItem.country) {
                 for (let i = 0; i < bigAnalyticsItem.country.length; i++) {
                     let country = bigAnalyticsItem.country[i];
-    
+
                     let gnCountry = new GNHashtable();
-    
+
                     gnCountry.add(GNParameterCode.CountryCode, country.countryCode);
-    
+
                     let gnRegions = new GNArray();
-    
+
                     for (let j = 0; j < country.regions.length; j++) {
                         let region = country.regions[j];
-    
+
                         let gnRegion = new GNHashtable();
-    
+
                         if (!region) continue;
                         gnRegion.add(GNParameterCode.RegionCode, region.regionCode);
                         gnRegion.add(GNParameterCode.RegionName, region.regionName);
                         gnRegion.add(GNParameterCode.CCU, region.ccu);
                         gnRegion.add(GNParameterCode.Latitude, region.latidute);
                         gnRegion.add(GNParameterCode.Longitude, region.longitude);
-    
+
                         gnRegions.add(gnRegion);
                     }
-    
+
                     gnCountry.add(GNParameterCode.Regions, gnRegions);
-    
+
                     gnCountrys.add(gnCountry);
                 }
             }
-    
+
             operationResponse.setParameter(GNParameterCode.Country, gnCountrys);
         }
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest, operationResponse);
 
-		return operationResponse;
-	}
+        return operationResponse;
+    }
 }

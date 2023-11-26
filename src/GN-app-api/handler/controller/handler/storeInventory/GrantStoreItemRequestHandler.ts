@@ -119,7 +119,7 @@ export class GrantStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
         let storeId = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
         if (request.storeId) storeId = request.storeId;
-        
+
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
         let result = {} as any;

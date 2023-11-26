@@ -33,8 +33,8 @@ class GetStatisticsLeaderboardOperationRequest extends OperationRequest {
 	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
-    @StringDataMember({ code: GNParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
-    version?: string;
+	@StringDataMember({ code: GNParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	version?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -167,94 +167,94 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 					request.loadFromCache = false;
 				}
 			}
-	
+
 			if (request.loadFromCache) {
 				if (!this.gnServer.getCacheData().isValid(cacheKey)) {
 					request.loadFromCache = false;
 				}
 			}
-			
+
 			let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
-	
+
 			let gnResults = new GNArray();
-	
+
 			let gamePlayers: GamePlayer[];
-	
+
 			if (request.loadFromCache) {
 				gamePlayers = this.gnServer.getCacheData().getData(cacheKey);
-	
+
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= gamePlayers.length) break;
-	
+
 					let gamePlayer = gamePlayers[i];
-	
+
 					let gnResult = new GNHashtable();
-	
+
 					gnResult.add(GNParameterCode.Position, i);
-	
+
 					gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
-	
+
 					gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
-	
+
 					gnResults.add(gnResult);
 				}
 			}
 			else {
 				if (request.skip + request.limit <= 100) {
 					gamePlayerFindOptions = null;
-	
+
 					gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, secretInfo.getGameId(), direction, gamePlayerFindOptions);
-	
+
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= gamePlayers.length) break;
-	
+
 						let gamePlayer = gamePlayers[i];
-	
+
 						let gnResult = new GNHashtable();
-	
+
 						gnResult.add(GNParameterCode.Position, i);
-	
+
 						gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
-	
+
 						gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
-	
+
 						gnResults.add(gnResult);
 					}
-	
+
 					this.gnServer.getCacheData().setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
 					gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), direction, gamePlayerFindOptions);
-	
+
 					for (let i = 0; i < gamePlayers.length; i++) {
-	
+
 						let gamePlayer = gamePlayers[i];
-	
+
 						let gnResult = new GNHashtable();
-	
+
 						gnResult.add(GNParameterCode.Position, i + request.skip);
-	
+
 						gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
-	
+
 						gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
-	
+
 						gnResults.add(gnResult);
 					}
 				}
 			}
-	
+
 			operationResponse.setParameter(GNParameterCode.Results, gnResults);
 		}
 		else {
 			let gameId = secretInfo.getGameId();
 			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("GamePlayer.StatisticsBackup", gameId);
 
-			let key =  request.key;
-			let version =  request.version;
+			let key = request.key;
+			let version = request.version;
 
 			let cacheKey = "gamePlayerStatisticsLeaderboard_" + key + "_" + version;
-	
+
 			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
 				let result = backupStatisticsLeaderboardCollection.findOne({ key: key, version: version });
 
@@ -265,7 +265,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 
 				this.gnServer.getCacheData().setData(cacheKey, result, xDatetime.ONE_DAY_MILLISECOND * 7);
 			}
-			
+
 			let backupData: {
 				key: string,
 				version: string,
@@ -280,7 +280,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 			} = this.gnServer.getCacheData().getData(cacheKey);
 
 			let gnResults = new GNArray();
-	
+
 			let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
 
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
@@ -292,7 +292,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 
 				gnResult.add(GNParameterCode.Position, result.position);
 				gnResult.add(GNParameterCode.BackupValue, result.value);
-	
+
 				gnResult.add(GNParameterCode.UserId, result.userId);
 
 				let gamePlayer = gamePlayerFindOptions == null ? null
@@ -303,7 +303,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 
 				gnResults.add(gnResult);
 			}
-	
+
 			operationResponse.setParameter(GNParameterCode.Results, gnResults);
 			operationResponse.setParameter(GNParameterCode.TsCreate, backupData.tsCreate);
 		}

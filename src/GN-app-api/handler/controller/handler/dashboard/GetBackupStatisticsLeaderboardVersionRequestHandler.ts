@@ -94,7 +94,7 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
         }
 
         let type = request.type;
-        let key =  request.key;
+        let key = request.key;
 
         let results = backupStatisticsLeaderboardCollection.find({ type: type, key: key }, {
             projection: {
@@ -105,7 +105,7 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
         }).sort({ _id: -1 });
 
         let gnResults = new GNArray();
-        
+
         while (await results.hasNext()) {
             let result = await results.next();
 

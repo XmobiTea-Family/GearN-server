@@ -53,7 +53,7 @@ export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
         }, secretInfo, operationRequest);
     }
 
-    private async execute(request: {eventName: string, script: string}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { eventName: string, script: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetEventCallbackCloudScript", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;

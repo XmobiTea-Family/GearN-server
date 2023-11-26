@@ -24,7 +24,7 @@ class GrantSecretInfoOperationRequest extends OperationRequest {
 
 	@NumberDataMember({ code: GNParameterCode.Role, mustInt: true })
 	role: number;
-	
+
 	@GNHashtableDataMember({ code: GNParameterCode.Permission, isOptional: true })
 	permissionParam?: PermissionParam;
 
@@ -843,7 +843,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				setDisplayName: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getTsCreate: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
-				
+
 				setAvatar: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAvatar: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
@@ -902,7 +902,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				setDisplayName: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getTsCreate: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
-				
+
 				setAvatar: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAvatar: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 

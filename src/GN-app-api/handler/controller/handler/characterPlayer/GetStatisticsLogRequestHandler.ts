@@ -18,7 +18,7 @@ class GetStatisticsLogOperationRequest extends OperationRequest {
     keys?: Array<string>;
 
     @StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true, isOptional: true })
-	characterId?: string;
+    characterId?: string;
 
     @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
@@ -131,7 +131,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let masterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
-        
+
         let keys: string[] = [];
         if (request.keys) {
             for (let i = 0; i < request.keys.length; i++) {
@@ -142,7 +142,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
                 }
             }
         }
-        
+
         let $filter = {} as any;
 
         if (request.characterId) {
@@ -153,7 +153,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
             if (keys.length == 1) $filter["key"] = keys[0];
             else $filter["key"] = { $in: keys };
         }
-        
+
         if (request.token) {
             $filter["_id"] = { $lt: request.token };
         }
@@ -163,7 +163,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
         let results = await this.gnServer.getDatabase().loadCharacterPlayerStatisticsLogAsync($filter, secretInfo.getGameId(), request.limit);
 
         let token: string;
-        
+
         while (await results.hasNext()) {
             let result = await results.next();
 

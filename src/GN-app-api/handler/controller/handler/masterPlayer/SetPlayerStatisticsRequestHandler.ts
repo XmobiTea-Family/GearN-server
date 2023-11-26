@@ -172,7 +172,7 @@ export class SetPlayerStatisticsRequestHandler extends MasterPlayerBaseRequestHa
 
             if (!masterPlayer.hasPlayerStatistics(key))
                 masterPlayer.setPlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
-            
+
             let playerStatistics = masterPlayer.getPlayerStatistics(key);
             let oldValue = playerStatistics.value;
 

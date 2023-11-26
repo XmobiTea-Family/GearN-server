@@ -151,7 +151,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
                 if (value != null && value instanceof GNData) {
                     value = (value as GNData).toData();
                 }
-            
+
                 inventory.setItemData(key, value as DataValueType);
 
                 let gnItemData = new GNHashtable();

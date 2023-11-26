@@ -174,13 +174,13 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
             storeInventory.clearStoreDatas();
             for (let i = 0; i < request.storeDataParams.length; i++) {
                 let storeDataParam = request.storeDataParams[i];
-    
+
                 let value = storeDataParam.value;
-    
+
                 if (value != null && value instanceof GNData) {
                     value = (value as GNData).toData();
                 }
-    
+
                 storeInventory.setStoreData(storeDataParam.key, value as DataValueType);
             }
         }
@@ -200,7 +200,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
                 storeInventory.setStoreCurrency(storeCurrencyParam.key, storeCurrencyParam.value);
             }
         }
-        
+
         if (request.priceCurrencyParams != null) {
             storeInventory.clearPriceCurrencies();
             for (let i = 0; i < request.priceCurrencyParams.length; i++) {
@@ -208,7 +208,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
                 storeInventory.setPriceCurrency(priceCurrencyParam.key, priceCurrencyParam.value);
             }
         }
-        
+
         if (request.inAppPurchaseParam != null) {
             let inAppPurchase = storeInventory.getInAppPurchase();
 
@@ -219,11 +219,11 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
                 analyticsPrice: request.inAppPurchaseParam.analyticsPrice ?? inAppPurchase.analyticsPrice,
             });
         }
-        
+
         if (request.displayName != null) {
             storeInventory.setDisplayName(request.displayName);
         }
-        
+
         if (request.avatarParam != null) {
             storeInventory.setAvatar(request.avatarParam.type, request.avatarParam.value);
         }

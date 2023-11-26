@@ -156,9 +156,9 @@ export class SetPlayerStatisticsRequestHandler extends CharacterPlayerBaseReques
             let gnPlayerStatistic = new GNHashtable();
             gnPlayerStatistic.add(GNParameterCode.Key, key);
 
-            if (!characterPlayer.hasPlayerStatistics(key)) 
+            if (!characterPlayer.hasPlayerStatistics(key))
                 characterPlayer.setPlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
-            
+
             let playerStatistics = characterPlayer.getPlayerStatistics(key);
             let oldValue = playerStatistics.value;
 

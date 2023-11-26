@@ -38,10 +38,10 @@ export class CountryIPDetailService implements ICountryIPDetailService {
                     let update = {} as any;
 
                     let ipAddressKey = this.getIPAddressKeyInDb(ipAddress);
-                    
+
                     update["ipAddressRegions." + regionCode + "." + ipAddressKey] = {
                         latitude: answer.detail.latitude,
-                        longitude:answer.detail.longitude,
+                        longitude: answer.detail.longitude,
                     }
 
                     update["nameRegions." + regionCode] = answer.detail.regionName;
@@ -59,7 +59,7 @@ export class CountryIPDetailService implements ICountryIPDetailService {
         catch (err) {
             Debug.log(err);
         }
-        
+
         return {
             statusCode: "CantQuery",
         }
@@ -78,7 +78,7 @@ export class CountryIPDetailService implements ICountryIPDetailService {
         }, {
             upsert: true
         });
-        
+
         if (oldCountryCode && oldRegionCode) {
             let update = {} as any;
             update["regions." + oldRegionCode + "." + userId] = null;

@@ -3905,7 +3905,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 
 				gnMasterAdmin.add(GNParameterCode.GetUsernameAdminAccount, gnPermissionRules);
 			}
-			
+
 			{
 				let permissionRules = masterAdmin.getAnalytics;
 				let gnPermissionRules = new GNHashtable();

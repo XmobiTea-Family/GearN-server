@@ -14,8 +14,8 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { ExecuteResponseStatus } from "./../../../../service/ICloudScriptService";
 
 class ExecuteFunctionOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    userId?: string;
 
     @StringDataMember({ code: GNParameterCode.FunctionName, minLength: 3, maxLength: 30, mustNonNull: true })
     functionName: string;
@@ -70,22 +70,22 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
         }
 
         if (!request.userId) {
-			if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
+            if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
 
-			request.userId = authInfo.getUserId();
-		}
-		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().cloudScript.executeFunction.otherSelfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
-		else {
-			if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
+            request.userId = authInfo.getUserId();
+        }
+        else if (request.userId != authInfo.getUserId()) {
+            if (!secretInfo.getPermission().cloudScript.executeFunction.otherSelfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
+        else {
+            if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
 
         return this.execute({
             userId: authInfo.getUserId(),

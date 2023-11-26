@@ -151,7 +151,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
                 if (value != null && value instanceof GNData) {
                     value = (value as GNData).toData();
                 }
-                
+
                 characterPlayer.setPlayerData(key, value as DataValueType);
 
                 let gnPlayerData = new GNHashtable();

@@ -73,8 +73,7 @@ export class AppleService implements IAppleService {
 		success: boolean,
 		productId?: string,
 	}> {
-		if (!this.appleClientId || !this.issuerId || !this.keyId || !this.p8Content)
-		{
+		if (!this.appleClientId || !this.issuerId || !this.keyId || !this.p8Content) {
 			return {
 				success: false,
 			}
@@ -93,7 +92,7 @@ export class AppleService implements IAppleService {
 			catch (err) {
 				Debug.log("[GN] error while validate apple receipt " + err.toString());
 			}
-			
+
 			return {
 				success: true,
 				productId: signedTransactionInfoPayload.productId,
@@ -189,8 +188,7 @@ export class AppleService implements IAppleService {
 	// 	return answer;
 	// }
 
-	public async getTransactionInfoAsync(transactionId: string, isSandbox: boolean)
-	{
+	public async getTransactionInfoAsync(transactionId: string, isSandbox: boolean) {
 		let token = this.getToken();
 
 		let url = isSandbox ? ("https://api.storekit-sandbox.itunes.apple.com/inApps/v1/transactions/" + transactionId)

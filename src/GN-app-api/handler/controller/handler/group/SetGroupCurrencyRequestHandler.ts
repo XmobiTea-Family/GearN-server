@@ -24,7 +24,7 @@ class SetGroupCurrenciesOperationRequest extends OperationRequest {
 
     @StringDataMember({ code: GNParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
     log?: string;
-    
+
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
 

@@ -151,7 +151,7 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
                 if (value != null && value instanceof GNData) {
                     value = (value as GNData).toData();
                 }
-                
+
                 group.setGroupData(key, value as DataValueType);
 
                 let gnGroupData = new GNHashtable();

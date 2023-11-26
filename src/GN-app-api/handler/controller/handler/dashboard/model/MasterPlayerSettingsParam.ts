@@ -24,5 +24,5 @@ export class MasterPlayerSettingsParam {
 
     @GNArrayDataMember({ code: GNParameterCode.TagsSettings, elementCls: TagSettingsParam, isOptional: true, })
     tagsSettings?: Array<TagSettingsParam>;
-    
+
 }

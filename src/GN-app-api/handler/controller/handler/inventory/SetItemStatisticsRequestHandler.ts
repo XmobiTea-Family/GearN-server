@@ -158,7 +158,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
             if (!inventory.hasItemStatistics(key))
                 inventory.setItemStatistics(key, inventoryStatisticsSettingsItem.initialValue, currentMilliseconds);
-            
+
             let inventoryStatistics = inventory.getItemStatistics(key);
             let oldValue = inventoryStatistics.value;
 
@@ -174,7 +174,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
                 if (inventoryStatisticsSettingsItem.minimumValue != null) {
                     if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
                 }
-                
+
                 inventory.setItemStatistics(key, newValue, currentMilliseconds);
                 gnItemStatistic.add(GNParameterCode.Value, newValue);
 

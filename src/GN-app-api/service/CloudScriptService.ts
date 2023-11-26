@@ -34,19 +34,19 @@ interface CloudScriptResponse {
 }
 
 enum CloudScriptEventType {
-	SendToUser = 0,
-	SendToMore = 1,
-	SendToAll = 2,
+    SendToUser = 0,
+    SendToMore = 1,
+    SendToAll = 2,
 }
 
 interface CloudScriptEvent {
-	eventType: CloudScriptEventType;
-	operationEvent: {
-		eventCode: number;
-		parameters: {};
-		encrypted: boolean;
-	};
-	receiver: string[] | string | null;
+    eventType: CloudScriptEventType;
+    operationEvent: {
+        eventCode: number;
+        parameters: {};
+        encrypted: boolean;
+    };
+    receiver: string[] | string | null;
 }
 
 interface DbConnection {

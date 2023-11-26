@@ -8,9 +8,9 @@ export class ThirtPartyGooglePlayGameSettingsParam {
 	@StringDataMember({ code: GNParameterCode.ClientId })
 	clientId: string;
 
-    @StringDataMember({ code: GNParameterCode.ClientSecret })
+	@StringDataMember({ code: GNParameterCode.ClientSecret })
 	clientSecret: string;
 
-    @StringDataMember({ code: GNParameterCode.ApplicationId })
+	@StringDataMember({ code: GNParameterCode.ApplicationId })
 	applicationId: string;
 }

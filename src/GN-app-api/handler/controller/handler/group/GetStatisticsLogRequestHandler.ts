@@ -131,7 +131,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let masterPlayerSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
-        
+
         let keys: string[] = [];
         if (request.keys) {
             for (let i = 0; i < request.keys.length; i++) {
@@ -142,7 +142,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
                 }
             }
         }
-        
+
         let $filter = {} as any;
 
         if (request.groupId) {
@@ -153,7 +153,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
             if (keys.length == 1) $filter["key"] = keys[0];
             else $filter["key"] = { $in: keys };
         }
-        
+
         if (request.token) {
             $filter["_id"] = { $lt: request.token };
         }
@@ -163,7 +163,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
         let results = await this.gnServer.getDatabase().loadGroupStatisticsLogAsync($filter, secretInfo.getGameId(), request.limit);
 
         let token: string;
-        
+
         while (await results.hasNext()) {
             let result = await results.next();
 

@@ -23,5 +23,5 @@ export class ContentPermissionRulesParam {
 
     @GNHashtableDataMember({ code: GNParameterCode.RequestDownloadFileUploadInfo, isOptional: true })
     requestDownloadFileUploadInfo?: PermissionRulesParam;
-    
+
 }

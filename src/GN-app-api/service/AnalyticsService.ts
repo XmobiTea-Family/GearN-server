@@ -37,7 +37,7 @@ export class AnalyticsService implements IAnalyticsService {
         this.gnServer = gnServer;
     }
 
-    public async getBigAnalyticsItem(tsDate?: number ): Promise<BigAnalyticsItem> {
+    public async getBigAnalyticsItem(tsDate?: number): Promise<BigAnalyticsItem> {
         let answer: BigAnalyticsItem;
 
         if (!tsDate) {
@@ -70,14 +70,14 @@ export class AnalyticsService implements IAnalyticsService {
             if (result == null) {
                 answer = {
                     CCU: 0,
-    
+
                     DAU: 0,
                     DAUSince0h: 0,
                     DNU: 0,
                     DNUSince0h: 0,
                     DRT: 0,
                     DRTSince0h: 0,
-    
+
                     MAU: 0,
                     MAUSince0h1: 0,
                     MNU: 0,
@@ -92,14 +92,14 @@ export class AnalyticsService implements IAnalyticsService {
             else {
                 answer = {
                     CCU: result["ccu"],
-    
+
                     DAU: result["dau"],
                     DAUSince0h: result["dauSince0h"],
                     DNU: result["dnu"],
                     DNUSince0h: result["dnuSince0h"],
                     DRT: result["drt"],
                     DRTSince0h: result["drtSince0h"],
-    
+
                     MAU: result["mau"],
                     MAUSince0h1: result["mauSince0h1"],
                     MNU: result["mnu"],
@@ -274,18 +274,18 @@ export class AnalyticsService implements IAnalyticsService {
             }[] = [];
 
             let countryRegionCollection = this.gnServer.getDatabase().systemCollection("CountryRegion");
-        
+
             let results = await countryRegionCollection.find({});
-    
+
             while (await results.hasNext()) {
                 let result = await results.next();
-    
+
                 let regions = result["regions"];
                 let nameRegions = result["nameRegions"];
                 let ipAddressRegions = result["ipAddressRegions"];
-    
+
                 if (!regions || !nameRegions || !ipAddressRegions) continue;
-    
+
                 let gnCountry: {
                     countryCode: string,
                     regions: {
@@ -299,9 +299,9 @@ export class AnalyticsService implements IAnalyticsService {
                     countryCode: result["countryCode"],
                     regions: [],
                 };
-                
+
                 let regionKeys = Object.keys(regions);
-    
+
                 for (let i = 0; i < regionKeys.length; i++) {
                     let key = regionKeys[i];
                     let ipAddressRegion = ipAddressRegions[key];
@@ -323,19 +323,19 @@ export class AnalyticsService implements IAnalyticsService {
                         latidute: 0,
                         longitude: 0,
                     };
-    
+
                     let ipAddressRegionIPKeys = Object.keys(ipAddressRegion);
                     let ipAddressRegionIPKey = ipAddressRegionIPKeys[0];
                     if (ipAddressRegionIPKey) {
                         let ipAddressRegionIP = ipAddressRegion[ipAddressRegionIPKey];
-    
+
                         gnRegion.latidute = ipAddressRegionIP["latitude"];
                         gnRegion.longitude = ipAddressRegionIP["longitude"];
                     }
 
                     gnCountry.regions.push(gnRegion);
                 }
-    
+
                 gnCountrys.push(gnCountry);
             }
 

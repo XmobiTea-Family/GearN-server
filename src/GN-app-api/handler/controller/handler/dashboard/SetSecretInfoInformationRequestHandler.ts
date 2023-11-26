@@ -111,7 +111,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 
 						let thisLayer1Any = thisLayer0Any[keyLayer1]; // loginByAccount data
 						if (thisLayer1Any != null) {
-							
+
 							let permissionAnyForLayer1Any = permissionAnyForLayer0Any[keyLayer1];
 
 							if (permissionAnyForLayer1Any == null) {

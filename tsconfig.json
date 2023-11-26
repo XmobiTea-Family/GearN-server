@@ -18,11 +18,22 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "forceConsistentCasingInFileNames": true,
-        "lib": ["ES2016"],
+        "lib": [
+            "ES2016"
+        ],
         "allowSyntheticDefaultImports": true,
         "stripInternal": true,
         "skipLibCheck": true,
-		"typeRoots": ["src/types.d.ts"],
+        "typeRoots": [
+            "src/types.d.ts"
+        ],
     },
-    "exclude": ["./test/", "./node_modules/", "./syncCode.js", "./syncCodeVer2.js", "./index.js", "./src/GN-startup/cloudScript/"]
+    "exclude": [
+        "./test/",
+        "./node_modules/",
+        "./syncCode.js",
+        "./syncCodeVer2.js",
+        "./index.js",
+        "./src/GN-startup/cloudScript/"
+    ]
 }

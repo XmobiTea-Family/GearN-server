@@ -139,7 +139,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
-            await currencyLogCollection.createIndex({ "key" : 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
+            await currencyLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
             await currencyLogCollection.createIndex({ "userId": 1, "key": 1, "_id": -1 }, { background: true, name: "userId_1_key_1_id_-1" });
         }
 
@@ -151,7 +151,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key" : 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ "userId": 1, "key": 1, "_id": -1 }, { background: true, name: "userId_1_key_1_id_-1" });
         }
 
@@ -176,7 +176,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
-            await currencyLogCollection.createIndex({ "key" : 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
+            await currencyLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
             await currencyLogCollection.createIndex({ "characterId": 1, "key": 1, "_id": -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
         }
 
@@ -188,7 +188,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key" : 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ "characterId": 1, "key": 1, "_id": -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
         }
 
@@ -213,7 +213,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.CurrencyLog", gameId);
-            await currencyLogCollection.createIndex({ "key" : 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
+            await currencyLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
             await currencyLogCollection.createIndex({ "groupId": 1, "key": 1, "_id": -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
         }
 
@@ -225,7 +225,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key" : 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ "groupId": 1, "key": 1, "_id": -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
         }
 
@@ -261,7 +261,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key" : 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ "itemId": 1, "key": 1, "_id": -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
         }
 
@@ -286,7 +286,7 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let storeInventoryLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
-            await storeInventoryLogCollection.createIndex({ "storeId" : 1, "id": 1, "storeReceiveType": -1, "_id": -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
+            await storeInventoryLogCollection.createIndex({ "storeId": 1, "id": 1, "storeReceiveType": -1, "_id": -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
             await storeInventoryLogCollection.createIndex({ "id": 1, "storeReceiveType": -1, "_id": -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
             await storeInventoryLogCollection.createIndex({ "storeReceiveType": -1, "_id": -1 }, { background: true, name: "storeReceiveType_-1_id_-1" });
         }
@@ -346,16 +346,16 @@ export class GrantGameRequestHandler extends RequestHandler {
 
                 let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemGameCollection("CloudScript.Function", gameId);
                 let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CloudScript.Log", gameId);
-    
+
                 cloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
                 cloudScriptService.setCloudScriptFunctionLogCollection(cloudScriptFunctionLogCollection);
-    
+
                 this.gnServer.setCloudScriptService(gameId, cloudScriptService);
 
                 {
                     let gnServerSettingsOptions: GNServerSettingsOptions = (oldCloudScriptService as any).gnServerSettingsOptions;
                     let dbConnection = (oldCloudScriptService as any).dbConnection;
-    
+
                     cloudScriptService.init(gameId, gnServerSettingsOptions, {
                         dbName: dbConnection.dbName,
                         url: dbConnection.url,

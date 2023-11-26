@@ -155,34 +155,34 @@ export class GetAllMatchmakingTicketRequestHandler extends MultiplayerBaseReques
             let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
             let gnMatchmakingTicket = new GNHashtable();
-    
+
             gnMatchmakingTicket.add(GNParameterCode.TicketId, matchmakingTicket.getTicketId());
             gnMatchmakingTicket.add(GNParameterCode.TsCreate, matchmakingTicket.getTsCreate());
             gnMatchmakingTicket.add(GNParameterCode.CreatorId, matchmakingTicket.getCreatorId());
             gnMatchmakingTicket.add(GNParameterCode.GiveUpAfterSeconds, matchmakingTicket.getGiveUpAfterSeconds());
             gnMatchmakingTicket.add(GNParameterCode.QueueName, matchmakingTicket.getQueueName());
             gnMatchmakingTicket.add(GNParameterCode.Status, matchmakingTicket.getStatus());
-    
+
             if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.Matched) {
                 gnMatchmakingTicket.add(GNParameterCode.MatchId, matchmakingTicket.getMatchId());
             }
-    
+
             if (request.returnMember) {
                 let gnMembers = new GNArray();
-    
+
                 let members = matchmakingTicket.getMembers();
                 for (let i = 0; i < members.length; i++) {
                     let member = members[i];
-    
+
                     let gnMember = new GNHashtable();
-    
+
                     gnMember.add(GNParameterCode.UserId, member.userId);
                     gnMember.add(GNParameterCode.Status, member.status);
                     gnMember.add(GNParameterCode.Attribute, member.attribute);
-    
+
                     gnMembers.add(gnMember);
                 }
-    
+
                 gnMatchmakingTicket.add(GNParameterCode.Members, gnMembers);
             }
 

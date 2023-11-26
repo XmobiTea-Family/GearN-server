@@ -33,8 +33,8 @@ class GetStatisticsLeaderboardOperationRequest extends OperationRequest {
 	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
-    @StringDataMember({ code: GNParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
-    version?: string;
+	@StringDataMember({ code: GNParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	version?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -171,94 +171,94 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 					request.loadFromCache = false;
 				}
 			}
-	
+
 			if (request.loadFromCache) {
 				if (!this.gnServer.getCacheData().isValid(cacheKey)) {
 					request.loadFromCache = false;
 				}
 			}
-			
+
 			let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
-	
+
 			let gnResults = new GNArray();
-	
+
 			let characterPlayers: CharacterPlayer[];
-	
+
 			if (request.loadFromCache) {
 				characterPlayers = this.gnServer.getCacheData().getData(cacheKey);
-	
+
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= characterPlayers.length) break;
-	
+
 					let characterPlayer = characterPlayers[i];
-	
+
 					let gnResult = new GNHashtable();
-	
+
 					gnResult.add(GNParameterCode.Position, i);
-	
+
 					gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
-	
+
 					gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
-	
+
 					gnResults.add(gnResult);
 				}
 			}
 			else {
 				if (request.skip + request.limit <= 100) {
 					characterPlayerFindOptions = null;
-	
+
 					characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, secretInfo.getGameId(), direction, characterPlayerFindOptions);
-	
+
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= characterPlayers.length) break;
-	
+
 						let characterPlayer = characterPlayers[i];
-	
+
 						let gnResult = new GNHashtable();
-	
+
 						gnResult.add(GNParameterCode.Position, i);
-	
+
 						gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
-	
+
 						gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
-	
+
 						gnResults.add(gnResult);
 					}
-	
+
 					this.gnServer.getCacheData().setData(cacheKey, characterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
 					characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), direction, characterPlayerFindOptions);
-	
+
 					for (let i = 0; i < characterPlayers.length; i++) {
-	
+
 						let characterPlayer = characterPlayers[i];
-	
+
 						let gnResult = new GNHashtable();
-	
+
 						gnResult.add(GNParameterCode.Position, i + request.skip);
-	
+
 						gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
-	
+
 						gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
-	
+
 						gnResults.add(gnResult);
 					}
 				}
 			}
-	
+
 			operationResponse.setParameter(GNParameterCode.Results, gnResults);
 		}
 		else {
 			let gameId = secretInfo.getGameId();
 			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("CharacterPlayer.StatisticsBackup", gameId);
 
-			let key =  request.key;
-			let version =  request.version;
+			let key = request.key;
+			let version = request.version;
 
 			let cacheKey = "characterPlayerStatisticsLeaderboard_" + key + "_" + version;
-	
+
 			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
 				let result = backupStatisticsLeaderboardCollection.findOne({ key: key, version: version });
 
@@ -269,22 +269,22 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 
 				this.gnServer.getCacheData().setData(cacheKey, result, xDatetime.ONE_DAY_MILLISECOND * 7);
 			}
-			
+
 			let backupData: {
-                key: string,
-                version: string,
-                log: string,
-                tsCreate: number,
-                results: {
-                    position: number,
-                    characterId: string,
-                    value: number,
-                    tsLastUpdate: number,
-                }[]
-            } = this.gnServer.getCacheData().getData(cacheKey);
+				key: string,
+				version: string,
+				log: string,
+				tsCreate: number,
+				results: {
+					position: number,
+					characterId: string,
+					value: number,
+					tsLastUpdate: number,
+				}[]
+			} = this.gnServer.getCacheData().getData(cacheKey);
 
 			let gnResults = new GNArray();
-	
+
 			let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
 
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
@@ -296,7 +296,7 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 
 				gnResult.add(GNParameterCode.Position, result.position);
 				gnResult.add(GNParameterCode.BackupValue, result.value);
-	
+
 				gnResult.add(GNParameterCode.CharacterId, result.characterId);
 
 				let characterPlayer = characterPlayerFindOptions == null ? null
@@ -307,7 +307,7 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 
 				gnResults.add(gnResult);
 			}
-	
+
 			operationResponse.setParameter(GNParameterCode.Results, gnResults);
 			operationResponse.setParameter(GNParameterCode.TsCreate, backupData.tsCreate);
 		}

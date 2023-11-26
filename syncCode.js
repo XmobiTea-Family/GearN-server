@@ -1,394 +1,394 @@
 var secretPermissionItem = {
-	authenticate: {
-		loginByAccount: {},
-		loginByAndroidDeviceId: {},
-		loginByApple: {},
-		loginByCustomDeviceId: {},
-		loginByCustomId: {},
-		loginByFacebook: {},
-		loginByGenericService: {},
-		loginByGoogle: {},
-		loginByiOSDeviceId: {},
-		loginByWindowsPhoneDeviceId: {},
-		registerAccount: {},
-		loginByEditorDeviceId: {},
-		loginByLinuxDeviceId: {},
-		loginByMacOSDeviceId: {},
-		loginByWindowsDeviceId: {},
-		refreshAuthToken: {},
-	},
-	masterPlayer: {
-		linkAccount: {},
-		linkAndroidDeviceId: {},
-		linkApple: {},
-		linkCustomDeviceId: {},
-		linkCustomId: {},
-		linkEditorDeviceId: {},
-		linkFacebook: {},
-		linkGenericService: {},
-		linkGoogle: {},
-		linkiOSDeviceId: {},
-		linkLinuxDeviceId: {},
-		linkMacOSDeviceId: {},
-		linkWindowsDeviceId: {},
-		linkWindowsPhoneDeviceId: {},
-
-		unlinkAccount: {},
-		unlinkAndroidDeviceId: {},
-		unlinkApple: {},
-		unlinkCustomDeviceId: {},
-		unlinkCustomId: {},
-		unlinkEditorDeviceId: {},
-		unlinkFacebook: {},
-		unlinkGenericService: {},
-		unlinkGoogle: {},
-		unlinkiOSDeviceId: {},
-		unlinkLinuxDeviceId: {},
-		unlinkMacOSDeviceId: {},
-		unlinkWindowsDeviceId: {},
-		unlinkWindowsPhoneDeviceId: {},
-
-		addSegment: {},
-		removeSegment: {},
-		getSegment: {},
-
-		setTag: {},
-		removeTag: {},
-		getTag: {},
-
-		getDisplayName: {},
-		setDisplayName: {},
-
-		getTsCreate: {},
-		getIpAddressCreate: {},
-
-		setTsLastLogin: {},
-		getTsLastLogin: {},
-
-		setPlayerBan: {},
-		getPlayerBan: {},
-
-		setCountryCode: {},
-		getCountryCode: {},
-
-		changeAccountPassword: {},
-		resetAccountPassword: {},
-
-		setAvatar: {},
-		getAvatar: {},
-
-		setPlayerCurrency: {},
-		getPlayerCurrency: {},
-
-		setPlayerStatistics: {},
-		getPlayerStatistics: {},
-
-		getStatisticsLeaderboard: {},
-		getStatisticsLeaderboardAroundPlayer: {},
-
-		getCustomData: {},
-		setCustomData: {},
-
-		setPlayerData: {},
-		getPlayerData: {},
-
-		getPlayerInformation: {},
-
-		getPlayersWithApple: {},
-		getPlayersWithFacebook: {},
-		getPlayersWithGoogle: {},
-		getPlayersWithGenericService: {},
-		getPlayersWithSegment: {},
-		getPlayersWithTag: {},
-		getExternal: {},
+    authenticate: {
+        loginByAccount: {},
+        loginByAndroidDeviceId: {},
+        loginByApple: {},
+        loginByCustomDeviceId: {},
+        loginByCustomId: {},
+        loginByFacebook: {},
+        loginByGenericService: {},
+        loginByGoogle: {},
+        loginByiOSDeviceId: {},
+        loginByWindowsPhoneDeviceId: {},
+        registerAccount: {},
+        loginByEditorDeviceId: {},
+        loginByLinuxDeviceId: {},
+        loginByMacOSDeviceId: {},
+        loginByWindowsDeviceId: {},
+        refreshAuthToken: {},
+    },
+    masterPlayer: {
+        linkAccount: {},
+        linkAndroidDeviceId: {},
+        linkApple: {},
+        linkCustomDeviceId: {},
+        linkCustomId: {},
+        linkEditorDeviceId: {},
+        linkFacebook: {},
+        linkGenericService: {},
+        linkGoogle: {},
+        linkiOSDeviceId: {},
+        linkLinuxDeviceId: {},
+        linkMacOSDeviceId: {},
+        linkWindowsDeviceId: {},
+        linkWindowsPhoneDeviceId: {},
+
+        unlinkAccount: {},
+        unlinkAndroidDeviceId: {},
+        unlinkApple: {},
+        unlinkCustomDeviceId: {},
+        unlinkCustomId: {},
+        unlinkEditorDeviceId: {},
+        unlinkFacebook: {},
+        unlinkGenericService: {},
+        unlinkGoogle: {},
+        unlinkiOSDeviceId: {},
+        unlinkLinuxDeviceId: {},
+        unlinkMacOSDeviceId: {},
+        unlinkWindowsDeviceId: {},
+        unlinkWindowsPhoneDeviceId: {},
+
+        addSegment: {},
+        removeSegment: {},
+        getSegment: {},
+
+        setTag: {},
+        removeTag: {},
+        getTag: {},
+
+        getDisplayName: {},
+        setDisplayName: {},
+
+        getTsCreate: {},
+        getIpAddressCreate: {},
+
+        setTsLastLogin: {},
+        getTsLastLogin: {},
+
+        setPlayerBan: {},
+        getPlayerBan: {},
+
+        setCountryCode: {},
+        getCountryCode: {},
+
+        changeAccountPassword: {},
+        resetAccountPassword: {},
+
+        setAvatar: {},
+        getAvatar: {},
+
+        setPlayerCurrency: {},
+        getPlayerCurrency: {},
+
+        setPlayerStatistics: {},
+        getPlayerStatistics: {},
+
+        getStatisticsLeaderboard: {},
+        getStatisticsLeaderboardAroundPlayer: {},
+
+        getCustomData: {},
+        setCustomData: {},
+
+        setPlayerData: {},
+        getPlayerData: {},
+
+        getPlayerInformation: {},
+
+        getPlayersWithApple: {},
+        getPlayersWithFacebook: {},
+        getPlayersWithGoogle: {},
+        getPlayersWithGenericService: {},
+        getPlayersWithSegment: {},
+        getPlayersWithTag: {},
+        getExternal: {},
 
-		getPlayersWithDisplayName: {},
+        getPlayersWithDisplayName: {},
 
-		setEmail: {},
-		getEmail: {},
-	},
-	gamePlayer: {
-		addSegment: {},
-		removeSegment: {},
-		getSegment: {},
+        setEmail: {},
+        getEmail: {},
+    },
+    gamePlayer: {
+        addSegment: {},
+        removeSegment: {},
+        getSegment: {},
 
-		setTag: {},
-		removeTag: {},
-		getTag: {},
+        setTag: {},
+        removeTag: {},
+        getTag: {},
 
-		getDisplayName: {},
-		setDisplayName: {},
+        getDisplayName: {},
+        setDisplayName: {},
 
-		getTsCreate: {},
-		getIpAddressCreate: {},
-		getTsLastLogin: {},
+        getTsCreate: {},
+        getIpAddressCreate: {},
+        getTsLastLogin: {},
 
-		setPlayerBan: {},
-		getPlayerBan: {},
+        setPlayerBan: {},
+        getPlayerBan: {},
 
-		setCountryCode: {},
-		getCountryCode: {},
+        setCountryCode: {},
+        getCountryCode: {},
 
-		setAvatar: {},
-		getAvatar: {},
+        setAvatar: {},
+        getAvatar: {},
 
-		setPlayerCurrency: {},
-		getPlayerCurrency: {},
+        setPlayerCurrency: {},
+        getPlayerCurrency: {},
 
-		setPlayerStatistics: {},
-		getPlayerStatistics: {},
+        setPlayerStatistics: {},
+        getPlayerStatistics: {},
 
-		getStatisticsLeaderboard: {},
-		getStatisticsLeaderboardAroundPlayer: {},
+        getStatisticsLeaderboard: {},
+        getStatisticsLeaderboardAroundPlayer: {},
 
-		getCustomData: {},
-		setCustomData: {},
+        getCustomData: {},
+        setCustomData: {},
 
-		setPlayerData: {},
-		getPlayerData: {},
+        setPlayerData: {},
+        getPlayerData: {},
 
-		getPlayerInformation: {},
+        getPlayerInformation: {},
 
-		getPlayersWithSegment: {},
-		getPlayersWithTag: {},
+        getPlayersWithSegment: {},
+        getPlayersWithTag: {},
 
-		getPlayerCharacter: {},
-		getPlayerInventory: {},
-		getPlayerGroup: {},
-		getPlayerFriend: {},
+        getPlayerCharacter: {},
+        getPlayerInventory: {},
+        getPlayerGroup: {},
+        getPlayerFriend: {},
 
-		removePlayerItem: {},
+        removePlayerItem: {},
 
-		getOnlineStatus: {},
-		grantGroup: {},
-		grantPlayerItem: {},
-		grantPlayerCharacter: {},
+        getOnlineStatus: {},
+        grantGroup: {},
+        grantPlayerItem: {},
+        grantPlayerCharacter: {},
 
-		addPlayerFriend: {},
-		removePlayerFriend: {},
+        addPlayerFriend: {},
+        removePlayerFriend: {},
 
-		removePlayerCharacter: {},
+        removePlayerCharacter: {},
 
-		joinGroup: {},
-		leaveGroup: {},
+        joinGroup: {},
+        leaveGroup: {},
 
-		getPlayersWithDisplayName: {},
+        getPlayersWithDisplayName: {},
 
-		getFriendStatisticsLeaderboardAroundPlayer: {},
-		getFriendStatisticsLeaderboard: {},
-	},
-	characterPlayer: {
-		addSegment: {},
-		removeSegment: {},
-		getSegment: {},
+        getFriendStatisticsLeaderboardAroundPlayer: {},
+        getFriendStatisticsLeaderboard: {},
+    },
+    characterPlayer: {
+        addSegment: {},
+        removeSegment: {},
+        getSegment: {},
 
-		setTag: {},
-		removeTag: {},
-		getTag: {},
+        setTag: {},
+        removeTag: {},
+        getTag: {},
 
-		getDisplayName: {},
-		setDisplayName: {},
+        getDisplayName: {},
+        setDisplayName: {},
 
-		getTsCreate: {},
-		getIpAddressCreate: {},
-		getTsLastLogin: {},
+        getTsCreate: {},
+        getIpAddressCreate: {},
+        getTsLastLogin: {},
 
-		setPlayerBan: {},
-		getPlayerBan: {},
+        setPlayerBan: {},
+        getPlayerBan: {},
 
-		setCountryCode: {},
-		getCountryCode: {},
+        setCountryCode: {},
+        getCountryCode: {},
 
-		setAvatar: {},
-		getAvatar: {},
+        setAvatar: {},
+        getAvatar: {},
 
-		setPlayerCurrency: {},
-		getPlayerCurrency: {},
+        setPlayerCurrency: {},
+        getPlayerCurrency: {},
 
-		setPlayerStatistics: {},
-		getPlayerStatistics: {},
+        setPlayerStatistics: {},
+        getPlayerStatistics: {},
 
-		getStatisticsLeaderboard: {},
-		getStatisticsLeaderboardAroundPlayer: {},
+        getStatisticsLeaderboard: {},
+        getStatisticsLeaderboardAroundPlayer: {},
 
-		getCustomData: {},
-		setCustomData: {},
+        getCustomData: {},
+        setCustomData: {},
 
-		setPlayerData: {},
-		getPlayerData: {},
+        setPlayerData: {},
+        getPlayerData: {},
 
-		getPlayerInformation: {},
+        getPlayerInformation: {},
 
-		getPlayersWithSegment: {},
-		getPlayersWithTag: {},
+        getPlayersWithSegment: {},
+        getPlayersWithTag: {},
 
-		getCatalogId: {},
-		getOwner: {},
-		getRemoveStatus: {},
+        getCatalogId: {},
+        getOwner: {},
+        getRemoveStatus: {},
 
-		getPlayerFriend: {},
-		getPlayerGroup: {},
-		getPlayerInventory: {},
-		removePlayerItem: {},
-		grantPlayerItem: {},
+        getPlayerFriend: {},
+        getPlayerGroup: {},
+        getPlayerInventory: {},
+        removePlayerItem: {},
+        grantPlayerItem: {},
 
-		grantGroup: {},
-		joinGroup: {},
-		leaveGroup: {},
+        grantGroup: {},
+        joinGroup: {},
+        leaveGroup: {},
 
-		setOwner: {},
+        setOwner: {},
 
-		addPlayerFriend: {},
-		removePlayerFriend: {},
+        addPlayerFriend: {},
+        removePlayerFriend: {},
 
-		getPlayersWithDisplayName: {},
+        getPlayersWithDisplayName: {},
 
-		setRemoveStatus: {},
+        setRemoveStatus: {},
 
-		getFriendStatisticsLeaderboardAroundPlayer: {},
-		getFriendStatisticsLeaderboard: {},
-	},
-	content: {
-		getContentData: {},
-		setContentData: {},
-		createNewFileUploadInfo: {},
-		getFileUploadInfo: {},
-		requestDownloadFileUploadInfo: {},
-		removeFileUploadInfo: {},
-		getFileUploadInfoList: {},
-	},
-	group: {
-		addSegment: {},
-		removeSegment: {},
-		getSegment: {},
+        getFriendStatisticsLeaderboardAroundPlayer: {},
+        getFriendStatisticsLeaderboard: {},
+    },
+    content: {
+        getContentData: {},
+        setContentData: {},
+        createNewFileUploadInfo: {},
+        getFileUploadInfo: {},
+        requestDownloadFileUploadInfo: {},
+        removeFileUploadInfo: {},
+        getFileUploadInfoList: {},
+    },
+    group: {
+        addSegment: {},
+        removeSegment: {},
+        getSegment: {},
 
-		setTag: {},
-		removeTag: {},
-		getTag: {},
+        setTag: {},
+        removeTag: {},
+        getTag: {},
 
-		getDisplayName: {},
-		setDisplayName: {},
+        getDisplayName: {},
+        setDisplayName: {},
 
-		getTsCreate: {},
+        getTsCreate: {},
 
-		setAvatar: {},
-		getAvatar: {},
+        setAvatar: {},
+        getAvatar: {},
 
-		setGroupCurrency: {},
-		getGroupCurrency: {},
+        setGroupCurrency: {},
+        getGroupCurrency: {},
 
-		setGroupStatistics: {},
-		getGroupStatistics: {},
+        setGroupStatistics: {},
+        getGroupStatistics: {},
 
-		getStatisticsLeaderboard: {},
-		getStatisticsLeaderboardAroundGroup: {},
+        getStatisticsLeaderboard: {},
+        getStatisticsLeaderboardAroundGroup: {},
 
-		getCustomData: {},
-		setCustomData: {},
+        getCustomData: {},
+        setCustomData: {},
 
-		setGroupData: {},
-		getGroupData: {},
+        setGroupData: {},
+        getGroupData: {},
 
-		getGroupInformation: {},
+        getGroupInformation: {},
 
-		getGroupsWithSegment: {},
-		getGroupsWithTag: {},
+        getGroupsWithSegment: {},
+        getGroupsWithTag: {},
 
-		getCatalogId: {},
-		getRemoveStatus: {},
+        getCatalogId: {},
+        getRemoveStatus: {},
 
-		getGroupInventory: {},
-		removeGroupItem: {},
-		grantGroupItem: {},
+        getGroupInventory: {},
+        removeGroupItem: {},
+        grantGroupItem: {},
 
-		getMembers: {},
+        getMembers: {},
 
-		addMember: {},
-		removeMember: {},
-		sendGroupMessage: {},
-		getGroupMessage: {},
-		setRemoveStatus: {},
+        addMember: {},
+        removeMember: {},
+        sendGroupMessage: {},
+        getGroupMessage: {},
+        setRemoveStatus: {},
 
-		getGroupsWithDisplayName: {},
-	},
-	inventory: {
-		addSegment: {},
-		removeSegment: {},
-		getSegment: {},
+        getGroupsWithDisplayName: {},
+    },
+    inventory: {
+        addSegment: {},
+        removeSegment: {},
+        getSegment: {},
 
-		setTag: {},
-		removeTag: {},
-		getTag: {},
+        setTag: {},
+        removeTag: {},
+        getTag: {},
 
-		getDisplayName: {},
-		setDisplayName: {},
+        getDisplayName: {},
+        setDisplayName: {},
 
-		getTsCreate: {},
+        getTsCreate: {},
 
-		setAvatar: {},
-		getAvatar: {},
+        setAvatar: {},
+        getAvatar: {},
 
-		setItemStatistics: {},
-		getItemStatistics: {},
+        setItemStatistics: {},
+        getItemStatistics: {},
 
-		getStatisticsLeaderboard: {},
-		getStatisticsLeaderboardAroundItem: {},
+        getStatisticsLeaderboard: {},
+        getStatisticsLeaderboardAroundItem: {},
 
-		getCustomData: {},
-		setCustomData: {},
+        getCustomData: {},
+        setCustomData: {},
 
-		setItemData: {},
-		getItemData: {},
+        setItemData: {},
+        getItemData: {},
 
-		getItemInformation: {},
+        getItemInformation: {},
 
-		getItemsWithSegment: {},
-		getItemsWithTag: {},
+        getItemsWithSegment: {},
+        getItemsWithTag: {},
 
-		getCatalogId: {},
-		getClassId: {},
-		getItemType: {},
-		getAmount: {},
-		getOwner: {},
-		getRemoveStatus: {},
+        getCatalogId: {},
+        getClassId: {},
+        getItemType: {},
+        getAmount: {},
+        getOwner: {},
+        getRemoveStatus: {},
 
-		setAmount: {},
-		setOwner: {},
+        setAmount: {},
+        setOwner: {},
 
-		setRemoveStatus: {},
+        setRemoveStatus: {},
 
-		getItemsWithDisplayName: {},
-	},
-	storeInventory: {
-		buyStoreItem: {},
-		getStoreItemInformation: {},
-		getStoreItemsWithTag: {},
-		grantStoreItem: {},
-		setRemoveStatus: {},
-		setStoreItemInformation: {},
-		validateAppleAppStoreReceipt: {},
-		validateGooglePlayStoreReceipt: {},
-		validateFacebookStoreReceipt: {},
-	},
-	masterAdmin: {
-		setMasterGameSettings: {},
-		grantAdminAccount: {},
-		removeAdminAccount: {},
-		setPasswordAdminAccount: {},
-		setSecretKeyAdminAccount: {},
-		setGameInformation: {},
-		grantGame: {},
-		changePasswordAdminAccount: {},
-		getAdminAccountList: {},
-		getGameInformation: {},
-		getGameList: {},
-		getMasterGameSettings: {},
-		getServerLog: {},
-		getSecretInfoInformation: {},
-		getSecretInfoList: {},
-		grantSecretInfo: {},
-		setSecretInfoInformation: {},
-	}
+        getItemsWithDisplayName: {},
+    },
+    storeInventory: {
+        buyStoreItem: {},
+        getStoreItemInformation: {},
+        getStoreItemsWithTag: {},
+        grantStoreItem: {},
+        setRemoveStatus: {},
+        setStoreItemInformation: {},
+        validateAppleAppStoreReceipt: {},
+        validateGooglePlayStoreReceipt: {},
+        validateFacebookStoreReceipt: {},
+    },
+    masterAdmin: {
+        setMasterGameSettings: {},
+        grantAdminAccount: {},
+        removeAdminAccount: {},
+        setPasswordAdminAccount: {},
+        setSecretKeyAdminAccount: {},
+        setGameInformation: {},
+        grantGame: {},
+        changePasswordAdminAccount: {},
+        getAdminAccountList: {},
+        getGameInformation: {},
+        getGameList: {},
+        getMasterGameSettings: {},
+        getServerLog: {},
+        getSecretInfoInformation: {},
+        getSecretInfoList: {},
+        grantSecretInfo: {},
+        setSecretInfoInformation: {},
+    }
 }
 
 const fs = require("fs");
@@ -419,7 +419,7 @@ function mainGetSecretInformation() {
         let childKeys = Object.keys(permissionItem);
 
         childKeys.forEach(childKey => {
-            
+
             str += "\t\t\t{\n";
             str += "\t\t\t\tlet permissionRules = " + mainKey + "." + childKey + ";\n";
             str += "\t\t\t\tlet gnPermissionRules = new GNHashtable();\n\n";
@@ -431,7 +431,7 @@ function mainGetSecretInformation() {
 
             let childKeyName = childKey[0].toUpperCase() + childKey.substring(1);
 
-            str += "\t\t\t\tgn" +  mainKeyName + ".add(GNParameterCode." + childKeyName + ", permissionRules);\n"
+            str += "\t\t\t\tgn" + mainKeyName + ".add(GNParameterCode." + childKeyName + ", permissionRules);\n"
 
             str += "\t\t\t}\n\n";
         });

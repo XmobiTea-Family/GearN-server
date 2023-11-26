@@ -120,7 +120,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 					serviceId: serviceId,
 					someDatas: serviceResponse.someDatas,
 				}
-				
+
 				newMasterPlayerResult["external"]["genericService"] = {
 					"genericServices": g
 				};

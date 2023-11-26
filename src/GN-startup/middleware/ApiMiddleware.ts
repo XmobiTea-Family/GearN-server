@@ -87,7 +87,7 @@ export class ApiMiddleware {
 				}).sort({ tsLastSeen: -1 }).limit(50).toArray();
 
 				this.dauLast30Min.length = 0;
-				
+
 				for (let i = 0; i < playerLast30Mins.length; i++) {
 					let playerLast30Min = playerLast30Mins[i];
 					this.dauLast30Min.push(playerLast30Min.userId);
@@ -168,7 +168,7 @@ export class ApiMiddleware {
 
 			if (secretInfoResult != null) {
 				// let secretRole = <SecretRole>secretInfoResult["role"];
-				
+
 				let defaultSecretPermissionItem = GrantSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false) as any;
 
 				let dataSecretPermissionItem = secretInfoResult.permission as any;
@@ -408,11 +408,11 @@ export class ApiMiddleware {
 					secretInfo = null;
 				}
 			}
-			
+
 			if (secretInfo == null) {
 				return ReturnCode.SecretInvalid;
 			}
-	
+
 			if (secretInfo.getTsExpire() != -1 && secretInfo.getTsExpire() < currentMilliseconds) {
 				return ReturnCode.SecretInvalid;
 			}
@@ -443,7 +443,7 @@ export class ApiMiddleware {
 				secretInfo = secretInfoAny;
 				secretInfo.setGameId(gameId);
 			}
-	
+
 			req.secretInfo = secretInfo;
 		}
 

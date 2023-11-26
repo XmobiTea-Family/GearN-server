@@ -167,7 +167,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 
 			return operationResponse;
 		}
-		
+
 		let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
 		let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 

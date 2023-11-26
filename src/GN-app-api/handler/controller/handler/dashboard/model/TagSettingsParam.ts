@@ -10,5 +10,5 @@ export class TagSettingsParam {
 
     @BooleanDataMember({ code: GNParameterCode.Index })
     index: boolean;
-    
+
 }

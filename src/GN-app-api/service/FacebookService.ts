@@ -29,7 +29,7 @@ export class FacebookService implements IFacebookService {
 		else {
 			try {
 				let scopeStr = answer.scopes.join(",");
-				
+
 				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIContentURL.replace("$scopes", scopeStr).replace("$access_token", accessToken));
 				answer = result.data;
 			} catch (error) {
@@ -49,7 +49,7 @@ export class FacebookService implements IFacebookService {
 		else {
 			try {
 				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIVerifyURL.replace("$access_token", this.facebookAppToken).replace("$input_token", accessToken));
-				
+
 				if (result.data.data.error) {
 					answer["error"] = result.data.data.error.message;
 				}

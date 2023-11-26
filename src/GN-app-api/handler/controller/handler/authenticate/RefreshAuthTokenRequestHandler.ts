@@ -86,7 +86,7 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
                 secretKey: secretInfo.getSecretKey(),
                 userId: request.userId,
             });
-    
+
             operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
         }
 

@@ -156,9 +156,9 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
             let gnGroupStatistic = new GNHashtable();
             gnGroupStatistic.add(GNParameterCode.Key, key);
 
-            if (!group.hasGroupStatistics(key)) 
+            if (!group.hasGroupStatistics(key))
                 group.setGroupStatistics(key, groupStatisticsSettingsItem.initialValue, currentMilliseconds);
-            
+
             let groupStatistics = group.getGroupStatistics(key);
             let oldValue = groupStatistics.value;
 

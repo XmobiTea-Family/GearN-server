@@ -158,7 +158,7 @@ export class GetStatisticsLeaderboardAroundGroupRequestHandler extends GroupBase
 
 		let statisticsAggregationMethod = <xStatisticsAggregationMethod>groupStatisticsSettingsItem.statisticsAggregationMethod;
 		let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
-		
+
 		let thisPosition = await this.gnServer.getDatabase().loadPositionGroupLeaderboardWithStatisticsAsync(request.key, request.groupId, secretInfo.getGameId(), groupStatisticsSettingsItem.initialValue, direction);
 
 		let groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, secretInfo.getGameId(), direction, groupFindOptions);

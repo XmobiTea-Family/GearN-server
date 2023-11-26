@@ -16,11 +16,11 @@ export class StatisticsSettingsParam {
 
     @NumberDataMember({ code: GNParameterCode.InitialValue })
     initialValue: number;
-    
+
     @StringDataMember({ code: GNParameterCode.DisplayName, minLength: 2, maxLength: 64 })
     displayName: string;
 
     @BooleanDataMember({ code: GNParameterCode.Index })
     index: boolean;
-    
+
 }
