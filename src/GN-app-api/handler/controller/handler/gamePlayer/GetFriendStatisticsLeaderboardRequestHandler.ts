@@ -31,8 +31,11 @@ class GetFriendStatisticsLeaderboardOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
+
+	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	loadFromCache?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -103,7 +106,8 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
@@ -125,7 +129,8 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
@@ -147,11 +152,12 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetFriendStatisticsLeaderboard", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -160,11 +166,8 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
-		if (gamePlayerFindOptions != null) gamePlayerFindOptions.playerStatistics = true;
-
-		let masterPlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
-		let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+		let playerStatisticsSettingsItem = gamePlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
 
 		if (playerStatisticsSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
@@ -172,37 +175,56 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 			return operationResponse;
 		}
 
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), { playerFriends: true, playerStatistics: true });
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-		if (gamePlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
+		let cacheKey = "gamePlayerStatisticsLeaderboardFriend_" + request.userId;
 
-			return operationResponse;
+		if (request.loadFromCache) {
+			if (!(await cacheData.isValid(cacheKey))) {
+				request.loadFromCache = false;
+			}
 		}
 
 		let gnResults = new GNArray();
 
-		let friendIds: string[] = [];
+		let gamePlayers: GamePlayer[];
 
-		let allPlayerFriends = gamePlayer.getAllPlayerFriends();
-
-		for (let i = 0; i < allPlayerFriends.length; i++) {
-			let playerFriendItem = allPlayerFriends[i];
-
-			if (playerFriendItem.status == <number>FriendStatus.Friend) {
-				friendIds.push(playerFriendItem.friendId);
-			}
+		if (request.loadFromCache) {
+			gamePlayers = await cacheData.getData(cacheKey);
 		}
+		else {
+			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), null);
 
-		let allGamePlayers = await this.gnServer.getDatabase().loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds, secretInfo.getGameId(), gamePlayerFindOptions);
+			if (gamePlayer == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
 
-		allGamePlayers.push(gamePlayer);
+				return operationResponse;
+			}
 
-		let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
+			let friendIds: string[] = [];
 
-		let gamePlayers = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum
-			? GetFriendStatisticsLeaderboardRequestHandler.quickSortAsc(request.key, allGamePlayers, playerStatisticsSettingsItem.initialValue)
-			: GetFriendStatisticsLeaderboardRequestHandler.quickSort(request.key, allGamePlayers, playerStatisticsSettingsItem.initialValue);
+			let allPlayerFriends = gamePlayer.getAllPlayerFriends();
+
+			for (let i = 0; i < allPlayerFriends.length; i++) {
+				let playerFriendItem = allPlayerFriends[i];
+
+				if (playerFriendItem.status == <number>FriendStatus.Friend) {
+					friendIds.push(playerFriendItem.friendId);
+				}
+			}
+
+			let allGamePlayers = await this.gnServer.getDatabase().loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds, secretInfo.getGameId(), null);
+
+			allGamePlayers.push(gamePlayer);
+
+			let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
+
+			gamePlayers = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum
+				? GetFriendStatisticsLeaderboardRequestHandler.quickSortAsc(request.key, allGamePlayers, playerStatisticsSettingsItem.initialValue)
+				: GetFriendStatisticsLeaderboardRequestHandler.quickSort(request.key, allGamePlayers, playerStatisticsSettingsItem.initialValue);
+
+			await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+		}
 
 		for (let i = request.skip; i < request.skip + request.limit; i++) {
 			if (i >= gamePlayers.length) break;

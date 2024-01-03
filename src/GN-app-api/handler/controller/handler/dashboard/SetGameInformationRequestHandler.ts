@@ -481,21 +481,44 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                     for (let i = 0; i < removeKeyLst.length; i++) {
                         let key = removeKeyLst[i];
 
-                        let indexName = "playerCurrencies." + key + ".value_-1";
-                        characterPlayerCollection.dropIndex(indexName);
+                        {
+                            let indexName = "playerCurrencies." + key + ".value_-1";
+                            characterPlayerCollection.dropIndex(indexName);
 
-                        Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                        }
+
+                        {
+                            let indexName = "catalogId_1_" + "playerCurrencies." + key + ".value_-1";
+                            characterPlayerCollection.dropIndex(indexName);
+
+                            Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                        }
                     }
 
                     for (let i = 0; i < addKeyLst.length; i++) {
                         let key = addKeyLst[i];
-                        let indexDoc = {} as any;
-                        indexDoc["playerCurrencies." + key + ".value"] = -1;
 
-                        let indexName = "playerCurrencies." + key + ".value_-1";
-                        characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                        {
+                            let indexDoc = {} as any;
+                            indexDoc["playerCurrencies." + key + ".value"] = -1;
 
-                        Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            let indexName = "playerCurrencies." + key + ".value_-1";
+                            characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                            Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                        }
+
+                        {
+                            let indexDoc = {} as any;
+                            indexDoc["catalogId"] = 1;
+                            indexDoc["playerCurrencies." + key + ".value"] = -1;
+
+                            let indexName = "catalogId_1_" + "playerCurrencies." + key + ".value_-1";
+                            characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                            Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                        }
                     }
                 }
 
@@ -558,22 +581,46 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         for (let i = 0; i < removeKeyLst.length; i++) {
                             let key = removeKeyLst[i];
 
-                            let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-                            characterPlayerCollection.dropIndex(indexName);
+                            {
+                                let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.dropIndex(indexName);
 
-                            Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
+
+                            {
+                                let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.dropIndex(indexName);
+
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
                         }
 
                         for (let i = 0; i < addKeyLst.length; i++) {
                             let key = addKeyLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["playerStatistics." + key + ".value"] = -1;
-                            indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-                            characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["playerStatistics." + key + ".value"] = -1;
+                                indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                                let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
+
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["catalogId"] = 1;
+                                indexDoc["playerStatistics." + key + ".value"] = -1;
+                                indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
+
+                                let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
                         }
                     }
 
@@ -594,22 +641,46 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         for (let i = 0; i < removeKeyAscLst.length; i++) {
                             let key = removeKeyAscLst[i];
 
-                            let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-                            characterPlayerCollection.dropIndex(indexName);
+                            {
+                                let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.dropIndex(indexName);
 
-                            Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
+
+                            {
+                                let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.dropIndex(indexName);
+
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
                         }
 
                         for (let i = 0; i < addKeyAscLst.length; i++) {
                             let key = addKeyAscLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["playerStatistics." + key + ".value"] = 1;
-                            indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-                            characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["playerStatistics." + key + ".value"] = 1;
+                                indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                                let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
+
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["catalogId"] = 1;
+                                indexDoc["playerStatistics." + key + ".value"] = 1;
+                                indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
+
+                                let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+                                characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
+                            }
                         }
                     }
                 }
@@ -623,6 +694,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         playerDatasSettings.push({
                             key: playerDatasSetting.key,
                             permission: playerDatasSetting.permission,
+                            displayName: playerDatasSetting.displayName,
                         });
                     }
 
@@ -639,6 +711,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         customDatasSettings.push({
                             key: customDatasSetting.key,
                             permission: customDatasSetting.permission,
+                            displayName: customDatasSetting.displayName,
                         });
                     }
 
@@ -949,6 +1022,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         playerDatasSettings.push({
                             key: playerDatasSetting.key,
                             permission: playerDatasSetting.permission,
+                            displayName: playerDatasSetting.displayName,
                         });
                     }
 
@@ -965,6 +1039,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         customDatasSettings.push({
                             key: customDatasSetting.key,
                             permission: customDatasSetting.permission,
+                            displayName: customDatasSetting.displayName,
                         });
                     }
 
@@ -1149,21 +1224,44 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                     for (let i = 0; i < removeKeyLst.length; i++) {
                         let key = removeKeyLst[i];
 
-                        let indexName = "groupCurrencies." + key + ".value_-1";
-                        groupCollection.dropIndex(indexName);
+                        {
+                            let indexName = "groupCurrencies." + key + ".value_-1";
+                            groupCollection.dropIndex(indexName);
 
-                        Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                            Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                        }
+
+                        {
+                            let indexName = "catalogId_1_" + "groupCurrencies." + key + ".value_-1";
+                            groupCollection.dropIndex(indexName);
+
+                            Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                        }
                     }
 
                     for (let i = 0; i < addKeyLst.length; i++) {
                         let key = addKeyLst[i];
-                        let indexDoc = {} as any;
-                        indexDoc["groupCurrencies." + key + ".value"] = -1;
 
-                        let indexName = "groupCurrencies." + key + ".value_-1";
-                        groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                        {
+                            let indexDoc = {} as any;
+                            indexDoc["groupCurrencies." + key + ".value"] = -1;
 
-                        Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                            let indexName = "groupCurrencies." + key + ".value_-1";
+                            groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                            Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                        }
+
+                        {
+                            let indexDoc = {} as any;
+                            indexDoc["catalogId"] = 1;
+                            indexDoc["groupCurrencies." + key + ".value"] = -1;
+
+                            let indexName = "catalogId_1_" + "groupCurrencies." + key + ".value_-1";
+                            groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                            Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                        }
                     }
                 }
 
@@ -1226,22 +1324,46 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         for (let i = 0; i < removeKeyLst.length; i++) {
                             let key = removeKeyLst[i];
 
-                            let indexName = "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
-                            groupCollection.dropIndex(indexName);
+                            {
+                                let indexName = "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.dropIndex(indexName);
 
-                            Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                            }
+
+                            {
+                                let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.dropIndex(indexName);
+
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                            }
                         }
 
                         for (let i = 0; i < addKeyLst.length; i++) {
                             let key = addKeyLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["groupStatistics." + key + ".value"] = -1;
-                            indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            let indexName = "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
-                            groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["groupStatistics." + key + ".value"] = -1;
+                                indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                                let indexName = "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                            }
+
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["catalogId"] = 1;
+                                indexDoc["groupStatistics." + key + ".value"] = -1;
+                                indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
+
+                                let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                            }
                         }
                     }
 
@@ -1262,22 +1384,46 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         for (let i = 0; i < removeKeyAscLst.length; i++) {
                             let key = removeKeyAscLst[i];
 
-                            let indexName = "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
-                            groupCollection.dropIndex(indexName);
+                            {
+                                let indexName = "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.dropIndex(indexName);
 
-                            Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                            }
+
+                            {
+                                let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.dropIndex(indexName);
+
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
+                            }
                         }
 
                         for (let i = 0; i < addKeyAscLst.length; i++) {
                             let key = addKeyAscLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["groupStatistics." + key + ".value"] = 1;
-                            indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            let indexName = "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
-                            groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["groupStatistics." + key + ".value"] = 1;
+                                indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                                let indexName = "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                            }
+
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["catalogId"] = 1;
+                                indexDoc["groupStatistics." + key + ".value"] = 1;
+                                indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
+
+                                let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
+                                groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
+                            }
                         }
                     }
                 }
@@ -1291,6 +1437,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         groupDatasSettings.push({
                             key: groupDatasSetting.key,
                             permission: groupDatasSetting.permission,
+                            displayName: groupDatasSetting.displayName,
                         });
                     }
 
@@ -1307,6 +1454,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         customDatasSettings.push({
                             key: customDatasSetting.key,
                             permission: customDatasSetting.permission,
+                            displayName: customDatasSetting.displayName,
                         });
                     }
 
@@ -1458,22 +1606,45 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         for (let i = 0; i < removeKeyLst.length; i++) {
                             let key = removeKeyLst[i];
 
-                            let indexName = "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
-                            inventoryCollection.dropIndex(indexName);
+                            {
+                                let indexName = "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.dropIndex(indexName);
 
-                            Debug.log("[GN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
+
+                            {
+                                let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.dropIndex(indexName);
+
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
                         }
 
                         for (let i = 0; i < addKeyLst.length; i++) {
                             let key = addKeyLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["itemStatistics." + key + ".value"] = -1;
-                            indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["itemStatistics." + key + ".value"] = -1;
+                                indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            let indexName = "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
-                            inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                                let indexName = "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-                            Debug.log("[GN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
+
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["catalogId"] = 1;
+                                indexDoc["itemStatistics." + key + ".value"] = -1;
+                                indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
+
+                                let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
                         }
                     }
 
@@ -1494,22 +1665,46 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         for (let i = 0; i < removeKeyAscLst.length; i++) {
                             let key = removeKeyAscLst[i];
 
-                            let indexName = "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
-                            inventoryCollection.dropIndex(indexName);
+                            {
+                                let indexName = "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.dropIndex(indexName);
 
-                            Debug.log("[GN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
+
+                            {
+                                let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.dropIndex(indexName);
+
+                                Debug.log("[GN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
                         }
 
                         for (let i = 0; i < addKeyAscLst.length; i++) {
                             let key = addKeyAscLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["itemStatistics." + key + ".value"] = 1;
-                            indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            let indexName = "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
-                            inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["itemStatistics." + key + ".value"] = 1;
+                                indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            Debug.log("[GN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
+                                let indexName = "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
+
+                            {
+                                let indexDoc = {} as any;
+                                indexDoc["catalogId"] = 1;
+                                indexDoc["itemStatistics." + key + ".value"] = 1;
+                                indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
+
+                                let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
+                                inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+
+                                Debug.log("[GN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
+                            }
                         }
                     }
                 }
@@ -1523,6 +1718,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         inventoryDatasSettings.push({
                             key: inventoryDatasSetting.key,
                             permission: inventoryDatasSetting.permission,
+                            displayName: inventoryDatasSetting.displayName,
                         });
                     }
 
@@ -1539,6 +1735,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                         customDatasSettings.push({
                             key: customDatasSetting.key,
                             permission: customDatasSetting.permission,
+                            displayName: customDatasSetting.displayName,
                         });
                     }
 

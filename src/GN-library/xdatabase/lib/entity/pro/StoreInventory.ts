@@ -25,6 +25,7 @@ interface InAppPurchase {
 
 export class StoreInventory extends DataObjectBase {
 	private static readonly _storeId: string = "storeId";
+	private static readonly _storeItemType: string = "storeItemType";
 
 	private static readonly _storeItems: string = "storeItems";
 	private static readonly _storeCurrencies: string = "storeCurrencies";
@@ -39,6 +40,7 @@ export class StoreInventory extends DataObjectBase {
 	private readonly storeId: string;
 
 	private storeItems: Array<StoreInventoryItem>;
+	private storeItemType: number;
 	private storeCurrencies: Array<CurrencyItem>;
 
 	private priceCurrencies: Array<CurrencyItem>;
@@ -57,6 +59,7 @@ export class StoreInventory extends DataObjectBase {
 	}
 
 	private setDocumentStoreInventory(result: mongoDB.WithId<mongoDB.Document>) {
+		this.storeItemType = result[StoreInventory._storeItemType];
 		this.storeItems = result[StoreInventory._storeItems];
 		this.storeCurrencies = result[StoreInventory._storeCurrencies];
 		this.priceCurrencies = result[StoreInventory._priceCurrencies];
@@ -282,4 +285,15 @@ export class StoreInventory extends DataObjectBase {
 
 		throw Error("can not found the key to remove");
 	}
+
+    public getStoreItemType(): number {
+        return this.storeItemType;
+    }
+
+    public setStoreItemType(storeItemType: number) {
+        this.storeItemType = storeItemType;
+
+        this.set(StoreInventory._storeItemType, this.storeItemType);
+    }
+
 }

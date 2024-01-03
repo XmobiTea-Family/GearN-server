@@ -72,4 +72,7 @@ export class MasterAdminPermissionRulesParam {
     @GNHashtableDataMember({ code: GNParameterCode.GetBackupStatisticsLeaderboardVersion, isOptional: true })
     getBackupStatisticsLeaderboardVersion?: PermissionRulesParam;
 
+    @GNHashtableDataMember({ code: GNParameterCode.DeleteInDatabase, isOptional: true })
+    deleteInDatabase?: PermissionRulesParam;
+
 }

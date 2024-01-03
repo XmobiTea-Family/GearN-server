@@ -68,24 +68,26 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
+        let type = request.type;
+
         let backupStatisticsLeaderboardCollection: mongoDB.Collection<mongoDB.Document>;
-        if (request.type == OwnerType.MasterPlayer) {
-            backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer.StatisticsBackup");
+        if (type == OwnerType.MasterPlayer) {
+            backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
         }
         else {
             let gameId = request.gameId;
 
-            if (request.type == OwnerType.GamePlayer) {
-                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("GamePlayer.StatisticsBackup", gameId);
+            if (type == OwnerType.GamePlayer) {
+                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsBackup", gameId);
             }
-            else if (request.type == OwnerType.CharacterPlayer) {
-                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("CharacterPlayer.StatisticsBackup", gameId);
+            else if (type == OwnerType.CharacterPlayer) {
+                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsBackup", gameId);
             }
-            else if (request.type == OwnerType.Inventory) {
-                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("Inventory.StatisticsBackup", gameId);
+            else if (type == OwnerType.Inventory) {
+                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsBackup", gameId);
             }
-            else if (request.type == OwnerType.Group) {
-                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("Group.StatisticsBackup", gameId);
+            else if (type == OwnerType.Group) {
+                backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsBackup", gameId);
             }
             else {
                 operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.OwnerNotFound);
@@ -93,10 +95,9 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
             }
         }
 
-        let type = request.type;
         let key = request.key;
 
-        let results = backupStatisticsLeaderboardCollection.find({ type: type, key: key }, {
+        let results = backupStatisticsLeaderboardCollection.find({ key: key }, {
             projection: {
                 version: true,
                 log: true,

@@ -1,5 +1,5 @@
 export enum ItemType {
-    NonConsumable = 1,
-    Consumable = 2,
+    NonStackable = 1,
+    Stackable = 2,
 
 }

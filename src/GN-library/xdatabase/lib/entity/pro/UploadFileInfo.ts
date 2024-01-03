@@ -5,8 +5,11 @@ import { RemoveStatusItem } from "./RemoveStatusItem";
 
 interface FileUpload {
     mimeType: string;
-    size: string;
+    size: number;
     folderFileName: string;
+    fullPath: string;
+    shortPath: string;
+    tsUploadFile: number;
 }
 
 export class UploadFileInfo extends MongoObject {
@@ -106,14 +109,14 @@ export class UploadFileInfo extends MongoObject {
         return this.fileUpload;
     }
 
-    public setUploadFile(mimeType: string, size: string, folderFileName: string): void {
-        this.fileUpload = {
-            folderFileName: folderFileName,
-            mimeType: mimeType,
-            size: size
-        }
+    // public setUploadFile(mimeType: string, size: number, folderFileName: string): void {
+    //     this.fileUpload = {
+    //         folderFileName: folderFileName,
+    //         mimeType: mimeType,
+    //         size: size
+    //     }
 
-        this.set(UploadFileInfo._fileUpload, this.fileUpload);
-    }
+    //     this.set(UploadFileInfo._fileUpload, this.fileUpload);
+    // }
 
 }

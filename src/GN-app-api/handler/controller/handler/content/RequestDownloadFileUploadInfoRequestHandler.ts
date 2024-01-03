@@ -13,6 +13,7 @@ import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErr
 import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { Md5Generate } from "./../../../../../GN-common/helper/Md5Generate";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class RequestDownloadFileUploadInfoOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
@@ -109,7 +110,10 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId);
+        let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId, {
+            removeStatus: true,
+            fileUpload: true,
+        });
 
         if (uploadFileInfo == null) {
             operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.FileNotFound);
@@ -133,9 +137,13 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
         let collection = this.gnServer.getDatabase().systemCollection("DownloadFileSession");
         collection.insertOne({
             fileId: request.fileId,
-            createdAt: new Date(),
+            createdAt: xDatetime.getCurrentDate(),
             downloadToken: downloadToken,
-            isValid: true,
+            fileUpload: {
+                fullPath: fileUpload.fullPath,
+                folderFileName: fileUpload.folderFileName,
+                mimeType: fileUpload.mimeType,
+            }
         });
 
         operationResponse.setParameter(GNParameterCode.DownloadToken, downloadToken);

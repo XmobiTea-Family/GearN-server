@@ -27,9 +27,6 @@ class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
 
 class ServerCreateNewFileUploadInfoOperationRequest extends CreateNewFileUploadInfoOperationRequest {
 
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	userId: string;
-
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -67,7 +64,6 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 		}
 
 		return this.execute({
-			userId: authInfo.getUserId(),
 			fileName: request.fileName,
 		}, secretInfo, operationRequest);
 	}
@@ -84,7 +80,6 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 		}
 
 		return this.execute({
-			userId: request.userId,
 			fileName: request.fileName,
 		}, secretInfo, operationRequest);
 	}
@@ -101,12 +96,11 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 		}
 
 		return this.execute({
-			userId: request.userId,
 			fileName: request.fileName,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, fileName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { fileName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_CreateNewFileUploadInfo", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -118,7 +112,6 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		let doc = {
 			fileId: StringUtility.generateRandomString(15, 0),
-			userId: request.userId,
 			fileName: request.fileName,
 			tsCreate: currentMilliseconds,
 			tsUploadExpire: currentMilliseconds + 5 * xDatetime.ONE_MINUTE_MILLISECOND,

@@ -114,6 +114,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnPlayerStatisticsSetting.add(GNParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
 					gnPlayerStatisticsSetting.add(GNParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
 					gnPlayerStatisticsSetting.add(GNParameterCode.InitialValue, playerStatisticsSetting.initialValue);
+					gnPlayerStatisticsSetting.add(GNParameterCode.DisplayName, playerStatisticsSetting.displayName);
 					gnPlayerStatisticsSetting.add(GNParameterCode.Index, playerStatisticsSetting.index);
 
 					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
@@ -131,6 +132,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnPlayerDatasSetting.add(GNParameterCode.Key, playerDatasSetting.key);
 					gnPlayerDatasSetting.add(GNParameterCode.Permission, playerDatasSetting.permission);
+					gnPlayerDatasSetting.add(GNParameterCode.DisplayName, playerDatasSetting.displayName);
 
 					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
 				}
@@ -147,6 +149,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
 					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}
@@ -271,6 +274,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnPlayerStatisticsSetting.add(GNParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
 					gnPlayerStatisticsSetting.add(GNParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
 					gnPlayerStatisticsSetting.add(GNParameterCode.InitialValue, playerStatisticsSetting.initialValue);
+					gnPlayerStatisticsSetting.add(GNParameterCode.DisplayName, playerStatisticsSetting.displayName);
 					gnPlayerStatisticsSetting.add(GNParameterCode.Index, playerStatisticsSetting.index);
 
 					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
@@ -288,6 +292,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnPlayerDatasSetting.add(GNParameterCode.Key, playerDatasSetting.key);
 					gnPlayerDatasSetting.add(GNParameterCode.Permission, playerDatasSetting.permission);
+					gnPlayerDatasSetting.add(GNParameterCode.DisplayName, playerDatasSetting.displayName);
 
 					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
 				}
@@ -304,6 +309,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
 					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}
@@ -444,6 +450,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnGroupStatisticsSetting.add(GNParameterCode.MinimumValue, groupStatisticsSetting.minimumValue);
 					gnGroupStatisticsSetting.add(GNParameterCode.MaximumValue, groupStatisticsSetting.maximumValue);
 					gnGroupStatisticsSetting.add(GNParameterCode.InitialValue, groupStatisticsSetting.initialValue);
+					gnGroupStatisticsSetting.add(GNParameterCode.DisplayName, groupStatisticsSetting.displayName);
 					gnGroupStatisticsSetting.add(GNParameterCode.Index, groupStatisticsSetting.index);
 
 					gnGroupStatisticsSettings.add(gnGroupStatisticsSetting);
@@ -461,6 +468,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnGroupDatasSetting.add(GNParameterCode.Key, groupDatasSetting.key);
 					gnGroupDatasSetting.add(GNParameterCode.Permission, groupDatasSetting.permission);
+					gnGroupDatasSetting.add(GNParameterCode.DisplayName, groupDatasSetting.displayName);
 
 					gnGroupDatasSettings.add(gnGroupDatasSetting);
 				}
@@ -477,6 +485,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
 					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}
@@ -550,6 +559,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnInventoryStatisticsSetting.add(GNParameterCode.MinimumValue, inventoryStatisticsSetting.minimumValue);
 					gnInventoryStatisticsSetting.add(GNParameterCode.MaximumValue, inventoryStatisticsSetting.maximumValue);
 					gnInventoryStatisticsSetting.add(GNParameterCode.InitialValue, inventoryStatisticsSetting.initialValue);
+					gnInventoryStatisticsSetting.add(GNParameterCode.DisplayName, inventoryStatisticsSetting.displayName);
 					gnInventoryStatisticsSetting.add(GNParameterCode.Index, inventoryStatisticsSetting.index);
 
 					gnInventoryStatisticsSettings.add(gnInventoryStatisticsSetting);
@@ -567,6 +577,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnInventoryDatasSetting.add(GNParameterCode.Key, inventoryDatasSetting.key);
 					gnInventoryDatasSetting.add(GNParameterCode.Permission, inventoryDatasSetting.permission);
+					gnInventoryDatasSetting.add(GNParameterCode.DisplayName, inventoryDatasSetting.displayName);
 
 					gnInventoryDatasSettings.add(gnInventoryDatasSetting);
 				}
@@ -583,6 +594,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
 					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}

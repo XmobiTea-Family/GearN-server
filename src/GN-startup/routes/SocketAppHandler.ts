@@ -359,9 +359,15 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(socketData));
 
 		if (operationResponse.isEncrypted())
-			socket.emit(Commands.ResponseCmd_MsgPack, encode(socketData));
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			socket.emit(Commands.ResponseCmd_MsgPack, socketDataMsgPack);
+		}
 		else
+		{
 			socket.emit(Commands.ResponseCmd_Json, socketData);
+		}
 	}
 
 	private sendEventForSocket(socket: Socket, operationEvent: OperationEvent) {
@@ -369,9 +375,15 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
-			socket.emit(Commands.EventCmd_MsgPack, encode(socketData));
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			socket.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+		}
 		else
+		{
 			socket.emit(Commands.EventCmd_Json, socketData);
+		}
 	}
 
 	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
@@ -379,9 +391,17 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] " + userId + " %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
-			this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, encode(socketData));
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.to(userId).emit(Commands.EventCmd_MsgPack, encode(socketData));
+		}
 		else
-			this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
+		{
+			if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
+			else this.server.to(userId).emit(Commands.EventCmd_Json, socketData);
+		}
 	}
 
 	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
@@ -389,9 +409,17 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] " + roomId + " %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
-			this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, encode(socketData));
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.to(roomId).emit(Commands.EventCmd_MsgPack, encode(socketData));
+		}
 		else
-			this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
+		{
+			if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
+			else this.server.to(roomId).emit(Commands.EventCmd_Json, socketData);
+		}
 	}
 
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
@@ -401,16 +429,12 @@ export class SocketAppHandler {
 		if (operationEvent.isEncrypted()) {
 			let socketDataMsgPack = encode(socketData);
 
-			for (let i = 0; i < userIds.length; i++) {
-				let userId = userIds[i];
-				this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-			}
+			if (this.emitter != null) this.emitter.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 		}
 		else {
-			for (let i = 0; i < userIds.length; i++) {
-				let userId = userIds[i];
-				this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
-			}
+			if (this.emitter != null) this.emitter.to(userIds).emit(Commands.EventCmd_Json, socketData);
+			else this.server.to(userIds).emit(Commands.EventCmd_Json, socketData);
 		}
 	}
 
@@ -419,9 +443,17 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ALL PLAYER] %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
-			this.emitter.of("/").emit(Commands.EventCmd_MsgPack, encode(socketData));
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+		}
 		else
-			this.emitter.of("/").emit(Commands.EventCmd_Json, socketData);
+		{
+			if (this.emitter != null) this.emitter.emit(Commands.EventCmd_Json, socketData);
+			else this.server.emit(Commands.EventCmd_Json, socketData);
+		}
 	}
 
 	public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
@@ -429,9 +461,17 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
 
 		if (operationEvent.isEncrypted())
-			this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, encode(socketData));
+		{
+			let socketDataMsgPack = encode(socketData);
+
+			if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+			else this.server.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+		}
 		else
-			this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
+		{
+			if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
+			else this.server.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
+		}
 	}
 
 	public getSocketViaSocketId(socketId: string): Socket {

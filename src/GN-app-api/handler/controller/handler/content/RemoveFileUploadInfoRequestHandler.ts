@@ -115,7 +115,10 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId);
+		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId, {
+            fileUpload: true,
+            removeStatus: true,
+        });
 
 		if (uploadFileInfo == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.FileNotFound);
@@ -128,6 +131,7 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 
 			let fileUpload = uploadFileInfo.getFileUpload();
 			if (fileUpload != null) {
+                this.gnServer.getHttpApp().getUploadFileHandler().removeFile(fileUpload.fullPath);
 				// remove khoi storage nao
 			}
 

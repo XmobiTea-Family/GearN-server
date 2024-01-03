@@ -21,16 +21,16 @@ class LinkGameCenterOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.PlayerId, minLength: 2, maxLength: 64, mustNonNull: true })
 	playerId: string;
 
-	@StringDataMember({ code: GNParameterCode.Name, minLength: 2, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Name, minLength: 2, maxLength: 128, mustNonNull: true })
 	name: string;
 
-	@StringDataMember({ code: GNParameterCode.PublicKeyUrl, minLength: 2, maxLength: 256, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.PublicKeyUrl, minLength: 2, maxLength: 2048, mustNonNull: true })
 	publicKeyUrl: string;
 
-	@StringDataMember({ code: GNParameterCode.Signature, minLength: 2, maxLength: 512, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Signature, minLength: 2, maxLength: 2048, mustNonNull: true })
 	signature: string;
 
-	@StringDataMember({ code: GNParameterCode.Salt, minLength: 2, maxLength: 128, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Salt, minLength: 2, maxLength: 256, mustNonNull: true })
 	salt: string;
 
 	@NumberDataMember({ code: GNParameterCode.Timestamp })
@@ -222,6 +222,10 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 		};
 		masterPlayer.setExternal(external);
 		masterPlayer.saveAsync();
+
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(GNParameterCode.External, this.generateExternal(masterPlayer));
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 

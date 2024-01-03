@@ -73,6 +73,9 @@ export class LoginByLinuxDeviceIdRequestHandler extends LoginBaseRequestHandler 
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) {
+			masterPlayerFindOptions.lastIPDetail = true;
+		}
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByLinuxDeviceIdAsync(request.linuxDeviceId, masterPlayerFindOptions);
 

@@ -18,7 +18,7 @@ class LinkAppleOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@StringDataMember({ code: GNParameterCode.Token, minLength: 64, maxLength: 512, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
 	token: string;
 
 	@BooleanDataMember({ code: GNParameterCode.ForceLink, isOptional: true, defaultValue: false })
@@ -182,6 +182,10 @@ export class LinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 		};
 		masterPlayer.setExternal(external);
 		masterPlayer.saveAsync();
+
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(GNParameterCode.External, this.generateExternal(masterPlayer));
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 

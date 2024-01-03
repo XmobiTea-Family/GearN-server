@@ -21,8 +21,11 @@ import { TagParam } from "./model/TagParam";
 import { InAppPurchaseParam } from "./model/InAppPurchaseParam";
 
 class SetStoreItemInformationOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
     storeId: string;
+
+    @NumberDataMember({ code: GNParameterCode.StoreItemType, minValue: 1, maxValue: 2, mustInt: true, isOptional: true, })
+    storeItemType?: number;
 
     @GNArrayDataMember({ code: GNParameterCode.StoreDatas, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreDataParam })
     storeDataParams?: Array<StoreDataParam>;
@@ -95,6 +98,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 
         return this.execute({
             storeId: request.storeId,
+            storeItemType: request.storeItemType,
             storeDataParams: request.storeDataParams,
             storeItemParams: request.storeItemParams,
             storeCurrencyParams: request.storeCurrencyParams,
@@ -119,6 +123,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 
         return this.execute({
             storeId: request.storeId,
+            storeItemType: request.storeItemType,
             storeDataParams: request.storeDataParams,
             storeItemParams: request.storeItemParams,
             storeCurrencyParams: request.storeCurrencyParams,
@@ -143,6 +148,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 
         return this.execute({
             storeId: request.storeId,
+            storeItemType: request.storeItemType,
             storeDataParams: request.storeDataParams,
             storeItemParams: request.storeItemParams,
             storeCurrencyParams: request.storeCurrencyParams,
@@ -154,7 +160,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
         }, secretInfo, operationRequest);
     }
 
-    private async execute(request: { storeId: string, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { storeId: string, storeItemType: number, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
@@ -228,6 +234,10 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
             storeInventory.setAvatar(request.avatarParam.type, request.avatarParam.value);
         }
 
+        if (request.storeItemType != null) {
+            storeInventory.setStoreItemType(request.storeItemType);
+        }
+
         if (request.tagParams != null) {
             storeInventory.clearTags();
             for (let i = 0; i < request.tagParams.length; i++) {
@@ -240,6 +250,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 
         operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(storeInventory, {
             storeItems: true,
+            storeItemType: true,
             storeCurrencies: true,
             priceCurrencies: true,
             inAppPurchase: true,

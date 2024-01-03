@@ -24,6 +24,7 @@ export class OperationCode {
 	public static readonly ResetStatisticsLeaderboard: number = -23;
 	public static readonly GetBackupStatisticsLeaderboardVersion: number = -24;
 	public static readonly GetServerGameData: number = -25;
+	public static readonly DeleteInDatabase: number = -26;
 
 	public static readonly LoginByAccount: number = 1;
 	public static readonly LoginByAndroidDeviceId: number = 2;
@@ -234,8 +235,17 @@ export class OperationCode {
 	public static readonly SendSocketOperationEvent: number = 182;
 	public static readonly GetStatisticsLog: number = 183;
 	public static readonly GetCurrencyLog: number = 184;
-	
+
 	public static readonly PresentStoreItem: number = 185;
 	public static readonly GetStoreLog: number = 186;
-	
+
+	public static readonly SendEmail: number = 187;
+	public static readonly SendPushNotification: number = 188;
+	public static readonly AddPushNotification: number = 189;
+	public static readonly RemovePushNotification: number = 190;
+	public static readonly GetPushNotification: number = 191;
+
+	public static readonly GetStoreUsed: number = 192;
+	public static readonly RemoveStoreUsed: number = 193;
+
 }

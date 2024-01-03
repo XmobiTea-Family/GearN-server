@@ -77,6 +77,12 @@ export class HttpAppHandler {
 		// 	return res.json([ReturnCode.OperationInvalid]);
 		// });
 
+		this.router.post("/ts", (req: express.Request, res: express.Response): any => {
+			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+
+			return res.status(200).json([ReturnCode.Ok, { "1": xDatetime.getCurrentMilliseconds() }]);
+		});
+
 		this.router.get("/ts", (req: express.Request, res: express.Response): any => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
@@ -90,26 +96,34 @@ export class HttpAppHandler {
 
 			if (!authToken) {
 				return res.status(200).json({
-					"error": "missing authToken in body"
+					error: "missing authToken in body"
 				});
 			}
 
 			let tokenPayload = this.apiMiddleware.verifyAuthToken(authToken);
 			if (tokenPayload == null) {
 				return res.status(200).json({
-					"error": "authToken expired or invalid"
+					error: "authToken expired or invalid"
 				});
 			}
 
 			let authInfo = await this.apiMiddleware.getAuthInfoByGNTokenInDatabase(tokenPayload.gnToken);
 			if (authInfo == null) {
 				return res.status(200).json({
-					"error": "authInfo not found"
+					error: "authInfo not found"
 				});
 			}
 
 			return res.status(200).json({
-				"data": authInfo.toDocumentData()
+				data: {
+					gnToken: authInfo.getGNToken(),
+					userId: authInfo.getUserId(),
+					isRemove: authInfo.isRemove(),
+					tsExpire: authInfo.getTsExpire(),
+					otherDatas: authInfo.getOtherDatas(),
+					tsCreate: authInfo.getTsCreate(),
+					secretKey: authInfo.getSecretKey(),
+				}
 			});
 		});
 
@@ -118,26 +132,34 @@ export class HttpAppHandler {
 
 			if (!authToken) {
 				return res.status(200).json({
-					"error": "missing authToken in body"
+					error: "missing authToken in body"
 				});
 			}
 
 			let tokenPayload = this.apiMiddleware.verifyAuthToken(authToken);
 			if (tokenPayload == null) {
 				return res.status(200).json({
-					"error": "authToken expired or invalid"
+					error: "authToken expired or invalid"
 				});
 			}
 
 			let authInfo = await this.apiMiddleware.getAuthInfoByGNTokenInDatabase(tokenPayload.gnToken);
 			if (authInfo == null) {
 				return res.status(200).json({
-					"error": "authInfo not found"
+					error: "authInfo not found"
 				});
 			}
 
 			return res.status(200).json({
-				"data": authInfo.toDocumentData()
+				data: {
+					gnToken: authInfo.getGNToken(),
+					userId: authInfo.getUserId(),
+					isRemove: authInfo.isRemove(),
+					tsExpire: authInfo.getTsExpire(),
+					otherDatas: authInfo.getOtherDatas(),
+					tsCreate: authInfo.getTsCreate(),
+					secretKey: authInfo.getSecretKey(),
+				}
 			});
 		});
 

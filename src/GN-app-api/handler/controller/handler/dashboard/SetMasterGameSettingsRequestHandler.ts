@@ -15,6 +15,8 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { MasterGameSettings } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterGameSettings";
 import { ThirtPartyParam } from "./model/ThirtPartyParam";
 import { MasterPlayerSettingsParam } from "./model/MasterPlayerSettingsParam";
+import { EmailSettingsParam } from "./model/EmailSettingsParam";
+import { PushNotificationSettingsParam } from "./model/PushNotificationSettingsParam";
 import { GoogleService } from "./../../../../service/GoogleService";
 import { FacebookService } from "./../../../../service/FacebookService";
 import { AppleService } from "./../../../../service/AppleService";
@@ -27,6 +29,8 @@ import { GameCenterService } from "../../../../service/GameCenterService";
 import { GooglePlayGameService } from "../../../../service/GooglePlayGameService";
 import { Debug } from "../../../../../GN-library/xdebug/lib/xDebug";
 import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { PushNotificationService } from "../../../../service/PushNotificationService";
+import { EmailService } from "../../../../service/EmailService";
 
 class SetMasterGameSettingsOperationRequest extends OperationRequest {
 	@GNHashtableDataMember({ code: GNParameterCode.ThirtPartySettings, isOptional: true })
@@ -34,6 +38,12 @@ class SetMasterGameSettingsOperationRequest extends OperationRequest {
 
 	@GNHashtableDataMember({ code: GNParameterCode.MasterPlayerSettings, isOptional: true })
 	masterPlayerSettings?: MasterPlayerSettingsParam;
+
+	@GNHashtableDataMember({ code: GNParameterCode.EmailSettings, isOptional: true })
+	emailSettings?: EmailSettingsParam;
+
+	@GNHashtableDataMember({ code: GNParameterCode.PushNotificationSettings, isOptional: true })
+	pushNotificationSettings?: PushNotificationSettingsParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -65,10 +75,12 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		return this.execute({
 			thirtPartySettings: request.thirtPartySettings,
 			masterPlayerSettings: request.masterPlayerSettings,
+			emailSettings: request.emailSettings,
+			pushNotificationSettings: request.pushNotificationSettings,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -76,6 +88,18 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetMasterGameSettings", request);
+		await this.applySettings(request);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
+
+	private async applySettings(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }) {
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
@@ -218,17 +242,19 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					}
 				}
 
-				for (let i = 0; i < removeKeyLst.length; i++) {
-					let key = removeKeyLst[i];
-					masterPlayerCollection.dropIndex("external.genericService.genericServices." + key + ".serviceId_1");
-				}
+				if (this.gnServer.isPrimary()) {
+					for (let i = 0; i < removeKeyLst.length; i++) {
+						let key = removeKeyLst[i];
+						masterPlayerCollection.dropIndex("external.genericService.genericServices." + key + ".serviceId_1");
+					}
 
-				for (let i = 0; i < addKeyLst.length; i++) {
-					let key = addKeyLst[i];
-					let indexDoc = {} as any;
-					indexDoc["external.genericService.genericServices." + key + ".serviceId"] = 1;
+					for (let i = 0; i < addKeyLst.length; i++) {
+						let key = addKeyLst[i];
+						let indexDoc = {} as any;
+						indexDoc["external.genericService.genericServices." + key + ".serviceId"] = 1;
 
-					masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: "external.genericService.genericServices." + key + ".serviceId_1" });
+						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: "external.genericService.genericServices." + key + ".serviceId_1" });
+					}
 				}
 
 				masterPlayerSettings.genericServiceSettings = genericServiceSettings;
@@ -274,24 +300,26 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					}
 				}
 
-				for (let i = 0; i < removeKeyLst.length; i++) {
-					let key = removeKeyLst[i];
+				if (this.gnServer.isPrimary()) {
+					for (let i = 0; i < removeKeyLst.length; i++) {
+						let key = removeKeyLst[i];
 
-					let indexName = "playerCurrencies." + key + ".value_-1";
-					masterPlayerCollection.dropIndex(indexName);
+						let indexName = "playerCurrencies." + key + ".value_-1";
+						masterPlayerCollection.dropIndex(indexName);
 
-					Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-				}
+						Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
 
-				for (let i = 0; i < addKeyLst.length; i++) {
-					let key = addKeyLst[i];
-					let indexDoc = {} as any;
-					indexDoc["playerCurrencies." + key + ".value"] = -1;
+					for (let i = 0; i < addKeyLst.length; i++) {
+						let key = addKeyLst[i];
+						let indexDoc = {} as any;
+						indexDoc["playerCurrencies." + key + ".value"] = -1;
 
-					let indexName = "playerCurrencies." + key + ".value_-1";
-					masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+						let indexName = "playerCurrencies." + key + ".value_-1";
+						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-					Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+						Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
 				}
 
 				masterPlayerSettings.playerCurrencySettings = playerCurrencySettings;
@@ -352,25 +380,27 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 						}
 					}
 
-					for (let i = 0; i < removeKeyLst.length; i++) {
-						let key = removeKeyLst[i];
+					if (this.gnServer.isPrimary()) {
+						for (let i = 0; i < removeKeyLst.length; i++) {
+							let key = removeKeyLst[i];
 
-						let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-						masterPlayerCollection.dropIndex(indexName);
+							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.dropIndex(indexName);
 
-						Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-					}
+							Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
 
-					for (let i = 0; i < addKeyLst.length; i++) {
-						let key = addKeyLst[i];
-						let indexDoc = {} as any;
-						indexDoc["playerStatistics." + key + ".value"] = -1;
-						indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
+						for (let i = 0; i < addKeyLst.length; i++) {
+							let key = addKeyLst[i];
+							let indexDoc = {} as any;
+							indexDoc["playerStatistics." + key + ".value"] = -1;
+							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-						let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-						Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+							Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
 					}
 				}
 
@@ -388,25 +418,27 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 						}
 					}
 
-					for (let i = 0; i < removeKeyAscLst.length; i++) {
-						let key = removeKeyAscLst[i];
+					if (this.gnServer.isPrimary()) {
+						for (let i = 0; i < removeKeyAscLst.length; i++) {
+							let key = removeKeyAscLst[i];
 
-						let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-						masterPlayerCollection.dropIndex(indexName);
+							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.dropIndex(indexName);
 
-						Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-					}
+							Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
 
-					for (let i = 0; i < addKeyAscLst.length; i++) {
-						let key = addKeyAscLst[i];
-						let indexDoc = {} as any;
-						indexDoc["playerStatistics." + key + ".value"] = 1;
-						indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
+						for (let i = 0; i < addKeyAscLst.length; i++) {
+							let key = addKeyAscLst[i];
+							let indexDoc = {} as any;
+							indexDoc["playerStatistics." + key + ".value"] = 1;
+							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-						let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-						Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+							Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
 					}
 				}
 
@@ -422,6 +454,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					playerDatasSettings.push({
 						key: playerDatasSetting.key,
 						permission: playerDatasSetting.permission,
+						displayName: playerDatasSetting.displayName,
 					});
 				}
 
@@ -438,6 +471,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					playerDatasSettings.push({
 						key: customDatasSetting.key,
 						permission: customDatasSetting.permission,
+						displayName: customDatasSetting.displayName,
 					});
 				}
 
@@ -486,24 +520,26 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					}
 				}
 
-				for (let i = 0; i < removeKeyLst.length; i++) {
-					let key = removeKeyLst[i];
+				if (this.gnServer.isPrimary()) {
+					for (let i = 0; i < removeKeyLst.length; i++) {
+						let key = removeKeyLst[i];
 
-					let indexName = "tags." + key + "_1";
-					masterPlayerCollection.dropIndex(indexName);
+						let indexName = "tags." + key + "_1";
+						masterPlayerCollection.dropIndex(indexName);
 
-					Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-				}
+						Debug.log("[GN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
 
-				for (let i = 0; i < addKeyLst.length; i++) {
-					let key = addKeyLst[i];
-					let indexDoc = {} as any;
-					indexDoc["tags." + key] = 1;
+					for (let i = 0; i < addKeyLst.length; i++) {
+						let key = addKeyLst[i];
+						let indexDoc = {} as any;
+						indexDoc["tags." + key] = 1;
 
-					let indexName = "tags." + key + "_1";
-					masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+						let indexName = "tags." + key + "_1";
+						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-					Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+						Debug.log("[GN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
 				}
 
 				masterPlayerSettings.tagsSettings = tagsSettings;
@@ -512,12 +548,38 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			masterGameSettings.setMasterPlayerSettings(masterPlayerSettings);
 		}
 
+		if (request.emailSettings != null) {
+			let emailSettings = masterGameSettings.getEmailSettings();
+
+			if (request.emailSettings.sendFrom) emailSettings.sendFrom = request.emailSettings.sendFrom;
+			if (request.emailSettings.sendGridApiKey) emailSettings.sendGridApiKey = request.emailSettings.sendGridApiKey;
+
+			(<EmailService>this.gnServer.getEmailService()).init(emailSettings.sendGridApiKey, emailSettings.sendFrom);
+			(<EmailService>this.gnServer.getEmailService()).run();
+
+			masterGameSettings.setEmailSettings(emailSettings);
+		}
+
+		if (request.pushNotificationSettings != null) {
+			let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
+
+			if (request.pushNotificationSettings.projectId) pushNotificationSettings.projectId = request.pushNotificationSettings.projectId;
+			if (request.pushNotificationSettings.clientEmail) pushNotificationSettings.clientEmail = request.pushNotificationSettings.clientEmail;
+			if (request.pushNotificationSettings.privateKey) pushNotificationSettings.privateKey = request.pushNotificationSettings.privateKey;
+
+			(<PushNotificationService>this.gnServer.getPushNotificationService()).init(request.pushNotificationSettings.projectId, request.pushNotificationSettings.clientEmail, request.pushNotificationSettings.privateKey);
+			(<PushNotificationService>this.gnServer.getPushNotificationService()).run();
+
+			masterGameSettings.setPushNotificationSettings(pushNotificationSettings);
+		}
+
 		masterGameSettings.saveAsync();
+	}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
-
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest, operationResponse);
-
-		return operationResponse;
+	protected override init(): void {
+		let thiz = this;
+		this.gnServer.getHttpApp().getClusterHandler().onEvent("dashboard_SetMasterGameSettings", data => {
+			thiz.applySettings(data);
+		});
 	}
 }

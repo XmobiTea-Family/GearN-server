@@ -32,7 +32,7 @@ class GrantPlayerItemOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.DisplayName, defaultValue: "", isOptional: true })
     displayName?: string;
 
-    @NumberDataMember({ code: GNParameterCode.Amount, defaultValue: 1, isOptional: true })
+    @NumberDataMember({ code: GNParameterCode.Amount, defaultValue: 1, mustInt: true, isOptional: true })
     amount?: number;
 
     public override isValidRequest() {
@@ -167,7 +167,7 @@ export class GrantPlayerItemRequestHandler extends CharacterPlayerBaseRequestHan
 
         let amount = request.amount;
 
-        if (playerItemCatalogSettingsItem.itemType == <number>ItemType.NonConsumable) {
+        if (playerItemCatalogSettingsItem.itemType == <number>ItemType.NonStackable) {
             amount = 1;
         }
 

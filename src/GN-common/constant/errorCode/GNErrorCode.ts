@@ -20,7 +20,7 @@ export class GNErrorCode {
 	public static readonly FileNotFound: number = 18;
 	public static readonly FileNotUpload: number = 19;
 	public static readonly OwnerTypeNotSupport: number = 20;
-	public static readonly ItemNotConsumable: number = 21;
+	public static readonly ItemNotStackable: number = 21;
 	public static readonly GameNotFound: number = 22;
 	public static readonly GameIsExists: number = 23;
 	public static readonly SecretInfoNotFound: number = 24;
@@ -49,5 +49,9 @@ export class GNErrorCode {
 
 	public static readonly ExecuteError: number = 46;
 	public static readonly VersionInvalid: number = 47;
+	public static readonly EmailInvalid: number = 48;
+
+	public static readonly StoreItemHadPurchaseAndNonConsumable: number = 49;
+	public static readonly StoreItemHadExists: number = 50;
 
 }

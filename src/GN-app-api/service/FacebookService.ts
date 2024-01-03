@@ -1,6 +1,6 @@
 import { IFacebookService } from "./IFacebookService";
 import axios from "axios";
-import * as CryptoJS from 'crypto-js';
+import * as CryptoJS from "crypto-js";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 export class FacebookService implements IFacebookService {

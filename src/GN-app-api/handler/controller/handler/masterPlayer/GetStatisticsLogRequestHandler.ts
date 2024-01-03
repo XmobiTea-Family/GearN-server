@@ -20,7 +20,7 @@ class GetStatisticsLogOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true, isOptional: true })
     userId?: string;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
 
     @StringDataMember({ code: GNParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
@@ -52,9 +52,6 @@ class AdminGetStatisticsLogOperationRequest extends ServerGetStatisticsLogOperat
 }
 
 export class GetStatisticsLogRequestHandler extends RequestHandler {
-    protected override init(): void {
-        this.gnServer.getCacheData
-    }
 
     public override getCode() {
         return OperationCode.GetStatisticsLog;

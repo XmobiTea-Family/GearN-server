@@ -47,7 +47,8 @@ export class LoginBaseRequestHandler extends RequestHandler {
             && infoRequestParam.tsLastLogin
             && infoRequestParam.ipAddressCreate
             && infoRequestParam.countryCode
-            && infoRequestParam.email;
+            && infoRequestParam.email
+            && infoRequestParam.pushNotifications;
     }
 
     protected convertToMasterPlayerFindOptions(infoRequestParam: InfoRequestParam): MasterPlayerFindOptions {
@@ -55,7 +56,6 @@ export class LoginBaseRequestHandler extends RequestHandler {
 
         let answer: MasterPlayerFindOptions = {};
         answer.userId = true;
-        answer.lastIPDetail = true;
 
         if (infoRequestParam.external) answer.external = infoRequestParam.external;
         if (infoRequestParam.segments) answer.segments = infoRequestParam.segments;
@@ -72,6 +72,7 @@ export class LoginBaseRequestHandler extends RequestHandler {
         if (infoRequestParam.ipAddressCreate) answer.ipAddressCreate = infoRequestParam.ipAddressCreate;
         if (infoRequestParam.countryCode) answer.countryCode = infoRequestParam.countryCode;
         if (infoRequestParam.email) answer.email = infoRequestParam.email;
+        if (infoRequestParam.pushNotifications) answer.pushNotifications = infoRequestParam.pushNotifications;
 
         answer.playerBan = true;
 
@@ -139,6 +140,11 @@ export class LoginBaseRequestHandler extends RequestHandler {
         if (!secretInfo.getPermission().masterPlayer.getExternal.selfEnable) {
             infoRequestParam.external = false;
         }
+
+        if (!secretInfo.getPermission().masterPlayer.getPushNotification.selfEnable) {
+            infoRequestParam.pushNotifications = false;
+        }
+
     }
 
     protected generateInfoResponseParameters(masterPlayer: MasterPlayer, infoRequestParam: InfoRequestParam): GNHashtable {
@@ -188,6 +194,9 @@ export class LoginBaseRequestHandler extends RequestHandler {
 
         if (infoRequestParam.email)
             answer.add(GNParameterCode.Email, this.generateEmail(masterPlayer));
+
+        if (infoRequestParam.pushNotifications)
+            answer.add(GNParameterCode.PushNotifications, this.generatePushNotifications(masterPlayer));
 
         return answer;
     }
@@ -470,6 +479,25 @@ export class LoginBaseRequestHandler extends RequestHandler {
         return masterPlayer.getEmail();
     }
 
+    protected generatePushNotifications(masterPlayer: MasterPlayer): GNArray {
+        let gnPushNotifications = new GNArray();
+
+        let pushNotifications = masterPlayer.getAllPushNotifications();
+
+        for (let i = 0; i < pushNotifications.length; i++) {
+            let pushNotification = pushNotifications[i];
+
+            let gnPushNotification = new GNHashtable();
+            gnPushNotification.add(GNParameterCode.PushId, pushNotification.pushId);
+            gnPushNotification.add(GNParameterCode.PlatformType, pushNotification.platformType);
+            gnPushNotification.add(GNParameterCode.Token, pushNotification.token);
+
+            gnPushNotifications.add(gnPushNotification);
+        }
+
+        return gnPushNotifications;
+    }
+
     protected setupAuthInfo(operationResponse: OperationResponse, masterPlayer: MasterPlayer, secretInfo: SecretInfo) {
         let userId = masterPlayer.getUserId();
         operationResponse.setParameter(ParameterCode.UserId, userId);
@@ -524,6 +552,7 @@ export class LoginBaseRequestHandler extends RequestHandler {
         };
         answer["countryCode"] = "";
         answer["email"] = "";
+        answer["pushNotifications"] = [];
 
         return answer;
     }

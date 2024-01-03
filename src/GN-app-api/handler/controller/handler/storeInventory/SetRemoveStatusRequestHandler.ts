@@ -16,7 +16,7 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
 	storeId: string;
 
 	@StringDataMember({ code: GNParameterCode.Reason, isOptional: true, defaultValue: "" })

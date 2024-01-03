@@ -1,10 +1,9 @@
-import { xConfigItem } from "./entity/xConfigItem";
+import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { IConfigService, ConfigItem } from "./IConfigService";
 import * as mongoDB from "mongodb";
-import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
-import { Debug } from "./../../xdebug/lib/xDebug";
 
-export class xConfig {
-	private configDic: Map<string, Map<string, xConfigItem>> = new Map();
+export class ConfigService implements IConfigService {
+    private configDic: Map<string, Map<string, ConfigItem>> = new Map();
 
 	private gameId: string;
 	private configCollection: mongoDB.Collection<mongoDB.Document>;
@@ -14,13 +13,11 @@ export class xConfig {
 		this.configCollection = configCollection;
 	}
 
-	public run(onRunSuccess?: OnRunSuccess): void {
+	public run(): void {
 		this.syncAllConfigAsync();
-
-		if (onRunSuccess != null) onRunSuccess();
 	}
 
-	public async syncAllConfigAsync(): Promise<void> {
+	private async syncAllConfigAsync(): Promise<void> {
 		let results = await this.configCollection.find({});
 
 		while (await results.hasNext()) {
@@ -30,7 +27,7 @@ export class xConfig {
 			let label = result["label"];
 			let data = result["data"];
 
-			let configItem = new xConfigItem(configName, label, data);
+			let configItem = new ConfigItem(configName, label, data);
 
 			if (!this.configDic.has(label)) {
 				this.configDic.set(label, new Map());
@@ -43,7 +40,7 @@ export class xConfig {
 		}
 	}
 
-	public async syncConfigFromDatabaseAsync(configName: string, label: string): Promise<xConfigItem> {
+	public async syncConfigFromDatabaseAsync(configName: string, label: string): Promise<ConfigItem> {
 		let result = await this.configCollection.findOne({ configName: configName, label: label });
 		if (result == null) {
 			Debug.logError("Can not found " + configName);
@@ -52,7 +49,7 @@ export class xConfig {
 
 		let data = result["Data"];
 
-		let configItem = new xConfigItem(configName, label, data);
+		let configItem = new ConfigItem(configName, label, data);
 
 		if (!this.configDic.has(label)) {
 			this.configDic.set(label, new Map());
@@ -65,8 +62,8 @@ export class xConfig {
 		return configItem;
 	}
 
-	public async setConfigAsync(configName: string, label: string, data: {}): Promise<xConfigItem> {
-		let configItem = new xConfigItem(configName, label, data);
+	public async setConfigAsync(configName: string, label: string, data: {}, withSave: boolean): Promise<ConfigItem> {
+		let configItem = new ConfigItem(configName, label, data);
 
 		if (!this.configDic.has(label)) {
 			this.configDic.set(label, new Map());
@@ -77,12 +74,12 @@ export class xConfig {
 		if (data == null) {
 			configDic2.delete(configName);
 
-			this.configCollection.deleteOne({ configName: configName, label: label });
+			if (withSave) this.configCollection.deleteOne({ configName: configName, label: label });
 		}
 		else {
 			configDic2.set(configName, configItem);
 
-			this.configCollection.updateOne({ configName: configName, label: label }, {
+			if (withSave) this.configCollection.updateOne({ configName: configName, label: label }, {
 				$set: {
 					"data": data
 				}
@@ -97,7 +94,7 @@ export class xConfig {
 		return configItem;
 	}
 
-	public getConfigItem(configName: string, label: string): xConfigItem {
+	public getConfigItem(configName: string, label: string): ConfigItem {
 		if (!this.configDic.has(label)) {
 			return null;
 		}
@@ -112,7 +109,7 @@ export class xConfig {
 		return configItem;
 	}
 
-	public getConfigDicViaLabel(label: string): Map<string, xConfigItem> {
+	public getConfigDicViaLabel(label: string): Map<string, ConfigItem> {
 		if (!this.configDic.has(label)) {
 			this.configDic.set(label, new Map());
 		}

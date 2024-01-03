@@ -20,16 +20,16 @@ class LoginByGameCenterOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.PlayerId, minLength: 2, maxLength: 64, mustNonNull: true })
 	playerId: string;
 
-	@StringDataMember({ code: GNParameterCode.Name, minLength: 2, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Name, minLength: 2, maxLength: 128, mustNonNull: true })
 	name: string;
 
-	@StringDataMember({ code: GNParameterCode.PublicKeyUrl, minLength: 2, maxLength: 256, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.PublicKeyUrl, minLength: 2, maxLength: 2048, mustNonNull: true })
 	publicKeyUrl: string;
 
-	@StringDataMember({ code: GNParameterCode.Signature, minLength: 2, maxLength: 512, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Signature, minLength: 2, maxLength: 2048, mustNonNull: true })
 	signature: string;
 
-	@StringDataMember({ code: GNParameterCode.Salt, minLength: 2, maxLength: 128, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Salt, minLength: 2, maxLength: 256, mustNonNull: true })
 	salt: string;
 
 	@NumberDataMember({ code: GNParameterCode.Timestamp })
@@ -111,6 +111,9 @@ export class LoginByGameCenterRequestHandler extends LoginBaseRequestHandler {
 		let email = result["email"] ?? "";
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) {
+			masterPlayerFindOptions.lastIPDetail = true;
+		}
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGameCenterAsync(playerId, masterPlayerFindOptions);
 

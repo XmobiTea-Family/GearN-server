@@ -217,7 +217,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 			gamePlayer = await this.gnServer.getDatabase().createGamePlayerAsync(result, secretInfo.getGameId());
 		}
 
-		if (request.updateTsLastLogin === true) {
+		if (request.updateTsLastLogin) {
 			gamePlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
 			gamePlayer.saveAsync();
 		}

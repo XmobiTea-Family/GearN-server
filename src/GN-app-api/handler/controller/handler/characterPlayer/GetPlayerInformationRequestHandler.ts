@@ -13,6 +13,7 @@ import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErr
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetPlayerInformationOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
@@ -68,6 +69,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 
 		let allowMethod = false;
 		let owned = false;
+		let updateTsLastLogin = false;
 
 		if (secretInfo.getPermission().characterPlayer.getPlayerInformation.otherSelfEnable) {
 			allowMethod = true;
@@ -80,6 +82,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 				if (gamePlayer.hasPlayerCharacter(request.characterId)) {
 					allowMethod = true;
 					owned = true;
+                    updateTsLastLogin = true;
 				}
 			}
 		}
@@ -98,6 +101,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 		return this.execute({
 			characterId: request.characterId,
 			infoRequestParam: request.infoRequestParam,
+            updateTsLastLogin: updateTsLastLogin,
 		}, secretInfo, operationRequest);
 	}
 
@@ -117,6 +121,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 		return this.execute({
 			characterId: request.characterId,
 			infoRequestParam: request.infoRequestParam,
+            updateTsLastLogin: false,
 		}, secretInfo, operationRequest);
 	}
 
@@ -136,10 +141,11 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 		return this.execute({
 			characterId: request.characterId,
 			infoRequestParam: request.infoRequestParam,
+            updateTsLastLogin: false,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { characterId: string, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { characterId: string, infoRequestParam: InfoRequestParam, updateTsLastLogin: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetPlayerInformation", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -162,8 +168,10 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 			return operationResponse;
 		}
 
-		// characterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-		// characterPlayer.saveAsync();
+        if (request.updateTsLastLogin) {
+            characterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
+            characterPlayer.saveAsync();
+        }
 
 		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
 

@@ -5,17 +5,17 @@ import { ServerApplication } from "./ServerApplication";
 import { GNServer } from "./../GNServer";
 import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
-import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { DdosSettings } from "./settings/DDosSettings";
+import { ClusterSettings } from "./settings/ClusterSettings";
 
 export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).setExpiredToken(2 * 24 * 60 * 60 * 1000).setPrivateKeyToken("defaultApplicationStartup").build();
+		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).setSocketPort(2901).setExpiredToken(2 * 24 * 60 * 60 * 1000).setPrivateKeyToken("defaultApplicationStartup").build();
 
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(true)
@@ -30,6 +30,7 @@ export class DefaultApplicationStartup {
 
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(true)
+			.setUseEmitter(false)
 			.setOrigins("*")
 			.addMethods([])
 			.setCredentials(true)
@@ -56,11 +57,6 @@ export class DefaultApplicationStartup {
 			})
 			.build();
 
-		let mailSettings = MailSettings.Builder()
-			.setFromEmail("changx@xmobitea.com")
-			.setSendGridApiKey("SG.")
-			.build();
-
 		let logSettings = LogSettings.Builder()
 			.setLogToFileEnable(true)
 			.setLogToConsoleEnable(true)
@@ -85,7 +81,18 @@ export class DefaultApplicationStartup {
 			.setHttpMaxRequestSize(1024)
 			.setMaxUploadPendingRequest(50)
 			.setMaxDownloadPendingRequest(50)
+			.setIPWhiteList(["127.0.0.1"])
 			.build();
+
+        let clusterSettings = ClusterSettings.Builder()
+            .setInstanceId("node_0")
+            .setIsPrimary(true)
+            .setPrivateKeyToken("defaultApplicationStartup")
+            .setAllNodes([{
+                instanceId: "node_0",
+                fullUrl: "http://127.0.0.1:2202"
+            }])
+            .build();
 
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
@@ -93,10 +100,10 @@ export class DefaultApplicationStartup {
 			socketAppSettings,
 			otherSettings,
 			databaseSettings,
-			mailSettings,
 			logSettings,
 			uploadFileSettings,
-			ddosSettings
+			ddosSettings,
+            clusterSettings,
 		);
 
 		this.serverApplication.run(() => {
@@ -110,10 +117,10 @@ export class DefaultApplicationStartup {
 		socketAppSettings: SocketAppSettings,
 		otherSettings: OtherSettings,
 		databaseSettings: DatabaseSettings,
-		mailSettings: MailSettings,
 		logSettings: LogSettings,
 		uploadFileSettings: UploadFileSettings,
-		ddosSettings: DdosSettings
+		ddosSettings: DdosSettings,
+        clusterSettings: ClusterSettings,
 	) {
 		return ServerApplication.Builder()
 			.setApplicationSettings(applicationSettings)
@@ -121,10 +128,10 @@ export class DefaultApplicationStartup {
 			.setSocketAppSettings(socketAppSettings)
 			.setOtherSettings(otherSettings)
 			.setDatabaseSettings(databaseSettings)
-			.setMailSettings(mailSettings)
 			.setLogSettings(logSettings)
 			.setUploadFileSettings(uploadFileSettings)
 			.setDdosSettings(ddosSettings)
+            .setClusterSettings(clusterSettings)
 			.build();
 	}
 

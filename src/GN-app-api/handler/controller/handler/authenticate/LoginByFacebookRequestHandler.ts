@@ -17,7 +17,7 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByFacebookOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Token, minLength: 32, maxLength: 512, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
 	token: string;
 
 	@BooleanDataMember({ code: GNParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
@@ -84,6 +84,9 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
 		let email = result["email"] ?? "";
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) {
+			masterPlayerFindOptions.lastIPDetail = true;
+		}
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByFacebookAsync(facebookId, masterPlayerFindOptions);
 

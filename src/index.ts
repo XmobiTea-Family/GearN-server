@@ -46,17 +46,38 @@ export { ILockService };
 import { IPushNotificationService } from "./GN-app-api/service/IPushNotificationService";
 export { IPushNotificationService };
 
+import { PushNotificationService } from "./GN-app-api/service/PushNotificationService";
+export { PushNotificationService };
+
 import { IRequestConverterService } from "./GN-app-api/service/IRequestConverterService";
 export { IRequestConverterService };
+
+import { RequestConverterService } from "./GN-app-api/service/RequestConverterService";
+export { RequestConverterService };
+
+import { IEmailService } from "./GN-app-api/service/IEmailService";
+export { IEmailService };
+
+import { EmailService } from "./GN-app-api/service/EmailService";
+export { EmailService };
+
+import { ICacheService, CacheItem } from "./GN-app-api/service/ICacheService";
+export { ICacheService, CacheItem };
+
+import { CacheService, ICacheServiceController, MemoryCacheServiceController, MongoDbCacheServiceController } from "./GN-app-api/service/CacheService";
+export { CacheService, ICacheServiceController, MemoryCacheServiceController, MongoDbCacheServiceController };
+
+import { IConfigService, ConfigItem } from "./GN-app-api/service/IConfigService";
+export { IConfigService, ConfigItem };
+
+import { ConfigService } from "./GN-app-api/service/ConfigService";
+export { ConfigService };
 
 import { ITimerService } from "./GN-app-api/service/ITimerService";
 export { ITimerService };
 
 import { LockService } from "./GN-app-api/service/LockService";
 export { LockService };
-
-import { RequestConverterService } from "./GN-app-api/service/RequestConverterService";
-export { RequestConverterService };
 
 import { TimerService } from "./GN-app-api/service/TimerService";
 export { TimerService };
@@ -79,6 +100,9 @@ export { InvalidMemberType };
 import { ItemType } from "./GN-common/constant/enumType/ItemType";
 export { ItemType };
 
+import { StoreItemType } from "./GN-common/constant/enumType/StoreItemType";
+export { StoreItemType };
+
 import { MatchmakingMemberStatus } from "./GN-common/constant/enumType/MatchmakingMemberStatus";
 export { MatchmakingMemberStatus };
 
@@ -90,6 +114,9 @@ export { OwnerType };
 
 import { PermissionDataItem } from "./GN-common/constant/enumType/PermissionDataItem";
 export { PermissionDataItem };
+
+import { PushPlatformType } from "./GN-common/constant/enumType/PushPlatformType";
+export { PushPlatformType };
 
 import { RequestRole } from "./GN-common/constant/enumType/RequestRole";
 export { RequestRole };
@@ -186,18 +213,6 @@ export { IBuilder };
 import { OnRunSuccess } from "./GN-library/xbuilder/lib/OnRunSuccess";
 export { OnRunSuccess };
 
-import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
-export { xCacheData };
-
-import { xCacheItem } from "./GN-library/xcachedata/lib/xCacheItem";
-export { xCacheItem };
-
-import { xConfigItem } from "./GN-library/xconfig/lib/entity/xConfigItem";
-export { xConfigItem };
-
-import { xConfig } from "./GN-library/xconfig/lib/xConfig";
-export { xConfig };
-
 import { CharacterPlayerFindOptions } from "./GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
 export { CharacterPlayerFindOptions };
 
@@ -266,6 +281,9 @@ export { ExternalItem };
 
 import { IPDetailItem } from "./GN-library/xdatabase/lib/entity/pro/IPDetailItem";
 export { IPDetailItem };
+
+import { PushNotificationItem } from "./GN-library/xdatabase/lib/entity/pro/PushNotificationItem";
+export { PushNotificationItem };
 
 import { FriendItem } from "./GN-library/xdatabase/lib/entity/pro/FriendItem";
 export { FriendItem };
@@ -342,9 +360,6 @@ export { xDatetime };
 import { Debug } from "./GN-library/xdebug/lib/xDebug";
 export { Debug };
 
-import { xMail } from "./GN-library/xmail/lib/xMail";
-export { xMail };
-
 import { xRandom } from "./GN-library/xrandom/lib/xRandom";
 export { xRandom };
 
@@ -402,6 +417,12 @@ export { xTagSettings };
 import { xThirtPartySettings } from "./GN-library/xsettings/lib/entity/xThirtPartySettings";
 export { xThirtPartySettings };
 
+import { xEmailSettings } from "./GN-library/xsettings/lib/entity/xEmailSettings";
+export { xEmailSettings };
+
+import { xPushNotificationSettings } from "./GN-library/xsettings/lib/entity/xPushNotificationSettings";
+export { xPushNotificationSettings };
+
 import { xGNSettings } from "./GN-library/xsettings/lib/xGNSettings";
 export { xGNSettings };
 
@@ -432,14 +453,14 @@ export { DatabaseSettings };
 import { DdosSettings } from "./GN-startup/settings/DDosSettings";
 export { DdosSettings };
 
+import { ClusterSettings } from "./GN-startup/settings/ClusterSettings";
+export { ClusterSettings };
+
 import { HttpAppSettings } from "./GN-startup/settings/HttpAppSettings";
 export { HttpAppSettings };
 
 import { LogSettings } from "./GN-startup/settings/LogSettings";
 export { LogSettings };
-
-import { MailSettings } from "./GN-startup/settings/MailSettings";
-export { MailSettings };
 
 import { OtherSettings } from "./GN-startup/settings/OtherSettings";
 export { OtherSettings };
@@ -630,6 +651,12 @@ export { ThirtPartyGooglePlayGameSettingsParam };
 
 import { ThirtPartyParam } from "./GN-app-api/handler/controller/handler/dashboard/model/ThirtPartyParam";
 export { ThirtPartyParam };
+
+import { EmailSettingsParam } from "./GN-app-api/handler/controller/handler/dashboard/model/EmailSettingsParam";
+export { EmailSettingsParam };
+
+import { PushNotificationSettingsParam } from "./GN-app-api/handler/controller/handler/dashboard/model/PushNotificationSettingsParam";
+export { PushNotificationSettingsParam };
 
 import { ServerGameDataRequestParams } from "./GN-app-api/handler/controller/handler/dashboard/GetServerGameDataRequestHandler"
 export { ServerGameDataRequestParams };

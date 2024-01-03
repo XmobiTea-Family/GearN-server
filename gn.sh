@@ -91,6 +91,7 @@ init_create_GNConfigDebugJson() {
     "options": {
         "applicationSettings": {
 			"port": 2202,
+			"socketPort": 2901,
 			"useSsl": false,
 			"keyFilePath": "",
 			"certFilePath": "",
@@ -111,6 +112,7 @@ init_create_GNConfigDebugJson() {
 
 		"socketAppSettings": {
 			"enable": true,
+			"useEmitter": false,
 			"allowOrigin": "*",
 			"credentials": true,
 			"allowMethods": ["GET"],
@@ -141,12 +143,6 @@ init_create_GNConfigDebugJson() {
 			"idTypeCase": 0,
 			"ipApiUrl": "http://127.0.0.1:2555/json"
 		},
-		
-		"mailSettings": {
-			"enable": false,
-			"sendFrom": "changx@xmobitea.com",
-			"sendGridApiKey": "SG."
-		},
 
 		"logSettings": {
 			"logToConsoleEnable": true,
@@ -164,8 +160,21 @@ init_create_GNConfigDebugJson() {
 			"httpMaxPendingRequest": 1000,
 			"httpMaxRequestSize": 1024,
 			"maxUploadPendingRequest": 200,
-			"maxDownloadPendingRequest": 200
-		}
+			"maxDownloadPendingRequest": 200,
+			"ipWhiteList": ["127.0.0.1"]
+		},
+
+        "clusterSettings": {
+            "instanceId": "node_0",
+            "isPrimary": true,
+            "privateKeyToken": "privateKeyDefault",
+            "allNodes": [
+                {
+                    "instanceId": "node_0",
+                    "fullUrl": "http://127.0.0.1:2202"
+                }
+            ]
+        }
     }
 }' > GNconfig.debug.json
     echo 'create GNconfig.debug.json file success'
@@ -467,11 +476,10 @@ init_create_packageJson() {
     "author": "GN-Server-author",
     "license": "ISC",
     "devDependencies": {
-        "typescript": "*"
+        "typescript": "^5.7.2"
     },
     "dependencies": {
-        "@xmobitea/gn-server": "*",
-        "fs": "*"
+        "@xmobitea/gn-server": "*"
     }
 }' > package.json
     echo 'create package.json file success'

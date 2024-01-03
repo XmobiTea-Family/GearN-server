@@ -21,7 +21,7 @@ class GetAllMatchOperationRequest extends OperationRequest {
     @NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
     skip?: number;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
 
     public override isValidRequest() {
@@ -143,57 +143,57 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
             let result = await results.next();
 
             let match = new Match(result, matchCollection);
-    
+
             let gnMatch = new GNHashtable();
-    
+
             gnMatch.add(GNParameterCode.MatchId, match.getMatchId());
             gnMatch.add(GNParameterCode.TsCreate, match.getTsCreate());
             gnMatch.add(GNParameterCode.QueueName, match.getQueueName());
             gnMatch.add(GNParameterCode.TimeToMatchInSeconds, match.getTimeToMatchInSeconds());
-    
+
             if (request.returnMember) {
                 let gnMembers = new GNArray();
-    
+
                 let members = match.getMembers();
                 for (let i = 0; i < members.length; i++) {
                     let member = members[i];
-    
+
                     let gnMember = new GNHashtable();
-    
+
                     gnMember.add(GNParameterCode.UserId, member.userId);
                     gnMember.add(GNParameterCode.TeamId, member.teamId);
                     gnMember.add(GNParameterCode.Attribute, member.attribute);
-    
+
                     gnMembers.add(gnMember);
                 }
-    
+
                 gnMatch.add(GNParameterCode.Members, gnMembers);
             }
-    
+
             let serverDetail = match.getServerDetail();
             if (serverDetail != null) {
                 let gnServerDetail = new GNHashtable();
-    
+
                 gnServerDetail.add(GNParameterCode.IpV4Address, serverDetail.ipV4Address);
-    
+
                 let gnPorts = new GNArray();
                 let ports = serverDetail.ports;
-    
+
                 for (let i = 0; i < ports.length; i++) {
                     let port = ports[i];
-    
+
                     let gnPort = new GNHashtable();
-    
+
                     gnPort.add(GNParameterCode.Name, port.name);
                     gnPort.add(GNParameterCode.PublicPort, port.publicPort);
                     gnPort.add(GNParameterCode.PrivatePort, port.privatePort);
                     gnPort.add(GNParameterCode.Protocol, port.protocol);
-    
+
                     gnPorts.add(gnPort);
                 }
-    
+
                 gnServerDetail.add(GNParameterCode.Ports, gnPorts);
-    
+
                 gnMatch.add(GNParameterCode.ServerDetail, gnServerDetail);
             }
 

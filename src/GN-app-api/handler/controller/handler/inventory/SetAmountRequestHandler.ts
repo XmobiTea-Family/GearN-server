@@ -133,8 +133,8 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
         }
 
         let itemType = <ItemType>inventory.getItemType();
-        if (itemType == ItemType.NonConsumable) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotConsumable);
+        if (itemType == ItemType.NonStackable) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotStackable);
             return operationResponse;
         }
 

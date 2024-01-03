@@ -16,9 +16,10 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { StoreReceiveType } from "../../../../../GN-common/constant/enumType/StoreReceiveType";
 import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { StoreItemType } from "../../../../../GN-common/constant/enumType/StoreItemType";
 
 class BuyStoreItemOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
     storeId: string;
 
     @StringDataMember({ code: GNParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
@@ -173,6 +174,15 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
         if (storeInventory.getRemoveStatus().tsRemove != 0) {
             operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadBeenRemove);
             return operationResponse;
+        }
+
+        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) {
+            let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id);
+
+            if (purchaseCount != 0) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadPurchaseAndNonConsumable);
+                return operationResponse;
+            }
         }
 
         let allPriceCurrencies = storeInventory.getAllPriceCurrencies();
@@ -426,7 +436,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
                     key: priceCurrency.key,
                     value: -priceCurrency.value
                 });
-                
+
                 if (playerCurrency.value < priceCurrency.value) {
                     enoughtCurrency = false;
                     break;
@@ -719,6 +729,8 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
         }
 
         this.gnServer.getDatabase().insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, <number>StoreReceiveType.Buy, request.log);
+
+        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
 
         let inAppPurchase = storeInventory.getInAppPurchase();
         if (inAppPurchase.analyticsPrice) {

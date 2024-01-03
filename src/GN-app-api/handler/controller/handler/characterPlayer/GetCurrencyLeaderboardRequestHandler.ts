@@ -26,11 +26,14 @@ class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
 	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
+
+	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	catalogId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -58,9 +61,6 @@ class AdminGetCurrencyLeaderboardOperationRequest extends ServerGetCurrencyLeade
 }
 
 export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseRequestHandler {
-	protected override init(): void {
-		this.gnServer.getCacheData
-	}
 
 	public override getCode() {
 		return OperationCode.GetCurrencyLeaderboard;
@@ -89,6 +89,7 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -111,6 +112,7 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -133,10 +135,11 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, catalogId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetCurrencyLeaderboard", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -145,10 +148,8 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
-
-		let masterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
-		let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
+		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
 
 		if (playerCurrencySettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
@@ -157,6 +158,7 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 		}
 
 		let cacheKey = "characterPlayerCurrencyLeaderboard_" + request.key;
+		if (request.catalogId) cacheKey += "_" + request.catalogId;
 
 		if (request.loadFromCache) {
 			if (request.skip + request.limit > 100) {
@@ -164,8 +166,10 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			}
 		}
 
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
 		if (request.loadFromCache) {
-			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+			if (!(await cacheData.isValid(cacheKey))) {
 				request.loadFromCache = false;
 			}
 		}
@@ -175,7 +179,7 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 		let characterPlayers: CharacterPlayer[];
 
 		if (request.loadFromCache) {
-			characterPlayers = this.gnServer.getCacheData().getData(cacheKey);
+			characterPlayers = await cacheData.getData(cacheKey);
 
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
 				if (i >= characterPlayers.length) break;
@@ -194,10 +198,12 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			}
 		}
 		else {
+            let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
+
 			if (request.skip + request.limit <= 100) {
 				characterPlayerFindOptions = null;
 
-				characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithCurrenciesAsync(request.key, 0, 100, secretInfo.getGameId(), characterPlayerFindOptions);
+				characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithCurrenciesAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= characterPlayers.length) break;
@@ -215,10 +221,10 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 					gnResults.add(gnResult);
 				}
 
-				this.gnServer.getCacheData().setData(cacheKey, characterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				await cacheData.setData(cacheKey, characterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
-				characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), characterPlayerFindOptions);
+				characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 				for (let i = 0; i < characterPlayers.length; i++) {
 

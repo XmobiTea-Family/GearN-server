@@ -14,6 +14,8 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { MasterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetStatisticsLeaderboardAroundPlayerOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
@@ -28,8 +30,11 @@ class GetStatisticsLeaderboardAroundPlayerOperationRequest extends OperationRequ
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
+
+	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	loadFromCache?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -100,7 +105,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
@@ -122,7 +128,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
@@ -144,11 +151,12 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetStatisticsLeaderboardAroundPlayer", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -156,8 +164,6 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
-
-		let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 		let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
@@ -168,28 +174,101 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 			return operationResponse;
 		}
 
-		let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
-		let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+        let positionCacheKey = "masterPlayerStatisticsLeaderboardAroundPosition_" + request.userId + "_" + request.key;
+        let cacheKey = "masterPlayerStatisticsLeaderboardAround_" + request.userId + "_" + request.key;
 
-		let gnResults = new GNArray();
+        if (request.loadFromCache) {
+            if (request.skip + request.limit > 100) {
+                request.loadFromCache = false;
+            }
+        }
 
-		let thisPosition = await this.gnServer.getDatabase().loadPositionMasterPlayerLeaderboardWithStatisticsAsync(request.key, request.userId, playerStatisticsSettingsItem.initialValue, direction);
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, direction, masterPlayerFindOptions);
+        if (request.loadFromCache) {
+            if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
+                request.loadFromCache = false;
+            }
+        }
 
-		for (let i = 0; i < masterPlayers.length; i++) {
-			let masterPlayer = masterPlayers[i];
+        let gnResults = new GNArray();
 
-			let gnResult = new GNHashtable();
+        let thisPosition: number;
+        let masterPlayers: MasterPlayer[];
 
-			gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
+        if (request.loadFromCache) {
+            thisPosition = await cacheData.getData(positionCacheKey);
+            masterPlayers = await cacheData.getData(cacheKey);
 
-			gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+            for (let i = request.skip; i < request.skip + request.limit; i++) {
+                if (i >= masterPlayers.length) break;
 
-			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+                let masterPlayer = masterPlayers[i];
 
-			gnResults.add(gnResult);
-		}
+                let gnResult = new GNHashtable();
+    
+                gnResult.add(GNParameterCode.Position, i + thisPosition);
+    
+                gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+    
+                gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+    
+                gnResults.add(gnResult);
+            }
+        }
+        else {
+            let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
+            let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+    
+            thisPosition = await this.gnServer.getDatabase().loadPositionMasterPlayerLeaderboardWithStatisticsAsync(request.key, request.userId, playerStatisticsSettingsItem.initialValue, direction);
+    
+            if (thisPosition != -1) {
+                await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+
+                let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+
+                if (request.skip + request.limit <= 100) {
+                    masterPlayerFindOptions = null;
+
+                    masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, direction, masterPlayerFindOptions);
+
+                    for (let i = request.skip; i < request.skip + request.limit; i++) {
+                        if (i >= masterPlayers.length) break;
+
+                        let masterPlayer = masterPlayers[i];
+
+                        let gnResult = new GNHashtable();
+
+                        gnResult.add(GNParameterCode.Position, i + thisPosition);
+
+                        gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+
+                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+
+                        gnResults.add(gnResult);
+                    }
+
+                    await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+                }
+                else {
+                    masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, direction, masterPlayerFindOptions);
+
+                    for (let i = 0; i < masterPlayers.length; i++) {
+                        let masterPlayer = masterPlayers[i];
+
+                        let gnResult = new GNHashtable();
+
+                        gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
+
+                        gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+
+                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+
+                        gnResults.add(gnResult);
+                    }
+                }
+            }
+        }
 
 		operationResponse.setParameter(GNParameterCode.Results, gnResults);
 

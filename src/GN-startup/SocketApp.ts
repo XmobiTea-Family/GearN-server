@@ -72,7 +72,10 @@ export class SocketApp {
 		});
 
 		this.socketAppHandler = new SocketAppHandler();
-		this.socketAppHandler.setEmitter(this.emitter);
+		if (this.appSettings.getUseEmitter()) {
+			this.socketAppHandler.setEmitter(this.emitter);
+		}
+		
 		this.socketAppHandler.setServer(this.io);
 		this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.socketAppHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);
@@ -88,7 +91,10 @@ export class SocketApp {
 
 	public setEmitter(adapterEventCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.emitter = new Emitter(adapterEventCollection);
-		if (this.socketAppHandler != null) this.socketAppHandler.setEmitter(this.emitter);
+
+		if (this.appSettings.getUseEmitter() && this.socketAppHandler != null) {
+			this.socketAppHandler.setEmitter(this.emitter);
+		}
 
 		this.io.adapter(createAdapter(adapterEventCollection, {
 

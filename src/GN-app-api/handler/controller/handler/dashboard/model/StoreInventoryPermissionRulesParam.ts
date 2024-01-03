@@ -38,4 +38,11 @@ export class StoreInventoryPermissionRulesParam {
 
     @GNHashtableDataMember({ code: GNParameterCode.GetStoreLog, isOptional: true })
     getStoreLog?: PermissionRulesParam;
+
+    @GNHashtableDataMember({ code: GNParameterCode.GetStoreUsed, isOptional: true })
+    getStoreUsed?: PermissionRulesParam;
+
+    @GNHashtableDataMember({ code: GNParameterCode.RemoveStoreUsed, isOptional: true })
+    removeStoreUsed?: PermissionRulesParam;
+
 }

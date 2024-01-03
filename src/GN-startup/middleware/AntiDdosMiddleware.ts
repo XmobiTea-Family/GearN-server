@@ -26,7 +26,8 @@ enum BanType {
 
 export class AntiDdosMiddleware {
 	private static readonly FIVE_MINUTE_TS: number = 5 * 60 * 1000;
-	private static readonly K_MULTIPLE: number = 5;
+	private static readonly K_MULTIPLE_WHITE_LIST: number = 100;
+	private static readonly K_MULTIPLE_BLACK_LIST: number = 5;
 
 	private socketRequestPerIPDic: { [k: string]: MaxRequestItem };
 	private socketRequestPerPeerDic: { [k: string]: MaxRequestItem };
@@ -53,6 +54,7 @@ export class AntiDdosMiddleware {
 	private maxUploadPendingRequest: number;
 	private maxDownloadPendingRequest: number;
 
+	private defaultIPWhiteLst: string[];
 	private ipWhiteLst: string[];
 	private ipBlackLst: string[];
 
@@ -104,6 +106,16 @@ export class AntiDdosMiddleware {
 		this.maxDownloadPendingRequest = maxDownloadPendingRequest;
 	}
 
+	public setIPWhiteList(ipWhiteList: string[]): void {
+		this.defaultIPWhiteLst = ipWhiteList;
+		if (this.defaultIPWhiteLst) {
+			for (let j = 0; j < this.defaultIPWhiteLst.length; j++) {
+				let defaultIP = this.defaultIPWhiteLst[j];
+				if (!this.ipWhiteLst.includes(defaultIP)) this.ipWhiteLst.push(defaultIP);
+			}
+		}
+	}
+
 	public async checkRequestSizeBodyViaJson(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = this.getReturnCodeForRequestSizeHttp(req);
 		if (returnCode != ReturnCode.Ok) {
@@ -127,12 +139,17 @@ export class AntiDdosMiddleware {
 	}
 
 	private getReturnCodeForRequestSizeHttp(req: express.Request): number {
-		let ip = req.xip;
+		let url = req.url;
+		if (url == "/-18/9/3" || url == "/-5/9/3" || url == "/-17/9/3" || url == "/128/3/3" || url == "/167/11/3") {
+			return ReturnCode.Ok;
+		}
 
 		let contentLengthStr: string = req.headers['content-length'];
 		if (contentLengthStr) {
+			let ip = req.xip;
+			
 			let httpMaxRequestSize = this.httpMaxRequestSize;
-			if (this.ipWhiteLst.indexOf(ip) != -1) httpMaxRequestSize = httpMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE;
+			if (this.ipWhiteLst.includes(ip)) httpMaxRequestSize = httpMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 			let contentLength = parseInt(contentLengthStr);
 			if (contentLength > httpMaxRequestSize) {
@@ -158,7 +175,7 @@ export class AntiDdosMiddleware {
 			let buffer = data[0] as Buffer;
 
 			let socketMaxRequestSize = this.socketMaxRequestSize;
-			if (this.ipWhiteLst.indexOf(ip) != -1) socketMaxRequestSize = socketMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE;
+			if (this.ipWhiteLst.includes(ip)) socketMaxRequestSize = socketMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 			if (buffer.length > socketMaxRequestSize) return;
 		}
@@ -178,7 +195,7 @@ export class AntiDdosMiddleware {
 			let buffer = data[0];
 
 			let socketMaxRequestSize = this.socketMaxRequestSize;
-			if (this.ipWhiteLst.indexOf(ip) != -1) socketMaxRequestSize = socketMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE;
+			if (this.ipWhiteLst.includes(ip)) socketMaxRequestSize = socketMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 			if (JSON.stringify(buffer).length > socketMaxRequestSize) return;
 		}
@@ -192,17 +209,17 @@ export class AntiDdosMiddleware {
 
 	public async checkMaxRequestPerSecondPerIpViaSocket(socket: Socket, data: any, next: Function) {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		let id = socket.data.IPAddress;
+		let ip = socket.data.IPAddress;
 
-		let socketRequestPerIPItem = this.socketRequestPerIPDic[id];
+		let socketRequestPerIPItem = this.socketRequestPerIPDic[ip];
 		if (socketRequestPerIPItem == null) {
 			socketRequestPerIPItem = {
-				id: id,
+				id: ip,
 				count: 0,
 				tsLastUpdate: currentMilliseconds
 			}
 
-			this.socketRequestPerIPDic[id] = socketRequestPerIPItem;
+			this.socketRequestPerIPDic[ip] = socketRequestPerIPItem;
 		}
 
 		if (socketRequestPerIPItem.tsLastUpdate + xDatetime.ONE_SECOND_MILLISECOND < currentMilliseconds) {
@@ -213,13 +230,13 @@ export class AntiDdosMiddleware {
 		socketRequestPerIPItem.count++;
 
 		let socketMaxRequestPerSecondPerIp = this.socketMaxRequestPerSecondPerIp;
-		if (this.ipBlackLst.indexOf(id) != -1) socketMaxRequestPerSecondPerIp = socketMaxRequestPerSecondPerIp / AntiDdosMiddleware.K_MULTIPLE;
-		else if (this.ipWhiteLst.indexOf(id) != -1) socketMaxRequestPerSecondPerIp = socketMaxRequestPerSecondPerIp * AntiDdosMiddleware.K_MULTIPLE;
+		if (this.ipBlackLst.indexOf(ip) != -1) socketMaxRequestPerSecondPerIp = socketMaxRequestPerSecondPerIp / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
+		else if (this.ipWhiteLst.indexOf(ip) != -1) socketMaxRequestPerSecondPerIp = socketMaxRequestPerSecondPerIp * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 		if (socketRequestPerIPItem.count > socketMaxRequestPerSecondPerIp) {
 			this.reportDdosCollection.insertOne({
 				returnCode: ReturnCode.MaxRequestReject,
-				ip: id,
+				ip: ip,
 				count: socketRequestPerIPItem.count,
 				type: RequestType.SOCKET,
 				tsCreate: currentMilliseconds
@@ -260,8 +277,8 @@ export class AntiDdosMiddleware {
 			socketRequestPerPeerItem.count++;
 
 			let socketMaxRequestPerSecondPerPeer = this.socketMaxRequestPerSecondPerPeer;
-			if (this.ipBlackLst.indexOf(ip) != -1) socketMaxRequestPerSecondPerPeer = socketMaxRequestPerSecondPerPeer / AntiDdosMiddleware.K_MULTIPLE;
-			else if (this.ipWhiteLst.indexOf(ip) != -1) socketMaxRequestPerSecondPerPeer = socketMaxRequestPerSecondPerPeer * AntiDdosMiddleware.K_MULTIPLE;
+			if (this.ipBlackLst.includes(ip)) socketMaxRequestPerSecondPerPeer = socketMaxRequestPerSecondPerPeer / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
+			else if (this.ipWhiteLst.includes(ip)) socketMaxRequestPerSecondPerPeer = socketMaxRequestPerSecondPerPeer * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 			if (socketRequestPerPeerItem.count > socketMaxRequestPerSecondPerPeer) {
 				this.reportDdosCollection.insertOne({
@@ -313,16 +330,16 @@ export class AntiDdosMiddleware {
 	private getReturnCodeForMaxRequestPerSecondPerIp(req: express.Request): number {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		let id = req.xip;
-		let httpRequestPerIPItem = this.httpRequestPerIPDic[id];
+		let ip = req.xip;
+		let httpRequestPerIPItem = this.httpRequestPerIPDic[ip];
 		if (httpRequestPerIPItem == null) {
 			httpRequestPerIPItem = {
-				id: id,
+				id: ip,
 				count: 0,
 				tsLastUpdate: currentMilliseconds
 			}
 
-			this.httpRequestPerIPDic[id] = httpRequestPerIPItem;
+			this.httpRequestPerIPDic[ip] = httpRequestPerIPItem;
 		}
 
 		if (httpRequestPerIPItem.tsLastUpdate + xDatetime.ONE_SECOND_MILLISECOND < currentMilliseconds) {
@@ -333,13 +350,13 @@ export class AntiDdosMiddleware {
 		httpRequestPerIPItem.count++;
 
 		let httpMaxRequestPerSecondPerIp = this.httpMaxRequestPerSecondPerIp;
-		if (this.ipBlackLst.indexOf(id) != -1) httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp / AntiDdosMiddleware.K_MULTIPLE;
-		else if (this.ipWhiteLst.indexOf(id) != -1) httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp * AntiDdosMiddleware.K_MULTIPLE;
+		if (this.ipBlackLst.includes(ip)) httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
+		else if (this.ipWhiteLst.includes(ip)) httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 		if (httpRequestPerIPItem.count > httpMaxRequestPerSecondPerIp) {
 			this.reportDdosCollection.insertOne({
 				returnCode: ReturnCode.MaxRequestReject,
-				ip: id,
+				ip: ip,
 				count: httpRequestPerIPItem.count,
 				type: RequestType.HTTP,
 				tsCreate: currentMilliseconds
@@ -409,8 +426,8 @@ export class AntiDdosMiddleware {
 			}
 
 			let httpMaxRequestPerSecondPerPeer = this.httpMaxRequestPerSecondPerPeer;
-			if (this.ipBlackLst.indexOf(ip) != -1) httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer / AntiDdosMiddleware.K_MULTIPLE;
-			else if (this.ipWhiteLst.indexOf(ip) != -1) httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer * AntiDdosMiddleware.K_MULTIPLE;
+			if (this.ipBlackLst.includes(ip)) httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
+			else if (this.ipWhiteLst.includes(ip)) httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 			httpRequestPerPeerItem.count++;
 			if (httpRequestPerPeerItem.count > httpMaxRequestPerSecondPerPeer) {
@@ -455,8 +472,8 @@ export class AntiDdosMiddleware {
 		let ip = req.xip;
 
 		let httpMaxPendingRequest = this.httpMaxPendingRequest;
-		if (this.ipBlackLst.indexOf(ip) != -1) httpMaxPendingRequest = httpMaxPendingRequest / AntiDdosMiddleware.K_MULTIPLE;
-		else if (this.ipWhiteLst.indexOf(ip) != -1) httpMaxPendingRequest = httpMaxPendingRequest * AntiDdosMiddleware.K_MULTIPLE;
+		if (this.ipBlackLst.includes(ip)) httpMaxPendingRequest = httpMaxPendingRequest / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
+		else if (this.ipWhiteLst.includes(ip)) httpMaxPendingRequest = httpMaxPendingRequest * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 		if (this.currentHttpRequestCount > httpMaxPendingRequest) {
 			this.reportDdosCollection.insertOne({
@@ -481,8 +498,8 @@ export class AntiDdosMiddleware {
 		let ip = req.xip;
 
 		let maxUploadPendingRequest = this.maxUploadPendingRequest;
-		if (this.ipBlackLst.indexOf(ip) != -1) maxUploadPendingRequest = maxUploadPendingRequest / AntiDdosMiddleware.K_MULTIPLE;
-		else if (this.ipWhiteLst.indexOf(ip) != -1) maxUploadPendingRequest = maxUploadPendingRequest * AntiDdosMiddleware.K_MULTIPLE;
+		if (this.ipBlackLst.includes(ip)) maxUploadPendingRequest = maxUploadPendingRequest / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
+		else if (this.ipWhiteLst.includes(ip)) maxUploadPendingRequest = maxUploadPendingRequest * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 		if (this.currentHttpUploadRequestCount > maxUploadPendingRequest) {
 			this.reportDdosCollection.insertOne({
@@ -527,8 +544,8 @@ export class AntiDdosMiddleware {
 		let ip = req.xip;
 
 		let maxDownloadPendingRequest = this.maxDownloadPendingRequest;
-		if (this.ipBlackLst.indexOf(ip) != -1) maxDownloadPendingRequest = maxDownloadPendingRequest / AntiDdosMiddleware.K_MULTIPLE;
-		else if (this.ipWhiteLst.indexOf(ip) != -1) maxDownloadPendingRequest = maxDownloadPendingRequest * AntiDdosMiddleware.K_MULTIPLE;
+		if (this.ipBlackLst.includes(ip)) maxDownloadPendingRequest = maxDownloadPendingRequest / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
+		else if (this.ipWhiteLst.includes(ip)) maxDownloadPendingRequest = maxDownloadPendingRequest * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
 		if (this.currentHttpDownloadRequestCount > maxDownloadPendingRequest) {
 			this.reportDdosCollection.insertOne({
@@ -587,6 +604,13 @@ export class AntiDdosMiddleware {
 					}
 					else if (banDdosResult.type == BanType.WHITE_LIST) {
 						this.ipWhiteLst.push(ip);
+
+						if (this.defaultIPWhiteLst) {
+							for (let j = 0; j < this.defaultIPWhiteLst.length; j++) {
+								let defaultIP = this.defaultIPWhiteLst[j];
+								if (!this.ipWhiteLst.includes(defaultIP)) this.ipWhiteLst.push(defaultIP);
+							}
+						}
 					}
 				}
 			}
@@ -707,6 +731,7 @@ export class AntiDdosMiddleware {
 		this.currentHttpUploadRequestCount = 0;
 		this.currentHttpDownloadRequestCount = 0;
 
+		this.defaultIPWhiteLst = [];
 		this.ipWhiteLst = [];
 		this.ipBlackLst = [];
 	}

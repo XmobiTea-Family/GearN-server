@@ -18,7 +18,7 @@ class GetPlayerDataOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.PlayerDataKeys, isOptional: true })
+	@GNArrayDataMember({ code: GNParameterCode.PlayerDataKeys, isOptional: true, elementCls: String })
 	playerDataKeys?: Array<string>;
 
 	public override isValidRequest() {

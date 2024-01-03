@@ -13,9 +13,9 @@ import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCo
 import { GNHashtableDataMember, StringDataMember } from "./../../../../../GN-common/entity/DataMember";
 import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 import { CloudScriptService } from "../../../../service/CloudScriptService";
-import { xConfig } from "../../../../../GN-library/xconfig/lib/xConfig";
-import { Debug } from "../../../../../GN-library/xdebug/lib/xDebug";
+import { CacheService, ICacheServiceController, MemoryCacheServiceController, MongoDbCacheServiceController } from "../../../../service/CacheService";
 import { GNServerSettingsOptions, LogType } from "@xmobitea/gn-typescript-client";
+import { ConfigService } from "../../../../service/ConfigService";
 
 class GrantGameOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
@@ -126,9 +126,10 @@ export class GrantGameRequestHandler extends RequestHandler {
         {
             let gamePlayerCollection = this.gnServer.getDatabase().systemGameCollection("GamePlayer", gameId);
 
-            await gamePlayerCollection.createIndex({ "userId": 1 }, { background: true, name: "userId_1" });
-            await gamePlayerCollection.createIndex({ "segments": 1 }, { background: true, name: "segments_1" });
-            await gamePlayerCollection.createIndex({ "displayNameNormalize": 1 }, { background: true, name: "displayNameNormalize_1" });
+            await gamePlayerCollection.createIndex({ userId: 1 }, { background: true, name: "userId_1" });
+            await gamePlayerCollection.createIndex({ segments: 1 }, { background: true, name: "segments_1" });
+            await gamePlayerCollection.createIndex({ displayNameNormalize: 1 }, { background: true, name: "displayNameNormalize_1" });
+            await gamePlayerCollection.createIndex({ tsLastLogin: -1 }, { background: true, name: "tsLastLogin_-1" });
         }
 
         {
@@ -139,8 +140,8 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
-            await currencyLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
-            await currencyLogCollection.createIndex({ "userId": 1, "key": 1, "_id": -1 }, { background: true, name: "userId_1_key_1_id_-1" });
+            await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
+            await currencyLogCollection.createIndex({ userId: 1, key: 1, "_id": -1 }, { background: true, name: "userId_1_key_1_id_-1" });
         }
 
         {
@@ -151,21 +152,21 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
-            await statisticsLogCollection.createIndex({ "userId": 1, "key": 1, "_id": -1 }, { background: true, name: "userId_1_key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
         }
 
         {
             let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsBackup", gameId);
-            await backupStatisticsLeaderboardCollection.createIndex({ "key": 1, "version": 1 }, { background: true, name: "key_1_version_1" });
+            await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
         }
 
         {
             let characterPlayerCollection = this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", gameId);
 
-            await characterPlayerCollection.createIndex({ "characterId": 1 }, { background: true, name: "characterId_1" });
-            await characterPlayerCollection.createIndex({ "segments": 1 }, { background: true, name: "segments_1" });
-            await characterPlayerCollection.createIndex({ "displayNameNormalize": 1 }, { background: true, name: "displayNameNormalize_1" });
+            await characterPlayerCollection.createIndex({ characterId: 1 }, { background: true, name: "characterId_1" });
+            await characterPlayerCollection.createIndex({ segments: 1 }, { background: true, name: "segments_1" });
+            await characterPlayerCollection.createIndex({ displayNameNormalize: 1 }, { background: true, name: "displayNameNormalize_1" });
         }
 
         {
@@ -176,8 +177,8 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
-            await currencyLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
-            await currencyLogCollection.createIndex({ "characterId": 1, "key": 1, "_id": -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
+            await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
+            await currencyLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
         }
 
         {
@@ -188,21 +189,21 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
-            await statisticsLogCollection.createIndex({ "characterId": 1, "key": 1, "_id": -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
         }
 
         {
             let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsBackup", gameId);
-            await backupStatisticsLeaderboardCollection.createIndex({ "key": 1, "version": 1 }, { background: true, name: "key_1_version_1" });
+            await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
         }
 
         {
             let groupCollection = this.gnServer.getDatabase().systemGameCollection("Group", gameId);
 
-            await groupCollection.createIndex({ "groupId": 1 }, { background: true, name: "groupId_1" });
-            await groupCollection.createIndex({ "segments": 1 }, { background: true, name: "segments_1" });
-            await groupCollection.createIndex({ "displayNameNormalize": 1 }, { background: true, name: "displayNameNormalize_1" });
+            await groupCollection.createIndex({ groupId: 1 }, { background: true, name: "groupId_1" });
+            await groupCollection.createIndex({ segments: 1 }, { background: true, name: "segments_1" });
+            await groupCollection.createIndex({ displayNameNormalize: 1 }, { background: true, name: "displayNameNormalize_1" });
         }
 
         {
@@ -213,8 +214,8 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.CurrencyLog", gameId);
-            await currencyLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
-            await currencyLogCollection.createIndex({ "groupId": 1, "key": 1, "_id": -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
+            await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
+            await currencyLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
         }
 
         {
@@ -225,13 +226,13 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
-            await statisticsLogCollection.createIndex({ "groupId": 1, "key": 1, "_id": -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
         }
 
         {
             let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsBackup", gameId);
-            await backupStatisticsLeaderboardCollection.createIndex({ "key": 1, "version": 1 }, { background: true, name: "key_1_version_1" });
+            await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
         }
 
         {
@@ -242,15 +243,15 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let groupMessageCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.Message", gameId);
-            await groupMessageCollection.createIndex({ "groupId": 1, "_id": -1 }, { background: true, name: "groupId_1_id_-1" });
+            await groupMessageCollection.createIndex({ groupId: 1, _id: -1 }, { background: true, name: "groupId_1_id_-1" });
         }
 
         {
             let inventoryCollection = this.gnServer.getDatabase().systemGameCollection("Inventory", gameId);
 
-            await inventoryCollection.createIndex({ "itemId": 1 }, { background: true, name: "itemId_1" });
-            await inventoryCollection.createIndex({ "segments": 1 }, { background: true, name: "segments_1" });
-            await inventoryCollection.createIndex({ "displayNameNormalize": 1 }, { background: true, name: "displayNameNormalize_1" });
+            await inventoryCollection.createIndex({ itemId: 1 }, { background: true, name: "itemId_1" });
+            await inventoryCollection.createIndex({ segments: 1 }, { background: true, name: "segments_1" });
+            await inventoryCollection.createIndex({ displayNameNormalize: 1 }, { background: true, name: "displayNameNormalize_1" });
         }
 
         {
@@ -261,21 +262,21 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsLog", gameId);
-            await statisticsLogCollection.createIndex({ "key": 1, "_id": -1 }, { background: true, name: "key_1_id_-1" });
-            await statisticsLogCollection.createIndex({ "itemId": 1, "key": 1, "_id": -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
+            await statisticsLogCollection.createIndex({ itemId: 1, key: 1, _id: -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
         }
 
         {
             let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsBackup", gameId);
-            await backupStatisticsLeaderboardCollection.createIndex({ "key": 1, "version": 1 }, { background: true, name: "key_1_version_1" });
+            await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
         }
 
         {
             let storeInventoryCollection = this.gnServer.getDatabase().systemGameCollection("StoreInventory", gameId);
 
-            await storeInventoryCollection.createIndex({ "storeId": 1 }, { background: true, name: "storeId_1" });
-            await storeInventoryCollection.createIndex({ "displayNameNormalize": 1 }, { background: true, name: "displayNameNormalize_1" });
-            await storeInventoryCollection.createIndex({ "tags": 1 }, { background: true, sparse: true, name: "tags_1" });
+            await storeInventoryCollection.createIndex({ storeId: 1 }, { background: true, name: "storeId_1" });
+            await storeInventoryCollection.createIndex({ displayNameNormalize: 1 }, { background: true, name: "displayNameNormalize_1" });
+            await storeInventoryCollection.createIndex({ tags: 1 }, { background: true, sparse: true, name: "tags_1" });
         }
 
         {
@@ -286,15 +287,20 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let storeInventoryLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
-            await storeInventoryLogCollection.createIndex({ "storeId": 1, "id": 1, "storeReceiveType": -1, "_id": -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
-            await storeInventoryLogCollection.createIndex({ "id": 1, "storeReceiveType": -1, "_id": -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
-            await storeInventoryLogCollection.createIndex({ "storeReceiveType": -1, "_id": -1 }, { background: true, name: "storeReceiveType_-1_id_-1" });
+            await storeInventoryLogCollection.createIndex({ storeId: 1, id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
+            await storeInventoryLogCollection.createIndex({ id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
+            await storeInventoryLogCollection.createIndex({ storeReceiveType: -1, _id: -1 }, { background: true, name: "storeReceiveType_-1_id_-1" });
+        }
+
+        {
+            let storeInventoryUsedCollection = this.gnServer.getDatabase().systemGameCollection("StoreInventory.StoreUsed", gameId);
+            await storeInventoryUsedCollection.createIndex({ storeId: 1 }, { background: true, name: "storeId_1" });
         }
 
         {
             let receiptIAPCollection = this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", gameId);
-            receiptIAPCollection.createIndex({ "payloadMd5": 1 }, { background: true, name: "payloadMd5_1" });
-            receiptIAPCollection.createIndex({ "transactionId": 1 }, { background: true, name: "transactionId_1" });
+            receiptIAPCollection.createIndex({ payloadMd5: 1 }, { background: true, name: "payloadMd5_1" });
+            receiptIAPCollection.createIndex({ transactionId: 1 }, { background: true, name: "transactionId_1" });
         }
 
         {
@@ -306,10 +312,10 @@ export class GrantGameRequestHandler extends RequestHandler {
 
             let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
-            await matchmakingTicketCollection.createIndex({ "userIds": 1, "queueName": 1, "status": -1 }, { background: true, name: "userIds_1_queueName_1_status_-1" });
-            await matchmakingTicketCollection.createIndex({ "queueName": 1, "status": -1, "tsCreate": -1 }, { background: true, name: "queueName_1_status_-1_tsCreate_-1" });
-            await matchmakingTicketCollection.createIndex({ "ticketId": 1 }, { background: true, name: "ticketId_1" });
-            await matchmakingTicketCollection.createIndex({ "status": -1, "_id": -1 }, { background: true, name: "status_-1_id_-1" });
+            await matchmakingTicketCollection.createIndex({ userIds: 1, queueName: 1, status: -1 }, { background: true, name: "userIds_1_queueName_1_status_-1" });
+            await matchmakingTicketCollection.createIndex({ queueName: 1, status: -1, tsCreate: -1 }, { background: true, name: "queueName_1_status_-1_tsCreate_-1" });
+            await matchmakingTicketCollection.createIndex({ ticketId: 1 }, { background: true, name: "ticketId_1" });
+            await matchmakingTicketCollection.createIndex({ status: -1, _id: -1 }, { background: true, name: "status_-1_id_-1" });
         }
 
         {
@@ -320,22 +326,39 @@ export class GrantGameRequestHandler extends RequestHandler {
             });
 
             let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CloudScript.Log", gameId);
-            await cloudScriptFunctionLogCollection.createIndex({ "tsCreate": -1 }, { background: true, name: "tsCreate-1" });
+            await cloudScriptFunctionLogCollection.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate-1" });
         }
 
         {
             let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", gameId);
 
-            await matchCollection.createIndex({ "matchId": 1 }, { background: true, name: "matchId_1" });
-            await matchCollection.createIndex({ "queueName": 1, "tsCreate": -1 }, { background: true, name: "queueName_1_tsCreate_-1" });
-            await matchCollection.createIndex({ "status": -1, "tsCreate": -1 }, { background: true, name: "status_-1_tsCreate_-1" });
+            await matchCollection.createIndex({ matchId: 1 }, { background: true, name: "matchId_1" });
+            await matchCollection.createIndex({ queueName: 1, tsCreate: -1 }, { background: true, name: "queueName_1_tsCreate_-1" });
+            await matchCollection.createIndex({ status: -1, tsCreate: -1 }, { background: true, name: "status_-1_tsCreate_-1" });
         }
 
         {
             let configCollection = this.gnServer.getDatabase().systemGameCollection("Config", gameId);
-            await configCollection.createIndex({ "configName": 1, "label": 1 }, { background: true, unique: true, name: "configName_1_label_1" });
+            await configCollection.createIndex({ configName: 1, label: 1 }, { background: true, unique: true, name: "configName_1_label_1" });
         }
 
+        {
+            let cacheCollection = this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId);
+            await cacheCollection.createIndex({ key: 1 }, { background: true, name: "key_1" });
+        }
+
+        this.gnServer.getHttpApp().getClusterHandler().sendEvent("addGameId", { gameId: gameId });
+
+        operationResponse.setParameter(GNParameterCode.GameId, gameId);
+
+        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GrantGame", request, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
+    }
+
+    private addGameId(gameId: string) {
         let gameIds = this.gnServer.getGameIds();
         if (!gameIds.includes(gameId)) gameIds.push(gameId);
 
@@ -367,23 +390,35 @@ export class GrantGameRequestHandler extends RequestHandler {
         }
 
         {
-            let xConfigGame = new xConfig();
+            let configService = new ConfigService();
 
             let configCollection = this.gnServer.getDatabase().systemGameCollection("Config", gameId);
-            xConfigGame.setConfigCollection(gameId, configCollection);
+            configService.setConfigCollection(gameId, configCollection);
 
-            this.gnServer.setConfigGame(gameId, xConfigGame);
-            xConfigGame.run(() => {
-                Debug.log("[GN] Config Game sync success for gameId " + gameId);
-            });
+            this.gnServer.setConfigGame(gameId, configService);
+            configService.run();
         }
 
-        operationResponse.setParameter(GNParameterCode.GameId, gameId);
+        {
+            let isSingleNode = this.gnServer.getHttpApp().getClusterHandler().getIsSingleNode();
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+            let cacheServiceController: ICacheServiceController;
+            if (isSingleNode) cacheServiceController = new MemoryCacheServiceController();
+            else cacheServiceController = new MongoDbCacheServiceController(this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId));
 
-        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GrantGame", request, secretInfo, operationRequest, operationResponse);
+            let cacheService = new CacheService(cacheServiceController);
+            this.gnServer.setCacheService(gameId, cacheService);
+        }
 
-        return operationResponse;
+    }
+
+    protected init(): void {
+        let thiz = this;
+
+        this.gnServer.getHttpApp().getClusterHandler().onEvent("addGameId", (data) => {
+            let gameId = data.gameId as string;
+
+            thiz.addGameId(gameId);
+        });
     }
 }

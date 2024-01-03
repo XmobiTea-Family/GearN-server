@@ -26,7 +26,7 @@ class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
     @NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
     skip?: number;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
 
     @BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
@@ -141,8 +141,6 @@ export class GetCurrencyLeaderboardRequestHandler extends MasterPlayerBaseReques
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
-
         let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
         let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
 
@@ -160,8 +158,10 @@ export class GetCurrencyLeaderboardRequestHandler extends MasterPlayerBaseReques
             }
         }
 
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
         if (request.loadFromCache) {
-            if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+            if (!(await cacheData.isValid(cacheKey))) {
                 request.loadFromCache = false;
             }
         }
@@ -171,7 +171,7 @@ export class GetCurrencyLeaderboardRequestHandler extends MasterPlayerBaseReques
         let masterPlayers: MasterPlayer[];
 
         if (request.loadFromCache) {
-            masterPlayers = this.gnServer.getCacheData().getData(cacheKey);
+            masterPlayers = await cacheData.getData(cacheKey);
 
             for (let i = request.skip; i < request.skip + request.limit; i++) {
                 if (i >= masterPlayers.length) break;
@@ -190,6 +190,8 @@ export class GetCurrencyLeaderboardRequestHandler extends MasterPlayerBaseReques
             }
         }
         else {
+            let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+
             if (request.skip + request.limit <= 100) {
                 masterPlayerFindOptions = null;
 
@@ -211,7 +213,7 @@ export class GetCurrencyLeaderboardRequestHandler extends MasterPlayerBaseReques
                     gnResults.add(gnResult);
                 }
 
-                this.gnServer.getCacheData().setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+                await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
             }
             else {
                 masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, masterPlayerFindOptions);

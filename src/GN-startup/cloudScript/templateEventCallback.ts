@@ -1,5 +1,3 @@
-import { parentPort, workerData } from "worker_threads";
-
 import { SecretInfo, SecretPermissionItem } from "../../index";
 import { AuthInfo } from "../../index";
 import { authenticate_InfoRequestParam as authenticate_InfoRequestParam } from "../../index";
@@ -69,6 +67,8 @@ import { ThirtPartyFacebookSettingsParam } from "../../index";
 import { ThirtPartyGameCenterSettingsParam } from "../../index";
 import { ThirtPartyGooglePlayGameSettingsParam } from "../../index";
 import { ThirtPartyParam } from "../../index";
+import { EmailSettingsParam } from "../../index";
+import { PushNotificationSettingsParam } from "../../index";
 import { AnalyticsRequestParams } from "../../index";
 import { ServerGameDataRequestParams } from "../../index";
 import { MatchmakingTicketCanMatch } from "../../index";
@@ -136,9 +136,14 @@ import {
 	GroupStatus,
 	GNDebug,
 	ItemType,
+    StoreItemType,
 	LogType,
 	GNSupport,
 	PostType,
+	GetAuthInfoResponse,
+	PushPlatformType,
+	StoreReceiveType,
+    GNUtils,
 } from "@xmobitea/gn-typescript-client";
 
 import * as mongodb from "mongodb";
@@ -170,7 +175,36 @@ class CloudScriptAdmin {
 	public readonly storeInventory = GNNetwork.storeInventory.admin;
 	public readonly multiplayer = GNNetwork.multiplayer.admin;
 	public readonly cloudScript = GNNetwork.cloudScript.admin;
-	public readonly dashboard = GNNetwork.dashboard;
+	public readonly dashboard = {
+        getAdminAccountList: GNNetwork.dashboard.getAdminAccountList,
+        getAdminAccountListAsync: GNNetwork.dashboard.getAdminAccountListAsync,
+        getGameInformation: GNNetwork.dashboard.getGameInformation,
+        getGameInformationAsync: GNNetwork.dashboard.getGameInformationAsync,
+        getGameList: GNNetwork.dashboard.getGameList,
+        getGameListAsync: GNNetwork.dashboard.getGameListAsync,
+        getMasterGameSettings: GNNetwork.dashboard.getMasterGameSettings,
+        getMasterGameSettingsAsync: GNNetwork.dashboard.getMasterGameSettingsAsync,
+        getSecretInfoInformation: GNNetwork.dashboard.getSecretInfoInformation,
+        getSecretInfoInformationAsync: GNNetwork.dashboard.getSecretInfoInformationAsync,
+        getSecretInfoList: GNNetwork.dashboard.getSecretInfoList,
+        getSecretInfoListAsync: GNNetwork.dashboard.getSecretInfoListAsync,
+        getServerLog: GNNetwork.dashboard.getServerLog,
+        getServerLogAsync: GNNetwork.dashboard.getServerLogAsync,
+        setGameInformation: GNNetwork.dashboard.setGameInformation,
+        setGameInformationAsync: GNNetwork.dashboard.setGameInformationAsync,
+        getUsernameAdminAccount: GNNetwork.dashboard.getUsernameAdminAccount,
+        getUsernameAdminAccountAsync: GNNetwork.dashboard.getUsernameAdminAccountAsync,
+        getAnalytics: GNNetwork.dashboard.getAnalytics,
+        getAnalyticsAsync: GNNetwork.dashboard.getAnalyticsAsync,
+        resetStatisticsLeaderboard: GNNetwork.dashboard.resetStatisticsLeaderboard,
+        resetStatisticsLeaderboardAsync: GNNetwork.dashboard.resetStatisticsLeaderboardAsync,
+        getBackupStatisticsLeaderboardVersion: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersion,
+        getBackupStatisticsLeaderboardVersionAsync: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersionAsync,
+        getServerGameData: GNNetwork.dashboard.getServerGameData,
+        getServerGameDataAsync: GNNetwork.dashboard.getServerGameDataAsync,
+        deleteInDatabase: GNNetwork.dashboard.deleteInDatabase,
+        deleteInDatabaseAsync: GNNetwork.dashboard.deleteInDatabaseAsync,
+    };
 	public send(
 		requestType: RequestType,
 		requestRole: RequestRole,
@@ -313,7 +347,128 @@ class CloudScriptSocket {
 	}
 
 	private async sendEvent(event: CloudScriptEvent) {
-		parentPort?.postMessage(event);
+        if (process?.send)
+		    process.send(event);
+	}
+}
+
+class CloudScriptMatchmaking {
+	public async confirmServerDetail(gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, serverDetail: ServerDetail) {
+		if (process?.send)
+		    process.send({
+                eventType: 10,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        gameId: gameId,
+                        matchmakingTicketCanMatch: matchmakingTicketCanMatch,
+                        serverDetail: serverDetail,
+                    },
+                },
+            });
+	}
+}
+
+class CloudScriptMail {
+	public async send(email: string, subject: string, contentHtml: string) {
+		if (process?.send)
+		    process.send({
+                eventType: 20,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        email: email,
+                        subject: subject,
+                        contentHtml: contentHtml,
+                    },
+                },
+            });
+	}
+
+	public async sendToMore(emails: string[], subject: string, contentHtml: string) {
+		if (process?.send)
+		    process.send({
+                eventType: 21,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        emails: emails,
+                        subject: subject,
+                        contentHtml: contentHtml,
+                    },
+                },
+            });
+	}
+}
+
+class CloudScriptPushNotification {
+	public async send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
+		if (process?.send)
+		    process.send({
+                eventType: 30,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        token: token,
+                        title: title,
+                        body: body,
+                        badge: badge,
+                        sound: sound,
+                        icon: icon,
+                        data: data,
+                    },
+                },
+            });
+	}
+
+	public async sendToMore(tokens: string[], title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
+		if (process?.send)
+		    process.send({
+                eventType: 31,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        tokens: tokens,
+                        title: title,
+                        body: body,
+                        badge: badge,
+                        sound: sound,
+                        icon: icon,
+                        data: data,
+                    },
+                },
+            });
+	}
+
+	public async sendToTopic(topic: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
+		if (process?.send)
+		    process.send({
+                eventType: 32,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        topic: topic,
+                        title: title,
+                        body: body,
+                        badge: badge,
+                        sound: sound,
+                        icon: icon,
+                        data: data,
+                    },
+                },
+            });
 	}
 }
 
@@ -321,6 +476,7 @@ enum EventCallbackType {
 	Pre = 0,
 	Post = 1,
 	System = 2,
+    Event = 3,
 }
 
 interface CloudScriptRequest {
@@ -350,7 +506,7 @@ interface CloudScriptRequest {
 		parameters: {};
 		encrypted: boolean;
 	};
-	log?: (log: any) => void;
+	log: (log: any) => void;
 }
 
 interface CloudScriptResponse {
@@ -392,126 +548,145 @@ interface FunctionResponse {
 	errorMessage: any;
 }
 
-if (parentPort) {
-	parentPort.on("message", async (request: CloudScriptRequest) => {
-		let startTime = performance.now();
-		let startMemoryUsage = process.memoryUsage();
+process?.on("message", async (request: CloudScriptRequest) => {
+    let startTime = performance.now();
+    let startMemoryUsage = process.memoryUsage();
 
-		let logs: string[] = [];
+    let logs: string[] = [];
 
-		let handleResponse: FunctionResponse = null as any;
+    let handleResponse: FunctionResponse = null as any;
 
-		if (request.eventType == EventCallbackType.System) {
-			if (request.eventName == "system_RequestServerDetail") {
-				let functionRequest: FunctionRequest = {
-					eventName: request.eventName,
-					operationRequest: null as any,
-					secretInfo: null as any,
-					request: request.request,
-					log(log: any) {
-						logs.push(log);
-					},
-				};
-	
-				handleResponse = await ___handleMatchmakingFunction(functionRequest);
-			}
-			else {
-				let functionRequest: FunctionRequest = {
-					eventName: request.eventName,
-					operationRequest: null as any,
-					secretInfo: null as any,
-					request: null as any,
-					log(log: any) {
-						logs.push(log);
-					},
-				};
-	
-				handleResponse = await ___handleSystemFunction(functionRequest);
-			}
-		} else {
-			let originOperationRequest = request.operationRequest;
-			let operationRequest = new OperationRequest(originOperationRequest.operationCode, originOperationRequest.encrypted);
-			if (originOperationRequest.parameters) {
-				operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
-			}
+    if (request.eventType == EventCallbackType.System) {
+        if (request.eventName == "system_RequestServerDetail") {
+            let functionRequest: FunctionRequest = {
+                eventName: request.eventName,
+                operationRequest: null as any,
+                secretInfo: null as any,
+                request: request.request,
+                log(log: any) {
+                    logs.push(JSON.stringify(log));
+                },
+            };
 
-			let originSecretInfo = request.secretInfo;
-			let secretInfo: SecretInfo = null as any;
-			if (originSecretInfo) {
-				secretInfo = SecretInfo.Builder()
-					.setSecretKey(originSecretInfo.secretKey)
-					.setRole(originSecretInfo.role)
-					.setIsRemove(originSecretInfo.remove)
-					.setTsExpire(originSecretInfo.tsExpire)
-					.setPermission(originSecretInfo.permission)
-					.setGameId(originSecretInfo.gameId)
-					.setIsDefault(originSecretInfo.isDefault)
-					.setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
-					.build();
-			}
+            handleResponse = await ___handleMatchmakingFunction(functionRequest);
+        }
+        else {
+            let functionRequest: FunctionRequest = {
+                eventName: request.eventName,
+                operationRequest: null as any,
+                secretInfo: null as any,
+                request: null as any,
+                log(log: any) {
+                    logs.push(JSON.stringify(log));
+                },
+            };
 
-			if (request.eventType == EventCallbackType.Pre) {
-				let functionRequest: FunctionRequest = {
-					eventName: request.eventName,
-					operationRequest: operationRequest,
-					secretInfo: secretInfo,
-					request: request.request,
-					log(log: any) {
-						logs.push(log);
-					},
-				};
+            handleResponse = await ___handleSystemFunction(functionRequest);
+        }
+    } else if (request.eventType == EventCallbackType.Event) {
+        let originOperationEvent = request.operationRequest;
+        
+        let operationEvent = new OperationEvent(originOperationEvent.operationCode, (originOperationEvent.parameters ? GNHashtable.builder().addAll(originOperationEvent.parameters).build() : null as any), originOperationEvent.encrypted);
 
-				handleResponse = await ___handlePreFunction(functionRequest);
-			} else if (request.eventType == EventCallbackType.Post) {
-				let originOperationResponse = request.operationResponse;
-				let operationResponse: OperationResponse = null as any;
+        let functionRequest: FunctionRequest = {
+            eventName: request.eventName,
+            operationRequest: null as any,
+            secretInfo: null as any,
+            request: {
+                operationEvent: operationEvent,
+                request: request.request,
+            },
+            log(log: any) {
+                logs.push(JSON.stringify(log));
+            },
+        };
 
-				if (originOperationResponse) {
-					operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId, originOperationRequest.encrypted);
-					operationResponse.setReturnCode(originOperationResponse.returnCode);
-					operationResponse.setDebugMessage(originOperationResponse.debugMessage);
+        handleResponse = await ___handleEventFunction(functionRequest);
+    } else {
+        let originOperationRequest = request.operationRequest;
+        let operationRequest = new OperationRequest(originOperationRequest.operationCode, originOperationRequest.encrypted);
+        if (originOperationRequest.parameters) {
+            operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
+        }
 
-					if (originOperationResponse.parameters) {
-						operationResponse.setParameters(GNHashtable.builder().addAll(originOperationResponse.parameters).build());
-					}
-				}
+        let originSecretInfo = request.secretInfo;
+        let secretInfo: SecretInfo = null as any;
+        if (originSecretInfo) {
+            secretInfo = SecretInfo.Builder()
+                .setSecretKey(originSecretInfo.secretKey)
+                .setRole(originSecretInfo.role)
+                .setIsRemove(originSecretInfo.remove)
+                .setTsExpire(originSecretInfo.tsExpire)
+                .setPermission(originSecretInfo.permission)
+                .setGameId(originSecretInfo.gameId)
+                .setIsDefault(originSecretInfo.isDefault)
+                .setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
+                .build();
+        }
 
-				let functionRequest: FunctionRequest = {
-					eventName: request.eventName,
-					operationRequest: operationRequest,
-					operationResponse: operationResponse,
-					secretInfo: secretInfo,
-					request: request.request,
-					log(log: any) {
-						logs.push(log);
-					},
-				};
+        if (request.eventType == EventCallbackType.Pre) {
+            let functionRequest: FunctionRequest = {
+                eventName: request.eventName,
+                operationRequest: operationRequest,
+                secretInfo: secretInfo,
+                request: request.request,
+                log(log: any) {
+                    logs.push(JSON.stringify(log));
+                },
+            };
 
-				handleResponse = await ___handlePostFunction(functionRequest);
-			}
-		}
+            handleResponse = await ___handlePreFunction(functionRequest);
+        } else if (request.eventType == EventCallbackType.Post) {
+            let originOperationResponse = request.operationResponse;
+            let operationResponse: OperationResponse = null as any;
 
-		let endTime = performance.now();
-		let endMemoryUsage = process.memoryUsage();
+            if (originOperationResponse) {
+                operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId, originOperationRequest.encrypted);
+                operationResponse.setReturnCode(originOperationResponse.returnCode);
+                operationResponse.setDebugMessage(originOperationResponse.debugMessage);
 
-		let memoryUsedInBytes = endMemoryUsage.rss - startMemoryUsage.rss;
-		let executeTimeInMs = endTime - startTime;
+                if (originOperationResponse.parameters) {
+                    operationResponse.setParameters(GNHashtable.builder().addAll(originOperationResponse.parameters).build());
+                }
+            }
 
-		//let cost = (memoryUsedInGb * executeTime) / 1000 * 0.022;
+            let functionRequest: FunctionRequest = {
+                eventName: request.eventName,
+                operationRequest: operationRequest,
+                operationResponse: operationResponse,
+                secretInfo: secretInfo,
+                request: request.request,
+                log(log: any) {
+                    logs.push(JSON.stringify(log));
+                },
+            };
 
-		let response: CloudScriptResponse = {
-			responseId: request.requestId,
-			response: handleResponse as any,
-			stats: {
-				executeTimeInMs: executeTimeInMs,
-				memoryUsedInBytes: memoryUsedInBytes,
-			},
-			logs: logs,
-		};
+            handleResponse = await ___handlePostFunction(functionRequest);
+        }
+    }
 
-		parentPort?.postMessage(response);
-	});
-}
+    let endTime = performance.now();
+    let endMemoryUsage = process.memoryUsage();
+
+    let memoryUsedInBytes = endMemoryUsage.heapUsed - startMemoryUsage.heapUsed;
+    if (memoryUsedInBytes <= 0) memoryUsedInBytes = 8192;
+    let executeTimeInMs = endTime - startTime;
+
+    //let cost = (memoryUsedInGb * executeTime) / 1000 * 0.022;
+
+    let response: CloudScriptResponse = {
+        responseId: request.requestId,
+        response: handleResponse as any,
+        stats: {
+            executeTimeInMs: executeTimeInMs,
+            memoryUsedInBytes: memoryUsedInBytes,
+        },
+        logs: logs,
+    };
+
+    if (process?.send)
+        process.send(response);
+});
 
 async function ___handleMatchmakingFunction(request: FunctionRequest): Promise<FunctionResponse> {
 	let handler = systemMatchmakingHandlers[request.eventName];
@@ -566,6 +741,46 @@ async function ___handleSystemFunction(request: FunctionRequest): Promise<Functi
 
 	try {
 		await handler(request.log);
+	} catch (err: any) {
+		answer.status = ExecuteResponseStatus.Exception;
+		answer.errorMessage = err.message;
+	}
+
+	return answer;
+}
+
+async function ___handleEventFunction(request: FunctionRequest): Promise<FunctionResponse> {
+    let handler = eventHandlers[request.eventName];
+
+	if (handler == null) {
+		return {
+			status: ExecuteResponseStatus.FunctionNameNotFound,
+			result: null,
+			request: null,
+			errorMessage: null,
+		};
+	}
+
+	let answer: FunctionResponse = {
+		status: ExecuteResponseStatus.Ok,
+		errorMessage: null,
+		result: null,
+		request: null,
+	};
+
+	try {
+		await handler(request.request.request, request.request.operationEvent, request.log);
+
+        let operationEvent = request.request.operationEvent;
+
+        answer.result = {
+            returnCode: operationEvent.getEventCode(),
+            debugMessage: null as any,
+            encrypted: operationEvent.isEncrypted(),
+            parameters: operationEvent.getParameters()?.toData(),
+        };
+
+        answer.request = request.request.request;
 	} catch (err: any) {
 		answer.status = ExecuteResponseStatus.Exception;
 		answer.errorMessage = err.message;
@@ -650,7 +865,7 @@ async function ___handlePostFunction(request: FunctionRequest): Promise<Function
 }
 
 {
-	let gnServerSettingsOptions: GNServerSettingsOptions = workerData.gnServerSettingsOptions;
+	let gnServerSettingsOptions: GNServerSettingsOptions = JSON.parse(process.env.gnServerSettingsOptions ?? "");
 
 	let gnServerSettings = new GNServerSettings();
 	gnServerSettings.config(gnServerSettingsOptions);
@@ -662,46 +877,26 @@ const admin = new CloudScriptAdmin();
 const database = new CloudScriptDatabase();
 const http = new CloudScriptHttp();
 const socket = new CloudScriptSocket();
+const matchmaking = new CloudScriptMatchmaking();
+const mail = new CloudScriptMail();
+const pushNotification = new CloudScriptPushNotification();
 
 {
-	let dbConnection = workerData.dbConnection;
+	let dbConnection = JSON.parse(process.env.dbConnection ?? "");
 	database.init(dbConnection.url, dbConnection.dbName, dbConnection.options);
 }
 
-const preHandlers: Record<
-	string,
-	(request: any, secretInfo: SecretInfo, operationRequest: OperationRequest, log?: (log: any) => void) => Promise<OperationResponse | null>
-> = {};
+process.env.dbConnection = "";
+process.env.gnServerSettingsOptions = "";
 
-const postHandlers: Record<
-	string,
-	(
-		request: any,
-		secretInfo: SecretInfo,
-		operationRequest: OperationRequest,
-		operationResponse: OperationResponse,
-		log?: (log: any) => void
-	) => Promise<OperationResponse>
-> = {};
+const preHandlers: Record<string, (request: any, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => Promise<OperationResponse | null>> = {};
 
-const systemHandlers: Record<string, (log?: (log: any) => void) => Promise<void>> = {};
+const postHandlers: Record<string, (request: any, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
 
-const confirmServerDetail = (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, serverDetail: ServerDetail) => {
-	parentPort?.postMessage({
-		eventType: 10,
-		receiver: null,
-		operationEvent: {
-			eventCode: 0,
-			encrypted: false,
-			parameters: {
-				gameId: gameId,
-				matchmakingTicketCanMatch,
-				serverDetail: serverDetail,
-			},
-		},
-	});
-}
+const systemHandlers: Record<string, (log: (log: any) => void) => Promise<void>> = {};
 
-const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log?: (log: any) => void) => Promise<{ success: boolean }>> = {};
+const eventHandlers: Record<string, (request: any, operationEvent: OperationEvent, log: (log: any) => void) => Promise<void>> = {};
+
+const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void) => Promise<{ success: boolean }>> = {};
 
 //$replaceScript

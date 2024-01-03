@@ -23,7 +23,7 @@ class GetCreateLeaderboardOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
 	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
@@ -145,8 +145,10 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 			}
 		}
 
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
 		if (request.loadFromCache) {
-			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+			if (!(await cacheData.isValid(cacheKey))) {
 				request.loadFromCache = false;
 			}
 		}
@@ -156,7 +158,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 		let groups: Group[];
 
 		if (request.loadFromCache) {
-			groups = this.gnServer.getCacheData().getData(cacheKey);
+			groups = await cacheData.getData(cacheKey);
 
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
 				if (i >= groups.length) break;
@@ -196,7 +198,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 					gnResults.add(gnResult);
 				}
 
-				this.gnServer.getCacheData().setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
 				groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCreateAsync(request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);

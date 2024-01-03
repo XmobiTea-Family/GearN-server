@@ -18,15 +18,62 @@ export interface BigAnalyticsItem {
     analyticsPrice: number;
 
     country: {
-        countryCode: string,
+        countryCode: string;
         regions: {
-            regionCode: string,
-            regionName: string,
-            ccu: number,
-            latidute: number,
-            longitude: number,
+            regionCode: string;
+            regionName: string;
+            ccu: number;
+            latidute: number;
+            longitude: number;
         }[]
     }[];
+
+    operationSystem: {
+        cpuUsage: number;
+        memoryUsage: {
+            totalMemoryInBytes: number;
+            freeMemoryInBytes: number;
+        };
+        storageUsage: {
+            name: string;
+            fsTotalSizeInBytes: number;
+            fsUsedSizeInBytes: number;
+        }[];
+    };
+
+    databaseSystem: {
+        fsTotalSizeInBytes: number;
+        fsUsedSizeInBytes: number;
+        totalSizeInBytes: number;
+        collections: number;
+        objects: number;
+        indexes: number;
+    };
+
+    requestComplete: {
+        eventName: string;
+        results: 
+        {
+            errorCode: number;
+            count: number;
+        }[]
+    }[];
+
+    cost: {
+        requestCount: number;
+        matchmakingRequestCount: number;
+        cloudScriptGBs: number;
+        storageSizeInBytes: number;
+        dataTransferSizeInBytes: number;
+    };
+
+    monthlyCost: {
+        requestCount: number;
+        matchmakingRequestCount: number;
+        cloudScriptGBs: number;
+        storageSizeInBytes: number;
+        dataTransferSizeInBytes: number;
+    };
 }
 
 export interface IAnalyticsService {

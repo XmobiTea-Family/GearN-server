@@ -1,5 +1,3 @@
-import { parentPort, workerData } from "worker_threads";
-
 import {
 	GNNetwork,
 	Action0,
@@ -62,9 +60,14 @@ import {
 	GroupStatus,
 	GNDebug,
 	ItemType,
+    StoreItemType,
 	LogType,
 	GNSupport,
 	PostType,
+    GetAuthInfoResponse,
+    PushPlatformType,
+    StoreReceiveType,
+    GNUtils,
 } from "@xmobitea/gn-typescript-client";
 
 import * as mongodb from "mongodb";
@@ -96,7 +99,36 @@ class CloudScriptAdmin {
 	public readonly storeInventory = GNNetwork.storeInventory.admin;
 	public readonly multiplayer = GNNetwork.multiplayer.admin;
 	public readonly cloudScript = GNNetwork.cloudScript.admin;
-	public readonly dashboard = GNNetwork.dashboard;
+	public readonly dashboard = {
+        getAdminAccountList: GNNetwork.dashboard.getAdminAccountList,
+        getAdminAccountListAsync: GNNetwork.dashboard.getAdminAccountListAsync,
+        getGameInformation: GNNetwork.dashboard.getGameInformation,
+        getGameInformationAsync: GNNetwork.dashboard.getGameInformationAsync,
+        getGameList: GNNetwork.dashboard.getGameList,
+        getGameListAsync: GNNetwork.dashboard.getGameListAsync,
+        getMasterGameSettings: GNNetwork.dashboard.getMasterGameSettings,
+        getMasterGameSettingsAsync: GNNetwork.dashboard.getMasterGameSettingsAsync,
+        getSecretInfoInformation: GNNetwork.dashboard.getSecretInfoInformation,
+        getSecretInfoInformationAsync: GNNetwork.dashboard.getSecretInfoInformationAsync,
+        getSecretInfoList: GNNetwork.dashboard.getSecretInfoList,
+        getSecretInfoListAsync: GNNetwork.dashboard.getSecretInfoListAsync,
+        getServerLog: GNNetwork.dashboard.getServerLog,
+        getServerLogAsync: GNNetwork.dashboard.getServerLogAsync,
+        setGameInformation: GNNetwork.dashboard.setGameInformation,
+        setGameInformationAsync: GNNetwork.dashboard.setGameInformationAsync,
+        getUsernameAdminAccount: GNNetwork.dashboard.getUsernameAdminAccount,
+        getUsernameAdminAccountAsync: GNNetwork.dashboard.getUsernameAdminAccountAsync,
+        getAnalytics: GNNetwork.dashboard.getAnalytics,
+        getAnalyticsAsync: GNNetwork.dashboard.getAnalyticsAsync,
+        resetStatisticsLeaderboard: GNNetwork.dashboard.resetStatisticsLeaderboard,
+        resetStatisticsLeaderboardAsync: GNNetwork.dashboard.resetStatisticsLeaderboardAsync,
+        getBackupStatisticsLeaderboardVersion: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersion,
+        getBackupStatisticsLeaderboardVersionAsync: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersionAsync,
+        getServerGameData: GNNetwork.dashboard.getServerGameData,
+        getServerGameDataAsync: GNNetwork.dashboard.getServerGameDataAsync,
+        deleteInDatabase: GNNetwork.dashboard.deleteInDatabase,
+        deleteInDatabaseAsync: GNNetwork.dashboard.deleteInDatabaseAsync,
+    };
 	public send(
 		requestType: RequestType,
 		requestRole: RequestRole,
@@ -239,7 +271,109 @@ class CloudScriptSocket {
 	}
 
 	private async sendEvent(event: CloudScriptEvent) {
-		parentPort?.postMessage(event);
+		if (process?.send)
+            process.send(event);
+	}
+}
+
+class CloudScriptMail {
+	public async send(email: string, subject: string, contentHtml: string) {
+		if (process?.send)
+            process.send({
+                eventType: 20,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        email: email,
+                        subject: subject,
+                        contentHtml: contentHtml,
+                    },
+                },
+            });
+	}
+
+	public async sendToMore(emails: string[], subject: string, contentHtml: string) {
+        if (process?.send)
+            process.send({
+                eventType: 21,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        emails: emails,
+                        subject: subject,
+                        contentHtml: contentHtml,
+                    },
+                },
+            });
+	}
+}
+
+class CloudScriptPushNotification {
+	public async send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
+		if (process?.send)
+            process.send({
+                eventType: 30,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        token: token,
+                        title: title,
+                        body: body,
+                        badge: badge,
+                        sound: sound,
+                        icon: icon,
+                        data: data,
+                    },
+                },
+            });
+	}
+
+	public async sendToMore(tokens: string[], title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
+		if (process?.send)
+            process.send({
+                eventType: 31,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        tokens: tokens,
+                        title: title,
+                        body: body,
+                        badge: badge,
+                        sound: sound,
+                        icon: icon,
+                        data: data,
+                    },
+                },
+            });
+	}
+
+	public async sendToTopic(topic: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
+		if (process?.send)
+            process.send({
+                eventType: 32,
+                receiver: null,
+                operationEvent: {
+                    eventCode: 0,
+                    encrypted: false,
+                    parameters: {
+                        topic: topic,
+                        title: title,
+                        body: body,
+                        badge: badge,
+                        sound: sound,
+                        icon: icon,
+                        data: data,
+                    },
+                },
+            });
 	}
 }
 
@@ -291,7 +425,7 @@ const ConvertObject = (result: any) => {
 			result = (<GNArray>result).toData();
 		}
 		else {
-			let typeofObject = typeof(result);
+			let typeofObject = typeof (result);
 			if (typeofObject == "object") {
 				if (Array.isArray(result)) {
 					result = ConvertArray(result as any[]);
@@ -334,84 +468,84 @@ const ConvertArray = (results: any[]) => {
 	return answer;
 }
 
-if (parentPort) {
-	parentPort.on("message", async (request: CloudScriptRequest) => {
-		let startTime = performance.now();
-		let startMemoryUsage = process.memoryUsage();
+process?.on("message", async (request: CloudScriptRequest) => {
+    let startTime = performance.now();
+    let startMemoryUsage = process.memoryUsage();
 
-		let logs: string[] = [];
-		let functionRequest: FunctionRequest = {
-			userId: request.userId,
-			name: request.name,
-			parameters: request.parameters,
-			context: {},
-			customTags: request.customTags,
-			log(log: any) {
-				logs.push(log);
-			},
-		};
+    let logs: string[] = [];
+    let functionRequest: FunctionRequest = {
+        userId: request.userId,
+        name: request.name,
+        parameters: request.parameters,
+        context: {},
+        customTags: request.customTags,
+        log(log: any) {
+            logs.push(JSON.stringify(log));
+        },
+    };
 
-		let handleResponse = await ___handleFunction(functionRequest);
+    let handleResponse = await ___handleFunction(functionRequest);
 
-		if (handleResponse.result) {
-			if (handleResponse.result instanceof GNHashtable) {
-				handleResponse.result = (<GNHashtable>handleResponse.result).toData();
-			}
-			else if (handleResponse.result instanceof GNArray) {
-				handleResponse.result = (<GNArray>handleResponse.result).toData();
-			}
-			else {
-				let typeofResult = typeof(handleResponse.result);
+    if (handleResponse.result) {
+        if (handleResponse.result instanceof GNHashtable) {
+            handleResponse.result = (<GNHashtable>handleResponse.result).toData();
+        }
+        else if (handleResponse.result instanceof GNArray) {
+            handleResponse.result = (<GNArray>handleResponse.result).toData();
+        }
+        else {
+            let typeofResult = typeof (handleResponse.result);
 
-				if (typeofResult == "boolean") {
+            if (typeofResult == "boolean") {
 
-				}
-				else if (typeofResult == "number") {
+            }
+            else if (typeofResult == "number") {
 
-				}
-				else if (typeofResult == "object") {
-					if (Array.isArray(handleResponse.result)) {
+            }
+            else if (typeofResult == "object") {
+                if (Array.isArray(handleResponse.result)) {
 
-						handleResponse.result = ConvertArray(handleResponse.result as any[]);
-                        //answer.push(this.deserializeArray(gnArray.getGNArray(i), cls));
-                    }
-                    else {
-                        handleResponse.result = ConvertObject(handleResponse.result);
-                    }
-				}
-				else if (typeofResult == "string") {
+                    handleResponse.result = ConvertArray(handleResponse.result as any[]);
+                    //answer.push(this.deserializeArray(gnArray.getGNArray(i), cls));
+                }
+                else {
+                    handleResponse.result = ConvertObject(handleResponse.result);
+                }
+            }
+            else if (typeofResult == "string") {
 
-				}
-				else {
-					handleResponse.result = null;
-	
-					handleResponse.errorMessage = "CloudScript must return void, number, string, boolean, null, json dictionary, json array, GNHashtable or GNArray";
-					handleResponse.status = ExecuteResponseStatus.Exception;
-				}
-			}
-		}
+            }
+            else {
+                handleResponse.result = null;
 
-		let endTime = performance.now();
-		let endMemoryUsage = process.memoryUsage();
+                handleResponse.errorMessage = "CloudScript must return void, number, string, boolean, null, json dictionary, json array, GNHashtable or GNArray";
+                handleResponse.status = ExecuteResponseStatus.Exception;
+            }
+        }
+    }
 
-		let memoryUsedInBytes = endMemoryUsage.rss - startMemoryUsage.rss;
-		let executeTimeInMs = endTime - startTime;
+    let endTime = performance.now();
+    let endMemoryUsage = process.memoryUsage();
 
-		//let cost = (memoryUsedInGb * executeTime) / 1000 * 0.022;
+    let memoryUsedInBytes = endMemoryUsage.heapUsed - startMemoryUsage.heapUsed;
+    if (memoryUsedInBytes <= 0) memoryUsedInBytes = 8192;
+    let executeTimeInMs = endTime - startTime;
 
-		let response: CloudScriptResponse = {
-			responseId: request.requestId,
-			response: handleResponse,
-			stats: {
-				executeTimeInMs: executeTimeInMs,
-				memoryUsedInBytes: memoryUsedInBytes,
-			},
-			logs: logs,
-		};
+    //let cost = (memoryUsedInGb * executeTime) / 1000 * 0.022;
 
-		parentPort?.postMessage(response);
-	});
-}
+    let response: CloudScriptResponse = {
+        responseId: request.requestId,
+        response: handleResponse,
+        stats: {
+            executeTimeInMs: executeTimeInMs,
+            memoryUsedInBytes: memoryUsedInBytes,
+        },
+        logs: logs,
+    };
+
+    if (process?.send)
+        process.send(response);
+});
 
 async function ___handleFunction(request: FunctionRequest): Promise<FunctionResponse> {
 	let handler = handlers[request.name];
@@ -440,29 +574,33 @@ async function ___handleFunction(request: FunctionRequest): Promise<FunctionResp
 	return answer;
 }
 
+const gameId: string = process.env.gameId ?? "";
+
 {
-	let gnServerSettingsOptions: GNServerSettingsOptions = workerData.gnServerSettingsOptions;
+	let gnServerSettingsOptions: GNServerSettingsOptions = JSON.parse(process.env.gnServerSettingsOptions ?? "");
 
 	let gnServerSettings = new GNServerSettings();
 	gnServerSettings.config(gnServerSettingsOptions);
 
 	GNNetwork.init(gnServerSettings);
-
-	let gameId = workerData.gameId;
 	GNNetwork.setGameId(gameId);
 }
 
-const gameId: string = workerData.gameId;
 const admin = new CloudScriptAdmin();
 const database = new CloudScriptDatabase();
 const http = new CloudScriptHttp();
 const socket = new CloudScriptSocket();
+const mail = new CloudScriptMail();
+const pushNotification = new CloudScriptPushNotification();
 
 {
-	let dbConnection = workerData.dbConnection;
+	let dbConnection = JSON.parse(process.env.dbConnection ?? "");
 	database.init(dbConnection.url, dbConnection.dbName, dbConnection.options);
 }
 
-const handlers: Record<string, (args?: any, context?: { userId: string; customTags: { [k: string]: any } }, log?: (log: any) => void) => any> = {};
+process.env.dbConnection = "";
+process.env.gnServerSettingsOptions = "";
+
+const handlers: Record<string, (args: any, context: { userId: string; customTags: { [k: string]: any } }, log: (log: any) => void) => any> = {};
 
 //$replaceScript

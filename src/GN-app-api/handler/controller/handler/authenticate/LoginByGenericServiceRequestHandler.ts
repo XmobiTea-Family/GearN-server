@@ -103,6 +103,9 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 		let serviceId = serviceResponse.serviceId;
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) {
+			masterPlayerFindOptions.lastIPDetail = true;
+		}
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGenericServiceAsync(request.serviceName, serviceId, masterPlayerFindOptions);
 

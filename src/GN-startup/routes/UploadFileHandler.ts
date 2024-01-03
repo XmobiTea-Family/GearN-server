@@ -2,11 +2,12 @@ import { UploadFileMiddleware } from "./../middleware/UploadFileMiddleware";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
 import * as mongoDB from "mongodb";
 import fs from "fs";
-import express from "express";
+import express, { NextFunction } from "express";
 import { wrap } from "async-middleware";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { Commands } from "./../../GN-common/constant/Commands";
+import { Debug } from "../../GN-library/xdebug/lib/xDebug";
 
 export class UploadFileHandler {
 	private apiMiddleware: ApiMiddleware;
@@ -66,43 +67,65 @@ export class UploadFileHandler {
 			this.uploadRouter
 		);
 
-		this.uploadRouter.get("/:downloadToken",
+        let downloadRouter = express.Router();
+        this.router.use(
+			"/download",
 			wrap((req, res, next) => {
-				return this.antiDdosMiddleware.addPendingDownloadRequest(req, res, next);
+				return this.apiMiddleware.getIP(req, res, next);
 			}),
+			wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkMaxUploadRequestPerSecondPerIp(req, res, next);
+			}),
+			wrap((req, res, next) => {
+				return this.antiDdosMiddleware.checkMaxUploadRequestPerSecondPerPeer(req, res, next);
+			}),
+			downloadRouter
+		);
+
+		downloadRouter.get("/:downloadToken",
+			// wrap((req, res, next) => {
+			// 	return this.antiDdosMiddleware.addPendingDownloadRequest(req, res, next);
+			// }),
 
 			async (req: express.Request, res: express.Response): Promise<any> => {
+                // this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
+
 				let downloadToken = req.params.downloadToken;
 				if (!downloadToken) return res.sendStatus(400);
 
-				let downloadFileSessionResult = await this.downloadFileSessionCollection.findOne({ downloadToken: downloadToken, isValid: true });
+				let downloadFileSessionResult = await this.downloadFileSessionCollection.findOne({ downloadToken: downloadToken }, {
+                    projection: {
+                        fileId: true,
+                        fileUpload: true,
+                    }
+                });
 				if (!downloadFileSessionResult) return res.sendStatus(404);
 
-				let fileId = downloadFileSessionResult["fileId"];
+                let fileUpload = downloadFileSessionResult.fileUpload;
+                let fullPath = fileUpload.fullPath;
+                let folderFileName = fileUpload.folderFileName;
 
-				let fileDoc = await this.uploadFileInfoCollection.findOne({ fileId: fileId });
-				if (!fileDoc) return res.sendStatus(404);
+                return res.download(fullPath, folderFileName, (err) => {
+                    if (err) {
+                        res.status(500).send(err.message);
+                    }
+                });
 
-				let fileUpload = fileDoc["fileUpload"];
-				if (!fileUpload) return res.sendStatus(404);
+				// fs.readFile(fullPath, (err, data) => {
 
-				let fullPath = fileUpload["fullPath"];
-				fs.readFile(fullPath, (err, data) => {
-					this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
+				// 	if (err) {
+				// 		return res.status(404).send(err.message);
+				// 	}
 
-					if (err) {
-						return res.status(404).send(err.message);
-					}
+				// 	// res.writeHead(200, { "Content-Type": fileUpload["mimeType"], "Cache-Control": "public, max-age=86400" });
 
-					res.writeHead(200, { "Content-type": fileUpload["mimeType"] });
-
-					this.downloadFileSessionCollection.updateOne({ downloadToken: downloadToken }, {
-						$set: {
-							isValid: false
-						}
-					});
-					return res.end(data);
-				});
+				// 	this.downloadFileSessionCollection.updateOne({ downloadToken: downloadToken }, {
+				// 		$set: {
+				// 			isValid: false
+				// 		}
+				// 	});
+				// 	return res.end(data);
+				// });
 			});
 	}
 
@@ -115,7 +138,7 @@ export class UploadFileHandler {
 		let uploadPath = configUploadPath;
 		if (uploadPath) {
 			if (!fs.existsSync(uploadPath)) {
-				uploadPath = process.cwd() + this.uploadPath;
+				uploadPath = process.cwd() + "/" + this.uploadPath;
 			}
 		}
 
@@ -131,7 +154,9 @@ export class UploadFileHandler {
 			wrap((req, res, next) => {
 				return this.uploadFileMiddleware.checkFileUploadInvalid(req, res, next);
 			}),
-			wrap(this.uploadFileMiddleware.handleUpload().single(Commands.File)),
+			wrap((req, res, next) => {
+				return this.uploadFileMiddleware.handleUpload().single(Commands.File)(req, res, next as NextFunction);
+			}),
 			async (req: express.Request, res: express.Response): Promise<any> => {
 				this.antiDdosMiddleware.removePendingUploadRequest(req, res);
 
@@ -162,5 +187,11 @@ export class UploadFileHandler {
 			}
 		);
 	}
+
+    public removeFile(fullPath: string): void {
+        fs.rm(fullPath, err => {
+            Debug.logError("[GN] remove file at path " + fullPath + ", error " + err);
+        });
+    }
 
 }

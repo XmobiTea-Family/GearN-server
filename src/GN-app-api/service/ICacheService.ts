@@ -1,6 +1,6 @@
-import { xDatetime } from "./../../xdatetime/lib/xDatetime";
+import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
 
-export class xCacheItem {
+export class CacheItem {
     private tsExpire: number;
     private tData: any;
 
@@ -21,4 +21,18 @@ export class xCacheItem {
     public getData(): any {
         return this.tData;
     }
+
+}
+
+export interface ICacheService {
+    getData<T>(key: string): Promise<T>;
+
+    setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void>;
+
+    removeData(key: string): Promise<boolean>;
+
+    isValid(key: string): Promise<boolean>;
+
+    removeInvalidData(): Promise<number>;
+
 }

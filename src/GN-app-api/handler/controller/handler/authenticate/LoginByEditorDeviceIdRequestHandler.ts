@@ -73,6 +73,9 @@ export class LoginByEditorDeviceIdRequestHandler extends LoginBaseRequestHandler
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) {
+			masterPlayerFindOptions.lastIPDetail = true;
+		}
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByEditorDeviceIdAsync(request.editorDeviceId, masterPlayerFindOptions);
 

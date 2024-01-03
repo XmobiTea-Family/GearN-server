@@ -33,7 +33,7 @@ export class UploadFileMiddleware {
 		let uploadPath = configUploadPath;
 		if (uploadPath) {
 			if (!fs.existsSync(uploadPath)) {
-				uploadPath = process.cwd() + this.uploadPath;
+				uploadPath = process.cwd() + "/" + this.uploadPath;
 			}
 		}
 
@@ -43,10 +43,7 @@ export class UploadFileMiddleware {
 			},
 			filename: (req, file, cb) => {
 				let fileId = req.params.fileId;
-				let reqAny = req as any;
-				let originFileName = reqAny.originFileName;
-
-				return cb(null, xDatetime.getCurrentMilliseconds() + "_" + fileId + "_" + originFileName);
+				return cb(null, xDatetime.getCurrentMilliseconds() + "_" + fileId + "_" + file.originalname);
 			},
 		});
 	}

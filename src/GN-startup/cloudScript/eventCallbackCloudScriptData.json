@@ -22,7 +22,27 @@
             },
             {
                 "eventName": "system_RequestServerDetail",
-                "script": "\nsystemMatchmakingHandlers.system_RequestServerDetail = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void): Promise<{ success: boolean }> => {\n\t//call confirmServerDetail(gameId, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
+                "script": "\nsystemMatchmakingHandlers.system_RequestServerDetail = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void): Promise<{ success: boolean }> => {\n\t//call matchmaking.confirmServerDetail(gameId, matchmakingTicketCanMatch, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "system_SendEventTo",
+                "script": "\neventHandlers.system_SendEventTo = async (request: { userId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "system_SendEventToRoom",
+                "script": "\neventHandlers.system_SendEventToRoom = async (request: { roomId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "system_SendEventToMoreUser",
+                "script": "\neventHandlers.system_SendEventToMoreUser = async (request: { userIds: string[] }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "system_SendEventToAllPlayer",
+                "script": "\neventHandlers.system_SendEventToAllPlayer = async (request: {}, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
                 "hasEdit": false
             }
         ]
@@ -89,6 +109,11 @@
                 "hasEdit": false
             },
             {
+                "eventName": "authenticate_LoginByiOSDeviceId",
+                "script": "\npreHandlers.authenticate_LoginByiOSDeviceId = async (request: { iOSDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.authenticate_LoginByiOSDeviceId = async (request: { iOSDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
                 "eventName": "authenticate_LoginByLinuxDeviceId",
                 "script": "\npreHandlers.authenticate_LoginByLinuxDeviceId = async (request: { linuxDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.authenticate_LoginByLinuxDeviceId = async (request: { linuxDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -106,11 +131,6 @@
             {
                 "eventName": "authenticate_LoginByWindowsPhoneDeviceId",
                 "script": "\npreHandlers.authenticate_LoginByWindowsPhoneDeviceId = async (request: { windowsPhoneDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.authenticate_LoginByWindowsPhoneDeviceId = async (request: { windowsPhoneDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
-                "eventName": "authenticate_LoginByiOSDeviceId",
-                "script": "\npreHandlers.authenticate_LoginByiOSDeviceId = async (request: { iOSDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.authenticate_LoginByiOSDeviceId = async (request: { iOSDeviceId: string, createPlayerIfNotExists: boolean, infoRequestParam: authenticate_InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -163,7 +183,7 @@
             },
             {
                 "eventName": "characterPlayer_GetCurrencyLeaderboard",
-                "script": "\npreHandlers.characterPlayer_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.characterPlayer_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, catalogId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, catalogId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -183,17 +203,22 @@
             },
             {
                 "eventName": "characterPlayer_GetFriendStatisticsLeaderboardAroundPlayer",
-                "script": "\npreHandlers.characterPlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.characterPlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "characterPlayer_GetFriendStatisticsLeaderboard",
-                "script": "\npreHandlers.characterPlayer_GetFriendStatisticsLeaderboard = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetFriendStatisticsLeaderboard = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.characterPlayer_GetFriendStatisticsLeaderboard = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetFriendStatisticsLeaderboard = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "characterPlayer_GetIpAddressCreate",
                 "script": "\npreHandlers.characterPlayer_GetIpAddressCreate = async (request: { characterId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetIpAddressCreate = async (request: { characterId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "characterPlayer_GetLastLoginLeaderboard",
+                "script": "\npreHandlers.characterPlayer_GetLastLoginLeaderboard = async (request: { skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetLastLoginLeaderboard = async (request: { skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -228,7 +253,7 @@
             },
             {
                 "eventName": "characterPlayer_GetPlayerInformation",
-                "script": "\npreHandlers.characterPlayer_GetPlayerInformation = async (request: { characterId: string, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetPlayerInformation = async (request: { characterId: string, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.characterPlayer_GetPlayerInformation = async (request: { characterId: string, infoRequestParam: characterPlayer_InfoRequestParam, updateTsLastLogin: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetPlayerInformation = async (request: { characterId: string, infoRequestParam: characterPlayer_InfoRequestParam, updateTsLastLogin: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -268,12 +293,12 @@
             },
             {
                 "eventName": "characterPlayer_GetStatisticsLeaderboardAroundPlayer",
-                "script": "\npreHandlers.characterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.characterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { characterId: string, key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "characterPlayer_GetStatisticsLeaderboard",
-                "script": "\npreHandlers.characterPlayer_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.characterPlayer_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, version: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: characterPlayer_InfoRequestParam, loadFromCache: boolean, version: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -434,7 +459,7 @@
         "childScripts": [
             {
                 "eventName": "content_CreateNewFileUploadInfo",
-                "script": "\npreHandlers.content_CreateNewFileUploadInfo = async (request: { userId: string, fileName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.content_CreateNewFileUploadInfo = async (request: { userId: string, fileName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.content_CreateNewFileUploadInfo = async (request: { fileName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.content_CreateNewFileUploadInfo = async (request: { fileName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -478,6 +503,11 @@
             {
                 "eventName": "dashboard_ChangePasswordAdminAccount",
                 "script": "\npreHandlers.dashboard_ChangePasswordAdminAccount = async (request: { userId: string, currentPassword: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_ChangePasswordAdminAccount = async (request: { userId: string, currentPassword: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "dashboard_DeleteInDatabase",
+                "script": "\npreHandlers.dashboard_DeleteInDatabase = async (request: { id: string, type: number, gameId: string, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_DeleteInDatabase = async (request: { id: string, type: number, gameId: string, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -567,12 +597,12 @@
             },
             {
                 "eventName": "dashboard_ResetStatisticsLeaderboard",
-                "script": "\npreHandlers.dashboard_ResetStatisticsLeaderboard = async (request: { type: number, key: string, version: string, gameId: string, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_ResetStatisticsLeaderboard = async (request: { type: number, key: string, version: string, gameId: string, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.dashboard_ResetStatisticsLeaderboard = async (request: { type: number, key: string, version: string, gameId: string, log: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_ResetStatisticsLeaderboard = async (request: { type: number, key: string, version: string, gameId: string, log: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "dashboard_SetEventCallbackCloudScript",
-                "script": "\npreHandlers.dashboard_SetEventCallbackCloudScript = async (request: {eventName: string, script: string}, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_SetEventCallbackCloudScript = async (request: {eventName: string, script: string}, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.dashboard_SetEventCallbackCloudScript = async (request: { eventName: string, script: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_SetEventCallbackCloudScript = async (request: { eventName: string, script: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -582,7 +612,7 @@
             },
             {
                 "eventName": "dashboard_SetMasterGameSettings",
-                "script": "\npreHandlers.dashboard_SetMasterGameSettings = async (request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_SetMasterGameSettings = async (request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.dashboard_SetMasterGameSettings = async (request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_SetMasterGameSettings = async (request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -655,17 +685,22 @@
             },
             {
                 "eventName": "gamePlayer_GetFriendStatisticsLeaderboardAroundPlayer",
-                "script": "\npreHandlers.gamePlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.gamePlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetFriendStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "gamePlayer_GetFriendStatisticsLeaderboard",
-                "script": "\npreHandlers.gamePlayer_GetFriendStatisticsLeaderboard = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetFriendStatisticsLeaderboard = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.gamePlayer_GetFriendStatisticsLeaderboard = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetFriendStatisticsLeaderboard = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "gamePlayer_GetIpAddressCreate",
                 "script": "\npreHandlers.gamePlayer_GetIpAddressCreate = async (request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetIpAddressCreate = async (request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "gamePlayer_GetLastLoginLeaderboard",
+                "script": "\npreHandlers.gamePlayer_GetLastLoginLeaderboard = async (request: { skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetLastLoginLeaderboard = async (request: { skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -740,7 +775,7 @@
             },
             {
                 "eventName": "gamePlayer_GetStatisticsLeaderboardAroundPlayer",
-                "script": "\npreHandlers.gamePlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.gamePlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: gamePlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -816,11 +851,6 @@
             {
                 "eventName": "gamePlayer_RemoveTag",
                 "script": "\npreHandlers.gamePlayer_RemoveTag = async (request: { userId: string, key: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_RemoveTag = async (request: { userId: string, key: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
-                "eventName": "gamePlayer_SendSocketOperationEvent",
-                "script": "\npreHandlers.gamePlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -903,7 +933,7 @@
             },
             {
                 "eventName": "group_GetCurrencyLeaderboard",
-                "script": "\npreHandlers.group_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.group_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_GetCurrencyLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -983,12 +1013,12 @@
             },
             {
                 "eventName": "group_GetStatisticsLeaderboardAroundGroup",
-                "script": "\npreHandlers.group_GetStatisticsLeaderboardAroundGroup = async (request: { groupId: string, key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_GetStatisticsLeaderboardAroundGroup = async (request: { groupId: string, key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.group_GetStatisticsLeaderboardAroundGroup = async (request: { groupId: string, key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_GetStatisticsLeaderboardAroundGroup = async (request: { groupId: string, key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "group_GetStatisticsLeaderboard",
-                "script": "\npreHandlers.group_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.group_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, version: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: group_InfoRequestParam, loadFromCache: boolean, version: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1140,11 +1170,6 @@
                 "hasEdit": false
             },
             {
-                "eventName": "inventory_GetItemType",
-                "script": "\npreHandlers.inventory_GetItemType = async (request: { itemId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetItemType = async (request: { itemId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
                 "eventName": "inventory_GetItemsWithDisplayName",
                 "script": "\npreHandlers.inventory_GetItemsWithDisplayName = async (request: { keyword: string, infoRequestParam: inventory_InfoRequestParam, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetItemsWithDisplayName = async (request: { keyword: string, infoRequestParam: inventory_InfoRequestParam, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -1157,6 +1182,11 @@
             {
                 "eventName": "inventory_GetItemsWithTag",
                 "script": "\npreHandlers.inventory_GetItemsWithTag = async (request: { key: string, value: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetItemsWithTag = async (request: { key: string, value: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "inventory_GetItemType",
+                "script": "\npreHandlers.inventory_GetItemType = async (request: { itemId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetItemType = async (request: { itemId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1176,12 +1206,12 @@
             },
             {
                 "eventName": "inventory_GetStatisticsLeaderboardAroundItem",
-                "script": "\npreHandlers.inventory_GetStatisticsLeaderboardAroundItem = async (request: { itemId: string, key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetStatisticsLeaderboardAroundItem = async (request: { itemId: string, key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.inventory_GetStatisticsLeaderboardAroundItem = async (request: { itemId: string, key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetStatisticsLeaderboardAroundItem = async (request: { itemId: string, key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "inventory_GetStatisticsLeaderboard",
-                "script": "\npreHandlers.inventory_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam, loadFromCache: boolean, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam, loadFromCache: boolean, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.inventory_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam, loadFromCache: boolean, version: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_GetStatisticsLeaderboard = async (request: { key: string, skip: number, limit: number, infoRequestParam: inventory_InfoRequestParam, loadFromCache: boolean, version: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1262,6 +1292,11 @@
         "fullScript": "// first full script",
         "tsLastUpdate": 1736498427663,
         "childScripts": [
+            {
+                "eventName": "masterPlayer_AddPushNotification",
+                "script": "\npreHandlers.masterPlayer_AddPushNotification = async (request: { userId: string, token: string, platformType: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_AddPushNotification = async (request: { userId: string, token: string, platformType: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
             {
                 "eventName": "masterPlayer_AddSegment",
                 "script": "\npreHandlers.masterPlayer_AddSegment = async (request: { userId: string, segment: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_AddSegment = async (request: { userId: string, segment: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
@@ -1398,13 +1433,18 @@
                 "hasEdit": false
             },
             {
+                "eventName": "masterPlayer_GetPushNotification",
+                "script": "\npreHandlers.masterPlayer_GetPushNotification = async (request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_GetPushNotification = async (request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
                 "eventName": "masterPlayer_GetSegment",
                 "script": "\npreHandlers.masterPlayer_GetSegment = async (request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_GetSegment = async (request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "masterPlayer_GetStatisticsLeaderboardAroundPlayer",
-                "script": "\npreHandlers.masterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: masterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: masterPlayer_InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.masterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: masterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_GetStatisticsLeaderboardAroundPlayer = async (request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: masterPlayer_InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1488,6 +1528,11 @@
                 "hasEdit": false
             },
             {
+                "eventName": "masterPlayer_LinkiOSDeviceId",
+                "script": "\npreHandlers.masterPlayer_LinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_LinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
                 "eventName": "masterPlayer_LinkLinuxDeviceId",
                 "script": "\npreHandlers.masterPlayer_LinkLinuxDeviceId = async (request: { userId: string, linuxDeviceId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_LinkLinuxDeviceId = async (request: { userId: string, linuxDeviceId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -1508,8 +1553,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "masterPlayer_LinkiOSDeviceId",
-                "script": "\npreHandlers.masterPlayer_LinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_LinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "masterPlayer_RemovePushNotification",
+                "script": "\npreHandlers.masterPlayer_RemovePushNotification = async (request: { userId: string, pushId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_RemovePushNotification = async (request: { userId: string, pushId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1525,6 +1570,21 @@
             {
                 "eventName": "masterPlayer_ResetAccountPassword",
                 "script": "\npreHandlers.masterPlayer_ResetAccountPassword = async (request: { userId: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_ResetAccountPassword = async (request: { userId: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "masterPlayer_SendEmail",
+                "script": "\npreHandlers.masterPlayer_SendEmail = async (request: { userId: string, subject: string, contentHtml: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SendEmail = async (request: { userId: string, subject: string, contentHtml: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "masterPlayer_SendPushNotification",
+                "script": "\npreHandlers.masterPlayer_SendPushNotification = async (request: { userId: string, title: string, body: string, badge: number, sound: string, icon: string, data: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SendPushNotification = async (request: { userId: string, title: string, body: string, badge: number, sound: string, icon: string, data: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "masterPlayer_SendSocketOperationEvent",
+                "script": "\npreHandlers.masterPlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1638,6 +1698,11 @@
                 "hasEdit": false
             },
             {
+                "eventName": "masterPlayer_UnlinkiOSDeviceId",
+                "script": "\npreHandlers.masterPlayer_UnlinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_UnlinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
                 "eventName": "masterPlayer_UnlinkLinuxDeviceId",
                 "script": "\npreHandlers.masterPlayer_UnlinkLinuxDeviceId = async (request: { userId: string, linuxDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_UnlinkLinuxDeviceId = async (request: { userId: string, linuxDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -1655,11 +1720,6 @@
             {
                 "eventName": "masterPlayer_UnlinkWindowsPhoneDeviceId",
                 "script": "\npreHandlers.masterPlayer_UnlinkWindowsPhoneDeviceId = async (request: { userId: string, windowsPhoneDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_UnlinkWindowsPhoneDeviceId = async (request: { userId: string, windowsPhoneDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
-                "eventName": "masterPlayer_UnlinkiOSDeviceId",
-                "script": "\npreHandlers.masterPlayer_UnlinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_UnlinkiOSDeviceId = async (request: { userId: string, iOSDeviceId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             }
         ]
@@ -1686,23 +1746,23 @@
                 "hasEdit": false
             },
             {
-                "eventName": "multiplayer_GetAllMatch",
-                "script": "\npreHandlers.multiplayer_GetAllMatch = async (request: { returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetAllMatch = async (request: { returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
                 "eventName": "multiplayer_GetAllMatchmakingTicket",
                 "script": "\npreHandlers.multiplayer_GetAllMatchmakingTicket = async (request: { status: number, returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetAllMatchmakingTicket = async (request: { status: number, returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
-                "eventName": "multiplayer_GetMatch",
-                "script": "\npreHandlers.multiplayer_GetMatch = async (request: { matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetMatch = async (request: { matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "multiplayer_GetAllMatch",
+                "script": "\npreHandlers.multiplayer_GetAllMatch = async (request: { returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetAllMatch = async (request: { returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "multiplayer_GetMatchmakingTicket",
                 "script": "\npreHandlers.multiplayer_GetMatchmakingTicket = async (request: { userId: string, ticketId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetMatchmakingTicket = async (request: { userId: string, ticketId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "multiplayer_GetMatch",
+                "script": "\npreHandlers.multiplayer_GetMatch = async (request: { matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetMatch = async (request: { matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1754,6 +1814,11 @@
                 "hasEdit": false
             },
             {
+                "eventName": "storeInventory_GetStoreUsed",
+                "script": "\npreHandlers.storeInventory_GetStoreUsed = async (request: { storeId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.storeInventory_GetStoreUsed = async (request: { storeId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
                 "eventName": "storeInventory_GrantStoreItem",
                 "script": "\npreHandlers.storeInventory_GrantStoreItem = async (request: { storeId: string, displayName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.storeInventory_GrantStoreItem = async (request: { storeId: string, displayName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -1764,13 +1829,18 @@
                 "hasEdit": false
             },
             {
+                "eventName": "storeInventory_RemoveStoreUsed",
+                "script": "\npreHandlers.storeInventory_RemoveStoreUsed = async (request: { storeId: string, ownerIds: string[] }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.storeInventory_RemoveStoreUsed = async (request: { storeId: string, ownerIds: string[] }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
                 "eventName": "storeInventory_SetRemoveStatus",
                 "script": "\npreHandlers.storeInventory_SetRemoveStatus = async (request: { storeId: string, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.storeInventory_SetRemoveStatus = async (request: { storeId: string, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
                 "eventName": "storeInventory_SetStoreItemInformation",
-                "script": "\npreHandlers.storeInventory_SetStoreItemInformation = async (request: { storeId: string, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.storeInventory_SetStoreItemInformation = async (request: { storeId: string, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.storeInventory_SetStoreItemInformation = async (request: { storeId: string, storeItemType: number, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.storeInventory_SetStoreItemInformation = async (request: { storeId: string, storeItemType: number, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

@@ -243,4 +243,22 @@ export class MasterPlayerPermissionRulesParam {
     @GNHashtableDataMember({ code: GNParameterCode.GetCurrencyLog, isOptional: true })
     getCurrencyLog?: PermissionRulesParam;
 
+    @GNHashtableDataMember({ code: GNParameterCode.SendSocketOperationEvent, isOptional: true })
+    sendSocketOperationEvent?: PermissionRulesParam;
+
+    @GNHashtableDataMember({ code: GNParameterCode.SendEmail, isOptional: true })
+    sendEmail?: PermissionRulesParam;
+
+    @GNHashtableDataMember({ code: GNParameterCode.SendPushNotification, isOptional: true })
+    sendPushNotification?: PermissionRulesParam;
+
+    @GNHashtableDataMember({ code: GNParameterCode.AddPushNotification, isOptional: true })
+    addPushNotification?: PermissionRulesParam;
+
+    @GNHashtableDataMember({ code: GNParameterCode.RemovePushNotification, isOptional: true })
+    removePushNotification?: PermissionRulesParam;
+
+    @GNHashtableDataMember({ code: GNParameterCode.GetPushNotification, isOptional: true })
+    getPushNotification?: PermissionRulesParam;
+
 }

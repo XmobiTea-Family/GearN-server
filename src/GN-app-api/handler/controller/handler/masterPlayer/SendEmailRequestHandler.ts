@@ -11,22 +11,29 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
-import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
-import { OperationEvent } from "../../../../../GN-common/entity/operationEvent/OperationEvent";
+import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
-class SendSocketOperationEventOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10 })
+class SendEmailOperationRequest extends OperationRequest {
+    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    userId?: string;
+
+    @StringDataMember({ code: GNParameterCode.Subject, minLength: 2, maxLength: 256, mustNonNull: true })
+    subject: string;
+
+    @StringDataMember({ code: GNParameterCode.ContentHtml, minLength: 2, maxLength: 8192, mustNonNull: true })
+    contentHtml: string;
+
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
+
+        return true;
+    }
+}
+
+class ServerSendEmailOperationRequest extends SendEmailOperationRequest {
+    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
     userId: string;
 
-    @NumberDataMember({ code: GNParameterCode.EventCode, minValue: 1000, mustInt: true })
-    eventCode: number;
-
-    @GNHashtableDataMember({ code: GNParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })
-    eventParameters?: GNHashtable;
-
-    @BooleanDataMember({ code: GNParameterCode.EventEncrypted, isOptional: true, defaultValue: false })
-    eventEncrypted?: boolean;
-
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
 
@@ -34,8 +41,7 @@ class SendSocketOperationEventOperationRequest extends OperationRequest {
     }
 }
 
-class ServerSendSocketOperationEventOperationRequest extends SendSocketOperationEventOperationRequest {
-
+class AdminSendEmailOperationRequest extends ServerSendEmailOperationRequest {
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
 
@@ -43,21 +49,13 @@ class ServerSendSocketOperationEventOperationRequest extends SendSocketOperation
     }
 }
 
-class AdminSendSocketOperationEventOperationRequest extends ServerSendSocketOperationEventOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
-
-        return true;
-    }
-}
-
-export class SendSocketOperationEventRequestHandler extends GamePlayerBaseRequestHandler {
+export class SendEmailRequestHandler extends MasterPlayerBaseRequestHandler {
     public override getCode() {
-        return OperationCode.SendSocketOperationEvent;
+        return OperationCode.SendEmail;
     }
 
     public override getCommonOperationRequest() {
-        return SendSocketOperationEventOperationRequest;
+        return SendEmailOperationRequest;
     }
 
     public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -68,71 +66,68 @@ export class SendSocketOperationEventRequestHandler extends GamePlayerBaseReques
         }
 
         if (!request.userId) {
-            if (!secretInfo.getPermission().gamePlayer.sendSocketOperationEvent.selfEnable) {
+            if (!secretInfo.getPermission().masterPlayer.sendEmail.selfEnable) {
                 return this.newOperationNotAllowError(request);
             }
 
             request.userId = authInfo.getUserId();
         }
         else if (request.userId != authInfo.getUserId()) {
-            if (!secretInfo.getPermission().gamePlayer.sendSocketOperationEvent.otherSelfEnable) {
+            if (!secretInfo.getPermission().masterPlayer.sendEmail.otherSelfEnable) {
                 return this.newOperationNotAllowError(request);
             }
         }
         else {
-            if (!secretInfo.getPermission().gamePlayer.sendSocketOperationEvent.selfEnable) {
+            if (!secretInfo.getPermission().masterPlayer.sendEmail.selfEnable) {
                 return this.newOperationNotAllowError(request);
             }
         }
 
         return this.execute({
             userId: request.userId,
-            eventCode: request.eventCode,
-            eventParameters: request.eventParameters?.toData() ?? null,
-            eventEncrypted: request.eventEncrypted,
+            subject: request.subject,
+            contentHtml: request.contentHtml,
         }, secretInfo, operationRequest);
     }
 
     public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSendSocketOperationEventOperationRequest);
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSendEmailOperationRequest);
 
         if (!request.isValidRequest()) {
             return this.newInvalidRequestParameters(request);
         }
 
-        if (!secretInfo.getPermission().gamePlayer.sendSocketOperationEvent.serverSelfEnable) {
+        if (!secretInfo.getPermission().masterPlayer.sendEmail.serverSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
         return this.execute({
             userId: request.userId,
-            eventCode: request.eventCode,
-            eventParameters: request.eventParameters?.toData() ?? null,
-            eventEncrypted: request.eventEncrypted,
+            subject: request.subject,
+            contentHtml: request.contentHtml,
         }, secretInfo, operationRequest);
     }
 
     public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSendSocketOperationEventOperationRequest);
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSendEmailOperationRequest);
 
         if (!request.isValidRequest()) {
             return this.newInvalidRequestParameters(request);
         }
 
-        if (!secretInfo.getPermission().gamePlayer.sendSocketOperationEvent.adminSelfEnable) {
+        if (!secretInfo.getPermission().masterPlayer.sendEmail.adminSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
         return this.execute({
             userId: request.userId,
-            eventCode: request.eventCode,
-            eventParameters: request.eventParameters?.toData() ?? null,
-            eventEncrypted: request.eventEncrypted,
+            subject: request.subject,
+            contentHtml: request.contentHtml,
         }, secretInfo, operationRequest);
     }
 
-    private async execute(request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_SendSocketOperationEvent", request, secretInfo, operationRequest);
+    private async execute(request: { userId: string, subject: string, contentHtml: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SendEmail", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
         }
@@ -140,11 +135,28 @@ export class SendSocketOperationEventRequestHandler extends GamePlayerBaseReques
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        this.gnServer.sendEventTo(request.userId, new OperationEvent(request.eventCode, request.eventParameters != null ? GNHashtable.builder().addAll(request.eventParameters).build() : null, request.eventEncrypted));
+        let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {
+            email: true,
+        });
+
+        if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+
+            return operationResponse;
+        }
+
+        let email = masterPlayer.getEmail();
+        if (!email) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.EmailInvalid);
+
+            return operationResponse;
+        }
+
+        this.gnServer.getEmailService().sendMail(email, request.subject, request.contentHtml);
 
         operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_SendSocketOperationEvent", request, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SendEmail", request, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
     }

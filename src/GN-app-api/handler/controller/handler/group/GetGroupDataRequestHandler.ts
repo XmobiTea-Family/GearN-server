@@ -18,7 +18,7 @@ class GetGroupDataOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	groupId: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.GroupDataKeys, isOptional: true })
+	@GNArrayDataMember({ code: GNParameterCode.GroupDataKeys, isOptional: true, elementCls: String })
 	groupDataKeys?: Array<string>;
 
 	public override isValidRequest() {

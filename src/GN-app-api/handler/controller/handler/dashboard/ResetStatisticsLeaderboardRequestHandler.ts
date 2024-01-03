@@ -38,6 +38,9 @@ class ResetStatisticsLeaderboardOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
     log?: string;
 
+	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	catalogId?: string;
+
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
 
@@ -71,10 +74,11 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
             version: request.version,
             gameId: request.gameId,
             log: request.log,
+            catalogId: request.catalogId,
         }, secretInfo, operationRequest);
     }
 
-    private async execute(request: { type: number, key: string, version: string, gameId: string, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { type: number, key: string, version: string, gameId: string, log: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_ResetStatisticsLeaderboard", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
@@ -91,7 +95,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
         let log = request.log;
 
         if (type == OwnerType.MasterPlayer) {
-            let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer.StatisticsBackup");
+            let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
 
             let hasThisVersion = (await backupStatisticsLeaderboardCollection.countDocuments({ key: key, version: version })) != 0;
             if (hasThisVersion) {
@@ -196,7 +200,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
             let gameId = request.gameId;
 
             if (type == OwnerType.GamePlayer) {
-                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("GamePlayer.StatisticsBackup", gameId);
+                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsBackup", gameId);
 
                 let hasThisVersion = (await backupStatisticsLeaderboardCollection.countDocuments({ key: key, version: version })) != 0;
                 if (hasThisVersion) {
@@ -297,7 +301,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
                 Debug.log("[GN] ResetStatisticsLeaderboard for key " + key + " at " + gamePlayerCollection.collectionName + " success");
             }
             else if (type == OwnerType.CharacterPlayer) {
-                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("CharacterPlayer.StatisticsBackup", gameId);
+                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsBackup", gameId);
 
                 let hasThisVersion = (await backupStatisticsLeaderboardCollection.countDocuments({ key: key, version: version })) != 0;
                 if (hasThisVersion) {
@@ -324,7 +328,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
                 let characterPlayerCollection = await this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", gameId);
                 Debug.log("[GN] ResetStatisticsLeaderboard for key " + key + " at " + characterPlayerCollection.collectionName + " starting");
 
-                let characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAllAsync(key, gameId, direction, characterPlayerFindOptions);
+                let characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAllAsync(key, request.catalogId, gameId, direction, characterPlayerFindOptions);
 
                 let backupData: {
                     key: string,
@@ -398,7 +402,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
                 Debug.log("[GN] ResetStatisticsLeaderboard for key " + key + " at " + characterPlayerCollection.collectionName + " success");
             }
             else if (type == OwnerType.Group) {
-                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("Group.StatisticsBackup", gameId);
+                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsBackup", gameId);
 
                 let hasThisVersion = (await backupStatisticsLeaderboardCollection.countDocuments({ key: key, version: version })) != 0;
                 if (hasThisVersion) {
@@ -425,7 +429,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
                 let groupCollection = await this.gnServer.getDatabase().systemGameCollection("Group", gameId);
                 Debug.log("[GN] ResetStatisticsLeaderboard for key " + key + " at " + groupCollection.collectionName + " starting");
 
-                let groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAllAsync(key, gameId, direction, groupFindOptions);
+                let groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAllAsync(key, request.catalogId, gameId, direction, groupFindOptions);
 
                 let backupData: {
                     key: string,
@@ -499,7 +503,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
                 Debug.log("[GN] ResetStatisticsLeaderboard for key " + key + " at " + groupCollection.collectionName + " success");
             }
             else if (type == OwnerType.Inventory) {
-                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("Inventory.StatisticsBackup", gameId);
+                let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsBackup", gameId);
 
                 let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(gameId);
                 let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == key);
@@ -520,7 +524,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
                 let inventoryCollection = await this.gnServer.getDatabase().systemGameCollection("Inventory", gameId);
                 Debug.log("[GN] ResetStatisticsLeaderboard for key " + key + " at " + inventoryCollection.collectionName + " starting");
 
-                let inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAllAsync(key, gameId, direction, inventoryFindOptions);
+                let inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAllAsync(key, request.catalogId, gameId, direction, inventoryFindOptions);
 
                 let backupData: {
                     key: string,

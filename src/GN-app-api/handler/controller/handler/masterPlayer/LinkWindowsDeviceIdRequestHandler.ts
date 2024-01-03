@@ -173,6 +173,10 @@ export class LinkWindowsDeviceIdRequestHandler extends MasterPlayerBaseRequestHa
 		masterPlayer.setExternal(external);
 		masterPlayer.saveAsync();
 
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(GNParameterCode.External, this.generateExternal(masterPlayer));
+		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+
 		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkWindowsDeviceId", request, secretInfo, operationRequest, operationResponse);

@@ -27,7 +27,7 @@ class GetStatisticsLeaderboardOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
 	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
@@ -35,6 +35,9 @@ class GetStatisticsLeaderboardOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: GNParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	version?: string;
+
+	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	catalogId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -90,6 +93,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
 			version: request.version,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -113,6 +117,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
 			version: request.version,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -136,10 +141,11 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
 			version: request.version,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, version: string, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetStatisticsLeaderboard", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -148,10 +154,8 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
-
-		let masterItemSettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
-		let inventoryStatisticsSettingsItem = masterItemSettings.inventoryStatisticsSettings.find(x => x.key == request.key);
+		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
+		let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == request.key);
 
 		if (inventoryStatisticsSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
@@ -159,8 +163,11 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 			return operationResponse;
 		}
 
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
 		if (!request.version) {
 			let cacheKey = "inventoryStatisticsLeaderboard_" + request.key;
+            if (request.catalogId) cacheKey += "_" + request.catalogId;
 
 			if (request.loadFromCache) {
 				if (request.skip + request.limit > 100) {
@@ -169,20 +176,17 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 			}
 
 			if (request.loadFromCache) {
-				if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+				if (!(await cacheData.isValid(cacheKey))) {
 					request.loadFromCache = false;
 				}
 			}
-
-			let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
-			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
 			let gnResults = new GNArray();
 
 			let inventorys: Inventory[];
 
 			if (request.loadFromCache) {
-				inventorys = this.gnServer.getCacheData().getData(cacheKey);
+				inventorys = await cacheData.getData(cacheKey);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= inventorys.length) break;
@@ -201,10 +205,15 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 				}
 			}
 			else {
+                let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
+
+                let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
+                let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+
 				if (request.skip + request.limit <= 100) {
 					inventoryFindOptions = null;
 
-					inventorys = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, 0, 100, secretInfo.getGameId(), direction, inventoryFindOptions);
+					inventorys = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= inventorys.length) break;
@@ -222,10 +231,10 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 						gnResults.add(gnResult);
 					}
 
-					this.gnServer.getCacheData().setData(cacheKey, inventorys, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+					await cacheData.setData(cacheKey, inventorys, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					inventorys = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), direction, inventoryFindOptions);
+					inventorys = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
 
 					for (let i = 0; i < inventorys.length; i++) {
 
@@ -248,22 +257,22 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 		}
 		else {
 			let gameId = secretInfo.getGameId();
-			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().systemGameCollection("Group.StatisticsBackup", gameId);
+			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsBackup", gameId);
 
 			let key = request.key;
 			let version = request.version;
 
 			let cacheKey = "inventoryStatisticsLeaderboard_" + key + "_" + version;
 
-			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
-				let result = backupStatisticsLeaderboardCollection.findOne({ key: key, version: version });
+			if (!(await cacheData.isValid(cacheKey))) {
+				let result = await backupStatisticsLeaderboardCollection.findOne({ key: key, version: version });
 
 				if (result == null) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.VersionInvalid);
 					return operationResponse;
 				}
 
-				this.gnServer.getCacheData().setData(cacheKey, result, xDatetime.ONE_DAY_MILLISECOND * 7);
+				await cacheData.setData(cacheKey, result, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 
 			let backupData: {
@@ -277,7 +286,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 					value: number,
 					tsLastUpdate: number,
 				}[]
-			} = this.gnServer.getCacheData().getData(cacheKey);
+			} = await cacheData.getData(cacheKey);
 
 
 			let gnResults = new GNArray();

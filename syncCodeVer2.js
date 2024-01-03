@@ -29,11 +29,31 @@ docs.push({
     },
     {
       "eventName": "system_RequestServerDetail",
-      "script": "\nsystemMatchmakingHandlers.system_RequestServerDetail = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void): Promise<{ success: boolean }> => {\n\t//call confirmServerDetail(gameId, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
+      "script": "\nsystemMatchmakingHandlers.system_RequestServerDetail = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void): Promise<{ success: boolean }> => {\n\t//call matchmaking.confirmServerDetail(gameId, matchmakingTicketCanMatch, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
+      "hasEdit": false
+    },
+    {
+      "eventName": "system_SendEventTo",
+      "script": "\neventHandlers.system_SendEventTo = async (request: { userId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+      "hasEdit": false
+    },
+    {
+      "eventName": "system_SendEventToRoom",
+      "script": "\neventHandlers.system_SendEventToRoom = async (request: { roomId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+      "hasEdit": false
+    },
+    {
+      "eventName": "system_SendEventToMoreUser",
+      "script": "\neventHandlers.system_SendEventToMoreUser = async (request: { userIds: string[] }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+      "hasEdit": false
+    },
+    {
+      "eventName": "system_SendEventToAllPlayer",
+      "script": "\neventHandlers.system_SendEventToAllPlayer = async (request: {}, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
       "hasEdit": false
     }
   ]
-})
+});
 
 docs.push(readAllTsFiles("authenticate"));
 docs.push(readAllTsFiles("characterPlayer"));

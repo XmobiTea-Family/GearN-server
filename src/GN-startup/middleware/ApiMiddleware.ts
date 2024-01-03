@@ -295,10 +295,10 @@ export class ApiMiddleware {
 	}
 
 	public async authenticateUploadToken(req: express.Request, res: express.Response, next: Function) {
-		// let returnCode = await this.getReturnCodeAuthenticate(req);
-		// if (returnCode != ReturnCode.Ok) {
-		// 	return res.sendStatus(401);
-		// }
+		let returnCode = await this.getReturnCodeAuthenticate(req);
+		if (returnCode != ReturnCode.Ok) {
+			return res.sendStatus(401);
+		}
 
 		return next();
 	}

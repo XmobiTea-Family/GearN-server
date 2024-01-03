@@ -113,6 +113,12 @@ export class AddFunctionRequestHandler extends RequestHandler {
             return operationResponse;
         }
 
+        if (request.script.includes("GNNetwork")) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExecuteError);
+            operationResponse.setParameter(GNParameterCode.Message, "Can not use keywork GNNetwork on cloudscript");
+            return operationResponse;
+        }
+
         let response = await cloudScriptService.addCloudScriptFunction(request.script, request.isLive, request.canExecute);
 
         if (response.success) {

@@ -16,13 +16,16 @@ export class MongoObject {
 	private static readonly EMPTY_STR: string = "";
 
 	private readonly collection: mongoDB.Collection<mongoDB.Document>;
+	
 	protected readonly _id: mongoDB.ObjectId;
+	protected readonly originResult: mongoDB.WithId<mongoDB.Document>;
 
 	private updateFilter: UpdateFilter;
 
 	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
 		this.collection = collection;
 		this._id = result[MongoObject.__id];
+		this.originResult = result;
 	}
 
 	protected inc(field: string, value: number) {
@@ -109,6 +112,10 @@ export class MongoObject {
 
 	public getObjectId(): mongoDB.ObjectId {
 		return this._id;
+	}
+
+	public getOriginResult(): mongoDB.WithId<mongoDB.Document> {
+		return this.originResult;
 	}
 
 	public async saveAsync(): Promise<mongoDB.UpdateResult> {

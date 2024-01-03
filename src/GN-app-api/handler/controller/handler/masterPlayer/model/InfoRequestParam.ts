@@ -47,6 +47,9 @@ export class InfoRequestParam {
     @BooleanDataMember({ code: GNParameterCode.TsLastLogin, isOptional: true, defaultValue: false })
     tsLastLogin?: boolean;
 
+    @BooleanDataMember({ code: GNParameterCode.PushNotifications, isOptional: true, defaultValue: false })
+    pushNotifications?: boolean;
+
     @GNArrayDataMember({ code: GNParameterCode.PlayerDataKeys, isOptional: true, elementCls: String })
     playerDataKeys?: Array<string>;
 
@@ -61,4 +64,5 @@ export class InfoRequestParam {
 
     @GNArrayDataMember({ code: GNParameterCode.TagKeys, isOptional: true, elementCls: String })
     tagKeys?: Array<string>;
+
 }

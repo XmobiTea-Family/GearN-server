@@ -1,9 +1,8 @@
-const GN_VERSION = "2.3";
+const GN_VERSION = "2.5";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
 import { OperationEvent } from "./GN-common/entity/operationEvent/OperationEvent";
 import { Socket } from "socket.io";
-import { xConfig } from "./GN-library/xconfig/lib/xConfig";
 import { xDatabase } from "./GN-library/xdatabase/lib/xDatabase";
 import { FacebookService } from "./GN-app-api/service/FacebookService";
 import { SocketApp } from "./GN-startup/SocketApp";
@@ -14,7 +13,6 @@ import { OperationResponse } from "./GN-common/entity/operationResponse/Operatio
 import { Request } from "./GN-common/entity/operationRequest/base/Request";
 
 import { AppleService } from "./GN-app-api/service/AppleService";
-import { xMail } from "./GN-library/xmail/lib/xMail";
 import { TimerService } from "./GN-app-api/service/TimerService";
 import { IFacebookService } from "./GN-app-api/service/IFacebookService";
 import { IGenericService } from "./GN-app-api/service/IGenericService";
@@ -24,7 +22,6 @@ import { ITimerService } from "./GN-app-api/service/ITimerService";
 import { OnRunSuccess } from "./GN-library/xbuilder/lib/OnRunSuccess";
 import { ILockService } from "./GN-app-api/service/ILockService";
 import { LockService } from "./GN-app-api/service/LockService";
-import { xCacheData } from "./GN-library/xcachedata/lib/xCacheData";
 import { ApiMiddleware } from "./GN-startup/middleware/ApiMiddleware";
 import { IRequestConverterService } from "./GN-app-api/service/IRequestConverterService";
 import { RequestConverterService } from "./GN-app-api/service/RequestConverterService";
@@ -33,6 +30,13 @@ import { GoogleService } from "./GN-app-api/service/GoogleService";
 import { CodeHelper } from "./GN-common/helper/CodeHelper";
 import { IAnalyticsService } from "./GN-app-api/service/IAnalyticsService";
 import { AnalyticsService } from "./GN-app-api/service/AnalyticsService";
+import { IPushNotificationService } from "./GN-app-api/service/IPushNotificationService";
+import { PushNotificationService } from "./GN-app-api/service/PushNotificationService";
+import { IEmailService } from "./GN-app-api/service/IEmailService";
+import { EmailService } from "./GN-app-api/service/EmailService";
+import { ICacheService } from "./GN-app-api/service/ICacheService";
+import { ConfigService } from "./GN-app-api/service/ConfigService";
+import { IConfigService } from "./GN-app-api/service/IConfigService";
 
 import { RequestType } from "./GN-common/constant/enumType/RequestType";
 import { xGNSettings } from "./GN-library/xsettings/lib/xGNSettings";
@@ -138,6 +142,12 @@ import { GetCreateLeaderboardRequestHandler as MasterPlayer_GetCreateLeaderboard
 import { GetLastLoginLeaderboardRequestHandler as MasterPlayer_GetLastLoginLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetLastLoginLeaderboardRequestHandler";
 import { GetStatisticsLogRequestHandler as MasterPlayer_GetStatisticsLogRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetStatisticsLogRequestHandler";
 import { GetCurrencyLogRequestHandler as MasterPlayer_GetCurrencyLogRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetCurrencyLogRequestHandler";
+import { SendSocketOperationEventRequestHandler as MasterPlayer_SendSocketOperationEventRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SendSocketOperationEventRequestHandler";
+import { SendEmailRequestHandler as MasterPlayer_SendEmailRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SendEmailRequestHandler";
+import { SendPushNotificationRequestHandler as MasterPlayer_SendPushNotificationRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SendPushNotificationRequestHandler";
+import { AddPushNotificationRequestHandler as MasterPlayer_AddPushNotificationRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/AddPushNotificationRequestHandler";
+import { RemovePushNotificationRequestHandler as MasterPlayer_RemovePushNotificationRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/RemovePushNotificationRequestHandler";
+import { GetPushNotificationRequestHandler as MasterPlayer_GetPushNotificationRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetPushNotificationRequestHandler";
 
 import { AddSegmentRequestHandler as CharacterPlayer_AddSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/AddSegmentRequestHandler";
 import { RemoveSegmentRequestHandler as CharacterPlayer_RemoveSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/RemoveSegmentRequestHandler";
@@ -189,6 +199,7 @@ import { GetFriendStatisticsLeaderboardAroundPlayerRequestHandler as CharacterPl
 import { GetFriendStatisticsLeaderboardRequestHandler as CharacterPlayer_GetFriendStatisticsLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetFriendStatisticsLeaderboardRequestHandler";
 import { GetCurrencyLeaderboardRequestHandler as CharacterPlayer_GetCurrencyLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetCurrencyLeaderboardRequestHandler";
 import { GetCreateLeaderboardRequestHandler as CharacterPlayer_GetCreateLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetCreateLeaderboardRequestHandler";
+import { GetLastLoginLeaderboardRequestHandler as CharacterPlayer_GetLastLoginLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetLastLoginLeaderboardRequestHandler";
 import { GetStatisticsLogRequestHandler as CharacterPlayer_GetStatisticsLogRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetStatisticsLogRequestHandler";
 import { GetCurrencyLogRequestHandler as CharacterPlayer_GetCurrencyLogRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetCurrencyLogRequestHandler";
 
@@ -240,8 +251,8 @@ import { GetPlayersWithDisplayNameRequestHandler as GamePlayer_GetPlayersWithDis
 import { GetFriendStatisticsLeaderboardAroundPlayerRequestHandler as GamePlayer_GetFriendStatisticsLeaderboardAroundPlayerRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetFriendStatisticsLeaderboardAroundPlayerRequestHandler";
 import { GetFriendStatisticsLeaderboardRequestHandler as GamePlayer_GetFriendStatisticsLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetFriendStatisticsLeaderboardRequestHandler";
 import { GetCurrencyLeaderboardRequestHandler as GamePlayer_GetCurrencyLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetCurrencyLeaderboardRequestHandler";
+import { GetLastLoginLeaderboardRequestHandler as GamePlayer_GetLastLoginLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetLastLoginLeaderboardRequestHandler";
 import { GetCreateLeaderboardRequestHandler as GamePlayer_GetCreateLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetCreateLeaderboardRequestHandler";
-import { SendSocketOperationEventRequestHandler as GamePlayer_SendSocketOperationEventRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/SendSocketOperationEventRequestHandler";
 import { GetStatisticsLogRequestHandler as GamePlayer_GetStatisticsLogRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetStatisticsLogRequestHandler";
 import { GetCurrencyLogRequestHandler as GamePlayer_GetCurrencyLogRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetCurrencyLogRequestHandler";
 
@@ -340,6 +351,8 @@ import { ValidateFacebookStoreReceiptRequestHandler as StoreInventory_ValidateFa
 import { GetCreateLeaderboardRequestHandler as StoreInventory_GetCreateLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/GetCreateLeaderboardRequestHandler";
 import { PresentStoreItemRequestHandler as StoreInventory_PresentStoreItemRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/PresentStoreItemRequestHandler";
 import { GetStoreLogRequestHandler as StoreInventory_GetStoreLogRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/GetStoreLogRequestHandler";
+import { GetStoreUsedRequestHandler as StoreInventory_GetStoreUsedRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/GetStoreUsedRequestHandler";
+import { RemoveStoreUsedRequestHandler as StoreInventory_RemoveStoreUsedRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/RemoveStoreUsedRequestHandler";
 
 import { LoginByAdminAccountRequestHandler as Dashboard_LoginByAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/LoginByAdminAccountRequestHandler";
 import { SetMasterGameSettingsRequestHandler as Dashboard_SetMasterGameSettingsRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/SetMasterGameSettingsRequestHandler";
@@ -366,6 +379,7 @@ import { SetEventCallbackCloudScriptRequestHandler as Dashboard_SetEventCallback
 import { ResetStatisticsLeaderboardRequestHandler as Dashboard_ResetStatisticsLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/ResetStatisticsLeaderboardRequestHandler";
 import { GetBackupStatisticsLeaderboardVersionRequestHandler as Dashboard_GetBackupStatisticsLeaderboardVersionRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetBackupStatisticsLeaderboardVersionRequestHandler";
 import { GetServerGameDataRequestHandler as Dashboard_GetServerGameDataRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetServerGameDataRequestHandler";
+import { DeleteInDatabaseRequestHandler as Dashboard_DeleteInDatabaseRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/DeleteInDatabaseRequestHandler";
 
 import { CancelAllMatchmakingTicketRequestHandler as Multiplayer_CancelAllMatchmakingTicketRequestHandler } from "./GN-app-api/handler/controller/handler/multiplayer/CancelAllMatchmakingTicketRequestHandler";
 import { CancelMatchmakingTicketRequestHandler as Multiplayer_CancelMatchmakingTicketRequestHandler } from "./GN-app-api/handler/controller/handler/multiplayer/CancelMatchmakingTicketRequestHandler";
@@ -396,7 +410,7 @@ import { CountryIPDetailService } from "./GN-app-api/service/CountryIPDetailServ
 import { MatchmakingTicketStatus } from "./GN-common/constant/enumType/MatchmakingTicketStatus";
 import { ServerDetail } from "./GN-library/xdatabase/lib/entity/pro/ServerDetail";
 import { Debug } from "./GN-library/xdebug/lib/xDebug";
-import { Match } from "./GN-library/xdatabase/lib/entity/pro/Match";
+import * as mongoDB from "mongodb";
 
 interface CreateIndexesOptions {
 	unique?: boolean;
@@ -416,11 +430,8 @@ export class GNServer {
 	private requestController: RequestController;
 
 	private idTypeCase: number;
-	private xConfigDic: Map<string, xConfig>;
 	private xGNSettings: xGNSettings;
 	private xDatabase: xDatabase;
-	private xMail: xMail;
-	private xCacheData: xCacheData;
 
 	private facebookService: IFacebookService;
 	private genericService: IGenericService;
@@ -437,10 +448,15 @@ export class GNServer {
 	private cloudScriptServiceDic: Map<string, ICloudScriptService>;
 	private eventCallbackCloudScriptService: IEventCallbackCloudScriptService;
 	private countryIPDetailService: ICountryIPDetailService;
+	private pushNotificationService: IPushNotificationService;
+	private emailService: IEmailService;
+	private cacheServiceDic: Map<string, ICacheService>;
+	private configServiceDic: Map<string, IConfigService>;
 
 	private gameIds: string[];
 	private matchmakingHandler: MatchmakingHandler;
 	private waitingServerDetailDict: Map<string, NodeJS.Timeout>;
+	private postEventCallbackCollection: mongoDB.Collection<mongoDB.Document>;
 
 	constructor() {
 		this.facebookService = new FacebookService();
@@ -457,13 +473,14 @@ export class GNServer {
 		this.timerService = new TimerService();
 		this.lockService = new LockService();
 		this.requestConverterService = new RequestConverterService();
+		this.pushNotificationService = new PushNotificationService();
+		this.emailService = new EmailService();
 
 		this.idTypeCase = 0;
-		this.xConfigDic = new Map();
+		this.configServiceDic = new Map();
 		this.xGNSettings = new xGNSettings();
 		this.xDatabase = new xDatabase();
-		this.xMail = new xMail();
-		this.xCacheData = new xCacheData();
+		this.cacheServiceDic = new Map();
 
 		this.requestController = new RequestController();
 		this.requestController.setRequestConverterService(this.requestConverterService);
@@ -477,7 +494,7 @@ export class GNServer {
 
 		this.cloudScriptServiceDic = new Map();
 		this.eventCallbackCloudScriptService = new EventCallbackCloudScriptService();
-		
+
 		this.countryIPDetailService = new CountryIPDetailService();
 
 		CodeHelper.init();
@@ -485,8 +502,14 @@ export class GNServer {
 		let thiz = this;
 		this.timerService.subscriberEverySecond(() => {
 			let currentDate = xDatetime.getCurrentDate();
-			if (currentDate.getSeconds() % 5 == 0)
+			if (currentDate.getSeconds() % 10 == 0)
 				thiz.handleMatchmaking();
+		});
+
+		this.timerService.subscriberEveryMinute(() => {
+			let currentDate = xDatetime.getCurrentDate();
+			if (currentDate.getMinutes() % 10 == 0)
+				thiz.handleRemoveCacheInvalidData();
 		});
 	}
 
@@ -597,6 +620,12 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new MasterPlayer_GetLastLoginLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new MasterPlayer_GetStatisticsLogRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new MasterPlayer_GetCurrencyLogRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new MasterPlayer_SendSocketOperationEventRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new MasterPlayer_SendEmailRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new MasterPlayer_SendPushNotificationRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new MasterPlayer_AddPushNotificationRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new MasterPlayer_RemovePushNotificationRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new MasterPlayer_GetPushNotificationRequestHandler(this), true);
 		}
 
 		{
@@ -652,6 +681,7 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetFriendStatisticsLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCurrencyLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCreateLeaderboardRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetLastLoginLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetStatisticsLogRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCurrencyLogRequestHandler(this), true);
 		}
@@ -707,8 +737,8 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetFriendStatisticsLeaderboardAroundPlayerRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetFriendStatisticsLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetCurrencyLeaderboardRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetLastLoginLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetCreateLeaderboardRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new GamePlayer_SendSocketOperationEventRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetStatisticsLogRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetCurrencyLogRequestHandler(this), true);
 		}
@@ -824,6 +854,8 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_GetCreateLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_PresentStoreItemRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreLogRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreUsedRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new StoreInventory_RemoveStoreUsedRequestHandler(this), true);
 		}
 
 		{
@@ -855,8 +887,9 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new Dashboard_ResetStatisticsLeaderboardRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetBackupStatisticsLeaderboardVersionRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetServerGameDataRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new Dashboard_DeleteInDatabaseRequestHandler(this), true);
 		}
-		
+
 		{
 			let requestTypeValue = <number>RequestType.Multiplayer;
 
@@ -900,6 +933,8 @@ export class GNServer {
 		tempAnalyticsService.setGNServer(this);
 		tempAnalyticsService.run();
 		this.analyticsService = tempAnalyticsService;
+
+		this.postEventCallbackCollection = this.xDatabase.systemCollection("EventCallback.Post");
 
 		if (onRunSuccess != null) onRunSuccess();
 	}
@@ -948,12 +983,12 @@ export class GNServer {
 		this.xDatabase.createIndex(collectionName, index, options);
 	}
 
-	public getConfigGame(gameId: string): xConfig {
-		return this.xConfigDic.get(gameId);
+	public getConfigService(gameId: string): IConfigService {
+		return this.configServiceDic.get(gameId);
 	}
 
-	public setConfigGame(gameId: string, config: xConfig) {
-		this.xConfigDic.set(gameId, config);
+	public setConfigGame(gameId: string, configService: IConfigService) {
+		this.configServiceDic.set(gameId, configService);
 	}
 
 	public setIdTypeCase(idTypeCase: number) {
@@ -972,13 +1007,13 @@ export class GNServer {
 		return this.xDatabase;
 	}
 
-	public getMail(): xMail {
-		return this.xMail;
+	public getCacheService(gameId: string): ICacheService {
+        return this.cacheServiceDic.get(gameId);
 	}
 
-	public getCacheData(): xCacheData {
-		return this.xCacheData;
-	}
+    public setCacheService(gameId: string, cacheService: ICacheService) {
+        this.cacheServiceDic.set(gameId, cacheService);
+    }
 
 	public getFacebookService(): IFacebookService {
 		return this.facebookService;
@@ -1036,6 +1071,14 @@ export class GNServer {
 		return this.requestConverterService;
 	}
 
+	public getEmailService(): IEmailService {
+		return this.emailService;
+	}
+
+	public getPushNotificationService(): IPushNotificationService {
+		return this.pushNotificationService;
+	}
+
 	public getCloudScriptService(gameId: string): ICloudScriptService {
 		return this.cloudScriptServiceDic.get(gameId);
 	}
@@ -1045,18 +1088,88 @@ export class GNServer {
 	}
 
 	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
+		await this.eventCallbackCloudScriptService.executeEvent("system_SendEventTo", { userId: userId }, operationEvent);
+
+		let operationEventToData = {
+			eventCode: operationEvent.getEventCode(),
+			encrypted: operationEvent.isEncrypted(),
+			parameters: operationEvent.getParameters()?.toData()
+		};
+
+		this.postEventCallbackCollection.insertOne({
+			eventName: "system_SendEventTo",
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			request: {
+				userId: userId
+			},
+			operationEvent: operationEventToData,
+			responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
+		});
+
 		return await this.socketApp.getSocketAppHandler().sendEventTo(userId, operationEvent);
 	}
 
 	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
+		await this.eventCallbackCloudScriptService.executeEvent("system_SendEventToRoom", { roomId: roomId }, operationEvent);
+
+		let operationEventToData = {
+			eventCode: operationEvent.getEventCode(),
+			encrypted: operationEvent.isEncrypted(),
+			parameters: operationEvent.getParameters()?.toData()
+		};
+
+		this.postEventCallbackCollection.insertOne({
+			eventName: "system_SendEventToRoom",
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			request: {
+				roomId: roomId
+			},
+			operationEvent: operationEventToData,
+			responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
+		});
+		
 		return await this.socketApp.getSocketAppHandler().sendEventToRoom(roomId, operationEvent);
 	}
 
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
+		await this.eventCallbackCloudScriptService.executeEvent("system_SendEventToMoreUser", { userIds: userIds }, operationEvent);
+
+		let operationEventToData = {
+			eventCode: operationEvent.getEventCode(),
+			encrypted: operationEvent.isEncrypted(),
+			parameters: operationEvent.getParameters()?.toData()
+		};
+
+		this.postEventCallbackCollection.insertOne({
+			eventName: "system_SendEventToMoreUser",
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			request: {
+				userIds: userIds
+			},
+			operationEvent: operationEventToData,
+			responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8") * userIds.length,
+		});
+
 		return await this.socketApp.getSocketAppHandler().sendEventToMoreUser(userIds, operationEvent);
 	}
 
 	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
+		await this.eventCallbackCloudScriptService.executeEvent("system_SendEventToAllPlayer", {}, operationEvent);
+
+		let operationEventToData = {
+			eventCode: operationEvent.getEventCode(),
+			encrypted: operationEvent.isEncrypted(),
+			parameters: operationEvent.getParameters()?.toData()
+		};
+
+		this.postEventCallbackCollection.insertOne({
+			eventName: "system_SendEventToAllPlayer",
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			request: {},
+			operationEvent: operationEventToData,
+			responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
+		});
+
 		return await this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent);
 	}
 
@@ -1099,6 +1212,13 @@ export class GNServer {
 		}
 	}
 
+    private handleRemoveCacheInvalidData() {
+        for (let i = 0; i < this.gameIds.length; i++) {
+			let gameId = this.gameIds[i];
+            this.getCacheService(gameId).removeInvalidData();
+		}
+    }
+
 	private async handleMatchmakingForGame(gameId: string) {
 		let matchmakingTicketCanMatchs = await this.matchmakingHandler.handle(gameId);
 
@@ -1121,13 +1241,13 @@ export class GNServer {
 
 	private async requestMatchServerDetail(gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch): Promise<void> {
 		let matchId = matchmakingTicketCanMatch.matchId;
-		Debug.logError("[GN] [Matchmaking] request match server detail for " + matchId + " to set serverDetail on gameId " + gameId);
+		Debug.logInfo("[GN] [Matchmaking] request match server detail for " + matchId + " to set serverDetail on gameId " + gameId);
 
 		let thiz = this;
 		let timeout = setTimeout(async () => {
 			thiz.setMatchServerDetailFailed(gameId, matchId, matchmakingTicketCanMatch.ticketIds, "Timeout");
 		}, 15 * 60 * 1000);
-		
+
 		this.waitingServerDetailDict.set(matchId, timeout);
 
 		let response = await this.eventCallbackCloudScriptService.executeRequestServerDetailSystem(gameId, matchmakingTicketCanMatch);
@@ -1157,10 +1277,10 @@ export class GNServer {
 			this.waitingServerDetailDict.delete(matchId);
 		}
 
-		Debug.logError("[GN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
+		Debug.logInfo("[GN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
 
 		let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
-		matchCollection.updateOne({ matchId: matchId }, { $set: {  } });
+		matchCollection.updateOne({ matchId: matchId }, { $set: {} });
 
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: <number>MatchmakingTicketStatus.Canceled } });
@@ -1169,4 +1289,9 @@ export class GNServer {
 	public getGameIds(): string[] {
 		return this.gameIds;
 	}
+
+    public isPrimary(): boolean {
+        return this.httpApp.getClusterHandler().getIsPrimary();
+    }
+    
 }

@@ -1277,6 +1277,78 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnMasterPlayer.add(GNParameterCode.GetCurrencyLog, gnPermissionRules);
 			}
 
+			{
+				let permissionRules = masterPlayer.sendSocketOperationEvent;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnMasterPlayer.add(GNParameterCode.SendSocketOperationEvent, gnPermissionRules);
+			}
+
+			{
+				let permissionRules = masterPlayer.sendEmail;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnMasterPlayer.add(GNParameterCode.SendEmail, gnPermissionRules);
+			}
+
+			{
+				let permissionRules = masterPlayer.sendPushNotification;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnMasterPlayer.add(GNParameterCode.SendPushNotification, gnPermissionRules);
+			}
+
+			{
+				let permissionRules = masterPlayer.addPushNotification;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnMasterPlayer.add(GNParameterCode.AddPushNotification, gnPermissionRules);
+			}
+
+			{
+				let permissionRules = masterPlayer.removePushNotification;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnMasterPlayer.add(GNParameterCode.RemovePushNotification, gnPermissionRules);
+			}
+
+			{
+				let permissionRules = masterPlayer.getPushNotification;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnMasterPlayer.add(GNParameterCode.GetPushNotification, gnPermissionRules);
+			}
+
 			gnPermission.add(GNParameterCode.MasterPlayer, gnMasterPlayer);
 		}
 
@@ -1873,7 +1945,15 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = gamePlayer.sendSocketOperationEvent;
+				let permissionRules = gamePlayer.getLastLoginLeaderboard;
+				if (permissionRules == null) {
+					permissionRules = {
+						selfEnable: false,
+						otherSelfEnable: false,
+						serverSelfEnable: false,
+						adminSelfEnable: false,
+					}
+				}
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -1881,7 +1961,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnGamePlayer.add(GNParameterCode.SendSocketOperationEvent, gnPermissionRules);
+				gnGamePlayer.add(GNParameterCode.GetLastLoginLeaderboard, gnPermissionRules);
 			}
 
 			{
@@ -2513,6 +2593,18 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
 				gnCharacterPlayer.add(GNParameterCode.GetCreateLeaderboard, gnPermissionRules);
+			}
+
+            {
+				let permissionRules = characterPlayer.getLastLoginLeaderboard;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnCharacterPlayer.add(GNParameterCode.GetLastLoginLeaderboard, gnPermissionRules);
 			}
 
 			{
@@ -3683,6 +3775,30 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnStoreInventory.add(GNParameterCode.GetStoreLog, gnPermissionRules);
 			}
 
+            {
+                let permissionRules = storeInventory.getStoreUsed;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnStoreInventory.add(GNParameterCode.GetStoreUsed, gnPermissionRules);
+            }
+
+            {
+                let permissionRules = storeInventory.removeStoreUsed;
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnStoreInventory.add(GNParameterCode.RemoveStoreUsed, gnPermissionRules);
+            }
+
 			gnPermission.add(GNParameterCode.StoreInventory, gnStoreInventory);
 		}
 
@@ -3976,6 +4092,26 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
 				gnMasterAdmin.add(GNParameterCode.GetServerGameData, gnPermissionRules);
+			}
+
+			{
+				let permissionRules = masterAdmin.deleteInDatabase;
+				if (permissionRules == null) {
+					permissionRules = {
+						selfEnable: false,
+						otherSelfEnable: false,
+						serverSelfEnable: false,
+						adminSelfEnable: false,
+					}
+				}
+				let gnPermissionRules = new GNHashtable();
+
+				gnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);
+				gnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+				gnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+				gnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+				gnMasterAdmin.add(GNParameterCode.ChangePasswordAdminAccount, gnPermissionRules);
 			}
 
 			gnPermission.add(GNParameterCode.MasterAdmin, gnMasterAdmin);

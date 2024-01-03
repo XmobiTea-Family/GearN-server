@@ -73,6 +73,9 @@ export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandle
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) {
+			masterPlayerFindOptions.lastIPDetail = true;
+		}
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAndroidDeviceIdAsync(request.androidDeviceId, masterPlayerFindOptions);
 

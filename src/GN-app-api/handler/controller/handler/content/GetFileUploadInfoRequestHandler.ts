@@ -118,7 +118,6 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
         operationResponse.setParameter(GNParameterCode.FileId, uploadFileInfo.getFileId());
         operationResponse.setParameter(GNParameterCode.FileName, uploadFileInfo.getFileName());
         operationResponse.setParameter(GNParameterCode.TsCreate, uploadFileInfo.getTsCreate());
-        operationResponse.setParameter(GNParameterCode.UserId, uploadFileInfo.getUserId());
 
         let gnRemoveStatus = new GNHashtable();
         let removeStatus = uploadFileInfo.getRemoveStatus();

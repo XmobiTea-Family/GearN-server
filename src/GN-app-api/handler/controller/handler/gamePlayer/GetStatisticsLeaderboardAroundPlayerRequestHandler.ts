@@ -14,6 +14,8 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { GamePlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/GamePlayer";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetStatisticsLeaderboardAroundPlayerOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
@@ -28,8 +30,11 @@ class GetStatisticsLeaderboardAroundPlayerOperationRequest extends OperationRequ
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
+
+	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	loadFromCache?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -100,7 +105,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
@@ -122,7 +128,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
@@ -144,11 +151,12 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetStatisticsLeaderboardAroundPlayer", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -157,10 +165,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
-
-		let masterPlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
-		let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+		let playerStatisticsSettingsItem = gamePlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
 
 		if (playerStatisticsSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
@@ -168,28 +174,102 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 			return operationResponse;
 		}
 
-		let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
-		let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+        let positionCacheKey = "gamePlayerStatisticsLeaderboardAroundPosition_" + request.userId + "_" + request.key;
+        let cacheKey = "gamePlayerStatisticsLeaderboardAround_" + request.userId + "_" + request.key;
 
-		let gnResults = new GNArray();
+        if (request.loadFromCache) {
+            if (request.skip + request.limit > 100) {
+                request.loadFromCache = false;
+            }
+        }
 
-		let thisPosition = await this.gnServer.getDatabase().loadPositionGamePlayerLeaderboardWithStatisticsAsync(request.key, request.userId, secretInfo.getGameId(), playerStatisticsSettingsItem.initialValue, direction);
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-		let gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, secretInfo.getGameId(), direction, gamePlayerFindOptions);
+        if (request.loadFromCache) {
+            if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
+                request.loadFromCache = false;
+            }
+        }
 
-		for (let i = 0; i < gamePlayers.length; i++) {
-			let gamePlayer = gamePlayers[i];
+        let gnResults = new GNArray();
 
-			let gnResult = new GNHashtable();
+        let thisPosition: number;
+		let gamePlayers: GamePlayer[];
 
-			gnResult.add(GNParameterCode.Position, i + request.skip + thisPosition);
+		if (request.loadFromCache) {
+            thisPosition = await cacheData.getData(positionCacheKey);
+            gamePlayers = await cacheData.getData(cacheKey);
 
-			gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
+            for (let i = request.skip; i < request.skip + request.limit; i++) {
+                if (i >= gamePlayers.length) break;
 
-			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
+                let gamePlayer = gamePlayers[i];
 
-			gnResults.add(gnResult);
-		}
+                let gnResult = new GNHashtable();
+
+                gnResult.add(GNParameterCode.Position, i + thisPosition);
+
+                gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
+
+                gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
+
+                gnResults.add(gnResult);
+            }
+        }
+        else {
+            let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
+            let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+
+            thisPosition = await this.gnServer.getDatabase().loadPositionGamePlayerLeaderboardWithStatisticsAsync(request.key, request.userId, secretInfo.getGameId(), playerStatisticsSettingsItem.initialValue, direction);
+
+            if (thisPosition != -1) {
+                await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+
+                let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
+
+                if (request.skip + request.limit <= 100) {
+                    gamePlayerFindOptions = null;
+
+                    gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, secretInfo.getGameId(), direction, gamePlayerFindOptions);
+
+                    for (let i = request.skip; i < request.skip + request.limit; i++) {
+                        if (i >= gamePlayers.length) break;
+        
+                        let gamePlayer = gamePlayers[i];
+        
+                        let gnResult = new GNHashtable();
+        
+                        gnResult.add(GNParameterCode.Position, i + thisPosition);
+        
+                        gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
+        
+                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
+        
+                        gnResults.add(gnResult);
+                    }
+    
+                    await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+                }
+                else {
+                    gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, secretInfo.getGameId(), direction, gamePlayerFindOptions);
+
+                    for (let i = 0; i < gamePlayers.length; i++) {
+    
+                        let gamePlayer = gamePlayers[i];
+    
+                        let gnResult = new GNHashtable();
+    
+                        gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
+    
+                        gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
+    
+                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
+    
+                        gnResults.add(gnResult);
+                    }
+                }
+            }
+        }
 
 		operationResponse.setParameter(GNParameterCode.Results, gnResults);
 

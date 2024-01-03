@@ -20,7 +20,7 @@ class GetStatisticsLogOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true, isOptional: true })
     characterId?: string;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
 
     @StringDataMember({ code: GNParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
@@ -52,9 +52,6 @@ class AdminGetStatisticsLogOperationRequest extends ServerGetStatisticsLogOperat
 }
 
 export class GetStatisticsLogRequestHandler extends RequestHandler {
-    protected override init(): void {
-        this.gnServer.getCacheData
-    }
 
     public override getCode() {
         return OperationCode.GetStatisticsLog;
@@ -130,12 +127,12 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let masterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+        let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 
         let keys: string[] = [];
         if (request.keys) {
             for (let i = 0; i < request.keys.length; i++) {
-                let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.keys[i]);
+                let playerStatisticsSettingsItem = characterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.keys[i]);
 
                 if (playerStatisticsSettingsItem != null) {
                     keys.push(playerStatisticsSettingsItem.key);

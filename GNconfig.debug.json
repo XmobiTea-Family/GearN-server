@@ -1,31 +1,43 @@
 {
-    "name": "debug",
-    "options": {
-        "applicationSettings": {
+	"name": "debug",
+	"options": {
+		"applicationSettings": {
 			"port": 2202,
+			"socketPort": 2901,
 			"useSsl": false,
 			"keyFilePath": "",
 			"certFilePath": "",
 			"expiredTokenInMs": 172800000,
-            "privateKeyToken": "privateKeyDefault"
+			"privateKeyToken": "privateKeyDefault"
 		},
-
 		"httpAppSettings": {
 			"enable": true,
 			"allowOrigin": "*",
 			"credentials": true,
-			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["a", "s", "g", "content-type", "content-length", "user-agent"],
+			"allowMethods": [
+				"GET",
+				"POST"
+			],
+			"allowHeaders": [
+				"a",
+				"s",
+				"g",
+				"content-type",
+				"content-length",
+				"user-agent"
+			],
 			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true
 		},
-
 		"socketAppSettings": {
 			"enable": true,
+			"useEmitter": false,
 			"allowOrigin": "*",
 			"credentials": true,
-			"allowMethods": ["GET"],
+			"allowMethods": [
+				"GET"
+			],
 			"allowHeaders": [],
 			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
@@ -33,39 +45,29 @@
 			"pingInterval": 50000,
 			"pingTimeout": 5000
 		},
-
 		"uploadFileSettings": {
 			"enable": true,
 			"uploadPath": "./file-upload",
 			"maxSizeUpload": 52428800,
-			"mimeTypeAccepts": ["image/png"]
+			"mimeTypeAccepts": [
+				"image/png"
+			]
 		},
-
 		"databaseSettings": {
-			"connectionString": "mongodb://gnserver:BA5NfnWPrH8dMfX4@127.0.0.1:27017/gnserver",
-			"databaseName": "gnserver",
-			"options": {
-			}
+			"connectionString": "mongodb://saroot:passhere@192.168.0.200:38017/admin",
+			"databaseName": "GN_IdleRPG_New",
+			"options": {}
 		},
-
 		"otherSettings": {
 			"headerIP": "x-ip",
-			"idTypeCase": 1,
+			"idTypeCase": 0,
 			"ipApiUrl": "https://ipdetail.changx.dev/json"
 		},
-		
-		"mailSettings": {
-			"enable": false,
-			"sendFrom": "changx@xmobitea.com",
-			"sendGridApiKey": "SG."
-		},
-
 		"logSettings": {
 			"logToConsoleEnable": true,
 			"logToFileEnable": true,
 			"logPath": "./log/debug/Server.log"
 		},
-
 		"ddosSettings": {
 			"socketMaxRequestPerSecondPerIp": 50,
 			"socketMaxRequestPerSecondPerPeer": 20,
@@ -76,7 +78,19 @@
 			"httpMaxPendingRequest": 1000,
 			"httpMaxRequestSize": 102400,
 			"maxUploadPendingRequest": 200,
-			"maxDownloadPendingRequest": 200
-		}
-    }
+			"maxDownloadPendingRequest": 200,
+			"ipWhiteList": ["127.0.0.1"]
+		},
+        "clusterSettings": {
+            "instanceId": "node_0",
+            "isPrimary": true,
+            "privateKeyToken": "privateKeyDefault",
+            "allNodes": [
+                {
+                    "instanceId": "node_0",
+                    "fullUrl": "http://127.0.0.1:2202"
+                }
+            ]
+        }
+	}
 }

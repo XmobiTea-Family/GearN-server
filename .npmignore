@@ -8,3 +8,8 @@ tsconfig-build.json
 webpack.config.js
 index.js
 node_modules/
+log/
+file-upload/
+GNconfig.debug.json
+syncCode.js
+syncCodeVer2.js

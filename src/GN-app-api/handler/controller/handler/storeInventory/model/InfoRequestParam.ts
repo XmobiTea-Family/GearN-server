@@ -5,6 +5,9 @@ export class InfoRequestParam {
     @BooleanDataMember({ code: GNParameterCode.StoreItems, isOptional: true, defaultValue: false })
     storeItems?: boolean;
 
+    @BooleanDataMember({ code: GNParameterCode.StoreItemType, isOptional: true, defaultValue: false })
+    storeItemType?: boolean;
+
     @BooleanDataMember({ code: GNParameterCode.StoreCurrencies, isOptional: true, defaultValue: false })
     storeCurrencies?: boolean;
 

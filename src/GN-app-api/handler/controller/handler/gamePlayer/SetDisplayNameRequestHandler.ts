@@ -13,6 +13,7 @@ import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErr
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
+import { DisplayNameUtility } from "../../../../../GN-common/helper/DisplayNameUtility";
 
 class SetDisplayNameOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
@@ -141,7 +142,7 @@ export class SetDisplayNameRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		if (request.uniqueDisplayName) {
-			let gamePlayerWithThisDisplayName = await this.gnServer.getDatabase().loadGamePlayerWithDisplayNameAsync(request.displayName, gamePlayerFindOptions);
+			let gamePlayerWithThisDisplayName = await this.gnServer.getDatabase().loadGamePlayerWithDisplayNameAsync(DisplayNameUtility.normalizeString(request.displayName), gamePlayerFindOptions);
 
 			if (gamePlayerWithThisDisplayName != null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.DisplayNameHasUse);

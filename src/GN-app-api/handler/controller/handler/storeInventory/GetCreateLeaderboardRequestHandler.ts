@@ -23,7 +23,7 @@ class GetCreateLeaderboardOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
 	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
@@ -139,8 +139,10 @@ export class GetCreateLeaderboardRequestHandler extends StoreItemBaseRequestHand
 			}
 		}
 
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
 		if (request.loadFromCache) {
-			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+			if (!(await cacheData.isValid(cacheKey))) {
 				request.loadFromCache = false;
 			}
 		}
@@ -150,7 +152,7 @@ export class GetCreateLeaderboardRequestHandler extends StoreItemBaseRequestHand
 		let storeInventorys: StoreInventory[];
 
 		if (request.loadFromCache) {
-			storeInventorys = this.gnServer.getCacheData().getData(cacheKey);
+			storeInventorys = await cacheData.getData(cacheKey);
 
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
 				if (i >= storeInventorys.length) break;
@@ -190,7 +192,7 @@ export class GetCreateLeaderboardRequestHandler extends StoreItemBaseRequestHand
 					gnResults.add(gnResult);
 				}
 
-				this.gnServer.getCacheData().setData(cacheKey, storeInventorys, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				await cacheData.setData(cacheKey, storeInventorys, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
 				storeInventorys = await this.gnServer.getDatabase().loadStoreInventoriesLeaderboardWithCreateAsync(request.skip, request.limit, secretInfo.getGameId(), storeInventoryFindOptions);

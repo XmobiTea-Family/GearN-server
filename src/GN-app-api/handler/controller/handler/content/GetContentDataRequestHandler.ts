@@ -114,7 +114,7 @@ export class GetContentDataRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let configGame = this.gnServer.getConfigGame(secretInfo.getGameId());
+		let configGame = this.gnServer.getConfigService(secretInfo.getGameId());
 		if (!configGame) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GameNotFound);
 			return operationResponse;

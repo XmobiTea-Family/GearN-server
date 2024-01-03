@@ -25,7 +25,10 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
         let answer: { [k: string]: DataValueType } = {};
 
         if (attribute != null && matchmakingQueueSettings.rules != null) {
-            let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, null);
+            let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, {
+                playerDatas: true,
+                
+            });
 
             if (gamePlayer != null) {
                 for (let i = 0; i < matchmakingQueueSettings.rules.length; i++) {

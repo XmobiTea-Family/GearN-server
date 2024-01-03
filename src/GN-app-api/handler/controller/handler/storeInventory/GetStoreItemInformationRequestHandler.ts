@@ -15,7 +15,7 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetStoreItemInformationOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
 	storeId: string;
 
 	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })

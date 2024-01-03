@@ -1,6 +1,7 @@
 import { HttpAppSettings } from "./settings/HttpAppSettings";
 import { HttpAppHandler } from "./routes/HttpAppHandler";
 import { UploadFileHandler } from "./routes/UploadFileHandler";
+import { ClusterHandler } from "./routes/ClusterHandler";
 
 import cors from "cors";
 import express, { Express } from "express";
@@ -12,15 +13,19 @@ import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { ApplicationSettings } from "./settings/ApplicationSettings";
 import { LogSettings } from "./settings/LogSettings";
+import { ClusterSettings } from "./settings/ClusterSettings";
 
 export class HttpApp {
 	private applicationSettings: ApplicationSettings;
 	private uploadFileSettings: UploadFileSettings;
 	private appSettings: HttpAppSettings;
 	private socketAppSettings: SocketAppSettings;
+	private clusterSettings: ClusterSettings;
+
 	private app: Express;
 	private httpAppHandler: HttpAppHandler;
 	private uploadFileHandler: UploadFileHandler;
+	private clusterHandler: ClusterHandler;
 
 	private antiDdosMiddleware: AntiDdosMiddleware;
 	private logSettings: LogSettings;
@@ -47,6 +52,10 @@ export class HttpApp {
 		return this.uploadFileHandler;
 	}
 
+	public getClusterHandler(): ClusterHandler {
+		return this.clusterHandler;
+	}
+
 	public setApiMiddleware(apiMiddleware: ApiMiddleware) {
 		this.apiMiddleware = apiMiddleware;
 	}
@@ -65,6 +74,10 @@ export class HttpApp {
 
 	public setSocketAppSettings(socketAppSettings: SocketAppSettings): void {
 		this.socketAppSettings = socketAppSettings;
+	}
+
+	public setClusterSettings(clusterSettings: ClusterSettings): void {
+		this.clusterSettings = clusterSettings;
 	}
 
 	public setUploadFileSettings(uploadFileSettings: UploadFileSettings): void {
@@ -138,6 +151,16 @@ export class HttpApp {
 		if (this.uploadFileSettings.getEnable()) {
 			this.uploadFileHandler.run();
 		}
+
+		this.clusterHandler = new ClusterHandler();
+		this.clusterHandler.setRouter(this.app);
+		this.clusterHandler.setInstanceId(this.clusterSettings.getInstanceId());
+		this.clusterHandler.setIsPrimary(this.clusterSettings.getIsPrimary());
+		this.clusterHandler.setPrivateKeyToken(this.clusterSettings.getPrivateKeyToken());
+		this.clusterHandler.setAllNodes(this.clusterSettings.getAllNodes());
+
+		this.clusterHandler.init();
+		this.clusterHandler.run();
 	}
 
 	constructor() { }

@@ -2,6 +2,7 @@ import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 abstract class BuilderBase {
 	protected port: number;
+	protected socketPort: number;
 	protected useSSL: boolean;
 
 	protected keyFilePath: string;
@@ -12,6 +13,10 @@ abstract class BuilderBase {
 
 	public getPort(): number {
 		return this.port;
+	}
+
+	public getSocketPort(): number {
+		return this.socketPort;
 	}
 
 	public getUseSSL(): boolean {
@@ -44,6 +49,11 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 		return this;
 	}
 
+	public setSocketPort(socketPort: number): Builder {
+		this.socketPort = socketPort;
+		return this;
+	}
+
 	public setUseSSL(useSSL: boolean): Builder {
 		this.useSSL = useSSL;
 		return this;
@@ -73,6 +83,7 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 		super();
 
 		this.port = 0;
+		this.socketPort = 0;
 		this.useSSL = false;
 		this.keyFilePath = "";
 		this.certFilePath = "";
@@ -91,6 +102,7 @@ export class ApplicationSettings extends BuilderBase {
 		super();
 
 		this.port = builder.getPort();
+		this.socketPort = builder.getSocketPort();
 		this.useSSL = builder.getUseSSL();
 		this.keyFilePath = builder.getKeyFilePath();
 		this.certFilePath = builder.getCertFilePath();

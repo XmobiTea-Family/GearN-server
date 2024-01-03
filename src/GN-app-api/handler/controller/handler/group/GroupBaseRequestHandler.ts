@@ -637,12 +637,14 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
     }
 
     protected async getGroupMessages(groupId: string, gameId: string, skip: number, limit: number): Promise<GroupMessageItem[]> {
-        let cacheData = this.gnServer.getCacheData();
-        if (!cacheData.hasData("GroupMessages_" + groupId)) {
-            cacheData.setData("GroupMessages_" + groupId, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
+
+        let cacheData = this.gnServer.getCacheService(gameId);
+
+        if (!(await cacheData.isValid("GroupMessages_" + groupId))) {
+            await cacheData.setData("GroupMessages_" + groupId, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
         }
 
-        let groupMessageItems = cacheData.getData<Array<GroupMessageItem>>("GroupMessages_" + groupId);
+        let groupMessageItems = await cacheData.getData<Array<GroupMessageItem>>("GroupMessages_" + groupId);
 
         let answer: GroupMessageItem[] = [];
 
@@ -686,14 +688,16 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
     }
 
     protected async sendGroupMessage(groupId: string, gameId: string, groupMessageItem: GroupMessageItem): Promise<void> {
-        let cacheData = this.gnServer.getCacheData();
-        if (!cacheData.hasData("GroupMessages_" + groupId)) {
-            cacheData.setData("GroupMessages_" + groupId, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
+
+        let cacheData = this.gnServer.getCacheService(gameId);
+
+        if (!(await cacheData.isValid("GroupMessages_" + groupId))) {
+            await cacheData.setData("GroupMessages_" + groupId, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
         }
 
         await this.gnServer.getDatabase().createGroupMessageAsync(groupId, gameId, groupMessageItem.senderId, groupMessageItem.senderType, groupMessageItem.message, groupMessageItem.tsCreate);
 
-        let groupMessageItems = cacheData.getData<Array<GroupMessageItem>>("GroupMessages_" + groupId);
+        let groupMessageItems = await cacheData.getData<Array<GroupMessageItem>>("GroupMessages_" + groupId);
 
         if (groupMessageItems.length > 150) groupMessageItems.splice(149, 1);
         groupMessageItems.unshift(groupMessageItem);

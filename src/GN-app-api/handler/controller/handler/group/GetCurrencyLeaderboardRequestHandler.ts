@@ -26,11 +26,14 @@ class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
     @NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
     skip?: number;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
 
     @BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
     loadFromCache?: boolean;
+
+	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	catalogId?: string;
 
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
@@ -85,6 +88,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
             limit: request.limit,
             infoRequestParam: request.infoRequestParam,
             loadFromCache: request.loadFromCache,
+            catalogId: request.catalogId,
         }, secretInfo, operationRequest);
     }
 
@@ -107,6 +111,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
             limit: request.limit,
             infoRequestParam: request.infoRequestParam,
             loadFromCache: request.loadFromCache,
+            catalogId: request.catalogId,
         }, secretInfo, operationRequest);
     }
 
@@ -129,10 +134,11 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
             limit: request.limit,
             infoRequestParam: request.infoRequestParam,
             loadFromCache: request.loadFromCache,
+            catalogId: request.catalogId,
         }, secretInfo, operationRequest);
     }
 
-    private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetCurrencyLeaderboard", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
@@ -141,10 +147,8 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
-
-        let masterGroupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
-        let groupCurrencySettingsItem = masterGroupSettings.groupCurrencySettings.find(x => x.key == request.key);
+        let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+        let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == request.key);
 
         if (groupCurrencySettingsItem == null) {
             operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
@@ -153,6 +157,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
         }
 
         let cacheKey = "groupCurrencyLeaderboard_" + request.key;
+        if (request.catalogId) cacheKey += "_" + request.catalogId;
 
         if (request.loadFromCache) {
             if (request.skip + request.limit > 100) {
@@ -160,8 +165,10 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
             }
         }
 
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
         if (request.loadFromCache) {
-            if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+            if (!(await cacheData.isValid(cacheKey))) {
                 request.loadFromCache = false;
             }
         }
@@ -171,7 +178,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
         let groups: Group[];
 
         if (request.loadFromCache) {
-            groups = this.gnServer.getCacheData().getData(cacheKey);
+            groups = await cacheData.getData(cacheKey);
 
             for (let i = request.skip; i < request.skip + request.limit; i++) {
                 if (i >= groups.length) break;
@@ -190,10 +197,12 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
             }
         }
         else {
+            let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
+
             if (request.skip + request.limit <= 100) {
                 groupFindOptions = null;
 
-                groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, 0, 100, secretInfo.getGameId(), groupFindOptions);
+                groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), groupFindOptions);
 
                 for (let i = request.skip; i < request.skip + request.limit; i++) {
                     if (i >= groups.length) break;
@@ -211,10 +220,10 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
                     gnResults.add(gnResult);
                 }
 
-                this.gnServer.getCacheData().setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+                await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
             }
             else {
-                groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
+                groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), groupFindOptions);
 
                 for (let i = 0; i < groups.length; i++) {
 

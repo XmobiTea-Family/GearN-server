@@ -1,6 +1,6 @@
 {
   "name": "@xmobitea/gn-server",
-  "version": "2.3.0",
+  "version": "2.5.0",
   "description": "Game Networking Server by XmobiTea (Pro)",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -17,7 +17,6 @@
   "devDependencies": {
     "@types/async-lock": "^1.4.2",
     "@types/bcrypt": "^5.0.2",
-    "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/md5": "^2.3.5",
@@ -40,17 +39,16 @@
     "@socket.io/mongo-emitter": "^0.2.0",
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.10.5",
-    "@xmobitea/gn-typescript-client": "^2.3.1",
+    "@xmobitea/gn-typescript-client": "^2.5.2",
     "async-lock": "^1.4.1",
     "async-middleware": "^1.2.1",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
-    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "express": "^4.21.2",
     "express-msgpack": "^5.1.2",
-    "fs": "^0.0.1-security",
+    "firebase-admin": "^13.0.2",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.1.0",
     "log4js": "^6.9.1",
@@ -58,7 +56,8 @@
     "mongodb": "^6.12.0",
     "multer": "^1.4.5-lts.1",
     "reflect-metadata": "^0.2.2",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "systeminformation": "^5.25.11"
   },
   "repository": {
     "type": "git",

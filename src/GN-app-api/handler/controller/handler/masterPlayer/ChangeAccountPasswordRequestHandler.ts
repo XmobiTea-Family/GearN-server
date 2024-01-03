@@ -100,7 +100,7 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 			return operationResponse;
 		}
 
-		let isMatch = await bcrypt.compare(request.currentPassword, masterPlayer.getPassword());
+		let isMatch = await bcrypt.compare(request.currentPassword, masterPlayer.getExternal().account.password);
 
 		if (!isMatch) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountPasswordWrong);

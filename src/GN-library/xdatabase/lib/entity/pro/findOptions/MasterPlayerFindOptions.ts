@@ -16,4 +16,5 @@ export interface MasterPlayerFindOptions {
     countryCode?: boolean,
     tsLastLogin?: boolean,
     email?: boolean,
+    pushNotifications?: boolean,
 }

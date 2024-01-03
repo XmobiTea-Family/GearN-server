@@ -150,8 +150,8 @@ export class GamePlayerPermissionRulesParam {
     @GNHashtableDataMember({ code: GNParameterCode.GetCreateLeaderboard, isOptional: true })
     getCreateLeaderboard?: PermissionRulesParam;
 
-    @GNHashtableDataMember({ code: GNParameterCode.SendSocketOperationEvent, isOptional: true })
-    sendSocketOperationEvent?: PermissionRulesParam;
+    @GNHashtableDataMember({ code: GNParameterCode.GetLastLoginLeaderboard, isOptional: true })
+    getLastLoginLeaderboard?: PermissionRulesParam;
 
     @GNHashtableDataMember({ code: GNParameterCode.GetStatisticsLog, isOptional: true })
     getStatisticsLog?: PermissionRulesParam;

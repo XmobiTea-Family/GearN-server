@@ -26,7 +26,7 @@ class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
 	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
@@ -141,10 +141,8 @@ export class GetCurrencyLeaderboardRequestHandler extends GamePlayerBaseRequestH
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
-
-		let masterPlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
-		let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+		let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
 
 		if (playerCurrencySettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
@@ -160,8 +158,10 @@ export class GetCurrencyLeaderboardRequestHandler extends GamePlayerBaseRequestH
 			}
 		}
 
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
 		if (request.loadFromCache) {
-			if (!this.gnServer.getCacheData().isValid(cacheKey)) {
+			if (!(await cacheData.isValid(cacheKey))) {
 				request.loadFromCache = false;
 			}
 		}
@@ -171,7 +171,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GamePlayerBaseRequestH
 		let gamePlayers: GamePlayer[];
 
 		if (request.loadFromCache) {
-			gamePlayers = this.gnServer.getCacheData().getData(cacheKey);
+			gamePlayers = await cacheData.getData(cacheKey);
 
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
 				if (i >= gamePlayers.length) break;
@@ -190,6 +190,8 @@ export class GetCurrencyLeaderboardRequestHandler extends GamePlayerBaseRequestH
 			}
 		}
 		else {
+            let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
+
 			if (request.skip + request.limit <= 100) {
 				gamePlayerFindOptions = null;
 
@@ -211,7 +213,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GamePlayerBaseRequestH
 					gnResults.add(gnResult);
 				}
 
-				this.gnServer.getCacheData().setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
 				gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);

@@ -12,6 +12,7 @@ import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErr
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import { ExecuteResponseStatus } from "./../../../../service/ICloudScriptService";
+import { GNData } from "../../../../../GN-common/common/GNData";
 
 class ExecuteFunctionOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
@@ -151,7 +152,14 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
             return operationResponse;
         }
 
-        let response = await cloudScriptService.executeCloudScriptFunction(request.userId, request.functionName, request.functionParameters, request.version, customTagsData);
+        let functionParameters = request.functionParameters;
+        if (functionParameters != null) {
+            if (functionParameters instanceof GNData) {
+                functionParameters = (functionParameters as GNData).toData();
+            }
+        }
+
+        let response = await cloudScriptService.executeCloudScriptFunction(request.userId, request.functionName, functionParameters, request.version, customTagsData);
 
         operationResponse.setParameter(GNParameterCode.FunctionLogs, response.logs);
 

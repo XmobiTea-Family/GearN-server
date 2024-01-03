@@ -26,7 +26,9 @@ export class CountryIPDetailService implements ICountryIPDetailService {
         };
 
         try {
-            let response = await axios.get(this.getIPApiUrl + "/" + ipAddress);
+            let response = await axios.get(this.getIPApiUrl + "/" + ipAddress, {
+                timeout: 10000
+            });
 
             let answer: IPDetailResponse = response.data;
 

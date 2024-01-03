@@ -17,7 +17,7 @@ import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNam
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 class GrantStoreItemOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 10, mustNonNull: true, isOptional: true })
+    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true, isOptional: true })
     storeId?: string;
 
     @StringDataMember({ code: GNParameterCode.DisplayName, defaultValue: "", isOptional: true })
@@ -117,8 +117,15 @@ export class GrantStoreItemRequestHandler extends StoreItemBaseRequestHandler {
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let storeId = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
-        if (request.storeId) storeId = request.storeId;
+        let storeId = request.storeId ?? StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
+
+        let oldStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(storeId, secretInfo.getGameId(), {
+            storeId: true,
+        });
+
+        if (oldStoreInventory != null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadExists);
+        }
 
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 

@@ -18,7 +18,7 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByGoogleOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Token, minLength: 32, maxLength: 512, mustNonNull: true })
+	@StringDataMember({ code: GNParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
 	token: string;
 
 	@NumberDataMember({ code: GNParameterCode.Type, minValue: 1, maxValue: 2, mustInt: true })
@@ -89,6 +89,9 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 		let email = result["email"] ?? "";
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+		if (masterPlayerFindOptions != null) {
+			masterPlayerFindOptions.lastIPDetail = true;
+		}
 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGoogleAsync(googleUserId, masterPlayerFindOptions);
 

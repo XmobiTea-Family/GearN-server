@@ -20,6 +20,7 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 export abstract class StoreItemBaseRequestHandler extends RequestHandler {
     private isGetAll(infoRequestParam: InfoRequestParam): boolean {
         return infoRequestParam.storeItems
+            && infoRequestParam.storeItemType
             && infoRequestParam.storeCurrencies
             && infoRequestParam.priceCurrencies
             && infoRequestParam.inAppPurchase
@@ -67,6 +68,7 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
         answer.storeId = true;
 
         if (infoRequestParam.storeItems) answer.storeItems = infoRequestParam.storeItems;
+        if (infoRequestParam.storeItemType) answer.storeItemType = infoRequestParam.storeItemType;
         if (infoRequestParam.storeCurrencies) answer.storeCurrencies = infoRequestParam.storeCurrencies;
         if (infoRequestParam.priceCurrencies) answer.priceCurrencies = infoRequestParam.priceCurrencies;
         if (infoRequestParam.inAppPurchase) answer.inAppPurchase = infoRequestParam.inAppPurchase;
@@ -87,6 +89,9 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 
         if (infoRequestParam.storeItems)
             answer.add(GNParameterCode.StoreItems, this.generateStoreItems(storeInventory));
+
+        if (infoRequestParam.storeItemType)
+            answer.add(GNParameterCode.StoreItemType, this.generateStoreItemType(storeInventory));
 
         if (infoRequestParam.storeCurrencies)
             answer.add(GNParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));
@@ -136,6 +141,10 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
         }
 
         return gnStoreItems;
+    }
+
+    protected generateStoreItemType(storeInventory: StoreInventory): number {
+        return storeInventory.getStoreItemType();
     }
 
     protected generateStoreCurrencies(storeInventory: StoreInventory): GNArray {

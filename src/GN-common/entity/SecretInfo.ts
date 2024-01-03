@@ -202,7 +202,7 @@ export interface SecretPermissionItem {
 		getPlayersWithGameCenter: MasterPlayerPermissionRules,
 
 		getExternal: MasterPlayerPermissionRules,
-		
+
 		getPlayersWithDisplayName: MasterPlayerPermissionRules,
 
 		setEmail: MasterPlayerPermissionRules,
@@ -214,6 +214,14 @@ export interface SecretPermissionItem {
 
 		getStatisticsLog: MasterPlayerPermissionRules,
 		getCurrencyLog: MasterPlayerPermissionRules,
+
+		sendSocketOperationEvent: MasterPlayerPermissionRules,
+		sendEmail: MasterPlayerPermissionRules,
+		sendPushNotification: MasterPlayerPermissionRules,
+		getPushNotification: MasterPlayerPermissionRules,
+		addPushNotification: MasterPlayerPermissionRules,
+		removePushNotification: MasterPlayerPermissionRules,
+
 	},
 	gamePlayer: {
 		addSegment: GamePlayerPermissionRules,
@@ -287,8 +295,7 @@ export interface SecretPermissionItem {
 
 		getCurrencyLeaderboard: GamePlayerPermissionRules,
 		getCreateLeaderboard: GamePlayerPermissionRules,
-
-		sendSocketOperationEvent: GamePlayerPermissionRules,
+		getLastLoginLeaderboard: MasterPlayerPermissionRules,
 
 		getStatisticsLog: GamePlayerPermissionRules,
 		getCurrencyLog: GamePlayerPermissionRules,
@@ -366,6 +373,7 @@ export interface SecretPermissionItem {
 
 		getCurrencyLeaderboard: CharacterPlayerPermissionRules,
 		getCreateLeaderboard: CharacterPlayerPermissionRules,
+        getLastLoginLeaderboard: CharacterPlayerPermissionRules,
 
 		getStatisticsLog: CharacterPlayerPermissionRules,
 		getCurrencyLog: CharacterPlayerPermissionRules,
@@ -503,6 +511,8 @@ export interface SecretPermissionItem {
 		getCreateLeaderboard: StoreInventoryPermissionRules,
 		presentStoreItem: StoreInventoryPermissionRules,
 		getStoreLog: StoreInventoryPermissionRules,
+        getStoreUsed: StoreInventoryPermissionRules,
+        removeStoreUsed: StoreInventoryPermissionRules,
 	},
 	masterAdmin: {
 		setMasterGameSettings: MasterAdminPermissionRules,
@@ -529,6 +539,7 @@ export interface SecretPermissionItem {
 		resetStatisticsLeaderboard: MasterAdminPermissionRules,
 		getBackupStatisticsLeaderboardVersion: MasterAdminPermissionRules,
 		getServerGameData: MasterAdminPermissionRules,
+		deleteInDatabase: MasterAdminPermissionRules,
 	},
 	multiplayer: {
 		cancelAllMatchmakingTicket: MultiplayerPermissionRules,

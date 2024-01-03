@@ -1,6 +1,5 @@
 import { ExecuteResponseStatus, ExecuteResult, ICloudScriptService } from "./ICloudScriptService";
-import { Worker } from 'worker_threads';
-import { execSync } from "child_process";
+import { ChildProcess, fork, execSync } from "child_process";
 import * as mongoDB from "mongodb";
 import fs from "fs";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
@@ -10,6 +9,8 @@ import { GNServer } from "../../GNServer";
 import { OperationEvent } from "../../GN-common/entity/operationEvent/OperationEvent";
 import { GNHashtable } from "../../GN-common/common/GNData";
 import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { MatchmakingTicketCanMatch } from "../handler/controller/handler/multiplayer/MatchmakingHandler";
+import { ServerDetail } from "../../GN-library/xdatabase/lib/entity/pro/ServerDetail";
 
 interface CloudScriptRequest {
     requestId: string,
@@ -58,7 +59,7 @@ interface DbConnection {
 export class CloudScriptService implements ICloudScriptService {
     private static readonly ExecuteTimeoutInMs = 12000;
 
-    private cloudScriptWorkerDict: Map<string, Worker>;
+    private cloudScriptWorkerDict: Map<string, ChildProcess>;
     private cloudScriptWaitingResponseCallbackDict: Map<string, (cloudScriptResponse: CloudScriptResponse) => void>;
 
     private latestVersion: string;
@@ -101,6 +102,16 @@ export class CloudScriptService implements ICloudScriptService {
 
     public run(): void {
         this.loadVersion();
+
+        let thiz = this;
+        this.gnServer.getHttpApp().getClusterHandler().onEvent("addCloudScriptFunction", data => {
+            thiz.remoteAddCloudScriptFunction(data);
+        });
+
+        this.gnServer.getHttpApp().getClusterHandler().onEvent("editCloudScriptFunction", data => {
+            thiz.remoteEditCloudScriptFunction(data);
+        });
+
     }
 
     private async loadVersion(): Promise<void> {
@@ -162,7 +173,7 @@ export class CloudScriptService implements ICloudScriptService {
             customTags: customTags,
         }
 
-        cloudScriptWorker.postMessage(cloudScriptRequest);
+        cloudScriptWorker.send(cloudScriptRequest);
 
         let thiz = this;
 
@@ -223,14 +234,10 @@ export class CloudScriptService implements ICloudScriptService {
 
             let filePathTemp = __dirname + "/./GN-startup/cloudScript";
 
-            await execSync("npx tsc " + filePathTempTs + " --noImplicitAny --allowJs --outDir " + filePathTemp);
+            await execSync("npx tsc " + filePathTempTs + " --allowJs --skipLibCheck --outDir " + filePathTemp);
 
             let filePathTempJs = __dirname + "/./GN-startup/cloudScript/temp.js";
             fullScriptJs = fs.readFileSync(filePathTempJs).toString();
-
-            if (canExecute) {
-                this.loadCloudScriptFunctionWorker(version, fullScriptJs);
-            }
         }
         catch (err) {
             if (fs.existsSync(filePathTempTs))
@@ -250,6 +257,12 @@ export class CloudScriptService implements ICloudScriptService {
                 success: false,
                 errorMessage: errorMessage,
             }
+        }
+
+        this.gnServer.getHttpApp().getClusterHandler().sendEvent("addCloudScriptFunction", { version: version, fullScriptJs: fullScriptJs, canExecute: canExecute, isLive: isLive, }, false);
+
+        if (canExecute) {
+            this.loadCloudScriptFunctionWorker(version, fullScriptJs);
         }
 
         if (isLive) {
@@ -285,6 +298,66 @@ export class CloudScriptService implements ICloudScriptService {
         };
     }
 
+    private async remoteAddCloudScriptFunction(request: { version: string, fullScriptJs: string, canExecute: boolean, isLive: boolean, }) {
+        let version = request.version;
+        let canExecute = request.canExecute;
+        let fullScriptJs = request.fullScriptJs;
+        let isLive = request.isLive;
+
+        if (canExecute) {
+            this.loadCloudScriptFunctionWorker(version, fullScriptJs);
+        }
+
+        if (isLive) {
+            this.liveLatestVersion = version;
+        }
+
+        this.latestVersion = version;
+
+        this.cloudScriptFunctions.unshift({
+            version: version,
+            canExecute: canExecute,
+            fullScript: fullScriptJs
+        });
+    }
+
+    private async remoteEditCloudScriptFunction(request: { version: string, isLive: boolean, canExecute: boolean, }) {
+        let version = request.version;
+        let canExecute = request.canExecute;
+        let isLive = request.isLive;
+
+        let cloudFunction = this.cloudScriptFunctions.find(x => x.version == version);
+        if (!cloudFunction) {
+            return;
+        }
+
+        cloudFunction.canExecute = canExecute;
+
+        if (isLive) {
+            if (this.liveLatestVersion != version) {
+                this.liveLatestVersion = version;
+            }
+        }
+        else {
+            if (this.liveLatestVersion == version) {
+                this.liveLatestVersion = null;
+            }
+        }
+
+        if (!canExecute) {
+            let cloudScriptWorker = this.cloudScriptWorkerDict.get(version);
+            if (cloudScriptWorker) {
+                this.cloudScriptWorkerDict.delete(version);
+
+                setTimeout(() => {
+                    if (!this.cloudScriptWorkerDict.has(version) && cloudScriptWorker) {
+                        cloudScriptWorker.kill("SIGKILL");
+                    }
+                }, 20000);
+            }
+        }
+    }
+
     public async editCloudScriptFunction(version: string, isLive: boolean, canExecute: boolean): Promise<{ success: boolean, errorMessage?: string }> {
         let cloudFunction = this.cloudScriptFunctions.find(x => x.version == version);
         if (!cloudFunction) {
@@ -293,6 +366,8 @@ export class CloudScriptService implements ICloudScriptService {
                 errorMessage: "version not found"
             }
         }
+
+        this.gnServer.getHttpApp().getClusterHandler().sendEvent("editCloudScriptFunction", { version: version, canExecute: canExecute, isLive: isLive, }, false);
 
         cloudFunction.canExecute = canExecute;
 
@@ -334,7 +409,7 @@ export class CloudScriptService implements ICloudScriptService {
 
                 setTimeout(() => {
                     if (!this.cloudScriptWorkerDict.has(version) && cloudScriptWorker) {
-                        cloudScriptWorker.terminate();
+                        cloudScriptWorker.kill("SIGKILL");
                     }
                 }, 20000);
             }
@@ -384,7 +459,7 @@ export class CloudScriptService implements ICloudScriptService {
         return this.liveLatestVersion;
     }
 
-    private loadCloudScriptFunctionWorkerFromCache(version: string): Worker {
+    private loadCloudScriptFunctionWorkerFromCache(version: string): ChildProcess {
         if (!version) return null;
 
         let cloudScriptWorker = this.cloudScriptWorkerDict.get(version);
@@ -400,7 +475,7 @@ export class CloudScriptService implements ICloudScriptService {
         return cloudScriptWorker;
     }
 
-    private loadCloudScriptFunctionWorker(version: string, fullScript: string): Worker {
+    private loadCloudScriptFunctionWorker(version: string, fullScript: string): ChildProcess {
         if (!version) return null;
 
         let filePath = __dirname + "/./GN-startup/cloudScript/" + version + ".js";
@@ -409,21 +484,21 @@ export class CloudScriptService implements ICloudScriptService {
         return this.loadCloudScriptWorker(version);
     }
 
-    private loadCloudScriptWorker(version: string): Worker {
+    private loadCloudScriptWorker(version: string): ChildProcess {
         let filePath = __dirname + "/./GN-startup/cloudScript/" + version + ".js";
 
         Debug.log("[GN] [CloudScript] run cloudScript " + version);
 
-        let cloudScriptWorker = new Worker(filePath, {
-            workerData: {
+        let cloudScriptWorker = fork(filePath, {
+            env: {
                 gameId: this.gameId,
-                gnServerSettingsOptions: this.gnServerSettingsOptions,
-                dbConnection: this.dbConnection,
+                gnServerSettingsOptions: JSON.stringify(this.gnServerSettingsOptions),
+                dbConnection: JSON.stringify(this.dbConnection),
             }
         });
 
         let thiz = this;
-        cloudScriptWorker.on('message', (cloudScriptResponse: CloudScriptResponse) => {
+        cloudScriptWorker.on("message", (cloudScriptResponse: CloudScriptResponse) => {
             if (cloudScriptResponse.responseId) {
                 let callback = thiz.cloudScriptWaitingResponseCallbackDict.get(cloudScriptResponse.responseId);
                 if (callback != null) {
@@ -433,21 +508,93 @@ export class CloudScriptService implements ICloudScriptService {
             else {
                 let cloudScriptEvent: CloudScriptEvent = cloudScriptResponse as any;
 
-                let operationEvent = new OperationEvent(cloudScriptEvent.operationEvent.eventCode, cloudScriptEvent.operationEvent.parameters != null ? GNHashtable.builder().addAll(cloudScriptEvent.operationEvent.parameters).build() : null, cloudScriptEvent.operationEvent.encrypted);
+                let operationEvent = new OperationEvent(
+                    cloudScriptEvent.operationEvent.eventCode,
+                    cloudScriptEvent.operationEvent.parameters != null ? GNHashtable.builder().addAll(cloudScriptEvent.operationEvent.parameters).build() : null,
+                    cloudScriptEvent.operationEvent.encrypted
+                );
 
                 if (cloudScriptEvent.eventType == CloudScriptEventType.SendToUser) {
                     thiz.gnServer.sendEventTo(cloudScriptEvent.receiver as string, operationEvent);
-                }
-                else if (cloudScriptEvent.eventType == CloudScriptEventType.SendToMore) {
+                } else if (cloudScriptEvent.eventType == CloudScriptEventType.SendToMore) {
                     thiz.gnServer.sendEventToMoreUser(cloudScriptEvent.receiver as string[], operationEvent);
-                }
-                else if (cloudScriptEvent.eventType == CloudScriptEventType.SendToAll) {
+                } else if (cloudScriptEvent.eventType == CloudScriptEventType.SendToAll) {
                     thiz.gnServer.sendEventToAllPlayer(operationEvent);
+                }
+                else {
+                    let eventTypeAny = cloudScriptEvent.eventType as any;
+
+                    if (eventTypeAny == 10) {
+                        let parameters: {
+                            gameId: string,
+                            matchmakingTicketCanMatch: MatchmakingTicketCanMatch,
+                            serverDetail: ServerDetail,
+                        } = cloudScriptEvent.operationEvent.parameters as any;
+
+                        thiz.gnServer.setMatchServerDetail(parameters.gameId, parameters.matchmakingTicketCanMatch.matchId, parameters.serverDetail, parameters.matchmakingTicketCanMatch.ticketIds);
+                    }
+                    else if (eventTypeAny == 20) {
+                        let parameters: {
+                            email: string,
+                            subject: string,
+                            contentHtml: string,
+                        } = cloudScriptEvent.operationEvent.parameters as any;
+
+                        thiz.gnServer.getEmailService().sendMail(parameters.email, parameters.subject, parameters.contentHtml);
+                    }
+                    else if (eventTypeAny == 21) {
+                        let parameters: {
+                            emails: string[],
+                            subject: string,
+                            contentHtml: string,
+                        } = cloudScriptEvent.operationEvent.parameters as any;
+
+                        thiz.gnServer.getEmailService().sendMailToMore(parameters.emails, parameters.subject, parameters.contentHtml);
+                    }
+                    else if (eventTypeAny == 30) {
+                        let parameters: {
+                            token: string,
+                            title: string,
+                            body: string,
+                            badge?: number,
+                            sound?: string,
+                            icon?: string,
+                            data?: { [k: string]: any },
+                        } = cloudScriptEvent.operationEvent.parameters as any;
+
+                        thiz.gnServer.getPushNotificationService().sendNotification(parameters.token, parameters.title, parameters.body, parameters.badge, parameters.sound, parameters.icon, parameters.data);
+                    }
+                    else if (eventTypeAny == 31) {
+                        let parameters: {
+                            tokens: string[],
+                            title: string,
+                            body: string,
+                            badge?: number,
+                            sound?: string,
+                            icon?: string,
+                            data?: { [k: string]: any },
+                        } = cloudScriptEvent.operationEvent.parameters as any;
+
+                        thiz.gnServer.getPushNotificationService().sendNotificationToMore(parameters.tokens, parameters.title, parameters.body, parameters.badge, parameters.sound, parameters.icon, parameters.data);
+                    }
+                    else if (eventTypeAny == 32) {
+                        let parameters: {
+                            topic: string,
+                            title: string,
+                            body: string,
+                            badge?: number,
+                            sound?: string,
+                            icon?: string,
+                            data?: { [k: string]: any },
+                        } = cloudScriptEvent.operationEvent.parameters as any;
+
+                        thiz.gnServer.getPushNotificationService().sendNotificationToTopic(parameters.topic, parameters.title, parameters.body, parameters.badge, parameters.sound, parameters.icon, parameters.data);
+                    }
                 }
             }
         });
 
-        cloudScriptWorker.on('exit', (code) => {
+        cloudScriptWorker.on("exit", (code) => {
             Debug.log("[GN] [CloudScript] terminal cloudScript " + version + " with code " + code);
 
             thiz.cloudScriptWorkerDict.delete(version);

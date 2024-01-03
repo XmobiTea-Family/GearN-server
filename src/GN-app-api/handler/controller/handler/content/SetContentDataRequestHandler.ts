@@ -13,6 +13,7 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
 import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
 import { ContentDataParam } from "./model/ContentDataParam";
+import { ConfigService } from "../../../../service/ConfigService";
 
 class SetContentDataOperationRequest extends OperationRequest {
 	@GNArrayDataMember({ code: GNParameterCode.Configs, elementCls: ContentDataParam, mustNonNull: true })
@@ -115,7 +116,7 @@ export class SetContentDataRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let configGame = this.gnServer.getConfigGame(secretInfo.getGameId());
+		let configGame = this.gnServer.getConfigService(secretInfo.getGameId());
 		if (!configGame) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GameNotFound);
 			return operationResponse;
@@ -123,11 +124,22 @@ export class SetContentDataRequestHandler extends RequestHandler {
 
 		if (!request.label) request.label = "origin";
 
-		for (let i = 0; i < request.configs.length; i++) {
-			let config = request.configs[i];
+        let configs: {key: string, data: {}}[] = [];
 
-			configGame.setConfigAsync(config.key, request.label, config.data != null ? config.data.toData() : null);
-		}
+        for (let i = 0; i < request.configs.length; i++) {
+            let config = request.configs[i];
+
+            configs.push({
+                key: config.key,
+                data: config.data != null ? config.data.toData() : null,
+            });
+        }
+
+        this.gnServer.getHttpApp().getClusterHandler().sendEvent("content_SetContentData", {
+            configs: configs,
+            label: request.label,
+            gameId: secretInfo.getGameId(),
+        });
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
 
@@ -135,4 +147,33 @@ export class SetContentDataRequestHandler extends RequestHandler {
 
 		return operationResponse;
 	}
+
+    private applySettings(request: { configs: Array<{key: string, data: {}}>, label: string, gameId: string }) {
+		let configGame = this.gnServer.getConfigService(request.gameId);
+		if (!configGame) {
+			return;
+		}
+        
+        if (this.gnServer.isPrimary()) {
+            for (let i = 0; i < request.configs.length; i++) {
+                let config = request.configs[i];
+    
+                (<ConfigService>configGame).setConfigAsync(config.key, request.label, config.data, true);
+            }
+        }
+        else {
+            for (let i = 0; i < request.configs.length; i++) {
+                let config = request.configs[i];
+    
+                (<ConfigService>configGame).setConfigAsync(config.key, request.label, config.data, false);
+            }
+        }
+    }
+
+    protected init(): void {
+        let thiz = this;
+        this.gnServer.getHttpApp().getClusterHandler().onEvent("content_SetContentData", data => {
+            thiz.applySettings(data);
+        });
+    }
 }

@@ -15,9 +15,10 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { OwnerType } from "../../../../../GN-common/constant/enumType/OwnerType";
 import { GroupStatus } from "../../../../../GN-common/constant/enumType/GroupStatus";
 import { StoreReceiveType } from "../../../../../GN-common/constant/enumType/StoreReceiveType";
+import { StoreItemType } from "../../../../../GN-common/constant/enumType/StoreItemType";
 
 class PresentStoreItemOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
     storeId: string;
 
     @StringDataMember({ code: GNParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
@@ -172,6 +173,15 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
         if (storeInventory.getRemoveStatus().tsRemove != 0) {
             operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadBeenRemove);
             return operationResponse;
+        }
+
+        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) {
+            let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id);
+
+            if (purchaseCount != 0) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadPurchaseAndNonConsumable);
+                return operationResponse;
+            }
         }
 
         let priceCurrencyStartValues: {
@@ -520,6 +530,8 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
         }
 
         this.gnServer.getDatabase().insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, <number>StoreReceiveType.Present, request.log);
+
+        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id, request.type);
 
         operationResponse.setParameter(GNParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));
         operationResponse.setParameter(GNParameterCode.StoreItems, this.generateStoreItems(storeInventory));

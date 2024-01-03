@@ -5,6 +5,7 @@ type MethodType = "GET" | "HEAD" | "PUT" | "PATCH" | "POST" | "DELETE" | "UPDATE
 abstract class BuilderBase {
 
 	protected enable: boolean;
+	protected useEmitter: boolean;
 	protected origin: string;
 	protected methods: MethodType[];
 	protected allowedHeaders: string[];
@@ -17,6 +18,10 @@ abstract class BuilderBase {
 
 	public getEnable(): boolean {
 		return this.enable;
+	}
+
+	public getUseEmitter(): boolean {
+		return this.useEmitter;
 	}
 
 	public getOrigin(): string {
@@ -114,6 +119,11 @@ class Builder extends BuilderBase implements IBuilder<SocketAppSettings> {
 		return this;
 	}
 
+	public setUseEmitter(useEmitter: boolean): Builder {
+		this.useEmitter = useEmitter;
+		return this;
+	}
+
 	public setEnableSendAndReceiveDebug(enableSendAndReceiveDebug: boolean): Builder {
 		this.enableSendAndReceiveDebug = enableSendAndReceiveDebug;
 		return this;
@@ -133,6 +143,7 @@ class Builder extends BuilderBase implements IBuilder<SocketAppSettings> {
 		super();
 
 		this.enable = false;
+		this.useEmitter = false;
 		this.origin = "";
 		this.methods = [];
 		this.allowedHeaders = [];
@@ -159,6 +170,7 @@ export class SocketAppSettings extends BuilderBase {
 		this.origin = builder.getOrigin();
 		this.methods = builder.getMethods();
 		this.enable = builder.getEnable();
+		this.useEmitter = builder.getUseEmitter();
 		this.allowedHeaders = builder.getAllowedHeaders();
 		this.credentials = builder.getCredentials();
 		this.enableSendAndReceiveDebug = builder.getEnableSendAndReceiveDebug();

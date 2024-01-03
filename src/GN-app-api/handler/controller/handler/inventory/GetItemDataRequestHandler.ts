@@ -18,7 +18,7 @@ class GetItemDataOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	itemId: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.ItemDataKeys, isOptional: true })
+	@GNArrayDataMember({ code: GNParameterCode.ItemDataKeys, isOptional: true, elementCls: String })
 	inventoryDataKeys?: Array<string>;
 
 	public override isValidRequest() {

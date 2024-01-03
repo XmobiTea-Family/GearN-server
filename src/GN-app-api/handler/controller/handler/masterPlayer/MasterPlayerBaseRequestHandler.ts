@@ -31,7 +31,8 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
             && infoRequestParam.tsLastLogin
             && infoRequestParam.ipAddressCreate
             && infoRequestParam.countryCode
-            && infoRequestParam.email;
+            && infoRequestParam.email
+            && infoRequestParam.pushNotifications;
     }
 
     protected convertToMasterPlayerFindOptions(infoRequestParam: InfoRequestParam): MasterPlayerFindOptions {
@@ -55,6 +56,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (infoRequestParam.ipAddressCreate) answer.ipAddressCreate = infoRequestParam.ipAddressCreate;
         if (infoRequestParam.countryCode) answer.countryCode = infoRequestParam.countryCode;
         if (infoRequestParam.email) answer.email = infoRequestParam.email;
+        if (infoRequestParam.pushNotifications) answer.pushNotifications = infoRequestParam.pushNotifications;
 
         return answer;
     }
@@ -120,6 +122,11 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (!secretInfo.getPermission().masterPlayer.getExternal.selfEnable) {
             infoRequestParam.external = false;
         }
+
+        if (!secretInfo.getPermission().masterPlayer.getPushNotification.selfEnable) {
+            infoRequestParam.pushNotifications = false;
+        }
+
     }
 
     protected generateInfoRequestParamForOther(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
@@ -183,6 +190,11 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (!secretInfo.getPermission().masterPlayer.getExternal.otherSelfEnable) {
             infoRequestParam.external = false;
         }
+
+        if (!secretInfo.getPermission().masterPlayer.getPushNotification.otherSelfEnable) {
+            infoRequestParam.pushNotifications = false;
+        }
+
     }
 
     protected generateInfoRequestParamForServer(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
@@ -246,10 +258,14 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (!secretInfo.getPermission().masterPlayer.getExternal.serverSelfEnable) {
             infoRequestParam.external = false;
         }
+
+        if (!secretInfo.getPermission().masterPlayer.getPushNotification.serverSelfEnable) {
+            infoRequestParam.pushNotifications = false;
+        }
+
     }
 
     protected generateInfoRequestParamForAdmin(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
-
 
         if (!secretInfo.getPermission().masterPlayer.getSegment.adminSelfEnable) {
             infoRequestParam.segments = false;
@@ -311,6 +327,10 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
             infoRequestParam.external = false;
         }
 
+        if (!secretInfo.getPermission().masterPlayer.getPushNotification.adminSelfEnable) {
+            infoRequestParam.pushNotifications = false;
+        }
+
     }
 
     protected generateInfoResponseParameters(masterPlayer: MasterPlayer, infoRequestParam: InfoRequestParam): GNHashtable {
@@ -360,6 +380,9 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 
         if (infoRequestParam.email)
             answer.add(GNParameterCode.Email, this.generateEmail(masterPlayer));
+
+        if (infoRequestParam.pushNotifications)
+            answer.add(GNParameterCode.PushNotifications, this.generatePushNotifications(masterPlayer));
 
         return answer;
     }
@@ -641,4 +664,24 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
     protected generateEmail(masterPlayer: MasterPlayer): string {
         return masterPlayer.getEmail();
     }
+
+    protected generatePushNotifications(masterPlayer: MasterPlayer): GNArray {
+        let gnPushNotifications = new GNArray();
+
+        let pushNotifications = masterPlayer.getAllPushNotifications();
+
+        for (let i = 0; i < pushNotifications.length; i++) {
+            let pushNotification = pushNotifications[i];
+
+            let gnPushNotification = new GNHashtable();
+            gnPushNotification.add(GNParameterCode.PushId, pushNotification.pushId);
+            gnPushNotification.add(GNParameterCode.PlatformType, pushNotification.platformType);
+            gnPushNotification.add(GNParameterCode.Token, pushNotification.token);
+
+            gnPushNotifications.add(gnPushNotification);
+        }
+
+        return gnPushNotifications;
+    }
+
 }

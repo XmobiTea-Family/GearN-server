@@ -15,6 +15,7 @@ import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { StoreInventoryFindOptions } from "./entity/pro/findOptions/StoreInventoryFindOptions";
 import { StoreInventory } from "./entity/pro/StoreInventory";
 import { UploadFileInfo } from "./entity/pro/UploadFileInfo";
+import { FileUploadInfoFindOptions } from "./entity/pro/findOptions/FileUploadInfoFindOptions";
 
 interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
@@ -152,10 +153,10 @@ export class xDatabase {
 
 	public async loadMasterPlayersWithGenericServiceAsync(genericService: string, genericIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
-		let filter = {} as any;
-		filter["external.genericService.genericServices." + genericService] = { $in: { "genericId": genericIds } };
+		let $filter = {} as any;
+		$filter["external.genericService.genericServices." + genericService] = { $in: { "genericId": genericIds } };
 
-		let results = await collection.find(filter, {
+		let results = await collection.find($filter, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
 		return this.convertToMasterPlayers(results, collection);
@@ -191,15 +192,15 @@ export class xDatabase {
 		return this.convertToMasterPlayers(results, collection);
 	}
 
-	public async loadMasterPlayerWithDisplayNameAsync(displayName: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
+	public async loadMasterPlayerWithDisplayNameAsync(displayNameNormalize: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let result = await collection.findOne({ displayNameNormalize: displayName }, {
+		let result = await collection.findOne({ displayNameNormalize: displayNameNormalize }, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
-		
+
 		if (!result) return null;
-		
+
 		return new MasterPlayer(result, collection);
 	}
 
@@ -226,7 +227,7 @@ export class xDatabase {
 		$sort["playerStatistics." + key + ".value"] = direction;
 		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({$filter}, {
+		let results = await collection.find($filter, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		}).sort($sort);
 		return this.convertToMasterPlayers(results, collection);
@@ -288,7 +289,7 @@ export class xDatabase {
 			tsLastUpdate = playerStatistics.tsLastUpdate;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
 
 		if (direction == -1) {
 			let condition1 = {} as any;
@@ -298,7 +299,7 @@ export class xDatabase {
 			condition2["playerStatistics." + key + ".value"] = score;
 			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
 		else {
 			let condition1 = {} as any;
@@ -308,10 +309,10 @@ export class xDatabase {
 			condition2["playerStatistics." + key + ".value"] = score;
 			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
-		
-		return await collection.countDocuments(filter);
+
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadPositionMasterPlayerLeaderboardWithCurrencies(key: string, userId: string): Promise<number> {
@@ -331,14 +332,14 @@ export class xDatabase {
 			score = playerCurrencies.value;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
 
-		filter["playerCurrencies." + key] = {
+		$filter["playerCurrencies." + key] = {
 			$gt: {
 				value: score,
 			}
 		}
-		return await collection.countDocuments(filter);
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadMasterPlayerAsync(userId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
@@ -569,10 +570,10 @@ export class xDatabase {
 	public async loadMasterPlayerByGenericServiceAsync(serviceName: string, serviceId: string, masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<MasterPlayer> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let filter = {} as any;
-		filter["external.genericService.genericServices." + serviceName + ".serviceId"] = serviceId;
+		let $filter = {} as any;
+		$filter["external.genericService.genericServices." + serviceName + ".serviceId"] = serviceId;
 
-		let result = await collection.findOne(filter, {
+		let result = await collection.findOne($filter, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
 
@@ -630,15 +631,15 @@ export class xDatabase {
 		return this.convertToGamePlayers(results, collection);
 	}
 
-	public async loadGamePlayerWithDisplayNameAsync(displayName: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
+	public async loadGamePlayerWithDisplayNameAsync(displayNameNormalize: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
 		let collection = this.systemCollection("GamePlayer");
 
-		let result = await collection.findOne({ displayNameNormalize: displayName }, {
+		let result = await collection.findOne({ displayNameNormalize: displayNameNormalize }, {
 			projection: this.getFindOptions(gamePlayerFindOptions)
 		});
 
 		if (!result) return null;
-		
+
 		return new GamePlayer(result, collection);
 	}
 
@@ -683,10 +684,22 @@ export class xDatabase {
 		return this.convertToGamePlayers(results, collection);
 	}
 
+	public async loadGamePlayersLeaderboardWithLastLoginAsync(skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["tsLastLogin"] = -1;
+
+		let results = await collection.find({}, {
+			projection: this.getFindOptions(gamePlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToGamePlayers(results, collection);
+	}
+
 	public async loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds: string[], gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
-		let results = await collection.find({ userId: { $in: friendIds }}, {
+		let results = await collection.find({ userId: { $in: friendIds } }, {
 			projection: this.getFindOptions(gamePlayerFindOptions)
 		});
 
@@ -731,7 +744,7 @@ export class xDatabase {
 			tsLastUpdate = playerStatistics.tsLastUpdate;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
 		if (direction == -1) {
 			let condition1 = {} as any;
 			let condition2 = {} as any;
@@ -740,7 +753,7 @@ export class xDatabase {
 			condition2["playerStatistics." + key + ".value"] = score;
 			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
 		else {
 			let condition1 = {} as any;
@@ -750,10 +763,10 @@ export class xDatabase {
 			condition2["playerStatistics." + key + ".value"] = score;
 			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
-		
-		return await collection.countDocuments(filter);
+
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadPositionGamePlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, gameId: string): Promise<number> {
@@ -772,14 +785,14 @@ export class xDatabase {
 			score = playerCurrencies.value;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
 
-		filter["playerCurrencies." + key] = {
+		$filter["playerCurrencies." + key] = {
 			$gt: {
 				value: score,
 			}
 		}
-		return await collection.countDocuments(filter);
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadGamePlayerAsync(userId: string, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
@@ -840,13 +853,13 @@ export class xDatabase {
 	public async loadMasterPlayerStatisticsLogAsync($filter: {}, limit: number) {
 		let collection = this.runtimeCollection("MasterPlayer.StatisticsLog");
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadMasterPlayerCurrencyLogAsync($filter: {}, limit: number) {
 		let collection = this.runtimeCollection("MasterPlayer.CurrencyLog");
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async insertGamePlayerStatisticsLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
@@ -886,13 +899,13 @@ export class xDatabase {
 	public async loadGamePlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadGamePlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	private async convertToCharacterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<CharacterPlayer>> {
@@ -935,24 +948,30 @@ export class xDatabase {
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadCharacterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+	public async loadCharacterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, catalogId: string, gameId: string, direction: -1 | 1, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
 		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, {
+		let $filter = {} as any;
+		if (catalogId) {
+			$filter["catalogId"] = catalogId;
+		}
+
+		let results = await collection.find($filter, {
 			projection: this.getFindOptions(characterPlayerFindOptions)
 		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadCharacterPlayersLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+	public async loadCharacterPlayersLeaderboardWithStatisticsAllAsync(key: string, catalogId: string, gameId: string, direction: -1 | 1, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
-		
+
 		let $filter = {} as any;
 		$filter["playerStatistics." + key + ".value"] = { $ne: null };
+		if (catalogId) $filter["catalogId"] = catalogId;
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
@@ -976,11 +995,11 @@ export class xDatabase {
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadCharacterPlayersLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+    public async loadCharacterPlayersLeaderboardWithLastLoginAsync(skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let $sort = {} as any;
-		$sort["playerCurrencies." + key + ".value"] = -1;
+		$sort["tsLastLogin"] = -1;
 
 		let results = await collection.find({}, {
 			projection: this.getFindOptions(characterPlayerFindOptions)
@@ -988,15 +1007,34 @@ export class xDatabase {
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-	public async loadPositionCharacterPlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
+	public async loadCharacterPlayersLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, catalogId: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+		let collection = this.systemGameCollection("CharacterPlayer", gameId);
+
+		let $sort = {} as any;
+		$sort["playerCurrencies." + key + ".value"] = -1;
+
+		let $filter = {} as any;
+		if (catalogId) {
+			$filter["catalogId"] = catalogId;
+		}
+
+		let results = await collection.find($filter, {
+			projection: this.getFindOptions(characterPlayerFindOptions)
+		}).sort($sort).skip(skip).limit(limit);
+		return this.convertToCharacterPlayers(results, collection);
+	}
+
+	public async loadPositionCharacterPlayerLeaderboardWithStatisticsAsync(key: string, characterId: string, catalogId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-			playerStatistics: true
+			catalogId: true,
+			playerStatistics: true,
 		};
 
-		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, characterPlayerFindOptions);
+		let thisPlayer = await this.loadCharacterPlayerAsync(characterId, gameId, characterPlayerFindOptions);
 		if (thisPlayer == null) return -1;
+		if (catalogId && thisPlayer.getCatalogId() != catalogId) return -1;
 
 		let score = initialValue;
 		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
@@ -1007,7 +1045,11 @@ export class xDatabase {
 			tsLastUpdate = playerStatistics.tsLastUpdate;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
+		if (catalogId) {
+			$filter["catalogId"] = catalogId;
+		}
+
 		if (direction == -1) {
 			let condition1 = {} as any;
 			let condition2 = {} as any;
@@ -1016,7 +1058,7 @@ export class xDatabase {
 			condition2["playerStatistics." + key + ".value"] = score;
 			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
 		else {
 			let condition1 = {} as any;
@@ -1026,21 +1068,23 @@ export class xDatabase {
 			condition2["playerStatistics." + key + ".value"] = score;
 			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
-		
-		return await collection.countDocuments(filter);
+
+		return await collection.countDocuments($filter);
 	}
 
-	public async loadPositionCharacterPlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, gameId: string): Promise<number> {
+	public async loadPositionCharacterPlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, catalogId: string, gameId: string): Promise<number> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-			playerCurrencies: true
+			playerCurrencies: true,
+            catalogId: true,
 		};
 
 		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, characterPlayerFindOptions);
 		if (thisPlayer == null) return -1;
+		if (catalogId && thisPlayer.getCatalogId() != catalogId) return -1;
 
 		let score = 0;
 
@@ -1049,20 +1093,20 @@ export class xDatabase {
 			score = playerCurrencies.value;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
 
-		filter["playerCurrencies." + key] = {
+		$filter["playerCurrencies." + key] = {
 			$gt: {
 				value: score,
 			}
 		}
-		return await collection.countDocuments(filter);
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadFriendCharacterPlayersLeaderboardWithStatisticsAsync(friendIds: string[], gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		let results = await collection.find({ userId: { $in: friendIds }}, {
+		let results = await collection.find({ characterId: { $in: friendIds } }, {
 			projection: this.getFindOptions(characterPlayerFindOptions)
 		});
 
@@ -1163,19 +1207,19 @@ export class xDatabase {
 	public async getStoreInventoryLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("StoreInventory.StoreLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadCharacterPlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadCharacterPlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	private async convertToGroups(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<Group>> {
@@ -1218,25 +1262,29 @@ export class xDatabase {
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadGroupsLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+	public async loadGroupsLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, catalogId: string, gameId: string, direction: -1 | 1, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let $sort = {} as any;
 		$sort["groupStatistics." + key + ".value"] = direction;
 		$sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, {
+		let $filter = {} as any;
+		if (catalogId) $filter["catalogId"] = catalogId;
+
+		let results = await collection.find($filter, {
 			projection: this.getFindOptions(groupFindOptions)
 		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadGroupsLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+	public async loadGroupsLeaderboardWithStatisticsAllAsync(key: string, catalogId: string, gameId: string, direction: -1 | 1, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let $filter = {} as any;
 		$filter["groupStatistics." + key + ".value"] = { $ne: null };
-		
+		if (catalogId) $filter["catalogId"] = catalogId;
+
 		let $sort = {} as any;
 		$sort["groupStatistics." + key + ".value"] = direction;
 		$sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
@@ -1259,27 +1307,32 @@ export class xDatabase {
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadGroupsLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
+	public async loadGroupsLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, catalogId: string, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Array<Group>> {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let $sort = {} as any;
 		$sort["groupCurrencies." + key + ".value"] = -1;
 
-		let results = await collection.find({}, {
+		let $filter = {} as any;
+		if (catalogId) $filter["catalogId"] = catalogId;
+
+		let results = await collection.find($filter, {
 			projection: this.getFindOptions(groupFindOptions)
 		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
 
-	public async loadPositionGroupLeaderboardWithStatisticsAsync(key: string, groupId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
+	public async loadPositionGroupLeaderboardWithStatisticsAsync(key: string, groupId: string, catalogId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
 		let collection = this.systemGameCollection("Group", gameId);
 
 		let groupFindOptions: GroupFindOptions = {
-			groupStatistics: true
+			groupStatistics: true,
+			catalogId: true,
 		};
 
 		let thisGroup = await this.loadGroupAsync(groupId, gameId, groupFindOptions);
 		if (thisGroup == null) return -1;
+		if (catalogId && thisGroup.getCatalogId() != catalogId) return -1;
 
 		let score = initialValue;
 		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
@@ -1290,7 +1343,9 @@ export class xDatabase {
 			tsLastUpdate = groupStatistics.tsLastUpdate;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
+		if (catalogId) $filter["catalogId"] = catalogId;
+
 		if (direction == -1) {
 			let condition1 = {} as any;
 			let condition2 = {} as any;
@@ -1299,7 +1354,7 @@ export class xDatabase {
 			condition2["groupStatistics." + key + ".value"] = score;
 			condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
 		else {
 			let condition1 = {} as any;
@@ -1309,10 +1364,10 @@ export class xDatabase {
 			condition2["groupStatistics." + key + ".value"] = score;
 			condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
-		
-		return await collection.countDocuments(filter);
+
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadPositionGroupLeaderboardWithCurrenciesAsync(key: string, groupId: string, gameId: string): Promise<number> {
@@ -1332,14 +1387,14 @@ export class xDatabase {
 			score = groupCurrency.value;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
 
-		filter["groupCurrencies." + key] = {
+		$filter["groupCurrencies." + key] = {
 			$gt: {
 				value: score,
 			}
 		}
-		return await collection.countDocuments(filter);
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadGroupAsync(groupId: string, gameId: string, groupFindOptions?: GroupFindOptions): Promise<Group> {
@@ -1403,24 +1458,28 @@ export class xDatabase {
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadInventoriesLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+	public async loadInventoriesLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, catalogId: string, gameId: string, direction: -1 | 1, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let $sort = {} as any;
 		$sort["itemStatistics." + key + ".value"] = direction;
 		$sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, {
+		let $filter = {} as any;
+		$filter["catalogId"] = catalogId;
+
+		let results = await collection.find($filter, {
 			projection: this.getFindOptions(inventoryFindOptions)
 		}).sort($sort).skip(skip).limit(limit);
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadInventoriesLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
+	public async loadInventoriesLeaderboardWithStatisticsAllAsync(key: string, catalogId: string, gameId: string, direction: -1 | 1, inventoryFindOptions?: InventoryFindOptions): Promise<Array<Inventory>> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let $filter = {} as any;
 		$filter["itemStatistics." + key + ".value"] = { $ne: null };
+		if (catalogId) $filter["catalogId"] = catalogId;
 
 		let $sort = {} as any;
 		$sort["itemStatistics." + key + ".value"] = direction;
@@ -1444,15 +1503,17 @@ export class xDatabase {
 		return this.convertToInventories(results, collection);
 	}
 
-	public async loadPositionInventoryLeaderboardWithStatisticsAsync(key: string, itemId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
+	public async loadPositionInventoryLeaderboardWithStatisticsAsync(key: string, itemId: string, catalogId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let inventoryFindOptions: InventoryFindOptions = {
-			itemStatistics: true
+			itemStatistics: true,
+            catalogId: true,
 		};
 
 		let thisInventory = await this.loadInventoryAsync(itemId, gameId, inventoryFindOptions);
 		if (thisInventory == null) return -1;
+		if (catalogId && thisInventory.getCatalogId() != catalogId) return -1;
 
 		let score = initialValue;
 		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
@@ -1463,7 +1524,9 @@ export class xDatabase {
 			tsLastUpdate = itemStatistics.tsLastUpdate;
 		}
 
-		let filter = {} as any;
+		let $filter = {} as any;
+		if (catalogId) $filter["catalogId"] = catalogId;
+
 		if (direction == -1) {
 			let condition1 = {} as any;
 			let condition2 = {} as any;
@@ -1472,7 +1535,7 @@ export class xDatabase {
 			condition2["itemStatistics." + key + ".value"] = score;
 			condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
 		else {
 			let condition1 = {} as any;
@@ -1482,10 +1545,10 @@ export class xDatabase {
 			condition2["itemStatistics." + key + ".value"] = score;
 			condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			filter.$or = [condition1, condition2];
+			$filter.$or = [condition1, condition2];
 		}
-		
-		return await collection.countDocuments(filter);
+
+		return await collection.countDocuments($filter);
 	}
 
 	public async loadInventoryAsync(itemId: string, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Inventory> {
@@ -1532,7 +1595,7 @@ export class xDatabase {
 	public async loadInventoryStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("Inventory.StatisticsLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	private async convertToStoreInventories(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<StoreInventory>> {
@@ -1544,6 +1607,58 @@ export class xDatabase {
 
 		return answer;
 	}
+
+    public async getStoreInventoryUsedAsync(storeId: string, gameId: string): Promise<{ storeId: string, useIds: { id: string, type: number, tsCreate: number }[]}> {
+		let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
+
+		let result = await collection.findOne({ storeId: storeId });
+
+		return result as any;
+	}
+
+    public async insertStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string, ownerType: number) {
+        let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
+
+        collection.updateOne({ storeId: storeId }, {
+            $push: {
+                useIds: {
+                    id: ownerId,
+                    type: ownerType,
+                    tsCreate: xDatetime.getCurrentMilliseconds(),
+                }
+            } as any
+        }, {
+            upsert: true,
+        });
+    }
+
+    public async removeStoreInventoryUsedAsync(storeId: string, gameId: string, ownerIds: string[]) {
+        let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
+
+        if (ownerIds == null) {
+            await collection.deleteOne({ storeId: storeId });
+        }
+        else {
+            collection.updateOne({ storeId: storeId }, {
+                $pull: {
+                    useIds: {
+                        id: { $in: ownerIds },
+                    }
+                } as any
+            });
+        }
+    }
+
+    public async getCountStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string): Promise<number> {
+        let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
+
+        let count = await collection.countDocuments({
+            storeId: storeId,
+            useIds: { $elemMatch: { id: ownerId } }
+        });
+
+        return count;
+    }
 
 	public async loadStoreInventoryAsync(storeId: string, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<StoreInventory> {
 		let collection = this.systemGameCollection("StoreInventory", gameId);
@@ -1593,7 +1708,7 @@ export class xDatabase {
 		let result = await collection.findOne({ "inAppPurchase.googlePlayStoreId": productId }, {
 			projection: this.getFindOptions(storeInventoryFindOptions)
 		});
-		
+
 		if (result) {
 			return new StoreInventory(result, collection);
 		}
@@ -1691,19 +1806,21 @@ export class xDatabase {
 	public async loadGroupStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("Group.StatisticsLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadGroupCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
 		let collection = this.runtimeGameCollection("Group.CurrencyLog", gameId);
 
-		return await collection.find($filter).sort({"_id": -1}).limit(limit);
+		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
-	public async loadUploadFileInfoAsync(fileId: string): Promise<UploadFileInfo> {
+	public async loadUploadFileInfoAsync(fileId: string, fileUploadInfoFindOptions?: FileUploadInfoFindOptions): Promise<UploadFileInfo> {
 		let collection = this.systemCollection("UploadFileInfo");
 
-		let result = await collection.findOne({ fileId: fileId });
+		let result = await collection.findOne({ fileId: fileId }, {
+			projection: this.getFindOptions(fileUploadInfoFindOptions)
+		});
 
 		if (result) {
 			return new UploadFileInfo(result, collection);

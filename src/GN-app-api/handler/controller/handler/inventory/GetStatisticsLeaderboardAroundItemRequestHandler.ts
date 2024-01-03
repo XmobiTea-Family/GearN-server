@@ -14,6 +14,8 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { Inventory } from "../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetStatisticsLeaderboardAroundItemOperationRequest extends OperationRequest {
 	@StringDataMember({ code: GNParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
@@ -28,8 +30,14 @@ class GetStatisticsLeaderboardAroundItemOperationRequest extends OperationReques
 	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 5, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
+
+	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	loadFromCache?: boolean;
+
+	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	catalogId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -86,7 +94,9 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
+            catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -108,7 +118,9 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
+            catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -130,11 +142,13 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			key: request.key,
 			skip: request.skip,
 			limit: request.limit,
-			infoRequestParam: request.infoRequestParam
+			infoRequestParam: request.infoRequestParam,
+            loadFromCache: request.loadFromCache,
+            catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { itemId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { itemId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetStatisticsLeaderboardAroundItem", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -143,10 +157,8 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
-
-		let masterItemSettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
-		let inventoryStatisticsSettingsItem = masterItemSettings.inventoryStatisticsSettings.find(x => x.key == request.key);
+		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
+		let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == request.key);
 
 		if (inventoryStatisticsSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
@@ -154,28 +166,106 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			return operationResponse;
 		}
 
+        let positionCacheKey = "inventoryStatisticsLeaderboardAroundPosition_" + request.itemId + "_" + request.key;
+        let cacheKey = "inventoryStatisticsLeaderboardAround_" + request.itemId + "_" + request.key;
+        if (request.catalogId) {
+            cacheKey += "_" + request.catalogId;
+            positionCacheKey += "_" + request.catalogId;
+        }
+
+        if (request.loadFromCache) {
+            if (request.skip + request.limit > 100) {
+                request.loadFromCache = false;
+            }
+        }
+
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+
+        if (request.loadFromCache) {
+            if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
+                request.loadFromCache = false;
+            }
+        }
+
 		let gnResults = new GNArray();
 
-		let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
-		let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+        let thisPosition: number;
+		let inventories: Inventory[];
 
-		let thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, secretInfo.getGameId(), inventoryStatisticsSettingsItem.initialValue, direction);
+        if (request.loadFromCache) {
+            thisPosition = await cacheData.getData(positionCacheKey);
+            inventories = await cacheData.getData(cacheKey);
 
-		let inventorys = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, secretInfo.getGameId(), direction, inventoryFindOptions);
+            for (let i = request.skip; i < request.skip + request.limit; i++) {
+                if (i >= inventories.length) break;
 
-		for (let i = 0; i < inventorys.length; i++) {
-			let inventory = inventorys[i];
+                let inventory = inventories[i];
 
-			let gnResult = new GNHashtable();
+                let gnResult = new GNHashtable();
 
-			gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
+                gnResult.add(GNParameterCode.Position, i + thisPosition);
 
-			gnResult.add(GNParameterCode.ItemId, inventory.getItemId());
+                gnResult.add(GNParameterCode.ItemId, inventory.getItemId());
 
-			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
+                gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
 
-			gnResults.add(gnResult);
-		}
+                gnResults.add(gnResult);
+            }
+        }
+        else {
+            let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
+            let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+    
+            thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), inventoryStatisticsSettingsItem.initialValue, direction);
+    
+            if (thisPosition != -1) {
+                await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+
+                let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
+
+                if (request.skip + request.limit <= 100) {
+                    inventoryFindOptions = null;
+    
+                    inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+    
+                    for (let i = request.skip; i < request.skip + request.limit; i++) {
+                        if (i >= inventories.length) break;
+    
+                        let inventory = inventories[i];
+    
+                        let gnResult = new GNHashtable();
+    
+                        gnResult.add(GNParameterCode.Position, i + thisPosition);
+    
+                        gnResult.add(GNParameterCode.ItemId, inventory.getItemId());
+    
+                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
+    
+                        gnResults.add(gnResult);
+                    }
+    
+                    await cacheData.setData(cacheKey, inventories, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+                }
+                else {
+                    inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+    
+                    for (let i = 0; i < inventories.length; i++) {
+    
+                        let inventory = inventories[i];
+    
+                        let gnResult = new GNHashtable();
+    
+                        gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
+    
+                        gnResult.add(GNParameterCode.ItemId, inventory.getItemId());
+    
+                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
+    
+                        gnResults.add(gnResult);
+                    }
+                }
+            }
+        }
 
 		operationResponse.setParameter(GNParameterCode.Results, gnResults);
 

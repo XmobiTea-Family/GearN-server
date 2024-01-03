@@ -18,6 +18,7 @@ import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 import { Md5Generate } from "./../../../../../GN-common/helper/Md5Generate";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { StoreReceiveType } from "../../../../../GN-common/constant/enumType/StoreReceiveType";
+import { StoreItemType } from "../../../../../GN-common/constant/enumType/StoreItemType";
 
 class ValidateGooglePlayStoreReceiptOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.Receipt, minLength: 10, maxLength: 2048, mustNonNull: true })
@@ -216,6 +217,15 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
         if (storeInventory.getRemoveStatus().tsRemove != 0) {
             operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadBeenRemove);
             return operationResponse;
+        }
+
+        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) {
+            let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id);
+
+            if (purchaseCount != 0) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadPurchaseAndNonConsumable);
+                return operationResponse;
+            }
         }
 
         this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).insertOne({
@@ -577,6 +587,8 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
         }
 
         this.gnServer.getDatabase().insertStoreInventoryLogAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, transactionId, <number>StoreReceiveType.GooglePlayStore, request.log);
+
+        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
 
         let inAppPurchase = storeInventory.getInAppPurchase();
         if (inAppPurchase.analyticsPrice) {

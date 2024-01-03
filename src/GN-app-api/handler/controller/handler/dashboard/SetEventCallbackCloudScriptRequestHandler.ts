@@ -17,7 +17,7 @@ class SetEventCallbackCloudScriptOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.EventName, minLength: 6, maxLength: 128, mustNonNull: true })
     eventName: string;
 
-    @StringDataMember({ code: GNParameterCode.Script, minLength: 6, maxLength: 4096, mustNonNull: true })
+    @StringDataMember({ code: GNParameterCode.Script, minLength: 6, maxLength: 40960, mustNonNull: true })
     script: string;
 
     public override isValidRequest() {
@@ -61,6 +61,12 @@ export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
         operationResponse.setReturnCode(ReturnCode.Ok);
+
+        if (request.script.includes("GNNetwork")) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExecuteError);
+            operationResponse.setParameter(GNParameterCode.Message, "Can not use keywork GNNetwork on cloudscript");
+            return operationResponse;
+        }
 
         let response = await this.gnServer.getEventCallbackCloudScriptService().addCloudScriptFunction(request.eventName, request.script);
 

@@ -32,23 +32,38 @@ export class AppleService implements IAppleService {
 		this.p8Content = request.p8Content;
 	}
 
-	private async verifyToken(token: string): Promise<{ [k: string]: any }> {
-		return new Promise((resolve, reject) =>
-			jwt.verify(token, (header: JwtHeader, callback: SigningKeyCallback) => {
-				this.client.getSigningKey(header.kid, (err: Error, key: jwksClient.SigningKey) => {
-					if (err) return callback(err, null);
-
-					let signingKey = key.getPublicKey();
-					return callback(null, signingKey);
-				});
-			}, (err: VerifyErrors | null, decoded: JwtPayload) => {
+	private getSigningKey(header: JwtHeader): Promise<string> {
+		return new Promise((resolve, reject) => {
+			if (!header.kid) {
+				return reject(new Error("No KID in token header"));
+			}
+	  
+			this.client.getSigningKey(header.kid, (err, key) => {
 				if (err) {
-					reject({ "error": err.message });
-				} else {
-					resolve(decoded);
+					return reject(err);
 				}
-			})
-		);
+				
+				const signingKey = key.getPublicKey(); // hoặc key.rsaPublicKey
+				resolve(signingKey);
+		  	});
+		});
+	  }
+
+	private async verifyToken(token: string): Promise<{ [k: string]: any }> {
+		try {
+			const signingKey = await this.getSigningKey(jwt.decode(token, { complete: true })?.header as JwtHeader);
+
+			return new Promise((resolve, reject) =>
+				jwt.verify(token, signingKey, (err: VerifyErrors | null, decoded: any) => {
+					if (err) {
+						return reject({ error: err.message });
+					}
+					return resolve(decoded);
+				})
+			);
+		} catch (error) {
+			return { error: error.message };
+		}
 	}
 
 	public async verifyAppleToken(token: string): Promise<{ [k: string]: any }> {

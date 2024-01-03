@@ -5,11 +5,11 @@ import { HttpAppSettings } from "./settings/HttpAppSettings";
 import { SocketAppSettings } from "./settings/SocketAppSettings";
 import { OtherSettings } from "./settings/OtherSettings";
 import { DatabaseSettings } from "./settings/DatabaseSettings";
-import { MailSettings } from "./settings/MailSettings";
 import { OnRunSuccess } from "./../GN-library/xbuilder/lib/OnRunSuccess";
 import { LogSettings } from "./settings/LogSettings";
 import { UploadFileSettings } from "./settings/UploadFileSettings";
 import { DdosSettings } from "./settings/DDosSettings";
+import { ClusterSettings } from "./settings/ClusterSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
 	private gnConfig: { [k: string]: any };
@@ -23,6 +23,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		let gnApplicationSettings = this.gnConfig["applicationSettings"];
 		if (gnApplicationSettings == null) gnApplicationSettings = {
 			"port": 2202,
+			"socketPort": 2901,
 			"useSsl": false,
 			"keyFilePath": "",
 			"certFilePath": "",
@@ -33,6 +34,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setCertFilePath(gnApplicationSettings["keyFilePath"] ?? "")
 			.setKeyFilePath(gnApplicationSettings["certFilePath"] ?? "")
 			.setPort(gnApplicationSettings["port"] ?? 2202)
+			.setSocketPort(gnApplicationSettings["socketPort"] ?? 2901)
 			.setExpiredToken(gnApplicationSettings["expiredTokenInMs"] ?? 172800000)
 			.setPrivateKeyToken(gnApplicationSettings["privateKeyToken"] ?? "")
 			.build();
@@ -74,6 +76,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		}
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(gnSocketAppSettings["enable"] ?? true)
+			.setUseEmitter(gnSocketAppSettings["useEmitter"] ?? false)
 			.setOrigins(gnSocketAppSettings["allowOrigin"] ?? "*")
 			.addMethods(gnSocketAppSettings["allowMethods"] ?? ["GET"])
 			.setCredentials(gnSocketAppSettings["credentials"] ?? true)
@@ -107,18 +110,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setConnectionString(gnDatabaseSettings["connectionString"] ?? "mongodb://127.0.0.1:27017/")
 			.setDatabaseName(gnDatabaseSettings["databaseName"] ?? "XmobiTea")
 			.setOptions(gnDatabaseSettings["options"] ?? {})
-			.build();
-
-		let gnMailSettings = this.gnConfig["mailSettings"];
-		if (gnMailSettings == null) gnMailSettings = {
-			"enable": false,
-			"sendFrom": "changx@xmobitea.com",
-			"sendGridApiKey": "SG.",
-		}
-		let mailSettings = MailSettings.Builder()
-			.setEnable(gnMailSettings["enable"] ?? false)
-			.setFromEmail(gnMailSettings["sendFrom"] ?? "changx@xmobitea.com")
-			.setSendGridApiKey(gnMailSettings["sendGridApiKey"] ?? "SG.")
 			.build();
 
 		let gnLogSettings = this.gnConfig["logSettings"];
@@ -171,7 +162,26 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setHttpMaxRequestSize(gnDdosSettings["httpMaxRequestSize"] ?? 1024)
 			.setMaxUploadPendingRequest(gnDdosSettings["maxUploadPendingRequest"] ?? 200)
 			.setMaxDownloadPendingRequest(gnDdosSettings["maxDownloadPendingRequest"] ?? 200)
+			.setIPWhiteList(gnDdosSettings["ipWhiteList"] ?? [])
 			.build();
+
+		let gnClusterSettings = this.gnConfig["clusterSettings"];
+		if (gnClusterSettings == null) gnClusterSettings = {
+			"instanceId": "node_0",
+			"isPrimary": true,
+			"privateKeyToken": "privateKeyDefault",
+			"allNodes": [
+				{
+					"instanceId": "node_0",
+					"fullUrl": "http://127.0.0.1:2202"
+				}
+			]
+		}
+		let clusterSettings = ClusterSettings.Builder()
+			.setInstanceId(gnClusterSettings["instanceId"] ?? "node_0")
+			.setIsPrimary(gnClusterSettings["isPrimary"] ?? true)
+			.setPrivateKeyToken(gnClusterSettings["privateKeyToken"] ?? "privateKeyDefault")
+			.setAllNodes(gnClusterSettings["allNodes"] ?? [{ instanceId: "node_0", fullUrl: "http://127.0.0.1:2202" }])
 
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
@@ -179,10 +189,10 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			socketAppSettings,
 			otherSettings,
 			databaseSettings,
-			mailSettings,
 			logSettings,
 			uploadFileSettings,
-			ddosSettings
+			ddosSettings,
+			clusterSettings,
 		);
 
 		this.serverApplication.run(() => {

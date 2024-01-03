@@ -1,6 +1,8 @@
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { GNServer } from "./../../GNServer";
 import { BigAnalyticsItem, IAnalyticsService } from "./IAnalyticsService";
+import si from "systeminformation";
+import * as mongoDB from "mongodb";
 
 export class AnalyticsService implements IAnalyticsService {
     private gnServer: GNServer;
@@ -20,7 +22,7 @@ export class AnalyticsService implements IAnalyticsService {
     private currentMNUSince0h1: number;
     private currentMRT: number;
     private currentMRTSince0h1: number;
-    private analyticsPrice: number;
+    private currentAnalyticsPrice: number;
 
     private currentCountry: {
         countryCode: string,
@@ -32,6 +34,52 @@ export class AnalyticsService implements IAnalyticsService {
             longitude: number,
         }[]
     }[];
+
+    private currentOperationSystem: {
+        cpuUsage: number;
+        memoryUsage: {
+            totalMemoryInBytes: number;
+            freeMemoryInBytes: number;
+        }
+        storageUsage: {
+            name: string;
+            fsTotalSizeInBytes: number;
+            fsUsedSizeInBytes: number;
+        }[];
+    };
+
+    private currentDatabaseSystem: {
+        fsTotalSizeInBytes: number;
+        fsUsedSizeInBytes: number;
+        totalSizeInBytes: number;
+        collections: number;
+        objects: number;
+        indexes: number;
+    };
+
+    private currentRequestComplete: {
+        eventName: string;
+        results: {
+            errorCode: number;
+            count: number;
+        }[]
+    }[];
+
+    private currentCost: {
+        requestCount: number;
+        matchmakingRequestCount: number;
+        cloudScriptGBs: number;
+        storageSizeInBytes: number;
+        dataTransferSizeInBytes: number;
+    }
+
+    private currentMonthlyCost: {
+        requestCount: number;
+        matchmakingRequestCount: number;
+        cloudScriptGBs: number;
+        storageSizeInBytes: number;
+        dataTransferSizeInBytes: number;
+    }
 
     public setGNServer(gnServer: GNServer): void {
         this.gnServer = gnServer;
@@ -58,8 +106,15 @@ export class AnalyticsService implements IAnalyticsService {
                 MRT: this.currentMRT,
                 MRTSince0h1: this.currentMRTSince0h1,
 
-                analyticsPrice: this.analyticsPrice,
+                analyticsPrice: this.currentAnalyticsPrice,
                 country: this.currentCountry,
+
+                operationSystem: this.currentOperationSystem,
+                requestComplete: this.currentRequestComplete,
+                databaseSystem: this.currentDatabaseSystem,
+
+                cost: this.currentCost,
+                monthlyCost: this.currentMonthlyCost,
             };
         }
         else {
@@ -87,6 +142,12 @@ export class AnalyticsService implements IAnalyticsService {
 
                     analyticsPrice: 0,
                     country: null,
+                    operationSystem: null,
+                    requestComplete: null,
+                    databaseSystem: null,
+
+                    cost: null,
+                    monthlyCost: null,
                 };
             }
             else {
@@ -109,6 +170,12 @@ export class AnalyticsService implements IAnalyticsService {
 
                     analyticsPrice: result["analyticsPrice"],
                     country: result["country"],
+                    operationSystem: result["operationSystem"],
+                    requestComplete: result["requestComplete"],
+                    databaseSystem: result["databaseSystem"],
+
+                    cost: result["cost"],
+                    monthlyCost: result["monthlyCost"],
                 };
             }
         }
@@ -124,12 +191,18 @@ export class AnalyticsService implements IAnalyticsService {
             let currentDate = xDatetime.getCurrentDate();
             if (currentDate.getMinutes() % 15 == 0)
                 thiz.analytics();
+            else if (currentDate.getMinutes() % 5 == 0) {
+                thiz.getAnalytics();
+            }
         });
     }
 
     private async analytics(): Promise<void> {
         await this.getAnalytics();
-        await this.saveAnalytics();
+
+        if (this.gnServer.isPrimary()) {
+            await this.saveAnalytics();
+        }
     }
 
     private async getAnalytics(): Promise<void> {
@@ -137,9 +210,10 @@ export class AnalyticsService implements IAnalyticsService {
         let millisecondsSince0h = xDatetime.getToday0hMilliseconds();
         let playerCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
 
+        let millisecondsAt15MinutesAgo = currentMilliseconds - 15 * xDatetime.ONE_MINUTE_MILLISECOND;
+
         // CCU
         {
-            let millisecondsAt15MinutesAgo = currentMilliseconds - 15 * xDatetime.ONE_MINUTE_MILLISECOND;
             this.currentCCU = await playerCollection.countDocuments({
                 tsLastLogin: {
                     $gt: millisecondsAt15MinutesAgo
@@ -148,9 +222,7 @@ export class AnalyticsService implements IAnalyticsService {
         }
 
         {
-            let millisecondsAt15MinutesAgo = currentMilliseconds - 15 * xDatetime.ONE_MINUTE_MILLISECOND;
-
-            this.analyticsPrice = await this.gnServer.getDatabase().systemCollection("StoreAnalytics").countDocuments({
+            this.currentAnalyticsPrice = await this.gnServer.getDatabase().systemCollection("StoreAnalytics").countDocuments({
                 tsLastLogin: {
                     $gt: millisecondsAt15MinutesAgo
                 }
@@ -341,6 +413,210 @@ export class AnalyticsService implements IAnalyticsService {
 
             this.currentCountry = gnCountrys;
         }
+
+        {
+            const cpu = await si.currentLoad();
+            const memory = await si.mem();
+            const fsSize = await si.fsSize();
+
+            let storageUsage: {
+                name: string;
+                fsTotalSizeInBytes: number;
+                fsUsedSizeInBytes: number;
+            }[] = [];
+
+            for (let i = 0; i < fsSize.length; i++) {
+                let storage = fsSize[i];
+
+                storageUsage.push({
+                    name: storage.fs,
+                    fsTotalSizeInBytes: storage.size,
+                    fsUsedSizeInBytes: storage.used
+                });
+            }
+
+            this.currentOperationSystem = {
+                cpuUsage: cpu.currentLoad,
+                memoryUsage: {
+                    freeMemoryInBytes: memory.available,
+                    totalMemoryInBytes: memory.total,
+                },
+                storageUsage: storageUsage
+            }
+        }
+
+        // {
+        //     let eventCallbackPostCollection = this.gnServer.getDatabase().systemCollection("EventCallback.Post");
+
+        //     let results = await eventCallbackPostCollection.aggregate([
+        //         {
+        //             $match: {
+        //                 _id: { $gt: mongoDB.ObjectId.createFromTime(millisecondsAt15MinutesAgo / 1000 - 1) }
+        //             }
+        //         },
+        //         {
+        //             $group: {
+        //                 _id: { eventName: "$eventName", E: "$operationResponse.parameters.E" },
+        //                 count: { $sum: 1 } // Đếm số lần xuất hiện
+        //             }
+        //         },
+        //         {
+        //             $group: {
+        //                 _id: "$_id.eventName",
+        //                 results: {
+        //                     $push: {
+        //                         errorCode: "$_id.E",
+        //                         count: "$count"
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     ]);
+
+        //     this.currentRequestComplete = [];
+
+        //     while (await results.hasNext()) {
+        //         let result = await results.next();
+
+        //         this.currentRequestComplete.push({
+        //             eventName: result["_id"],
+        //             results: result.results,
+        //         });
+        //     }
+        // }
+
+        {
+            let stats = await this.gnServer.getDatabase().getDb().stats();
+
+            if (stats.ok == 1) {
+                this.currentDatabaseSystem = {
+                    collections: stats.collections,
+                    fsTotalSizeInBytes: stats.fsTotalSize,
+                    fsUsedSizeInBytes: stats.fsUsedSize,
+                    indexes: stats.indexes,
+                    objects: stats.objects,
+                    totalSizeInBytes: stats.totalSize,
+                }
+            }
+        }
+
+        {
+            let eventCallbackPostCollection = this.gnServer.getDatabase().systemCollection("EventCallback.Post");
+
+            let now = xDatetime.getCurrentDate();
+            let month0h = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            let results = await eventCallbackPostCollection.find({ _id: { $gt: mongoDB.ObjectId.createFromTime(month0h.getTime() / 1000 - 1) } })
+
+            this.currentCost = {
+                requestCount: 0,
+                matchmakingRequestCount: 0,
+                cloudScriptGBs: 0,
+                storageSizeInBytes: this.currentDatabaseSystem?.totalSizeInBytes ?? 0,
+                dataTransferSizeInBytes: 0,
+            }
+
+            this.currentMonthlyCost = {
+                requestCount: 0,
+                matchmakingRequestCount: 0,
+                cloudScriptGBs: 0,
+                storageSizeInBytes: this.currentDatabaseSystem?.totalSizeInBytes ?? 0,
+                dataTransferSizeInBytes: 0,
+            }
+
+            this.currentRequestComplete = [];
+
+            while (await results.hasNext()) {
+                let result = await results.next();
+
+                let tsCreate = result["tsCreate"];
+                let eventName = result["eventName"];
+                let operationResponse = result["operationResponse"];
+
+                if (tsCreate > millisecondsAt15MinutesAgo) {
+                    let thisCurrentRequestComplete = this.currentRequestComplete.find(x => x.eventName == eventName);
+                    if (thisCurrentRequestComplete == null) {
+                        thisCurrentRequestComplete = {
+                            eventName: eventName,
+                            results: [],
+                        };
+
+                        this.currentRequestComplete.push(thisCurrentRequestComplete);
+                    }
+
+                    let errorCode = operationResponse?.parameters?.E;
+                    if (errorCode) {
+                        let thisCurrentRequestCompleteErrorCode = thisCurrentRequestComplete.results.find(x => x.errorCode == errorCode);
+                        if (thisCurrentRequestCompleteErrorCode == null) {
+                            thisCurrentRequestCompleteErrorCode = {
+                                errorCode: errorCode,
+                                count: 0,
+                            };
+
+                            thisCurrentRequestComplete.results.push(thisCurrentRequestCompleteErrorCode);
+                        }
+
+                        thisCurrentRequestCompleteErrorCode.count += 1;
+                    }
+
+                    if (!eventName.startsWith("dashboard_")) {
+                        if (!eventName.startsWith("system_")) {
+                            this.currentCost.requestCount += 1;
+                            this.currentMonthlyCost.requestCount += 1;
+
+                            if (eventName.startsWith("multiplayer_")) {
+                                this.currentCost.matchmakingRequestCount += 1;
+                                this.currentMonthlyCost.matchmakingRequestCount += 1;
+
+                            }
+                            else if (eventName.startsWith("cloudScript_")) {
+                                let parameters = operationResponse?.parameters;
+                                if (parameters) {
+                                    let executionTimeInMs = parameters.executionTimeInMs;
+                                    let memoryUsedInBytes = parameters.memoryUsedInBytes;
+
+                                    if (executionTimeInMs != null && memoryUsedInBytes != null) {
+                                        let cloudScriptGBs = (executionTimeInMs / 1000) * (memoryUsedInBytes / 1024 / 1024 / 1024);
+
+                                        this.currentCost.cloudScriptGBs += cloudScriptGBs;
+                                        this.currentMonthlyCost.cloudScriptGBs += cloudScriptGBs;
+                                    }
+                                }
+                            }
+                        }
+
+                        this.currentCost.dataTransferSizeInBytes += result.responseSize ?? 0;
+                        this.currentMonthlyCost.dataTransferSizeInBytes += result.responseSize ?? 0;
+                    }
+                }
+                else {
+                    if (!eventName.startsWith("dashboard_")) {
+                        if (!eventName.startsWith("system_")) {
+                            this.currentMonthlyCost.requestCount += 1;
+
+                            if (eventName.startsWith("multiplayer_")) {
+                                this.currentMonthlyCost.matchmakingRequestCount += 1;
+                            }
+                            else if (eventName.startsWith("cloudScript_")) {
+                                let parameters = operationResponse?.parameters;
+                                if (parameters) {
+                                    let executionTimeInMs = parameters.executionTimeInMs;
+                                    let memoryUsedInBytes = parameters.memoryUsedInBytes;
+
+                                    if (executionTimeInMs != null && memoryUsedInBytes != null) {
+                                        let cloudScriptGBs = (executionTimeInMs / 1000) * (memoryUsedInBytes / 1024 / 1024 / 1024);
+
+                                        this.currentMonthlyCost.cloudScriptGBs += cloudScriptGBs;
+                                    }
+                                }
+                            }
+                        }
+
+                        this.currentMonthlyCost.dataTransferSizeInBytes += result.responseSize ?? 0;
+                    }
+                }
+            }
+        }
     }
 
     private async saveAnalytics(): Promise<void> {
@@ -368,10 +644,18 @@ export class AnalyticsService implements IAnalyticsService {
             mrt: this.currentMRT,
             mrtSince0h1: this.currentMRTSince0h1,
 
-            analyticsPrice: this.analyticsPrice,
+            analyticsPrice: this.currentAnalyticsPrice,
             country: this.currentCountry,
+
+            operationSystem: this.currentOperationSystem,
+            requestComplete: this.currentRequestComplete,
+            databaseSystem: this.currentDatabaseSystem,
+
+            cost: this.currentCost,
+            monthlyCost: this.currentMonthlyCost,
 
             tsCreate: currentDate.getTime()
         });
     }
+
 }
