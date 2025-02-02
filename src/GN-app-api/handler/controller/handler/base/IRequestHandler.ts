@@ -2,18 +2,17 @@ import { OperationRequest } from "./../../../../../GN-common/entity/operationReq
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { Constructor } from "./../../../../service/IRequestConverterService";
-
-export interface PostHandle {
-	(authInfo: AuthInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, ...otherParams: any[]): Promise<void>;
-}
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 export interface IRequestHandler {
 	getCode(): number;
 
 	getCommonOperationRequest(): Constructor<OperationRequest>;
 
-	handle(authInfo: AuthInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
+	adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
 
-	setPostHandle(postHandle: PostHandle): void;
+	serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
+
+	handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
 
 }
