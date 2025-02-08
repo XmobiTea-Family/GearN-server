@@ -1,3 +1,4 @@
+import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ITimerService } from "./ITimerService";
 
@@ -11,7 +12,7 @@ export class TimerService implements ITimerService {
 		setInterval(() => {
 			this.onEverySecond();
 
-			let now = new Date();
+			let now = xDatetime.getCurrentDate();
 
 			if (now.getSeconds() == 0) {
 				this.onEveryMinute();
