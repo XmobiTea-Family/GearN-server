@@ -5,6 +5,11 @@ test/
 .gitignore
 tsconfig.json
 tsconfig-build.json
-webpack.config.js
+webpack.config.mjs
 index.js
 node_modules/
+log/
+file-upload/
+GNconfig.debug.json
+syncCode.js
+syncCodeVer2.js

@@ -1,17 +1,19 @@
 import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 abstract class BuilderBase {
+	protected gnToken: string;
 	protected authToken: string;
 	protected userId: string;
-	protected role: number;
 	protected remove: boolean;
 	protected tsExpire: number;
-	protected otherUserLogin: boolean;
 	protected otherDatas: { [k: string]: any };
 	protected tsLastUpdate: number;
-	protected socketId: string;
-	protected socketRoomIds: string[];
 	protected tsCreate: number;
+	protected secretKey: string;
+
+	public getGNToken(): string {
+		return this.gnToken;
+	}
 
 	public getAuthToken(): string {
 		return this.authToken;
@@ -19,10 +21,6 @@ abstract class BuilderBase {
 
 	public getUserId(): string {
 		return this.userId;
-	}
-
-	public getRole(): number {
-		return this.role;
 	}
 
 	public isRemove(): boolean {
@@ -33,10 +31,6 @@ abstract class BuilderBase {
 		return this.tsExpire;
 	}
 
-	public getOtherUserLogin(): boolean {
-		return this.otherUserLogin;
-	}
-
 	public getOtherDatas(): {} {
 		return this.otherDatas;
 	}
@@ -45,16 +39,12 @@ abstract class BuilderBase {
 		return this.tsLastUpdate;
 	}
 
-	public getSocketId(): string {
-		return this.socketId;
-	}
-
-	public getSocketRoomIds(): string[] {
-		return this.socketRoomIds;
-	}
-
 	public getTsCreate() {
 		return this.tsCreate;
+	}
+
+	public getSecretKey(): string {
+		return this.secretKey;
 	}
 
 	public setTsCreate(tsCreate: number): Builder {
@@ -62,28 +52,7 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
-	public setSocketId(socketId: string): Builder {
-		this.socketId = socketId;
-		return this as Builder;
-	}
-
-	public setSocketRoomIds(roomIds: string[]): Builder {
-		this.socketRoomIds = roomIds;
-		return this as Builder;
-	}
-
-	public addSocketRoomId(roomId: string): Builder {
-		if (this.socketRoomIds.indexOf(roomId) == -1)
-			this.socketRoomIds.push(roomId);
-
-		return this as Builder;
-	}
-
-	public removeSocketRoomId(roomId: string): Builder {
-		let indexOf = this.socketRoomIds.indexOf(roomId);
-		if (indexOf != -1)
-			this.socketRoomIds.splice(indexOf, 1);
-
+	public setGNToken(gnToken: string): Builder {
 		return this as Builder;
 	}
 
@@ -92,10 +61,6 @@ abstract class BuilderBase {
 	}
 
 	public setUserId(userId: string): Builder {
-		return this as Builder;
-	}
-
-	public setRole(role: number): Builder {
 		return this as Builder;
 	}
 
@@ -111,11 +76,6 @@ abstract class BuilderBase {
 
 	public setTsLastUpdate(tsLastUpdate: number): Builder {
 		this.tsLastUpdate = tsLastUpdate;
-		return this as Builder;
-	}
-
-	public setOtherUserLogin(otherUserLogin: boolean): Builder {
-		this.otherUserLogin = otherUserLogin;
 		return this as Builder;
 	}
 
@@ -138,30 +98,34 @@ abstract class BuilderBase {
 		return this.otherDatas[key];
 	}
 
+	public setSecretKey(secretKey: string): Builder {
+		this.secretKey = secretKey;
+		return this as Builder;
+	}
+
 	public build(): AuthInfo {
 		return null;
 	}
 
 	constructor() {
 		this.otherDatas = {};
-		this.socketRoomIds = [];
 	}
 
 }
 
 class Builder extends BuilderBase implements IBuilder<AuthInfo> {
+	public setGNToken(gnToken: string): Builder {
+		this.gnToken = gnToken;
+		return this;
+	}
+
 	public setAuthToken(authToken: string): Builder {
 		this.authToken = authToken;
-		return this;
+		return this as Builder;
 	}
 
 	public setUserId(userId: string): Builder {
 		this.userId = userId;
-		return this;
-	}
-
-	public setRole(role: number): Builder {
-		this.role = role;
 		return this;
 	}
 
@@ -172,7 +136,12 @@ class Builder extends BuilderBase implements IBuilder<AuthInfo> {
 
 	public setTsCreate(tsCreate: number): Builder {
 		this.tsCreate = tsCreate;
-		return this as Builder;
+		return this;
+	}
+
+	public setSecretKey(secretKey: string): Builder {
+		this.secretKey = secretKey;
+		return this;
 	}
 
 	public build(): AuthInfo {
@@ -192,31 +161,27 @@ export class AuthInfo extends BuilderBase {
 	constructor(builder: Builder) {
 		super();
 
+		this.gnToken = builder.getGNToken();
 		this.authToken = builder.getAuthToken();
 		this.userId = builder.getUserId();
-		this.role = builder.getRole();
 		this.remove = builder.isRemove();
 		this.tsExpire = builder.getTsExpire();
-		this.otherUserLogin = builder.getOtherUserLogin();
 		this.otherDatas = builder.getOtherDatas();
 		this.tsLastUpdate = builder.getTsLastUpdate();
-		this.socketId = builder.getSocketId();
-		this.socketRoomIds = builder.getSocketRoomIds();
 		this.tsCreate = builder.getTsCreate();
+		this.secretKey = builder.getSecretKey();
 	}
 
 	public toDocumentData() {
 		return {
-			"AuthToken": this.authToken,
-			"UserId": this.userId,
-			"Role": this.role,
-			"IsRemove": this.remove,
-			"TsExpire": this.tsExpire,
-			"OtherUserLogin": this.otherUserLogin,
-			"OtherDatas": this.otherDatas,
-			"SocketId": this.socketId,
-			"SocketRoomIds": this.socketRoomIds,
-			"TsCreate": this.tsCreate
+			"gnToken": this.gnToken,
+			"authToken": this.authToken,
+			"userId": this.userId,
+			"isRemove": this.remove,
+			"tsExpire": this.tsExpire,
+			"otherDatas": this.otherDatas,
+			"tsCreate": this.tsCreate,
+			"secretKey": this.secretKey
 		}
 	}
 

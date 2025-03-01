@@ -14,11 +14,11 @@ export enum FieldDataType {
 export interface GNObjectFieldMetadata {
     name: string;
     fieldType: FieldDataType;
-
+    cls: new (...args: any[]) => any;
 };
 
 export interface GNObjectMetadata {
     id: string;
     fields: GNObjectFieldMetadata[];
-    
+
 };

@@ -8,6 +8,7 @@ import { Emitter } from "@socket.io/mongo-emitter";
 import * as mongoDB from "mongodb";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
+import { GNServer } from "./../GNServer";
 
 export class SocketApp {
 	private appSettings: SocketAppSettings;
@@ -17,10 +18,16 @@ export class SocketApp {
 	private antiDdosMiddleware: AntiDdosMiddleware;
 	private io: Server;
 
+	private gnServer: GNServer;
+
 	private emitter: Emitter;
 
 	public setServer(server: http.Server): void {
 		this.server = server;
+	}
+
+	public setGNServer(gnServer: GNServer): void {
+		this.gnServer = gnServer;
 	}
 
 	public getHttpServer(): http.Server {
@@ -65,13 +72,17 @@ export class SocketApp {
 		});
 
 		this.socketAppHandler = new SocketAppHandler();
-		this.socketAppHandler.setEmitter(this.emitter);
+		if (this.appSettings.getUseEmitter()) {
+			this.socketAppHandler.setEmitter(this.emitter);
+		}
+		
 		this.socketAppHandler.setServer(this.io);
 		this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.socketAppHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);
 		this.socketAppHandler.setEnableSendAndReceiveDebug(this.appSettings.getEnableSendAndReceiveDebug());
 		this.socketAppHandler.setEnablePostViaMsgPack(this.appSettings.getEnablePostViaMsgPack());
 		this.socketAppHandler.setEnablePostViaJson(this.appSettings.getEnablePostViaJson());
+		this.socketAppHandler.setDatabase(this.gnServer.getDatabase());
 
 		if (this.appSettings.getEnable()) {
 			this.socketAppHandler.run();
@@ -80,9 +91,14 @@ export class SocketApp {
 
 	public setEmitter(adapterEventCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.emitter = new Emitter(adapterEventCollection);
-		if (this.socketAppHandler != null) this.socketAppHandler.setEmitter(this.emitter);
 
-		this.io.adapter(createAdapter(adapterEventCollection) as any);
+		if (this.appSettings.getUseEmitter() && this.socketAppHandler != null) {
+			this.socketAppHandler.setEmitter(this.emitter);
+		}
+
+		this.io.adapter(createAdapter(adapterEventCollection, {
+
+		}) as any);
 
 	}
 

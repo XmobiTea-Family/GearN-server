@@ -63,7 +63,7 @@ export class OperationResponse {
 		return this;
 	}
 
-	public setScriptData(k: string, value: any): OperationResponse {
+	public setParameter(k: string, value: any): OperationResponse {
 		this.parameters.add(k, value);
 		return this;
 	}
@@ -84,27 +84,27 @@ export class OperationResponse {
 	}
 
 	public toString(): string {
-        let stringBuilder = "";
+		let stringBuilder = "";
 
-        stringBuilder += "Code: " + CodeHelper.getOperationCodeName(this.operationCode) + " (" + this.operationCode + ")" +", responseId: " + this.responseId + ", returnCode " + CodeHelper.getReturnCodeName(this.returnCode);
+		stringBuilder += "Code: " + CodeHelper.getOperationCodeName(this.operationCode) + " (" + this.operationCode + ")" + ", responseId: " + this.responseId + ", returnCode " + CodeHelper.getReturnCodeName(this.returnCode);
 
-        if (this.returnCode == ReturnCode.Ok) stringBuilder += ", parameters " + this.parameters;
-        else if (this.returnCode == ReturnCode.InvalidRequestParameters) {
-            if (this.invalidMembers != null) {
-                let invalidStr = "";
+		if (this.returnCode == ReturnCode.Ok) stringBuilder += ", parameters " + this.parameters;
+		else if (this.returnCode == ReturnCode.InvalidRequestParameters) {
+			if (this.invalidMembers != null) {
+				let invalidStr = "";
 
-                this.invalidMembers.forEach(invalidMember => {
-                    invalidStr += invalidMember;
-                });
-                stringBuilder += ", invalidMembers " + invalidStr;
-            }
-            else stringBuilder += ", invalidMembers " + this.invalidMembers;
-        }
-        else stringBuilder += ", debugMessage " + this.debugMessage;
-        
-        stringBuilder += ", encrypted " + this.encrypted;
+				this.invalidMembers.forEach(invalidMember => {
+					invalidStr += invalidMember;
+				});
+				stringBuilder += ", invalidMembers " + invalidStr;
+			}
+			else stringBuilder += ", invalidMembers " + this.invalidMembers;
+		}
+		else stringBuilder += ", debugMessage " + this.debugMessage;
 
-        return stringBuilder;
+		stringBuilder += ", encrypted " + this.encrypted;
+
+		return stringBuilder;
 	}
 
 }

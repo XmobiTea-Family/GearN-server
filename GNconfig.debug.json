@@ -3,94 +3,94 @@
 	"options": {
 		"applicationSettings": {
 			"port": 2202,
+			"socketPort": 2901,
 			"useSsl": false,
 			"keyFilePath": "",
 			"certFilePath": "",
-			"licenseKeyFilePath": "",
-			"expiredTokenInMs": 172800000
+			"expiredTokenInMs": 172800000,
+			"privateKeyToken": "privateKeyDefault"
 		},
-
 		"httpAppSettings": {
 			"enable": true,
 			"allowOrigin": "*",
 			"credentials": true,
-			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["a", "content-type"],
-			"enableSendAndReceiveDebug": true,
+			"allowMethods": [
+				"GET",
+				"POST"
+			],
+			"allowHeaders": [
+				"a",
+				"s",
+				"g",
+				"content-type",
+				"content-length",
+				"user-agent"
+			],
+			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true
 		},
-
 		"socketAppSettings": {
 			"enable": true,
+			"useEmitter": false,
 			"allowOrigin": "*",
 			"credentials": true,
-			"allowMethods": ["GET"],
+			"allowMethods": [
+				"GET"
+			],
 			"allowHeaders": [],
-			"enableSendAndReceiveDebug": true,
+			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true,
 			"pingInterval": 50000,
 			"pingTimeout": 5000
 		},
-
 		"uploadFileSettings": {
 			"enable": true,
 			"uploadPath": "./file-upload",
 			"maxSizeUpload": 52428800,
-			"mimeTypeAccepts": ["image/png"]
+			"mimeTypeAccepts": [
+				"image/png"
+			]
 		},
-
 		"databaseSettings": {
-			"connectionString": "mongodb://127.0.0.1:27017/",
-			"databaseName": "XmobiTea",
-			"databaseGameName": "GN",
-			"options": {
-			}
+			"connectionString": "mongodb://saroot:passhere@192.168.0.200:38017/admin",
+			"databaseName": "GN_IdleRPG",
+			"options": {}
 		},
-
 		"otherSettings": {
-			"adapterEventCollectionName": "AdapterEventCollection",
-			"authInfoCollectionName": "AuthInfoCollection",
-			"configCollectionName": "Config",
-			"packageName": "com.xmobitea.GNServer",
-			"appleClientId": "com.xmobitea.GNServer",
-			"googleClientId": "gn-server",
-			"headerIP": "x-ip"
+			"headerIP": "X-Real-IP",
+			"idTypeCase": 0,
+			"ipApiUrl": "https://ipdetail.changx.dev/json"
 		},
-		
-		"mailSettings": {
-			"enable": false,
-			"sendFrom": "changx@xmobitea.com",
-			"sendGridApiKey": "SG."
-		},
-
-		"adminViewSettings": {
-			"enable": true,
-			"debugViewEnable": true,
-			"logViewEnable": true,
-			"debugHashs": ["hashhere"]
-		},
-
 		"logSettings": {
 			"logToConsoleEnable": true,
 			"logToFileEnable": true,
 			"logPath": "./log/debug/Server.log"
 		},
-
 		"ddosSettings": {
 			"socketMaxRequestPerSecondPerIp": 50,
 			"socketMaxRequestPerSecondPerPeer": 20,
 			"socketMaxPendingRequest": 1000,
-			"socketMaxRequestSize": 1024,
+			"socketMaxRequestSize": 4096,
 			"httpMaxRequestPerSecondPerIp": 50,
 			"httpMaxRequestPerSecondPerPeer": 20,
 			"httpMaxPendingRequest": 1000,
-			"httpMaxRequestSize": 1024,
+			"httpMaxRequestSize": 4096,
 			"maxUploadPendingRequest": 200,
 			"maxDownloadPendingRequest": 200,
-			"reportDdosCollectionName": "ReportDdosCollection",
-			"banDdosCollectionName": "BanDdosCollection"
-		}
+			"ipWhiteList": ["127.0.0.1"]
+		},
+        "clusterSettings": {
+            "instanceId": "node_0",
+            "isPrimary": true,
+            "privateKeyToken": "privateKeyDefault",
+            "allNodes": [
+                {
+                    "instanceId": "node_0",
+                    "fullUrl": "http://127.0.0.1:2202"
+                }
+            ]
+        }
 	}
 }

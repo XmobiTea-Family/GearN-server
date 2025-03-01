@@ -96,6 +96,18 @@ export class DisplayNameUtility {
 			else if (char == "x") inputReturn += "x";
 			else if (char == "y" || char == "ý" || char == "ỳ" || char == "ỷ" || char == "ỹ" || char == "ỵ") inputReturn += "y";
 			else if (char == "z") inputReturn += "z";
+            else if (
+				char == "0" ||
+				char == "1" ||
+				char == "2" ||
+				char == "3" ||
+				char == "4" ||
+				char == "5" ||
+				char == "6" ||
+				char == "7" ||
+				char == "8" ||
+				char == "9"
+			) inputReturn += char;
 		}
 
 		return inputReturn;
