@@ -1,0 +1,97 @@
+THIRD-PARTY LICENSES
+=====================
+
+This project includes third-party packages that are subject to their own licenses. Below is a list of key dependencies and their licenses.
+
+You must comply with their terms in accordance with the Apache 2.0 license of this project.
+
+---
+
+1. bcrypt | Nick Campbell (https://github.com/ncb000gt)   
+License: MIT  
+https://github.com/kelektiv/node.bcrypt.js
+
+2. express | TJ Holowaychuk <tj@vision-media.ca>   
+License: MIT  
+https://github.com/expressjs/express
+
+3. jsonwebtoken | auth0   
+License: MIT  
+https://github.com/auth0/node-jsonwebtoken
+
+4. multer | Hage Yaapa <captain@hacksparrow.com> (http://www.hacksparrow.com) Jaret Pfluger <https://github.com/jpfluger> Linus Unnebäck <linus@folkdatorn.se>   
+License: MIT  
+https://github.com/expressjs/multer
+
+5. @msgpack/msgpack | The MessagePack community (https://msgpack.org)   
+License: ISC  
+https://github.com/msgpack/msgpack-javascript
+
+6. @sendgrid/mail | Twilio SendGrid   
+License: MIT  
+https://github.com/sendgrid/sendgrid-nodejs
+
+7. @socket.io/mongo-adapter | darrachequesne   
+License: MIT  
+https://github.com/socketio/socket.io-mongo-adapter
+
+8. @socket.io/mongo-emitter | darrachequesne   
+License: MIT  
+https://github.com/socketio/socket.io-mongo-emitter
+
+9. @xmobitea/gn-typescript-client | Chang X <changx.develop@gmail.com> (https://xmobitea.com)
+License: Apache-2.0  
+https://github.com/XmobiTea-Family/gn-typescript-client
+
+10. axios | Matt Zabriskie
+License: MIT  
+https://github.com/axios/axios
+
+11. cors | Troy Goode <troygoode@gmail.com> (https://github.com/troygoode/)
+License: MIT  
+https://github.com/expressjs/cors
+
+12. firebase-admin | Firebase <firebase-support@google.com> (https://firebase.google.com/)
+License: Apache-2.0  
+https://github.com/firebase/firebase-admin-node
+
+13. jwks-rsa | Auth0
+License: MIT  
+https://github.com/auth0/node-jwks-rsa
+
+14. log4js | Gareth Jones <gareth.nomiddlename@gmail.com> Lam Wei Li <lam_wei_li@hotmail.com>
+License: Apache-2.0  
+https://github.com/log4js-node/log4js-node
+
+15. mongodb | The MongoDB NodeJS Team dbx-node@mongodb.com
+License: Apache-2.0  
+https://github.com/mongodb/node-mongodb-native
+
+16. reflect-metadata | Ron Buckton ron.buckton@microsoft.com
+License: Apache-2.0  
+https://github.com/rbuckton/reflect-metadata
+
+17. socket.io | socket.io
+License: MIT  
+https://github.com/socketio/socket.io
+
+18. systeminformation | Sebastian Hildebrandt <hildebrandt@plus-innovations.com> (https://plus-innovations.com)
+License: MIT  
+https://github.com/sebhildebrandt/systeminformation
+
+---
+
+DevDependencies:
+----------------
+These are used only during development/build and not included in final distribution.
+
+- typescript@^5.7.2 — Apache-2.0 — https://github.com/microsoft/TypeScript | Microsoft Corp.
+- webpack@^5.97.1 — MIT — https://github.com/webpack/webpack | Tobias Koppers @sokra
+- webpack-cli@^5.1.4 — MIT — https://github.com/webpack/webpack-cli | webpack
+- terser-webpack-plugin@^5.3.10 — MIT — https://github.com/webpack-contrib/terser-webpack-plugin | webpack Contrib Team
+- ts-loader@^9.5.1 — MIT — https://github.com/TypeStrong/ts-loader | John Reilly <johnny_reilly@hotmail.com> (https://johnnyreilly.com)
+- webpack-node-externals@^3.0.0 — MIT — https://github.com/liady/webpack-node-externals | Liad Yosef (https://github.com/liady)
+
+---
+
+This list may not be exhaustive. Please refer to each individual package's LICENSE file for full terms.
