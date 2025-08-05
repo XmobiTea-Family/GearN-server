@@ -50,6 +50,7 @@ export class DefaultApplicationStartup {
 
 		let databaseSettings = DatabaseSettings.Builder()
 			.setConnectionString("mongodb://rootuser:rootpass@127.0.10.21:27017,127.0.10.22:27017,127.0.10.23:27017/?retryWrites=false&replicaSet=rs0&readPreference=primaryPreferred&serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-256")
+			.setLogConnectionString(null)
 			.setDatabaseName("XmobiTea")
 			.setOptions({
 				"minPoolSize": 5,

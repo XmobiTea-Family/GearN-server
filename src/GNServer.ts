@@ -931,7 +931,7 @@ export class GNServer {
 		tempAnalyticsService.run();
 		this.analyticsService = tempAnalyticsService;
 
-		this.postEventCallbackCollection = this.xDatabase.systemCollection("EventCallback.Post");
+		this.postEventCallbackCollection = this.xDatabase.logSystemCollection("EventCallback.PostLog");
 
         this.getHttpApp().getClusterHandler().onEvent("sendEventTo", data => {
 			this.executeSendEventTo(data);
@@ -994,6 +994,10 @@ export class GNServer {
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
 		this.xDatabase.createIndex(collectionName, index, options);
+	}
+
+	public logCreateIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
+		this.xDatabase.logCreateIndex(collectionName, index, options);
 	}
 
 	public getConfigService(gameId: string): IConfigService {

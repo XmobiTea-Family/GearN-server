@@ -94,7 +94,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             }
 
             this.gnServer.getDatabase().systemCollection("MasterPlayer").deleteOne({ userId: masterPlayer.getUserId() });
-            this.gnServer.getDatabase().runtimeCollection("DeleteInDatabaseLog").insertOne(result);
+            this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
         }
         else if (request.type == OwnerType.GamePlayer) {
             let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.id, request.gameId);
@@ -113,7 +113,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             }
 
             this.gnServer.getDatabase().systemGameCollection("GamePlayer", request.gameId).deleteOne({ userId: gamePlayer.getUserId() });
-            this.gnServer.getDatabase().runtimeCollection("DeleteInDatabaseLog").insertOne(result);
+            this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
         }
         else if (request.type == OwnerType.CharacterPlayer) {
             let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, request.gameId);
@@ -132,7 +132,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             }
 
             this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", request.gameId).deleteOne({ characterId: characterPlayer.getCharacterId() });
-            this.gnServer.getDatabase().runtimeCollection("DeleteInDatabaseLog").insertOne(result);
+            this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
 
             let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(characterPlayer.getOwner().id, request.gameId);
             if (gamePlayer != null) {
@@ -159,7 +159,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             }
 
             this.gnServer.getDatabase().systemGameCollection("Inventory", request.gameId).deleteOne({ itemId: inventory.getItemId() });
-            this.gnServer.getDatabase().runtimeCollection("DeleteInDatabaseLog").insertOne(result);
+            this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
 
             let owner = inventory.getOwner();
             if (owner.type == OwnerType.GamePlayer) {
@@ -236,7 +236,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             }
 
             this.gnServer.getDatabase().systemGameCollection("Group", request.gameId).deleteOne({ groupId: groupId });
-            this.gnServer.getDatabase().runtimeCollection("DeleteInDatabaseLog").insertOne(result);
+            this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
         }
         else if (request.type == OwnerType.StoreInventory) {
             let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.id, request.gameId);
@@ -259,7 +259,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             }
 
             this.gnServer.getDatabase().systemGameCollection("StoreInventory", request.gameId).deleteOne({ storeId: storeId });
-            this.gnServer.getDatabase().runtimeCollection("DeleteInDatabaseLog").insertOne(result);
+            this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
         }
         else {
             operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
@@ -303,7 +303,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let currencyLogCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.CurrencyLog");
+            let currencyLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.CurrencyLog");
             let results = await currencyLogCollection.find({ userId: userId });
 
             while (await results.hasNext()) {
@@ -319,7 +319,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsLog");
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.StatisticsLog");
             let results = await statisticsLogCollection.find({ userId: userId });
 
             while (await results.hasNext()) {
@@ -460,7 +460,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+            let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
             let results = await currencyLogCollection.find({ userId: userId });
 
             while (await results.hasNext()) {
@@ -476,7 +476,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
             let results = await statisticsLogCollection.find({ userId: userId });
 
             while (await results.hasNext()) {
@@ -523,7 +523,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let backupStoreLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
+            let backupStoreLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
             let results = await backupStoreLogCollection.find({ id: userId });
 
             while (await results.hasNext()) {
@@ -616,7 +616,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+            let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
             let results = await currencyLogCollection.find({ characterId: characterId });
 
             while (await results.hasNext()) {
@@ -632,7 +632,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
             let results = await statisticsLogCollection.find({ characterId: characterId });
 
             while (await results.hasNext()) {
@@ -679,7 +679,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let backupStoreLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
+            let backupStoreLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
             let results = await backupStoreLogCollection.find({ id: characterId });
 
             while (await results.hasNext()) {
@@ -708,7 +708,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         let itemId = inventory.getItemId();
 
         {
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
             let results = await statisticsLogCollection.find({ itemId: itemId });
 
             while (await results.hasNext()) {
@@ -804,7 +804,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.CurrencyLog", gameId);
+            let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.CurrencyLog", gameId);
             let results = await currencyLogCollection.find({ groupId: groupId });
 
             while (await results.hasNext()) {
@@ -820,7 +820,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.StatisticsLog", gameId);
             let results = await statisticsLogCollection.find({ groupId: groupId });
 
             while (await results.hasNext()) {
@@ -867,7 +867,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
         }
 
         {
-            let backupStoreLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
+            let backupStoreLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
             let results = await backupStoreLogCollection.find({ id: groupId });
 
             while (await results.hasNext()) {

@@ -32,6 +32,9 @@ class GetAnalyticsOperationRequest extends OperationRequest {
     @BooleanDataMember({ code: GNParameterCode.DatabaseSystem, isOptional: true })
     databaseSystem?: boolean;
 
+    @BooleanDataMember({ code: GNParameterCode.LogDatabaseSystem, isOptional: true })
+    logDatabaseSystem?: boolean;
+
     @BooleanDataMember({ code: GNParameterCode.Cost, isOptional: true })
     cost?: boolean;
 
@@ -51,6 +54,7 @@ export interface AnalyticsRequestParams {
     requestComplete: boolean;
     operationSystem: boolean;
     databaseSystem: boolean;
+    logDatabaseSystem: boolean;
     cost: boolean;
     monthlyCost: boolean;
 }
@@ -84,6 +88,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
                     operationSystem: request.operationSystem,
                     requestComplete: request.requestComplete,
                     databaseSystem: request.databaseSystem,
+                    logDatabaseSystem: request.logDatabaseSystem,
                     cost: request.cost,
                     monthlyCost: request.monthlyCost,
                 }
@@ -214,6 +219,21 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
             }
 
             operationResponse.setParameter(GNParameterCode.DatabaseSystem, gnDatabaseSystem);
+        }
+
+        if (request.requestParams.logDatabaseSystem) {
+            let gnDatabaseSystem = new GNHashtable();
+
+            if (bigAnalyticsItem.operationSystem) {
+                gnDatabaseSystem.add(GNParameterCode.FsTotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsTotalSizeInBytes);
+                gnDatabaseSystem.add(GNParameterCode.FsUsedSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsUsedSizeInBytes);
+                gnDatabaseSystem.add(GNParameterCode.TotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.totalSizeInBytes);
+                gnDatabaseSystem.add(GNParameterCode.Collections, bigAnalyticsItem.logDatabaseSystem.collections);
+                gnDatabaseSystem.add(GNParameterCode.Objects, bigAnalyticsItem.logDatabaseSystem.objects);
+                gnDatabaseSystem.add(GNParameterCode.Indexes, bigAnalyticsItem.logDatabaseSystem.indexes);
+            }
+
+            operationResponse.setParameter(GNParameterCode.LogDatabaseSystem, gnDatabaseSystem);
         }
 
         if (request.requestParams.requestComplete) {

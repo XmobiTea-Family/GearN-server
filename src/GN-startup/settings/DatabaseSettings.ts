@@ -2,6 +2,7 @@ import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 abstract class BuilderBase {
 	protected connectionString: string;
+	protected logConnectionString: string;
 	protected databaseName: string;
 
 	protected options: { [k: string]: any };
@@ -9,6 +10,11 @@ abstract class BuilderBase {
 	public getConnectionString(): string {
 		return this.connectionString;
 	}
+
+	public getLogConnectionString(): string {
+		return this.logConnectionString;
+	}
+
 	public getDatabaseName(): string {
 		return this.databaseName;
 	}
@@ -27,6 +33,11 @@ class Builder extends BuilderBase implements IBuilder<DatabaseSettings> {
 		return this;
 	}
 
+	public setLogConnectionString(logConnectionString: string): Builder {
+		this.logConnectionString = logConnectionString;
+		return this;
+	}
+
 	public setDatabaseName(databaseName: string): Builder {
 		this.databaseName = databaseName;
 		return this;
@@ -41,6 +52,7 @@ class Builder extends BuilderBase implements IBuilder<DatabaseSettings> {
 		super();
 
 		this.connectionString = "";
+		this.logConnectionString = "";
 		this.databaseName = "";
 		this.options = {};
 	}
@@ -56,6 +68,7 @@ export class DatabaseSettings extends BuilderBase {
 		super();
 
 		this.connectionString = builder.getConnectionString();
+		this.logConnectionString = builder.getLogConnectionString();
 		this.databaseName = builder.getDatabaseName();
 
 		this.options = builder.getOptions();
