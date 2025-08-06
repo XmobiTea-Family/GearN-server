@@ -202,16 +202,31 @@ export class HttpAppHandler {
 
                 if (operationResponse != null) {
                     let httpData = OperationHelper.toResponseHttpData(operationResponse);
-                    if (this.enableSendAndReceiveDebug) {
-                        Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+
+                    let finalData = {
+                        returnCode: httpData.returnCode,
+                    } as any;
+
+                    if (httpData.parameters) {
+                        finalData.parameters = httpData.parameters;
                     }
+
+                    if (httpData.invalidRequestParameters) {
+                        finalData.invalidRequestParameters = httpData.invalidRequestParameters;
+                    }
+
+                    if (httpData.debugMessage) {
+                        finalData.debugMessage = httpData.debugMessage;
+                    }
+                    
+                    if (this.enableSendAndReceiveDebug) Debug.log("[HTTP SEND] %O", JSON.stringify(finalData));
 
                     if (operationResponse.isEncrypted()) {
                         // TODO Encrypt data here
                     }
 
                     res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-                    return res.send(httpData);
+                    return res.send(finalData);
                 }
 
                 res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
@@ -270,9 +285,24 @@ export class HttpAppHandler {
 
                 if (operationResponse != null) {
                     let httpData = OperationHelper.toResponseHttpData(operationResponse);
-                    if (this.enableSendAndReceiveDebug) {
-                        Debug.log("[HTTP SEND] %O", JSON.stringify(httpData));
+
+                    let finalData = {
+                        returnCode: httpData.returnCode,
+                    } as any;
+
+                    if (httpData.parameters) {
+                        finalData.parameters = httpData.parameters;
                     }
+
+                    if (httpData.invalidRequestParameters) {
+                        finalData.invalidRequestParameters = httpData.invalidRequestParameters;
+                    }
+
+                    if (httpData.debugMessage) {
+                        finalData.debugMessage = httpData.debugMessage;
+                    }
+
+                    if (this.enableSendAndReceiveDebug) Debug.log("[HTTP SEND] %O", JSON.stringify(finalData));
 
                     if (operationResponse.isEncrypted()) {
                         // TODO Encrypt data here

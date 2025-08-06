@@ -22,7 +22,7 @@ export class OperationHelper {
 	} {
 		return {
 			returnCode: operationResponse.getReturnCode(),
-			parameters: operationResponse.getParameters()?.toData(),
+			parameters: OperationHelper.toDataGNHashtable(operationResponse.getParameters()),
 			invalidRequestParameters: OperationHelper.invalidMemberData(operationResponse),
 			debugMessage: operationResponse.getDebugMessage(),
 			responseId: operationResponse.getResponseId(),
@@ -37,7 +37,7 @@ export class OperationHelper {
 	} {
 		return {
 			returnCode: operationResponse.getReturnCode(),
-			parameters: operationResponse.getParameters()?.toData(),
+			parameters: OperationHelper.toDataGNHashtable(operationResponse.getParameters()),
 			invalidRequestParameters: OperationHelper.invalidMemberData(operationResponse),
 			debugMessage: operationResponse.getDebugMessage(),
 		}

@@ -27,7 +27,7 @@
             },
             {
                 "eventName": "system_OnAuthenticateSuccess",
-                "script": "\nsystemAuthenticateHandlers.system_OnAuthenticateSuccess = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\nreturn operationResponse;\n}\n",
+                "script": "\nsystemAuthenticateHandlers.system_OnAuthenticateSuccess = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1589,7 +1589,7 @@
             },
             {
                 "eventName": "masterPlayer_SendSocketOperationEvent",
-                "script": "\npreHandlers.masterPlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.masterPlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: string, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SendSocketOperationEvent = async (request: { userId: string, eventCode: string, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

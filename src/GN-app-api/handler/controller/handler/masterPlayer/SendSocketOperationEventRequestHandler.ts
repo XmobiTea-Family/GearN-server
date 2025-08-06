@@ -18,8 +18,8 @@ class SendSocketOperationEventOperationRequest extends OperationRequest {
     @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
     userId?: string;
 
-    @NumberDataMember({ code: GNParameterCode.EventCode, minValue: 1000, mustInt: true })
-    eventCode: number;
+    @StringDataMember({ code: GNParameterCode.EventCode, minLength: 1, maxLength: 100 })
+    eventCode: string;
 
     @GNHashtableDataMember({ code: GNParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })
     eventParameters?: GNHashtable;

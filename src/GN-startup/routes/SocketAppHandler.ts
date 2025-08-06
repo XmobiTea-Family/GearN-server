@@ -367,19 +367,37 @@ export class SocketAppHandler {
 
 	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse, useMsgPack: boolean) {
 		let socketData = OperationHelper.toResponseSocketData(operationResponse);
-		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(socketData));
+		
+		let finalData = {
+			returnCode: socketData.returnCode,
+			responseId: socketData.responseId,
+		} as any;
+
+		if (socketData.parameters) {
+			finalData.parameters = socketData.parameters;
+		}
+
+		if (socketData.invalidRequestParameters) {
+			finalData.invalidRequestParameters = socketData.invalidRequestParameters;
+		}
+
+		if (socketData.debugMessage) {
+			finalData.debugMessage = socketData.debugMessage;
+		}
+
+		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(finalData));
 
 		if (operationResponse.isEncrypted()) {
             // TODO Encrypt data
 		}
 
         if (useMsgPack) {
-            let socketDataMsgPack = encode(socketData);
+            let socketDataMsgPack = encode(finalData);
 
             socket.emit(Commands.ResponseCmd_MsgPack, socketDataMsgPack);
         }
         else {
-            socket.emit(Commands.ResponseCmd_Json, socketData);
+            socket.emit(Commands.ResponseCmd_Json, finalData);
         }
 	}
 

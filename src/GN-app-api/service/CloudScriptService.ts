@@ -43,7 +43,7 @@ enum CloudScriptEventType {
 interface CloudScriptEvent {
     eventType: CloudScriptEventType;
     operationEvent: {
-        eventCode: number;
+        eventCode: string;
         parameters: {};
         encrypted: boolean;
     };

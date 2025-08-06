@@ -158,7 +158,7 @@ enum CloudScriptEventType {
 interface CloudScriptEvent {
 	eventType: CloudScriptEventType;
 	operationEvent: {
-		eventCode: number;
+		eventCode: string;
 		parameters: {} | null;
 		encrypted: boolean;
 	};
@@ -570,7 +570,7 @@ interface CloudScriptRequest {
 		onlyMasterAdmin: boolean;
 	};
 	operationRequest: {
-		operationCode: number;
+		operationCode: string;
 		requestId: number;
 		parameters: {};
 		encrypted: boolean;
