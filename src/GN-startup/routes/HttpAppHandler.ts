@@ -11,6 +11,9 @@ import { encode, decode } from "@msgpack/msgpack";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
 import { Commands } from "./../../GN-common/constant/Commands";
+import { EnumUtility } from "../../GN-common/helper/EnumUtility";
+import { RequestType } from "../../GN-common/constant/enumType/RequestType";
+import { RequestRole } from "../../GN-common/constant/enumType/RequestRole";
 
 interface OnHttpRequest {
     (request: Request): Promise<OperationResponse>;
@@ -192,7 +195,7 @@ export class HttpAppHandler {
                 this.apiJsonRouter
             );
 
-            this.apiJsonRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response): Promise<any> => {
+            this.apiJsonRouter.post("/:requestType/:operationCode/:role", async (req: express.Request, res: express.Response): Promise<any> => {
                 let operationResponse = await this.onHttpRequest(req, false);
 
                 this.antiDdosMiddleware.removePendingRequest(req, res);
@@ -260,7 +263,7 @@ export class HttpAppHandler {
                 this.apiMsgPackRouter
             );
 
-            this.apiMsgPackRouter.post("/:code/:type/:role", async (req: express.Request, res: express.Response): Promise<any> => {
+            this.apiMsgPackRouter.post("/:requestType/:operationCode/:role", async (req: express.Request, res: express.Response): Promise<any> => {
                 let operationResponse = await this.onHttpRequest(req, true);
 
                 this.antiDdosMiddleware.removePendingRequest(req, res);
@@ -290,19 +293,22 @@ export class HttpAppHandler {
     }
 
     private async onHttpRequest(req: express.Request, encrypted: boolean): Promise<OperationResponse> {
-        let codeStr = req.params.code;
-        let typeStr = req.params.type;
+        let requestTypeStr = req.params.requestType;
+        let operationCodeStr = req.params.operationCode;
         let roleStr = req.params.role;
-        if (isNaN(codeStr as any) || isNaN(typeStr as any) || isNaN(roleStr as any)) return null;
 
-        let code = Number.parseInt(codeStr);
-        let type = Number.parseInt(typeStr);
-        let role = Number.parseInt(roleStr);
+        if (!operationCodeStr || !requestTypeStr || !roleStr) return null;
+
+        let requestType = EnumUtility.parse(RequestType, requestTypeStr, true);
+        let role = EnumUtility.parse(RequestRole, roleStr, true);
+
+        if (requestType == null || role == null) return null;
+
         let operationResponse: OperationResponse;
 
         let parameters = req.body;
         let ip = req.xip;
-        let request = new Request(code, type, role);
+        let request = new Request(operationCodeStr, requestType, role);
         request.setRequestId(0);
         request.setIP(ip);
         request.setParameters(!parameters ? {} : parameters);
@@ -319,8 +325,9 @@ export class HttpAppHandler {
             operationResponse = await this._onRequestCb(request);
         }
         catch (err) {
-            operationResponse = new OperationResponse(code, 0, request.isEncrypted());
+            operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
             operationResponse.setReturnCode(ReturnCode.InternalServerError);
+            operationResponse.setDebugMessage(err.message);
 
             Debug.logException(err);
         }

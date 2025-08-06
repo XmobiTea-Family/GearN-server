@@ -23,11 +23,7 @@ class LoginBaseOperationRequest extends OperationRequest {
     }
 }
 
-export class LoginBaseRequestHandler extends RequestHandler {
-    public override getCode() {
-        return 0;
-    }
-
+export abstract class LoginBaseRequestHandler extends RequestHandler {
     public override getCommonOperationRequest() {
         return LoginBaseOperationRequest;
     }

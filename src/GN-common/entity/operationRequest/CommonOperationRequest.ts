@@ -7,8 +7,8 @@ export class CommonOperationRequest extends OperationRequest {
 
     private originRequest: Request;
 
-    constructor(operationCode: number, encrypted: boolean, timeout: number = OperationRequest.DefaultTimeOut) {
-        super(operationCode, encrypted, timeout);
+    constructor(operationCode: string, encrypted: boolean) {
+        super(operationCode, encrypted);
 
         this.invalidMembers = [];
     }

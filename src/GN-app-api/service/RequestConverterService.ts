@@ -1695,7 +1695,7 @@ export class RequestConverterService implements IRequestConverterService {
     }
 
     public newOperationRequest(request: Request): OperationRequest {
-        let answer = new CommonOperationRequest(request.getCode(), request.isEncrypted());
+        let answer = new CommonOperationRequest(request.getOperationCode(), request.isEncrypted());
         answer.setOriginRequest(request);
         answer.setRequestId(request.getRequestId());
 

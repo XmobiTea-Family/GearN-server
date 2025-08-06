@@ -2,27 +2,23 @@ import { CodeHelper } from "./../../helper/CodeHelper";
 import { GNHashtable } from "./../../common/GNData";
 
 export class OperationRequest {
-	public static readonly DefaultTimeOut: number = 15;
-
 	private isValid: boolean;
 
 	public isValidRequest(): boolean {
 		return this.isValid;
 	}
 
-	private operationCode: number;
+	private operationCode: string;
 	private requestId: number;
 	private parameters: GNHashtable;
 	private encrypted: boolean;
-	private timeout: number;
 
-	constructor(operationCode: number, encrypted: boolean, timeout: number = OperationRequest.DefaultTimeOut) {
+	constructor(operationCode: string, encrypted: boolean) {
 		this.operationCode = operationCode;
 		this.encrypted = encrypted;
-		this.timeout = timeout;
 	}
 
-	public getOperationCode(): number {
+	public getOperationCode(): string {
 		return this.operationCode;
 	}
 
@@ -36,10 +32,6 @@ export class OperationRequest {
 
 	public isEncrypted(): boolean {
 		return this.encrypted;
-	}
-
-	public getTimeout(): number {
-		return this.timeout;
 	}
 
 	public setRequestId(requestId: number): OperationRequest {
@@ -62,11 +54,6 @@ export class OperationRequest {
 
 	public setEncrypted(encrypted: boolean): OperationRequest {
 		this.encrypted = encrypted;
-		return this;
-	}
-
-	public setTimeout(timeout: number): OperationRequest {
-		this.timeout = timeout;
 		return this;
 	}
 

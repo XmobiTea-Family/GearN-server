@@ -133,7 +133,7 @@ export class SendSocketOperationEventRequestHandler extends MasterPlayerBaseRequ
         }, secretInfo, operationRequest);
     }
 
-    private async execute(request: { userId: string, eventCode: number, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { userId: string, eventCode: string, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SendSocketOperationEvent", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;

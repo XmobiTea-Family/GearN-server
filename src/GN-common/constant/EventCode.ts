@@ -1,8 +1,8 @@
 export class EventCode {
-    public static readonly OnGamePlayerFriendUpdate: number = 1;
-    public static readonly OnCharacterPlayerFriendUpdate: number = 2;
-    public static readonly OnGamePlayerGroupUpdate: number = 3;
-    public static readonly OnGroupMemberUpdate: number = 4;
-    public static readonly OnGroupMessageUpdate: number = 5;
-    public static readonly OnCharacterPlayerGroupUpdate: number = 6;
+    public static readonly OnGamePlayerFriendUpdate: string = "onGamePlayerFriendUpdate";
+    public static readonly OnCharacterPlayerFriendUpdate: string = "onCharacterPlayerFriendUpdate";
+    public static readonly OnGamePlayerGroupUpdate: string = "onGamePlayerGroupUpdate";
+    public static readonly OnGroupMemberUpdate: string = "onGroupMemberUpdate";
+    public static readonly OnGroupMessageUpdate: string = "onGroupMessageUpdate";
+    public static readonly OnCharacterPlayerGroupUpdate: string = "onCharacterPlayerGroupUpdate";
 }

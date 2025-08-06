@@ -8,11 +8,11 @@ import { RequestRole } from "./../../../GN-common/constant/enumType/RequestRole"
 export class RequestController {
 	private handlers: {
 		[k: number]: {
-			[k: number]: IRequestHandler;
+			[k: string]: IRequestHandler;
 		}
 	};
 
-	private requestUnAuthenticatedCodes: number[];
+	private requestUnAuthenticatedCodes: string[];
 
 	private requestConverterService: IRequestConverterService;
 
@@ -20,71 +20,71 @@ export class RequestController {
 		this.requestConverterService = requestConverterService;
 	}
 
-	public getRequestUnAuthenticatedCodes(): number[] {
+	public getRequestUnAuthenticatedCodes(): string[] {
 		return this.requestUnAuthenticatedCodes;
 	}
 
-	public addHandler(type: number, requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
-		if (this.handlers[type] == null) {
-			this.handlers[type] = {};
+	public addHandler(requestType: number, requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
+		if (this.handlers[requestType] == null) {
+			this.handlers[requestType] = {};
 		}
 
-		let allHandler = this.handlers[type];
+		let allHandler = this.handlers[requestType];
 
-		let code = requestHandler.getCode();
-		allHandler[code] = requestHandler;
+		let operationCode = requestHandler.getCode();
+		allHandler[operationCode] = requestHandler;
 
-		if (!onlyAuthenticated) this.requestUnAuthenticatedCodes.push(code);
+		if (!onlyAuthenticated) this.requestUnAuthenticatedCodes.push(operationCode);
 	}
 
-	public removeHandler(type: number, code: number) {
-		if (this.handlers[type] == null) {
-			this.handlers[type] = {};
+	public removeHandler(requestType: number, operationCode: string) {
+		if (this.handlers[requestType] == null) {
+			this.handlers[requestType] = {};
 		}
 
-		let allHandler = this.handlers[type];
+		let allHandler = this.handlers[requestType];
 
-		delete allHandler[code];
+		delete allHandler[operationCode];
 	}
 
 	public removeAllHandlers() {
 		this.handlers = {};
 	}
 
-	public getHandler(type: number, code: number): IRequestHandler {
-		if (this.handlers[type] == null) {
-			this.handlers[type] = {};
+	public getHandler(requestType: number, operationCode: string): IRequestHandler {
+		if (this.handlers[requestType] == null) {
+			this.handlers[requestType] = {};
 		}
 
-		let allHandler = this.handlers[type];
+		let allHandler = this.handlers[requestType];
 
-		return allHandler[code];
+		return allHandler[operationCode];
 	}
 
-	public getAllHandlers(type: number): IRequestHandler[] {
-		if (this.handlers[type] == null) {
-			this.handlers[type] = {};
+	public getAllHandlers(requestType: number): IRequestHandler[] {
+		if (this.handlers[requestType] == null) {
+			this.handlers[requestType] = {};
 		}
 
-		let allHandler = this.handlers[type];
+		let allHandler = this.handlers[requestType];
 		return Object.values(allHandler);
 	}
 
 	public async handleRequest(request: Request): Promise<OperationResponse> {
-		let code = request.getCode();
+		let operationCode = request.getOperationCode();
 		let role = <RequestRole>request.getRole();
 
 		let isAuthenticated = request.isAuthenticated();
 		if (!isAuthenticated && role != RequestRole.Admin && role != RequestRole.Server) {
 			// if the user not authentication
 			// and this request not in unAthenticated
-			if (this.requestUnAuthenticatedCodes.indexOf(code) == -1) {
-				return OperationHelper.newOperationResponseNotAuthorized(code, request.getRequestId(), request.isEncrypted());
+			if (this.requestUnAuthenticatedCodes.indexOf(operationCode) == -1) {
+				return OperationHelper.newOperationResponseNotAuthorized(operationCode, request.getRequestId(), request.isEncrypted());
 			}
 		}
 
-		let type = request.getType();
-		let handler = this.getHandler(type, code);
+		let requestType = request.getRequestType();
+		let handler = this.getHandler(requestType, operationCode);
 		if (handler != null) {
 			let operationRequest = this.requestConverterService.newOperationRequest(request);
 
