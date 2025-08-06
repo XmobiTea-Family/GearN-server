@@ -57,8 +57,6 @@ interface DbConnection {
 }
 
 export class CloudScriptService implements ICloudScriptService {
-    private static readonly ExecuteTimeoutInMs = 12000;
-
     private cloudScriptWorkerDict: Map<string, ChildProcess>;
     private cloudScriptWaitingResponseCallbackDict: Map<string, (cloudScriptResponse: CloudScriptResponse) => void>;
 
@@ -72,6 +70,7 @@ export class CloudScriptService implements ICloudScriptService {
     private gnServerSettingsOptions: GNServerSettingsOptions;
     private dbConnection: DbConnection;
     private gameId: string;
+    private executeTimeoutInMs: number;
 
     private cloudScriptFunctions: Array<{
         version: string,
@@ -85,11 +84,12 @@ export class CloudScriptService implements ICloudScriptService {
         this.cloudScriptWaitingResponseCallbackDict = new Map();
     }
 
-    public init(gameId: string, gnServerSettingsOptions: GNServerSettingsOptions, dbConnection: DbConnection, gnServer: GNServer): void {
+    public init(gameId: string, gnServerSettingsOptions: GNServerSettingsOptions, dbConnection: DbConnection, gnServer: GNServer, executeTimeoutInMs: number): void {
         this.gameId = gameId;
         this.gnServerSettingsOptions = gnServerSettingsOptions;
         this.dbConnection = dbConnection;
         this.gnServer = gnServer;
+        this.executeTimeoutInMs = executeTimeoutInMs;
     }
 
     public setCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>): void {
@@ -193,7 +193,7 @@ export class CloudScriptService implements ICloudScriptService {
                     stats: null,
                     logs: [],
                 });
-            }, CloudScriptService.ExecuteTimeoutInMs);
+            }, thiz.executeTimeoutInMs);
 
             thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
                 if (isResolved) return;

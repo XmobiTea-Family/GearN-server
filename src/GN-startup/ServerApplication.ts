@@ -346,7 +346,7 @@ export class ServerApplication extends BuilderBase {
 			let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemCollection("EventCallback.CloudScript");
 			eventCallbackCloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
 
-			eventCallbackCloudScriptService.init(gnServerSettingsOptions, dbConnection, this.gnServer);
+			eventCallbackCloudScriptService.init(gnServerSettingsOptions, dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
 			eventCallbackCloudScriptService.run();
 		}
 
@@ -377,7 +377,7 @@ export class ServerApplication extends BuilderBase {
 
 				{
 					let cloudScriptService = <CloudScriptService>this.gnServer.getCloudScriptService(gameId);
-					cloudScriptService.init(gameId, gnServerSettingsOptions, dbConnection, this.gnServer);
+					cloudScriptService.init(gameId, gnServerSettingsOptions, dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
 					cloudScriptService.run();
 				}
 
@@ -392,7 +392,7 @@ export class ServerApplication extends BuilderBase {
 			let countryRegionCollection = this.gnServer.getDatabase().systemCollection("CountryRegion");
 			let userIPAddressCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer.IPAddress");
 
-			(this.gnServer.getCountryIPDetailService() as CountryIPDetailService).init(this.otherSettings.getIPApiUrl(), countryRegionCollection, userIPAddressCollection);
+			(this.gnServer.getCountryIPDetailService() as CountryIPDetailService).init(this.getOtherSettings().getIPApiUrl(), countryRegionCollection, userIPAddressCollection);
 		}
 
 	}

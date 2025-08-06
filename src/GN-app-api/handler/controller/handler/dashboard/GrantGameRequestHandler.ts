@@ -383,7 +383,7 @@ export class GrantGameRequestHandler extends RequestHandler {
                         dbName: dbConnection.dbName,
                         url: dbConnection.url,
                         options: dbConnection.options,
-                    }, this.gnServer);
+                    }, this.gnServer, (oldCloudScriptService as any).executeTimeoutInMs);
                     cloudScriptService.run();
                 }
             }

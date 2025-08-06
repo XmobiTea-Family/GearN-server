@@ -25,7 +25,7 @@ class ExecuteFunctionOperationRequest extends OperationRequest {
     functionParameters?: object;
 
     @StringDataMember({ code: GNParameterCode.Version, minLength: 7, maxLength: 7, isOptional: true })
-    version: string;
+    version?: string;
 
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;

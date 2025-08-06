@@ -138,7 +138,6 @@ export interface IEventCallbackCloudScriptService {
 }
 
 export class EventCallbackCloudScriptService implements IEventCallbackCloudScriptService {
-	private static readonly ExecuteTimeoutInMs = 12000;
 
 	private static readonly SystemExecuteTimeoutInMs = 12000000;
 	private static readonly OnEveryMinute = "system_OnEveryMinute";
@@ -154,6 +153,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	private gnServer: GNServer;
 	private gnServerSettingsOptions: GNServerSettingsOptions;
 	private dbConnection: DbConnection;
+    private executeTimeoutInMs: number;
 
 	private cloudScriptFunctionDict = new Map<string, EventCallbackCloudScriptFunction>();
 
@@ -200,10 +200,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		return answer;
 	}
 
-	public init(gnServerSettingsOptions: GNServerSettingsOptions, dbConnection: DbConnection, gnServer: GNServer): void {
+	public init(gnServerSettingsOptions: GNServerSettingsOptions, dbConnection: DbConnection, gnServer: GNServer, executeTimeoutInMs: number): void {
 		this.gnServerSettingsOptions = gnServerSettingsOptions;
 		this.dbConnection = dbConnection;
 		this.gnServer = gnServer;
+		this.executeTimeoutInMs = executeTimeoutInMs;
 
 		let thiz = this;
 
@@ -555,7 +556,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 					stats: null,
 					logs: [],
 				});
-			}, EventCallbackCloudScriptService.ExecuteTimeoutInMs);
+			}, thiz.executeTimeoutInMs);
 
 			thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
 				if (isResolved) return;
@@ -683,7 +684,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 					stats: null,
 					logs: [],
 				});
-			}, EventCallbackCloudScriptService.ExecuteTimeoutInMs);
+			}, thiz.executeTimeoutInMs);
 
 			thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
 				if (isResolved) return;
@@ -793,7 +794,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 					stats: null,
 					logs: [],
 				});
-			}, EventCallbackCloudScriptService.ExecuteTimeoutInMs);
+			}, thiz.executeTimeoutInMs);
 
 			thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
 				if (isResolved) return;
@@ -918,7 +919,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			if (cloudScriptWorker != null) {
 				cloudScriptWorker.kill("SIGKILL");
 			}
-		}, EventCallbackCloudScriptService.ExecuteTimeoutInMs + 10000);
+		}, this.executeTimeoutInMs + 10000);
 
 		this.loadCloudScriptFunctionWorker(type, version, fullScriptJs);
 
@@ -979,7 +980,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			if (cloudScriptWorker != null) {
 				cloudScriptWorker.kill("SIGKILL");
 			}
-		}, EventCallbackCloudScriptService.ExecuteTimeoutInMs + 10000);
+		}, this.executeTimeoutInMs + 10000);
 
 		this.loadCloudScriptFunctionWorker(type, version, fullScriptJs);
 

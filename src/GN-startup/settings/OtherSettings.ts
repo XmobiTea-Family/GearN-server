@@ -4,6 +4,7 @@ abstract class BuilderBase {
 	protected headerIP: string;
 	protected idTypeCase: number;
 	protected ipApiUrl: string;
+    protected cloudScriptExecuteTimeoutInMs: number;
 
 	public getHeaderIP(): string {
 		return this.headerIP;
@@ -15,6 +16,10 @@ abstract class BuilderBase {
 
 	public getIPApiUrl(): string {
 		return this.ipApiUrl;
+	}
+
+	public getCloudScriptExecuteTimeoutInMs(): number {
+		return this.cloudScriptExecuteTimeoutInMs;
 	}
 
 	constructor() { }
@@ -38,12 +43,18 @@ class Builder extends BuilderBase implements IBuilder<OtherSettings> {
 		return this;
 	}
 
+    public setCloudScriptExecuteTimeoutInMs(cloudScriptExecuteTimeoutInMs: number): Builder {
+		this.cloudScriptExecuteTimeoutInMs = cloudScriptExecuteTimeoutInMs;
+		return this;
+	}
+
 	constructor() {
 		super();
 
 		this.headerIP = "";
 		this.idTypeCase = 0;
 		this.ipApiUrl = "";
+		this.cloudScriptExecuteTimeoutInMs = 15000;
 	}
 
 	public build() {
@@ -59,6 +70,7 @@ export class OtherSettings extends BuilderBase {
 		this.headerIP = builder.getHeaderIP();
 		this.idTypeCase = builder.getIdTypeCase();
 		this.ipApiUrl = builder.getIPApiUrl();
+		this.cloudScriptExecuteTimeoutInMs = builder.getCloudScriptExecuteTimeoutInMs();
 	}
 
 	public static Builder(): Builder {

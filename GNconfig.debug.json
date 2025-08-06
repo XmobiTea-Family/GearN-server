@@ -61,7 +61,8 @@
 		"otherSettings": {
 			"headerIP": "X-Real-IP",
 			"idTypeCase": 0,
-			"ipApiUrl": "https://ipdetail.changx.dev/json"
+			"ipApiUrl": "https://ipdetail.gearn.net/json",
+            "cloudScriptExecuteTimeoutInMs": 15000
 		},
 		"logSettings": {
 			"logToConsoleEnable": true,

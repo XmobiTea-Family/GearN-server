@@ -141,7 +141,8 @@ init_create_GNConfigDebugJson() {
 		"otherSettings": {
 			"headerIP": "X-Real-IP",
 			"idTypeCase": 0,
-			"ipApiUrl": "http://127.0.0.1:2555/json"
+			"ipApiUrl": "https://ipdetail.gearn.net/json",
+            "cloudScriptExecuteTimeoutInMs": 15000
 		},
 
 		"logSettings": {
