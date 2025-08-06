@@ -334,6 +334,7 @@ export class ServerApplication extends BuilderBase {
 		let dbConnection = {
 			dbName: this.databaseSettings.getDatabaseName(),
 			url: this.databaseSettings.getConnectionString(),
+			logUrl: this.databaseSettings.getLogConnectionString(),
 			options: this.databaseSettings.getOptions(),
 		}
 
@@ -350,7 +351,7 @@ export class ServerApplication extends BuilderBase {
 			eventCallbackCloudScriptService.run();
 		}
 
-		let postEventCallbackCollection = this.gnServer.getDatabase().systemCollection("EventCallback.Post");
+		let postEventCallbackCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.PostLog");
 		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setEventCallbackCollection(postEventCallbackCollection);
 
 		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
@@ -830,13 +831,13 @@ export class ServerApplication extends BuilderBase {
 
 		{
 			{
-				await this.gnServer.getDatabase().createCollection("Runtime.MasterPlayer.CurrencyLog", {
+				await this.gnServer.getDatabase().logCreateCollection("Runtime.MasterPlayer.CurrencyLog", {
 					capped: true,
 					size: 5120000000,
 					max: 100000000
 				});
 
-				let currencyLogCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.CurrencyLog");
+				let currencyLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.CurrencyLog");
 				await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 				await currencyLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
 				
@@ -844,13 +845,13 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
-				await this.gnServer.getDatabase().createCollection("Runtime.MasterPlayer.StatisticsLog", {
+				await this.gnServer.getDatabase().logCreateCollection("Runtime.MasterPlayer.StatisticsLog", {
 					capped: true,
 					size: 5120000000,
 					max: 100000000
 				});
 
-				let statisticsLogCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsLog");
+				let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.StatisticsLog");
 				await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 				await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
 			
@@ -882,7 +883,7 @@ export class ServerApplication extends BuilderBase {
 				await this.gnServer.getDatabase().createCollection("System.Analytics", {
 					capped: true,
 					size: 5120000,
-					max: 100000
+					max: 105120
 				});
 
 				let analyticsCollection = this.gnServer.getDatabase().systemCollection("Analytics");
@@ -973,13 +974,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
 
@@ -987,13 +988,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
 
@@ -1019,13 +1020,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
 
@@ -1033,13 +1034,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
 
@@ -1064,13 +1065,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Group.CurrencyLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.CurrencyLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.CurrencyLog", gameId);
+					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
 
@@ -1078,13 +1079,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Group.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
 
@@ -1122,13 +1123,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ itemId: 1, key: 1, _id: -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
 
@@ -1153,13 +1154,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let storeInventoryLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
+					let storeInventoryLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
 					await storeInventoryLogCollection.createIndex({ storeId: 1, id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
 					await storeInventoryLogCollection.createIndex({ id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
 					await storeInventoryLogCollection.createIndex({ storeReceiveType: -1, _id: -1 }, { background: true, name: "storeReceiveType_-1_id_-1" });
@@ -1200,13 +1201,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CloudScript.Log", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CloudScript.Log", {
 						capped: true,
 						size: 5120000,
 						max: 100000
 					});
 
-					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CloudScript.Log", gameId);
+					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 					await cloudScriptFunctionLogCollection.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate-1" });
 
 					Debug.log("create some indexes on Runtime." + gameId + ".CloudScript.Log success.");
@@ -1304,25 +1305,25 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
 				}
@@ -1344,25 +1345,25 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
 				}
@@ -1383,25 +1384,25 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Group.CurrencyLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.CurrencyLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.CurrencyLog", gameId);
+					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Group.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
 				}
@@ -1433,13 +1434,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsLog", gameId);
+					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ itemId: 1, key: 1, _id: -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
 				}
@@ -1460,13 +1461,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
 						capped: true,
 						size: 5120000000,
 						max: 100000000
 					});
 
-					let storeInventoryLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
+					let storeInventoryLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
 					await storeInventoryLogCollection.createIndex({ storeId: 1, id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
 					await storeInventoryLogCollection.createIndex({ id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
 					await storeInventoryLogCollection.createIndex({ storeReceiveType: -1, _id: -1 }, { background: true, name: "storeReceiveType_-1_id_-1" });
@@ -1505,13 +1506,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CloudScript.Log", {
+					await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CloudScript.Log", {
 						capped: true,
 						size: 5120000,
 						max: 100000
 					});
 
-					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CloudScript.Log", gameId);
+					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 					await cloudScriptFunctionLogCollection.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate-1" });
 
 					Debug.log("create some indexes on Runtime." + gameId + ".CloudScript.Log success.");
@@ -1598,13 +1599,13 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
-			await this.gnServer.getDatabase().createCollection("System.EventCallback.Post", {
+			await this.gnServer.getDatabase().logCreateCollection("System.EventCallback.PostLog", {
 				capped: true,
 				size: 512000000,
 				max: 100000
 			});
 
-			// let postEventCallbackPostCollection = this.gnServer.getDatabase().systemCollection("EventCallback.Post");
+			// let postEventCallbackPostCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.PostLog");
 			// await postEventCallbackPostCollection.createIndex({ eventName: 1, _id: -1 }, { background: true, name: "eventName_1_id_-1" });
 
 			Debug.log("create some indexes for System.EventCallback.Post success.");
@@ -1797,7 +1798,7 @@ export class ServerApplication extends BuilderBase {
 					let cloudScriptService = new CloudScriptService();
 
 					let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemGameCollection("CloudScript.Function", gameId);
-					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CloudScript.Log", gameId);
+					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 
 					cloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
 					cloudScriptService.setCloudScriptFunctionLogCollection(cloudScriptFunctionLogCollection);
@@ -1839,10 +1840,11 @@ export class ServerApplication extends BuilderBase {
 		// settings database
 		{
 			let connectionString = this.databaseSettings.getConnectionString();
+			let logConnectionString = this.databaseSettings.getLogConnectionString();
 			let databaseName = this.databaseSettings.getDatabaseName();
 
 			let options = this.databaseSettings.getOptions();
-			gnServer.getDatabase().init(connectionString, databaseName, options);
+			gnServer.getDatabase().init(connectionString, logConnectionString, databaseName, options);
 		}
 
 		return gnServer;

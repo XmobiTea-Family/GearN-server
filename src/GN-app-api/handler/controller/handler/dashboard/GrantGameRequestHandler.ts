@@ -133,25 +133,25 @@ export class GrantGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+            let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
             await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
             await currencyLogCollection.createIndex({ userId: 1, key: 1, "_id": -1 }, { background: true, name: "userId_1_key_1_id_-1" });
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
             await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
         }
@@ -170,25 +170,25 @@ export class GrantGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+            let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
             await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
             await currencyLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
             await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
         }
@@ -207,25 +207,25 @@ export class GrantGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Group.CurrencyLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.CurrencyLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let currencyLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.CurrencyLog", gameId);
+            let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.CurrencyLog", gameId);
             await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
             await currencyLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Group.StatisticsLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.StatisticsLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.StatisticsLog", gameId);
             await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
         }
@@ -255,13 +255,13 @@ export class GrantGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let statisticsLogCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsLog", gameId);
+            let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
             await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
             await statisticsLogCollection.createIndex({ itemId: 1, key: 1, _id: -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
         }
@@ -280,13 +280,13 @@ export class GrantGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
                 capped: true,
                 size: 5120000000,
                 max: 100000000
             });
 
-            let storeInventoryLogCollection = this.gnServer.getDatabase().runtimeGameCollection("StoreInventory.StoreLog", gameId);
+            let storeInventoryLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
             await storeInventoryLogCollection.createIndex({ storeId: 1, id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
             await storeInventoryLogCollection.createIndex({ id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
             await storeInventoryLogCollection.createIndex({ storeReceiveType: -1, _id: -1 }, { background: true, name: "storeReceiveType_-1_id_-1" });
@@ -319,13 +319,13 @@ export class GrantGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".CloudScript.Log", {
+            await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CloudScript.Log", {
                 capped: true,
                 size: 5120000,
                 max: 100000
             });
 
-            let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CloudScript.Log", gameId);
+            let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
             await cloudScriptFunctionLogCollection.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate-1" });
         }
 
@@ -368,7 +368,7 @@ export class GrantGameRequestHandler extends RequestHandler {
                 let cloudScriptService = new CloudScriptService();
 
                 let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemGameCollection("CloudScript.Function", gameId);
-                let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().runtimeGameCollection("CloudScript.Log", gameId);
+                let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 
                 cloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
                 cloudScriptService.setCloudScriptFunctionLogCollection(cloudScriptFunctionLogCollection);

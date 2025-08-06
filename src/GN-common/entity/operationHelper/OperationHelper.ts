@@ -13,32 +13,56 @@ import { GNHashtable } from "./../../common/GNData";
 
 export class OperationHelper {
 
-	private static invalidMemberData(operationResponse: OperationResponse): (string | number)[][] {
-		let anwser = [];
-
-		let invalidMembers = operationResponse.getInvalidMembers();
-		if (invalidMembers != null) {
-			for (let i = 0; i < invalidMembers.length; i++) {
-				let invalidMember = invalidMembers[i];
-				anwser.push([invalidMember.code, invalidMember.invalidMemberType as number]);
-			}
+	public static toResponseSocketData(operationResponse: OperationResponse): {
+		returnCode: number,
+		parameters: {},
+		invalidRequestParameters: (string | number)[][],
+		debugMessage: string,
+		responseId: number,
+	} {
+		return {
+			returnCode: operationResponse.getReturnCode(),
+			parameters: operationResponse.getParameters()?.toData(),
+			invalidRequestParameters: OperationHelper.invalidMemberData(operationResponse),
+			debugMessage: operationResponse.getDebugMessage(),
+			responseId: operationResponse.getResponseId(),
 		}
-
-		return anwser;
 	}
 
-	public static toResponseSocketData(operationResponse: OperationResponse): [number, any, number] {
-		return [operationResponse.getReturnCode(), operationResponse.getReturnCode() == ReturnCode.Ok ? operationResponse.getParameters().toData() : operationResponse.getReturnCode() == ReturnCode.InvalidRequestParameters ? OperationHelper.invalidMemberData(operationResponse) : operationResponse.getDebugMessage(), operationResponse.getResponseId()];
-	}
-
-	public static toResponseHttpData(operationResponse: OperationResponse): [number, any] {
-		return [operationResponse.getReturnCode(), operationResponse.getReturnCode() == ReturnCode.Ok ? operationResponse.getParameters().toData() : operationResponse.getReturnCode() == ReturnCode.InvalidRequestParameters ? OperationHelper.invalidMemberData(operationResponse) : operationResponse.getDebugMessage()];
+	public static toResponseHttpData(operationResponse: OperationResponse): {
+		returnCode: number,
+		parameters: {},
+		invalidRequestParameters: (string | number)[][],
+		debugMessage: string,
+	} {
+		return {
+			returnCode: operationResponse.getReturnCode(),
+			parameters: operationResponse.getParameters()?.toData(),
+			invalidRequestParameters: OperationHelper.invalidMemberData(operationResponse),
+			debugMessage: operationResponse.getDebugMessage(),
+		}
 	}
 
 	public static toDataGNHashtable(gnHashtable: GNHashtable) {
 		if (gnHashtable == null) return null;
 
 		return gnHashtable.toData();
+	}
+
+	private static invalidMemberData(operationResponse: OperationResponse): (string | number)[][] {
+		let invalidMembers = operationResponse.getInvalidMembers();
+		if (invalidMembers != null) {
+			let anwser = [];
+
+			for (let i = 0; i < invalidMembers.length; i++) {
+				let invalidMember = invalidMembers[i];
+				anwser.push([invalidMember.code, invalidMember.invalidMemberType as number]);
+			}
+
+			return anwser;
+		}
+
+		return null;
 	}
 
 	public static toDataOperationResponse(operationResponse: OperationResponse) {
@@ -63,8 +87,8 @@ export class OperationHelper {
 
 	public static toDataFromRequest(request: Request) {
 		return {
-			code: CodeHelper.getOperationCodeName(request.getCode()),
-			type: RequestType[<RequestType>request.getType()],
+			code: CodeHelper.getOperationCodeName(request.getOperationCode()),
+			type: RequestType[<RequestType>request.getRequestType()],
 			role: RequestRole[<RequestRole>request.getRole()],
 			ip: request.getIP(),
 			secretInfo: OperationHelper.toDataSecretInfo(request.getSecretInfo()),
@@ -89,11 +113,11 @@ export class OperationHelper {
 		}
 	}
 
-	public static newOperationResponse(operationCode: number, responseId: number, encrypted: boolean): OperationResponse {
+	public static newOperationResponse(operationCode: string, responseId: number, encrypted: boolean): OperationResponse {
 		return new OperationResponse(operationCode, responseId, encrypted);
 	}
 
-	public static newOperationResponseInvalid(operationCode: number, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
+	public static newOperationResponseInvalid(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
 		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
 
 		operationInvalid.setReturnCode(ReturnCode.OperationInvalid);
@@ -102,7 +126,7 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationResponseInvalidRequestParameters(operationCode: number, responseId: number, invalidMembers: InvalidMember[], encrypted: boolean, debugMessage?: string): OperationResponse {
+	public static newOperationResponseInvalidRequestParameters(operationCode: string, responseId: number, invalidMembers: InvalidMember[], encrypted: boolean, debugMessage?: string): OperationResponse {
 		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
 
 		operationInvalid.setReturnCode(ReturnCode.InvalidRequestParameters);
@@ -113,7 +137,7 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationResponseInternalServerError(operationCode: number, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
+	public static newOperationResponseInternalServerError(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
 		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
 
 		operationInvalid.setReturnCode(ReturnCode.InternalServerError);
@@ -122,7 +146,7 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationResponseNotAuthorized(operationCode: number, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
+	public static newOperationResponseNotAuthorized(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
 		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
 
 		operationInvalid.setReturnCode(ReturnCode.OperationNotAuthorized);
@@ -131,7 +155,7 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationNotAllowError(operationCode: number, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
+	public static newOperationNotAllowError(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
 		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
 
 		operationInvalid.setReturnCode(ReturnCode.OperationNotAllow);
@@ -140,8 +164,14 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static toEventSocketData(operationEvent: OperationEvent): [number, {}] {
-		return [operationEvent.getEventCode(), operationEvent.getParameters() == null ? null : operationEvent.getParameters().toData()];
+	public static toEventSocketData(operationEvent: OperationEvent): {
+		eventCode: string,
+		parameters: {}
+	} {
+		return {
+			eventCode: operationEvent.getEventCode(),
+			parameters: OperationHelper.toDataGNHashtable(operationEvent.getParameters())
+		}
 	}
 
 }

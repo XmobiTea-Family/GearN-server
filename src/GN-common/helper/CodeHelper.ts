@@ -5,16 +5,16 @@ import { ReturnCode } from "./../constant/ReturnCode";
 export class CodeHelper {
     private static readonly UnknownCode = "Unknown";
 
-    private static operationCodeDic: { [k: number]: string };
-    private static eventCodeDic: { [k: number]: string };
+    private static operationCodeDic: { [k: string]: string };
+    private static eventCodeDic: { [k: string]: string };
     private static returnCodeDic: { [k: number]: string };
 
-    public static getOperationCodeName(operationCode: number): string {
+    public static getOperationCodeName(operationCode: string): string {
         let operationCodeName = this.operationCodeDic[operationCode];
         return operationCodeName ? operationCodeName : this.UnknownCode;
     }
 
-    public static getEventCodeName(eventCode: number): string {
+    public static getEventCodeName(eventCode: string): string {
         let eventCodeName = this.eventCodeDic[eventCode];
         return eventCodeName ? eventCodeName : this.UnknownCode;
     }

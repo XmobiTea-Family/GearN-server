@@ -3,17 +3,17 @@ import { GNHashtable } from "./../../common/GNData";
 
 export class OperationEvent {
 
-	private eventCode: number;
+	private eventCode: string;
 	private parameters: GNHashtable;
 	private encrypted: boolean;
 
-	constructor(eventCode: number, parameters: GNHashtable = null, encrypted: boolean = true) {
+	constructor(eventCode: string, parameters: GNHashtable = null, encrypted: boolean = true) {
 		this.eventCode = eventCode;
 		this.parameters = parameters;
 		this.encrypted = encrypted;
 	}
 
-	public getEventCode(): number {
+	public getEventCode(): string {
 		return this.eventCode;
 	}
 

@@ -12,7 +12,7 @@ export abstract class RequestHandler implements IRequestHandler {
 	protected gnServer: GNServer;
 	protected requestConverterService: IRequestConverterService;
 
-	public abstract getCode(): number;
+	public abstract getCode(): string;
 
 	public abstract getCommonOperationRequest(): Constructor<OperationRequest>;
 

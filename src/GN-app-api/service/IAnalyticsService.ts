@@ -50,6 +50,15 @@ export interface BigAnalyticsItem {
         indexes: number;
     };
 
+    logDatabaseSystem: {
+        fsTotalSizeInBytes: number;
+        fsUsedSizeInBytes: number;
+        totalSizeInBytes: number;
+        collections: number;
+        objects: number;
+        indexes: number;
+    };
+
     requestComplete: {
         eventName: string;
         results: 

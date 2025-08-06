@@ -931,7 +931,7 @@ export class GNServer {
 		tempAnalyticsService.run();
 		this.analyticsService = tempAnalyticsService;
 
-		this.postEventCallbackCollection = this.xDatabase.systemCollection("EventCallback.Post");
+		this.postEventCallbackCollection = this.xDatabase.logSystemCollection("EventCallback.PostLog");
 
         this.getHttpApp().getClusterHandler().onEvent("sendEventTo", data => {
 			this.executeSendEventTo(data);
@@ -981,19 +981,23 @@ export class GNServer {
 	}
 
 	public addCustomHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true): void {
-		this.requestController.addHandler(<number>RequestType.Custom, requestHandler, onlyAuthenticated);
+		this.requestController.addHandler(RequestType.Custom, requestHandler, onlyAuthenticated);
 	}
 
-	public getCustomHandler(code: number): IRequestHandler {
-		return this.requestController.getHandler(<number>RequestType.Custom, code);
+	public getCustomHandler(operationCode: string): IRequestHandler {
+		return this.requestController.getHandler(RequestType.Custom, operationCode);
 	}
 
-	public removeCustomHandler(code: number): void {
-		return this.requestController.removeHandler(<number>RequestType.Custom, code);
+	public removeCustomHandler(operationCode: string): void {
+		return this.requestController.removeHandler(RequestType.Custom, operationCode);
 	}
 
 	public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
 		this.xDatabase.createIndex(collectionName, index, options);
+	}
+
+	public logCreateIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
+		this.xDatabase.logCreateIndex(collectionName, index, options);
 	}
 
 	public getConfigService(gameId: string): IConfigService {
@@ -1125,7 +1129,7 @@ export class GNServer {
 	private executeSendEventTo(data: {
 		userId: string,
 		operationEvent: {
-			eventCode: number,
+			eventCode: string,
 			encrypted: boolean,
 			parameters: {}
 		},
@@ -1165,7 +1169,7 @@ export class GNServer {
     private executeSendEventToRoom(data: {
 		roomId: string,
 		operationEvent: {
-			eventCode: number,
+			eventCode: string,
 			encrypted: boolean,
 			parameters: {}
 		},
@@ -1205,7 +1209,7 @@ export class GNServer {
 	private executeSendEventToMoreUser(data: {
 		userIds: string[],
 		operationEvent: {
-			eventCode: number,
+			eventCode: string,
 			encrypted: boolean,
 			parameters: {}
 		},
@@ -1241,7 +1245,7 @@ export class GNServer {
 
 	private executeSendEventToAllPlayer(data: {
 		operationEvent: {
-			eventCode: number,
+			eventCode: string,
 			encrypted: boolean,
 			parameters: {}
 		},

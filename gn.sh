@@ -415,7 +415,7 @@ export class EventCodeExtensions extends EventCode {
     echo 'import { OperationCode } from "@xmobitea/gn-server";
 
 export class OperationCodeExtensions extends OperationCode {
-    public static readonly Test: number = 50;
+    public static readonly Test: number = 500;
 }' > OperationCode.ext.ts
     echo 'create OperationCode.ext.ts success'
 

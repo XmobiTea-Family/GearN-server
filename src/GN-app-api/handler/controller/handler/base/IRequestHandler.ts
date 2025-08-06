@@ -5,7 +5,7 @@ import { Constructor } from "./../../../../service/IRequestConverterService";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 export interface IRequestHandler {
-	getCode(): number;
+	getCode(): string;
 
 	getCommonOperationRequest(): Constructor<OperationRequest>;
 

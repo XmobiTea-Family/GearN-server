@@ -630,6 +630,7 @@ export class GNParameterCode {
 	public static readonly Objects: string = "objects";
 	public static readonly Indexes: string = "indexes";
 	public static readonly DatabaseSystem: string = "databaseSystem";
+	public static readonly LogDatabaseSystem: string = "logDatabaseSystem";
 
 	public static readonly Cost: string = "cost";
 	public static readonly MonthlyCost: string = "monthlyCost";

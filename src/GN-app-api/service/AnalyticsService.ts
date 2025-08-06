@@ -57,6 +57,15 @@ export class AnalyticsService implements IAnalyticsService {
         indexes: number;
     };
 
+    private currentLogDatabaseSystem: {
+        fsTotalSizeInBytes: number;
+        fsUsedSizeInBytes: number;
+        totalSizeInBytes: number;
+        collections: number;
+        objects: number;
+        indexes: number;
+    };
+
     private currentRequestComplete: {
         eventName: string;
         results: {
@@ -112,6 +121,7 @@ export class AnalyticsService implements IAnalyticsService {
                 operationSystem: this.currentOperationSystem,
                 requestComplete: this.currentRequestComplete,
                 databaseSystem: this.currentDatabaseSystem,
+                logDatabaseSystem: this.currentLogDatabaseSystem,
 
                 cost: this.currentCost,
                 monthlyCost: this.currentMonthlyCost,
@@ -145,6 +155,7 @@ export class AnalyticsService implements IAnalyticsService {
                     operationSystem: null,
                     requestComplete: null,
                     databaseSystem: null,
+                    logDatabaseSystem: null,
 
                     cost: null,
                     monthlyCost: null,
@@ -173,6 +184,7 @@ export class AnalyticsService implements IAnalyticsService {
                     operationSystem: result["operationSystem"],
                     requestComplete: result["requestComplete"],
                     databaseSystem: result["databaseSystem"],
+                    logDatabaseSystem: result["logDatabaseSystem"],
 
                     cost: result["cost"],
                     monthlyCost: result["monthlyCost"],
@@ -446,7 +458,7 @@ export class AnalyticsService implements IAnalyticsService {
         }
 
         // {
-        //     let eventCallbackPostCollection = this.gnServer.getDatabase().systemCollection("EventCallback.Post");
+        //     let eventCallbackPostCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.Post");
 
         //     let results = await eventCallbackPostCollection.aggregate([
         //         {
@@ -501,7 +513,22 @@ export class AnalyticsService implements IAnalyticsService {
         }
 
         {
-            let eventCallbackPostCollection = this.gnServer.getDatabase().systemCollection("EventCallback.Post");
+            let stats = await this.gnServer.getDatabase().getLogDb().stats();
+
+            if (stats.ok == 1) {
+                this.currentLogDatabaseSystem = {
+                    collections: stats.collections,
+                    fsTotalSizeInBytes: stats.fsTotalSize,
+                    fsUsedSizeInBytes: stats.fsUsedSize,
+                    indexes: stats.indexes,
+                    objects: stats.objects,
+                    totalSizeInBytes: stats.totalSize,
+                }
+            }
+        }
+
+        {
+            let eventCallbackPostCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.PostLog");
 
             let now = xDatetime.getCurrentDate();
             let month0h = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -650,6 +677,7 @@ export class AnalyticsService implements IAnalyticsService {
             operationSystem: this.currentOperationSystem,
             requestComplete: this.currentRequestComplete,
             databaseSystem: this.currentDatabaseSystem,
+            logDatabaseSystem: this.currentLogDatabaseSystem,
 
             cost: this.currentCost,
             monthlyCost: this.currentMonthlyCost,

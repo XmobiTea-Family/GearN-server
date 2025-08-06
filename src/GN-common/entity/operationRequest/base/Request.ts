@@ -2,8 +2,8 @@ import { AuthInfo } from "./../../AuthInfo";
 import { SecretInfo } from "./../../SecretInfo";
 
 export class Request {
-	private code: number;
-	private type: number;
+	private operationCode: string;
+	private requestType: number;
 	private role: number;
 	private requestId: number = -1;
 	private authInfo: AuthInfo = null;
@@ -12,9 +12,9 @@ export class Request {
 	private parameters: { [k: string]: any } = {};
 	private encrypted: boolean;
 
-	constructor(code: number, type: number, role: number) {
-		this.code = code;
-		this.type = type;
+	constructor(operationCode: string, requestType: number, role: number) {
+		this.operationCode = operationCode;
+		this.requestType = requestType;
 		this.role = role;
 	}
 
@@ -42,12 +42,12 @@ export class Request {
 		this.encrypted = encrypted;
 	}
 
-	public getCode(): number {
-		return this.code;
+	public getOperationCode(): string {
+		return this.operationCode;
 	}
 
-	public getType(): number {
-		return this.type;
+	public getRequestType(): number {
+		return this.requestType;
 	}
 
 	public getRole(): number {

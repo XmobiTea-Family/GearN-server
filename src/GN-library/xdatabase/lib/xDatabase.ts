@@ -30,14 +30,30 @@ export class xDatabase {
 	private client: mongoDB.MongoClient;
 	private db: mongoDB.Db;
 
+	private logClient: mongoDB.MongoClient;
+	private logDb: mongoDB.Db;
+
 	public getDb(): mongoDB.Db {
 		return this.db;
 	}
 
-	public init(url: string, dbName: string, options?: mongoDB.MongoClientOptions): void {
+	public getLogDb(): mongoDB.Db {
+		return this.logDb;
+	}
+
+	public init(url: string, logUrl: string, dbName: string, options?: mongoDB.MongoClientOptions): void {
 		this.client = new mongoDB.MongoClient(url, options);
 
 		this.db = this.client.db(dbName);
+
+		if (!logUrl || logUrl == "" || logUrl == url) {
+			this.logClient = this.client;
+			this.logDb = this.db;
+		}
+		else {
+			this.logClient = new mongoDB.MongoClient(logUrl, options);
+			this.logDb = this.logClient.db(dbName);
+		}
 	}
 
 	public run(onMongoRunSuccess?: OnRunSuccess, onMongoRunError?: OnMongoRunError): void {
@@ -48,40 +64,88 @@ export class xDatabase {
 		});
 	}
 
-	public runtimeCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.RUNTIME + collectionName);
+	public runtimeCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+		return this.collection<TSchema>(xDatabase.RUNTIME + collectionName);
 	}
 
-	public metaCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.META + collectionName);
+	public metaCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+		return this.collection<TSchema>(xDatabase.META + collectionName);
 	}
 
-	public systemCollection(collectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.SYSTEM + collectionName);
+	public systemCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+		return this.collection<TSchema>(xDatabase.SYSTEM + collectionName);
 	}
 
-	public runtimeGameCollection(collectionName: string, gameId: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
+	public runtimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+		return this.collection<TSchema>(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
 	}
 
-	public metaGameCollection(collectionName: string, gameId: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.META + gameId + xDatabase.DOT + collectionName);
+	public metaGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+		return this.collection<TSchema>(xDatabase.META + gameId + xDatabase.DOT + collectionName);
 	}
 
-	public systemGameCollection(collectionName: string, gameId: string): mongoDB.Collection<mongoDB.Document> {
-		return this.collection(xDatabase.SYSTEM + gameId + xDatabase.DOT + collectionName);
+	public systemGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+		return this.collection<TSchema>(xDatabase.SYSTEM + gameId + xDatabase.DOT + collectionName);
 	}
 
-	public collection(fullCollectionName: string): mongoDB.Collection<mongoDB.Document> {
-		return this.db.collection(fullCollectionName);
+	public collection<TSchema extends mongoDB.Document = mongoDB.Document>(fullCollectionName: string): mongoDB.Collection<TSchema> {
+		return this.db.collection<TSchema>(fullCollectionName);
 	}
 
-	public createCollection(collectionName: string, options?: mongoDB.CreateCollectionOptions) {
-		return this.db.createCollection(collectionName, options)
+	public createCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, options?: mongoDB.CreateCollectionOptions) {
+		return this.db.createCollection<TSchema>(collectionName, options)
 	}
 
-	public createIndex(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
-		let collection = this.collection(collectionName);
+	public createIndex<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
+		let collection = this.collection<TSchema>(collectionName);
+
+		let createIndexesOptions: mongoDB.CreateIndexesOptions = {
+			background: true,
+		};
+
+		if (options != null) {
+			if (options.expireAfterSeconds != null) createIndexesOptions.expireAfterSeconds = options.expireAfterSeconds;
+			if (options.sparse != null) createIndexesOptions.sparse = options.sparse;
+			if (options.unique != null) createIndexesOptions.unique = options.unique;
+		}
+
+		collection.createIndex(index, createIndexesOptions);
+	}
+
+	public logRuntimeCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+		return this.logCollection<TSchema>(xDatabase.RUNTIME + collectionName);
+	}
+
+	public logMetaCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+		return this.logCollection<TSchema>(xDatabase.META + collectionName);
+	}
+
+	public logSystemCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+		return this.logCollection<TSchema>(xDatabase.SYSTEM + collectionName);
+	}
+
+	public logRuntimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+		return this.logCollection<TSchema>(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
+	}
+
+	public logMetaGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+		return this.logCollection<TSchema>(xDatabase.META + gameId + xDatabase.DOT + collectionName);
+	}
+
+	public logSystemGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+		return this.logCollection<TSchema>(xDatabase.SYSTEM + gameId + xDatabase.DOT + collectionName);
+	}
+
+	public logCollection<TSchema extends mongoDB.Document = mongoDB.Document>(fullCollectionName: string): mongoDB.Collection<TSchema> {
+		return this.logDb.collection<TSchema>(fullCollectionName);
+	}
+
+	public logCreateCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, options?: mongoDB.CreateCollectionOptions) {
+		return this.logDb.createCollection<TSchema>(collectionName, options)
+	}
+
+	public logCreateIndex<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
+		let collection = this.logCollection<TSchema>(collectionName);
 
 		let createIndexesOptions: mongoDB.CreateIndexesOptions = {
 			background: true,
@@ -837,7 +901,7 @@ export class xDatabase {
 	}
 
 	public async insertMasterPlayerStatisticsLogAsync(userId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeCollection("MasterPlayer.StatisticsLog");
+		let collection = this.logRuntimeCollection("MasterPlayer.StatisticsLog");
 
 		await collection.insertOne({
 			userId: userId,
@@ -851,7 +915,7 @@ export class xDatabase {
 	}
 
 	public async insertMasterPlayerCurrencyLogAsync(userId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeCollection("MasterPlayer.CurrencyLog");
+		let collection = this.logRuntimeCollection("MasterPlayer.CurrencyLog");
 
 		await collection.insertOne({
 			userId: userId,
@@ -865,25 +929,25 @@ export class xDatabase {
 	}
 
 	public async insertMasterPlayerStatisticsLogsAsync(requests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[]): Promise<void> {
-		let collection = this.runtimeCollection("MasterPlayer.StatisticsLog");
+		let collection = this.logRuntimeCollection("MasterPlayer.StatisticsLog");
 
 		await collection.insertMany(requests);
 	}
 
 	public async loadMasterPlayerStatisticsLogAsync($filter: {}, limit: number) {
-		let collection = this.runtimeCollection("MasterPlayer.StatisticsLog");
+		let collection = this.logRuntimeCollection("MasterPlayer.StatisticsLog");
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadMasterPlayerCurrencyLogAsync($filter: {}, limit: number) {
-		let collection = this.runtimeCollection("MasterPlayer.CurrencyLog");
+		let collection = this.logRuntimeCollection("MasterPlayer.CurrencyLog");
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async insertGamePlayerStatisticsLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 
 		await collection.insertOne({
 			userId: userId,
@@ -897,13 +961,13 @@ export class xDatabase {
 	}
 
 	public async insertGamePlayerStatisticsLogsAsync(requests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
-		let collection = this.runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 
 		await collection.insertMany(requests);
 	}
 
 	public async insertGamePlayerCurrencyLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+		let collection = this.logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 
 		await collection.insertOne({
 			userId: userId,
@@ -917,13 +981,13 @@ export class xDatabase {
 	}
 
 	public async loadGamePlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("GamePlayer.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadGamePlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("GamePlayer.CurrencyLog", gameId);
+		let collection = this.logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
@@ -959,7 +1023,7 @@ export class xDatabase {
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-    public async loadCharacterPlayerWithDisplayNameAsync(displayName: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<CharacterPlayer> {
+	public async loadCharacterPlayerWithDisplayNameAsync(displayName: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<CharacterPlayer> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let result = await collection.findOne({ displayName: displayName }, {
@@ -967,10 +1031,10 @@ export class xDatabase {
 		});
 
 		if (!result) return null;
-        return new CharacterPlayer(result, collection);
+		return new CharacterPlayer(result, collection);
 	}
 
-    public async loadCharacterPlayerWithDisplayNameNormalizeAsync(displayNameNormalize: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<CharacterPlayer> {
+	public async loadCharacterPlayerWithDisplayNameNormalizeAsync(displayNameNormalize: string, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<CharacterPlayer> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let result = await collection.findOne({ displayNameNormalize: displayNameNormalize }, {
@@ -978,7 +1042,7 @@ export class xDatabase {
 		});
 
 		if (!result) return null;
-        return new CharacterPlayer(result, collection);
+		return new CharacterPlayer(result, collection);
 	}
 
 	public async loadCharacterPlayersWithDisplayNameNormalizeRegexAsync(keyword: string, skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
@@ -989,7 +1053,7 @@ export class xDatabase {
 		}).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
-    
+
 	public async loadCharacterPlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, catalogId: string, gameId: string, direction: -1 | 1, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
@@ -1037,7 +1101,7 @@ export class xDatabase {
 		return this.convertToCharacterPlayers(results, collection);
 	}
 
-    public async loadCharacterPlayersLeaderboardWithLastLoginAsync(skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
+	public async loadCharacterPlayersLeaderboardWithLastLoginAsync(skip: number, limit: number, gameId: string, characterPlayerFindOptions?: CharacterPlayerFindOptions): Promise<Array<CharacterPlayer>> {
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
 		let $sort = {} as any;
@@ -1121,7 +1185,7 @@ export class xDatabase {
 
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerCurrencies: true,
-            catalogId: true,
+			catalogId: true,
 		};
 
 		let thisPlayer = await this.loadCharacterPlayerAsync(userId, gameId, characterPlayerFindOptions);
@@ -1184,7 +1248,7 @@ export class xDatabase {
 	}
 
 	public async insertCharacterPlayerStatisticsLogAsync(characterId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 
 		await collection.insertOne({
 			characterId: characterId,
@@ -1198,13 +1262,13 @@ export class xDatabase {
 	}
 
 	public async insertCharacterPlayerStatisticsLogsAsync(requests: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
-		let collection = this.runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 
 		await collection.insertMany(requests);
 	}
 
 	public async insertCharacterPlayerCurrencyLogAsync(characterId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+		let collection = this.logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 
 		await collection.insertOne({
 			characterId: characterId,
@@ -1226,7 +1290,7 @@ export class xDatabase {
 		storeCurrencyFinalValues: { key: string, value: number }[],
 		storeItemFinalValues: { catalogId: string, classId: string, itemId: string }[],
 		transactionId: string, storeReceiveType: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("StoreInventory.StoreLog", gameId);
+		let collection = this.logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
 
 		await collection.insertOne({
 			storeId: storeId,
@@ -1247,19 +1311,19 @@ export class xDatabase {
 	}
 
 	public async getStoreInventoryLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("StoreInventory.StoreLog", gameId);
+		let collection = this.logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadCharacterPlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadCharacterPlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
+		let collection = this.logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
@@ -1302,7 +1366,7 @@ export class xDatabase {
 			projection: this.getFindOptions(groupFindOptions)
 		});
 
-        if (!result) return null;
+		if (!result) return null;
 		return new Group(result, collection);
 	}
 
@@ -1313,7 +1377,7 @@ export class xDatabase {
 			projection: this.getFindOptions(groupFindOptions)
 		});
 
-        if (!result) return null;
+		if (!result) return null;
 		return new Group(result, collection);
 	}
 
@@ -1513,25 +1577,25 @@ export class xDatabase {
 		return this.convertToInventories(results, collection);
 	}
 
-    public async loadInventoryWithDisplayNameAsync(displayName: string, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Inventory> {
+	public async loadInventoryWithDisplayNameAsync(displayName: string, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Inventory> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let result = await collection.findOne({ displayName: displayName }, {
 			projection: this.getFindOptions(inventoryFindOptions)
 		});
 
-        if (!result) null;
+		if (!result) null;
 		return new Inventory(result, collection);
 	}
 
-    public async loadInventoryWithDisplayNameNormalizeAsync(displayNameNormalize: string, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Inventory> {
+	public async loadInventoryWithDisplayNameNormalizeAsync(displayNameNormalize: string, gameId: string, inventoryFindOptions?: InventoryFindOptions): Promise<Inventory> {
 		let collection = this.systemGameCollection("Inventory", gameId);
 
 		let result = await collection.findOne({ displayNameNormalize: displayNameNormalize }, {
 			projection: this.getFindOptions(inventoryFindOptions)
 		});
 
-        if (!result) null;
+		if (!result) null;
 		return new Inventory(result, collection);
 	}
 
@@ -1594,7 +1658,7 @@ export class xDatabase {
 
 		let inventoryFindOptions: InventoryFindOptions = {
 			itemStatistics: true,
-            catalogId: true,
+			catalogId: true,
 		};
 
 		let thisInventory = await this.loadInventoryAsync(itemId, gameId, inventoryFindOptions);
@@ -1659,7 +1723,7 @@ export class xDatabase {
 	}
 
 	public async insertInventoryStatisticsLogAsync(itemId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("Inventory.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
 
 		await collection.insertOne({
 			itemId: itemId,
@@ -1673,13 +1737,13 @@ export class xDatabase {
 	}
 
 	public async insertInventoryStatisticsLogsAsync(requests: { itemId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
-		let collection = this.runtimeGameCollection("Inventory.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
 
 		await collection.insertMany(requests);
 	}
 
 	public async loadInventoryStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("Inventory.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
@@ -1694,7 +1758,7 @@ export class xDatabase {
 		return answer;
 	}
 
-    public async getStoreInventoryUsedAsync(storeId: string, gameId: string): Promise<{ storeId: string, useIds: { id: string, type: number, tsCreate: number }[]}> {
+	public async getStoreInventoryUsedAsync(storeId: string, gameId: string): Promise<{ storeId: string, useIds: { id: string, type: number, tsCreate: number }[] }> {
 		let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
 
 		let result = await collection.findOne({ storeId: storeId });
@@ -1702,49 +1766,49 @@ export class xDatabase {
 		return result as any;
 	}
 
-    public async insertStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string, ownerType: number) {
-        let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
+	public async insertStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string, ownerType: number) {
+		let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
 
-        collection.updateOne({ storeId: storeId }, {
-            $push: {
-                useIds: {
-                    id: ownerId,
-                    type: ownerType,
-                    tsCreate: xDatetime.getCurrentMilliseconds(),
-                }
-            } as any
-        }, {
-            upsert: true,
-        });
-    }
+		collection.updateOne({ storeId: storeId }, {
+			$push: {
+				useIds: {
+					id: ownerId,
+					type: ownerType,
+					tsCreate: xDatetime.getCurrentMilliseconds(),
+				}
+			} as any
+		}, {
+			upsert: true,
+		});
+	}
 
-    public async removeStoreInventoryUsedAsync(storeId: string, gameId: string, ownerIds: string[]) {
-        let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
+	public async removeStoreInventoryUsedAsync(storeId: string, gameId: string, ownerIds: string[]) {
+		let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
 
-        if (ownerIds == null) {
-            await collection.deleteOne({ storeId: storeId });
-        }
-        else {
-            collection.updateOne({ storeId: storeId }, {
-                $pull: {
-                    useIds: {
-                        id: { $in: ownerIds },
-                    }
-                } as any
-            });
-        }
-    }
+		if (ownerIds == null) {
+			await collection.deleteOne({ storeId: storeId });
+		}
+		else {
+			collection.updateOne({ storeId: storeId }, {
+				$pull: {
+					useIds: {
+						id: { $in: ownerIds },
+					}
+				} as any
+			});
+		}
+	}
 
-    public async getCountStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string): Promise<number> {
-        let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
+	public async getCountStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string): Promise<number> {
+		let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
 
-        let count = await collection.countDocuments({
-            storeId: storeId,
-            useIds: { $elemMatch: { id: ownerId } }
-        });
+		let count = await collection.countDocuments({
+			storeId: storeId,
+			useIds: { $elemMatch: { id: ownerId } }
+		});
 
-        return count;
-    }
+		return count;
+	}
 
 	public async loadStoreInventoryAsync(storeId: string, gameId: string, storeInventoryFindOptions?: StoreInventoryFindOptions): Promise<StoreInventory> {
 		let collection = this.systemGameCollection("StoreInventory", gameId);
@@ -1856,7 +1920,7 @@ export class xDatabase {
 	}
 
 	public async insertGroupStatisticsLogAsync(groupId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("Group.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("Group.StatisticsLog", gameId);
 
 		await collection.insertOne({
 			groupId: groupId,
@@ -1870,13 +1934,13 @@ export class xDatabase {
 	}
 
 	public async insertGroupStatisticsLogsAsync(requests: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
-		let collection = this.runtimeGameCollection("Group.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("Group.StatisticsLog", gameId);
 
 		await collection.insertMany(requests);
 	}
 
 	public async insertGroupCurrencyLogAsync(groupId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		let collection = this.runtimeGameCollection("Group.CurrencyLog", gameId);
+		let collection = this.logRuntimeGameCollection("Group.CurrencyLog", gameId);
 
 		await collection.insertOne({
 			groupId: groupId,
@@ -1890,13 +1954,13 @@ export class xDatabase {
 	}
 
 	public async loadGroupStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("Group.StatisticsLog", gameId);
+		let collection = this.logRuntimeGameCollection("Group.StatisticsLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	public async loadGroupCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
-		let collection = this.runtimeGameCollection("Group.CurrencyLog", gameId);
+		let collection = this.logRuntimeGameCollection("Group.CurrencyLog", gameId);
 
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}

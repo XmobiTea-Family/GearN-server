@@ -11,6 +11,9 @@ import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
 import { Commands } from "./../../GN-common/constant/Commands";
 import { xDatabase } from "./../../GN-library/xdatabase/lib/xDatabase";
+import { RequestType } from "../../GN-common/constant/enumType/RequestType";
+import { EnumUtility } from "../../GN-common/helper/EnumUtility";
+import { RequestRole } from "../../GN-common/constant/enumType/RequestRole";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -303,13 +306,21 @@ export class SocketAppHandler {
 	}
 
 	private async onSocketResponse(socket: Socket, requestData: any, returnCode: number, encrypted: boolean): Promise<OperationResponse> {
-		let code = requestData[0] as number;
-		let type = requestData[1] as number;
-		let role = requestData[2] as number;
+		let requestTypeStr = requestData[0] as string;
+		let operationCodeStr = requestData[1] as string;
+		let roleStr = requestData[2] as string;
+		
+		if (!operationCodeStr || !requestTypeStr || !roleStr) return null;
+
+		let requestType = EnumUtility.parse(RequestType, requestTypeStr, true);
+		let role = EnumUtility.parse(RequestRole, roleStr, true);
+		
+		if (requestType == null || role == null) return null;
+
 		let params = requestData.length > 3 ? (requestData[3] as {}) : {};
 		let requestId = requestData.length > 4 ? (requestData[4] as number) : -1;
 
-		let request = new Request(code, type, role);
+		let request = new Request(operationCodeStr, requestType, role);
 		request.setIP(socket.data.IPAddress);
 		request.setParameters(params);
 		request.setRequestId(requestId);
@@ -333,14 +344,15 @@ export class SocketAppHandler {
 				operationResponse = await this._onRequestCb(request);
 			}
 			catch (err) {
-				operationResponse = new OperationResponse(request.getCode(), request.getRequestId(), request.isEncrypted());
+				operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 				operationResponse.setReturnCode(ReturnCode.InternalServerError);
+				operationResponse.setDebugMessage(err.message);
 
 				Debug.logException(err);
 			}
 		}
 		else {
-			operationResponse = new OperationResponse(request.getCode(), request.getRequestId(), request.isEncrypted());
+			operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
 			operationResponse.setReturnCode(returnCode);
 		}
 

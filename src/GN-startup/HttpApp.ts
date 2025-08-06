@@ -115,6 +115,10 @@ export class HttpApp {
 			return res.sendStatus(200);
 		});
 
+		this.app.post("/ping", (req: express.Request, res: express.Response): any => {
+			return res.sendStatus(200);
+		});
+
 		let allowedHeaders = this.appSettings.getAllowedHeaders();
 		allowedHeaders.push(this.sessionId);
 

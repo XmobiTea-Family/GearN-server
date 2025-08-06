@@ -4,7 +4,7 @@ import { GNHashtable } from "./../../common/GNData";
 import { InvalidMember } from "./../InvalidMember";
 
 export class OperationResponse {
-	private operationCode: number;
+	private operationCode: string;
 	private responseId: number;
 	private returnCode: number;
 	private debugMessage: string;
@@ -13,7 +13,7 @@ export class OperationResponse {
 
 	private invalidMembers: InvalidMember[];
 
-	constructor(operationCode: number, responseId: number, encrypted: boolean = true) {
+	constructor(operationCode: string, responseId: number, encrypted: boolean = true) {
 		this.operationCode = operationCode;
 		this.responseId = responseId;
 		this.encrypted = encrypted;
@@ -21,7 +21,7 @@ export class OperationResponse {
 		this.debugMessage = null;
 	}
 
-	public getOperationCode(): number {
+	public getOperationCode(): string {
 		return this.operationCode;
 	}
 
