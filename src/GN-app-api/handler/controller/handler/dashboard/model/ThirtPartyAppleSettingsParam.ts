@@ -1,20 +1,20 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ThirtPartyAppleSettingsParam {
-	@StringDataMember({ code: GNParameterCode.AppleClientId })
+	@StringDataMember({ code: ParameterCode.AppleClientId })
 	appleClientId: string;
 
-	@BooleanDataMember({ code: GNParameterCode.SandboxEnable })
+	@BooleanDataMember({ code: ParameterCode.SandboxEnable })
 	sandboxEnable: boolean;
 
-	@StringDataMember({ code: GNParameterCode.IssuerId })
+	@StringDataMember({ code: ParameterCode.IssuerId })
 	issuerId: string;
 
-	@StringDataMember({ code: GNParameterCode.KeyId })
+	@StringDataMember({ code: ParameterCode.KeyId })
 	keyId: string;
 
-	@StringDataMember({ code: GNParameterCode.P8Content })
+	@StringDataMember({ code: ParameterCode.P8Content })
 	p8Content: string;
 
 }

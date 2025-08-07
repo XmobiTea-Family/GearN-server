@@ -6,8 +6,8 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MatchmakingTicketStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
@@ -16,10 +16,10 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetMatchmakingTicketOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.TicketId, minLength: 10, maxLength: 10 })
+    @StringDataMember({ code: ParameterCode.TicketId, minLength: 10, maxLength: 10 })
     ticketId: string;
 
-    @BooleanDataMember({ code: GNParameterCode.ReturnMember, isOptional: true, defaultValue: false })
+    @BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
     returnMember?: boolean;
 
     public override isValidRequest() {
@@ -115,7 +115,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
@@ -124,7 +124,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
         let result = await matchmakingTicketCollection.findOne({ ticketId: request.ticketId });
 
         if (result == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
             return operationResponse;
         }
 
@@ -133,23 +133,23 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
         if (secretInfo.getRole() == SecretRole.Player) {
             let member = matchmakingTicket.getMember(request.userId);
             if (member == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
                 return operationResponse;
             }
         }
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         let gnMatchmakingTicket = new GNHashtable();
 
-        gnMatchmakingTicket.add(GNParameterCode.TsCreate, matchmakingTicket.getTsCreate());
-        gnMatchmakingTicket.add(GNParameterCode.CreatorId, matchmakingTicket.getCreatorId());
-        gnMatchmakingTicket.add(GNParameterCode.GiveUpAfterSeconds, matchmakingTicket.getGiveUpAfterSeconds());
-        gnMatchmakingTicket.add(GNParameterCode.QueueName, matchmakingTicket.getQueueName());
-        gnMatchmakingTicket.add(GNParameterCode.Status, matchmakingTicket.getStatus());
+        gnMatchmakingTicket.add(ParameterCode.TsCreate, matchmakingTicket.getTsCreate());
+        gnMatchmakingTicket.add(ParameterCode.CreatorId, matchmakingTicket.getCreatorId());
+        gnMatchmakingTicket.add(ParameterCode.GiveUpAfterSeconds, matchmakingTicket.getGiveUpAfterSeconds());
+        gnMatchmakingTicket.add(ParameterCode.QueueName, matchmakingTicket.getQueueName());
+        gnMatchmakingTicket.add(ParameterCode.Status, matchmakingTicket.getStatus());
 
         if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.Matched) {
-            gnMatchmakingTicket.add(GNParameterCode.MatchId, matchmakingTicket.getMatchId());
+            gnMatchmakingTicket.add(ParameterCode.MatchId, matchmakingTicket.getMatchId());
         }
 
         if (request.returnMember) {
@@ -161,17 +161,17 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 
                 let gnMember = new GNHashtable();
 
-                gnMember.add(GNParameterCode.UserId, member.userId);
-                gnMember.add(GNParameterCode.Status, member.status);
-                gnMember.add(GNParameterCode.Attribute, member.attribute);
+                gnMember.add(ParameterCode.UserId, member.userId);
+                gnMember.add(ParameterCode.Status, member.status);
+                gnMember.add(ParameterCode.Attribute, member.attribute);
 
                 gnMembers.add(gnMember);
             }
 
-            gnMatchmakingTicket.add(GNParameterCode.Members, gnMembers);
+            gnMatchmakingTicket.add(ParameterCode.Members, gnMembers);
         }
 
-        operationResponse.setParameter(GNParameterCode.MatchmakingTicket, gnMatchmakingTicket);
+        operationResponse.setParameter(ParameterCode.MatchmakingTicket, gnMatchmakingTicket);
 
         await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest, operationResponse);
 

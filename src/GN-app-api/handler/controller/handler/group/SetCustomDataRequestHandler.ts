@@ -6,21 +6,21 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CustomDataParam } from "./model/CustomDataParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
-import { DataValueType } from "../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 class SetCustomDataOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	groupId: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
+	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
 	customData: Array<CustomDataParam>;
 
 	public override isValidRequest() {
@@ -115,7 +115,7 @@ export class SetCustomDataRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupFindOptions: GroupFindOptions = {
@@ -125,7 +125,7 @@ export class SetCustomDataRequestHandler extends GroupBaseRequestHandler {
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
@@ -157,18 +157,18 @@ export class SetCustomDataRequestHandler extends GroupBaseRequestHandler {
 			}
 
 			let gnGroupData = new GNHashtable();
-			gnGroupData.add(GNParameterCode.Key, key);
-			gnGroupData.add(GNParameterCode.Value, customDataParameter.value);
+			gnGroupData.add(ParameterCode.Key, key);
+			gnGroupData.add(ParameterCode.Value, customDataParameter.value);
 
 			gnCustomDatas.add(gnGroupData);
 		}
 
 		group.saveAsync();
 
-		gnInfoResponseParameters.add(GNParameterCode.CustomDatas, gnCustomDatas);
+		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("group_SetCustomData", request, secretInfo, operationRequest, operationResponse);
 

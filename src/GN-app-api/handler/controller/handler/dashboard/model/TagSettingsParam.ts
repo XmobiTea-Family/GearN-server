@@ -1,14 +1,14 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class TagSettingsParam {
-    @StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32 })
-    key: string;
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
+	key: string;
 
-    @StringDataMember({ code: GNParameterCode.DisplayName, isOptional: true })
-    displayName?: string;
+	@StringDataMember({ code: ParameterCode.Description, isOptional: true })
+	description?: string;
 
-    @BooleanDataMember({ code: GNParameterCode.Index })
-    index: boolean;
+	@BooleanDataMember({ code: ParameterCode.Index })
+	index: boolean;
 
 }

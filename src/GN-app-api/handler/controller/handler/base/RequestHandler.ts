@@ -33,19 +33,19 @@ export abstract class RequestHandler implements IRequestHandler {
 	}
 
 	protected newInvalidRequestParameters(operationRequest: OperationRequest): OperationResponse {
-		return OperationHelper.newOperationResponseInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), (operationRequest as any).invalidMembers, operationRequest.isEncrypted());
+		return OperationHelper.newOperationResponseInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), (operationRequest as any).invalidMembers);
 	}
 
 	protected newOperationInvalid(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationHelper.newOperationResponseInvalid(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
+		return OperationHelper.newOperationResponseInvalid(operationRequest.getOperationCode(), operationRequest.getRequestId(), debugMessage);
 	}
 
 	protected newOperationInternalServerError(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationHelper.newOperationResponseInternalServerError(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
+		return OperationHelper.newOperationResponseInternalServerError(operationRequest.getOperationCode(), operationRequest.getRequestId(), debugMessage);
 	}
 
 	protected newOperationNotAllowError(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
-		return OperationHelper.newOperationNotAllowError(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted(), debugMessage);
+		return OperationHelper.newOperationResponseNotAllowError(operationRequest.getOperationCode(), operationRequest.getRequestId(), debugMessage);
 	}
 
 	constructor(gnServer: GNServer) {

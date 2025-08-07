@@ -6,21 +6,21 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
-import { OwnerType } from "../../../../../GN-common/constant/enumType/OwnerType";
-import { GroupStatus } from "../../../../../GN-common/constant/enumType/GroupStatus";
+import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 
 class GetItemInformationOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	itemId: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
@@ -76,39 +76,39 @@ export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
 		}
 
 		if (secretInfo.getPermission().inventory.getItemInformation.selfEnable) {
-            let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), { owner: true });
-            if (inventory != null) {
-                let owner = inventory.getOwner();
-                if (owner != null) {
-                    if (owner.type == <number>OwnerType.GamePlayer) {
-                        if (owner.id == authInfo.getUserId()) {
-                            allowMethod = true;
-                            owned = true;
-                        }
-                    }
-                    else if (owner.type == <number>OwnerType.CharacterPlayer) {
-                        let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
+			let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), { owner: true });
+			if (inventory != null) {
+				let owner = inventory.getOwner();
+				if (owner != null) {
+					if (owner.type == <number>OwnerType.GamePlayer) {
+						if (owner.id == authInfo.getUserId()) {
+							allowMethod = true;
+							owned = true;
+						}
+					}
+					else if (owner.type == <number>OwnerType.CharacterPlayer) {
+						let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
-                        if (gamePlayer != null) {
-                            if (gamePlayer.hasPlayerCharacter(owner.id)) {
-                                allowMethod = true;
-                                owned = true;
-                            }
-                        }
-                    }
-                    else if (owner.type == <number>OwnerType.Group) {
-                        let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
+						if (gamePlayer != null) {
+							if (gamePlayer.hasPlayerCharacter(owner.id)) {
+								allowMethod = true;
+								owned = true;
+							}
+						}
+					}
+					else if (owner.type == <number>OwnerType.Group) {
+						let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
 
-                        if (gamePlayer != null) {
-                            let playerGroup = gamePlayer.getPlayerGroup(owner.id);
-                            if (playerGroup != null && playerGroup.status == <number>GroupStatus.Member) {
-                                allowMethod = true;
-                                owned = true;
-                            }
-                        }
-                    }
-                }
-            }
+						if (gamePlayer != null) {
+							let playerGroup = gamePlayer.getPlayerGroup(owner.id);
+							if (playerGroup != null && playerGroup.status == <number>GroupStatus.Member) {
+								allowMethod = true;
+								owned = true;
+							}
+						}
+					}
+				}
+			}
 		}
 
 		if (!allowMethod) {
@@ -172,27 +172,21 @@ export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
 
-		if (inventoryFindOptions != null && inventoryFindOptions.displayName) {
-			inventoryFindOptions.catalogId = true;
-			inventoryFindOptions.owner = true;
-			inventoryFindOptions.classId = true;
-		}
-
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
 		}
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("inventory_GetItemInformation", request, secretInfo, operationRequest, operationResponse);
 

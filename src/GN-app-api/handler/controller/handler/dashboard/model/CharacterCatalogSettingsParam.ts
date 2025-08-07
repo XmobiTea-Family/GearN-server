@@ -1,10 +1,11 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class CharacterCatalogSettingsParam {
-    @StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32 })
-    catalogId: string;
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32 })
+	catalogId: string;
 
-    @StringDataMember({ code: GNParameterCode.DisplayName, isOptional: true })
-    displayName?: string;
+	@StringDataMember({ code: ParameterCode.Description, isOptional: true })
+	description?: string;
+
 }

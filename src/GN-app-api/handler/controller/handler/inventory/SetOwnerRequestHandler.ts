@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
@@ -19,225 +19,225 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 
 class SetOwnerOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.ItemId, minLength: 11, maxLength: 11, mustNonNull: true })
-    itemId: string;
+	@StringDataMember({ code: ParameterCode.ItemId, minLength: 11, maxLength: 11, mustNonNull: true })
+	itemId: string;
 
-    @StringDataMember({ code: GNParameterCode.OwnerId, minLength: 10, maxLength: 12, mustNonNull: true })
-    newOwnerId: string;
+	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 12, mustNonNull: true })
+	newOwnerId: string;
 
-    @NumberDataMember({ code: GNParameterCode.OwnerType, mustInt: true })
-    newOwnerType: number;
+	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
+	newOwnerType: number;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class ServerSetOwnerOperationRequest extends SetOwnerOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminSetOwnerOperationRequest extends ServerSetOwnerOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 
-    public override getCode() {
-        return OperationCode.SetOwner;
-    }
+	public override getCode() {
+		return OperationCode.SetOwner;
+	}
 
-    public override getCommonOperationRequest() {
-        return SetOwnerOperationRequest;
-    }
+	public override getCommonOperationRequest() {
+		return SetOwnerOperationRequest;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setOwner);
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setOwner);
 
-        if (!allowMethod) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!allowMethod) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            itemId: request.itemId,
-            newOwnerId: request.newOwnerId,
-            newOwnerType: request.newOwnerType,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			itemId: request.itemId,
+			newOwnerId: request.newOwnerId,
+			newOwnerType: request.newOwnerType,
+		}, secretInfo, operationRequest);
+	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetOwnerOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetOwnerOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().inventory.setOwner.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().inventory.setOwner.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            itemId: request.itemId,
-            newOwnerId: request.newOwnerId,
-            newOwnerType: request.newOwnerType,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			itemId: request.itemId,
+			newOwnerId: request.newOwnerId,
+			newOwnerType: request.newOwnerType,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetOwnerOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetOwnerOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().inventory.setOwner.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().inventory.setOwner.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            itemId: request.itemId,
-            newOwnerId: request.newOwnerId,
-            newOwnerType: request.newOwnerType,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			itemId: request.itemId,
+			newOwnerId: request.newOwnerId,
+			newOwnerType: request.newOwnerType,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(request: { itemId: string, newOwnerId: string, newOwnerType: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetOwner", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+	private async execute(request: { itemId: string, newOwnerId: string, newOwnerType: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetOwner", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let inventoryFindOptions: InventoryFindOptions = {
-            owner: true,
-            catalogId: true,
-            classId: true,
-        }
+		let inventoryFindOptions: InventoryFindOptions = {
+			owner: true,
+			catalogId: true,
+			classId: true,
+		}
 
-        let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
+		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
-        if (inventory == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
-            return operationResponse;
-        }
+		if (inventory == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+			return operationResponse;
+		}
 
-        let owner = inventory.getOwner();
-        if (owner.id != request.newOwnerId) {
-            if (request.newOwnerType == OwnerType.Group) {
-                let groupFindOptions: GroupFindOptions = {
-                    groupInventories: true,
-                }
+		let owner = inventory.getOwner();
+		if (owner.id != request.newOwnerId) {
+			if (request.newOwnerType == OwnerType.Group) {
+				let groupFindOptions: GroupFindOptions = {
+					groupInventories: true,
+				}
 
-                let newItemOwnerPlayer = await this.gnServer.getDatabase().loadGroupAsync(request.newOwnerId, secretInfo.getGameId(), groupFindOptions);
-                if (newItemOwnerPlayer == null) {
-                    operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.OwnerNotFound);
-                    return operationResponse;
-                }
+				let newItemOwnerPlayer = await this.gnServer.getDatabase().loadGroupAsync(request.newOwnerId, secretInfo.getGameId(), groupFindOptions);
+				if (newItemOwnerPlayer == null) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
+					return operationResponse;
+				}
 
-                newItemOwnerPlayer.setGroupInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
-                newItemOwnerPlayer.saveAsync();
-            }
-            else if (request.newOwnerType == OwnerType.GamePlayer) {
-                let gamePlayerFindOptions: GamePlayerFindOptions = {
-                    playerInventories: true,
-                }
+				newItemOwnerPlayer.setGroupInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
+				newItemOwnerPlayer.saveAsync();
+			}
+			else if (request.newOwnerType == OwnerType.GamePlayer) {
+				let gamePlayerFindOptions: GamePlayerFindOptions = {
+					playerInventories: true,
+				}
 
-                let newItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
-                if (newItemOwnerPlayer == null) {
-                    operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.OwnerNotFound);
-                    return operationResponse;
-                }
+				let newItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
+				if (newItemOwnerPlayer == null) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
+					return operationResponse;
+				}
 
-                newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
-                newItemOwnerPlayer.saveAsync();
-            }
-            else if (request.newOwnerType == OwnerType.CharacterPlayer) {
-                let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-                    playerInventories: true,
-                }
+				newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
+				newItemOwnerPlayer.saveAsync();
+			}
+			else if (request.newOwnerType == OwnerType.CharacterPlayer) {
+				let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+					playerInventories: true,
+				}
 
-                let newItemOwnerPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.newOwnerId, secretInfo.getGameId(), characterPlayerFindOptions);
-                if (newItemOwnerPlayer == null) {
-                    operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.OwnerNotFound);
-                    return operationResponse;
-                }
+				let newItemOwnerPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.newOwnerId, secretInfo.getGameId(), characterPlayerFindOptions);
+				if (newItemOwnerPlayer == null) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
+					return operationResponse;
+				}
 
-                newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
-                newItemOwnerPlayer.saveAsync();
-            }
-            else {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.OwnerTypeNotSupport);
-                return operationResponse;
-            }
+				newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
+				newItemOwnerPlayer.saveAsync();
+			}
+			else {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerTypeNotSupport);
+				return operationResponse;
+			}
 
-            if (owner.type == OwnerType.Group) {
-                let groupFindOptions: GroupFindOptions = {
-                    groupInventories: true,
-                }
+			if (owner.type == OwnerType.Group) {
+				let groupFindOptions: GroupFindOptions = {
+					groupInventories: true,
+				}
 
-                let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadGroupAsync(owner.id, secretInfo.getGameId(), groupFindOptions);
-                if (currentItemOwnerPlayer != null) {
-                    if (currentItemOwnerPlayer.hasGroupInventory(request.itemId)) {
-                        currentItemOwnerPlayer.removeGroupInventory(request.itemId);
-                        currentItemOwnerPlayer.saveAsync();
-                    }
-                }
-            }
-            else if (owner.type == OwnerType.GamePlayer) {
-                let gamePlayerFindOptions: GamePlayerFindOptions = {
-                    playerInventories: true,
-                }
+				let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadGroupAsync(owner.id, secretInfo.getGameId(), groupFindOptions);
+				if (currentItemOwnerPlayer != null) {
+					if (currentItemOwnerPlayer.hasGroupInventory(request.itemId)) {
+						currentItemOwnerPlayer.removeGroupInventory(request.itemId);
+						currentItemOwnerPlayer.saveAsync();
+					}
+				}
+			}
+			else if (owner.type == OwnerType.GamePlayer) {
+				let gamePlayerFindOptions: GamePlayerFindOptions = {
+					playerInventories: true,
+				}
 
-                let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
-                if (currentItemOwnerPlayer != null) {
-                    if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
-                        currentItemOwnerPlayer.removePlayerInventory(request.itemId);
-                        currentItemOwnerPlayer.saveAsync();
-                    }
-                }
-            }
-            else if (owner.type == OwnerType.CharacterPlayer) {
-                let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-                    playerInventories: true,
-                }
+				let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
+				if (currentItemOwnerPlayer != null) {
+					if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
+						currentItemOwnerPlayer.removePlayerInventory(request.itemId);
+						currentItemOwnerPlayer.saveAsync();
+					}
+				}
+			}
+			else if (owner.type == OwnerType.CharacterPlayer) {
+				let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+					playerInventories: true,
+				}
 
-                let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), characterPlayerFindOptions);
-                if (currentItemOwnerPlayer != null) {
-                    if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
-                        currentItemOwnerPlayer.removePlayerInventory(request.itemId);
-                        currentItemOwnerPlayer.saveAsync();
-                    }
-                }
-            }
+				let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), characterPlayerFindOptions);
+				if (currentItemOwnerPlayer != null) {
+					if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
+						currentItemOwnerPlayer.removePlayerInventory(request.itemId);
+						currentItemOwnerPlayer.saveAsync();
+					}
+				}
+			}
 
-            inventory.setOwner(request.newOwnerId, request.newOwnerType);
-            inventory.saveAsync();
-        }
+			inventory.setOwner(request.newOwnerId, request.newOwnerType);
+			inventory.saveAsync();
+		}
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetOwner", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetOwner", request, secretInfo, operationRequest, operationResponse);
 
-        return operationResponse;
-    }
+		return operationResponse;
+	}
 }

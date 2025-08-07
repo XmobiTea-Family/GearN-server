@@ -26,14 +26,14 @@ import { DdosSettings } from "./settings/DDosSettings";
 import { ClusterSettings } from "./settings/ClusterSettings";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 import { GoogleService } from "./../GN-app-api/service/GoogleService";
-import { PushNotificationService } from "../GN-app-api/service/PushNotificationService";
+import { PushNotificationService } from "./../GN-app-api/service/PushNotificationService";
 import { CloudScriptService } from "./../GN-app-api/service/CloudScriptService";
-import { GooglePlayGameService } from "../GN-app-api/service/GooglePlayGameService";
-import { GameCenterService } from "../GN-app-api/service/GameCenterService";
-import { CountryIPDetailService } from "../GN-app-api/service/CountryIPDetailService";
-import { EmailService } from "../GN-app-api/service/EmailService";
-import { CacheService, ICacheServiceController, MemoryCacheServiceController, MongoDbCacheServiceController } from "../GN-app-api/service/CacheService";
-import { ConfigService } from "../GN-app-api/service/ConfigService";
+import { GooglePlayGameService } from "./../GN-app-api/service/GooglePlayGameService";
+import { GameCenterService } from "./../GN-app-api/service/GameCenterService";
+import { CountryIPDetailService } from "./../GN-app-api/service/CountryIPDetailService";
+import { EmailService } from "./../GN-app-api/service/EmailService";
+import { CacheService, ICacheServiceController, MemoryCacheServiceController, MongoDbCacheServiceController } from "./../GN-app-api/service/CacheService";
+import { ConfigService } from "./../GN-app-api/service/ConfigService";
 import { StringUtility } from "./../GN-common/helper/StringUtility";
 
 import bcrypt from "bcrypt";
@@ -42,7 +42,7 @@ import { SecretInfoItem } from "./../GN-library/xdatabase/lib/entity/pro/masterA
 import { MasterGameSettings } from "./../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterGameSettings";
 import { FacebookService } from "./../GN-app-api/service/FacebookService";
 import { GameItem } from "./../GN-library/xdatabase/lib/entity/pro/masterAdmin/GameItem";
-import { GrantSecretInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/dashboard/GrantSecretInfoRequestHandler";
+import { CreateSecretInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/dashboard/CreateSecretInfoRequestHandler";
 import { xDatetime } from "./../GN-library/xdatetime/lib/xDatetime";
 import { EventCallbackCloudScriptService, PostEventCallbackService, PreEventCallbackService } from "./../GN-app-api/service/EventCallbackService";
 import { GNServerSettingsOptions, LogType, MessageType } from "@xmobitea/gn-typescript-client";
@@ -368,9 +368,14 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			if (onRunSuccess != null) onRunSuccess();
+
+			let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
+
+			let bannerTxt = fs.readFileSync(bannerPath, "utf8");
+
+			Debug.log('\n' + bannerTxt + '\n\n');
+
 		});
-
-
 
 		{
 			for (let i = 0; i < gameIds.length; i++) {
@@ -440,7 +445,7 @@ export class ServerApplication extends BuilderBase {
 
 			// create secretInfo for admin account
 			{
-				let permission = GrantSecretInfoRequestHandler.generateRecommendAdminPermission();
+				let permission = CreateSecretInfoRequestHandler.generateRecommendAdminPermission();
 
 				{
 					permission.masterAdmin.setMasterGameSettings = {
@@ -450,7 +455,7 @@ export class ServerApplication extends BuilderBase {
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.grantAdminAccount = {
+					permission.masterAdmin.createAdminAccount = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
@@ -485,7 +490,7 @@ export class ServerApplication extends BuilderBase {
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.grantGame = {
+					permission.masterAdmin.createGame = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
@@ -541,7 +546,7 @@ export class ServerApplication extends BuilderBase {
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.grantSecretInfo = {
+					permission.masterAdmin.createSecretInfo = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
@@ -571,11 +576,11 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				let adminPermission = structuredClone(permission);
-				// adminPermission.masterAdmin.grantAdminAccount.selfEnable = false;
+				// adminPermission.masterAdmin.createAdminAccount.selfEnable = false;
 				// adminPermission.masterAdmin.removeAdminAccount.selfEnable = false;
 				// adminPermission.masterAdmin.setPasswordAdminAccount.selfEnable = false;
 				// adminPermission.masterAdmin.setSecretKeyAdminAccount.selfEnable = false;
-				// adminPermission.masterAdmin.grantGame.selfEnable = false;
+				// adminPermission.masterAdmin.createGame.selfEnable = false;
 
 				let result = {
 					type: "secretInfo",
@@ -586,7 +591,7 @@ export class ServerApplication extends BuilderBase {
 					creatorId: userId,
 					remove: false,
 					tsExpire: -1,
-					displayName: "default recommend sub admin secret info",
+					description: "default recommend sub admin secret info",
 					tsCreate: currentMilliseconds,
 				} as any;
 
@@ -601,7 +606,7 @@ export class ServerApplication extends BuilderBase {
 					.setRole(secretInfoItem.getRole())
 					.setSecretKey(secretInfoItem.getSecretKey())
 					.setTsExpire(secretInfoItem.getTsExpire())
-					.setDisplayName(secretInfoItem.getDisplayName())
+					.setDescription(secretInfoItem.getDescription())
 					.build();
 
 				this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
@@ -610,7 +615,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
-				let permission = GrantSecretInfoRequestHandler.generateRecommendPlayerPermission();
+				let permission = CreateSecretInfoRequestHandler.generateRecommendPlayerPermission();
 
 				{
 					let result = {
@@ -622,7 +627,7 @@ export class ServerApplication extends BuilderBase {
 						creatorId: userId,
 						remove: false,
 						tsExpire: -1,
-						displayName: "default recommend player secret info for gameId dev",
+						description: "default recommend player secret info for gameId dev",
 						tsCreate: currentMilliseconds,
 					} as any;
 
@@ -637,7 +642,7 @@ export class ServerApplication extends BuilderBase {
 						.setRole(secretInfoItem.getRole())
 						.setSecretKey(secretInfoItem.getSecretKey())
 						.setTsExpire(secretInfoItem.getTsExpire())
-						.setDisplayName(secretInfoItem.getDisplayName())
+						.setDescription(secretInfoItem.getDescription())
 						.build();
 
 					this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
@@ -655,7 +660,7 @@ export class ServerApplication extends BuilderBase {
 						creatorId: userId,
 						remove: false,
 						tsExpire: -1,
-						displayName: "default recommend player secret info for gameId main",
+						description: "default recommend player secret info for gameId main",
 						tsCreate: currentMilliseconds,
 					} as any;
 
@@ -670,7 +675,7 @@ export class ServerApplication extends BuilderBase {
 						.setRole(secretInfoItem.getRole())
 						.setSecretKey(secretInfoItem.getSecretKey())
 						.setTsExpire(secretInfoItem.getTsExpire())
-						.setDisplayName(secretInfoItem.getDisplayName())
+						.setDescription(secretInfoItem.getDescription())
 						.build();
 
 					this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
@@ -684,7 +689,7 @@ export class ServerApplication extends BuilderBase {
 
 			// create secretInfo for admin account
 			{
-				let permission = GrantSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
+				let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
 				let secretKey = StringUtility.generateRandomString(20, 0);
 
 				let newSecretInfo = SecretInfo.Builder()
@@ -694,7 +699,7 @@ export class ServerApplication extends BuilderBase {
 					.setRole(<number>SecretRole.Admin)
 					.setSecretKey(secretKey)
 					.setTsExpire(-1)
-					.setDisplayName("default root admin secret info")
+					.setDescription("default root admin secret info")
 					.setIsDefault(true)
 					.setIsOnlyMasterAdmin(true)
 					.build();
@@ -768,7 +773,7 @@ export class ServerApplication extends BuilderBase {
 			await masterPlayerCollection.createIndex({ "external.facebook.facebookId": 1 }, { background: true, sparse: true, name: "external.facebook.facebookId_1" });
 
 			Debug.log("create some indexes on System.MasterPlayer success.");
-			Debug.log("[Security] Please login via account with username '" + username + "' and password is '" + password + "' and change new password");
+			Debug.log("[Security] Please login dashboard via account with username '" + username + "' and password is '" + password + "' and change new password");
 		}
 
 		{

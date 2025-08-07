@@ -6,19 +6,19 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class RemoveSegmentOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	characterId: string;
 
-	@StringDataMember({ code: GNParameterCode.Value, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Value, minLength: 2, maxLength: 32, mustNonNull: true })
 	value: string;
 
 	public override isValidRequest() {
@@ -113,7 +113,7 @@ export class RemoveSegmentRequestHandler extends CharacterPlayerBaseRequestHandl
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
@@ -123,7 +123,7 @@ export class RemoveSegmentRequestHandler extends CharacterPlayerBaseRequestHandl
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.CharacterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
 			return operationResponse;
 		}
 
@@ -133,7 +133,7 @@ export class RemoveSegmentRequestHandler extends CharacterPlayerBaseRequestHandl
 			characterPlayer.saveAsync();
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_RemoveSegment", request, secretInfo, operationRequest, operationResponse);
 

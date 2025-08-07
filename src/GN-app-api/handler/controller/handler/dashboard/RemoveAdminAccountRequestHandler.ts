@@ -6,15 +6,15 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class RemoveAdminAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	userId: string;
 
 	public override isValidRequest() {
@@ -59,7 +59,7 @@ export class RemoveAdminAccountRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -67,7 +67,7 @@ export class RemoveAdminAccountRequestHandler extends RequestHandler {
 		let thisUser = await collection.findOne({ type: "account", userId: request.userId });
 
 		if (thisUser == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 			return operationResponse;
 		}
 
@@ -76,7 +76,7 @@ export class RemoveAdminAccountRequestHandler extends RequestHandler {
 			"userId": request.userId,
 		});
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_RemoveAdminAccount", request, secretInfo, operationRequest, operationResponse);
 

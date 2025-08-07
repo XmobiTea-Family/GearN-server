@@ -6,37 +6,37 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
-import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
-import { Inventory } from "../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { Inventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetStatisticsLeaderboardAroundItemOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	itemId: string;
 
-	@StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	key: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
-	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
-	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	catalogId?: string;
 
 	public override isValidRequest() {
@@ -95,8 +95,8 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -119,8 +119,8 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -143,8 +143,8 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -154,122 +154,122 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
 		let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == request.key);
 
 		if (inventoryStatisticsSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;
 		}
 
-        let positionCacheKey = "inventoryStatisticsLeaderboardAroundPosition_" + request.itemId + "_" + request.key;
-        let cacheKey = "inventoryStatisticsLeaderboardAround_" + request.itemId + "_" + request.key;
-        if (request.catalogId) {
-            cacheKey += "_" + request.catalogId;
-            positionCacheKey += "_" + request.catalogId;
-        }
+		let positionCacheKey = "inventoryStatisticsLeaderboardAroundPosition_" + request.itemId + "_" + request.key;
+		let cacheKey = "inventoryStatisticsLeaderboardAround_" + request.itemId + "_" + request.key;
+		if (request.catalogId) {
+			cacheKey += "_" + request.catalogId;
+			positionCacheKey += "_" + request.catalogId;
+		}
 
-        if (request.loadFromCache) {
-            if (request.skip + request.limit > 100) {
-                request.loadFromCache = false;
-            }
-        }
+		if (request.loadFromCache) {
+			if (request.skip + request.limit > 100) {
+				request.loadFromCache = false;
+			}
+		}
 
-        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-        if (request.loadFromCache) {
-            if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
-                request.loadFromCache = false;
-            }
-        }
+		if (request.loadFromCache) {
+			if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
+				request.loadFromCache = false;
+			}
+		}
 
 		let gnResults = new GNArray();
 
-        let thisPosition: number;
+		let thisPosition: number;
 		let inventories: Inventory[];
 
-        if (request.loadFromCache) {
-            thisPosition = await cacheData.getData(positionCacheKey);
-            inventories = await cacheData.getData(cacheKey);
+		if (request.loadFromCache) {
+			thisPosition = await cacheData.getData(positionCacheKey);
+			inventories = await cacheData.getData(cacheKey);
 
-            for (let i = request.skip; i < request.skip + request.limit; i++) {
-                if (i >= inventories.length) break;
+			for (let i = request.skip; i < request.skip + request.limit; i++) {
+				if (i >= inventories.length) break;
 
-                let inventory = inventories[i];
+				let inventory = inventories[i];
 
-                let gnResult = new GNHashtable();
+				let gnResult = new GNHashtable();
 
-                gnResult.add(GNParameterCode.Position, i + thisPosition);
+				gnResult.add(ParameterCode.Position, i + thisPosition);
 
-                gnResult.add(GNParameterCode.ItemId, inventory.getItemId());
+				gnResult.add(ParameterCode.ItemId, inventory.getItemId());
 
-                gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
+				gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
 
-                gnResults.add(gnResult);
-            }
-        }
-        else {
-            let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
-            let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
-    
-            thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), inventoryStatisticsSettingsItem.initialValue, direction);
-    
-            if (thisPosition != -1) {
-                await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				gnResults.add(gnResult);
+			}
+		}
+		else {
+			let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
+			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-                let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
+			thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), inventoryStatisticsSettingsItem.initialValue, direction);
 
-                if (request.skip + request.limit <= 100) {
-                    inventoryFindOptions = null;
-    
-                    inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
-    
-                    for (let i = request.skip; i < request.skip + request.limit; i++) {
-                        if (i >= inventories.length) break;
-    
-                        let inventory = inventories[i];
-    
-                        let gnResult = new GNHashtable();
-    
-                        gnResult.add(GNParameterCode.Position, i + thisPosition);
-    
-                        gnResult.add(GNParameterCode.ItemId, inventory.getItemId());
-    
-                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
-    
-                        gnResults.add(gnResult);
-                    }
-    
-                    await cacheData.setData(cacheKey, inventories, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-                }
-                else {
-                    inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
-    
-                    for (let i = 0; i < inventories.length; i++) {
-    
-                        let inventory = inventories[i];
-    
-                        let gnResult = new GNHashtable();
-    
-                        gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
-    
-                        gnResult.add(GNParameterCode.ItemId, inventory.getItemId());
-    
-                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
-    
-                        gnResults.add(gnResult);
-                    }
-                }
-            }
-        }
+			if (thisPosition != -1) {
+				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 
-		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+				let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+				if (request.skip + request.limit <= 100) {
+					inventoryFindOptions = null;
+
+					inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+
+					for (let i = request.skip; i < request.skip + request.limit; i++) {
+						if (i >= inventories.length) break;
+
+						let inventory = inventories[i];
+
+						let gnResult = new GNHashtable();
+
+						gnResult.add(ParameterCode.Position, i + thisPosition);
+
+						gnResult.add(ParameterCode.ItemId, inventory.getItemId());
+
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
+
+						gnResults.add(gnResult);
+					}
+
+					await cacheData.setData(cacheKey, inventories, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				}
+				else {
+					inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+
+					for (let i = 0; i < inventories.length; i++) {
+
+						let inventory = inventories[i];
+
+						let gnResult = new GNHashtable();
+
+						gnResult.add(ParameterCode.Position, i + thisPosition + request.skip);
+
+						gnResult.add(ParameterCode.ItemId, inventory.getItemId());
+
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, secretInfo.getGameId()));
+
+						gnResults.add(gnResult);
+					}
+				}
+			}
+		}
+
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("inventory_GetStatisticsLeaderboardAroundItem", request, secretInfo, operationRequest, operationResponse);
 

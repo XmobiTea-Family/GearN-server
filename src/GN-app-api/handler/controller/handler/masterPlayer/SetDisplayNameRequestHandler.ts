@@ -6,22 +6,22 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class SetDisplayNameOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@StringDataMember({ code: GNParameterCode.DisplayName, minLength: 5, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.DisplayName, minLength: 5, maxLength: 32, mustNonNull: true })
 	displayName: string;
 
-	@BooleanDataMember({ code: GNParameterCode.UniqueDisplayName, defaultValue: false, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.UniqueDisplayName, defaultValue: false, isOptional: true })
 	uniqueDisplayName?: boolean;
 
 	public override isValidRequest() {
@@ -32,7 +32,7 @@ class SetDisplayNameOperationRequest extends OperationRequest {
 }
 
 class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -133,7 +133,7 @@ export class SetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
@@ -144,7 +144,7 @@ export class SetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler
 			let masterPlayerWithThisDisplayName = await this.gnServer.getDatabase().loadMasterPlayerWithDisplayNameAsync(request.displayName, masterPlayerFindOptions);
 
 			if (masterPlayerWithThisDisplayName != null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.DisplayNameHasUse);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameHasUse);
 				return operationResponse;
 			}
 		}
@@ -152,14 +152,14 @@ export class SetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
 		}
 
 		masterPlayer.setDisplayName(request.displayName);
 		masterPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SetDisplayName", request, secretInfo, operationRequest, operationResponse);
 

@@ -6,16 +6,16 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class GetMembersOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	groupId: string;
 
 	public override isValidRequest() {
@@ -107,7 +107,7 @@ export class GetMembersRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupFindOptions: GroupFindOptions = {
@@ -117,16 +117,16 @@ export class GetMembersRequestHandler extends GroupBaseRequestHandler {
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
 		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(GNParameterCode.Members, this.generateMembers(group));
+		gnInfoResponseParameters.add(ParameterCode.Members, this.generateMembers(group));
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("group_GetMembers", request, secretInfo, operationRequest, operationResponse);
 

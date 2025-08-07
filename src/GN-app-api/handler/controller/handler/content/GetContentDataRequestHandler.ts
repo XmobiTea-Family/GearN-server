@@ -10,14 +10,14 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 class GetContentDataOperationRequest extends OperationRequest {
-	@GNArrayDataMember({ code: GNParameterCode.Keys, elementCls: String, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.Keys, elementCls: String, isOptional: true })
 	keys?: Array<string>;
 
-	@StringDataMember({ code: GNParameterCode.Label, minLength: 2, maxLength: 32, isOptional: true, defaultValue: "" })
+	@StringDataMember({ code: ParameterCode.Label, minLength: 2, maxLength: 32, isOptional: true, defaultValue: "" })
 	label?: string;
 
 	public override isValidRequest() {
@@ -111,12 +111,12 @@ export class GetContentDataRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let configGame = this.gnServer.getConfigService(secretInfo.getGameId());
 		if (!configGame) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GameNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameNotFound);
 			return operationResponse;
 		}
 
@@ -130,16 +130,16 @@ export class GetContentDataRequestHandler extends RequestHandler {
 			if (request.keys == null || request.keys.indexOf(key) != -1) {
 				let gnConfig = new GNHashtable();
 
-				gnConfig.add(GNParameterCode.Key, key);
-				gnConfig.add(GNParameterCode.Data, value.getData());
+				gnConfig.add(ParameterCode.Key, key);
+				gnConfig.add(ParameterCode.Data, value.getData());
 
 				gnConfigs.add(gnConfig);
 			}
 		});
 
-		operationResponse.setParameter(GNParameterCode.Configs, gnConfigs);
+		operationResponse.setParameter(ParameterCode.Configs, gnConfigs);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("content_GetContentData", request, secretInfo, operationRequest, operationResponse);
 

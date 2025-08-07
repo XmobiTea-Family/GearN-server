@@ -6,19 +6,19 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayerInformationOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
@@ -29,7 +29,7 @@ class GetPlayerInformationOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayerInformationOperationRequest extends GetPlayerInformationOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -138,7 +138,7 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
@@ -146,13 +146,13 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
 		}
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetPlayerInformation", request, secretInfo, operationRequest, operationResponse);
 

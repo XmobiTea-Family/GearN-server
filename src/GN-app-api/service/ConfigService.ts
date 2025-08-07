@@ -1,4 +1,4 @@
-import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { IConfigService, ConfigItem } from "./IConfigService";
 import * as mongoDB from "mongodb";
 

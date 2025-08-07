@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
@@ -16,25 +16,25 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { FriendStatus } from "./../../../../../GN-common/constant/enumType/FriendStatus";
 import { GamePlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/GamePlayer";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 
 class GetFriendStatisticsLeaderboardOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	key: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
-	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
 	public override isValidRequest() {
@@ -46,7 +46,7 @@ class GetFriendStatisticsLeaderboardOperationRequest extends OperationRequest {
 
 class ServerGetFriendStatisticsLeaderboardOperationRequest extends GetFriendStatisticsLeaderboardOperationRequest {
 
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -163,19 +163,19 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 		let playerStatisticsSettingsItem = gamePlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
 
 		if (playerStatisticsSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;
 		}
 
-        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
 		let cacheKey = "gamePlayerStatisticsLeaderboardFriend_" + request.userId;
 
@@ -196,7 +196,7 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), null);
 
 			if (gamePlayer == null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 
 				return operationResponse;
 			}
@@ -233,18 +233,18 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 
 			let gnResult = new GNHashtable();
 
-			gnResult.add(GNParameterCode.Position, i);
+			gnResult.add(ParameterCode.Position, i);
 
-			gnResult.add(GNParameterCode.UserId, gamePlayer.getUserId());
+			gnResult.add(ParameterCode.UserId, gamePlayer.getUserId());
 
-			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
+			gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
 
 			gnResults.add(gnResult);
 		}
 
-		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetFriendStatisticsLeaderboard", request, secretInfo, operationRequest, operationResponse);
 
@@ -254,7 +254,6 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 	public static quickSort(key: string, gamePlayers: GamePlayer[], initialValue: number): GamePlayer[] {
 		if (gamePlayers.length < 2) return gamePlayers;
 
-		// *** lấy phần tử cuối của 'arr' làm 'pivot'
 		let pivotIndex = gamePlayers.length - 1;
 		let pivot = gamePlayers[pivotIndex];
 
@@ -272,7 +271,6 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 		let right = [];
 
 		let currentItem;
-		// *** 'i < pivotIndex' => chúng ta sẽ không loop qua 'pivot' nữa
 		for (let i = 0; i < pivotIndex; i++) {
 			currentItem = gamePlayers[i];
 
@@ -306,7 +304,6 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 	public static quickSortAsc(key: string, gamePlayers: GamePlayer[], initialValue: number): GamePlayer[] {
 		if (gamePlayers.length < 2) return gamePlayers;
 
-		// *** lấy phần tử cuối của 'arr' làm 'pivot'
 		let pivotIndex = gamePlayers.length - 1;
 		let pivot = gamePlayers[pivotIndex];
 
@@ -324,7 +321,6 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 		let right = [];
 
 		let currentItem;
-		// *** 'i < pivotIndex' => chúng ta sẽ không loop qua 'pivot' nữa
 		for (let i = 0; i < pivotIndex; i++) {
 			currentItem = gamePlayers[i];
 

@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import bcrypt from "bcrypt";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
@@ -16,10 +16,10 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterAdminPlayer";
 
 class LoginByAdminAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	username: string;
 
-	@StringDataMember({ code: GNParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
 	public override isValidRequest() {
@@ -57,7 +57,7 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -65,7 +65,7 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 		let result = await collection.findOne({ type: "account", username: request.username });
 
 		if (result == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 			return operationResponse;
 		}
 
@@ -76,13 +76,13 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 		let isMatch = await bcrypt.compare(request.password, password);
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 			return operationResponse;
 		}
 
 		this.setupAuthInfo(operationResponse, masterAdminPlayer);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_LoginByAdminAccount", request, secretInfo, operationRequest, operationResponse);
 

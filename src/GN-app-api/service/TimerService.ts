@@ -1,4 +1,4 @@
-import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { ITimerService } from "./ITimerService";
 

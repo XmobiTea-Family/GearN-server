@@ -1,4 +1,4 @@
-import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 export class CacheItem {
     private tsExpire: number;

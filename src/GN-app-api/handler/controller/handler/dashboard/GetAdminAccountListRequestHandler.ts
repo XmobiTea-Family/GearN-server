@@ -5,11 +5,11 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterAdminPlayer";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
@@ -50,7 +50,7 @@ export class GetAdminAccountListRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -64,16 +64,16 @@ export class GetAdminAccountListRequestHandler extends RequestHandler {
 
 			let gnMasterAdminPlayer = new GNHashtable();
 
-			gnMasterAdminPlayer.add(GNParameterCode.UserId, masterAdminPlayer.getUserId());
-			gnMasterAdminPlayer.add(GNParameterCode.Username, masterAdminPlayer.getUsername());
-			gnMasterAdminPlayer.add(GNParameterCode.SecretKey, masterAdminPlayer.getSecretKey());
+			gnMasterAdminPlayer.add(ParameterCode.UserId, masterAdminPlayer.getUserId());
+			gnMasterAdminPlayer.add(ParameterCode.Username, masterAdminPlayer.getUsername());
+			gnMasterAdminPlayer.add(ParameterCode.SecretKey, masterAdminPlayer.getSecretKey());
 
 			gnMasterAdminPlayers.add(gnMasterAdminPlayer);
 		}
 
-		operationResponse.setParameter(GNParameterCode.Results, gnMasterAdminPlayers);
+		operationResponse.setParameter(ParameterCode.Results, gnMasterAdminPlayers);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetAdminAccountList", request, secretInfo, operationRequest, operationResponse);
 

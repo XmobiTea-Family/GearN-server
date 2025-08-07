@@ -1,10 +1,10 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, DataMember, GNArrayDataMember, NumberDataMember, StringDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class PlayerDataParam {
-    @StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-    key: string;
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	key: string;
 
-    @DataMember({ code: GNParameterCode.Value })
-    value: any;
+	@DataMember({ code: ParameterCode.Value })
+	value: any;
 }

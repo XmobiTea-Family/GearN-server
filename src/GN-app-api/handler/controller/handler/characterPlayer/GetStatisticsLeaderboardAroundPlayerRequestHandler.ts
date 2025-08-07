@@ -6,37 +6,37 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
-import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
-import { CharacterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/CharacterPlayer";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { CharacterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/CharacterPlayer";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetStatisticsLeaderboardAroundPlayerOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	characterId: string;
 
-	@StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	key: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
-	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
-	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	catalogId?: string;
 
 	public override isValidRequest() {
@@ -95,8 +95,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends Characte
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -119,8 +119,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends Characte
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -143,8 +143,8 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends Characte
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -154,122 +154,122 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends Characte
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 		let playerStatisticsSettingsItem = characterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
 
 		if (playerStatisticsSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;
 		}
 
-        let positionCacheKey = "characterPlayerStatisticsLeaderboardAroundPosition_" + request.characterId + "_" + request.key;
-        let cacheKey = "characterPlayerStatisticsLeaderboardAround_" + request.characterId + "_" + request.key;
-        if (request.catalogId) {
-            cacheKey += "_" + request.catalogId;
-            positionCacheKey += "_" + request.catalogId;
-        }
+		let positionCacheKey = "characterPlayerStatisticsLeaderboardAroundPosition_" + request.characterId + "_" + request.key;
+		let cacheKey = "characterPlayerStatisticsLeaderboardAround_" + request.characterId + "_" + request.key;
+		if (request.catalogId) {
+			cacheKey += "_" + request.catalogId;
+			positionCacheKey += "_" + request.catalogId;
+		}
 
-        if (request.loadFromCache) {
-            if (request.skip + request.limit > 100) {
-                request.loadFromCache = false;
-            }
-        }
+		if (request.loadFromCache) {
+			if (request.skip + request.limit > 100) {
+				request.loadFromCache = false;
+			}
+		}
 
-        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-        if (request.loadFromCache) {
-            if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
-                request.loadFromCache = false;
-            }
-        }
+		if (request.loadFromCache) {
+			if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
+				request.loadFromCache = false;
+			}
+		}
 
 		let gnResults = new GNArray();
 
-        let thisPosition: number;
+		let thisPosition: number;
 		let characterPlayers: CharacterPlayer[];
 
-        if (request.loadFromCache) {
-		    thisPosition = await cacheData.getData(positionCacheKey);
-            characterPlayers = await cacheData.getData(cacheKey);
+		if (request.loadFromCache) {
+			thisPosition = await cacheData.getData(positionCacheKey);
+			characterPlayers = await cacheData.getData(cacheKey);
 
-            for (let i = request.skip; i < request.skip + request.limit; i++) {
-                if (i >= characterPlayers.length) break;
+			for (let i = request.skip; i < request.skip + request.limit; i++) {
+				if (i >= characterPlayers.length) break;
 
-                let characterPlayer = characterPlayers[i];
+				let characterPlayer = characterPlayers[i];
 
-                let gnResult = new GNHashtable();
+				let gnResult = new GNHashtable();
 
-                gnResult.add(GNParameterCode.Position, i + thisPosition);
+				gnResult.add(ParameterCode.Position, i + thisPosition);
 
-                gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
+				gnResult.add(ParameterCode.CharacterId, characterPlayer.getCharacterId());
 
-                gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
+				gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
 
-                gnResults.add(gnResult);
-            }
-        }
-        else {
-            let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
-            let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
-    
-            thisPosition = await this.gnServer.getDatabase().loadPositionCharacterPlayerLeaderboardWithStatisticsAsync(request.key, request.characterId, request.catalogId, secretInfo.getGameId(), playerStatisticsSettingsItem.initialValue, direction);
+				gnResults.add(gnResult);
+			}
+		}
+		else {
+			let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
+			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-            if (thisPosition != -1) {
-                await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-                
-                let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
+			thisPosition = await this.gnServer.getDatabase().loadPositionCharacterPlayerLeaderboardWithStatisticsAsync(request.key, request.characterId, request.catalogId, secretInfo.getGameId(), playerStatisticsSettingsItem.initialValue, direction);
 
-                if (request.skip + request.limit <= 100) {
-                    characterPlayerFindOptions = null;
-    
-                    characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
-    
-                    for (let i = request.skip; i < request.skip + request.limit; i++) {
-                        if (i >= characterPlayers.length) break;
-    
-                        let characterPlayer = characterPlayers[i];
-    
-                        let gnResult = new GNHashtable();
-    
-                        gnResult.add(GNParameterCode.Position, i + thisPosition);
-    
-                        gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
-    
-                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
-    
-                        gnResults.add(gnResult);
-                    }
-    
-                    await cacheData.setData(cacheKey, characterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-                }
-                else {
-                    characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
-    
-                    for (let i = 0; i < characterPlayers.length; i++) {
-    
-                        let characterPlayer = characterPlayers[i];
-    
-                        let gnResult = new GNHashtable();
-    
-                        gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
-    
-                        gnResult.add(GNParameterCode.CharacterId, characterPlayer.getCharacterId());
-    
-                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
-    
-                        gnResults.add(gnResult);
-                    }
-                }
-            }
-        }
+			if (thisPosition != -1) {
+				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 
-		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+				let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+				if (request.skip + request.limit <= 100) {
+					characterPlayerFindOptions = null;
+
+					characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
+
+					for (let i = request.skip; i < request.skip + request.limit; i++) {
+						if (i >= characterPlayers.length) break;
+
+						let characterPlayer = characterPlayers[i];
+
+						let gnResult = new GNHashtable();
+
+						gnResult.add(ParameterCode.Position, i + thisPosition);
+
+						gnResult.add(ParameterCode.CharacterId, characterPlayer.getCharacterId());
+
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
+
+						gnResults.add(gnResult);
+					}
+
+					await cacheData.setData(cacheKey, characterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				}
+				else {
+					characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
+
+					for (let i = 0; i < characterPlayers.length; i++) {
+
+						let characterPlayer = characterPlayers[i];
+
+						let gnResult = new GNHashtable();
+
+						gnResult.add(ParameterCode.Position, i + thisPosition + request.skip);
+
+						gnResult.add(ParameterCode.CharacterId, characterPlayer.getCharacterId());
+
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, secretInfo.getGameId()));
+
+						gnResults.add(gnResult);
+					}
+				}
+			}
+		}
+
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetStatisticsLeaderboardAroundPlayer", request, secretInfo, operationRequest, operationResponse);
 

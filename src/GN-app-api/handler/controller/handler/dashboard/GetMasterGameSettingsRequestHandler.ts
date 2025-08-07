@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
@@ -16,259 +16,259 @@ import { MasterGameSettings } from "./../../../../../GN-library/xdatabase/lib/en
 
 class GetMasterGameSettingsOperationRequest extends OperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetMasterGameSettingsRequestHandler extends RequestHandler {
-    public override getCode() {
-        return OperationCode.GetMasterGameSettings;
-    }
+	public override getCode() {
+		return OperationCode.GetMasterGameSettings;
+	}
 
-    public override getCommonOperationRequest() {
-        return GetMasterGameSettingsOperationRequest;
-    }
+	public override getCommonOperationRequest() {
+		return GetMasterGameSettingsOperationRequest;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(operationRequest);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(operationRequest);
+		}
 
-        if (!secretInfo.getPermission().masterAdmin.getMasterGameSettings.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterAdmin.getMasterGameSettings.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({}, secretInfo, operationRequest);
-    }
+		return this.execute({}, secretInfo, operationRequest);
+	}
 
-    private async execute(request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetMasterGameSettings", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+	private async execute(request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetMasterGameSettings", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
+		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
-        let result = await collection.findOne({ type: "masterGameSettings" });
+		let result = await collection.findOne({ type: "masterGameSettings" });
 
-        let masterGameSettings = new MasterGameSettings(result, collection);
+		let masterGameSettings = new MasterGameSettings(result, collection);
 
-        {
-            let thirtPartySettings = masterGameSettings.getThirtPartySettings();
+		{
+			let thirtPartySettings = masterGameSettings.getThirtPartySettings();
 
-            let gnThirtPartySettings = new GNHashtable();
+			let gnThirtPartySettings = new GNHashtable();
 
-            if (thirtPartySettings.googleSettings != null) {
-                let gnGoogleSettings = new GNHashtable();
+			if (thirtPartySettings.googleSettings != null) {
+				let gnGoogleSettings = new GNHashtable();
 
-                gnGoogleSettings.add(GNParameterCode.GoogleClientId, thirtPartySettings.googleSettings.googleClientId);
-                gnGoogleSettings.add(GNParameterCode.PackageId, thirtPartySettings.googleSettings.packageId);
-                gnGoogleSettings.add(GNParameterCode.PublicRSAKey, thirtPartySettings.googleSettings.publicRSAKey);
+				gnGoogleSettings.add(ParameterCode.GoogleClientId, thirtPartySettings.googleSettings.googleClientId);
+				gnGoogleSettings.add(ParameterCode.PackageId, thirtPartySettings.googleSettings.packageId);
+				gnGoogleSettings.add(ParameterCode.PublicRSAKey, thirtPartySettings.googleSettings.publicRSAKey);
 
-                gnThirtPartySettings.add(GNParameterCode.GoogleSettings, gnGoogleSettings);
-            }
+				gnThirtPartySettings.add(ParameterCode.GoogleSettings, gnGoogleSettings);
+			}
 
-            if (thirtPartySettings.facebookSettings != null) {
-                let gnFacebookSettings = new GNHashtable();
+			if (thirtPartySettings.facebookSettings != null) {
+				let gnFacebookSettings = new GNHashtable();
 
-                gnFacebookSettings.add(GNParameterCode.FacebookAppId, thirtPartySettings.facebookSettings.facebookAppId);
-                gnFacebookSettings.add(GNParameterCode.PackageId, thirtPartySettings.facebookSettings.packageId);
-                gnFacebookSettings.add(GNParameterCode.FacebookInappSecret, thirtPartySettings.facebookSettings.facebookInappSecret);
-                gnFacebookSettings.add(GNParameterCode.FacebookAppToken, thirtPartySettings.facebookSettings.facebookAppToken);
+				gnFacebookSettings.add(ParameterCode.FacebookAppId, thirtPartySettings.facebookSettings.facebookAppId);
+				gnFacebookSettings.add(ParameterCode.PackageId, thirtPartySettings.facebookSettings.packageId);
+				gnFacebookSettings.add(ParameterCode.FacebookInappSecret, thirtPartySettings.facebookSettings.facebookInappSecret);
+				gnFacebookSettings.add(ParameterCode.FacebookAppToken, thirtPartySettings.facebookSettings.facebookAppToken);
 
-                gnThirtPartySettings.add(GNParameterCode.FacebookSettings, gnFacebookSettings);
-            }
+				gnThirtPartySettings.add(ParameterCode.FacebookSettings, gnFacebookSettings);
+			}
 
-            if (thirtPartySettings.appleSettings != null) {
-                let gnAppleSettings = new GNHashtable();
+			if (thirtPartySettings.appleSettings != null) {
+				let gnAppleSettings = new GNHashtable();
 
-                gnAppleSettings.add(GNParameterCode.AppleClientId, thirtPartySettings.appleSettings.appleClientId);
-                gnAppleSettings.add(GNParameterCode.SandboxEnable, thirtPartySettings.appleSettings.sandboxEnable);
-                gnAppleSettings.add(GNParameterCode.IssuerId, thirtPartySettings.appleSettings.issuerId);
-                gnAppleSettings.add(GNParameterCode.KeyId, thirtPartySettings.appleSettings.keyId);
-                gnAppleSettings.add(GNParameterCode.P8Content, thirtPartySettings.appleSettings.p8Content);
+				gnAppleSettings.add(ParameterCode.AppleClientId, thirtPartySettings.appleSettings.appleClientId);
+				gnAppleSettings.add(ParameterCode.SandboxEnable, thirtPartySettings.appleSettings.sandboxEnable);
+				gnAppleSettings.add(ParameterCode.IssuerId, thirtPartySettings.appleSettings.issuerId);
+				gnAppleSettings.add(ParameterCode.KeyId, thirtPartySettings.appleSettings.keyId);
+				gnAppleSettings.add(ParameterCode.P8Content, thirtPartySettings.appleSettings.p8Content);
 
-                gnThirtPartySettings.add(GNParameterCode.AppleSettings, gnAppleSettings);
-            }
+				gnThirtPartySettings.add(ParameterCode.AppleSettings, gnAppleSettings);
+			}
 
-            if (thirtPartySettings.googlePlayGameSettings != null) {
-                let gnGooglePlayGameSettings = new GNHashtable();
+			if (thirtPartySettings.googlePlayGameSettings != null) {
+				let gnGooglePlayGameSettings = new GNHashtable();
 
-                gnGooglePlayGameSettings.add(GNParameterCode.ApplicationId, thirtPartySettings.googlePlayGameSettings.applicationId);
-                gnGooglePlayGameSettings.add(GNParameterCode.ClientId, thirtPartySettings.googlePlayGameSettings.clientId);
-                gnGooglePlayGameSettings.add(GNParameterCode.ClientSecret, thirtPartySettings.googlePlayGameSettings.clientSecret);
-                gnGooglePlayGameSettings.add(GNParameterCode.RedirectUri, thirtPartySettings.googlePlayGameSettings.redirectUri);
+				gnGooglePlayGameSettings.add(ParameterCode.ApplicationId, thirtPartySettings.googlePlayGameSettings.applicationId);
+				gnGooglePlayGameSettings.add(ParameterCode.ClientId, thirtPartySettings.googlePlayGameSettings.clientId);
+				gnGooglePlayGameSettings.add(ParameterCode.ClientSecret, thirtPartySettings.googlePlayGameSettings.clientSecret);
+				gnGooglePlayGameSettings.add(ParameterCode.RedirectUri, thirtPartySettings.googlePlayGameSettings.redirectUri);
 
-                gnThirtPartySettings.add(GNParameterCode.GooglePlayGameSettings, gnGooglePlayGameSettings);
-            }
+				gnThirtPartySettings.add(ParameterCode.GooglePlayGameSettings, gnGooglePlayGameSettings);
+			}
 
-            if (thirtPartySettings.gameCenterSettings != null) {
-                let gnGameCenterSettings = new GNHashtable();
+			if (thirtPartySettings.gameCenterSettings != null) {
+				let gnGameCenterSettings = new GNHashtable();
 
-                gnGameCenterSettings.add(GNParameterCode.PackageId, thirtPartySettings.gameCenterSettings.packageId);
+				gnGameCenterSettings.add(ParameterCode.PackageId, thirtPartySettings.gameCenterSettings.packageId);
 
-                gnThirtPartySettings.add(GNParameterCode.GameCenterSettings, gnGameCenterSettings);
-            }
+				gnThirtPartySettings.add(ParameterCode.GameCenterSettings, gnGameCenterSettings);
+			}
 
-            operationResponse.setParameter(GNParameterCode.ThirtPartySettings, gnThirtPartySettings);
-        }
+			operationResponse.setParameter(ParameterCode.ThirtPartySettings, gnThirtPartySettings);
+		}
 
-        {
-            let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
+		{
+			let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
 
-            let gnMasterPlayerSettings = new GNHashtable();
+			let gnMasterPlayerSettings = new GNHashtable();
 
-            {
-                let gnGenericServiceSettings = new GNArray();
+			{
+				let gnGenericServiceSettings = new GNArray();
 
-                for (let i = 0; i < masterPlayerSettings.genericServiceSettings.length; i++) {
-                    let genericServiceSetting = masterPlayerSettings.genericServiceSettings[i];
+				for (let i = 0; i < masterPlayerSettings.genericServiceSettings.length; i++) {
+					let genericServiceSetting = masterPlayerSettings.genericServiceSettings[i];
 
-                    let gnGenericServiceSetting = new GNHashtable();
+					let gnGenericServiceSetting = new GNHashtable();
 
-                    gnGenericServiceSetting.add(GNParameterCode.ServiceName, genericServiceSetting.serviceName);
+					gnGenericServiceSetting.add(ParameterCode.ServiceName, genericServiceSetting.serviceName);
 
-                    gnGenericServiceSettings.add(gnGenericServiceSetting);
-                }
+					gnGenericServiceSettings.add(gnGenericServiceSetting);
+				}
 
-                gnMasterPlayerSettings.add(GNParameterCode.GenericServiceSettings, gnGenericServiceSettings);
-            }
+				gnMasterPlayerSettings.add(ParameterCode.GenericServiceSettings, gnGenericServiceSettings);
+			}
 
-            {
-                let gnPlayerCurrencySettings = new GNArray();
+			{
+				let gnPlayerCurrencySettings = new GNArray();
 
-                for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
-                    let playerCurrencySetting = masterPlayerSettings.playerCurrencySettings[i];
+				for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
+					let playerCurrencySetting = masterPlayerSettings.playerCurrencySettings[i];
 
-                    let gnPlayerCurrencySetting = new GNHashtable();
+					let gnPlayerCurrencySetting = new GNHashtable();
 
-                    gnPlayerCurrencySetting.add(GNParameterCode.Key, playerCurrencySetting.key);
-                    gnPlayerCurrencySetting.add(GNParameterCode.InitialValue, playerCurrencySetting.initialValue);
-                    gnPlayerCurrencySetting.add(GNParameterCode.DisplayName, playerCurrencySetting.displayName);
-                    gnPlayerCurrencySetting.add(GNParameterCode.Index, playerCurrencySetting.index);
+					gnPlayerCurrencySetting.add(ParameterCode.Key, playerCurrencySetting.key);
+					gnPlayerCurrencySetting.add(ParameterCode.InitialValue, playerCurrencySetting.initialValue);
+					gnPlayerCurrencySetting.add(ParameterCode.Description, playerCurrencySetting.description);
+					gnPlayerCurrencySetting.add(ParameterCode.Index, playerCurrencySetting.index);
 
-                    gnPlayerCurrencySettings.add(gnPlayerCurrencySetting);
-                }
+					gnPlayerCurrencySettings.add(gnPlayerCurrencySetting);
+				}
 
-                gnMasterPlayerSettings.add(GNParameterCode.CurrencySettings, gnPlayerCurrencySettings);
-            }
+				gnMasterPlayerSettings.add(ParameterCode.CurrencySettings, gnPlayerCurrencySettings);
+			}
 
-            {
-                let gnPlayerStatisticsSettings = new GNArray();
+			{
+				let gnPlayerStatisticsSettings = new GNArray();
 
-                for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
-                    let playerStatisticsSetting = masterPlayerSettings.playerStatisticsSettings[i];
+				for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
+					let playerStatisticsSetting = masterPlayerSettings.playerStatisticsSettings[i];
 
-                    let gnPlayerStatisticsSetting = new GNHashtable();
+					let gnPlayerStatisticsSetting = new GNHashtable();
 
-                    gnPlayerStatisticsSetting.add(GNParameterCode.Key, playerStatisticsSetting.key);
-                    gnPlayerStatisticsSetting.add(GNParameterCode.StatisticsAggregationMethod, playerStatisticsSetting.statisticsAggregationMethod);
-                    gnPlayerStatisticsSetting.add(GNParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
-                    gnPlayerStatisticsSetting.add(GNParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
-                    gnPlayerStatisticsSetting.add(GNParameterCode.InitialValue, playerStatisticsSetting.initialValue);
-                    gnPlayerStatisticsSetting.add(GNParameterCode.DisplayName, playerStatisticsSetting.displayName);
-                    gnPlayerStatisticsSetting.add(GNParameterCode.Index, playerStatisticsSetting.index);
+					gnPlayerStatisticsSetting.add(ParameterCode.Key, playerStatisticsSetting.key);
+					gnPlayerStatisticsSetting.add(ParameterCode.StatisticsAggregationMethod, playerStatisticsSetting.statisticsAggregationMethod);
+					gnPlayerStatisticsSetting.add(ParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.InitialValue, playerStatisticsSetting.initialValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.Description, playerStatisticsSetting.description);
+					gnPlayerStatisticsSetting.add(ParameterCode.Index, playerStatisticsSetting.index);
 
-                    gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
-                }
+					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
+				}
 
-                gnMasterPlayerSettings.add(GNParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
-            }
+				gnMasterPlayerSettings.add(ParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
+			}
 
-            {
-                let gnPlayerDatasSettings = new GNArray();
+			{
+				let gnPlayerDatasSettings = new GNArray();
 
-                for (let i = 0; i < masterPlayerSettings.playerDatasSettings.length; i++) {
-                    let playerDatasSetting = masterPlayerSettings.playerDatasSettings[i];
+				for (let i = 0; i < masterPlayerSettings.playerDatasSettings.length; i++) {
+					let playerDatasSetting = masterPlayerSettings.playerDatasSettings[i];
 
-                    let gnPlayerDatasSetting = new GNHashtable();
+					let gnPlayerDatasSetting = new GNHashtable();
 
-                    gnPlayerDatasSetting.add(GNParameterCode.Key, playerDatasSetting.key);
-                    gnPlayerDatasSetting.add(GNParameterCode.Permission, playerDatasSetting.permission);
-                    gnPlayerDatasSetting.add(GNParameterCode.DisplayName, playerDatasSetting.displayName);
+					gnPlayerDatasSetting.add(ParameterCode.Key, playerDatasSetting.key);
+					gnPlayerDatasSetting.add(ParameterCode.Permission, playerDatasSetting.permission);
+					gnPlayerDatasSetting.add(ParameterCode.Description, playerDatasSetting.description);
 
-                    gnPlayerDatasSettings.add(gnPlayerDatasSetting);
-                }
+					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
+				}
 
-                gnMasterPlayerSettings.add(GNParameterCode.DatasSettings, gnPlayerDatasSettings);
-            }
+				gnMasterPlayerSettings.add(ParameterCode.DatasSettings, gnPlayerDatasSettings);
+			}
 
-            {
-                let gnCustomDatasSettings = new GNArray();
+			{
+				let gnCustomDatasSettings = new GNArray();
 
-                for (let i = 0; i < masterPlayerSettings.customDatasSettings.length; i++) {
-                    let customDatasSetting = masterPlayerSettings.customDatasSettings[i];
+				for (let i = 0; i < masterPlayerSettings.customDatasSettings.length; i++) {
+					let customDatasSetting = masterPlayerSettings.customDatasSettings[i];
 
-                    let gnCustomDatasSetting = new GNHashtable();
+					let gnCustomDatasSetting = new GNHashtable();
 
-                    gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
-                    gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
-                    gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
+					gnCustomDatasSetting.add(ParameterCode.Key, customDatasSetting.key);
+					gnCustomDatasSetting.add(ParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(ParameterCode.Description, customDatasSetting.description);
 
-                    gnCustomDatasSettings.add(gnCustomDatasSetting);
-                }
+					gnCustomDatasSettings.add(gnCustomDatasSetting);
+				}
 
-                gnMasterPlayerSettings.add(GNParameterCode.CustomDatasSettings, gnCustomDatasSettings);
-            }
+				gnMasterPlayerSettings.add(ParameterCode.CustomDatasSettings, gnCustomDatasSettings);
+			}
 
-            {
-                let gnTagsSettings = new GNArray();
+			{
+				let gnTagsSettings = new GNArray();
 
-                for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
-                    let tagsSetting = masterPlayerSettings.tagsSettings[i];
+				for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
+					let tagsSetting = masterPlayerSettings.tagsSettings[i];
 
-                    let gnTagsSetting = new GNHashtable();
+					let gnTagsSetting = new GNHashtable();
 
-                    gnTagsSetting.add(GNParameterCode.Key, tagsSetting.key);
-                    gnTagsSetting.add(GNParameterCode.DisplayName, tagsSetting.displayName);
-                    gnTagsSetting.add(GNParameterCode.Index, tagsSetting.index);
+					gnTagsSetting.add(ParameterCode.Key, tagsSetting.key);
+					gnTagsSetting.add(ParameterCode.Description, tagsSetting.description);
+					gnTagsSetting.add(ParameterCode.Index, tagsSetting.index);
 
-                    gnTagsSettings.add(gnTagsSetting);
-                }
+					gnTagsSettings.add(gnTagsSetting);
+				}
 
-                gnMasterPlayerSettings.add(GNParameterCode.TagsSettings, gnTagsSettings);
-            }
+				gnMasterPlayerSettings.add(ParameterCode.TagsSettings, gnTagsSettings);
+			}
 
-            operationResponse.setParameter(GNParameterCode.MasterPlayerSettings, gnMasterPlayerSettings);
-        }
+			operationResponse.setParameter(ParameterCode.MasterPlayerSettings, gnMasterPlayerSettings);
+		}
 
-        {
-            let emailSettings = masterGameSettings.getEmailSettings();
+		{
+			let emailSettings = masterGameSettings.getEmailSettings();
 
-            let gnEmailSettings = new GNHashtable();
-            gnEmailSettings.add(GNParameterCode.SendFrom, emailSettings.sendFrom);
-            gnEmailSettings.add(GNParameterCode.Host, emailSettings.host);
-            gnEmailSettings.add(GNParameterCode.Port, emailSettings.port);
-            gnEmailSettings.add(GNParameterCode.Secure, emailSettings.secure);
-            gnEmailSettings.add(GNParameterCode.Username, emailSettings.username);
-            gnEmailSettings.add(GNParameterCode.Password, emailSettings.password);
+			let gnEmailSettings = new GNHashtable();
+			gnEmailSettings.add(ParameterCode.SendFrom, emailSettings.sendFrom);
+			gnEmailSettings.add(ParameterCode.Host, emailSettings.host);
+			gnEmailSettings.add(ParameterCode.Port, emailSettings.port);
+			gnEmailSettings.add(ParameterCode.Secure, emailSettings.secure);
+			gnEmailSettings.add(ParameterCode.Username, emailSettings.username);
+			gnEmailSettings.add(ParameterCode.Password, emailSettings.password);
 
-            operationResponse.setParameter(GNParameterCode.EmailSettings, gnEmailSettings);
-        }
+			operationResponse.setParameter(ParameterCode.EmailSettings, gnEmailSettings);
+		}
 
-        {
-            let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
+		{
+			let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
 
-            let gnPushNotificationSettings = new GNHashtable();
-            gnPushNotificationSettings.add(GNParameterCode.ProjectId, pushNotificationSettings.projectId);
-            gnPushNotificationSettings.add(GNParameterCode.ClientEmail, pushNotificationSettings.clientEmail);
-            gnPushNotificationSettings.add(GNParameterCode.PrivateKey, pushNotificationSettings.privateKey);
+			let gnPushNotificationSettings = new GNHashtable();
+			gnPushNotificationSettings.add(ParameterCode.ProjectId, pushNotificationSettings.projectId);
+			gnPushNotificationSettings.add(ParameterCode.ClientEmail, pushNotificationSettings.clientEmail);
+			gnPushNotificationSettings.add(ParameterCode.PrivateKey, pushNotificationSettings.privateKey);
 
-            operationResponse.setParameter(GNParameterCode.PushNotificationSettings, gnPushNotificationSettings);
-        }
+			operationResponse.setParameter(ParameterCode.PushNotificationSettings, gnPushNotificationSettings);
+		}
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetMasterGameSetings", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetMasterGameSetings", request, secretInfo, operationRequest, operationResponse);
 
-        return operationResponse;
-    }
+		return operationResponse;
+	}
 }

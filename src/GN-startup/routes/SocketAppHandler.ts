@@ -11,9 +11,9 @@ import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
 import { Commands } from "./../../GN-common/constant/Commands";
 import { xDatabase } from "./../../GN-library/xdatabase/lib/xDatabase";
-import { RequestType } from "../../GN-common/constant/enumType/RequestType";
-import { EnumUtility } from "../../GN-common/helper/EnumUtility";
-import { RequestRole } from "../../GN-common/constant/enumType/RequestRole";
+import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
+import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
+import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -283,7 +283,7 @@ export class SocketAppHandler {
 			return null;
 		}
 
-		return await this.onSocketResponse(socket, requestData, returnCode, true);
+		return await this.onSocketResponse(socket, requestData, returnCode);
 	}
 
 	private async onSocketRequestJson(socket: Socket, data: any, returnCode: number): Promise<OperationResponse> {
@@ -302,10 +302,10 @@ export class SocketAppHandler {
 			return null;
 		}
 
-		return await this.onSocketResponse(socket, requestData, returnCode, false);
+		return await this.onSocketResponse(socket, requestData, returnCode);
 	}
 
-	private async onSocketResponse(socket: Socket, requestData: any, returnCode: number, encrypted: boolean): Promise<OperationResponse> {
+	private async onSocketResponse(socket: Socket, requestData: any, returnCode: number): Promise<OperationResponse> {
 		let requestTypeStr = requestData[0] as string;
 		let operationCodeStr = requestData[1] as string;
 		let roleStr = requestData[2] as string;
@@ -324,7 +324,6 @@ export class SocketAppHandler {
 		request.setIP(socket.data.IPAddress);
 		request.setParameters(params);
 		request.setRequestId(requestId);
-		request.setEncrypted(encrypted);
 
 		let isAuthenticated = socket.data.isAuthenticated;
 		if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
@@ -344,7 +343,7 @@ export class SocketAppHandler {
 				operationResponse = await this._onRequestCb(request);
 			}
 			catch (err) {
-				operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
+				operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 				operationResponse.setReturnCode(ReturnCode.InternalServerError);
 				operationResponse.setDebugMessage(err.message);
 
@@ -352,7 +351,7 @@ export class SocketAppHandler {
 			}
 		}
 		else {
-			operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
+			operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
 			operationResponse.setReturnCode(returnCode);
 		}
 
@@ -387,10 +386,6 @@ export class SocketAppHandler {
 
 		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(finalData));
 
-		if (operationResponse.isEncrypted()) {
-            // TODO Encrypt data
-		}
-
         if (useMsgPack) {
             let socketDataMsgPack = encode(finalData);
 
@@ -401,11 +396,11 @@ export class SocketAppHandler {
         }
 	}
 
-	// private sendEventForSocket(socket: Socket, operationEvent: OperationEvent) {
+	// private sendEventForSocket(socket: Socket, operationEvent: OperationEvent, useMsgPack: boolean = true) {
 	// 	let socketData = OperationHelper.toEventSocketData(operationEvent);
 	// 	if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
 
-	// 	if (operationEvent.isEncrypted())
+	// 	if (useMsgPack)
 	// 	{
 	// 		let socketDataMsgPack = encode(socketData);
 
@@ -420,10 +415,6 @@ export class SocketAppHandler {
 	public sendEventTo(userId: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] " + userId + " %O", JSON.stringify(socketData));
-
-		if (operationEvent.isEncrypted()) {
-			// TODO Encrypt data
-		}
 
         if (useMsgPack) {
             let socketDataMsgPack = encode(socketData);
@@ -441,10 +432,6 @@ export class SocketAppHandler {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] " + roomId + " %O", JSON.stringify(socketData));
 
-		if (operationEvent.isEncrypted()) {
-			// TODO Encrypt data
-		}
-
         if (useMsgPack) {
             let socketDataMsgPack = encode(socketData);
 
@@ -460,10 +447,6 @@ export class SocketAppHandler {
 	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO MORE USER] %O", JSON.stringify(socketData));
-
-        if (operationEvent.isEncrypted()) {
-			// TODO Encrypt data
-		}
 
 		if (useMsgPack) {
 			let socketDataMsgPack = encode(socketData);
@@ -481,10 +464,6 @@ export class SocketAppHandler {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ALL PLAYER] %O", JSON.stringify(socketData));
 
-        if (operationEvent.isEncrypted()) {
-			// TODO Encrypt data
-		}
-
 		if (useMsgPack)
 		{
 			let socketDataMsgPack = encode(socketData);
@@ -499,11 +478,11 @@ export class SocketAppHandler {
 		}
 	}
 
-	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent): void {
+	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
 
-		if (operationEvent.isEncrypted())
+		if (useMsgPack)
 		{
 			let socketDataMsgPack = encode(socketData);
 

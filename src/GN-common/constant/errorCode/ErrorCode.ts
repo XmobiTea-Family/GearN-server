@@ -1,4 +1,4 @@
-export class GNErrorCode {
+export class ErrorCode {
 	public static readonly Ok: number = 1;
 
 	public static readonly AccountNotFound: number = 2;

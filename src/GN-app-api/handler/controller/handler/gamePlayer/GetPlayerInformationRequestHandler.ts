@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
@@ -16,10 +16,10 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetPlayerInformationOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
@@ -30,10 +30,10 @@ class GetPlayerInformationOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayerInformationOperationRequest extends GetPlayerInformationOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
-	@BooleanDataMember({ code: GNParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
+	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
 	createPlayerIfNotExists?: boolean;
 
 	public override isValidRequest() {
@@ -163,7 +163,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
@@ -172,13 +172,13 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 
 		if (gamePlayer == null) {
 			if (!request.createPlayerIfNotExists) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 				return operationResponse;
 			}
 			else {
 				let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {});
 				if (!masterPlayer) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 					return operationResponse;
 				}
 			}
@@ -222,9 +222,9 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 			gamePlayer.saveAsync();
 		}
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayerInformation", request, secretInfo, operationRequest, operationResponse);
 

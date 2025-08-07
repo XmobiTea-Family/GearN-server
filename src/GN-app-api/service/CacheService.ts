@@ -1,157 +1,157 @@
-import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { ICacheService, CacheItem } from "./ICacheService";
 import * as mongoDB from "mongodb";
 
 export interface ICacheServiceController {
-    getData<T>(key: string): Promise<T>;
+	getData<T>(key: string): Promise<T>;
 
-    setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void>;
+	setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void>;
 
-    removeData(key: string): Promise<boolean>;
+	removeData(key: string): Promise<boolean>;
 
-    isValid(key: string): Promise<boolean>;
+	isValid(key: string): Promise<boolean>;
 
-    removeInvalidData(): Promise<number>;
+	removeInvalidData(): Promise<number>;
 }
 
 export class MemoryCacheServiceController implements ICacheServiceController {
-    private dataDic: Map<string, CacheItem>;
+	private dataDic: Map<string, CacheItem>;
 
-    public async getData<T>(key: string): Promise<T> {
-        if (!this.dataDic.has(key)) return null;
+	public async getData<T>(key: string): Promise<T> {
+		if (!this.dataDic.has(key)) return null;
 
-        return <T>this.dataDic.get(key).getData();
-    }
+		return <T>this.dataDic.get(key).getData();
+	}
 
-    public async setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void> {
-        if (!this.dataDic.has(key)) this.dataDic.set(key, new CacheItem(tData, expireAfterMs));
-        else {
-            this.dataDic.get(key).setData(tData, expireAfterMs);
-        }
-    }
+	public async setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void> {
+		if (!this.dataDic.has(key)) this.dataDic.set(key, new CacheItem(tData, expireAfterMs));
+		else {
+			this.dataDic.get(key).setData(tData, expireAfterMs);
+		}
+	}
 
-    public async removeData(key: string): Promise<boolean> {
-        return this.dataDic.delete(key);
-    }
+	public async removeData(key: string): Promise<boolean> {
+		return this.dataDic.delete(key);
+	}
 
-    public async isValid(key: string): Promise<boolean> {
-        if (!this.dataDic.has(key)) return false;
+	public async isValid(key: string): Promise<boolean> {
+		if (!this.dataDic.has(key)) return false;
 
-        let cacheItem = this.dataDic.get(key);
-        if (cacheItem.isExpired()) return false;
+		let cacheItem = this.dataDic.get(key);
+		if (cacheItem.isExpired()) return false;
 
-        return true;
-    }
+		return true;
+	}
 
-    public async removeInvalidData(): Promise<number> {
-        let removeCount = 0;
+	public async removeInvalidData(): Promise<number> {
+		let removeCount = 0;
 
-        let entries = this.dataDic.entries();
+		let entries = this.dataDic.entries();
 
-        let keysNeedRemove: string[] = [];
+		let keysNeedRemove: string[] = [];
 
-        for (let [key, cacheItem] of entries) {
-            if (cacheItem == null || cacheItem.isExpired()) {
-                keysNeedRemove.push(key);
-                removeCount++;
-            }
-        }
+		for (let [key, cacheItem] of entries) {
+			if (cacheItem == null || cacheItem.isExpired()) {
+				keysNeedRemove.push(key);
+				removeCount++;
+			}
+		}
 
-        for (let key of keysNeedRemove) {
-            this.dataDic.delete(key);
-        }
+		for (let key of keysNeedRemove) {
+			this.dataDic.delete(key);
+		}
 
-        return removeCount;
-    }
+		return removeCount;
+	}
 
-    constructor() {
-        this.dataDic = new Map();
-    }
+	constructor() {
+		this.dataDic = new Map();
+	}
 }
 
 export class MongoDbCacheServiceController implements ICacheServiceController {
-    private cacheCollection: mongoDB.Collection<mongoDB.Document>;
+	private cacheCollection: mongoDB.Collection<mongoDB.Document>;
 
-    public async getData<T>(key: string): Promise<T> {
-        let result = await this.cacheCollection.findOne({ key: key }, {
-            projection: {
-                data: true
-            }
-        });
+	public async getData<T>(key: string): Promise<T> {
+		let result = await this.cacheCollection.findOne({ key: key }, {
+			projection: {
+				data: true
+			}
+		});
 
-        if (!result) return null;
+		if (!result) return null;
 
-        return <T>result.data;
-    }
+		return <T>result.data;
+	}
 
-    public async setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void> {
-        await this.cacheCollection.updateOne({ key: key }, {
-            $set: {
-                data: tData,
-                tsExpire: xDatetime.getCurrentMilliseconds() + expireAfterMs
-            },
-        },
-        {
-            upsert: true,
-        });
-    }
+	public async setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void> {
+		await this.cacheCollection.updateOne({ key: key }, {
+			$set: {
+				data: tData,
+				tsExpire: xDatetime.getCurrentMilliseconds() + expireAfterMs
+			},
+		},
+			{
+				upsert: true,
+			});
+	}
 
-    public async removeData(key: string): Promise<boolean> {
-        let deleteResult = await this.cacheCollection.deleteOne({ key: key });
+	public async removeData(key: string): Promise<boolean> {
+		let deleteResult = await this.cacheCollection.deleteOne({ key: key });
 
-        return deleteResult.deletedCount > 0;
-    }
+		return deleteResult.deletedCount > 0;
+	}
 
-    public async isValid(key: string): Promise<boolean> {
-        let result = await this.cacheCollection.findOne({ key: key }, {
-            projection: {
-                tsExpire: true
-            }
-        });
+	public async isValid(key: string): Promise<boolean> {
+		let result = await this.cacheCollection.findOne({ key: key }, {
+			projection: {
+				tsExpire: true
+			}
+		});
 
-        if (!result) return false;
+		if (!result) return false;
 
-        if (result.tsExpire < xDatetime.getCurrentMilliseconds()) return false;
+		if (result.tsExpire < xDatetime.getCurrentMilliseconds()) return false;
 
-        return true;
-    }
+		return true;
+	}
 
-    public async removeInvalidData(): Promise<number> {
-        let deleteResult = await this.cacheCollection.deleteMany({ tsExpire: { $lt: xDatetime.getCurrentMilliseconds() } });
-        
-        let removeCount = deleteResult.deletedCount;
-        return removeCount;
-    }
+	public async removeInvalidData(): Promise<number> {
+		let deleteResult = await this.cacheCollection.deleteMany({ tsExpire: { $lt: xDatetime.getCurrentMilliseconds() } });
 
-    constructor(cacheCollection: mongoDB.Collection<mongoDB.Document>) {
-        this.cacheCollection = cacheCollection;
-    }
+		let removeCount = deleteResult.deletedCount;
+		return removeCount;
+	}
+
+	constructor(cacheCollection: mongoDB.Collection<mongoDB.Document>) {
+		this.cacheCollection = cacheCollection;
+	}
 }
 
 export class CacheService implements ICacheService {
-    private cacheServiceController: ICacheServiceController;
+	private cacheServiceController: ICacheServiceController;
 
-    public async getData<T>(key: string): Promise<T> {
-        return await this.cacheServiceController.getData<T>(key);
-    }
+	public async getData<T>(key: string): Promise<T> {
+		return await this.cacheServiceController.getData<T>(key);
+	}
 
-    public async setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void> {
-        return await this.cacheServiceController.setData<T>(key, tData, expireAfterMs);
-    }
+	public async setData<T>(key: string, tData: T, expireAfterMs: number): Promise<void> {
+		return await this.cacheServiceController.setData<T>(key, tData, expireAfterMs);
+	}
 
-    public async removeData(key: string): Promise<boolean> {
-        return await this.cacheServiceController.removeData(key);
-    }
+	public async removeData(key: string): Promise<boolean> {
+		return await this.cacheServiceController.removeData(key);
+	}
 
-    public async isValid(key: string): Promise<boolean> {
-        return await this.cacheServiceController.isValid(key);
-    }
+	public async isValid(key: string): Promise<boolean> {
+		return await this.cacheServiceController.isValid(key);
+	}
 
-    public async removeInvalidData(): Promise<number> {
-        return await this.cacheServiceController.removeInvalidData();
-    }
+	public async removeInvalidData(): Promise<number> {
+		return await this.cacheServiceController.removeInvalidData();
+	}
 
-    constructor(cacheServiceController: ICacheServiceController) {
-        this.cacheServiceController = cacheServiceController;
-    }
+	constructor(cacheServiceController: ICacheServiceController) {
+		this.cacheServiceController = cacheServiceController;
+	}
 }

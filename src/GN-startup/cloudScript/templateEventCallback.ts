@@ -1,78 +1,78 @@
-import { SecretInfo, SecretPermissionItem } from "../../index";
-import { AuthInfo } from "../../index";
-import { authenticate_InfoRequestParam as authenticate_InfoRequestParam } from "../../index";
-import { characterPlayer_InfoRequestParam as characterPlayer_InfoRequestParam } from "../../index";
-import { gamePlayer_InfoRequestParam as gamePlayer_InfoRequestParam } from "../../index";
-import { group_InfoRequestParam as group_InfoRequestParam } from "../../index";
-import { inventory_InfoRequestParam as inventory_InfoRequestParam } from "../../index";
-import { masterPlayer_InfoRequestParam as masterPlayer_InfoRequestParam } from "../../index";
-import { storeInventory_InfoRequestParam as storeInventory_InfoRequestParam } from "../../index";
-import { PermissionParam } from "../../index";
+import { SecretInfo, SecretPermissionItem } from "./../../index";
+import { AuthInfo } from "./../../index";
+import { authenticate_InfoRequestParam as authenticate_InfoRequestParam } from "./../../index";
+import { characterPlayer_InfoRequestParam as characterPlayer_InfoRequestParam } from "./../../index";
+import { gamePlayer_InfoRequestParam as gamePlayer_InfoRequestParam } from "./../../index";
+import { group_InfoRequestParam as group_InfoRequestParam } from "./../../index";
+import { inventory_InfoRequestParam as inventory_InfoRequestParam } from "./../../index";
+import { masterPlayer_InfoRequestParam as masterPlayer_InfoRequestParam } from "./../../index";
+import { storeInventory_InfoRequestParam as storeInventory_InfoRequestParam } from "./../../index";
+import { PermissionParam } from "./../../index";
 
-import { ContentDataParam } from "../../index";
+import { ContentDataParam } from "./../../index";
 
-import { CustomDataParam } from "../../index";
-// import { GroupMemberParam } from "../../index";
-import { PlayerCurrencyParam } from "../../index";
-import { PlayerDataParam } from "../../index";
-import { PlayerStatisticsParam } from "../../index";
+import { CustomDataParam } from "./../../index";
+// import { GroupMemberParam } from "./../../index";
+import { PlayerCurrencyParam } from "./../../index";
+import { PlayerDataParam } from "./../../index";
+import { PlayerStatisticsParam } from "./../../index";
 
-import { GroupCurrencyParam } from "../../index";
-import { GroupDataParam } from "../../index";
-import { GroupMemberParam } from "../../index";
-import { GroupMessageItem } from "../../index";
-import { GroupStatisticsParam } from "../../index";
+import { GroupCurrencyParam } from "./../../index";
+import { GroupDataParam } from "./../../index";
+import { GroupMemberParam } from "./../../index";
+import { GroupMessageItem } from "./../../index";
+import { GroupStatisticsParam } from "./../../index";
 
-import { ItemDataParam } from "../../index";
-import { ItemStatisticsParam } from "../../index";
+import { ItemDataParam } from "./../../index";
+import { ItemStatisticsParam } from "./../../index";
 
-import { AvatarParam } from "../../index";
-import { CurrencyParam } from "../../index";
-import { InAppPurchaseParam } from "../../index";
-import { StoreDataParam } from "../../index";
-import { StoreItemParam } from "../../index";
-import { TagParam } from "../../index";
+import { AvatarParam } from "./../../index";
+import { CurrencyParam } from "./../../index";
+import { InAppPurchaseParam } from "./../../index";
+import { StoreDataParam } from "./../../index";
+import { StoreItemParam } from "./../../index";
+import { TagParam } from "./../../index";
 
-import { AuthenticatePermissionRulesParam } from "../../index";
-import { CharacterCatalogSettingsParam } from "../../index";
-import { CharacterPlayerPermissionRulesParam } from "../../index";
-import { CharacterPlayerSettingsParam } from "../../index";
-import { CloudScriptPermissionRulesParam } from "../../index";
-import { ContentPermissionRulesParam } from "../../index";
-import { CurrencySettingsParam } from "../../index";
-import { DataSettingsParam } from "../../index";
-import { FriendCatalogSettingsParam } from "../../index";
-import { GamePlayerPermissionRulesParam } from "../../index";
-import { GamePlayerSettingsParam } from "../../index";
-import { GameSettingsParam } from "../../index";
-import { GenericServiceSettingsParam } from "../../index";
-import { GroupCatalogSettingsParam } from "../../index";
-import { GroupPermissionRulesParam } from "../../index";
-import { GroupSettingsParam } from "../../index";
-import { InventoryPermissionRulesParam } from "../../index";
-import { InventorySettingsParam } from "../../index";
-import { ItemCatalogSettingsParam } from "../../index";
-import { ItemClassSettingsParam } from "../../index";
-import { MasterAdminPermissionRulesParam } from "../../index";
-import { MasterPlayerPermissionRulesParam } from "../../index";
-import { MasterPlayerSettingsParam } from "../../index";
-import { MatchmakingQueueSettingsParam } from "../../index";
-import { MultiplayerPermissionRulesParam } from "../../index";
-import { PermissionRulesParam } from "../../index";
-import { StatisticsSettingsParam } from "../../index";
-import { StoreInventoryPermissionRulesParam } from "../../index";
-import { TagSettingsParam } from "../../index";
-import { ThirtPartyAppleSettingsParam } from "../../index";
-import { ThirtPartyFacebookSettingsParam } from "../../index";
-import { ThirtPartyGameCenterSettingsParam } from "../../index";
-import { ThirtPartyGooglePlayGameSettingsParam } from "../../index";
-import { ThirtPartyParam } from "../../index";
-import { EmailSettingsParam } from "../../index";
-import { PushNotificationSettingsParam } from "../../index";
-import { AnalyticsRequestParams } from "../../index";
-import { ServerGameDataRequestParams } from "../../index";
-import { MatchmakingTicketCanMatch } from "../../index";
-import { ServerDetail } from "../../index";
+import { AuthenticatePermissionRulesParam } from "./../../index";
+import { CharacterCatalogSettingsParam } from "./../../index";
+import { CharacterPlayerPermissionRulesParam } from "./../../index";
+import { CharacterPlayerSettingsParam } from "./../../index";
+import { CloudScriptPermissionRulesParam } from "./../../index";
+import { ContentPermissionRulesParam } from "./../../index";
+import { CurrencySettingsParam } from "./../../index";
+import { DataSettingsParam } from "./../../index";
+import { FriendCatalogSettingsParam } from "./../../index";
+import { GamePlayerPermissionRulesParam } from "./../../index";
+import { GamePlayerSettingsParam } from "./../../index";
+import { GameSettingsParam } from "./../../index";
+import { GenericServiceSettingsParam } from "./../../index";
+import { GroupCatalogSettingsParam } from "./../../index";
+import { GroupPermissionRulesParam } from "./../../index";
+import { GroupSettingsParam } from "./../../index";
+import { InventoryPermissionRulesParam } from "./../../index";
+import { InventorySettingsParam } from "./../../index";
+import { ItemCatalogSettingsParam } from "./../../index";
+import { ItemClassSettingsParam } from "./../../index";
+import { MasterAdminPermissionRulesParam } from "./../../index";
+import { MasterPlayerPermissionRulesParam } from "./../../index";
+import { MasterPlayerSettingsParam } from "./../../index";
+import { MatchmakingQueueSettingsParam } from "./../../index";
+import { MultiplayerPermissionRulesParam } from "./../../index";
+import { PermissionRulesParam } from "./../../index";
+import { StatisticsSettingsParam } from "./../../index";
+import { StoreInventoryPermissionRulesParam } from "./../../index";
+import { TagSettingsParam } from "./../../index";
+import { ThirtPartyAppleSettingsParam } from "./../../index";
+import { ThirtPartyFacebookSettingsParam } from "./../../index";
+import { ThirtPartyGameCenterSettingsParam } from "./../../index";
+import { ThirtPartyGooglePlayGameSettingsParam } from "./../../index";
+import { ThirtPartyParam } from "./../../index";
+import { EmailSettingsParam } from "./../../index";
+import { PushNotificationSettingsParam } from "./../../index";
+import { AnalyticsRequestParams } from "./../../index";
+import { ServerGameDataRequestParams } from "./../../index";
+import { MatchmakingTicketCanMatch } from "./../../index";
+import { ServerDetail } from "./../../index";
 
 import {
 	GNNetwork,
@@ -83,8 +83,7 @@ import {
 	Action4,
 	ConverterService,
 	OwnerType,
-	GNErrorCode,
-	GNParameterCode,
+	ErrorCode,
 	ParameterCode,
 	Commands,
 	EventCode,
@@ -160,7 +159,6 @@ interface CloudScriptEvent {
 	operationEvent: {
 		eventCode: string;
 		parameters: {} | null;
-		encrypted: boolean;
 	};
 	receiver: string[] | string | null;
 }
@@ -358,7 +356,6 @@ class CloudScriptSocket {
 			receiver: userId,
 			operationEvent: {
 				eventCode: operationEvent.getEventCode(),
-				encrypted: operationEvent.isEncrypted(),
 				parameters: operationEvent.getParameters()?.toData() ?? null,
 			},
 		});
@@ -370,7 +367,6 @@ class CloudScriptSocket {
 			receiver: userIds,
 			operationEvent: {
 				eventCode: operationEvent.getEventCode(),
-				encrypted: operationEvent.isEncrypted(),
 				parameters: operationEvent.getParameters()?.toData() ?? null,
 			},
 		});
@@ -382,7 +378,6 @@ class CloudScriptSocket {
 			receiver: null,
 			operationEvent: {
 				eventCode: operationEvent.getEventCode(),
-				encrypted: operationEvent.isEncrypted(),
 				parameters: operationEvent.getParameters()?.toData() ?? null,
 			},
 		});
@@ -402,7 +397,6 @@ class CloudScriptMatchmaking {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						gameId: gameId,
 						matchmakingTicketCanMatch: matchmakingTicketCanMatch,
@@ -421,7 +415,6 @@ class CloudScriptMail {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						email: email,
 						subject: subject,
@@ -438,7 +431,6 @@ class CloudScriptMail {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						emails: emails,
 						subject: subject,
@@ -457,7 +449,6 @@ class CloudScriptPushNotification {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						token: token,
 						title: title,
@@ -478,7 +469,6 @@ class CloudScriptPushNotification {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						tokens: tokens,
 						title: title,
@@ -499,7 +489,6 @@ class CloudScriptPushNotification {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						topic: topic,
 						title: title,
@@ -520,7 +509,6 @@ class CloudScriptPushNotification {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						tokens: tokens,
 						topic: topic,
@@ -536,7 +524,6 @@ class CloudScriptPushNotification {
 				receiver: null,
 				operationEvent: {
 					eventCode: 0,
-					encrypted: false,
 					parameters: {
 						tokens: tokens,
 						topic: topic,
@@ -566,20 +553,18 @@ interface CloudScriptRequest {
 		permission: SecretPermissionItem;
 		gameId: string;
 		isDefault: boolean;
-		displayName: string;
+		description: string;
 		onlyMasterAdmin: boolean;
 	};
 	operationRequest: {
 		operationCode: string;
 		requestId: number;
 		parameters: {};
-		encrypted: boolean;
 	};
 	operationResponse?: {
 		returnCode: number;
 		debugMessage: string;
 		parameters: {};
-		encrypted: boolean;
 	};
 	log: (log: any) => void;
 }
@@ -615,7 +600,6 @@ interface FunctionResponse {
 		returnCode: number;
 		debugMessage: string;
 		parameters?: {};
-		encrypted: boolean;
 	} | null;
 	request: {
 		[k: string]: any;
@@ -645,9 +629,22 @@ process?.on("message", async (request: CloudScriptRequest) => {
 
 			handleResponse = await ___handleMatchmakingFunction(functionRequest);
 		}
+		else if (request.eventName == "system_VerifyGenericService") {
+			let functionRequest: FunctionRequest = {
+				eventName: request.eventName,
+				operationRequest: null as any,
+				secretInfo: null as any,
+				request: request.request,
+				log(log: any) {
+					logs.push(JSON.stringify(log));
+				},
+			};
+
+			handleResponse = await ___handleGenericServiceFunction(functionRequest);
+		}
 		else if (request.eventName == "system_OnAuthenticateSuccess") {
 			let originOperationRequest = request.operationRequest;
-			let operationRequest = new OperationRequest(originOperationRequest.operationCode, originOperationRequest.encrypted);
+			let operationRequest = new OperationRequest(originOperationRequest.operationCode);
 			if (originOperationRequest.parameters) {
 				operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
 			}
@@ -657,7 +654,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 			if (originSecretInfo) {
 				secretInfo = SecretInfo.Builder()
 					.setSecretKey(originSecretInfo.secretKey)
-					.setDisplayName(originSecretInfo.displayName)
+					.setDescription(originSecretInfo.description)
 					.setRole(originSecretInfo.role)
 					.setIsRemove(originSecretInfo.remove)
 					.setTsExpire(originSecretInfo.tsExpire)
@@ -672,7 +669,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 			let operationResponse: OperationResponse = null as any;
 
 			if (originOperationResponse) {
-				operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId, originOperationRequest.encrypted);
+				operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId);
 				operationResponse.setReturnCode(originOperationResponse.returnCode);
 				operationResponse.setDebugMessage(originOperationResponse.debugMessage);
 
@@ -710,7 +707,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 	} else if (request.eventType == EventCallbackType.Event) {
 		let originOperationEvent = request.operationRequest;
 
-		let operationEvent = new OperationEvent(originOperationEvent.operationCode, (originOperationEvent.parameters ? GNHashtable.builder().addAll(originOperationEvent.parameters).build() : null as any), originOperationEvent.encrypted);
+		let operationEvent = new OperationEvent(originOperationEvent.operationCode, (originOperationEvent.parameters ? GNHashtable.builder().addAll(originOperationEvent.parameters).build() : null as any));
 
 		let functionRequest: FunctionRequest = {
 			eventName: request.eventName,
@@ -728,7 +725,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 		handleResponse = await ___handleEventFunction(functionRequest);
 	} else {
 		let originOperationRequest = request.operationRequest;
-		let operationRequest = new OperationRequest(originOperationRequest.operationCode, originOperationRequest.encrypted);
+		let operationRequest = new OperationRequest(originOperationRequest.operationCode);
 		if (originOperationRequest.parameters) {
 			operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
 		}
@@ -738,7 +735,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 		if (originSecretInfo) {
 			secretInfo = SecretInfo.Builder()
 				.setSecretKey(originSecretInfo.secretKey)
-				.setDisplayName(originSecretInfo.displayName)
+				.setDescription(originSecretInfo.description)
 				.setRole(originSecretInfo.role)
 				.setIsRemove(originSecretInfo.remove)
 				.setTsExpire(originSecretInfo.tsExpire)
@@ -766,7 +763,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 			let operationResponse: OperationResponse = null as any;
 
 			if (originOperationResponse) {
-				operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId, originOperationRequest.encrypted);
+				operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId);
 				operationResponse.setReturnCode(originOperationResponse.returnCode);
 				operationResponse.setDebugMessage(originOperationResponse.debugMessage);
 
@@ -845,6 +842,38 @@ async function ___handleMatchmakingFunction(request: FunctionRequest): Promise<F
 	return answer;
 }
 
+async function ___handleGenericServiceFunction(request: FunctionRequest): Promise<FunctionResponse> {
+	let handler = systemGenericServiceHandlers[request.eventName];
+
+	if (handler == null) {
+		return {
+			status: ExecuteResponseStatus.FunctionNameNotFound,
+			result: null,
+			request: null,
+			errorMessage: null,
+		};
+	}
+
+	let answer: FunctionResponse = {
+		status: ExecuteResponseStatus.Ok,
+		errorMessage: null,
+		result: null,
+		request: null,
+	};
+
+	try {
+		let result = await handler(request.request.serviceName, request.request.serviceData, request.log);
+
+		if (result != null)
+			answer.request = result;
+	} catch (err: any) {
+		answer.status = ExecuteResponseStatus.Exception;
+		answer.errorMessage = err.message;
+	}
+
+	return answer;
+}
+
 async function ___handleSystemAuthenticateFunction(request: FunctionRequest): Promise<FunctionResponse> {
 	let handler = systemAuthenticateHandlers[request.eventName];
 
@@ -871,7 +900,6 @@ async function ___handleSystemAuthenticateFunction(request: FunctionRequest): Pr
 			answer.result = {
 				returnCode: result.getReturnCode(),
 				debugMessage: result.getDebugMessage(),
-				encrypted: result.isEncrypted(),
 				parameters: result.getParameters()?.toData(),
 			};
 		}
@@ -940,7 +968,6 @@ async function ___handleEventFunction(request: FunctionRequest): Promise<Functio
 		answer.result = {
 			returnCode: operationEvent.getEventCode(),
 			debugMessage: null as any,
-			encrypted: operationEvent.isEncrypted(),
 			parameters: operationEvent.getParameters()?.toData(),
 		};
 
@@ -979,7 +1006,6 @@ async function ___handlePreFunction(request: FunctionRequest): Promise<FunctionR
 			answer.result = {
 				returnCode: result.getReturnCode(),
 				debugMessage: result.getDebugMessage(),
-				encrypted: result.isEncrypted(),
 				parameters: result.getParameters()?.toData(),
 			};
 
@@ -1018,7 +1044,6 @@ async function ___handlePostFunction(request: FunctionRequest): Promise<Function
 			answer.result = {
 				returnCode: result.getReturnCode(),
 				debugMessage: result.getDebugMessage(),
-				encrypted: result.isEncrypted(),
 				parameters: result.getParameters()?.toData(),
 			};
 		}
@@ -1066,5 +1091,7 @@ const eventHandlers: Record<string, (request: any, operationEvent: OperationEven
 const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void) => Promise<{ success: boolean }>> = {};
 
 const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
+
+const systemGenericServiceHandlers: Record<string, (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void) => Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>> = {};
 
 //$replaceScript

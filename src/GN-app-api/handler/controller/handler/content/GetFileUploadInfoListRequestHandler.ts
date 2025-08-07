@@ -9,137 +9,137 @@ import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { UploadFileInfo } from "./../../../../../GN-library/xdatabase/lib/entity/pro/UploadFileInfo";
 
 class GetFileUploadInfoListOperationRequest extends OperationRequest {
-    @NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-    skip?: number;
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	skip?: number;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-    limit?: number;
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	limit?: number;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 
 }
 
 class ServerGetFileUploadInfoListOperationRequest extends GetFileUploadInfoListOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminGetFileUploadInfoListOperationRequest extends ServerGetFileUploadInfoListOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetFileUploadInfoListRequestHandler extends RequestHandler {
-    public override getCode() {
-        return OperationCode.GetFileUploadInfoList;
-    }
+	public override getCode() {
+		return OperationCode.GetFileUploadInfoList;
+	}
 
-    public override getCommonOperationRequest() {
-        return GetFileUploadInfoListOperationRequest;
-    }
+	public override getCommonOperationRequest() {
+		return GetFileUploadInfoListOperationRequest;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().content.getFileUploadInfoList.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().content.getFileUploadInfoList.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			skip: request.skip,
+			limit: request.limit,
+		}, secretInfo, operationRequest);
+	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetFileUploadInfoListOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetFileUploadInfoListOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().content.getFileUploadInfoList.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().content.getFileUploadInfoList.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			skip: request.skip,
+			limit: request.limit,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetFileUploadInfoListOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetFileUploadInfoListOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().content.getFileUploadInfoList.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().content.getFileUploadInfoList.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			skip: request.skip,
+			limit: request.limit,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(request: { skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_GetFileUploadInfoList", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+	private async execute(request: { skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_GetFileUploadInfoList", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let collection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
-        let uploadFileInfos = await collection.find({ gameId: secretInfo.getGameId() }, {
-            projection: {
-                fileId: true
-            }
-        }).sort({ _id: -1 }).skip(request.skip).limit(request.limit);
+		let collection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
+		let uploadFileInfos = await collection.find({ gameId: secretInfo.getGameId() }, {
+			projection: {
+				fileId: true
+			}
+		}).sort({ _id: -1 }).skip(request.skip).limit(request.limit);
 
-        let gnResults = new GNArray();
+		let gnResults = new GNArray();
 
-        while (await uploadFileInfos.hasNext()) {
-            let uploadFileInfo = new UploadFileInfo(await uploadFileInfos.next(), collection);
+		while (await uploadFileInfos.hasNext()) {
+			let uploadFileInfo = new UploadFileInfo(await uploadFileInfos.next(), collection);
 
-            let gnUploadFileInfo = new GNHashtable();
+			let gnUploadFileInfo = new GNHashtable();
 
-            gnUploadFileInfo.add(GNParameterCode.FileId, uploadFileInfo.getFileId());
+			gnUploadFileInfo.add(ParameterCode.FileId, uploadFileInfo.getFileId());
 
-            gnResults.add(gnUploadFileInfo);
-        }
+			gnResults.add(gnUploadFileInfo);
+		}
 
-        operationResponse.setParameter(GNParameterCode.Results, gnResults);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("content_GetFileUploadInfoList", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("content_GetFileUploadInfoList", request, secretInfo, operationRequest, operationResponse);
 
-        return operationResponse;
-    }
+		return operationResponse;
+	}
 }

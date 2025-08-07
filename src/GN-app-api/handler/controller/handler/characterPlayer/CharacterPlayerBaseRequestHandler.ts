@@ -6,7 +6,7 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
@@ -412,61 +412,61 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
         let answer = new GNHashtable();
 
         if (infoRequestParam.catalogId)
-            answer.add(GNParameterCode.CatalogId, this.generateCatalogId(characterPlayer));
+            answer.add(ParameterCode.CatalogId, this.generateCatalogId(characterPlayer));
 
         if (infoRequestParam.owner)
-            answer.add(GNParameterCode.Owner, this.generateOwner(characterPlayer));
+            answer.add(ParameterCode.Owner, this.generateOwner(characterPlayer));
 
         if (infoRequestParam.removeStatus)
-            answer.add(GNParameterCode.RemoveStatus, this.generateRemoveStatus(characterPlayer));
+            answer.add(ParameterCode.RemoveStatus, this.generateRemoveStatus(characterPlayer));
 
         if (infoRequestParam.segments)
-            answer.add(GNParameterCode.Segments, this.generateSegments(characterPlayer));
+            answer.add(ParameterCode.Segments, this.generateSegments(characterPlayer));
 
         if (infoRequestParam.customDatas)
-            answer.add(GNParameterCode.CustomDatas, this.generateCustomDatas(characterPlayer, infoRequestParam.customDataKeys, gameId));
+            answer.add(ParameterCode.CustomDatas, this.generateCustomDatas(characterPlayer, infoRequestParam.customDataKeys, gameId));
 
         if (infoRequestParam.displayName)
-            answer.add(GNParameterCode.DisplayName, this.generateDisplayName(characterPlayer, gameId));
+            answer.add(ParameterCode.DisplayName, this.generateDisplayName(characterPlayer));
 
         if (infoRequestParam.avatar)
-            answer.add(GNParameterCode.Avatar, this.generateAvatar(characterPlayer));
+            answer.add(ParameterCode.Avatar, this.generateAvatar(characterPlayer));
 
         if (infoRequestParam.tsCreate)
-            answer.add(GNParameterCode.TsCreate, this.generateTsCreate(characterPlayer));
+            answer.add(ParameterCode.TsCreate, this.generateTsCreate(characterPlayer));
 
         if (infoRequestParam.tags)
-            answer.add(GNParameterCode.Tags, this.generateTags(characterPlayer, infoRequestParam.tagKeys, gameId));
+            answer.add(ParameterCode.Tags, this.generateTags(characterPlayer, infoRequestParam.tagKeys, gameId));
 
         if (infoRequestParam.playerBan)
-            answer.add(GNParameterCode.PlayerBan, this.generatePlayerBan(characterPlayer));
+            answer.add(ParameterCode.PlayerBan, this.generatePlayerBan(characterPlayer));
 
         if (infoRequestParam.playerDatas)
-            answer.add(GNParameterCode.PlayerDatas, this.generatePlayerDatas(characterPlayer, infoRequestParam.playerDataKeys, gameId));
+            answer.add(ParameterCode.PlayerDatas, this.generatePlayerDatas(characterPlayer, infoRequestParam.playerDataKeys, gameId));
 
         if (infoRequestParam.playerCurrencies)
-            answer.add(GNParameterCode.PlayerCurrencies, this.generatePlayerCurrencies(characterPlayer, infoRequestParam.playerCurrencyKeys, gameId));
+            answer.add(ParameterCode.PlayerCurrencies, this.generatePlayerCurrencies(characterPlayer, infoRequestParam.playerCurrencyKeys, gameId));
 
         if (infoRequestParam.playerStatistics)
-            answer.add(GNParameterCode.PlayerStatistics, this.generatePlayerStatistics(characterPlayer, infoRequestParam.playerStatisticsKeys, gameId));
+            answer.add(ParameterCode.PlayerStatistics, this.generatePlayerStatistics(characterPlayer, infoRequestParam.playerStatisticsKeys, gameId));
 
         if (infoRequestParam.playerInventories)
-            answer.add(GNParameterCode.PlayerInventories, this.generatePlayerInventories(characterPlayer, infoRequestParam.itemCatalogIds));
+            answer.add(ParameterCode.PlayerInventories, this.generatePlayerInventories(characterPlayer, infoRequestParam.itemCatalogIds));
 
         if (infoRequestParam.playerGroups)
-            answer.add(GNParameterCode.PlayerGroups, this.generatePlayerGroups(characterPlayer, infoRequestParam.groupCatalogIds));
+            answer.add(ParameterCode.PlayerGroups, this.generatePlayerGroups(characterPlayer, infoRequestParam.groupCatalogIds));
 
         if (infoRequestParam.playerFriends)
-            answer.add(GNParameterCode.PlayerFriends, this.generatePlayerFriends(characterPlayer, infoRequestParam.friendCatalogIds));
+            answer.add(ParameterCode.PlayerFriends, this.generatePlayerFriends(characterPlayer, infoRequestParam.friendCatalogIds));
 
         if (infoRequestParam.tsLastLogin)
-            answer.add(GNParameterCode.TsLastLogin, this.generateTsLastLogin(characterPlayer));
+            answer.add(ParameterCode.TsLastLogin, this.generateTsLastLogin(characterPlayer));
 
         if (infoRequestParam.ipAddressCreate)
-            answer.add(GNParameterCode.IpAddressCreate, this.generateIpAddressCreate(characterPlayer));
+            answer.add(ParameterCode.IpAddressCreate, this.generateIpAddressCreate(characterPlayer));
 
         if (infoRequestParam.countryCode)
-            answer.add(GNParameterCode.CountryCode, this.generateCountryCode(characterPlayer));
+            answer.add(ParameterCode.CountryCode, this.generateCountryCode(characterPlayer));
 
         return answer;
     }
@@ -480,8 +480,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 
         let gnOwner = new GNHashtable();
 
-        gnOwner.add(GNParameterCode.Type, owner.type);
-        gnOwner.add(GNParameterCode.Id, owner.id);
+        gnOwner.add(ParameterCode.Type, owner.type);
+        gnOwner.add(ParameterCode.Id, owner.id);
 
         return gnOwner;
     }
@@ -491,8 +491,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 
         let gnRemoveStatus = new GNHashtable();
 
-        gnRemoveStatus.add(GNParameterCode.TsRemove, removeStatus.tsRemove);
-        gnRemoveStatus.add(GNParameterCode.Reason, removeStatus.reason);
+        gnRemoveStatus.add(ParameterCode.TsRemove, removeStatus.tsRemove);
+        gnRemoveStatus.add(ParameterCode.Reason, removeStatus.reason);
 
         return gnRemoveStatus;
     }
@@ -515,8 +515,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
                 if (value != null) {
                     let gnCustomData = new GNHashtable();
 
-                    gnCustomData.add(GNParameterCode.Key, customDatasSettingsItem.key);
-                    gnCustomData.add(GNParameterCode.Value, value);
+                    gnCustomData.add(ParameterCode.Key, customDatasSettingsItem.key);
+                    gnCustomData.add(ParameterCode.Value, value);
 
                     gnCustomDatas.add(gnCustomData);
                 }
@@ -526,30 +526,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
         return gnCustomDatas;
     }
 
-    protected generateDisplayName(characterPlayer: CharacterPlayer, gameId: string): string {
-        let displayName = characterPlayer.getDisplayName();
-        if (!displayName) {
-            let owner = characterPlayer.getOwner();
-            let catalogId = characterPlayer.getCatalogId();
-
-            if (owner != null && catalogId != null) {
-                let playerCharacterCatalogSettings: xCharacterCatalogSettings[] = null;
-
-                if (owner.type == OwnerType.GamePlayer) {
-                    playerCharacterCatalogSettings = this.gnServer.getGNSettings().getGamePlayerSettings(gameId).playerCharacterCatalogSettings;
-                }
-
-                if (playerCharacterCatalogSettings != null) {
-                    let playerCharacterCatalogSettingsItem = playerCharacterCatalogSettings.find(x => x.catalogId == catalogId);
-
-                    if (playerCharacterCatalogSettingsItem != null) {
-                        displayName = playerCharacterCatalogSettingsItem.displayName ?? "";
-                    }
-                }
-            }
-        }
-
-        return displayName;
+    protected generateDisplayName(characterPlayer: CharacterPlayer): string {
+        return characterPlayer.getDisplayName();
     }
 
     protected generateAvatar(characterPlayer: CharacterPlayer): GNHashtable {
@@ -557,8 +535,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 
         let gnAvatar = new GNHashtable();
 
-        gnAvatar.add(GNParameterCode.Type, avatar.type);
-        gnAvatar.add(GNParameterCode.Value, avatar.value);
+        gnAvatar.add(ParameterCode.Type, avatar.type);
+        gnAvatar.add(ParameterCode.Value, avatar.value);
 
         return gnAvatar;
     }
@@ -581,8 +559,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
                 if (value != null) {
                     let gnTag = new GNHashtable();
 
-                    gnTag.add(GNParameterCode.Key, tagsSettingsItem.key);
-                    gnTag.add(GNParameterCode.Value, value);
+                    gnTag.add(ParameterCode.Key, tagsSettingsItem.key);
+                    gnTag.add(ParameterCode.Value, value);
 
                     gnTags.add(gnTag);
                 }
@@ -597,8 +575,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 
         let playerBan = characterPlayer.getPlayerBan();
 
-        gnPlayerBan.add(GNParameterCode.TsExpire, playerBan.tsExpire);
-        gnPlayerBan.add(GNParameterCode.Reason, playerBan.reason);
+        gnPlayerBan.add(ParameterCode.TsExpire, playerBan.tsExpire);
+        gnPlayerBan.add(ParameterCode.Reason, playerBan.reason);
 
         return gnPlayerBan;
     }
@@ -617,8 +595,8 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
                 if (playerData != null) {
                     let gnPlayerData = new GNHashtable();
 
-                    gnPlayerData.add(GNParameterCode.Key, playerData.key);
-                    gnPlayerData.add(GNParameterCode.Value, playerData.value);
+                    gnPlayerData.add(ParameterCode.Key, playerData.key);
+                    gnPlayerData.add(ParameterCode.Value, playerData.value);
 
                     gnPlayerDatas.add(gnPlayerData);
                 }
@@ -640,10 +618,10 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
                 let playerCurrency = characterPlayer.getPlayerCurrency(playerCurrencySettingsItem.key);
 
                 let gnPlayerCurrency = new GNHashtable();
-                gnPlayerCurrency.add(GNParameterCode.Key, playerCurrencySettingsItem.key);
+                gnPlayerCurrency.add(ParameterCode.Key, playerCurrencySettingsItem.key);
 
-                if (playerCurrency != null) gnPlayerCurrency.add(GNParameterCode.Value, playerCurrency.value);
-                else gnPlayerCurrency.add(GNParameterCode.Value, playerCurrencySettingsItem.initialValue);
+                if (playerCurrency != null) gnPlayerCurrency.add(ParameterCode.Value, playerCurrency.value);
+                else gnPlayerCurrency.add(ParameterCode.Value, playerCurrencySettingsItem.initialValue);
 
                 gnPlayerCurrencies.add(gnPlayerCurrency);
             }
@@ -664,10 +642,10 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
                 let playerStatistics = characterPlayer.getPlayerStatistics(playerStatisticsSettingsItem.key);
 
                 let gnPlayerStatistic = new GNHashtable();
-                gnPlayerStatistic.add(GNParameterCode.Key, playerStatisticsSettingsItem.key);
+                gnPlayerStatistic.add(ParameterCode.Key, playerStatisticsSettingsItem.key);
 
-                if (playerStatistics != null) gnPlayerStatistic.add(GNParameterCode.Value, playerStatistics.value);
-                else gnPlayerStatistic.add(GNParameterCode.Value, playerStatisticsSettingsItem.initialValue);
+                if (playerStatistics != null) gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
+                else gnPlayerStatistic.add(ParameterCode.Value, playerStatisticsSettingsItem.initialValue);
 
                 gnPlayerStatistics.add(gnPlayerStatistic);
             }
@@ -687,9 +665,9 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
             if (itemCatalogIds == null || itemCatalogIds.indexOf(playerInventory.catalogId) != -1) {
                 let gnPlayerInventory = new GNHashtable();
 
-                gnPlayerInventory.add(GNParameterCode.ItemId, playerInventory.itemId);
-                gnPlayerInventory.add(GNParameterCode.CatalogId, playerInventory.catalogId);
-                gnPlayerInventory.add(GNParameterCode.ClassId, playerInventory.classId);
+                gnPlayerInventory.add(ParameterCode.ItemId, playerInventory.itemId);
+                gnPlayerInventory.add(ParameterCode.CatalogId, playerInventory.catalogId);
+                gnPlayerInventory.add(ParameterCode.ClassId, playerInventory.classId);
 
                 gnPlayerInventories.add(gnPlayerInventory);
             }
@@ -709,10 +687,10 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
             if (groupCatalogIds == null || groupCatalogIds.indexOf(playerGroup.catalogId) != -1) {
                 let gnPlayerGroup = new GNHashtable();
 
-                gnPlayerGroup.add(GNParameterCode.GroupId, playerGroup.groupId);
-                gnPlayerGroup.add(GNParameterCode.CatalogId, playerGroup.catalogId);
-                gnPlayerGroup.add(GNParameterCode.Status, playerGroup.status);
-                gnPlayerGroup.add(GNParameterCode.TsLastStatusUpdate, playerGroup.tsLastStatusUpdate);
+                gnPlayerGroup.add(ParameterCode.GroupId, playerGroup.groupId);
+                gnPlayerGroup.add(ParameterCode.CatalogId, playerGroup.catalogId);
+                gnPlayerGroup.add(ParameterCode.Status, playerGroup.status);
+                gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, playerGroup.tsLastStatusUpdate);
 
                 gnPlayerGroups.add(gnPlayerGroup);
             }
@@ -732,10 +710,10 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
             if (friendCatalogIds == null || friendCatalogIds.indexOf(playerFriend.catalogId) != -1) {
                 let gnPlayerFriend = new GNHashtable();
 
-                gnPlayerFriend.add(GNParameterCode.FriendId, playerFriend.friendId);
-                gnPlayerFriend.add(GNParameterCode.CatalogId, playerFriend.catalogId);
-                gnPlayerFriend.add(GNParameterCode.Status, playerFriend.status);
-                gnPlayerFriend.add(GNParameterCode.TsLastStatusUpdate, playerFriend.tsLastStatusUpdate);
+                gnPlayerFriend.add(ParameterCode.FriendId, playerFriend.friendId);
+                gnPlayerFriend.add(ParameterCode.CatalogId, playerFriend.catalogId);
+                gnPlayerFriend.add(ParameterCode.Status, playerFriend.status);
+                gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, playerFriend.tsLastStatusUpdate);
 
                 gnPlayerFriends.add(gnPlayerFriend);
             }

@@ -5,7 +5,7 @@ export interface xStatisticsSettings {
     maximumValue?: number;
     minimumValue?: number;
 
-    displayName: string;
+    description: string;
     initialValue: number;
     index: boolean;
     

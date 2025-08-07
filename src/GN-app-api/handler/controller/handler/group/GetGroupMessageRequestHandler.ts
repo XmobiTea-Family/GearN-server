@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
@@ -16,13 +16,13 @@ import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class GetGroupMessageOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	groupId: string;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
 	public override isValidRequest() {
@@ -123,7 +123,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupFindOptions: GroupFindOptions = {
@@ -135,13 +135,13 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 		if (group == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
 		let removeStatus = group.getRemoveStatus();
 		if (removeStatus.tsRemove != 0) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
@@ -152,7 +152,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			let groupSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 			let playerGroupCatalogSettingsItem = groupSettings.playerGroupCatalogSettings.find(x => x.catalogId == catalogId);
 			if (playerGroupCatalogSettingsItem == null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 				return operationResponse;
 			}
 		}
@@ -160,7 +160,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			let groupSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 			let playerGroupCatalogSettingsItem = groupSettings.playerGroupCatalogSettings.find(x => x.catalogId == catalogId);
 			if (playerGroupCatalogSettingsItem == null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 				return operationResponse;
 			}
 		}
@@ -168,7 +168,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 		let role = <SecretRole>secretInfo.getRole();
 		if (role == SecretRole.Player) {
 			if (!this.isMember(group, request.userId, secretInfo.getGameId())) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.PlayerNotMember);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerNotMember);
 				return operationResponse;
 			}
 		}
@@ -182,17 +182,17 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 
 			let gnGroupMessageItem = new GNHashtable();
 
-			gnGroupMessageItem.add(GNParameterCode.Message, groupMessageItem.message);
-			gnGroupMessageItem.add(GNParameterCode.SenderId, groupMessageItem.senderId);
-			gnGroupMessageItem.add(GNParameterCode.SenderType, groupMessageItem.senderType);
-			gnGroupMessageItem.add(GNParameterCode.TsCreate, groupMessageItem.tsCreate);
+			gnGroupMessageItem.add(ParameterCode.Message, groupMessageItem.message);
+			gnGroupMessageItem.add(ParameterCode.SenderId, groupMessageItem.senderId);
+			gnGroupMessageItem.add(ParameterCode.SenderType, groupMessageItem.senderType);
+			gnGroupMessageItem.add(ParameterCode.TsCreate, groupMessageItem.tsCreate);
 
 			gnGroupMessages.add(gnGroupMessageItem);
 		}
 
-		operationResponse.setParameter(GNParameterCode.GroupMessages, gnGroupMessages);
+		operationResponse.setParameter(ParameterCode.GroupMessages, gnGroupMessages);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupMessage", request, secretInfo, operationRequest, operationResponse);
 

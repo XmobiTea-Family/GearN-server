@@ -1,13 +1,13 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ThirtPartyFacebookSettingsParam {
-	@StringDataMember({ code: GNParameterCode.FacebookAppId })
+	@StringDataMember({ code: ParameterCode.FacebookAppId })
 	facebookAppId: string;
 
-	@StringDataMember({ code: GNParameterCode.FacebookAppToken })
+	@StringDataMember({ code: ParameterCode.FacebookAppToken })
 	facebookAppToken: string;
 
-	@StringDataMember({ code: GNParameterCode.FacebookInappSecret })
+	@StringDataMember({ code: ParameterCode.FacebookInappSecret })
 	facebookInappSecret: string;
 }

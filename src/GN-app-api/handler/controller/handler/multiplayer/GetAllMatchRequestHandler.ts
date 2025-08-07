@@ -1,27 +1,27 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { Match } from "../../../../../GN-library/xdatabase/lib/entity/pro/Match";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { Match } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Match";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetAllMatchOperationRequest extends OperationRequest {
-    @BooleanDataMember({ code: GNParameterCode.ReturnMember, isOptional: true, defaultValue: false })
+    @BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
     returnMember?: boolean;
 
-    @NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
     skip?: number;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
 
     public override isValidRequest() {
@@ -118,7 +118,7 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", secretInfo.getGameId());
@@ -146,10 +146,10 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 
             let gnMatch = new GNHashtable();
 
-            gnMatch.add(GNParameterCode.MatchId, match.getMatchId());
-            gnMatch.add(GNParameterCode.TsCreate, match.getTsCreate());
-            gnMatch.add(GNParameterCode.QueueName, match.getQueueName());
-            gnMatch.add(GNParameterCode.TimeToMatchInSeconds, match.getTimeToMatchInSeconds());
+            gnMatch.add(ParameterCode.MatchId, match.getMatchId());
+            gnMatch.add(ParameterCode.TsCreate, match.getTsCreate());
+            gnMatch.add(ParameterCode.QueueName, match.getQueueName());
+            gnMatch.add(ParameterCode.TimeToMatchInSeconds, match.getTimeToMatchInSeconds());
 
             if (request.returnMember) {
                 let gnMembers = new GNArray();
@@ -160,21 +160,21 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 
                     let gnMember = new GNHashtable();
 
-                    gnMember.add(GNParameterCode.UserId, member.userId);
-                    gnMember.add(GNParameterCode.TeamId, member.teamId);
-                    gnMember.add(GNParameterCode.Attribute, member.attribute);
+                    gnMember.add(ParameterCode.UserId, member.userId);
+                    gnMember.add(ParameterCode.TeamId, member.teamId);
+                    gnMember.add(ParameterCode.Attribute, member.attribute);
 
                     gnMembers.add(gnMember);
                 }
 
-                gnMatch.add(GNParameterCode.Members, gnMembers);
+                gnMatch.add(ParameterCode.Members, gnMembers);
             }
 
             let serverDetail = match.getServerDetail();
             if (serverDetail != null) {
                 let gnServerDetail = new GNHashtable();
 
-                gnServerDetail.add(GNParameterCode.IpV4Address, serverDetail.ipV4Address);
+                gnServerDetail.add(ParameterCode.IpV4Address, serverDetail.ipV4Address);
 
                 let gnPorts = new GNArray();
                 let ports = serverDetail.ports;
@@ -184,24 +184,24 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 
                     let gnPort = new GNHashtable();
 
-                    gnPort.add(GNParameterCode.Name, port.name);
-                    gnPort.add(GNParameterCode.PublicPort, port.publicPort);
-                    gnPort.add(GNParameterCode.PrivatePort, port.privatePort);
-                    gnPort.add(GNParameterCode.Protocol, port.protocol);
+                    gnPort.add(ParameterCode.Name, port.name);
+                    gnPort.add(ParameterCode.PublicPort, port.publicPort);
+                    gnPort.add(ParameterCode.PrivatePort, port.privatePort);
+                    gnPort.add(ParameterCode.Protocol, port.protocol);
 
                     gnPorts.add(gnPort);
                 }
 
-                gnServerDetail.add(GNParameterCode.Ports, gnPorts);
+                gnServerDetail.add(ParameterCode.Ports, gnPorts);
 
-                gnMatch.add(GNParameterCode.ServerDetail, gnServerDetail);
+                gnMatch.add(ParameterCode.ServerDetail, gnServerDetail);
             }
 
             gnResults.add(gnMatch);
         }
 
-        operationResponse.setParameter(GNParameterCode.Results, gnResults);
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.Results, gnResults);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetAllMatch", request, secretInfo, operationRequest, operationResponse);
 

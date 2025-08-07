@@ -5,22 +5,22 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { Debug } from "../../../../../GN-library/xdebug/lib/xDebug";
-import { NumberDataMember } from "../../../../../GN-common/entity/DataMember";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { NumberDataMember } from "./../../../../../GN-common/entity/DataMember";
 import fs from "fs";
 import readline from "readline";
 
 class GetServerLogOperationRequest extends OperationRequest {
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 50, minValue: 5, maxValue: 200, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 50, minValue: 5, maxValue: 200, mustInt: true, isOptional: true })
 	limit?: number;
 
 	public override isValidRequest() {
@@ -59,7 +59,7 @@ export class GetServerLogRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let logs: string[] = [];
@@ -96,9 +96,9 @@ export class GetServerLogRequestHandler extends RequestHandler {
 			}
 		}
 
-		operationResponse.setParameter(GNParameterCode.Results, gnLogs);
+		operationResponse.setParameter(ParameterCode.Results, gnLogs);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetServerLog", request, secretInfo, operationRequest, operationResponse);
 

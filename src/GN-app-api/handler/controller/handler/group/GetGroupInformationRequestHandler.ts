@@ -6,21 +6,21 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
-import { OwnerType } from "../../../../../GN-common/constant/enumType/OwnerType";
+import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class GetGroupInformationOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	groupId: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
@@ -76,46 +76,46 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		if (secretInfo.getPermission().group.getGroupInformation.selfEnable) {
-            let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), {
-                members: true,
-                groupType: true,
-            });
+			let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), {
+				members: true,
+				groupType: true,
+			});
 
-            if (group != null) {
-                let groupType = group.getGroupType();
-                if (groupType == <number>OwnerType.GamePlayer) {
-                    let memberItem = group.getMember(authInfo.getUserId());
-                    if (memberItem != null) {
-                        if (memberItem.status == <number>GroupStatus.Member) {
-                            allowMethod = true;
-                            owned = true;
-                        }
-                    }
-                }
-                else if (groupType == <number>OwnerType.CharacterPlayer) {
-                    let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
+			if (group != null) {
+				let groupType = group.getGroupType();
+				if (groupType == <number>OwnerType.GamePlayer) {
+					let memberItem = group.getMember(authInfo.getUserId());
+					if (memberItem != null) {
+						if (memberItem.status == <number>GroupStatus.Member) {
+							allowMethod = true;
+							owned = true;
+						}
+					}
+				}
+				else if (groupType == <number>OwnerType.CharacterPlayer) {
+					let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
-                    if (gamePlayer != null) {
-                        let characterPlayers = gamePlayer.getAllPlayerCharacters();
-                        
-                        if (characterPlayers != null) {
-                            for (let i = 0; i < characterPlayers.length; i++) {
-                                let characterPlayer = characterPlayers[i];
+					if (gamePlayer != null) {
+						let characterPlayers = gamePlayer.getAllPlayerCharacters();
 
-                                let memberItem = group.getMember(characterPlayer.characterId);
-                                if (memberItem != null) {
-                                    if (memberItem.status == <number>GroupStatus.Member) {
-                                        allowMethod = true;
-                                        owned = true;
-                                        
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+						if (characterPlayers != null) {
+							for (let i = 0; i < characterPlayers.length; i++) {
+								let characterPlayer = characterPlayers[i];
+
+								let memberItem = group.getMember(characterPlayer.characterId);
+								if (memberItem != null) {
+									if (memberItem.status == <number>GroupStatus.Member) {
+										allowMethod = true;
+										owned = true;
+
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		if (!allowMethod) {
@@ -179,26 +179,21 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
 
-		if (groupFindOptions != null && groupFindOptions.displayName) {
-			groupFindOptions.catalogId = true;
-			groupFindOptions.groupType = true;
-		}
-
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupInformation", request, secretInfo, operationRequest, operationResponse);
 

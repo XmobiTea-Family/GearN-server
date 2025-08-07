@@ -1,10 +1,10 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, DataMember, GNArrayDataMember, StringDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class AvatarParam {
-    @NumberDataMember({ code: GNParameterCode.Type, mustInt: true })
-    type: number;
+	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
+	type: number;
 
-    @StringDataMember({ code: GNParameterCode.Value, minLength: 1, maxLength: 128, mustNonNull: true })
-    value: string;
+	@StringDataMember({ code: ParameterCode.Value, minLength: 1, maxLength: 128, mustNonNull: true })
+	value: string;
 }

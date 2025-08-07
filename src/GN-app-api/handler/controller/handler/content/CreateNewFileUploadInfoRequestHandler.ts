@@ -10,12 +10,12 @@ import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 
 class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.FileName, mustNonNull: true, minLength: 5, maxLength: 50 })
+	@StringDataMember({ code: ParameterCode.FileName, mustNonNull: true, minLength: 5, maxLength: 50 })
 	fileName: string;
 
 	public override isValidRequest() {
@@ -106,7 +106,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
@@ -121,9 +121,9 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		await this.gnServer.getDatabase().createUploadFileInfoAsync(doc);
 
-		operationResponse.setParameter(GNParameterCode.FileId, doc["fileId"]);
+		operationResponse.setParameter(ParameterCode.FileId, doc["fileId"]);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("content_CreateNewFileUploadInfo", request, secretInfo, operationRequest, operationResponse);
 

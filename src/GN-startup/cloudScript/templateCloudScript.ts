@@ -7,8 +7,7 @@ import {
 	Action4,
 	ConverterService,
 	OwnerType,
-	GNErrorCode,
-	GNParameterCode,
+	ErrorCode,
 	ParameterCode,
 	Commands,
 	EventCode,
@@ -84,7 +83,6 @@ interface CloudScriptEvent {
 	operationEvent: {
 		eventCode: string;
 		parameters: {} | null;
-		encrypted: boolean;
 	};
 	receiver: string[] | string | null;
 }
@@ -282,7 +280,6 @@ class CloudScriptSocket {
 			receiver: userId,
 			operationEvent: {
 				eventCode: operationEvent.getEventCode(),
-				encrypted: operationEvent.isEncrypted(),
 				parameters: operationEvent.getParameters()?.toData() ?? null,
 			}
 		});
@@ -294,7 +291,6 @@ class CloudScriptSocket {
 			receiver: userIds,
 			operationEvent: {
 				eventCode: operationEvent.getEventCode(),
-				encrypted: operationEvent.isEncrypted(),
 				parameters: operationEvent.getParameters()?.toData() ?? null,
 			}
 		});
@@ -306,7 +302,6 @@ class CloudScriptSocket {
 			receiver: null,
 			operationEvent: {
 				eventCode: operationEvent.getEventCode(),
-				encrypted: operationEvent.isEncrypted(),
 				parameters: operationEvent.getParameters()?.toData() ?? null,
 			}
 		});
@@ -326,7 +321,6 @@ class CloudScriptMail {
                 receiver: null,
                 operationEvent: {
                     eventCode: 0,
-                    encrypted: false,
                     parameters: {
                         email: email,
                         subject: subject,
@@ -343,7 +337,6 @@ class CloudScriptMail {
                 receiver: null,
                 operationEvent: {
                     eventCode: 0,
-                    encrypted: false,
                     parameters: {
                         emails: emails,
                         subject: subject,
@@ -362,7 +355,6 @@ class CloudScriptPushNotification {
                 receiver: null,
                 operationEvent: {
                     eventCode: 0,
-                    encrypted: false,
                     parameters: {
                         token: token,
                         title: title,
@@ -383,7 +375,6 @@ class CloudScriptPushNotification {
                 receiver: null,
                 operationEvent: {
                     eventCode: 0,
-                    encrypted: false,
                     parameters: {
                         tokens: tokens,
                         title: title,
@@ -404,7 +395,6 @@ class CloudScriptPushNotification {
                 receiver: null,
                 operationEvent: {
                     eventCode: 0,
-                    encrypted: false,
                     parameters: {
                         topic: topic,
                         title: title,
@@ -425,7 +415,6 @@ class CloudScriptPushNotification {
                 receiver: null,
                 operationEvent: {
                     eventCode: 0,
-                    encrypted: false,
                     parameters: {
                         tokens: tokens,
                         topic: topic,
@@ -441,7 +430,6 @@ class CloudScriptPushNotification {
                 receiver: null,
                 operationEvent: {
                     eventCode: 0,
-                    encrypted: false,
                     parameters: {
                         tokens: tokens,
                         topic: topic,

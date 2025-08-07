@@ -1,8 +1,8 @@
 import express from "express";
 import { wrap } from "./utils/wrap";
-import { xDatetime } from "../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import axios from "axios";
-import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 
 interface NodeInfo {
 	instanceId: string;

@@ -6,34 +6,34 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { MasterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 
 class GetStatisticsLeaderboardOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	key: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
-	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
-	@StringDataMember({ code: GNParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	@StringDataMember({ code: ParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	version?: string;
 
 	public override isValidRequest() {
@@ -145,14 +145,14 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 		let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
 
 		if (playerStatisticsSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;
 		}
@@ -188,11 +188,11 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 
 					let gnResult = new GNHashtable();
 
-					gnResult.add(GNParameterCode.Position, i);
+					gnResult.add(ParameterCode.Position, i);
 
-					gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+					gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
 
-					gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 					gnResults.add(gnResult);
 				}
@@ -215,11 +215,11 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 
 						let gnResult = new GNHashtable();
 
-						gnResult.add(GNParameterCode.Position, i);
+						gnResult.add(ParameterCode.Position, i);
 
-						gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+						gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
 
-						gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 						gnResults.add(gnResult);
 					}
@@ -235,18 +235,18 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 
 						let gnResult = new GNHashtable();
 
-						gnResult.add(GNParameterCode.Position, i + request.skip);
+						gnResult.add(ParameterCode.Position, i + request.skip);
 
-						gnResult.add(GNParameterCode.UserId, masterPlayer.getUserId());
+						gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
 
-						gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 						gnResults.add(gnResult);
 					}
 				}
 			}
 
-			operationResponse.setParameter(GNParameterCode.Results, gnResults);
+			operationResponse.setParameter(ParameterCode.Results, gnResults);
 		}
 		else {
 			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
@@ -260,7 +260,7 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 				let result = await backupStatisticsLeaderboardCollection.findOne({ key: key, version: version });
 
 				if (result == null) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.VersionInvalid);
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VersionInvalid);
 					return operationResponse;
 				}
 
@@ -291,25 +291,25 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 
 				let gnResult = new GNHashtable();
 
-				gnResult.add(GNParameterCode.Position, result.position);
-				gnResult.add(GNParameterCode.BackupValue, result.value);
+				gnResult.add(ParameterCode.Position, result.position);
+				gnResult.add(ParameterCode.BackupValue, result.value);
 
-				gnResult.add(GNParameterCode.UserId, result.userId);
+				gnResult.add(ParameterCode.UserId, result.userId);
 
 				let masterPlayer = masterPlayerFindOptions == null ? null
 					: await this.gnServer.getDatabase().loadMasterPlayerAsync(result.userId, masterPlayerFindOptions);
 
-				if (masterPlayer == null) gnResult.add(GNParameterCode.InfoResponseParameters, new GNHashtable());
-				else gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+				if (masterPlayer == null) gnResult.add(ParameterCode.InfoResponseParameters, new GNHashtable());
+				else gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 				gnResults.add(gnResult);
 			}
 
-			operationResponse.setParameter(GNParameterCode.Results, gnResults);
-			operationResponse.setParameter(GNParameterCode.TsCreate, backupData.tsCreate);
+			operationResponse.setParameter(ParameterCode.Results, gnResults);
+			operationResponse.setParameter(ParameterCode.TsCreate, backupData.tsCreate);
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetStatisticsLeaderboard", request, secretInfo, operationRequest, operationResponse);
 

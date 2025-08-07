@@ -104,7 +104,7 @@ init_create_GNConfigDebugJson() {
 			"allowOrigin": "*",
 			"credentials": true,
 			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["a", "content-type", "s", "g", "content-length", "user-agent"],
+			"allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent"],
 			"enableSendAndReceiveDebug": true,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true

@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { StoreInventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/StoreInventoryFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
@@ -16,10 +16,10 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
 	storeId: string;
 
-	@StringDataMember({ code: GNParameterCode.Reason, isOptional: true, defaultValue: "" })
+	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
 	reason?: string;
 
 	public override isValidRequest() {
@@ -113,7 +113,7 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let storeInventoryFindOptions: StoreInventoryFindOptions = {
@@ -123,7 +123,7 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), storeInventoryFindOptions);
 
 		if (storeInventory == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
 			return operationResponse;
 		}
 
@@ -133,7 +133,7 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 			storeInventory.saveAsync();
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_SetRemoveStatus", request, secretInfo, operationRequest, operationResponse);
 

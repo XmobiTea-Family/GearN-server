@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
@@ -16,16 +16,16 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 
 class GetGroupsWithDisplayNameOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Keyword, minLength: 2, maxLength: 32 })
+	@StringDataMember({ code: ParameterCode.Keyword, minLength: 2, maxLength: 32 })
 	keyword: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
 	public override isValidRequest() {
@@ -131,7 +131,7 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
@@ -145,15 +145,15 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
 
 			let gnResult = new GNHashtable();
 
-			gnResult.add(GNParameterCode.GroupId, group.getGroupId());
-			gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+			gnResult.add(ParameterCode.GroupId, group.getGroupId());
+			gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
 			gnResults.add(gnResult);
 		}
 
-		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupWithDisplayName", request, secretInfo, operationRequest, operationResponse);
 

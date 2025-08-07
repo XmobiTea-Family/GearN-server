@@ -6,8 +6,8 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MatchmakingTicketStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
@@ -16,7 +16,7 @@ import { MatchmakingTicket } from "./../../../../../GN-library/xdatabase/lib/ent
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class CancelMatchmakingTicketOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.TicketId, minLength: 10, maxLength: 10 })
+    @StringDataMember({ code: ParameterCode.TicketId, minLength: 10, maxLength: 10 })
     ticketId: string;
 
     public override isValidRequest() {
@@ -27,7 +27,7 @@ class CancelMatchmakingTicketOperationRequest extends OperationRequest {
 }
 
 class ServerCancelMatchmakingTicketOperationRequest extends CancelMatchmakingTicketOperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10 })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
     userId: string;
 
     public override isValidRequest() {
@@ -112,7 +112,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
@@ -126,20 +126,20 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
         });
 
         if (result == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
             return operationResponse;
         }
 
         let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
         if (matchmakingTicket.getStatus() != <number>MatchmakingTicketStatus.WaitingForMembers && matchmakingTicket.getStatus() != <number>MatchmakingTicketStatus.WaitingForMatch) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketAlreadyCompleted);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketAlreadyCompleted);
             return operationResponse;
         }
 
         let member = matchmakingTicket.getMember(request.userId);
         if (member == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingPlayerHasNotJoinedTicket);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingPlayerHasNotJoinedTicket);
             return operationResponse;
         }
 
@@ -150,7 +150,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
             matchmakingTicket.saveAsync();
         }
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_CancelMatchmakingTicket", request, secretInfo, operationRequest, operationResponse);
 

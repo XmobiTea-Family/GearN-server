@@ -1,4 +1,4 @@
 export interface ISteamService {
-    verifyTicket(ticket: string, identity: string): Promise<{ [k: string]: any }>;
+	verifyTicket(ticket: string, identity: string): Promise<{ [k: string]: any }>;
 
 }

@@ -5,18 +5,18 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import { GameItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/GameItem";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { StringDataMember } from "./../../../../../GN-common/entity/DataMember";
 import { GNArray, GNHashtable, GNHashtableBuilder } from "./../../../../../GN-common/common/GNData";
 import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleExpansionType, RuleType, SetIntersectionRule, StringRule, TeamDifferenceRule, TeamSizeBalanceRule, TeamTicketSizeSimilarityRule } from "./../../../../../GN-library/xsettings/lib/entity/xMatchmakingQueueSettings";
 
 class GetGameInformationOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
 	gameId: string;
 
 	public override isValidRequest() {
@@ -57,7 +57,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -65,18 +65,18 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 		let result = await collection.findOne({ type: "gameSettings", "gameId": request.gameId });
 
 		if (result == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GameNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameNotFound);
 			return operationResponse;
 		}
 
 		let gameItem = new GameItem(result, collection);
 
-		operationResponse.setParameter(GNParameterCode.GameId, gameItem.getGameId());
-		operationResponse.setParameter(GNParameterCode.TsCreate, gameItem.getTsCreate());
-		operationResponse.setParameter(GNParameterCode.CreatorId, gameItem.getCreatorId());
-		operationResponse.setParameter(GNParameterCode.GameDescription, gameItem.getGameDescription());
-		operationResponse.setParameter(GNParameterCode.GameIconUrl, gameItem.getGameIconUrl());
-		operationResponse.setParameter(GNParameterCode.GameName, gameItem.getGameName());
+		operationResponse.setParameter(ParameterCode.GameId, gameItem.getGameId());
+		operationResponse.setParameter(ParameterCode.TsCreate, gameItem.getTsCreate());
+		operationResponse.setParameter(ParameterCode.CreatorId, gameItem.getCreatorId());
+		operationResponse.setParameter(ParameterCode.GameDescription, gameItem.getGameDescription());
+		operationResponse.setParameter(ParameterCode.GameIconUrl, gameItem.getGameIconUrl());
+		operationResponse.setParameter(ParameterCode.GameName, gameItem.getGameName());
 
 		let gnGameSettings = new GNHashtable();
 
@@ -91,15 +91,15 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let playerCurrencySetting = playerCurrencySettings[i];
 					let gnPlayerCurrencySetting = new GNHashtable();
 
-					gnPlayerCurrencySetting.add(GNParameterCode.Key, playerCurrencySetting.key);
-					gnPlayerCurrencySetting.add(GNParameterCode.InitialValue, playerCurrencySetting.initialValue);
-					gnPlayerCurrencySetting.add(GNParameterCode.DisplayName, playerCurrencySetting.displayName);
-					gnPlayerCurrencySetting.add(GNParameterCode.Index, playerCurrencySetting.index);
+					gnPlayerCurrencySetting.add(ParameterCode.Key, playerCurrencySetting.key);
+					gnPlayerCurrencySetting.add(ParameterCode.InitialValue, playerCurrencySetting.initialValue);
+					gnPlayerCurrencySetting.add(ParameterCode.Description, playerCurrencySetting.description);
+					gnPlayerCurrencySetting.add(ParameterCode.Index, playerCurrencySetting.index);
 
 					gnPlayerCurrencySettings.add(gnPlayerCurrencySetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.CurrencySettings, gnPlayerCurrencySettings);
+				gnCharacterPlayerSettings.add(ParameterCode.CurrencySettings, gnPlayerCurrencySettings);
 			}
 
 			{
@@ -109,18 +109,18 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let playerStatisticsSetting = playerStatisticsSettings[i];
 					let gnPlayerStatisticsSetting = new GNHashtable();
 
-					gnPlayerStatisticsSetting.add(GNParameterCode.Key, playerStatisticsSetting.key);
-					gnPlayerStatisticsSetting.add(GNParameterCode.StatisticsAggregationMethod, playerStatisticsSetting.statisticsAggregationMethod);
-					gnPlayerStatisticsSetting.add(GNParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
-					gnPlayerStatisticsSetting.add(GNParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
-					gnPlayerStatisticsSetting.add(GNParameterCode.InitialValue, playerStatisticsSetting.initialValue);
-					gnPlayerStatisticsSetting.add(GNParameterCode.DisplayName, playerStatisticsSetting.displayName);
-					gnPlayerStatisticsSetting.add(GNParameterCode.Index, playerStatisticsSetting.index);
+					gnPlayerStatisticsSetting.add(ParameterCode.Key, playerStatisticsSetting.key);
+					gnPlayerStatisticsSetting.add(ParameterCode.StatisticsAggregationMethod, playerStatisticsSetting.statisticsAggregationMethod);
+					gnPlayerStatisticsSetting.add(ParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.InitialValue, playerStatisticsSetting.initialValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.Description, playerStatisticsSetting.description);
+					gnPlayerStatisticsSetting.add(ParameterCode.Index, playerStatisticsSetting.index);
 
 					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
 			}
 
 			{
@@ -130,14 +130,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let playerDatasSetting = playerDatasSettings[i];
 					let gnPlayerDatasSetting = new GNHashtable();
 
-					gnPlayerDatasSetting.add(GNParameterCode.Key, playerDatasSetting.key);
-					gnPlayerDatasSetting.add(GNParameterCode.Permission, playerDatasSetting.permission);
-					gnPlayerDatasSetting.add(GNParameterCode.DisplayName, playerDatasSetting.displayName);
+					gnPlayerDatasSetting.add(ParameterCode.Key, playerDatasSetting.key);
+					gnPlayerDatasSetting.add(ParameterCode.Permission, playerDatasSetting.permission);
+					gnPlayerDatasSetting.add(ParameterCode.Description, playerDatasSetting.description);
 
 					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.DatasSettings, gnPlayerDatasSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.DatasSettings, gnPlayerDatasSettings);
 			}
 
 			{
@@ -147,14 +147,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let customDatasSetting = customDatasSettings[i];
 					let gnCustomDatasSetting = new GNHashtable();
 
-					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
-					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
-					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
+					gnCustomDatasSetting.add(ParameterCode.Key, customDatasSetting.key);
+					gnCustomDatasSetting.add(ParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(ParameterCode.Description, customDatasSetting.description);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.CustomDatasSettings, gnCustomDatasSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.CustomDatasSettings, gnCustomDatasSettings);
 			}
 
 			{
@@ -164,14 +164,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let tagsSetting = tagsSettings[i];
 					let gnTagsSetting = new GNHashtable();
 
-					gnTagsSetting.add(GNParameterCode.Key, tagsSetting.key);
-					gnTagsSetting.add(GNParameterCode.DisplayName, tagsSetting.displayName);
-					gnTagsSetting.add(GNParameterCode.Index, tagsSetting.index);
+					gnTagsSetting.add(ParameterCode.Key, tagsSetting.key);
+					gnTagsSetting.add(ParameterCode.Description, tagsSetting.description);
+					gnTagsSetting.add(ParameterCode.Index, tagsSetting.index);
 
 					gnTagsSettings.add(gnTagsSetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.TagsSettings, gnTagsSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.TagsSettings, gnTagsSettings);
 			}
 
 			{
@@ -181,14 +181,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let groupCatalogSetting = groupCatalogSettings[i];
 					let gnGroupCatalogSetting = new GNHashtable();
 
-					gnGroupCatalogSetting.add(GNParameterCode.CatalogId, groupCatalogSetting.catalogId);
-					gnGroupCatalogSetting.add(GNParameterCode.DisplayName, groupCatalogSetting.displayName);
-					gnGroupCatalogSetting.add(GNParameterCode.ForceAcceptMember, groupCatalogSetting.forceAcceptMember);
+					gnGroupCatalogSetting.add(ParameterCode.CatalogId, groupCatalogSetting.catalogId);
+					gnGroupCatalogSetting.add(ParameterCode.Description, groupCatalogSetting.description);
+					gnGroupCatalogSetting.add(ParameterCode.ForceAcceptMember, groupCatalogSetting.forceAcceptMember);
 
 					gnGroupCatalogSettings.add(gnGroupCatalogSetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.GroupCatalogSettings, gnGroupCatalogSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.GroupCatalogSettings, gnGroupCatalogSettings);
 			}
 
 			{
@@ -198,7 +198,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let itemCatalogSetting = itemCatalogSettings[i];
 					let gnItemCatalogSetting = new GNHashtable();
 
-					gnItemCatalogSetting.add(GNParameterCode.CatalogId, itemCatalogSetting.catalogId);
+					gnItemCatalogSetting.add(ParameterCode.CatalogId, itemCatalogSetting.catalogId);
 
 					let gnItemClassSettings = new GNArray();
 
@@ -206,19 +206,19 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 						let itemClassSetting = itemCatalogSetting.itemClassSettings[j];
 
 						let gnItemClassSetting = new GNHashtable();
-						gnItemClassSetting.add(GNParameterCode.ClassId, itemClassSetting.classId);
-						gnItemClassSetting.add(GNParameterCode.DisplayName, itemClassSetting.displayName);
+						gnItemClassSetting.add(ParameterCode.ClassId, itemClassSetting.classId);
+						gnItemClassSetting.add(ParameterCode.Description, itemClassSetting.description);
 
 						gnItemClassSettings.add(gnItemClassSetting);
 					}
 
-					gnItemCatalogSetting.add(GNParameterCode.ItemClassSettings, gnItemClassSettings);
-					gnItemCatalogSetting.add(GNParameterCode.ItemType, itemCatalogSetting.itemType);
+					gnItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
+					gnItemCatalogSetting.add(ParameterCode.ItemType, itemCatalogSetting.itemType);
 
 					gnItemCatalogSettings.add(gnItemCatalogSetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
 			}
 
 			{
@@ -228,16 +228,16 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let friendCatalogSetting = friendCatalogSettings[i];
 					let gnFriendCatalogSetting = new GNHashtable();
 
-					gnFriendCatalogSetting.add(GNParameterCode.CatalogId, friendCatalogSetting.catalogId);
-					gnFriendCatalogSetting.add(GNParameterCode.ForceAcceptFriend, friendCatalogSetting.forceAcceptFriend);
+					gnFriendCatalogSetting.add(ParameterCode.CatalogId, friendCatalogSetting.catalogId);
+					gnFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, friendCatalogSetting.forceAcceptFriend);
 
 					gnFriendCatalogSettings.add(gnFriendCatalogSetting);
 				}
 
-				gnCharacterPlayerSettings.add(GNParameterCode.FriendCatalogSettings, gnFriendCatalogSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.FriendCatalogSettings, gnFriendCatalogSettings);
 			}
 
-			gnGameSettings.add(GNParameterCode.CharacterPlayerSettings, gnCharacterPlayerSettings);
+			gnGameSettings.add(ParameterCode.CharacterPlayerSettings, gnCharacterPlayerSettings);
 		}
 
 		{
@@ -251,15 +251,15 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let playerCurrencySetting = playerCurrencySettings[i];
 					let gnPlayerCurrencySetting = new GNHashtable();
 
-					gnPlayerCurrencySetting.add(GNParameterCode.Key, playerCurrencySetting.key);
-					gnPlayerCurrencySetting.add(GNParameterCode.InitialValue, playerCurrencySetting.initialValue);
-					gnPlayerCurrencySetting.add(GNParameterCode.DisplayName, playerCurrencySetting.displayName);
-					gnPlayerCurrencySetting.add(GNParameterCode.Index, playerCurrencySetting.index);
+					gnPlayerCurrencySetting.add(ParameterCode.Key, playerCurrencySetting.key);
+					gnPlayerCurrencySetting.add(ParameterCode.InitialValue, playerCurrencySetting.initialValue);
+					gnPlayerCurrencySetting.add(ParameterCode.Description, playerCurrencySetting.description);
+					gnPlayerCurrencySetting.add(ParameterCode.Index, playerCurrencySetting.index);
 
 					gnPlayerCurrencySettings.add(gnPlayerCurrencySetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.CurrencySettings, gnPlayerCurrencySettings);
+				gnGamePlayerSettings.add(ParameterCode.CurrencySettings, gnPlayerCurrencySettings);
 			}
 
 			{
@@ -269,18 +269,18 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let playerStatisticsSetting = playerStatisticsSettings[i];
 					let gnPlayerStatisticsSetting = new GNHashtable();
 
-					gnPlayerStatisticsSetting.add(GNParameterCode.Key, playerStatisticsSetting.key);
-					gnPlayerStatisticsSetting.add(GNParameterCode.StatisticsAggregationMethod, playerStatisticsSetting.statisticsAggregationMethod);
-					gnPlayerStatisticsSetting.add(GNParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
-					gnPlayerStatisticsSetting.add(GNParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
-					gnPlayerStatisticsSetting.add(GNParameterCode.InitialValue, playerStatisticsSetting.initialValue);
-					gnPlayerStatisticsSetting.add(GNParameterCode.DisplayName, playerStatisticsSetting.displayName);
-					gnPlayerStatisticsSetting.add(GNParameterCode.Index, playerStatisticsSetting.index);
+					gnPlayerStatisticsSetting.add(ParameterCode.Key, playerStatisticsSetting.key);
+					gnPlayerStatisticsSetting.add(ParameterCode.StatisticsAggregationMethod, playerStatisticsSetting.statisticsAggregationMethod);
+					gnPlayerStatisticsSetting.add(ParameterCode.MinimumValue, playerStatisticsSetting.minimumValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.MaximumValue, playerStatisticsSetting.maximumValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.InitialValue, playerStatisticsSetting.initialValue);
+					gnPlayerStatisticsSetting.add(ParameterCode.Description, playerStatisticsSetting.description);
+					gnPlayerStatisticsSetting.add(ParameterCode.Index, playerStatisticsSetting.index);
 
 					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
+				gnGamePlayerSettings.add(ParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
 			}
 
 			{
@@ -290,14 +290,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let playerDatasSetting = playerDatasSettings[i];
 					let gnPlayerDatasSetting = new GNHashtable();
 
-					gnPlayerDatasSetting.add(GNParameterCode.Key, playerDatasSetting.key);
-					gnPlayerDatasSetting.add(GNParameterCode.Permission, playerDatasSetting.permission);
-					gnPlayerDatasSetting.add(GNParameterCode.DisplayName, playerDatasSetting.displayName);
+					gnPlayerDatasSetting.add(ParameterCode.Key, playerDatasSetting.key);
+					gnPlayerDatasSetting.add(ParameterCode.Permission, playerDatasSetting.permission);
+					gnPlayerDatasSetting.add(ParameterCode.Description, playerDatasSetting.description);
 
 					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.DatasSettings, gnPlayerDatasSettings);
+				gnGamePlayerSettings.add(ParameterCode.DatasSettings, gnPlayerDatasSettings);
 			}
 
 			{
@@ -307,14 +307,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let customDatasSetting = customDatasSettings[i];
 					let gnCustomDatasSetting = new GNHashtable();
 
-					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
-					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
-					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
+					gnCustomDatasSetting.add(ParameterCode.Key, customDatasSetting.key);
+					gnCustomDatasSetting.add(ParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(ParameterCode.Description, customDatasSetting.description);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.CustomDatasSettings, gnCustomDatasSettings);
+				gnGamePlayerSettings.add(ParameterCode.CustomDatasSettings, gnCustomDatasSettings);
 			}
 
 			{
@@ -324,14 +324,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let tagsSetting = tagsSettings[i];
 					let gnTagsSetting = new GNHashtable();
 
-					gnTagsSetting.add(GNParameterCode.Key, tagsSetting.key);
-					gnTagsSetting.add(GNParameterCode.DisplayName, tagsSetting.displayName);
-					gnTagsSetting.add(GNParameterCode.Index, tagsSetting.index);
+					gnTagsSetting.add(ParameterCode.Key, tagsSetting.key);
+					gnTagsSetting.add(ParameterCode.Description, tagsSetting.description);
+					gnTagsSetting.add(ParameterCode.Index, tagsSetting.index);
 
 					gnTagsSettings.add(gnTagsSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.TagsSettings, gnTagsSettings);
+				gnGamePlayerSettings.add(ParameterCode.TagsSettings, gnTagsSettings);
 			}
 
 			{
@@ -341,13 +341,13 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let characterCatalogSetting = characterCatalogSettings[i];
 					let gnCharacterCatalogSetting = new GNHashtable();
 
-					gnCharacterCatalogSetting.add(GNParameterCode.CatalogId, characterCatalogSetting.catalogId);
-					gnCharacterCatalogSetting.add(GNParameterCode.DisplayName, characterCatalogSetting.displayName);
+					gnCharacterCatalogSetting.add(ParameterCode.CatalogId, characterCatalogSetting.catalogId);
+					gnCharacterCatalogSetting.add(ParameterCode.Description, characterCatalogSetting.description);
 
 					gnCharacterCatalogSettings.add(gnCharacterCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.CharacterCatalogSettings, gnCharacterCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.CharacterCatalogSettings, gnCharacterCatalogSettings);
 			}
 
 			{
@@ -357,14 +357,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let groupCatalogSetting = groupCatalogSettings[i];
 					let gnGroupCatalogSetting = new GNHashtable();
 
-					gnGroupCatalogSetting.add(GNParameterCode.CatalogId, groupCatalogSetting.catalogId);
-					gnGroupCatalogSetting.add(GNParameterCode.DisplayName, groupCatalogSetting.displayName);
-					gnGroupCatalogSetting.add(GNParameterCode.ForceAcceptMember, groupCatalogSetting.forceAcceptMember);
+					gnGroupCatalogSetting.add(ParameterCode.CatalogId, groupCatalogSetting.catalogId);
+					gnGroupCatalogSetting.add(ParameterCode.Description, groupCatalogSetting.description);
+					gnGroupCatalogSetting.add(ParameterCode.ForceAcceptMember, groupCatalogSetting.forceAcceptMember);
 
 					gnGroupCatalogSettings.add(gnGroupCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.GroupCatalogSettings, gnGroupCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.GroupCatalogSettings, gnGroupCatalogSettings);
 			}
 
 			{
@@ -374,7 +374,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let itemCatalogSetting = itemCatalogSettings[i];
 					let gnItemCatalogSetting = new GNHashtable();
 
-					gnItemCatalogSetting.add(GNParameterCode.CatalogId, itemCatalogSetting.catalogId);
+					gnItemCatalogSetting.add(ParameterCode.CatalogId, itemCatalogSetting.catalogId);
 
 					let gnItemClassSettings = new GNArray();
 
@@ -382,19 +382,19 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 						let itemClassSetting = itemCatalogSetting.itemClassSettings[j];
 
 						let gnItemClassSetting = new GNHashtable();
-						gnItemClassSetting.add(GNParameterCode.ClassId, itemClassSetting.classId);
-						gnItemClassSetting.add(GNParameterCode.DisplayName, itemClassSetting.displayName);
+						gnItemClassSetting.add(ParameterCode.ClassId, itemClassSetting.classId);
+						gnItemClassSetting.add(ParameterCode.Description, itemClassSetting.description);
 
 						gnItemClassSettings.add(gnItemClassSetting);
 					}
 
-					gnItemCatalogSetting.add(GNParameterCode.ItemClassSettings, gnItemClassSettings);
-					gnItemCatalogSetting.add(GNParameterCode.ItemType, itemCatalogSetting.itemType);
+					gnItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
+					gnItemCatalogSetting.add(ParameterCode.ItemType, itemCatalogSetting.itemType);
 
 					gnItemCatalogSettings.add(gnItemCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
 			}
 
 			{
@@ -404,16 +404,16 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let friendCatalogSetting = friendCatalogSettings[i];
 					let gnFriendCatalogSetting = new GNHashtable();
 
-					gnFriendCatalogSetting.add(GNParameterCode.CatalogId, friendCatalogSetting.catalogId);
-					gnFriendCatalogSetting.add(GNParameterCode.ForceAcceptFriend, friendCatalogSetting.forceAcceptFriend);
+					gnFriendCatalogSetting.add(ParameterCode.CatalogId, friendCatalogSetting.catalogId);
+					gnFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, friendCatalogSetting.forceAcceptFriend);
 
 					gnFriendCatalogSettings.add(gnFriendCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(GNParameterCode.FriendCatalogSettings, gnFriendCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.FriendCatalogSettings, gnFriendCatalogSettings);
 			}
 
-			gnGameSettings.add(GNParameterCode.GamePlayerSettings, gnGamePlayerSettings);
+			gnGameSettings.add(ParameterCode.GamePlayerSettings, gnGamePlayerSettings);
 		}
 
 		{
@@ -427,15 +427,15 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let groupCurrencySetting = groupCurrencySettings[i];
 					let gnGroupCurrencySetting = new GNHashtable();
 
-					gnGroupCurrencySetting.add(GNParameterCode.Key, groupCurrencySetting.key);
-					gnGroupCurrencySetting.add(GNParameterCode.InitialValue, groupCurrencySetting.initialValue);
-					gnGroupCurrencySetting.add(GNParameterCode.DisplayName, groupCurrencySetting.displayName);
-					gnGroupCurrencySetting.add(GNParameterCode.Index, groupCurrencySetting.index);
+					gnGroupCurrencySetting.add(ParameterCode.Key, groupCurrencySetting.key);
+					gnGroupCurrencySetting.add(ParameterCode.InitialValue, groupCurrencySetting.initialValue);
+					gnGroupCurrencySetting.add(ParameterCode.Description, groupCurrencySetting.description);
+					gnGroupCurrencySetting.add(ParameterCode.Index, groupCurrencySetting.index);
 
 					gnGroupCurrencySettings.add(gnGroupCurrencySetting);
 				}
 
-				gnGroupSettings.add(GNParameterCode.CurrencySettings, gnGroupCurrencySettings);
+				gnGroupSettings.add(ParameterCode.CurrencySettings, gnGroupCurrencySettings);
 			}
 
 			{
@@ -445,18 +445,18 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let groupStatisticsSetting = groupStatisticsSettings[i];
 					let gnGroupStatisticsSetting = new GNHashtable();
 
-					gnGroupStatisticsSetting.add(GNParameterCode.Key, groupStatisticsSetting.key);
-					gnGroupStatisticsSetting.add(GNParameterCode.StatisticsAggregationMethod, groupStatisticsSetting.statisticsAggregationMethod);
-					gnGroupStatisticsSetting.add(GNParameterCode.MinimumValue, groupStatisticsSetting.minimumValue);
-					gnGroupStatisticsSetting.add(GNParameterCode.MaximumValue, groupStatisticsSetting.maximumValue);
-					gnGroupStatisticsSetting.add(GNParameterCode.InitialValue, groupStatisticsSetting.initialValue);
-					gnGroupStatisticsSetting.add(GNParameterCode.DisplayName, groupStatisticsSetting.displayName);
-					gnGroupStatisticsSetting.add(GNParameterCode.Index, groupStatisticsSetting.index);
+					gnGroupStatisticsSetting.add(ParameterCode.Key, groupStatisticsSetting.key);
+					gnGroupStatisticsSetting.add(ParameterCode.StatisticsAggregationMethod, groupStatisticsSetting.statisticsAggregationMethod);
+					gnGroupStatisticsSetting.add(ParameterCode.MinimumValue, groupStatisticsSetting.minimumValue);
+					gnGroupStatisticsSetting.add(ParameterCode.MaximumValue, groupStatisticsSetting.maximumValue);
+					gnGroupStatisticsSetting.add(ParameterCode.InitialValue, groupStatisticsSetting.initialValue);
+					gnGroupStatisticsSetting.add(ParameterCode.Description, groupStatisticsSetting.description);
+					gnGroupStatisticsSetting.add(ParameterCode.Index, groupStatisticsSetting.index);
 
 					gnGroupStatisticsSettings.add(gnGroupStatisticsSetting);
 				}
 
-				gnGroupSettings.add(GNParameterCode.StatisticsSettings, gnGroupStatisticsSettings);
+				gnGroupSettings.add(ParameterCode.StatisticsSettings, gnGroupStatisticsSettings);
 			}
 
 			{
@@ -466,14 +466,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let groupDatasSetting = groupDatasSettings[i];
 					let gnGroupDatasSetting = new GNHashtable();
 
-					gnGroupDatasSetting.add(GNParameterCode.Key, groupDatasSetting.key);
-					gnGroupDatasSetting.add(GNParameterCode.Permission, groupDatasSetting.permission);
-					gnGroupDatasSetting.add(GNParameterCode.DisplayName, groupDatasSetting.displayName);
+					gnGroupDatasSetting.add(ParameterCode.Key, groupDatasSetting.key);
+					gnGroupDatasSetting.add(ParameterCode.Permission, groupDatasSetting.permission);
+					gnGroupDatasSetting.add(ParameterCode.Description, groupDatasSetting.description);
 
 					gnGroupDatasSettings.add(gnGroupDatasSetting);
 				}
 
-				gnGroupSettings.add(GNParameterCode.DatasSettings, gnGroupDatasSettings);
+				gnGroupSettings.add(ParameterCode.DatasSettings, gnGroupDatasSettings);
 			}
 
 			{
@@ -483,14 +483,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let customDatasSetting = customDatasSettings[i];
 					let gnCustomDatasSetting = new GNHashtable();
 
-					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
-					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
-					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
+					gnCustomDatasSetting.add(ParameterCode.Key, customDatasSetting.key);
+					gnCustomDatasSetting.add(ParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(ParameterCode.Description, customDatasSetting.description);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}
 
-				gnGroupSettings.add(GNParameterCode.CustomDatasSettings, gnCustomDatasSettings);
+				gnGroupSettings.add(ParameterCode.CustomDatasSettings, gnCustomDatasSettings);
 			}
 
 			{
@@ -500,14 +500,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let tagsSetting = tagsSettings[i];
 					let gnTagsSetting = new GNHashtable();
 
-					gnTagsSetting.add(GNParameterCode.Key, tagsSetting.key);
-					gnTagsSetting.add(GNParameterCode.DisplayName, tagsSetting.displayName);
-					gnTagsSetting.add(GNParameterCode.Index, tagsSetting.index);
+					gnTagsSetting.add(ParameterCode.Key, tagsSetting.key);
+					gnTagsSetting.add(ParameterCode.Description, tagsSetting.description);
+					gnTagsSetting.add(ParameterCode.Index, tagsSetting.index);
 
 					gnTagsSettings.add(gnTagsSetting);
 				}
 
-				gnGroupSettings.add(GNParameterCode.TagsSettings, gnTagsSettings);
+				gnGroupSettings.add(ParameterCode.TagsSettings, gnTagsSettings);
 			}
 
 			{
@@ -517,7 +517,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let itemCatalogSetting = itemCatalogSettings[i];
 					let gnItemCatalogSetting = new GNHashtable();
 
-					gnItemCatalogSetting.add(GNParameterCode.CatalogId, itemCatalogSetting.catalogId);
+					gnItemCatalogSetting.add(ParameterCode.CatalogId, itemCatalogSetting.catalogId);
 
 					let gnItemClassSettings = new GNArray();
 
@@ -525,22 +525,22 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 						let itemClassSetting = itemCatalogSetting.itemClassSettings[j];
 
 						let gnItemClassSetting = new GNHashtable();
-						gnItemClassSetting.add(GNParameterCode.ClassId, itemClassSetting.classId);
-						gnItemClassSetting.add(GNParameterCode.DisplayName, itemClassSetting.displayName);
+						gnItemClassSetting.add(ParameterCode.ClassId, itemClassSetting.classId);
+						gnItemClassSetting.add(ParameterCode.Description, itemClassSetting.description);
 
 						gnItemClassSettings.add(gnItemClassSetting);
 					}
 
-					gnItemCatalogSetting.add(GNParameterCode.ItemClassSettings, gnItemClassSettings);
-					gnItemCatalogSetting.add(GNParameterCode.ItemType, itemCatalogSetting.itemType);
+					gnItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
+					gnItemCatalogSetting.add(ParameterCode.ItemType, itemCatalogSetting.itemType);
 
 					gnItemCatalogSettings.add(gnItemCatalogSetting);
 				}
 
-				gnGroupSettings.add(GNParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
+				gnGroupSettings.add(ParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
 			}
 
-			gnGameSettings.add(GNParameterCode.GroupSettings, gnGroupSettings);
+			gnGameSettings.add(ParameterCode.GroupSettings, gnGroupSettings);
 		}
 
 		{
@@ -554,18 +554,18 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let inventoryStatisticsSetting = inventoryStatisticsSettings[i];
 					let gnInventoryStatisticsSetting = new GNHashtable();
 
-					gnInventoryStatisticsSetting.add(GNParameterCode.Key, inventoryStatisticsSetting.key);
-					gnInventoryStatisticsSetting.add(GNParameterCode.StatisticsAggregationMethod, inventoryStatisticsSetting.statisticsAggregationMethod);
-					gnInventoryStatisticsSetting.add(GNParameterCode.MinimumValue, inventoryStatisticsSetting.minimumValue);
-					gnInventoryStatisticsSetting.add(GNParameterCode.MaximumValue, inventoryStatisticsSetting.maximumValue);
-					gnInventoryStatisticsSetting.add(GNParameterCode.InitialValue, inventoryStatisticsSetting.initialValue);
-					gnInventoryStatisticsSetting.add(GNParameterCode.DisplayName, inventoryStatisticsSetting.displayName);
-					gnInventoryStatisticsSetting.add(GNParameterCode.Index, inventoryStatisticsSetting.index);
+					gnInventoryStatisticsSetting.add(ParameterCode.Key, inventoryStatisticsSetting.key);
+					gnInventoryStatisticsSetting.add(ParameterCode.StatisticsAggregationMethod, inventoryStatisticsSetting.statisticsAggregationMethod);
+					gnInventoryStatisticsSetting.add(ParameterCode.MinimumValue, inventoryStatisticsSetting.minimumValue);
+					gnInventoryStatisticsSetting.add(ParameterCode.MaximumValue, inventoryStatisticsSetting.maximumValue);
+					gnInventoryStatisticsSetting.add(ParameterCode.InitialValue, inventoryStatisticsSetting.initialValue);
+					gnInventoryStatisticsSetting.add(ParameterCode.Description, inventoryStatisticsSetting.description);
+					gnInventoryStatisticsSetting.add(ParameterCode.Index, inventoryStatisticsSetting.index);
 
 					gnInventoryStatisticsSettings.add(gnInventoryStatisticsSetting);
 				}
 
-				gnInventorySettings.add(GNParameterCode.StatisticsSettings, gnInventoryStatisticsSettings);
+				gnInventorySettings.add(ParameterCode.StatisticsSettings, gnInventoryStatisticsSettings);
 			}
 
 			{
@@ -575,14 +575,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let inventoryDatasSetting = inventoryDatasSettings[i];
 					let gnInventoryDatasSetting = new GNHashtable();
 
-					gnInventoryDatasSetting.add(GNParameterCode.Key, inventoryDatasSetting.key);
-					gnInventoryDatasSetting.add(GNParameterCode.Permission, inventoryDatasSetting.permission);
-					gnInventoryDatasSetting.add(GNParameterCode.DisplayName, inventoryDatasSetting.displayName);
+					gnInventoryDatasSetting.add(ParameterCode.Key, inventoryDatasSetting.key);
+					gnInventoryDatasSetting.add(ParameterCode.Permission, inventoryDatasSetting.permission);
+					gnInventoryDatasSetting.add(ParameterCode.Description, inventoryDatasSetting.description);
 
 					gnInventoryDatasSettings.add(gnInventoryDatasSetting);
 				}
 
-				gnInventorySettings.add(GNParameterCode.DatasSettings, gnInventoryDatasSettings);
+				gnInventorySettings.add(ParameterCode.DatasSettings, gnInventoryDatasSettings);
 			}
 
 			{
@@ -592,14 +592,14 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let customDatasSetting = customDatasSettings[i];
 					let gnCustomDatasSetting = new GNHashtable();
 
-					gnCustomDatasSetting.add(GNParameterCode.Key, customDatasSetting.key);
-					gnCustomDatasSetting.add(GNParameterCode.Permission, customDatasSetting.permission);
-					gnCustomDatasSetting.add(GNParameterCode.DisplayName, customDatasSetting.displayName);
+					gnCustomDatasSetting.add(ParameterCode.Key, customDatasSetting.key);
+					gnCustomDatasSetting.add(ParameterCode.Permission, customDatasSetting.permission);
+					gnCustomDatasSetting.add(ParameterCode.Description, customDatasSetting.description);
 
 					gnCustomDatasSettings.add(gnCustomDatasSetting);
 				}
 
-				gnInventorySettings.add(GNParameterCode.CustomDatasSettings, gnCustomDatasSettings);
+				gnInventorySettings.add(ParameterCode.CustomDatasSettings, gnCustomDatasSettings);
 			}
 
 			{
@@ -609,20 +609,20 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let tagsSetting = tagsSettings[i];
 					let gnTagsSetting = new GNHashtable();
 
-					gnTagsSetting.add(GNParameterCode.Key, tagsSetting.key);
-					gnTagsSetting.add(GNParameterCode.DisplayName, tagsSetting.displayName);
-					gnTagsSetting.add(GNParameterCode.Index, tagsSetting.index);
+					gnTagsSetting.add(ParameterCode.Key, tagsSetting.key);
+					gnTagsSetting.add(ParameterCode.Description, tagsSetting.description);
+					gnTagsSetting.add(ParameterCode.Index, tagsSetting.index);
 
 					gnTagsSettings.add(gnTagsSetting);
 				}
 
-				gnInventorySettings.add(GNParameterCode.TagsSettings, gnTagsSettings);
+				gnInventorySettings.add(ParameterCode.TagsSettings, gnTagsSettings);
 			}
 
-			gnGameSettings.add(GNParameterCode.InventorySettings, gnInventorySettings);
+			gnGameSettings.add(ParameterCode.InventorySettings, gnInventorySettings);
 		}
 
-		operationResponse.setParameter(GNParameterCode.GameSettings, gnGameSettings);
+		operationResponse.setParameter(ParameterCode.GameSettings, gnGameSettings);
 
 		let gnMatchmakingQueueSettings = new GNArray();
 
@@ -634,18 +634,18 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 				let gnMatchmakingQueueSetting = new GNHashtable();
 
-				gnMatchmakingQueueSetting.add(GNParameterCode.QueueName, matchmakingQueueSetting.queueName);
-				gnMatchmakingQueueSetting.add(GNParameterCode.MatchSize,
+				gnMatchmakingQueueSetting.add(ParameterCode.QueueName, matchmakingQueueSetting.queueName);
+				gnMatchmakingQueueSetting.add(ParameterCode.MatchSize,
 					new GNHashtableBuilder()
-						.add(GNParameterCode.Min, matchmakingQueueSetting.matchSize.min)
-						.add(GNParameterCode.Max, matchmakingQueueSetting.matchSize.max)
+						.add(ParameterCode.Min, matchmakingQueueSetting.matchSize.min)
+						.add(ParameterCode.Max, matchmakingQueueSetting.matchSize.max)
 						.build()
 				);
 
-				gnMatchmakingQueueSetting.add(GNParameterCode.TicketSize,
+				gnMatchmakingQueueSetting.add(ParameterCode.TicketSize,
 					new GNHashtableBuilder()
-						.add(GNParameterCode.Min, matchmakingQueueSetting.ticketSize.min)
-						.add(GNParameterCode.Max, matchmakingQueueSetting.ticketSize.max)
+						.add(ParameterCode.Min, matchmakingQueueSetting.ticketSize.min)
+						.add(ParameterCode.Max, matchmakingQueueSetting.ticketSize.max)
 						.build()
 				);
 
@@ -657,23 +657,23 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 						let gnTeam = new GNHashtable();
 
-						gnTeam.add(GNParameterCode.TeamId, team.teamId);
-						gnTeam.add(GNParameterCode.TeamSize,
+						gnTeam.add(ParameterCode.TeamId, team.teamId);
+						gnTeam.add(ParameterCode.TeamSize,
 							new GNHashtableBuilder()
-								.add(GNParameterCode.Min, team.teamSize.min)
-								.add(GNParameterCode.Max, team.teamSize.max)
+								.add(ParameterCode.Min, team.teamSize.min)
+								.add(ParameterCode.Max, team.teamSize.max)
 								.build()
 						);
 
 						gnTeams.add(gnTeam);
 					}
 
-					gnMatchmakingQueueSetting.add(GNParameterCode.Teams, gnTeams);
+					gnMatchmakingQueueSetting.add(ParameterCode.Teams, gnTeams);
 				}
 
 				let gnServerAllocation = new GNHashtable();
-				gnServerAllocation.add(GNParameterCode.Enable, matchmakingQueueSetting.serverAllocation.enable);
-				gnMatchmakingQueueSetting.add(GNParameterCode.ServerAllocation, gnServerAllocation);
+				gnServerAllocation.add(ParameterCode.Enable, matchmakingQueueSetting.serverAllocation.enable);
+				gnMatchmakingQueueSetting.add(ParameterCode.ServerAllocation, gnServerAllocation);
 
 				if (matchmakingQueueSetting.rules != null) {
 					let gnRules = new GNArray();
@@ -683,229 +683,229 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 						let gnRule = new GNHashtable();
 
-						gnRule.add(GNParameterCode.Name, rule.name);
-						gnRule.add(GNParameterCode.Type, <number>rule.type);
+						gnRule.add(ParameterCode.Name, rule.name);
+						gnRule.add(ParameterCode.Type, <number>rule.type);
 
 						if (rule.type == RuleType.String) {
 							let stringRule = <StringRule>rule;
 
-							gnRule.add(GNParameterCode.AttributeSource, <number>stringRule.attributeSource);
-							gnRule.add(GNParameterCode.AttributePath, stringRule.attributePath);
-							gnRule.add(GNParameterCode.DefaultValue, stringRule.defaultValue);
-							gnRule.add(GNParameterCode.CompairType, <number>stringRule.compairType);
+							gnRule.add(ParameterCode.AttributeSource, <number>stringRule.attributeSource);
+							gnRule.add(ParameterCode.AttributePath, stringRule.attributePath);
+							gnRule.add(ParameterCode.DefaultValue, stringRule.defaultValue);
+							gnRule.add(ParameterCode.CompairType, <number>stringRule.compairType);
 
 							if (stringRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, stringRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(GNParameterCode.ExpansionType, <number>stringRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, stringRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>stringRule.advancedSettings.expansionType);
 
 								if (stringRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									let gnCustomExpansions = new GNHashtable();
 
-									gnCustomExpansions.add(GNParameterCode.SecondsBetweenExpansions, stringRule.advancedSettings.customExpansions.secondsBetweenExpansions);
-									gnCustomExpansions.add(GNParameterCode.OverrideValue, stringRule.advancedSettings.customExpansions.overrideValue);
+									gnCustomExpansions.add(ParameterCode.SecondsBetweenExpansions, stringRule.advancedSettings.customExpansions.secondsBetweenExpansions);
+									gnCustomExpansions.add(ParameterCode.OverrideValue, stringRule.advancedSettings.customExpansions.overrideValue);
 
-									gnAdvancedSettings.add(GNParameterCode.CustomExpansions, gnCustomExpansions);
+									gnAdvancedSettings.add(ParameterCode.CustomExpansions, gnCustomExpansions);
 								}
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 						else if (rule.type == RuleType.Difference) {
 							let differenceRule = <DifferenceRule>rule;
 
-							gnRule.add(GNParameterCode.AttributeSource, <number>differenceRule.attributeSource);
-							gnRule.add(GNParameterCode.AttributePath, differenceRule.attributePath);
-							gnRule.add(GNParameterCode.DefaultValue, differenceRule.defaultValue);
-							gnRule.add(GNParameterCode.AllowedDifference, differenceRule.allowedDifference);
+							gnRule.add(ParameterCode.AttributeSource, <number>differenceRule.attributeSource);
+							gnRule.add(ParameterCode.AttributePath, differenceRule.attributePath);
+							gnRule.add(ParameterCode.DefaultValue, differenceRule.defaultValue);
+							gnRule.add(ParameterCode.AllowedDifference, differenceRule.allowedDifference);
 
 							if (differenceRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, differenceRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(GNParameterCode.ExpansionType, <number>differenceRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, differenceRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>differenceRule.advancedSettings.expansionType);
 
 								if (differenceRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									let gnLinearExpansions = new GNHashtable();
 
-									gnLinearExpansions.add(GNParameterCode.SecondsBetweenExpansions, differenceRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
-									gnLinearExpansions.add(GNParameterCode.Delta, differenceRule.advancedSettings.linearExpansions.delta);
-									gnLinearExpansions.add(GNParameterCode.Limit, differenceRule.advancedSettings.linearExpansions.limit);
+									gnLinearExpansions.add(ParameterCode.SecondsBetweenExpansions, differenceRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
+									gnLinearExpansions.add(ParameterCode.Delta, differenceRule.advancedSettings.linearExpansions.delta);
+									gnLinearExpansions.add(ParameterCode.Limit, differenceRule.advancedSettings.linearExpansions.limit);
 
-									gnAdvancedSettings.add(GNParameterCode.LinearExpansions, gnLinearExpansions);
+									gnAdvancedSettings.add(ParameterCode.LinearExpansions, gnLinearExpansions);
 								}
 								else if (differenceRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									let gnCustomExpansions = new GNHashtable();
 
-									gnCustomExpansions.add(GNParameterCode.SecondsBetweenExpansions, differenceRule.advancedSettings.customExpansions.secondsBetweenExpansions);
-									gnCustomExpansions.add(GNParameterCode.OverrideValue, differenceRule.advancedSettings.customExpansions.overrideValue);
+									gnCustomExpansions.add(ParameterCode.SecondsBetweenExpansions, differenceRule.advancedSettings.customExpansions.secondsBetweenExpansions);
+									gnCustomExpansions.add(ParameterCode.OverrideValue, differenceRule.advancedSettings.customExpansions.overrideValue);
 
-									gnAdvancedSettings.add(GNParameterCode.CustomExpansions, gnCustomExpansions);
+									gnAdvancedSettings.add(ParameterCode.CustomExpansions, gnCustomExpansions);
 								}
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 						else if (rule.type == RuleType.SetIntersection) {
 							let setIntersectionRule = <SetIntersectionRule>rule;
 
-							gnRule.add(GNParameterCode.AttributeSource, <number>setIntersectionRule.attributeSource);
-							gnRule.add(GNParameterCode.AttributePath, setIntersectionRule.attributePath);
-							gnRule.add(GNParameterCode.DefaultValue, setIntersectionRule.defaultValue);
-							gnRule.add(GNParameterCode.Min, setIntersectionRule.min);
+							gnRule.add(ParameterCode.AttributeSource, <number>setIntersectionRule.attributeSource);
+							gnRule.add(ParameterCode.AttributePath, setIntersectionRule.attributePath);
+							gnRule.add(ParameterCode.DefaultValue, setIntersectionRule.defaultValue);
+							gnRule.add(ParameterCode.Min, setIntersectionRule.min);
 
 							if (setIntersectionRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, setIntersectionRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(GNParameterCode.ExpansionType, <number>setIntersectionRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, setIntersectionRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>setIntersectionRule.advancedSettings.expansionType);
 
 								if (setIntersectionRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									let gnLinearExpansions = new GNHashtable();
 
-									gnLinearExpansions.add(GNParameterCode.SecondsBetweenExpansions, setIntersectionRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
-									gnLinearExpansions.add(GNParameterCode.Delta, setIntersectionRule.advancedSettings.linearExpansions.delta);
+									gnLinearExpansions.add(ParameterCode.SecondsBetweenExpansions, setIntersectionRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
+									gnLinearExpansions.add(ParameterCode.Delta, setIntersectionRule.advancedSettings.linearExpansions.delta);
 
-									gnAdvancedSettings.add(GNParameterCode.LinearExpansions, gnLinearExpansions);
+									gnAdvancedSettings.add(ParameterCode.LinearExpansions, gnLinearExpansions);
 								}
 								else if (setIntersectionRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									let gnCustomExpansions = new GNHashtable();
 
-									gnCustomExpansions.add(GNParameterCode.SecondsBetweenExpansions, setIntersectionRule.advancedSettings.customExpansions.secondsBetweenExpansions);
-									gnCustomExpansions.add(GNParameterCode.OverrideValue, setIntersectionRule.advancedSettings.customExpansions.overrideValue);
+									gnCustomExpansions.add(ParameterCode.SecondsBetweenExpansions, setIntersectionRule.advancedSettings.customExpansions.secondsBetweenExpansions);
+									gnCustomExpansions.add(ParameterCode.OverrideValue, setIntersectionRule.advancedSettings.customExpansions.overrideValue);
 
-									gnAdvancedSettings.add(GNParameterCode.CustomExpansions, gnCustomExpansions);
+									gnAdvancedSettings.add(ParameterCode.CustomExpansions, gnCustomExpansions);
 								}
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 						else if (rule.type == RuleType.MatchTotal) {
 							let matchTotalRule = <MatchTotalRule>rule;
 
-							gnRule.add(GNParameterCode.AttributeSource, <number>matchTotalRule.attributeSource);
-							gnRule.add(GNParameterCode.AttributePath, matchTotalRule.attributePath);
-							gnRule.add(GNParameterCode.Max, matchTotalRule.max);
-							gnRule.add(GNParameterCode.Min, matchTotalRule.min);
+							gnRule.add(ParameterCode.AttributeSource, <number>matchTotalRule.attributeSource);
+							gnRule.add(ParameterCode.AttributePath, matchTotalRule.attributePath);
+							gnRule.add(ParameterCode.Max, matchTotalRule.max);
+							gnRule.add(ParameterCode.Min, matchTotalRule.min);
 
 							if (matchTotalRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, matchTotalRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(GNParameterCode.ExpansionType, <number>matchTotalRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, matchTotalRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>matchTotalRule.advancedSettings.expansionType);
 
 								if (matchTotalRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									let gnCustomExpansions = new GNHashtable();
 
-									gnCustomExpansions.add(GNParameterCode.SecondsBetweenExpansions, matchTotalRule.advancedSettings.customExpansions.secondsBetweenExpansions);
-									gnCustomExpansions.add(GNParameterCode.OverrideMin, matchTotalRule.advancedSettings.customExpansions.overrideMin);
-									gnCustomExpansions.add(GNParameterCode.OverrideMax, matchTotalRule.advancedSettings.customExpansions.overrideMax);
+									gnCustomExpansions.add(ParameterCode.SecondsBetweenExpansions, matchTotalRule.advancedSettings.customExpansions.secondsBetweenExpansions);
+									gnCustomExpansions.add(ParameterCode.OverrideMin, matchTotalRule.advancedSettings.customExpansions.overrideMin);
+									gnCustomExpansions.add(ParameterCode.OverrideMax, matchTotalRule.advancedSettings.customExpansions.overrideMax);
 
-									gnAdvancedSettings.add(GNParameterCode.CustomExpansions, gnCustomExpansions);
+									gnAdvancedSettings.add(ParameterCode.CustomExpansions, gnCustomExpansions);
 								}
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 						else if (rule.type == RuleType.RegionSelection) {
 							let regionSelectionRule = <RegionSelectionRule>rule;
 
-							gnRule.add(GNParameterCode.AttributePath, regionSelectionRule.attributePath);
-							gnRule.add(GNParameterCode.Max, regionSelectionRule.max);
+							gnRule.add(ParameterCode.AttributePath, regionSelectionRule.attributePath);
+							gnRule.add(ParameterCode.Max, regionSelectionRule.max);
 
 							if (regionSelectionRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, regionSelectionRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(GNParameterCode.ExpansionType, <number>regionSelectionRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, regionSelectionRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>regionSelectionRule.advancedSettings.expansionType);
 
 								if (regionSelectionRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									let gnLinearExpansions = new GNHashtable();
 
-									gnLinearExpansions.add(GNParameterCode.SecondsBetweenExpansions, regionSelectionRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
-									gnLinearExpansions.add(GNParameterCode.Delta, regionSelectionRule.advancedSettings.linearExpansions.delta);
-									gnLinearExpansions.add(GNParameterCode.Limit, regionSelectionRule.advancedSettings.linearExpansions.limit);
+									gnLinearExpansions.add(ParameterCode.SecondsBetweenExpansions, regionSelectionRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
+									gnLinearExpansions.add(ParameterCode.Delta, regionSelectionRule.advancedSettings.linearExpansions.delta);
+									gnLinearExpansions.add(ParameterCode.Limit, regionSelectionRule.advancedSettings.linearExpansions.limit);
 
-									gnAdvancedSettings.add(GNParameterCode.LinearExpansions, gnLinearExpansions);
+									gnAdvancedSettings.add(ParameterCode.LinearExpansions, gnLinearExpansions);
 								}
 								else if (regionSelectionRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									let gnCustomExpansions = new GNHashtable();
 
-									gnCustomExpansions.add(GNParameterCode.SecondsBetweenExpansions, regionSelectionRule.advancedSettings.customExpansions.secondsBetweenExpansions);
-									gnCustomExpansions.add(GNParameterCode.OverrideValue, regionSelectionRule.advancedSettings.customExpansions.overrideValue);
+									gnCustomExpansions.add(ParameterCode.SecondsBetweenExpansions, regionSelectionRule.advancedSettings.customExpansions.secondsBetweenExpansions);
+									gnCustomExpansions.add(ParameterCode.OverrideValue, regionSelectionRule.advancedSettings.customExpansions.overrideValue);
 
-									gnAdvancedSettings.add(GNParameterCode.CustomExpansions, gnCustomExpansions);
+									gnAdvancedSettings.add(ParameterCode.CustomExpansions, gnCustomExpansions);
 								}
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 						else if (rule.type == RuleType.TeamSizeBalance) {
 							let teamSizeBalanceRule = <TeamSizeBalanceRule>rule;
 
-							gnRule.add(GNParameterCode.AllowedDifference, teamSizeBalanceRule.allowedDifference);
+							gnRule.add(ParameterCode.AllowedDifference, teamSizeBalanceRule.allowedDifference);
 
 							if (teamSizeBalanceRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, teamSizeBalanceRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(GNParameterCode.ExpansionType, <number>teamSizeBalanceRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, teamSizeBalanceRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>teamSizeBalanceRule.advancedSettings.expansionType);
 
 								if (teamSizeBalanceRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									let gnLinearExpansions = new GNHashtable();
 
-									gnLinearExpansions.add(GNParameterCode.SecondsBetweenExpansions, teamSizeBalanceRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
-									gnLinearExpansions.add(GNParameterCode.Delta, teamSizeBalanceRule.advancedSettings.linearExpansions.delta);
-									gnLinearExpansions.add(GNParameterCode.Limit, teamSizeBalanceRule.advancedSettings.linearExpansions.limit);
+									gnLinearExpansions.add(ParameterCode.SecondsBetweenExpansions, teamSizeBalanceRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
+									gnLinearExpansions.add(ParameterCode.Delta, teamSizeBalanceRule.advancedSettings.linearExpansions.delta);
+									gnLinearExpansions.add(ParameterCode.Limit, teamSizeBalanceRule.advancedSettings.linearExpansions.limit);
 
-									gnAdvancedSettings.add(GNParameterCode.LinearExpansions, gnLinearExpansions);
+									gnAdvancedSettings.add(ParameterCode.LinearExpansions, gnLinearExpansions);
 								}
 								else if (teamSizeBalanceRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									let gnCustomExpansions = new GNHashtable();
 
-									gnCustomExpansions.add(GNParameterCode.SecondsBetweenExpansions, teamSizeBalanceRule.advancedSettings.customExpansions.secondsBetweenExpansions);
-									gnCustomExpansions.add(GNParameterCode.OverrideValue, teamSizeBalanceRule.advancedSettings.customExpansions.overrideValue);
+									gnCustomExpansions.add(ParameterCode.SecondsBetweenExpansions, teamSizeBalanceRule.advancedSettings.customExpansions.secondsBetweenExpansions);
+									gnCustomExpansions.add(ParameterCode.OverrideValue, teamSizeBalanceRule.advancedSettings.customExpansions.overrideValue);
 
-									gnAdvancedSettings.add(GNParameterCode.CustomExpansions, gnCustomExpansions);
+									gnAdvancedSettings.add(ParameterCode.CustomExpansions, gnCustomExpansions);
 								}
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 						else if (rule.type == RuleType.TeamDifference) {
 							let teamDifferenceRule = <TeamDifferenceRule>rule;
 
-							gnRule.add(GNParameterCode.AttributeSource, <number>teamDifferenceRule.attributeSource);
-							gnRule.add(GNParameterCode.AttributePath, teamDifferenceRule.attributePath);
-							gnRule.add(GNParameterCode.DefaultValue, teamDifferenceRule.defaultValue);
-							gnRule.add(GNParameterCode.AllowedDifference, teamDifferenceRule.allowedDifference);
+							gnRule.add(ParameterCode.AttributeSource, <number>teamDifferenceRule.attributeSource);
+							gnRule.add(ParameterCode.AttributePath, teamDifferenceRule.attributePath);
+							gnRule.add(ParameterCode.DefaultValue, teamDifferenceRule.defaultValue);
+							gnRule.add(ParameterCode.AllowedDifference, teamDifferenceRule.allowedDifference);
 
 							if (teamDifferenceRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, teamDifferenceRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(GNParameterCode.ExpansionType, <number>teamDifferenceRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, teamDifferenceRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>teamDifferenceRule.advancedSettings.expansionType);
 
 								if (teamDifferenceRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									let gnLinearExpansions = new GNHashtable();
 
-									gnLinearExpansions.add(GNParameterCode.SecondsBetweenExpansions, teamDifferenceRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
-									gnLinearExpansions.add(GNParameterCode.Delta, teamDifferenceRule.advancedSettings.linearExpansions.delta);
-									gnLinearExpansions.add(GNParameterCode.Limit, teamDifferenceRule.advancedSettings.linearExpansions.limit);
+									gnLinearExpansions.add(ParameterCode.SecondsBetweenExpansions, teamDifferenceRule.advancedSettings.linearExpansions.secondsBetweenExpansions);
+									gnLinearExpansions.add(ParameterCode.Delta, teamDifferenceRule.advancedSettings.linearExpansions.delta);
+									gnLinearExpansions.add(ParameterCode.Limit, teamDifferenceRule.advancedSettings.linearExpansions.limit);
 
-									gnAdvancedSettings.add(GNParameterCode.LinearExpansions, gnLinearExpansions);
+									gnAdvancedSettings.add(ParameterCode.LinearExpansions, gnLinearExpansions);
 								}
 								else if (teamDifferenceRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									let gnCustomExpansions = new GNHashtable();
 
-									gnCustomExpansions.add(GNParameterCode.SecondsBetweenExpansions, teamDifferenceRule.advancedSettings.customExpansions.secondsBetweenExpansions);
-									gnCustomExpansions.add(GNParameterCode.OverrideValue, teamDifferenceRule.advancedSettings.customExpansions.overrideValue);
+									gnCustomExpansions.add(ParameterCode.SecondsBetweenExpansions, teamDifferenceRule.advancedSettings.customExpansions.secondsBetweenExpansions);
+									gnCustomExpansions.add(ParameterCode.OverrideValue, teamDifferenceRule.advancedSettings.customExpansions.overrideValue);
 
-									gnAdvancedSettings.add(GNParameterCode.CustomExpansions, gnCustomExpansions);
+									gnAdvancedSettings.add(ParameterCode.CustomExpansions, gnCustomExpansions);
 								}
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 						else if (rule.type == RuleType.TeamTicketSizeSimilarity) {
@@ -914,25 +914,25 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 							if (teamTicketSizeSimilarityRule.advancedSettings != null) {
 								let gnAdvancedSettings = new GNHashtable();
 
-								gnAdvancedSettings.add(GNParameterCode.SecondsUntilOptional, teamTicketSizeSimilarityRule.advancedSettings.secondsUntilOptional);
+								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, teamTicketSizeSimilarityRule.advancedSettings.secondsUntilOptional);
 
-								gnRule.add(GNParameterCode.AdvancedSettings, gnAdvancedSettings);
+								gnRule.add(ParameterCode.AdvancedSettings, gnAdvancedSettings);
 							}
 						}
 
 						gnRules.add(gnRule);
 					}
 
-					gnMatchmakingQueueSetting.add(GNParameterCode.Rules, gnRules);
+					gnMatchmakingQueueSetting.add(ParameterCode.Rules, gnRules);
 				}
 
 				gnMatchmakingQueueSettings.add(gnMatchmakingQueueSetting);
 			}
 		}
 
-		operationResponse.setParameter(GNParameterCode.MatchmakingQueueSettings, gnMatchmakingQueueSettings);
+		operationResponse.setParameter(ParameterCode.MatchmakingQueueSettings, gnMatchmakingQueueSettings);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetGameInformation", request, secretInfo, operationRequest, operationResponse);
 

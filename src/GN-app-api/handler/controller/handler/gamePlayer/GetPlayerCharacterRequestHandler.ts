@@ -6,19 +6,19 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class GetPlayerCharacterOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.CharacterCatalogIds, isOptional: true, elementCls: String })
+	@GNArrayDataMember({ code: ParameterCode.CharacterCatalogIds, isOptional: true, elementCls: String })
 	characterCatalogIds?: Array<string>;
 
 	public override isValidRequest() {
@@ -29,7 +29,7 @@ class GetPlayerCharacterOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayerCharacterOperationRequest extends GetPlayerCharacterOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -129,7 +129,7 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
@@ -139,16 +139,16 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
 		}
 
 		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(GNParameterCode.PlayerCharacters, this.generatePlayerCharacters(gamePlayer, request.characterCatalogIds));
+		gnInfoResponseParameters.add(ParameterCode.PlayerCharacters, this.generatePlayerCharacters(gamePlayer, request.characterCatalogIds));
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayerCharacter", request, secretInfo, operationRequest, operationResponse);
 

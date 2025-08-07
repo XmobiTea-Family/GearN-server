@@ -6,26 +6,23 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
-import { OperationEvent } from "../../../../../GN-common/entity/operationEvent/OperationEvent";
+import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 
 class SendSocketOperationEventOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
     userId?: string;
 
-    @StringDataMember({ code: GNParameterCode.EventCode, minLength: 1, maxLength: 100 })
+    @StringDataMember({ code: ParameterCode.EventCode, minLength: 1, maxLength: 100 })
     eventCode: string;
 
-    @GNHashtableDataMember({ code: GNParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })
+    @GNHashtableDataMember({ code: ParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })
     eventParameters?: GNHashtable;
-
-    @BooleanDataMember({ code: GNParameterCode.EventEncrypted, isOptional: true, defaultValue: false })
-    eventEncrypted?: boolean;
 
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
@@ -35,7 +32,7 @@ class SendSocketOperationEventOperationRequest extends OperationRequest {
 }
 
 class ServerSendSocketOperationEventOperationRequest extends SendSocketOperationEventOperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
     declare userId: string;
 
     public override isValidRequest() {
@@ -91,7 +88,6 @@ export class SendSocketOperationEventRequestHandler extends MasterPlayerBaseRequ
             userId: request.userId,
             eventCode: request.eventCode,
             eventParameters: request.eventParameters?.toData() ?? null,
-            eventEncrypted: request.eventEncrypted,
         }, secretInfo, operationRequest);
     }
 
@@ -110,7 +106,6 @@ export class SendSocketOperationEventRequestHandler extends MasterPlayerBaseRequ
             userId: request.userId,
             eventCode: request.eventCode,
             eventParameters: request.eventParameters?.toData() ?? null,
-            eventEncrypted: request.eventEncrypted,
         }, secretInfo, operationRequest);
     }
 
@@ -129,22 +124,21 @@ export class SendSocketOperationEventRequestHandler extends MasterPlayerBaseRequ
             userId: request.userId,
             eventCode: request.eventCode,
             eventParameters: request.eventParameters?.toData() ?? null,
-            eventEncrypted: request.eventEncrypted,
         }, secretInfo, operationRequest);
     }
 
-    private async execute(request: { userId: string, eventCode: string, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { userId: string, eventCode: string, eventParameters: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SendSocketOperationEvent", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        this.gnServer.sendEventTo(request.userId, new OperationEvent(request.eventCode, request.eventParameters != null ? GNHashtable.builder().addAll(request.eventParameters).build() : null, request.eventEncrypted));
+        this.gnServer.sendEventTo(request.userId, new OperationEvent(request.eventCode, request.eventParameters != null ? GNHashtable.builder().addAll(request.eventParameters).build() : null));
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SendSocketOperationEvent", request, secretInfo, operationRequest, operationResponse);
 

@@ -160,9 +160,9 @@ var secretPermissionItem = {
         removePlayerItem: {},
 
         getOnlineStatus: {},
-        grantGroup: {},
-        grantPlayerItem: {},
-        grantPlayerCharacter: {},
+        createGroup: {},
+        createPlayerItem: {},
+        createPlayerCharacter: {},
 
         addPlayerFriend: {},
         removePlayerFriend: {},
@@ -230,9 +230,9 @@ var secretPermissionItem = {
         getPlayerGroup: {},
         getPlayerInventory: {},
         removePlayerItem: {},
-        grantPlayerItem: {},
+        createPlayerItem: {},
 
-        grantGroup: {},
+        createGroup: {},
         joinGroup: {},
         leaveGroup: {},
 
@@ -299,7 +299,7 @@ var secretPermissionItem = {
 
         getGroupInventory: {},
         removeGroupItem: {},
-        grantGroupItem: {},
+        createGroupItem: {},
 
         getMembers: {},
 
@@ -363,7 +363,7 @@ var secretPermissionItem = {
         buyStoreItem: {},
         getStoreItemInformation: {},
         getStoreItemsWithTag: {},
-        grantStoreItem: {},
+        createStoreItem: {},
         setRemoveStatus: {},
         setStoreItemInformation: {},
         validateAppleAppStoreReceipt: {},
@@ -372,12 +372,12 @@ var secretPermissionItem = {
     },
     masterAdmin: {
         setMasterGameSettings: {},
-        grantAdminAccount: {},
+        createAdminAccount: {},
         removeAdminAccount: {},
         setPasswordAdminAccount: {},
         setSecretKeyAdminAccount: {},
         setGameInformation: {},
-        grantGame: {},
+        createGame: {},
         changePasswordAdminAccount: {},
         getAdminAccountList: {},
         getGameInformation: {},
@@ -386,7 +386,7 @@ var secretPermissionItem = {
         getServerLog: {},
         getSecretInfoInformation: {},
         getSecretInfoList: {},
-        grantSecretInfo: {},
+        createSecretInfo: {},
         setSecretInfoInformation: {},
     }
 }
@@ -424,14 +424,14 @@ function mainGetSecretInformation() {
             str += "\t\t\t\tlet permissionRules = " + mainKey + "." + childKey + ";\n";
             str += "\t\t\t\tlet gnPermissionRules = new GNHashtable();\n\n";
 
-            str += "\t\t\t\tgnPermissionRules.add(GNParameterCode.SelfEnable, permissionRules.selfEnable);\n";
-            str += "\t\t\t\tgnPermissionRules.add(GNParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);\n";
-            str += "\t\t\t\tgnPermissionRules.add(GNParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);\n";
-            str += "\t\t\t\tgnPermissionRules.add(GNParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);\n\n";
+            str += "\t\t\t\tgnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);\n";
+            str += "\t\t\t\tgnPermissionRules.add(ParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);\n";
+            str += "\t\t\t\tgnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);\n";
+            str += "\t\t\t\tgnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);\n\n";
 
             let childKeyName = childKey[0].toUpperCase() + childKey.substring(1);
 
-            str += "\t\t\t\tgn" + mainKeyName + ".add(GNParameterCode." + childKeyName + ", permissionRules);\n"
+            str += "\t\t\t\tgn" + mainKeyName + ".add(ParameterCode." + childKeyName + ", permissionRules);\n"
 
             str += "\t\t\t}\n\n";
         });
@@ -550,10 +550,10 @@ function syncCodeCSharp(dirName, ignoreFileLst, modelName) {
                         }
 
                         if (lineK.includes("@")) {
-                            let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
-                            let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                            let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                            let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
                             let dataMemberName = lineK2Spls[0]; // StringDataMember
-                            let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
+                            let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
 
                             let hasMustInt = false;
                             let isOptional = false;
@@ -636,7 +636,6 @@ function syncCodeCSharp(dirName, ignoreFileLst, modelName) {
         clientRequestModelFileStr += "\tpublic class " + name + "OperationRequest : CustomOperationRequest<" + modelName + "Models." + name + "RequestData>\n";
         clientRequestModelFileStr += "\t{\n";
         clientRequestModelFileStr += "\t\tprotected override int operationCode => OperationCode." + name + ";\n";
-        clientRequestModelFileStr += "\t\tprotected override bool operationEncrypted => true;\n";
         clientRequestModelFileStr += "\t\tprotected override RequestType requestType => RequestType." + modelName + ";\n";
         clientRequestModelFileStr += "\t\tprotected override RequestRole requestRole => RequestRole.Client;\n\n";
 
@@ -746,10 +745,10 @@ function syncModelCodeCSharp(dirName, modelName) {
                         }
 
                         if (lineK.includes("@")) {
-                            let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
-                            let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                            let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                            let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
                             let dataMemberName = lineK2Spls[0]; // StringDataMember
-                            let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
+                            let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
 
                             let hasMustInt = false;
                             let isOptional = false;
@@ -885,9 +884,9 @@ function fixCodeTypescript(dirName, ignoreFileLst, modelName) {
 
                 let lineK = lineJ;
 
-                let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
-                let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
-                let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
+                let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
 
                 for (let l = 0; l < lineK3Spls.length; l++) {
                     let lineK4Spls = lineK3Spls[l].split(":");
@@ -960,9 +959,9 @@ function syncModelCodeTypescript(dirName, modelName) {
 
                     let lineK = lineJ;
 
-                    let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
-                    let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
-                    let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
+                    let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                    let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+                    let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
 
                     for (let l = 0; l < lineK3Spls.length; l++) {
                         let lineK4Spls = lineK3Spls[l].split(":");

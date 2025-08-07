@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import bcrypt from "bcrypt";
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
@@ -18,13 +18,13 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	username: string;
 
-	@StringDataMember({ code: GNParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
@@ -70,7 +70,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
@@ -81,7 +81,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 			return operationResponse;
 		}
 		else {
@@ -107,20 +107,20 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		let isMatch = await bcrypt.compare(request.password, masterPlayer.getPassword());
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountPasswordWrong);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountPasswordWrong);
 
 			return operationResponse;
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		operationResponse.setParameter(GNParameterCode.UserId, masterPlayer.getUserId());
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+		operationResponse.setParameter(ParameterCode.UserId, masterPlayer.getUserId());
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
 		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
-			authenticationType: "LoginByAccount",
+			authenticationType: "loginByAccount",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: false,

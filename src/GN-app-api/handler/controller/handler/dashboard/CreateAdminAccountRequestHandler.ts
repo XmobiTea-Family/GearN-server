@@ -6,8 +6,8 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import bcrypt from "bcrypt";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
@@ -15,14 +15,14 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterAdminPlayer";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
-class GrantAdminAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
+class CreateAdminAccountOperationRequest extends OperationRequest {
+	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	username: string;
 
-	@StringDataMember({ code: GNParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
-	@StringDataMember({ code: GNParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
 	secretKey: string;
 
 	public override isValidRequest() {
@@ -32,13 +32,13 @@ class GrantAdminAccountOperationRequest extends OperationRequest {
 	}
 }
 
-export class GrantAdminAccountRequestHandler extends RequestHandler {
+export class CreateAdminAccountRequestHandler extends RequestHandler {
 	public override getCode() {
-		return OperationCode.GrantAdminAccount;
+		return OperationCode.CreateAdminAccount;
 	}
 
 	public override getCommonOperationRequest() {
-		return GrantAdminAccountOperationRequest;
+		return CreateAdminAccountOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -48,7 +48,7 @@ export class GrantAdminAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(operationRequest);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.grantAdminAccount.selfEnable) {
+		if (!secretInfo.getPermission().masterAdmin.createAdminAccount.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -60,12 +60,12 @@ export class GrantAdminAccountRequestHandler extends RequestHandler {
 	}
 
 	private async execute(request: { username: string, password: string, secretKey: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GrantAdminAccount", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_CreateAdminAccount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -73,7 +73,7 @@ export class GrantAdminAccountRequestHandler extends RequestHandler {
 		let thisUser = await collection.findOne({ type: "account", username: request.username });
 
 		if (thisUser != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountUsernameExists);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountUsernameExists);
 			return operationResponse;
 		}
 
@@ -89,11 +89,11 @@ export class GrantAdminAccountRequestHandler extends RequestHandler {
 
 		let masterAdminPlayer = new MasterAdminPlayer(result, collection);
 
-		operationResponse.setParameter(GNParameterCode.UserId, masterAdminPlayer.getUserId());
+		operationResponse.setParameter(ParameterCode.UserId, masterAdminPlayer.getUserId());
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GrantAdminAccount", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_CreateAdminAccount", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

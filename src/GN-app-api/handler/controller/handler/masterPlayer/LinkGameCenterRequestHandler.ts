@@ -1,42 +1,42 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkGameCenterOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@StringDataMember({ code: GNParameterCode.PlayerId, minLength: 2, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.PlayerId, minLength: 2, maxLength: 64, mustNonNull: true })
 	playerId: string;
 
-	@StringDataMember({ code: GNParameterCode.Name, minLength: 2, maxLength: 128, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Name, minLength: 2, maxLength: 128, mustNonNull: true })
 	name: string;
 
-	@StringDataMember({ code: GNParameterCode.PublicKeyUrl, minLength: 2, maxLength: 2048, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.PublicKeyUrl, minLength: 2, maxLength: 2048, mustNonNull: true })
 	publicKeyUrl: string;
 
-	@StringDataMember({ code: GNParameterCode.Signature, minLength: 2, maxLength: 2048, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Signature, minLength: 2, maxLength: 2048, mustNonNull: true })
 	signature: string;
 
-	@StringDataMember({ code: GNParameterCode.Salt, minLength: 2, maxLength: 256, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Salt, minLength: 2, maxLength: 256, mustNonNull: true })
 	salt: string;
 
-	@NumberDataMember({ code: GNParameterCode.Timestamp })
+	@NumberDataMember({ code: ParameterCode.Timestamp })
 	timestamp: number;
 
-	@BooleanDataMember({ code: GNParameterCode.ForceLink, isOptional: true, defaultValue: false })
+	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
 	forceLink?: boolean;
 
 	public override isValidRequest() {
@@ -47,7 +47,7 @@ class LinkGameCenterOperationRequest extends OperationRequest {
 }
 
 class ServerLinkGameCenterOperationRequest extends LinkGameCenterOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -163,7 +163,7 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
@@ -173,13 +173,13 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
 		}
 
 		let external = masterPlayer.getExternal();
 		if (external.google != null && external.google.googleId != null && !request.forceLink) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalLinkedOtherValue);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherValue);
 			return operationResponse;
 		}
 
@@ -193,7 +193,7 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 		});
 
 		if (result["error"] != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.VerifyTokenError);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VerifyTokenError);
 			return operationResponse;
 		}
 
@@ -204,7 +204,7 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 		let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGameCenterAsync(playerId, masterPlayerFindOptions);
 		if (otherMasterPlayer != null && otherMasterPlayer.getUserId() != masterPlayer.getUserId()) {
 			if (!request.forceLink) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalLinkedOtherAccount);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherAccount);
 				return operationResponse;
 			}
 
@@ -224,10 +224,10 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 		masterPlayer.saveAsync();
 
 		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(GNParameterCode.External, this.generateExternal(masterPlayer));
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkGameCenter", request, secretInfo, operationRequest, operationResponse);
 

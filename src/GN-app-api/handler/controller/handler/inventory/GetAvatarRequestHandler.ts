@@ -6,16 +6,16 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class GetAvatarOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	itemId: string;
 
 	public override isValidRequest() {
@@ -111,7 +111,7 @@ export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let inventoryFindOptions: InventoryFindOptions = {
@@ -121,17 +121,17 @@ export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, request.gameId, inventoryFindOptions);
 
 		if (inventory == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
 		}
 
 		let gnInfoResponseParameters = new GNHashtable();
 
-		gnInfoResponseParameters.add(GNParameterCode.Avatar, this.generateAvatar(inventory));
+		gnInfoResponseParameters.add(ParameterCode.Avatar, this.generateAvatar(inventory));
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("inventory_GetAvatar", request, secretInfo, operationRequest, operationResponse);
 

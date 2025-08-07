@@ -6,8 +6,8 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MatchmakingTicketStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
@@ -17,7 +17,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class ListMatchmakingTicketsForPlayerOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.QueueName, minLength: 6, maxLength: 32 })
+    @StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
     queueName: string;
 
     public override isValidRequest() {
@@ -28,7 +28,7 @@ class ListMatchmakingTicketsForPlayerOperationRequest extends OperationRequest {
 }
 
 class ServerListMatchmakingTicketsForPlayerOperationRequest extends ListMatchmakingTicketsForPlayerOperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10 })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
     userId: string;
 
     public override isValidRequest() {
@@ -113,7 +113,7 @@ export class ListMatchmakingTicketsForPlayerRequestHandler extends MultiplayerBa
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
@@ -138,8 +138,8 @@ export class ListMatchmakingTicketsForPlayerRequestHandler extends MultiplayerBa
             }
         }
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
-        operationResponse.setParameter(GNParameterCode.TicketIds, ticketIds);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.TicketIds, ticketIds);
 
         await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_ListMatchmakingTicketsForPlayer", request, secretInfo, operationRequest, operationResponse);
 

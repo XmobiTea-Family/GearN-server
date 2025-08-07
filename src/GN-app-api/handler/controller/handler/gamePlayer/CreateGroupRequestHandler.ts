@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
@@ -20,17 +20,17 @@ import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNam
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
-class GrantGroupOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+class CreateGroupOperationRequest extends OperationRequest {
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
 	catalogId: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.GroupMembers, isOptional: true, elementCls: GroupMemberParam })
+	@GNArrayDataMember({ code: ParameterCode.GroupMembers, isOptional: true, elementCls: GroupMemberParam })
 	groupMembers?: Array<GroupMemberParam>;
 
-	@StringDataMember({ code: GNParameterCode.DisplayName, defaultValue: "", isOptional: true })
+	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
 	displayName?: string;
 
 	// them data vao day
@@ -42,8 +42,8 @@ class GrantGroupOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGrantGroupOperationRequest extends GrantGroupOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+class ServerCreateGroupOperationRequest extends CreateGroupOperationRequest {
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -53,7 +53,7 @@ class ServerGrantGroupOperationRequest extends GrantGroupOperationRequest {
 	}
 }
 
-class AdminGrantGroupOperationRequest extends ServerGrantGroupOperationRequest {
+class AdminCreateGroupOperationRequest extends ServerCreateGroupOperationRequest {
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -61,13 +61,13 @@ class AdminGrantGroupOperationRequest extends ServerGrantGroupOperationRequest {
 	}
 }
 
-export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
+export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 	public override getCode() {
-		return OperationCode.GrantGroup;
+		return OperationCode.CreateGroup;
 	}
 
 	public override getCommonOperationRequest() {
-		return GrantGroupOperationRequest;
+		return CreateGroupOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -78,19 +78,19 @@ export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		if (!request.userId) {
-			if (!secretInfo.getPermission().gamePlayer.grantGroup.selfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.createGroup.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 
 			request.userId = authInfo.getUserId();
 		}
 		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().gamePlayer.grantGroup.otherSelfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.createGroup.otherSelfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
 		else {
-			if (!secretInfo.getPermission().gamePlayer.grantGroup.selfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.createGroup.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
@@ -104,13 +104,13 @@ export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGrantGroupOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreateGroupOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().gamePlayer.grantGroup.serverSelfEnable) {
+		if (!secretInfo.getPermission().gamePlayer.createGroup.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -123,13 +123,13 @@ export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGrantGroupOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreateGroupOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().gamePlayer.grantGroup.adminSelfEnable) {
+		if (!secretInfo.getPermission().gamePlayer.createGroup.adminSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -142,12 +142,12 @@ export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
 	}
 
 	private async execute(request: { userId: string, catalogId: string, groupMembers: Array<GroupMemberParam>, displayName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GrantGroup", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_CreateGroup", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
@@ -158,7 +158,7 @@ export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		let playerGroupCatalogSettingsItem = gamePlayerSettings.playerGroupCatalogSettings.find(x => x.catalogId == request.catalogId);
 
 		if (playerGroupCatalogSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.CatalogIdNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
 
 			return operationResponse;
 		}
@@ -166,7 +166,7 @@ export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
 		}
 
@@ -220,23 +220,23 @@ export class GrantGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 		let gnPlayerGroup = new GNHashtable();
 
-		gnPlayerGroup.add(GNParameterCode.GroupId, group.getGroupId());
-		gnPlayerGroup.add(GNParameterCode.CatalogId, group.getCatalogId());
-		gnPlayerGroup.add(GNParameterCode.Status, <number>GroupStatus.Member);
-		gnPlayerGroup.add(GNParameterCode.TsLastStatusUpdate, currentMilliseconds);
+		gnPlayerGroup.add(ParameterCode.GroupId, group.getGroupId());
+		gnPlayerGroup.add(ParameterCode.CatalogId, group.getCatalogId());
+		gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.Member);
+		gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 
 		gnPlayerGroups.add(gnPlayerGroup);
 
 		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(GNParameterCode.PlayerGroups, gnPlayerGroups);
+		gnInfoResponseParameters.add(ParameterCode.PlayerGroups, gnPlayerGroups);
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		this.gnServer.joinRoom(request.userId, groupId);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GrantGroup", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_CreateGroup", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

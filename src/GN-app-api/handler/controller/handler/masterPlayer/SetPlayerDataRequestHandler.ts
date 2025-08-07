@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
@@ -18,10 +18,10 @@ import { PlayerDataParam } from "./model/PlayerDataParam";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class SetPlayerDataOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.PlayerDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerDataParam })
+	@GNArrayDataMember({ code: ParameterCode.PlayerDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerDataParam })
 	playerDataParams: Array<PlayerDataParam>;
 
 	public override isValidRequest() {
@@ -32,7 +32,7 @@ class SetPlayerDataOperationRequest extends OperationRequest {
 }
 
 class ServerSetPlayerDataOperationRequest extends SetPlayerDataOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -130,7 +130,7 @@ export class SetPlayerDataRequestHandler extends MasterPlayerBaseRequestHandler 
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
@@ -140,7 +140,7 @@ export class SetPlayerDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
 		}
 
@@ -170,8 +170,8 @@ export class SetPlayerDataRequestHandler extends MasterPlayerBaseRequestHandler 
 				masterPlayer.setPlayerData(key, value as DataValueType);
 
 				let gnPlayerData = new GNHashtable();
-				gnPlayerData.add(GNParameterCode.Key, key);
-				gnPlayerData.add(GNParameterCode.Value, playerDataParam.value);
+				gnPlayerData.add(ParameterCode.Key, key);
+				gnPlayerData.add(ParameterCode.Value, playerDataParam.value);
 
 				gnPlayerDatas.add(gnPlayerData);
 			}
@@ -179,10 +179,10 @@ export class SetPlayerDataRequestHandler extends MasterPlayerBaseRequestHandler 
 
 		masterPlayer.saveAsync();
 
-		gnInfoResponseParameters.add(GNParameterCode.PlayerDatas, gnPlayerDatas);
+		gnInfoResponseParameters.add(ParameterCode.PlayerDatas, gnPlayerDatas);
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SetPlayerData", request, secretInfo, operationRequest, operationResponse);
 

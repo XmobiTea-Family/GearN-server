@@ -6,180 +6,180 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import { ExecuteResponseStatus } from "./../../../../service/ICloudScriptService";
-import { GNData } from "../../../../../GN-common/common/GNData";
+import { GNData } from "./../../../../../GN-common/common/GNData";
 
 class ExecuteFunctionOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-    userId?: string;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	userId?: string;
 
-    @StringDataMember({ code: GNParameterCode.FunctionName, minLength: 3, maxLength: 30, mustNonNull: true })
-    functionName: string;
+	@StringDataMember({ code: ParameterCode.FunctionName, minLength: 3, maxLength: 30, mustNonNull: true })
+	functionName: string;
 
-    @DataMember({ code: GNParameterCode.FunctionParameters, isOptional: true })
-    functionParameters?: object;
+	@DataMember({ code: ParameterCode.FunctionParameters, isOptional: true })
+	functionParameters?: object;
 
-    @StringDataMember({ code: GNParameterCode.Version, minLength: 7, maxLength: 7, isOptional: true })
-    version?: string;
+	@StringDataMember({ code: ParameterCode.Version, minLength: 7, maxLength: 7, isOptional: true })
+	version?: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class ServerExecuteFunctionOperationRequest extends ExecuteFunctionOperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-    declare userId: string;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	declare userId: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminExecuteFunctionOperationRequest extends ServerExecuteFunctionOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class ExecuteFunctionRequestHandler extends RequestHandler {
-    public override getCode() {
-        return OperationCode.ExecuteFunction;
-    }
+	public override getCode() {
+		return OperationCode.ExecuteFunction;
+	}
 
-    public override getCommonOperationRequest() {
-        return ExecuteFunctionOperationRequest;
-    }
+	public override getCommonOperationRequest() {
+		return ExecuteFunctionOperationRequest;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!request.userId) {
-            if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
+		if (!request.userId) {
+			if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 
-            request.userId = authInfo.getUserId();
-        }
-        else if (request.userId != authInfo.getUserId()) {
-            if (!secretInfo.getPermission().cloudScript.executeFunction.otherSelfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
-        else {
-            if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().cloudScript.executeFunction.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().cloudScript.executeFunction.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-        return this.execute({
-            userId: authInfo.getUserId(),
-            functionName: request.functionName,
-            functionParameters: request.functionParameters,
-            version: request.version,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			userId: authInfo.getUserId(),
+			functionName: request.functionName,
+			functionParameters: request.functionParameters,
+			version: request.version,
+		}, secretInfo, operationRequest);
+	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerExecuteFunctionOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerExecuteFunctionOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().cloudScript.executeFunction.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().cloudScript.executeFunction.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            functionName: request.functionName,
-            functionParameters: request.functionParameters,
-            version: request.version,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			functionName: request.functionName,
+			functionParameters: request.functionParameters,
+			version: request.version,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminExecuteFunctionOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminExecuteFunctionOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().cloudScript.executeFunction.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().cloudScript.executeFunction.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            functionName: request.functionName,
-            functionParameters: request.functionParameters,
-            version: request.version,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			userId: request.userId,
+			functionName: request.functionName,
+			functionParameters: request.functionParameters,
+			version: request.version,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(request: { userId: string, functionName: string, functionParameters: object, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_ExecuteFunction", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+	private async execute(request: { userId: string, functionName: string, functionParameters: object, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_ExecuteFunction", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let customTags = operationRequest.getParameters().getGNHashtable("CustomTags");
-        let customTagsData = customTags == null ? null : customTags.toData();
+		let customTags = operationRequest.getParameters().getGNHashtable("customTags");
+		let customTagsData = customTags == null ? null : customTags.toData();
 
-        let cloudScriptService = this.gnServer.getCloudScriptService(secretInfo.getGameId());
-        if (!cloudScriptService) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GameNotFound);
-            return operationResponse;
-        }
+		let cloudScriptService = this.gnServer.getCloudScriptService(secretInfo.getGameId());
+		if (!cloudScriptService) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameNotFound);
+			return operationResponse;
+		}
 
-        let functionParameters = request.functionParameters;
-        if (functionParameters != null) {
-            if (functionParameters instanceof GNData) {
-                functionParameters = (functionParameters as GNData).toData();
-            }
-        }
+		let functionParameters = request.functionParameters;
+		if (functionParameters != null) {
+			if (functionParameters instanceof GNData) {
+				functionParameters = (functionParameters as GNData).toData();
+			}
+		}
 
-        let response = await cloudScriptService.executeCloudScriptFunction(request.userId, request.functionName, functionParameters, request.version, customTagsData);
+		let response = await cloudScriptService.executeCloudScriptFunction(request.userId, request.functionName, functionParameters, request.version, customTagsData);
 
-        operationResponse.setParameter(GNParameterCode.FunctionLogs, response.logs);
+		operationResponse.setParameter(ParameterCode.FunctionLogs, response.logs);
 
-        if (response.response.status == ExecuteResponseStatus.Ok) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
-            operationResponse.setParameter(GNParameterCode.Status, <number>response.response.status);
+		if (response.response.status == ExecuteResponseStatus.Ok) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+			operationResponse.setParameter(ParameterCode.Status, <number>response.response.status);
 
-            operationResponse.setParameter(GNParameterCode.ExecutionTimeInMs, response.stats.executeTimeInMs);
-            operationResponse.setParameter(GNParameterCode.MemoryUsedInBytes, response.stats.memoryUsedInBytes);
-            operationResponse.setParameter(GNParameterCode.FunctionResult, response.response.result);
-        }
-        else {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExecuteError);
-            operationResponse.setParameter(GNParameterCode.Status, <number>response.response.status);
+			operationResponse.setParameter(ParameterCode.ExecutionTimeInMs, response.stats.executeTimeInMs);
+			operationResponse.setParameter(ParameterCode.MemoryUsedInBytes, response.stats.memoryUsedInBytes);
+			operationResponse.setParameter(ParameterCode.FunctionResult, response.response.result);
+		}
+		else {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExecuteError);
+			operationResponse.setParameter(ParameterCode.Status, <number>response.response.status);
 
-            operationResponse.setParameter(GNParameterCode.Message, response.response.errorMessage);
-        }
+			operationResponse.setParameter(ParameterCode.ErrorMessage, response.response.errorMessage);
+		}
 
-        await this.gnServer.getPostEventCallbackService().onEvent("cloudScript_ExecuteFunction", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("cloudScript_ExecuteFunction", request, secretInfo, operationRequest, operationResponse);
 
-        return operationResponse;
-    }
+		return operationResponse;
+	}
 }

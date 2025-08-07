@@ -1,33 +1,33 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
-import { OwnerType } from "../../../../../GN-common/constant/enumType/OwnerType";
-import { GroupStatus } from "../../../../../GN-common/constant/enumType/GroupStatus";
-import { StoreReceiveType } from "../../../../../GN-common/constant/enumType/StoreReceiveType";
-import { StoreItemType } from "../../../../../GN-common/constant/enumType/StoreItemType";
+import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
+import { StoreReceiveType } from "./../../../../../GN-common/constant/enumType/StoreReceiveType";
+import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
 
 class PresentStoreItemOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
     storeId: string;
 
-    @StringDataMember({ code: GNParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
     id: string;
 
-    @NumberDataMember({ code: GNParameterCode.OwnerType, mustInt: true })
+    @NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
     type: number;
 
-    @StringDataMember({ code: GNParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
+    @StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
     log?: string;
 
     public override isValidRequest() {
@@ -160,18 +160,18 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
 
         if (storeInventory == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
             return operationResponse;
         }
 
         if (storeInventory.getRemoveStatus().tsRemove != 0) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadBeenRemove);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadBeenRemove);
             return operationResponse;
         }
 
@@ -179,7 +179,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
             let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id);
 
             if (purchaseCount != 0) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadPurchaseAndNonConsumable);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadPurchaseAndNonConsumable);
                 return operationResponse;
             }
         }
@@ -230,7 +230,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
             });
 
             if (characterPlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.BuyerNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
                 return operationResponse;
             }
 
@@ -250,14 +250,14 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
                     if (playerItemCatalogSettingsItem != null) {
                         let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
                         if (itemClassSettingsItem != null) {
-                            let inventory = await this.grantItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
+                            let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
                             characterPlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
 
                             let gnPlayerInventory = new GNHashtable();
 
-                            gnPlayerInventory.add(GNParameterCode.ItemId, inventory.getItemId());
-                            gnPlayerInventory.add(GNParameterCode.CatalogId, inventory.getCatalogId());
-                            gnPlayerInventory.add(GNParameterCode.ClassId, inventory.getClassId());
+                            gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
+                            gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+                            gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
 
                             gnPlayerInventories.add(gnPlayerInventory);
 
@@ -304,8 +304,8 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
                     let gnPlayerCurrency = new GNHashtable();
 
-                    gnPlayerCurrency.add(GNParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(GNParameterCode.Value, serverValue);
+                    gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
 
                     storeCurrencyFinalValues.push({
                         key: storeCurrency.key,
@@ -320,10 +320,10 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
             characterPlayer.saveAsync();
 
-            gnInfoResponseParameters.add(GNParameterCode.Currencies, gnPlayerCurrencies);
-            gnInfoResponseParameters.add(GNParameterCode.Inventories, gnPlayerInventories);
+            gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
+            gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
 
-            operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+            operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
         }
         else if (request.type == <number>OwnerType.GamePlayer) {
             let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
@@ -332,7 +332,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
             });
 
             if (gamePlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.BuyerNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
                 return operationResponse;
             }
 
@@ -352,14 +352,14 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
                     if (playerItemCatalogSettingsItem != null) {
                         let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
                         if (itemClassSettingsItem != null) {
-                            let inventory = await this.grantItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
+                            let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
                             gamePlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
 
                             let gnPlayerInventory = new GNHashtable();
 
-                            gnPlayerInventory.add(GNParameterCode.ItemId, inventory.getItemId());
-                            gnPlayerInventory.add(GNParameterCode.CatalogId, inventory.getCatalogId());
-                            gnPlayerInventory.add(GNParameterCode.ClassId, inventory.getClassId());
+                            gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
+                            gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+                            gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
 
                             gnPlayerInventories.add(gnPlayerInventory);
 
@@ -406,8 +406,8 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
                     let gnPlayerCurrency = new GNHashtable();
 
-                    gnPlayerCurrency.add(GNParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(GNParameterCode.Value, serverValue);
+                    gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
 
                     storeCurrencyFinalValues.push({
                         key: storeCurrency.key,
@@ -422,10 +422,10 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
             gamePlayer.saveAsync();
 
-            gnInfoResponseParameters.add(GNParameterCode.Currencies, gnPlayerCurrencies);
-            gnInfoResponseParameters.add(GNParameterCode.Inventories, gnPlayerInventories);
+            gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
+            gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
 
-            operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+            operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
         }
         else if (request.type == <number>OwnerType.Group) {
             let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, secretInfo.getGameId(), {
@@ -434,7 +434,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
             });
 
             if (group == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.BuyerNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
                 return operationResponse;
             }
 
@@ -454,14 +454,14 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
                     if (groupItemCatalogSettingsItem != null) {
                         let itemClassSettingsItem = groupItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
                         if (itemClassSettingsItem != null) {
-                            let inventory = await this.grantItem(storeItem.catalogId, storeItem.classId, storeItem.amount, groupItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
+                            let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, groupItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
                             group.setGroupInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
 
                             let gnGroupInventory = new GNHashtable();
 
-                            gnGroupInventory.add(GNParameterCode.ItemId, inventory.getItemId());
-                            gnGroupInventory.add(GNParameterCode.CatalogId, inventory.getCatalogId());
-                            gnGroupInventory.add(GNParameterCode.ClassId, inventory.getClassId());
+                            gnGroupInventory.add(ParameterCode.ItemId, inventory.getItemId());
+                            gnGroupInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+                            gnGroupInventory.add(ParameterCode.ClassId, inventory.getClassId());
 
                             gnInventories.add(gnGroupInventory);
 
@@ -508,8 +508,8 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
                     let gnPlayerCurrency = new GNHashtable();
 
-                    gnPlayerCurrency.add(GNParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(GNParameterCode.Value, serverValue);
+                    gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
 
                     storeCurrencyFinalValues.push({
                         key: storeCurrency.key,
@@ -523,21 +523,21 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
             group.saveAsync();
 
-            gnInfoResponseParameters.add(GNParameterCode.Currencies, gnCurrencies);
-            gnInfoResponseParameters.add(GNParameterCode.Inventories, gnInventories);
+            gnInfoResponseParameters.add(ParameterCode.Currencies, gnCurrencies);
+            gnInfoResponseParameters.add(ParameterCode.Inventories, gnInventories);
 
-            operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+            operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
         }
 
         this.gnServer.getDatabase().insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, <number>StoreReceiveType.Present, request.log);
 
         if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id, request.type);
 
-        operationResponse.setParameter(GNParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));
-        operationResponse.setParameter(GNParameterCode.StoreItems, this.generateStoreItems(storeInventory));
-        operationResponse.setParameter(GNParameterCode.PriceCurrencies, this.generatePriceCurrencies(storeInventory));
+        operationResponse.setParameter(ParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));
+        operationResponse.setParameter(ParameterCode.StoreItems, this.generateStoreItems(storeInventory));
+        operationResponse.setParameter(ParameterCode.PriceCurrencies, this.generatePriceCurrencies(storeInventory));
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_PresentStoreItem", request, secretInfo, operationRequest, operationResponse);
 

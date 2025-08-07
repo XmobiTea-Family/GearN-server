@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
@@ -54,7 +54,7 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let masterPlayerFindOptions: MasterPlayerFindOptions = {
@@ -64,7 +64,7 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
         let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
         if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 
             return operationResponse;
         }
@@ -75,11 +75,11 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
         let playerBan = masterPlayer.getPlayerBan();
         if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
-            operationResponse.setParameter(GNParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.PlayerBan);
+            operationResponse.setParameter(ParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
         }
         else {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
             let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
                 gnToken: null,

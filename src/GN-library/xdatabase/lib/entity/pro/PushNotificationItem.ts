@@ -1,5 +1,5 @@
 export interface PushNotificationItem {
-    pushId: string;
-    token: string;
-    platformType: number;
+	pushId: string;
+	token: string;
+	platformType: number;
 }

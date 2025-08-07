@@ -1,3 +1,3 @@
 export interface IGooglePlayGameService {
-    verifyToken(authCode: string): Promise<{ [k: string]: any }>;
+	verifyToken(authCode: string): Promise<{ [k: string]: any }>;
 }

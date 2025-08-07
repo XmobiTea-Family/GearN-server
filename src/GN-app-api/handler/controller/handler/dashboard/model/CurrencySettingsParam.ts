@@ -1,17 +1,17 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class CurrencySettingsParam {
-    @StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32 })
-    key: string;
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
+	key: string;
 
-    @NumberDataMember({ code: GNParameterCode.InitialValue })
-    initialValue: number;
+	@NumberDataMember({ code: ParameterCode.InitialValue })
+	initialValue: number;
 
-    @StringDataMember({ code: GNParameterCode.DisplayName, minLength: 2, maxLength: 64 })
-    displayName: string;
+	@StringDataMember({ code: ParameterCode.Description, minLength: 2, maxLength: 64 })
+	description: string;
 
-    @BooleanDataMember({ code: GNParameterCode.Index })
-    index: boolean;
+	@BooleanDataMember({ code: ParameterCode.Index })
+	index: boolean;
 
 }

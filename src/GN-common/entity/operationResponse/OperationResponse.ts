@@ -9,14 +9,12 @@ export class OperationResponse {
 	private returnCode: number;
 	private debugMessage: string;
 	private parameters: GNHashtable;
-	private encrypted: boolean;
 
 	private invalidMembers: InvalidMember[];
 
-	constructor(operationCode: string, responseId: number, encrypted: boolean = true) {
+	constructor(operationCode: string, responseId: number) {
 		this.operationCode = operationCode;
 		this.responseId = responseId;
-		this.encrypted = encrypted;
 		this.parameters = new GNHashtable();
 		this.debugMessage = null;
 	}
@@ -31,10 +29,6 @@ export class OperationResponse {
 
 	public getParameters(): GNHashtable {
 		return this.parameters;
-	}
-
-	public isEncrypted(): boolean {
-		return this.encrypted;
 	}
 
 	public getResponseId(): number {
@@ -73,11 +67,6 @@ export class OperationResponse {
 		return this;
 	}
 
-	public setEncrypted(encrypted: boolean): OperationResponse {
-		this.encrypted = encrypted;
-		return this;
-	}
-
 	public setInvalidMembers(invalidMembers: InvalidMember[]): OperationResponse {
 		this.invalidMembers = invalidMembers;
 		return this;
@@ -86,9 +75,9 @@ export class OperationResponse {
 	public toString(): string {
 		let stringBuilder = "";
 
-		stringBuilder += "Code: " + CodeHelper.getOperationCodeName(this.operationCode) + " (" + this.operationCode + ")" + ", responseId: " + this.responseId + ", returnCode " + CodeHelper.getReturnCodeName(this.returnCode);
+		stringBuilder += "OperationCode: " + this.operationCode + ", responseId: " + this.responseId + ", returnCode " + CodeHelper.getReturnCodeName(this.returnCode);
 
-		if (this.returnCode == ReturnCode.Ok) stringBuilder += ", parameters " + this.parameters;
+		if (this.returnCode == ReturnCode.Ok) stringBuilder += ", parameters " + JSON.stringify(this.parameters?.toData());
 		else if (this.returnCode == ReturnCode.InvalidRequestParameters) {
 			if (this.invalidMembers != null) {
 				let invalidStr = "";
@@ -100,9 +89,7 @@ export class OperationResponse {
 			}
 			else stringBuilder += ", invalidMembers " + this.invalidMembers;
 		}
-		else stringBuilder += ", debugMessage " + this.debugMessage;
-
-		stringBuilder += ", encrypted " + this.encrypted;
+		else stringBuilder += ", debugMessage " + (this.debugMessage ?? "");
 
 		return stringBuilder;
 	}

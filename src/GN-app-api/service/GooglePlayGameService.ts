@@ -52,7 +52,7 @@ export class GooglePlayGameService implements IGooglePlayGameService {
 
         try {
             let tokenInfoResult = await axios.post(GooglePlayGameService.googleAPIUrl + GooglePlayGameService.googleAPITokenUrl, {
-                grant_type: "authorization_code",
+                create_type: "authorization_code",
                 redirect_uri: this.redirectUri,
                 code: authCode,
                 client_id: this.clientId,

@@ -1,16 +1,16 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ThirtPartyGooglePlayGameSettingsParam {
-	@StringDataMember({ code: GNParameterCode.RedirectUri })
+	@StringDataMember({ code: ParameterCode.RedirectUri })
 	redirectUri: string;
 
-	@StringDataMember({ code: GNParameterCode.ClientId })
+	@StringDataMember({ code: ParameterCode.ClientId })
 	clientId: string;
 
-	@StringDataMember({ code: GNParameterCode.ClientSecret })
+	@StringDataMember({ code: ParameterCode.ClientSecret })
 	clientSecret: string;
 
-	@StringDataMember({ code: GNParameterCode.ApplicationId })
+	@StringDataMember({ code: ParameterCode.ApplicationId })
 	applicationId: string;
 }

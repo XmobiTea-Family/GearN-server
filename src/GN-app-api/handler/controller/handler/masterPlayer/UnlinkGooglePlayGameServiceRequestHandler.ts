@@ -1,24 +1,24 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class UnlinkGooglePlayGameServiceOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@StringDataMember({ code: GNParameterCode.PlayerId, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.PlayerId, minLength: 6, maxLength: 64, mustNonNull: true })
 	playerId: string;
 
 	public override isValidRequest() {
@@ -29,7 +29,7 @@ class UnlinkGooglePlayGameServiceOperationRequest extends OperationRequest {
 }
 
 class ServerUnlinkGooglePlayGameServiceOperationRequest extends UnlinkGooglePlayGameServiceOperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	declare userId: string;
 
 	public override isValidRequest() {
@@ -129,7 +129,7 @@ export class UnlinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseR
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
@@ -139,13 +139,13 @@ export class UnlinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseR
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
 		}
 
 		let external = masterPlayer.getExternal();
 		if (external.googlePlayGameService == null || external.googlePlayGameService.playerId != request.playerId) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalNotLinked);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalNotLinked);
 			return operationResponse;
 		}
 
@@ -153,7 +153,7 @@ export class UnlinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseR
 		masterPlayer.setExternal(external);
 		masterPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_UnlinkGooglePlayGameService", request, secretInfo, operationRequest, operationResponse);
 

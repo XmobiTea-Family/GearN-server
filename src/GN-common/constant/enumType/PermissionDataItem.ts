@@ -1,5 +1,5 @@
 export enum PermissionDataItem {
-    ReadOnly = 1,
-    CanOverride = 2,
+	ReadOnly = 1,
+	CanOverride = 2,
 
 }

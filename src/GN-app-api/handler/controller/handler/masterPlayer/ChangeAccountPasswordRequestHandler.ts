@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import bcrypt from "bcrypt";
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
@@ -16,13 +16,13 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class ChangeAccountPasswordOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	userId?: string;
 
-	@StringDataMember({ code: GNParameterCode.CurrentPassword, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.CurrentPassword, minLength: 6, maxLength: 64, mustNonNull: true })
 	currentPassword: string;
 
-	@StringDataMember({ code: GNParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
 	public override isValidRequest() {
@@ -80,7 +80,7 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
@@ -90,20 +90,20 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MasterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
 		}
 
 		let external = masterPlayer.getExternal();
 		if (external.account == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExternalNotLinked);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalNotLinked);
 			return operationResponse;
 		}
 
 		let isMatch = await bcrypt.compare(request.currentPassword, masterPlayer.getPassword());
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountPasswordWrong);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountPasswordWrong);
 			return operationResponse;
 		}
 
@@ -112,7 +112,7 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 		masterPlayer.setExternal(external);
 		masterPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_ChangeAccountPassword", request, secretInfo, operationRequest, operationResponse);
 

@@ -14,4 +14,5 @@ export class ReturnCode {
 	public static readonly UnknownError: number = 0;
 
 	public static readonly Ok: number = 1;
+
 }

@@ -6,37 +6,37 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
-import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
-import { Group } from "../../../../../GN-library/xdatabase/lib/entity/pro/Group";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { Group } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Group";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetStatisticsLeaderboardAroundGroupOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	groupId: string;
 
-	@StringDataMember({ code: GNParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	key: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
-	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
-	@StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	catalogId?: string;
 
 	public override isValidRequest() {
@@ -154,121 +154,121 @@ export class GetStatisticsLeaderboardAroundGroupRequestHandler extends GroupBase
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 		let groupStatisticsSettingsItem = groupSettings.groupStatisticsSettings.find(x => x.key == request.key);
 
 		if (groupStatisticsSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.KeyNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;
 		}
 
-        let positionCacheKey = "groupStatisticsLeaderboardAroundPosition_" + request.groupId + "_" + request.key;
-        let cacheKey = "groupStatisticsLeaderboardAround_" + request.groupId + "_" + request.key;
-        if (request.catalogId) {
-            cacheKey += "_" + request.catalogId;
-            positionCacheKey += "_" + request.catalogId;
-        }
+		let positionCacheKey = "groupStatisticsLeaderboardAroundPosition_" + request.groupId + "_" + request.key;
+		let cacheKey = "groupStatisticsLeaderboardAround_" + request.groupId + "_" + request.key;
+		if (request.catalogId) {
+			cacheKey += "_" + request.catalogId;
+			positionCacheKey += "_" + request.catalogId;
+		}
 
-        if (request.loadFromCache) {
-            if (request.skip + request.limit > 100) {
-                request.loadFromCache = false;
-            }
-        }
+		if (request.loadFromCache) {
+			if (request.skip + request.limit > 100) {
+				request.loadFromCache = false;
+			}
+		}
 
-        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-        if (request.loadFromCache) {
-            if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
-                request.loadFromCache = false;
-            }
-        }
+		if (request.loadFromCache) {
+			if (!(await cacheData.isValid(cacheKey)) || !(await cacheData.isValid(positionCacheKey))) {
+				request.loadFromCache = false;
+			}
+		}
 
 		let gnResults = new GNArray();
 
-        let thisPosition: number;
-        let groups: Group[];
+		let thisPosition: number;
+		let groups: Group[];
 
-        if (request.loadFromCache) {
-            thisPosition = await cacheData.getData(positionCacheKey);
-            groups = await cacheData.getData(cacheKey);
+		if (request.loadFromCache) {
+			thisPosition = await cacheData.getData(positionCacheKey);
+			groups = await cacheData.getData(cacheKey);
 
-            for (let i = request.skip; i < request.skip + request.limit; i++) {
-                if (i >= groups.length) break;
+			for (let i = request.skip; i < request.skip + request.limit; i++) {
+				if (i >= groups.length) break;
 
-                let group = groups[i];
+				let group = groups[i];
 
-                let gnResult = new GNHashtable();
+				let gnResult = new GNHashtable();
 
-                gnResult.add(GNParameterCode.Position, i + thisPosition);
+				gnResult.add(ParameterCode.Position, i + thisPosition);
 
-                gnResult.add(GNParameterCode.GroupId, group.getGroupId());
+				gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-                gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+				gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
-                gnResults.add(gnResult);
-            }
-        }
-        else {
-            let statisticsAggregationMethod = <xStatisticsAggregationMethod>groupStatisticsSettingsItem.statisticsAggregationMethod;
-            let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+				gnResults.add(gnResult);
+			}
+		}
+		else {
+			let statisticsAggregationMethod = <xStatisticsAggregationMethod>groupStatisticsSettingsItem.statisticsAggregationMethod;
+			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-            thisPosition = await this.gnServer.getDatabase().loadPositionGroupLeaderboardWithStatisticsAsync(request.key, request.groupId, request.catalogId, secretInfo.getGameId(), groupStatisticsSettingsItem.initialValue, direction);
+			thisPosition = await this.gnServer.getDatabase().loadPositionGroupLeaderboardWithStatisticsAsync(request.key, request.groupId, request.catalogId, secretInfo.getGameId(), groupStatisticsSettingsItem.initialValue, direction);
 
-            if (thisPosition != -1) {
-                await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+			if (thisPosition != -1) {
+				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 
-                let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
+				let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
 
-                if (request.skip + request.limit <= 100) {
-                    groupFindOptions = null;
+				if (request.skip + request.limit <= 100) {
+					groupFindOptions = null;
 
-                    groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
+					groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
 
-                    for (let i = request.skip; i < request.skip + request.limit; i++) {
-                        if (i >= groups.length) break;
+					for (let i = request.skip; i < request.skip + request.limit; i++) {
+						if (i >= groups.length) break;
 
-                        let group = groups[i];
+						let group = groups[i];
 
-                        let gnResult = new GNHashtable();
+						let gnResult = new GNHashtable();
 
-                        gnResult.add(GNParameterCode.Position, i + thisPosition);
+						gnResult.add(ParameterCode.Position, i + thisPosition);
 
-                        gnResult.add(GNParameterCode.GroupId, group.getGroupId());
+						gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
-                        gnResults.add(gnResult);
-                    }
-    
-                    await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-                }
-                else {
-                    groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
+						gnResults.add(gnResult);
+					}
 
-                    for (let i = 0; i < groups.length; i++) {
-                        let group = groups[i];
+					await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+				}
+				else {
+					groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
 
-                        let gnResult = new GNHashtable();
+					for (let i = 0; i < groups.length; i++) {
+						let group = groups[i];
 
-                        gnResult.add(GNParameterCode.Position, i + thisPosition + request.skip);
+						let gnResult = new GNHashtable();
 
-                        gnResult.add(GNParameterCode.GroupId, group.getGroupId());
+						gnResult.add(ParameterCode.Position, i + thisPosition + request.skip);
 
-                        gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+						gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-                        gnResults.add(gnResult);
-                    }
-                }
-            }
-        }
+						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
-		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+						gnResults.add(gnResult);
+					}
+				}
+			}
+		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("group_GetStatisticsLeaderboardAroundGroup", request, secretInfo, operationRequest, operationResponse);
 

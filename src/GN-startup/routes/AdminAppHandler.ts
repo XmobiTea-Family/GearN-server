@@ -16,7 +16,7 @@
 // import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
 // import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
 // import { DashboardModels, GNNetwork, GNServerSettings, GNServerSettingsOptions, LogType } from "@xmobitea/gn-typescript-client";
-// import { GNErrorCode } from "./../../GN-common/constant/errorCode/GNErrorCode";
+// import { ErrorCode } from "./../../GN-common/constant/errorCode/ErrorCode";
 
 // export class AdminAppHandler {
 // 	private applicationSettings: ApplicationSettings;
@@ -268,9 +268,9 @@
 // 						return res.redirect("/admin/change-password");
 // 					}
 // 					else {
-// 						let errorCode = <GNErrorCode>response.errorCode;
-// 						if (errorCode != GNErrorCode.Ok) {
-// 							let errorCodeStr = "GNErrorCode " + errorCode;
+// 						let errorCode = <ErrorCode>response.errorCode;
+// 						if (errorCode != ErrorCode.Ok) {
+// 							let errorCodeStr = "ErrorCode " + errorCode;
 
 // 							(req.session as any).messages = {
 // 								"errors": {
@@ -330,13 +330,13 @@
 // 						return res.redirect("/admin/signin");
 // 					}
 // 					else {
-// 						let errorCode = <GNErrorCode>response.errorCode;
-// 						if (errorCode != GNErrorCode.Ok) {
+// 						let errorCode = <ErrorCode>response.errorCode;
+// 						if (errorCode != ErrorCode.Ok) {
 // 							let errorCodeStr = "ErrorCode " + errorCode;
 
 // 							(req.session as any).messages = {
 // 								"errors": {
-// 									"GNErrorCode": errorCodeStr
+// 									"ErrorCode": errorCodeStr
 // 								}
 // 							}
 

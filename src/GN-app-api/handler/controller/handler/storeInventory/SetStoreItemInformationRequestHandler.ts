@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
@@ -21,34 +21,34 @@ import { TagParam } from "./model/TagParam";
 import { InAppPurchaseParam } from "./model/InAppPurchaseParam";
 
 class SetStoreItemInformationOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
     storeId: string;
 
-    @NumberDataMember({ code: GNParameterCode.StoreItemType, minValue: 1, maxValue: 2, mustInt: true, isOptional: true, })
+    @NumberDataMember({ code: ParameterCode.StoreItemType, minValue: 1, maxValue: 2, mustInt: true, isOptional: true, })
     storeItemType?: number;
 
-    @GNArrayDataMember({ code: GNParameterCode.StoreDatas, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreDataParam })
+    @GNArrayDataMember({ code: ParameterCode.StoreDatas, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreDataParam })
     storeDataParams?: Array<StoreDataParam>;
 
-    @GNArrayDataMember({ code: GNParameterCode.StoreItems, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreItemParam })
+    @GNArrayDataMember({ code: ParameterCode.StoreItems, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreItemParam })
     storeItemParams?: Array<StoreItemParam>;
 
-    @GNArrayDataMember({ code: GNParameterCode.StoreCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
+    @GNArrayDataMember({ code: ParameterCode.StoreCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
     storeCurrencyParams?: Array<CurrencyParam>;
 
-    @GNArrayDataMember({ code: GNParameterCode.PriceCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
+    @GNArrayDataMember({ code: ParameterCode.PriceCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
     priceCurrencyParams?: Array<CurrencyParam>;
 
-    @GNHashtableDataMember({ code: GNParameterCode.InAppPurchase, mustNonNull: true, isOptional: true, })
+    @GNHashtableDataMember({ code: ParameterCode.InAppPurchase, mustNonNull: true, isOptional: true, })
     inAppPurchaseParam?: InAppPurchaseParam;
 
-    @StringDataMember({ code: GNParameterCode.DisplayName, mustNonNull: true, isOptional: true, })
+    @StringDataMember({ code: ParameterCode.DisplayName, mustNonNull: true, isOptional: true, })
     displayName?: string;
 
-    @GNHashtableDataMember({ code: GNParameterCode.Avatar, mustNonNull: true, isOptional: true, })
+    @GNHashtableDataMember({ code: ParameterCode.Avatar, mustNonNull: true, isOptional: true, })
     avatarParam?: AvatarParam;
 
-    @GNArrayDataMember({ code: GNParameterCode.Tags, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: TagParam })
+    @GNArrayDataMember({ code: ParameterCode.Tags, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: TagParam })
     tagParams?: Array<TagParam>;
 
     public override isValidRequest() {
@@ -166,13 +166,13 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
 
         if (storeInventory == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
             return operationResponse;
         }
 
@@ -248,7 +248,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 
         storeInventory.saveAsync();
 
-        operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(storeInventory, {
+        operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(storeInventory, {
             storeItems: true,
             storeItemType: true,
             storeCurrencies: true,
@@ -262,7 +262,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
             storeDatas: true,
         }, secretInfo.getGameId()));
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest, operationResponse);
 

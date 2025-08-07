@@ -5,12 +5,12 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/SecretInfoItem";
 
 class GetSecretInfoListOperationRequest extends OperationRequest {
@@ -50,7 +50,7 @@ export class GetSecretInfoListRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -65,7 +65,7 @@ export class GetSecretInfoListRequestHandler extends RequestHandler {
 			let secretInfoItem = new SecretInfoItem(await results.next(), collection);
 
 			let gnSecretInfoItem = new GNHashtable();
-			gnSecretInfoItem.add(GNParameterCode.SecretKey, secretInfoItem.getSecretKey());
+			gnSecretInfoItem.add(ParameterCode.SecretKey, secretInfoItem.getSecretKey());
 
 			let role = <SecretRole>secretInfoItem.getRole();
 			if (role == SecretRole.Admin) gnAdminSecretKeys.add(gnSecretInfoItem);
@@ -73,11 +73,11 @@ export class GetSecretInfoListRequestHandler extends RequestHandler {
 			else gnPlayerSecretKeys.add(gnSecretInfoItem);
 		}
 
-		operationResponse.setParameter(GNParameterCode.AdminSecretKeys, gnAdminSecretKeys);
-		operationResponse.setParameter(GNParameterCode.ServerSecretKeys, gnServerSecretKeys);
-		operationResponse.setParameter(GNParameterCode.PlayerSecretKeys, gnPlayerSecretKeys);
+		operationResponse.setParameter(ParameterCode.AdminSecretKeys, gnAdminSecretKeys);
+		operationResponse.setParameter(ParameterCode.ServerSecretKeys, gnServerSecretKeys);
+		operationResponse.setParameter(ParameterCode.PlayerSecretKeys, gnPlayerSecretKeys);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetSecretInfoList", request, secretInfo, operationRequest, operationResponse);
 

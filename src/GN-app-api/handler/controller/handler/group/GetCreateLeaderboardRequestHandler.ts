@@ -1,32 +1,32 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
-import { Group } from "../../../../../GN-library/xdatabase/lib/entity/pro/Group";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { Group } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Group";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetCreateLeaderboardOperationRequest extends OperationRequest {
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
-	@NumberDataMember({ code: GNParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	skip?: number;
 
-	@NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	limit?: number;
 
-	@BooleanDataMember({ code: GNParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	loadFromCache?: boolean;
 
 	public override isValidRequest() {
@@ -132,7 +132,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
@@ -145,7 +145,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 			}
 		}
 
-        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
 		if (request.loadFromCache) {
 			if (!(await cacheData.isValid(cacheKey))) {
@@ -167,11 +167,11 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 
 				let gnResult = new GNHashtable();
 
-				gnResult.add(GNParameterCode.Position, i);
+				gnResult.add(ParameterCode.Position, i);
 
-				gnResult.add(GNParameterCode.GroupId, group.getGroupId());
+				gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-				gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+				gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
 				gnResults.add(gnResult);
 			}
@@ -189,11 +189,11 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 
 					let gnResult = new GNHashtable();
 
-					gnResult.add(GNParameterCode.Position, i);
+					gnResult.add(ParameterCode.Position, i);
 
-					gnResult.add(GNParameterCode.GroupId, group.getGroupId());
+					gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-					gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
 					gnResults.add(gnResult);
 				}
@@ -209,20 +209,20 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 
 					let gnResult = new GNHashtable();
 
-					gnResult.add(GNParameterCode.Position, i + request.skip);
+					gnResult.add(ParameterCode.Position, i + request.skip);
 
-					gnResult.add(GNParameterCode.GroupId, group.getGroupId());
+					gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-					gnResult.add(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
 					gnResults.add(gnResult);
 				}
 			}
 		}
 
-		operationResponse.setParameter(GNParameterCode.Results, gnResults);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("group_GetCreateLeaderboard", request, secretInfo, operationRequest, operationResponse);
 

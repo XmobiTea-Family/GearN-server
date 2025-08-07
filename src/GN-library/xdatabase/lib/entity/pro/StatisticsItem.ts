@@ -1,4 +1,4 @@
 export interface StatisticsItem {
-    value: number;
-    tsLastUpdate: number
+	value: number;
+	tsLastUpdate: number
 }

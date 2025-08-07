@@ -6,8 +6,8 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
@@ -19,10 +19,10 @@ import { MatchmakingTicket } from "./../../../../../GN-library/xdatabase/lib/ent
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetQueueStatisticsOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.QueueName, minLength: 6, maxLength: 32 })
+    @StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
     queueName: string;
 
-    @NumberDataMember({ code: GNParameterCode.TimeInSeconds, mustInt: true, minValue: 20 })
+    @NumberDataMember({ code: ParameterCode.TimeInSeconds, mustInt: true, minValue: 20 })
     timeInSeconds: number;
 
     public override isValidRequest() {
@@ -116,7 +116,7 @@ export class GetQueueStatisticsRequestHandler extends MultiplayerBaseRequestHand
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
@@ -162,9 +162,9 @@ export class GetQueueStatisticsRequestHandler extends MultiplayerBaseRequestHand
 
         let averageMatchmakingTimeInSeconds = totalMatchSuccess == 0 ? -1 : totalMatchSuccessTimeInSeconds / totalMatchSuccess;
 
-        operationResponse.setParameter(GNParameterCode.PendingMemberCount, pendingMemberCount);
-        operationResponse.setParameter(GNParameterCode.PendingTicketCount, pendingTicketCount);
-        operationResponse.setParameter(GNParameterCode.AverageMatchmakingTimeInSeconds, averageMatchmakingTimeInSeconds);
+        operationResponse.setParameter(ParameterCode.PendingMemberCount, pendingMemberCount);
+        operationResponse.setParameter(ParameterCode.PendingTicketCount, pendingTicketCount);
+        operationResponse.setParameter(ParameterCode.AverageMatchmakingTimeInSeconds, averageMatchmakingTimeInSeconds);
 
         await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetQueueStatistics", request, secretInfo, operationRequest, operationResponse);
 

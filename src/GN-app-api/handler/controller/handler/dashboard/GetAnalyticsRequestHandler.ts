@@ -5,302 +5,302 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable, GNHashtableBuilder } from "./../../../../../GN-common/common/GNData";
-import { BooleanDataMember, NumberDataMember } from "../../../../../GN-common/entity/DataMember";
+import { BooleanDataMember, NumberDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 class GetAnalyticsOperationRequest extends OperationRequest {
-    @NumberDataMember({ code: GNParameterCode.Timestamp, minValue: 0, isOptional: true })
-    timestamp?: number;
+	@NumberDataMember({ code: ParameterCode.Timestamp, minValue: 0, isOptional: true })
+	timestamp?: number;
 
-    @BooleanDataMember({ code: GNParameterCode.AnalyticsItem, isOptional: true })
-    analyticsItem?: boolean;
+	@BooleanDataMember({ code: ParameterCode.AnalyticsItem, isOptional: true })
+	analyticsItem?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.Country, isOptional: true })
-    country?: boolean;
+	@BooleanDataMember({ code: ParameterCode.Country, isOptional: true })
+	country?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.RequestComplete, isOptional: true })
-    requestComplete?: boolean;
+	@BooleanDataMember({ code: ParameterCode.RequestComplete, isOptional: true })
+	requestComplete?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.OperationSystem, isOptional: true })
-    operationSystem?: boolean;
+	@BooleanDataMember({ code: ParameterCode.OperationSystem, isOptional: true })
+	operationSystem?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.DatabaseSystem, isOptional: true })
-    databaseSystem?: boolean;
+	@BooleanDataMember({ code: ParameterCode.DatabaseSystem, isOptional: true })
+	databaseSystem?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.LogDatabaseSystem, isOptional: true })
-    logDatabaseSystem?: boolean;
+	@BooleanDataMember({ code: ParameterCode.LogDatabaseSystem, isOptional: true })
+	logDatabaseSystem?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.Cost, isOptional: true })
-    cost?: boolean;
+	@BooleanDataMember({ code: ParameterCode.Cost, isOptional: true })
+	cost?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.MonthlyCost, isOptional: true })
-    monthlyCost?: boolean;
+	@BooleanDataMember({ code: ParameterCode.MonthlyCost, isOptional: true })
+	monthlyCost?: boolean;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export interface AnalyticsRequestParams {
-    analyticsItem: boolean;
-    country: boolean;
-    requestComplete: boolean;
-    operationSystem: boolean;
-    databaseSystem: boolean;
-    logDatabaseSystem: boolean;
-    cost: boolean;
-    monthlyCost: boolean;
+	analyticsItem: boolean;
+	country: boolean;
+	requestComplete: boolean;
+	operationSystem: boolean;
+	databaseSystem: boolean;
+	logDatabaseSystem: boolean;
+	cost: boolean;
+	monthlyCost: boolean;
 }
 
 export class GetAnalyticsRequestHandler extends RequestHandler {
-    public override getCode() {
-        return OperationCode.GetAnalytics;
-    }
+	public override getCode() {
+		return OperationCode.GetAnalytics;
+	}
 
-    public override getCommonOperationRequest() {
-        return GetAnalyticsOperationRequest;
-    }
+	public override getCommonOperationRequest() {
+		return GetAnalyticsOperationRequest;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(operationRequest);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(operationRequest);
+		}
 
-        if (!secretInfo.getPermission().masterAdmin.getAnalytics.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterAdmin.getAnalytics.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute(
-            {
-                timestamp: request.timestamp,
-                requestParams: {
-                    analyticsItem: request.analyticsItem,
-                    country: request.country,
-                    operationSystem: request.operationSystem,
-                    requestComplete: request.requestComplete,
-                    databaseSystem: request.databaseSystem,
-                    logDatabaseSystem: request.logDatabaseSystem,
-                    cost: request.cost,
-                    monthlyCost: request.monthlyCost,
-                }
-            },
-            secretInfo,
-            operationRequest
-        );
-    }
+		return this.execute(
+			{
+				timestamp: request.timestamp,
+				requestParams: {
+					analyticsItem: request.analyticsItem,
+					country: request.country,
+					operationSystem: request.operationSystem,
+					requestComplete: request.requestComplete,
+					databaseSystem: request.databaseSystem,
+					logDatabaseSystem: request.logDatabaseSystem,
+					cost: request.cost,
+					monthlyCost: request.monthlyCost,
+				}
+			},
+			secretInfo,
+			operationRequest
+		);
+	}
 
-    private async execute(request: { timestamp: number, requestParams: AnalyticsRequestParams }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+	private async execute(request: { timestamp: number, requestParams: AnalyticsRequestParams }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let analyticsService = this.gnServer.getAnalyticsService();
-        let bigAnalyticsItem = await analyticsService.getBigAnalyticsItem(request.timestamp);
+		let analyticsService = this.gnServer.getAnalyticsService();
+		let bigAnalyticsItem = await analyticsService.getBigAnalyticsItem(request.timestamp);
 
-        if (bigAnalyticsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
-            return operationResponse;
-        }
+		if (bigAnalyticsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+			return operationResponse;
+		}
 
-        if (request.requestParams.analyticsItem) {
-            let gnAnalyticsItem = new GNHashtable();
+		if (request.requestParams.analyticsItem) {
+			let gnAnalyticsItem = new GNHashtable();
 
-            gnAnalyticsItem.add(GNParameterCode.CCU, bigAnalyticsItem.CCU);
-            gnAnalyticsItem.add(GNParameterCode.DAU, bigAnalyticsItem.DAU);
-            gnAnalyticsItem.add(GNParameterCode.DAUSince0h, bigAnalyticsItem.DAUSince0h);
-            gnAnalyticsItem.add(GNParameterCode.DNU, bigAnalyticsItem.DNU);
-            gnAnalyticsItem.add(GNParameterCode.DNUSince0h, bigAnalyticsItem.DNUSince0h);
-            gnAnalyticsItem.add(GNParameterCode.DRT, bigAnalyticsItem.DRT);
-            gnAnalyticsItem.add(GNParameterCode.DRTSince0h, bigAnalyticsItem.DRTSince0h);
-            gnAnalyticsItem.add(GNParameterCode.MAU, bigAnalyticsItem.MAU);
-            gnAnalyticsItem.add(GNParameterCode.MAUSince0h1, bigAnalyticsItem.MAUSince0h1);
-            gnAnalyticsItem.add(GNParameterCode.MNU, bigAnalyticsItem.MNU);
-            gnAnalyticsItem.add(GNParameterCode.MNUSince0h1, bigAnalyticsItem.MNUSince0h1);
-            gnAnalyticsItem.add(GNParameterCode.MRT, bigAnalyticsItem.MRT);
-            gnAnalyticsItem.add(GNParameterCode.MRTSince0h1, bigAnalyticsItem.MRTSince0h1);
-            gnAnalyticsItem.add(GNParameterCode.AnalyticsPrice, bigAnalyticsItem.analyticsPrice);
+			gnAnalyticsItem.add(ParameterCode.CCU, bigAnalyticsItem.CCU);
+			gnAnalyticsItem.add(ParameterCode.DAU, bigAnalyticsItem.DAU);
+			gnAnalyticsItem.add(ParameterCode.DAUSince0h, bigAnalyticsItem.DAUSince0h);
+			gnAnalyticsItem.add(ParameterCode.DNU, bigAnalyticsItem.DNU);
+			gnAnalyticsItem.add(ParameterCode.DNUSince0h, bigAnalyticsItem.DNUSince0h);
+			gnAnalyticsItem.add(ParameterCode.DRT, bigAnalyticsItem.DRT);
+			gnAnalyticsItem.add(ParameterCode.DRTSince0h, bigAnalyticsItem.DRTSince0h);
+			gnAnalyticsItem.add(ParameterCode.MAU, bigAnalyticsItem.MAU);
+			gnAnalyticsItem.add(ParameterCode.MAUSince0h1, bigAnalyticsItem.MAUSince0h1);
+			gnAnalyticsItem.add(ParameterCode.MNU, bigAnalyticsItem.MNU);
+			gnAnalyticsItem.add(ParameterCode.MNUSince0h1, bigAnalyticsItem.MNUSince0h1);
+			gnAnalyticsItem.add(ParameterCode.MRT, bigAnalyticsItem.MRT);
+			gnAnalyticsItem.add(ParameterCode.MRTSince0h1, bigAnalyticsItem.MRTSince0h1);
+			gnAnalyticsItem.add(ParameterCode.AnalyticsPrice, bigAnalyticsItem.analyticsPrice);
 
-            operationResponse.setParameter(GNParameterCode.AnalyticsItem, gnAnalyticsItem);
-        }
+			operationResponse.setParameter(ParameterCode.AnalyticsItem, gnAnalyticsItem);
+		}
 
-        if (request.requestParams.country) {
-            let gnCountrys = new GNArray();
+		if (request.requestParams.country) {
+			let gnCountrys = new GNArray();
 
-            if (bigAnalyticsItem.country) {
-                for (let i = 0; i < bigAnalyticsItem.country.length; i++) {
-                    let country = bigAnalyticsItem.country[i];
+			if (bigAnalyticsItem.country) {
+				for (let i = 0; i < bigAnalyticsItem.country.length; i++) {
+					let country = bigAnalyticsItem.country[i];
 
-                    let gnCountry = new GNHashtable();
+					let gnCountry = new GNHashtable();
 
-                    gnCountry.add(GNParameterCode.CountryCode, country.countryCode);
+					gnCountry.add(ParameterCode.CountryCode, country.countryCode);
 
-                    let gnRegions = new GNArray();
+					let gnRegions = new GNArray();
 
-                    for (let j = 0; j < country.regions.length; j++) {
-                        let region = country.regions[j];
+					for (let j = 0; j < country.regions.length; j++) {
+						let region = country.regions[j];
 
-                        let gnRegion = new GNHashtable();
+						let gnRegion = new GNHashtable();
 
-                        if (!region) continue;
-                        gnRegion.add(GNParameterCode.RegionCode, region.regionCode);
-                        gnRegion.add(GNParameterCode.RegionName, region.regionName);
-                        gnRegion.add(GNParameterCode.CCU, region.ccu);
-                        gnRegion.add(GNParameterCode.Latitude, region.latidute);
-                        gnRegion.add(GNParameterCode.Longitude, region.longitude);
+						if (!region) continue;
+						gnRegion.add(ParameterCode.RegionCode, region.regionCode);
+						gnRegion.add(ParameterCode.RegionName, region.regionName);
+						gnRegion.add(ParameterCode.CCU, region.ccu);
+						gnRegion.add(ParameterCode.Latitude, region.latidute);
+						gnRegion.add(ParameterCode.Longitude, region.longitude);
 
-                        gnRegions.add(gnRegion);
-                    }
+						gnRegions.add(gnRegion);
+					}
 
-                    gnCountry.add(GNParameterCode.Regions, gnRegions);
+					gnCountry.add(ParameterCode.Regions, gnRegions);
 
-                    gnCountrys.add(gnCountry);
-                }
-            }
+					gnCountrys.add(gnCountry);
+				}
+			}
 
-            operationResponse.setParameter(GNParameterCode.Country, gnCountrys);
-        }
+			operationResponse.setParameter(ParameterCode.Country, gnCountrys);
+		}
 
-        if (request.requestParams.operationSystem) {
-            let gnOperationSystem = new GNHashtable();
+		if (request.requestParams.operationSystem) {
+			let gnOperationSystem = new GNHashtable();
 
-            if (bigAnalyticsItem.operationSystem) {
-                gnOperationSystem.add(GNParameterCode.CpuUsage, bigAnalyticsItem.operationSystem.cpuUsage);
+			if (bigAnalyticsItem.operationSystem) {
+				gnOperationSystem.add(ParameterCode.CpuUsage, bigAnalyticsItem.operationSystem.cpuUsage);
 
-                let gnMemoryUsage = new GNHashtable();
-                if (bigAnalyticsItem.operationSystem.memoryUsage) {
-                    gnMemoryUsage.add(GNParameterCode.FreeMemoryInBytes, bigAnalyticsItem.operationSystem.memoryUsage.freeMemoryInBytes);
-                    gnMemoryUsage.add(GNParameterCode.TotalMemoryInBytes, bigAnalyticsItem.operationSystem.memoryUsage.totalMemoryInBytes);
-                }
-                gnOperationSystem.add(GNParameterCode.MemoryUsage, gnMemoryUsage);
+				let gnMemoryUsage = new GNHashtable();
+				if (bigAnalyticsItem.operationSystem.memoryUsage) {
+					gnMemoryUsage.add(ParameterCode.FreeMemoryInBytes, bigAnalyticsItem.operationSystem.memoryUsage.freeMemoryInBytes);
+					gnMemoryUsage.add(ParameterCode.TotalMemoryInBytes, bigAnalyticsItem.operationSystem.memoryUsage.totalMemoryInBytes);
+				}
+				gnOperationSystem.add(ParameterCode.MemoryUsage, gnMemoryUsage);
 
-                let gnStorageUsages = new GNArray();
-                if (bigAnalyticsItem.operationSystem.storageUsage) {
-                    for (let i = 0; i < bigAnalyticsItem.operationSystem.storageUsage.length; i++) {
-                        let storageUsage = bigAnalyticsItem.operationSystem.storageUsage[i];
-                        
-                        let gnStorageUsage = new GNHashtable();
+				let gnStorageUsages = new GNArray();
+				if (bigAnalyticsItem.operationSystem.storageUsage) {
+					for (let i = 0; i < bigAnalyticsItem.operationSystem.storageUsage.length; i++) {
+						let storageUsage = bigAnalyticsItem.operationSystem.storageUsage[i];
 
-                        gnStorageUsage.add(GNParameterCode.Name, storageUsage.name);
-                        gnStorageUsage.add(GNParameterCode.FsTotalSizeInBytes, storageUsage.fsTotalSizeInBytes);
-                        gnStorageUsage.add(GNParameterCode.FsUsedSizeInBytes, storageUsage.fsUsedSizeInBytes);
+						let gnStorageUsage = new GNHashtable();
 
-                        gnStorageUsages.add(gnStorageUsage);
-                    }
-                }
-                gnOperationSystem.add(GNParameterCode.StorageUsage, gnStorageUsages);
-            }
+						gnStorageUsage.add(ParameterCode.Name, storageUsage.name);
+						gnStorageUsage.add(ParameterCode.FsTotalSizeInBytes, storageUsage.fsTotalSizeInBytes);
+						gnStorageUsage.add(ParameterCode.FsUsedSizeInBytes, storageUsage.fsUsedSizeInBytes);
 
-            operationResponse.setParameter(GNParameterCode.OperationSystem, gnOperationSystem);
-        }
+						gnStorageUsages.add(gnStorageUsage);
+					}
+				}
+				gnOperationSystem.add(ParameterCode.StorageUsage, gnStorageUsages);
+			}
 
-        if (request.requestParams.databaseSystem) {
-            let gnDatabaseSystem = new GNHashtable();
+			operationResponse.setParameter(ParameterCode.OperationSystem, gnOperationSystem);
+		}
 
-            if (bigAnalyticsItem.operationSystem) {
-                gnDatabaseSystem.add(GNParameterCode.FsTotalSizeInBytes, bigAnalyticsItem.databaseSystem.fsTotalSizeInBytes);
-                gnDatabaseSystem.add(GNParameterCode.FsUsedSizeInBytes, bigAnalyticsItem.databaseSystem.fsUsedSizeInBytes);
-                gnDatabaseSystem.add(GNParameterCode.TotalSizeInBytes, bigAnalyticsItem.databaseSystem.totalSizeInBytes);
-                gnDatabaseSystem.add(GNParameterCode.Collections, bigAnalyticsItem.databaseSystem.collections);
-                gnDatabaseSystem.add(GNParameterCode.Objects, bigAnalyticsItem.databaseSystem.objects);
-                gnDatabaseSystem.add(GNParameterCode.Indexes, bigAnalyticsItem.databaseSystem.indexes);
-            }
+		if (request.requestParams.databaseSystem) {
+			let gnDatabaseSystem = new GNHashtable();
 
-            operationResponse.setParameter(GNParameterCode.DatabaseSystem, gnDatabaseSystem);
-        }
+			if (bigAnalyticsItem.operationSystem) {
+				gnDatabaseSystem.add(ParameterCode.FsTotalSizeInBytes, bigAnalyticsItem.databaseSystem.fsTotalSizeInBytes);
+				gnDatabaseSystem.add(ParameterCode.FsUsedSizeInBytes, bigAnalyticsItem.databaseSystem.fsUsedSizeInBytes);
+				gnDatabaseSystem.add(ParameterCode.TotalSizeInBytes, bigAnalyticsItem.databaseSystem.totalSizeInBytes);
+				gnDatabaseSystem.add(ParameterCode.Collections, bigAnalyticsItem.databaseSystem.collections);
+				gnDatabaseSystem.add(ParameterCode.Objects, bigAnalyticsItem.databaseSystem.objects);
+				gnDatabaseSystem.add(ParameterCode.Indexes, bigAnalyticsItem.databaseSystem.indexes);
+			}
 
-        if (request.requestParams.logDatabaseSystem) {
-            let gnDatabaseSystem = new GNHashtable();
+			operationResponse.setParameter(ParameterCode.DatabaseSystem, gnDatabaseSystem);
+		}
 
-            if (bigAnalyticsItem.operationSystem) {
-                gnDatabaseSystem.add(GNParameterCode.FsTotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsTotalSizeInBytes);
-                gnDatabaseSystem.add(GNParameterCode.FsUsedSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsUsedSizeInBytes);
-                gnDatabaseSystem.add(GNParameterCode.TotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.totalSizeInBytes);
-                gnDatabaseSystem.add(GNParameterCode.Collections, bigAnalyticsItem.logDatabaseSystem.collections);
-                gnDatabaseSystem.add(GNParameterCode.Objects, bigAnalyticsItem.logDatabaseSystem.objects);
-                gnDatabaseSystem.add(GNParameterCode.Indexes, bigAnalyticsItem.logDatabaseSystem.indexes);
-            }
+		if (request.requestParams.logDatabaseSystem) {
+			let gnDatabaseSystem = new GNHashtable();
 
-            operationResponse.setParameter(GNParameterCode.LogDatabaseSystem, gnDatabaseSystem);
-        }
+			if (bigAnalyticsItem.operationSystem) {
+				gnDatabaseSystem.add(ParameterCode.FsTotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsTotalSizeInBytes);
+				gnDatabaseSystem.add(ParameterCode.FsUsedSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsUsedSizeInBytes);
+				gnDatabaseSystem.add(ParameterCode.TotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.totalSizeInBytes);
+				gnDatabaseSystem.add(ParameterCode.Collections, bigAnalyticsItem.logDatabaseSystem.collections);
+				gnDatabaseSystem.add(ParameterCode.Objects, bigAnalyticsItem.logDatabaseSystem.objects);
+				gnDatabaseSystem.add(ParameterCode.Indexes, bigAnalyticsItem.logDatabaseSystem.indexes);
+			}
 
-        if (request.requestParams.requestComplete) {
-            let gnRequestComplete = new GNArray();
+			operationResponse.setParameter(ParameterCode.LogDatabaseSystem, gnDatabaseSystem);
+		}
 
-            if (bigAnalyticsItem.requestComplete) {
-                for (let i = 0; i < bigAnalyticsItem.requestComplete.length; i++) {
-                    let requestComplete = bigAnalyticsItem.requestComplete[i];
+		if (request.requestParams.requestComplete) {
+			let gnRequestComplete = new GNArray();
 
-                    let thisGnRequestComplete = new GNHashtable();
+			if (bigAnalyticsItem.requestComplete) {
+				for (let i = 0; i < bigAnalyticsItem.requestComplete.length; i++) {
+					let requestComplete = bigAnalyticsItem.requestComplete[i];
 
-                    thisGnRequestComplete.add(GNParameterCode.EventName, requestComplete.eventName);
+					let thisGnRequestComplete = new GNHashtable();
 
-                    let gnResults = new GNArray();
+					thisGnRequestComplete.add(ParameterCode.EventName, requestComplete.eventName);
 
-                    for (let j = 0; j < requestComplete.results.length; j++) {
-                        let result = requestComplete.results[j];
+					let gnResults = new GNArray();
 
-                        let gnResult = new GNHashtable();
+					for (let j = 0; j < requestComplete.results.length; j++) {
+						let result = requestComplete.results[j];
 
-                        gnResult.add(GNParameterCode.ErrorCode, result.errorCode);
-                        gnResult.add(GNParameterCode.Count, result.count);
+						let gnResult = new GNHashtable();
 
-                        gnResults.add(gnResult);
-                    }
+						gnResult.add(ParameterCode.ErrorCode, result.errorCode);
+						gnResult.add(ParameterCode.Count, result.count);
 
-                    thisGnRequestComplete.add(GNParameterCode.Results, gnResults);
+						gnResults.add(gnResult);
+					}
 
-                    gnRequestComplete.add(thisGnRequestComplete);
-                }
-            }
+					thisGnRequestComplete.add(ParameterCode.Results, gnResults);
 
-            operationResponse.setParameter(GNParameterCode.RequestComplete, gnRequestComplete);
-        }
+					gnRequestComplete.add(thisGnRequestComplete);
+				}
+			}
 
-        if (request.requestParams.cost) {
-            let gnCost = new GNHashtable();
+			operationResponse.setParameter(ParameterCode.RequestComplete, gnRequestComplete);
+		}
 
-            if (bigAnalyticsItem.cost) {
-                gnCost.add(GNParameterCode.RequestCount, bigAnalyticsItem.cost.requestCount);
-                gnCost.add(GNParameterCode.MatchmakingRequestCount, bigAnalyticsItem.cost.matchmakingRequestCount);
-                gnCost.add(GNParameterCode.CloudScriptGBs, bigAnalyticsItem.cost.cloudScriptGBs);
-                gnCost.add(GNParameterCode.StorageSizeInBytes, bigAnalyticsItem.cost.storageSizeInBytes);
-                gnCost.add(GNParameterCode.DataTransferSizeInBytes, bigAnalyticsItem.cost.dataTransferSizeInBytes);
-            }
-            
-            operationResponse.setParameter(GNParameterCode.Cost, gnCost);
-        }
+		if (request.requestParams.cost) {
+			let gnCost = new GNHashtable();
 
-        if (request.requestParams.monthlyCost) {
-            let gnCost = new GNHashtable();
+			if (bigAnalyticsItem.cost) {
+				gnCost.add(ParameterCode.RequestCount, bigAnalyticsItem.cost.requestCount);
+				gnCost.add(ParameterCode.MatchmakingRequestCount, bigAnalyticsItem.cost.matchmakingRequestCount);
+				gnCost.add(ParameterCode.CloudScriptGBs, bigAnalyticsItem.cost.cloudScriptGBs);
+				gnCost.add(ParameterCode.StorageSizeInBytes, bigAnalyticsItem.cost.storageSizeInBytes);
+				gnCost.add(ParameterCode.DataTransferSizeInBytes, bigAnalyticsItem.cost.dataTransferSizeInBytes);
+			}
 
-            if (bigAnalyticsItem.monthlyCost) {
-                gnCost.add(GNParameterCode.RequestCount, bigAnalyticsItem.monthlyCost.requestCount);
-                gnCost.add(GNParameterCode.MatchmakingRequestCount, bigAnalyticsItem.monthlyCost.matchmakingRequestCount);
-                gnCost.add(GNParameterCode.CloudScriptGBs, bigAnalyticsItem.monthlyCost.cloudScriptGBs);
-                gnCost.add(GNParameterCode.StorageSizeInBytes, bigAnalyticsItem.monthlyCost.storageSizeInBytes);
-                gnCost.add(GNParameterCode.DataTransferSizeInBytes, bigAnalyticsItem.monthlyCost.dataTransferSizeInBytes);
-            }
+			operationResponse.setParameter(ParameterCode.Cost, gnCost);
+		}
 
-            operationResponse.setParameter(GNParameterCode.MonthlyCost, gnCost);
-        }
+		if (request.requestParams.monthlyCost) {
+			let gnCost = new GNHashtable();
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+			if (bigAnalyticsItem.monthlyCost) {
+				gnCost.add(ParameterCode.RequestCount, bigAnalyticsItem.monthlyCost.requestCount);
+				gnCost.add(ParameterCode.MatchmakingRequestCount, bigAnalyticsItem.monthlyCost.matchmakingRequestCount);
+				gnCost.add(ParameterCode.CloudScriptGBs, bigAnalyticsItem.monthlyCost.cloudScriptGBs);
+				gnCost.add(ParameterCode.StorageSizeInBytes, bigAnalyticsItem.monthlyCost.storageSizeInBytes);
+				gnCost.add(ParameterCode.DataTransferSizeInBytes, bigAnalyticsItem.monthlyCost.dataTransferSizeInBytes);
+			}
 
-        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest, operationResponse);
+			operationResponse.setParameter(ParameterCode.MonthlyCost, gnCost);
+		}
 
-        return operationResponse;
-    }
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

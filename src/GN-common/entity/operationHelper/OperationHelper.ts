@@ -67,8 +67,7 @@ export class OperationHelper {
 
 	public static toDataOperationResponse(operationResponse: OperationResponse) {
 		return {
-			operationCode: CodeHelper.getOperationCodeName(operationResponse.getOperationCode()),
-			encrypted: operationResponse.isEncrypted(),
+			operationCode: operationResponse.getOperationCode(),
 			responseId: operationResponse.getResponseId(),
 			parameters: OperationHelper.toDataGNHashtable(operationResponse.getParameters()),
 			debugMessage: operationResponse.getDebugMessage(),
@@ -78,8 +77,7 @@ export class OperationHelper {
 
 	public static toDataOperationRequest(operationRequest: OperationRequest) {
 		return {
-			operationCode: CodeHelper.getOperationCodeName(operationRequest.getOperationCode()),
-			encrypted: operationRequest.isEncrypted(),
+			operationCode: operationRequest.getOperationCode(),
 			requestId: operationRequest.getRequestId(),
 			parameters: OperationHelper.toDataGNHashtable(operationRequest.getParameters())
 		};
@@ -87,9 +85,9 @@ export class OperationHelper {
 
 	public static toDataFromRequest(request: Request) {
 		return {
-			code: CodeHelper.getOperationCodeName(request.getOperationCode()),
-			type: RequestType[<RequestType>request.getRequestType()],
-			role: RequestRole[<RequestRole>request.getRole()],
+			operationCode: request.getOperationCode(),
+			requestType: RequestType[request.getRequestType()],
+			role: RequestRole[request.getRole()],
 			ip: request.getIP(),
 			secretInfo: OperationHelper.toDataSecretInfo(request.getSecretInfo()),
 			authInfo: OperationHelper.toAuthInfo(request.getAuthInfo()),
@@ -100,7 +98,7 @@ export class OperationHelper {
 		if (secretInfo == null) return null;
 
 		return {
-			role: RequestRole[<RequestRole>secretInfo.getRole()],
+			role: RequestRole[secretInfo.getRole()],
 			gameId: secretInfo.getGameId(),
 		}
 	}
@@ -113,12 +111,12 @@ export class OperationHelper {
 		}
 	}
 
-	public static newOperationResponse(operationCode: string, responseId: number, encrypted: boolean): OperationResponse {
-		return new OperationResponse(operationCode, responseId, encrypted);
+	public static newOperationResponse(operationCode: string, responseId: number): OperationResponse {
+		return new OperationResponse(operationCode, responseId);
 	}
 
-	public static newOperationResponseInvalid(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
+	public static newOperationResponseInvalid(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+		let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
 		operationInvalid.setReturnCode(ReturnCode.OperationInvalid);
 		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
@@ -126,8 +124,8 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationResponseInvalidRequestParameters(operationCode: string, responseId: number, invalidMembers: InvalidMember[], encrypted: boolean, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
+	public static newOperationResponseInvalidRequestParameters(operationCode: string, responseId: number, invalidMembers: InvalidMember[], debugMessage?: string): OperationResponse {
+		let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
 		operationInvalid.setReturnCode(ReturnCode.InvalidRequestParameters);
 		operationInvalid.setInvalidMembers(invalidMembers);
@@ -137,8 +135,8 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationResponseInternalServerError(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
+	public static newOperationResponseInternalServerError(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+		let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
 		operationInvalid.setReturnCode(ReturnCode.InternalServerError);
 		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
@@ -146,8 +144,8 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationResponseNotAuthorized(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
+	public static newOperationResponseNotAuthorized(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+		let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
 		operationInvalid.setReturnCode(ReturnCode.OperationNotAuthorized);
 		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);
@@ -155,8 +153,8 @@ export class OperationHelper {
 		return operationInvalid;
 	}
 
-	public static newOperationNotAllowError(operationCode: string, responseId: number, encrypted: boolean, debugMessage?: string): OperationResponse {
-		let operationInvalid = this.newOperationResponse(operationCode, responseId, encrypted);
+	public static newOperationResponseNotAllowError(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+		let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
 		operationInvalid.setReturnCode(ReturnCode.OperationNotAllow);
 		if (debugMessage !== null) operationInvalid.setDebugMessage(debugMessage);

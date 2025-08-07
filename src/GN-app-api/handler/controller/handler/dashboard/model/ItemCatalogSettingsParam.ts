@@ -1,14 +1,14 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 import { ItemClassSettingsParam } from "./ItemClassSettingsParam";
 
 export class ItemCatalogSettingsParam {
-    @StringDataMember({ code: GNParameterCode.CatalogId, minLength: 2, maxLength: 32 })
-    catalogId: string;
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32 })
+	catalogId: string;
 
-    @NumberDataMember({ code: GNParameterCode.ItemType, mustInt: true })
-    itemType: number;
+	@NumberDataMember({ code: ParameterCode.ItemType, mustInt: true })
+	itemType: number;
 
-    @GNArrayDataMember({ code: GNParameterCode.ItemClassSettings, elementCls: ItemClassSettingsParam })
-    itemClassSettings: Array<ItemClassSettingsParam>;
+	@GNArrayDataMember({ code: ParameterCode.ItemClassSettings, elementCls: ItemClassSettingsParam })
+	itemClassSettings: Array<ItemClassSettingsParam>;
 }

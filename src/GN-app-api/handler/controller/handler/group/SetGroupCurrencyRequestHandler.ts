@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
@@ -16,13 +16,13 @@ import { GroupCurrencyParam } from "./model/GroupCurrencyParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class SetGroupCurrenciesOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
     groupId: string;
 
-    @GNArrayDataMember({ code: GNParameterCode.GroupCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupCurrencyParam })
+    @GNArrayDataMember({ code: ParameterCode.GroupCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupCurrencyParam })
     groupCurrencyParams: Array<GroupCurrencyParam>;
 
-    @StringDataMember({ code: GNParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
+    @StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
     log?: string;
 
     public override isValidRequest() {
@@ -118,7 +118,7 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let groupFindOptions: GroupFindOptions = {
@@ -128,7 +128,7 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
         let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
         if (group == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
             return operationResponse;
         }
 
@@ -159,14 +159,14 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
             serverValue += amount;
             if (serverValue <= 0) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.NotEnoughCurrency);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
                 return operationResponse;
             }
 
             let gnGroupCurrency = new GNHashtable();
 
-            gnGroupCurrency.add(GNParameterCode.Key, key);
-            gnGroupCurrency.add(GNParameterCode.Value, serverValue);
+            gnGroupCurrency.add(ParameterCode.Key, key);
+            gnGroupCurrency.add(ParameterCode.Value, serverValue);
 
             gnGroupCurrencies.add(gnGroupCurrency);
 
@@ -175,10 +175,10 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
         group.saveAsync();
 
-        gnInfoResponseParameters.add(GNParameterCode.GroupCurrencies, gnGroupCurrencies);
+        gnInfoResponseParameters.add(ParameterCode.GroupCurrencies, gnGroupCurrencies);
 
-        operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest, operationResponse);
 

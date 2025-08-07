@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
@@ -21,10 +21,10 @@ import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class LeaveGroupOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
     userId?: string;
 
-    @StringDataMember({ code: GNParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
     groupId: string;
 
     public override isValidRequest() {
@@ -35,7 +35,7 @@ class LeaveGroupOperationRequest extends OperationRequest {
 }
 
 class ServerLeaveGroupOperationRequest extends LeaveGroupOperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
     declare userId: string;
 
     public override isValidRequest() {
@@ -133,7 +133,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let groupFindOptions: GroupFindOptions = {
@@ -144,19 +144,19 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
         let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
         if (group == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
             return operationResponse;
         }
 
         let groupType = <OwnerType>group.getGroupType();
         if (groupType != OwnerType.GamePlayer) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
             return operationResponse;
         }
 
         let removeStatus = group.getRemoveStatus();
         if (removeStatus.tsRemove != 0) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
             return operationResponse;
         }
 
@@ -164,7 +164,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
         let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
         let playerGroupCatalogSettingsItem = gamePlayerSettings.playerGroupCatalogSettings.find(x => x.catalogId == catalogId);
         if (playerGroupCatalogSettingsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GroupNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
             return operationResponse;
         }
 
@@ -175,7 +175,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
         let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
         if (gamePlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.GamePlayerNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
             return operationResponse;
         }
 
@@ -189,15 +189,15 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
                 let gnPlayerGroups = new GNArray();
 
                 let gnPlayerGroup = new GNHashtable();
-                gnPlayerGroup.add(GNParameterCode.GroupId, request.groupId);
-                gnPlayerGroup.add(GNParameterCode.CatalogId, catalogId);
-                gnPlayerGroup.add(GNParameterCode.Status, <number>GroupStatus.NotMember);
-                gnPlayerGroup.add(GNParameterCode.TsLastStatusUpdate, currentMilliseconds);
+                gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
+                gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
+                gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+                gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
                 gnPlayerGroups.add(gnPlayerGroup);
 
-                let gamePlayerGroupUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerGroupUpdate, null, operationRequest.isEncrypted());
+                let gamePlayerGroupUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerGroupUpdate, null);
 
-                gamePlayerGroupUpdateOperationEvent.setParameter(GNParameterCode.PlayerGroups, gnPlayerGroups);
+                gamePlayerGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
 
                 this.gnServer.sendEventTo(request.userId, gamePlayerGroupUpdateOperationEvent);
             }
@@ -212,14 +212,14 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
                 let gnMember = new GNHashtable();
 
-                gnMember.add(GNParameterCode.UserId, request.userId);
-                gnMember.add(GNParameterCode.Status, <number>GroupStatus.NotMember);
+                gnMember.add(ParameterCode.UserId, request.userId);
+                gnMember.add(ParameterCode.Status, <number>GroupStatus.NotMember);
 
                 gnMembers.add(gnMember);
 
-                let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null, operationRequest.isEncrypted());
+                let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
-                groupMemberUpdateOperationEvent.setParameter(GNParameterCode.Members, gnMembers);
+                groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
 
                 this.gnServer.leaveRoom(request.userId, request.groupId);
 
@@ -227,7 +227,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
             }
         }
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_LeaveGroup", request, secretInfo, operationRequest, operationResponse);
 

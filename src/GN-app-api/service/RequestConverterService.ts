@@ -37,7 +37,6 @@ export class RequestConverterService implements IRequestConverterService {
 
         let isValidRequest = true;
         let parameters = operationRequest.getParameters();
-        let encrypted = operationRequest.isEncrypted();
 
         for (let i = 0; i < declaredFields.length; i++) {
             let field = declaredFields[i];
@@ -828,7 +827,6 @@ export class RequestConverterService implements IRequestConverterService {
         answerAny.operationCode = operationRequest.getOperationCode();
         answerAny.requestId = operationRequest.getRequestId();
         answerAny.parameters = parameters;
-        answerAny.encrypted = encrypted;
 
         answerAny.isValid = isValidRequest;
 
@@ -1695,7 +1693,7 @@ export class RequestConverterService implements IRequestConverterService {
     }
 
     public newOperationRequest(request: Request): OperationRequest {
-        let answer = new CommonOperationRequest(request.getOperationCode(), request.isEncrypted());
+        let answer = new CommonOperationRequest(request.getOperationCode());
         answer.setOriginRequest(request);
         answer.setRequestId(request.getRequestId());
 

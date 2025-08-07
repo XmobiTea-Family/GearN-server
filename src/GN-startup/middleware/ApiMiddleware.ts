@@ -9,7 +9,7 @@ import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Commands } from "./../../GN-common/constant/Commands";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { SecretInfo, SecretPermissionItem, SecretRole } from "./../../GN-common/entity/SecretInfo";
-import { GrantSecretInfoRequestHandler } from "./../../GN-app-api/handler/controller/handler/dashboard/GrantSecretInfoRequestHandler";
+import { CreateSecretInfoRequestHandler } from "./../../GN-app-api/handler/controller/handler/dashboard/CreateSecretInfoRequestHandler";
 import jwt from "jsonwebtoken";
 import { TokenPayload } from "./../../GN-common/entity/TokenPayload";
 
@@ -178,7 +178,7 @@ export class ApiMiddleware {
 			if (secretInfoResult != null) {
 				// let secretRole = <SecretRole>secretInfoResult["role"];
 
-				let defaultSecretPermissionItem = GrantSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false) as any;
+				let defaultSecretPermissionItem = CreateSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false) as any;
 
 				let dataSecretPermissionItem = secretInfoResult.permission as any;
 				let keyLayer0s = Object.keys(dataSecretPermissionItem);		// authenticate, masterPlayer, ...
@@ -297,7 +297,7 @@ export class ApiMiddleware {
 		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-			return res.send([returnCode]);
+			return res.send({ returnCode: returnCode });
 		}
 
 		return next();
@@ -315,7 +315,7 @@ export class ApiMiddleware {
 	public async authenticateTokenViaMsgPack(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
-			let content = Buffer.from(encode([returnCode]));
+			let content = Buffer.from(encode({ returnCode: returnCode }));
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 			res.setHeader(Commands.CONTENT_LENGTH, content.length);
 			return res.send(content);
@@ -399,7 +399,7 @@ export class ApiMiddleware {
 
 		if (!secretKey) {
 			if (!req.isAuthenticated) {
-				if (req.url != "/-1/9/3") {
+				if (req.url != "/dashboard/loginByAdminAccount/client") {
 					return ReturnCode.SecretInvalid;
 				}
 			}

@@ -17,6 +17,8 @@ export interface IPostEventCallbackService {
         userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string,
     }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void>;
 
+    onVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>;
+
 }
 
 export interface OnPreCallbackFunction {

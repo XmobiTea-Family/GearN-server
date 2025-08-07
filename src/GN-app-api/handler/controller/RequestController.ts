@@ -79,7 +79,7 @@ export class RequestController {
 			// if the user not authentication
 			// and this request not in unAthenticated
 			if (this.requestUnAuthenticatedCodes.indexOf(operationCode) == -1) {
-				return OperationHelper.newOperationResponseNotAuthorized(operationCode, request.getRequestId(), request.isEncrypted());
+				return OperationHelper.newOperationResponseNotAuthorized(operationCode, request.getRequestId());
 			}
 		}
 

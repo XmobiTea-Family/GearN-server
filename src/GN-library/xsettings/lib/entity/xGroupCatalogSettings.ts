@@ -1,5 +1,5 @@
 export interface xGroupCatalogSettings {
     catalogId: string;
-    displayName: string;
+    description: string;
     forceAcceptMember: boolean;
 }

@@ -15,7 +15,6 @@ import { Request } from "./GN-common/entity/operationRequest/base/Request";
 import { AppleService } from "./GN-app-api/service/AppleService";
 import { TimerService } from "./GN-app-api/service/TimerService";
 import { IFacebookService } from "./GN-app-api/service/IFacebookService";
-import { IGenericService } from "./GN-app-api/service/IGenericService";
 import { IAppleService } from "./GN-app-api/service/IAppleService";
 import { ICloudScriptService } from "./GN-app-api/service/ICloudScriptService";
 import { ITimerService } from "./GN-app-api/service/ITimerService";
@@ -184,8 +183,8 @@ import { GetPlayerFriendRequestHandler as CharacterPlayer_GetPlayerFriendRequest
 import { GetPlayerGroupRequestHandler as CharacterPlayer_GetPlayerGroupRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetPlayerGroupRequestHandler";
 import { GetPlayerInventoryRequestHandler as CharacterPlayer_GetPlayerInventoryRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GetPlayerInventoryRequestHandler";
 import { RemovePlayerItemRequestHandler as CharacterPlayer_RemovePlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/RemovePlayerItemRequestHandler";
-import { GrantPlayerItemRequestHandler as CharacterPlayer_GrantPlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GrantPlayerItemRequestHandler";
-import { GrantGroupRequestHandler as CharacterPlayer_GrantGroupRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/GrantGroupRequestHandler";
+import { CreatePlayerItemRequestHandler as CharacterPlayer_CreatePlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/CreatePlayerItemRequestHandler";
+import { CreateGroupRequestHandler as CharacterPlayer_CreateGroupRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/CreateGroupRequestHandler";
 import { JoinGroupRequestHandler as CharacterPlayer_JoinGroupRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/JoinGroupRequestHandler";
 import { LeaveGroupRequestHandler as CharacterPlayer_LeaveGroupRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/LeaveGroupRequestHandler";
 import { SetOwnerRequestHandler as CharacterPlayer_SetOwnerRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/SetOwnerRequestHandler";
@@ -237,9 +236,9 @@ import { GetPlayerGroupRequestHandler as GamePlayer_GetPlayerGroupRequestHandler
 import { GetPlayerFriendRequestHandler as GamePlayer_GetPlayerFriendRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetPlayerFriendRequestHandler";
 import { RemovePlayerItemRequestHandler as GamePlayer_RemovePlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/RemovePlayerItemRequestHandler";
 import { GetOnlineStatusRequestHandler as GamePlayer_GetOnlineStatusRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetOnlineStatusRequestHandler";
-import { GrantGroupRequestHandler as GamePlayer_GrantGroupRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GrantGroupRequestHandler";
-import { GrantPlayerItemRequestHandler as GamePlayer_GrantPlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GrantPlayerItemRequestHandler";
-import { GrantPlayerCharacterRequestHandler as GamePlayer_GrantPlayerCharacterRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GrantPlayerCharacterRequestHandler";
+import { CreateGroupRequestHandler as GamePlayer_CreateGroupRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/CreateGroupRequestHandler";
+import { CreatePlayerItemRequestHandler as GamePlayer_CreatePlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/CreatePlayerItemRequestHandler";
+import { CreatePlayerCharacterRequestHandler as GamePlayer_CreatePlayerCharacterRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/CreatePlayerCharacterRequestHandler";
 import { AddPlayerFriendRequestHandler as GamePlayer_AddPlayerFriendRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/AddPlayerFriendRequestHandler";
 import { RemovePlayerFriendRequestHandler as GamePlayer_RemovePlayerFriendRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/RemovePlayerFriendRequestHandler";
 import { RemovePlayerCharacterRequestHandler as GamePlayer_RemovePlayerCharacterRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/RemovePlayerCharacterRequestHandler";
@@ -290,7 +289,7 @@ import { GetCatalogIdRequestHandler as Group_GetCatalogIdRequestHandler } from "
 import { GetRemoveStatusRequestHandler as Group_GetRemoveStatusRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetRemoveStatusRequestHandler";
 import { GetGroupInventoryRequestHandler as Group_GetGroupInventoryRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetGroupInventoryRequestHandler";
 import { RemoveGroupItemRequestHandler as Group_RemoveGroupItemRequestHandler } from "./GN-app-api/handler/controller/handler/group/RemoveGroupItemRequestHandler";
-import { GrantGroupItemRequestHandler as Group_GrantGroupItemRequestHandler } from "./GN-app-api/handler/controller/handler/group/GrantGroupItemRequestHandler";
+import { CreateGroupItemRequestHandler as Group_CreateGroupItemRequestHandler } from "./GN-app-api/handler/controller/handler/group/CreateGroupItemRequestHandler";
 import { GetMembersRequestHandler as Group_GetMembersRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetMembersRequestHandler";
 import { AddMemberRequestHandler as Group_AddMemberRequestHandler } from "./GN-app-api/handler/controller/handler/group/AddMemberRequestHandler";
 import { RemoveMemberRequestHandler as Group_RemoveMemberRequestHandler } from "./GN-app-api/handler/controller/handler/group/RemoveMemberRequestHandler";
@@ -340,7 +339,7 @@ import { GetStatisticsLogRequestHandler as Inventory_GetStatisticsLogRequestHand
 import { BuyStoreItemRequestHandler as StoreInventory_BuyStoreItemRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/BuyStoreItemRequestHandler";
 import { GetStoreItemInformationRequestHandler as StoreInventory_GetStoreItemInformationRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/GetStoreItemInformationRequestHandler";
 import { GetStoreItemsWithTagRequestHandler as StoreInventory_GetStoreItemsWithTagRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/GetStoreItemsWithTagRequestHandler";
-import { GrantStoreItemRequestHandler as StoreInventory_GrantStoreItemRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/GrantStoreItemRequestHandler";
+import { CreateStoreItemRequestHandler as StoreInventory_CreateStoreItemRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/CreateStoreItemRequestHandler";
 import { SetRemoveStatusRequestHandler as StoreInventory_SetRemoveStatusRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/SetRemoveStatusRequestHandler";
 import { SetStoreItemInformationRequestHandler as StoreInventory_SetStoreItemInformationRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/SetStoreItemInformationRequestHandler";
 import { ValidateAppleAppStoreReceiptRequestHandler as StoreInventory_ValidateAppleAppStoreReceiptRequestHandler } from "./GN-app-api/handler/controller/handler/storeInventory/ValidateAppleAppStoreReceiptRequestHandler";
@@ -354,12 +353,12 @@ import { RemoveStoreUsedRequestHandler as StoreInventory_RemoveStoreUsedRequestH
 
 import { LoginByAdminAccountRequestHandler as Dashboard_LoginByAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/LoginByAdminAccountRequestHandler";
 import { SetMasterGameSettingsRequestHandler as Dashboard_SetMasterGameSettingsRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/SetMasterGameSettingsRequestHandler";
-import { GrantAdminAccountRequestHandler as Dashboard_GrantAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GrantAdminAccountRequestHandler";
+import { CreateAdminAccountRequestHandler as Dashboard_CreateAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/CreateAdminAccountRequestHandler";
 import { RemoveAdminAccountRequestHandler as Dashboard_RemoveAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/RemoveAdminAccountRequestHandler";
 import { SetPasswordAdminAccountRequestHandler as Dashboard_SetPasswordAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/SetPasswordAdminAccountRequestHandler";
 import { SetSecretKeyAdminAccountRequestHandler as Dashboard_SetSecretKeyAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/SetSecretKeyAdminAccountRequestHandler";
 import { SetGameInformationRequestHandler as Dashboard_SetGameInformationRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/SetGameInformationRequestHandler";
-import { GrantGameRequestHandler as Dashboard_GrantGameRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GrantGameRequestHandler";
+import { CreateGameRequestHandler as Dashboard_CreateGameRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/CreateGameRequestHandler";
 import { ChangePasswordAdminAccountRequestHandler as Dashboard_ChangePasswordAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/ChangePasswordAdminAccountRequestHandler";
 import { GetAdminAccountListRequestHandler as Dashboard_GetAdminAccountListRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetAdminAccountListRequestHandler";
 import { GetGameInformationRequestHandler as Dashboard_GetGameInformationRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetGameInformationRequestHandler";
@@ -368,7 +367,7 @@ import { GetMasterGameSettingsRequestHandler as Dashboard_GetMasterGameSettingsR
 import { GetServerLogRequestHandler as Dashboard_GetServerLogRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetServerLogRequestHandler";
 import { GetSecretInfoInformationRequestHandler as Dashboard_GetSecretInfoInformationRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetSecretInfoInformationRequestHandler";
 import { GetSecretInfoListRequestHandler as Dashboard_GetSecretInfoListRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetSecretInfoListRequestHandler";
-import { GrantSecretInfoRequestHandler as Dashboard_GrantSecretInfoRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GrantSecretInfoRequestHandler";
+import { CreateSecretInfoRequestHandler as Dashboard_CreateSecretInfoRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/CreateSecretInfoRequestHandler";
 import { SetSecretInfoInformationRequestHandler as Dashboard_SetSecretInfoInformationRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/SetSecretInfoInformationRequestHandler";
 import { GetUsernameAdminAccountRequestHandler as Dashboard_GetUsernameAdminAccountRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetUsernameAdminAccountRequestHandler";
 import { GetAnalyticsRequestHandler as Dashboard_GetAnalyticsRequestHandler } from "./GN-app-api/handler/controller/handler/dashboard/GetAnalyticsRequestHandler";
@@ -398,7 +397,6 @@ import { GetFunctionsRequestHandler as CloudScript_GetFunctionsRequestHandler } 
 
 import { MatchmakingHandler, MatchmakingTicketCanMatch } from "./GN-app-api/handler/controller/handler/multiplayer/MatchmakingHandler";
 import { xDatetime } from "./GN-library/xdatetime/lib/xDatetime";
-import { GenericService } from "./GN-app-api/service/GenericService";
 import { IGameCenterService } from "./GN-app-api/service/IGameCenterService";
 import { IGooglePlayGameService } from "./GN-app-api/service/IGooglePlayGameService";
 import { GooglePlayGameService } from "./GN-app-api/service/GooglePlayGameService";
@@ -433,7 +431,6 @@ export class GNServer {
 	private xDatabase: xDatabase;
 
 	private facebookService: IFacebookService;
-	private genericService: IGenericService;
 	private appleService: IAppleService;
 	private googleService: IGoogleService;
 	private googlePlayGameService: IGooglePlayGameService;
@@ -458,7 +455,6 @@ export class GNServer {
 
 	constructor() {
 		this.facebookService = new FacebookService();
-		this.genericService = new GenericService();
 		this.postEventCallbackService = new PostEventCallbackService();
 		this.preEventCallbackService = new PreEventCallbackService();
 
@@ -665,8 +661,8 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerGroupRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerInventoryRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_RemovePlayerItemRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GrantPlayerItemRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_GrantGroupRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_CreatePlayerItemRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_CreateGroupRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_JoinGroupRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_LeaveGroupRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new CharacterPlayer_SetOwnerRequestHandler(this), true);
@@ -722,9 +718,9 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerFriendRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerItemRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_GetOnlineStatusRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new GamePlayer_GrantGroupRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new GamePlayer_GrantPlayerItemRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new GamePlayer_GrantPlayerCharacterRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new GamePlayer_CreateGroupRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerItemRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerCharacterRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_AddPlayerFriendRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerFriendRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerCharacterRequestHandler(this), true);
@@ -784,7 +780,7 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new Group_GetRemoveStatusRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Group_GetGroupInventoryRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Group_RemoveGroupItemRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new Group_GrantGroupItemRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new Group_CreateGroupItemRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Group_GetMembersRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Group_AddMemberRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Group_RemoveMemberRequestHandler(this), true);
@@ -842,7 +838,7 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_BuyStoreItemRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreItemInformationRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreItemsWithTagRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new StoreInventory_GrantStoreItemRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new StoreInventory_CreateStoreItemRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_SetRemoveStatusRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_SetStoreItemInformationRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new StoreInventory_ValidateAppleAppStoreReceiptRequestHandler(this), true);
@@ -861,12 +857,12 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new Dashboard_LoginByAdminAccountRequestHandler(this), false);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_SetMasterGameSettingsRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_SetMasterGameSettingsRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new Dashboard_GrantAdminAccountRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new Dashboard_CreateAdminAccountRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_RemoveAdminAccountRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_SetPasswordAdminAccountRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_SetSecretKeyAdminAccountRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_SetGameInformationRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new Dashboard_GrantGameRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new Dashboard_CreateGameRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_ChangePasswordAdminAccountRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetAdminAccountListRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetGameInformationRequestHandler(this), true);
@@ -875,7 +871,7 @@ export class GNServer {
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetServerLogRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetSecretInfoInformationRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetSecretInfoListRequestHandler(this), true);
-			this.requestController.addHandler(requestTypeValue, new Dashboard_GrantSecretInfoRequestHandler(this), true);
+			this.requestController.addHandler(requestTypeValue, new Dashboard_CreateSecretInfoRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_SetSecretInfoInformationRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetUsernameAdminAccountRequestHandler(this), true);
 			this.requestController.addHandler(requestTypeValue, new Dashboard_GetAnalyticsRequestHandler(this), true);
@@ -933,7 +929,7 @@ export class GNServer {
 
 		this.postEventCallbackCollection = this.xDatabase.logSystemCollection("EventCallback.PostLog");
 
-        this.getHttpApp().getClusterHandler().onEvent("sendEventTo", data => {
+		this.getHttpApp().getClusterHandler().onEvent("sendEventTo", data => {
 			this.executeSendEventTo(data);
 		});
 
@@ -1025,19 +1021,15 @@ export class GNServer {
 	}
 
 	public getCacheService(gameId: string): ICacheService {
-        return this.cacheServiceDic.get(gameId);
+		return this.cacheServiceDic.get(gameId);
 	}
 
-    public setCacheService(gameId: string, cacheService: ICacheService) {
-        this.cacheServiceDic.set(gameId, cacheService);
-    }
+	public setCacheService(gameId: string, cacheService: ICacheService) {
+		this.cacheServiceDic.set(gameId, cacheService);
+	}
 
 	public getFacebookService(): IFacebookService {
 		return this.facebookService;
-	}
-
-	public getGenericService(): IGenericService {
-		return this.genericService;
 	}
 
 	public getPostEventCallbackService(): IPostEventCallbackService {
@@ -1105,7 +1097,6 @@ export class GNServer {
 
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
-			encrypted: operationEvent.isEncrypted(),
 			parameters: operationEvent.getParameters()?.toData()
 		};
 
@@ -1119,10 +1110,10 @@ export class GNServer {
 			responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
 		});
 
-        this.getHttpApp().getClusterHandler().sendEvent("sendEventTo", {
+		this.getHttpApp().getClusterHandler().sendEvent("sendEventTo", {
 			userId: userId,
 			operationEvent: operationEventToData,
-            useMsgPack: true,
+			useMsgPack: true,
 		});
 	}
 
@@ -1130,12 +1121,11 @@ export class GNServer {
 		userId: string,
 		operationEvent: {
 			eventCode: string,
-			encrypted: boolean,
 			parameters: {}
 		},
-        useMsgPack: boolean
+		useMsgPack: boolean
 	}) {
-		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null, data.operationEvent.encrypted);
+		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventTo(data.userId, operationEvent, data.useMsgPack);
 	}
@@ -1145,7 +1135,6 @@ export class GNServer {
 
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
-			encrypted: operationEvent.isEncrypted(),
 			parameters: operationEvent.getParameters()?.toData()
 		};
 
@@ -1158,24 +1147,23 @@ export class GNServer {
 			operationEvent: operationEventToData,
 			responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
 		});
-		
-        this.getHttpApp().getClusterHandler().sendEvent("sendEventToRoom", {
+
+		this.getHttpApp().getClusterHandler().sendEvent("sendEventToRoom", {
 			roomId: roomId,
 			operationEvent: operationEventToData,
-            useMsgPack: true,
+			useMsgPack: true,
 		});
 	}
 
-    private executeSendEventToRoom(data: {
+	private executeSendEventToRoom(data: {
 		roomId: string,
 		operationEvent: {
 			eventCode: string,
-			encrypted: boolean,
 			parameters: {}
 		},
-        useMsgPack: boolean
+		useMsgPack: boolean
 	}) {
-		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null, data.operationEvent.encrypted);
+		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventToRoom(data.roomId, operationEvent, data.useMsgPack);
 	}
@@ -1185,7 +1173,6 @@ export class GNServer {
 
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
-			encrypted: operationEvent.isEncrypted(),
 			parameters: operationEvent.getParameters()?.toData()
 		};
 
@@ -1199,10 +1186,10 @@ export class GNServer {
 			responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8") * userIds.length,
 		});
 
-        this.getHttpApp().getClusterHandler().sendEvent("sendEventToMoreUser", {
+		this.getHttpApp().getClusterHandler().sendEvent("sendEventToMoreUser", {
 			userIds: userIds,
 			operationEvent: operationEventToData,
-            useMsgPack: true,
+			useMsgPack: true,
 		});
 	}
 
@@ -1210,12 +1197,11 @@ export class GNServer {
 		userIds: string[],
 		operationEvent: {
 			eventCode: string,
-			encrypted: boolean,
 			parameters: {}
 		},
-        useMsgPack: boolean,
+		useMsgPack: boolean,
 	}) {
-		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null, data.operationEvent.encrypted);
+		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventToMoreUser(data.userIds, operationEvent, data.useMsgPack);
 	}
@@ -1225,7 +1211,6 @@ export class GNServer {
 
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
-			encrypted: operationEvent.isEncrypted(),
 			parameters: operationEvent.getParameters()?.toData()
 		};
 
@@ -1239,19 +1224,18 @@ export class GNServer {
 
 		this.getHttpApp().getClusterHandler().sendEvent("sendEventToAllPlayer", {
 			operationEvent: operationEventToData,
-            useMsgPack: true,
+			useMsgPack: true,
 		});
 	}
 
 	private executeSendEventToAllPlayer(data: {
 		operationEvent: {
 			eventCode: string,
-			encrypted: boolean,
 			parameters: {}
 		},
-        useMsgPack: boolean,
+		useMsgPack: boolean,
 	}) {
-		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null, data.operationEvent.encrypted);
+		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent, data.useMsgPack);
 	}
@@ -1295,12 +1279,12 @@ export class GNServer {
 		}
 	}
 
-    private handleRemoveCacheInvalidData() {
-        for (let i = 0; i < this.gameIds.length; i++) {
+	private handleRemoveCacheInvalidData() {
+		for (let i = 0; i < this.gameIds.length; i++) {
 			let gameId = this.gameIds[i];
-            this.getCacheService(gameId).removeInvalidData();
+			this.getCacheService(gameId).removeInvalidData();
 		}
-    }
+	}
 
 	private async handleMatchmakingForGame(gameId: string) {
 		let matchmakingTicketCanMatchs = await this.matchmakingHandler.handle(gameId);
@@ -1373,8 +1357,8 @@ export class GNServer {
 		return this.gameIds;
 	}
 
-    public isPrimary(): boolean {
-        return this.httpApp.getClusterHandler().getIsPrimary();
-    }
-    
+	public isPrimary(): boolean {
+		return this.httpApp.getClusterHandler().getIsPrimary();
+	}
+
 }

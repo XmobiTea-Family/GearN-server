@@ -6,21 +6,21 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class SendEmailOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
     userId?: string;
 
-    @StringDataMember({ code: GNParameterCode.Subject, minLength: 2, maxLength: 256, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.Subject, minLength: 2, maxLength: 256, mustNonNull: true })
     subject: string;
 
-    @StringDataMember({ code: GNParameterCode.ContentHtml, minLength: 2, maxLength: 8192, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.ContentHtml, minLength: 2, maxLength: 8192, mustNonNull: true })
     contentHtml: string;
 
     public override isValidRequest() {
@@ -31,7 +31,7 @@ class SendEmailOperationRequest extends OperationRequest {
 }
 
 class ServerSendEmailOperationRequest extends SendEmailOperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
     declare userId: string;
 
     public override isValidRequest() {
@@ -132,7 +132,7 @@ export class SendEmailRequestHandler extends MasterPlayerBaseRequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {
@@ -140,21 +140,21 @@ export class SendEmailRequestHandler extends MasterPlayerBaseRequestHandler {
         });
 
         if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 
             return operationResponse;
         }
 
         let email = masterPlayer.getEmail();
         if (!email) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.EmailInvalid);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.EmailInvalid);
 
             return operationResponse;
         }
 
         this.gnServer.getEmailService().sendMail(email, request.subject, request.contentHtml);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SendEmail", request, secretInfo, operationRequest, operationResponse);
 

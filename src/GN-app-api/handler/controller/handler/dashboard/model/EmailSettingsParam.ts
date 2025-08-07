@@ -1,23 +1,23 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class EmailSettingsParam {
-    @StringDataMember({ code: GNParameterCode.SendFrom })
-    sendFrom: string;
+	@StringDataMember({ code: ParameterCode.SendFrom })
+	sendFrom: string;
 
-    @BooleanDataMember({ code: GNParameterCode.Secure })
-    secure: boolean;
+	@BooleanDataMember({ code: ParameterCode.Secure })
+	secure: boolean;
 
-    @StringDataMember({ code: GNParameterCode.Host })
-    host: string;
+	@StringDataMember({ code: ParameterCode.Host })
+	host: string;
 
-    @NumberDataMember({ code: GNParameterCode.Port })
-    port: number;
+	@NumberDataMember({ code: ParameterCode.Port })
+	port: number;
 
-    @StringDataMember({ code: GNParameterCode.Username })
-    username: string;
+	@StringDataMember({ code: ParameterCode.Username })
+	username: string;
 
-    @StringDataMember({ code: GNParameterCode.Password })
-    password: string;
+	@StringDataMember({ code: ParameterCode.Password })
+	password: string;
 
 }

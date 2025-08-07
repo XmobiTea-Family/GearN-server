@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
@@ -18,16 +18,16 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class LoginByGenericServiceOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.ServiceName, minLength: 6, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.ServiceName, minLength: 6, maxLength: 32, mustNonNull: true })
 	serviceName: string;
 
-	@GNHashtableDataMember({ code: GNParameterCode.ServiceData, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.ServiceData, mustNonNull: true })
 	serviceData: GNHashtable;
 
-	@BooleanDataMember({ code: GNParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
+	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
 	createPlayerIfNotExists?: boolean;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
@@ -74,29 +74,25 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
-		let playerStatisticsSettingsItem = masterPlayerSettings.genericServiceSettings.find(x => x.serviceName == request.serviceName);
+		let genericServiceSettingsItem = masterPlayerSettings.genericServiceSettings.find(x => x.serviceName == request.serviceName);
 
-		if (playerStatisticsSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ServiceNameNotFound);
+		if (genericServiceSettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ServiceNameNotFound);
 
 			return operationResponse;
 		}
 
-		let serviceResponse = await this.gnServer.getGenericService().verifyGenericService(request.serviceName, request.serviceData);
+		let serviceResponse = await this.gnServer.getPostEventCallbackService().onVerifyGenericService(request.serviceName, request.serviceData);
 
-		if (serviceResponse == null || serviceResponse.status == "ServiceNotFound") {
-			Debug.log("service name error " + serviceResponse.error);
+		if (!serviceResponse.success) {
+			Debug.log("service name error " + serviceResponse.errorMessage);
 
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ServiceNameNotFound);
-			return operationResponse;
-		}
-
-		if (!serviceResponse.serviceId || serviceResponse.status == "VerifyError") {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorMessage, serviceResponse.errorMessage);
 			return operationResponse;
 		}
 
@@ -111,7 +107,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 
 		if (masterPlayer == null) {
 			if (!request.createPlayerIfNotExists) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 
 				return operationResponse;
 			}
@@ -142,7 +138,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 				}
 
 				masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult); masterPlayer.getExternal
-				operationResponse.setParameter(GNParameterCode.NewlyCreated, true);
+				operationResponse.setParameter(ParameterCode.NewlyCreated, true);
 			}
 		}
 		else {
@@ -165,18 +161,18 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 			masterPlayer.saveAsync();
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		operationResponse.setParameter(GNParameterCode.UserId, masterPlayer.getUserId());
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+		operationResponse.setParameter(ParameterCode.UserId, masterPlayer.getUserId());
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
 		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
-			authenticationType: "LoginByGenericService",
+			authenticationType: "loginByGenericService",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
-			isNewUser: operationResponse.getParameters().getBoolean(GNParameterCode.NewlyCreated, false),
+			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByGenericService", request, secretInfo, operationRequest, operationResponse);

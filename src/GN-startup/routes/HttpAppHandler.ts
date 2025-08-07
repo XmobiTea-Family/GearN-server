@@ -11,9 +11,9 @@ import { encode, decode } from "@msgpack/msgpack";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
 import { Commands } from "./../../GN-common/constant/Commands";
-import { EnumUtility } from "../../GN-common/helper/EnumUtility";
-import { RequestType } from "../../GN-common/constant/enumType/RequestType";
-import { RequestRole } from "../../GN-common/constant/enumType/RequestRole";
+import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
+import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
+import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
 
 interface OnHttpRequest {
     (request: Request): Promise<OperationResponse>;
@@ -82,13 +82,17 @@ export class HttpAppHandler {
         this.router.post("/ts", (req: express.Request, res: express.Response): any => {
             res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
-            return res.status(200).json([ReturnCode.Ok, { "1": xDatetime.getCurrentMilliseconds() }]);
+            return res.status(200).json({
+                "ts": xDatetime.getCurrentMilliseconds(),
+            });
         });
 
         this.router.get("/ts", (req: express.Request, res: express.Response): any => {
             res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
-            return res.status(200).json([ReturnCode.Ok, { "1": xDatetime.getCurrentMilliseconds() }]);
+            return res.status(200).json({
+                "ts": xDatetime.getCurrentMilliseconds(),
+            });
         });
 
         this.router.post("/getAuthInfo", async (req: express.Request, res: express.Response): Promise<any> => {
@@ -196,7 +200,7 @@ export class HttpAppHandler {
             );
 
             this.apiJsonRouter.post("/:requestType/:operationCode/:role", async (req: express.Request, res: express.Response): Promise<any> => {
-                let operationResponse = await this.onHttpRequest(req, false);
+                let operationResponse = await this.onHttpRequest(req);
 
                 this.antiDdosMiddleware.removePendingRequest(req, res);
 
@@ -221,16 +225,14 @@ export class HttpAppHandler {
                     
                     if (this.enableSendAndReceiveDebug) Debug.log("[HTTP SEND] %O", JSON.stringify(finalData));
 
-                    if (operationResponse.isEncrypted()) {
-                        // TODO Encrypt data here
-                    }
-
                     res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
                     return res.send(finalData);
                 }
 
                 res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-                return res.send([ReturnCode.OperationInvalid]);
+                return res.send({
+                    returnCode: ReturnCode.OperationInvalid
+                });
             });
         }
 
@@ -279,7 +281,7 @@ export class HttpAppHandler {
             );
 
             this.apiMsgPackRouter.post("/:requestType/:operationCode/:role", async (req: express.Request, res: express.Response): Promise<any> => {
-                let operationResponse = await this.onHttpRequest(req, true);
+                let operationResponse = await this.onHttpRequest(req);
 
                 this.antiDdosMiddleware.removePendingRequest(req, res);
 
@@ -304,17 +306,13 @@ export class HttpAppHandler {
 
                     if (this.enableSendAndReceiveDebug) Debug.log("[HTTP SEND] %O", JSON.stringify(finalData));
 
-                    if (operationResponse.isEncrypted()) {
-                        // TODO Encrypt data here
-                    }
-
                     let content = Buffer.from(encode(httpData));
                     res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
                     res.setHeader(Commands.CONTENT_LENGTH, content.length);
                     return res.send(content);
                 }
 
-                let content = Buffer.from(encode([ReturnCode.OperationInvalid]));
+                let content = Buffer.from(encode({ returnCode: ReturnCode.OperationInvalid }));
                 res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
                 res.setHeader(Commands.CONTENT_LENGTH, content.length);
                 return res.send(content);
@@ -322,7 +320,7 @@ export class HttpAppHandler {
         }
     }
 
-    private async onHttpRequest(req: express.Request, encrypted: boolean): Promise<OperationResponse> {
+    private async onHttpRequest(req: express.Request): Promise<OperationResponse> {
         let requestTypeStr = req.params.requestType;
         let operationCodeStr = req.params.operationCode;
         let roleStr = req.params.role;
@@ -344,7 +342,6 @@ export class HttpAppHandler {
         request.setParameters(!parameters ? {} : parameters);
         request.setAuthenticate(req.authInfo);
         request.setSecretInfo(req.secretInfo);
-        request.setEncrypted(encrypted);
 
         if (this.enableSendAndReceiveDebug) {
             Debug.log("[HTTP RECV] %O", request);
@@ -355,7 +352,7 @@ export class HttpAppHandler {
             operationResponse = await this._onRequestCb(request);
         }
         catch (err) {
-            operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId(), request.isEncrypted());
+            operationResponse = new OperationResponse(request.getOperationCode(), request.getRequestId());
             operationResponse.setReturnCode(ReturnCode.InternalServerError);
             operationResponse.setDebugMessage(err.message);
 

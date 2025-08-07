@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
@@ -17,596 +17,596 @@ import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupS
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 import { Md5Generate } from "./../../../../../GN-common/helper/Md5Generate";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { StoreReceiveType } from "../../../../../GN-common/constant/enumType/StoreReceiveType";
-import { StoreItemType } from "../../../../../GN-common/constant/enumType/StoreItemType";
+import { StoreReceiveType } from "./../../../../../GN-common/constant/enumType/StoreReceiveType";
+import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
 
 class ValidateFacebookStoreReceiptOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.Receipt, minLength: 10, maxLength: 2048, mustNonNull: true })
-    receipt: string;
+	@StringDataMember({ code: ParameterCode.Receipt, minLength: 10, maxLength: 2048, mustNonNull: true })
+	receipt: string;
 
-    @StringDataMember({ code: GNParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
-    id: string;
+	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
+	id: string;
 
-    @NumberDataMember({ code: GNParameterCode.OwnerType, mustInt: true })
-    type: number;
+	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
+	type: number;
 
-    @StringDataMember({ code: GNParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-    log?: string;
+	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
+	log?: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class ServerValidateFacebookStoreReceiptOperationRequest extends ValidateFacebookStoreReceiptOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminValidateFacebookStoreReceiptOperationRequest extends ServerValidateFacebookStoreReceiptOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.ValidateFacebookStoreReceipt;
-    }
-
-    public override getCommonOperationRequest() {
-        return ValidateFacebookStoreReceiptOperationRequest;
-    }
-
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
-
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
-
-        let allowMethod = false;
-
-        if (secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.otherSelfEnable) {
-            allowMethod = true;
-        }
-        else if (secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.selfEnable) {
-            if (request.type == <number>OwnerType.CharacterPlayer) {
-                let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
-
-                if (gamePlayer != null) {
-                    if (gamePlayer.hasPlayerCharacter(request.id)) {
-                        allowMethod = true;
-                    }
-                }
-            }
-            else if (request.type == <number>OwnerType.GamePlayer) {
-                if (request.id == authInfo.getUserId()) {
-                    allowMethod = true;
-                }
-            }
-            else if (request.type == <number>OwnerType.Group) {
-                let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
-
-                if (gamePlayer != null) {
-                    let groupItem = gamePlayer.getPlayerGroup(request.id);
-
-                    if (groupItem != null && groupItem.status == <number>GroupStatus.Member) {
-                        allowMethod = true;
-                    }
-                }
-            }
-        }
-
-        if (!allowMethod) {
-            return this.newOperationNotAllowError(request);
-        }
-
-        return this.execute({
-            receipt: request.receipt,
-            id: request.id,
-            type: request.type,
-            log: request.log,
-        }, secretInfo, operationRequest);
-    }
-
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerValidateFacebookStoreReceiptOperationRequest);
-
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
-
-        if (!secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
-
-        return this.execute({
-            receipt: request.receipt,
-            id: request.id,
-            type: request.type,
-            log: request.log,
-        }, secretInfo, operationRequest);
-    }
-
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminValidateFacebookStoreReceiptOperationRequest);
-
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
-
-        if (!secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
-
-        return this.execute({
-            receipt: request.receipt,
-            id: request.id,
-            type: request.type,
-            log: request.log,
-        }, secretInfo, operationRequest);
-    }
-
-    private async execute(request: { receipt: string, id: string, type: number, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_ValidateFacebookStoreReceipt", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
-
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
-        operationResponse.setReturnCode(ReturnCode.Ok);
-
-        let productId: string;
-        let payload: string;
-        let transactionId: string;
-
-        try {
-            let receiptJson = JSON.parse(request.receipt);
-
-            let store = receiptJson["Store"];
-            if (store != "FacebookStore") {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreInvalid);
-                return operationResponse;
-            }
-
-            payload = receiptJson["Payload"];
-
-            let receiptResult = await this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).findOne({
-                payloadMd5: Md5Generate.getMd5(payload)
-            });
-
-            if (receiptResult != null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ReceiptInvalid);
-                return operationResponse;
-            }
-
-            transactionId = receiptJson["TransactionID"];
-
-            let receiptStatus = await this.gnServer.getFacebookService().validateReceipt(payload);
-            if (!receiptStatus.success) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ReceiptInvalid);
-                return operationResponse;
-            }
-
-            productId = receiptStatus.productId;
-        }
-        catch (err) {
-            Debug.logException(err);
-
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ExceptionWhenValidateReceipt);
-            return operationResponse;
-        }
-
-        let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryByFacebookStoreAsync(productId, secretInfo.getGameId(), null);
-
-        if (storeInventory == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemNotFound);
-            return operationResponse;
-        }
-
-        if (storeInventory.getRemoveStatus().tsRemove != 0) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadBeenRemove);
-            return operationResponse;
-        }
-
-        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) {
-            let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id);
-
-            if (purchaseCount != 0) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.StoreItemHadPurchaseAndNonConsumable);
-                return operationResponse;
-            }
-        }
-
-        this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).insertOne({
-            payloadMd5: Md5Generate.getMd5(payload),
-            transactionId: transactionId,
-            payload: payload,
-            buyer: {
-                id: request.id,
-                type: request.type
-            },
-            tsCreate: xDatetime.getCurrentMilliseconds(),
-            productId: productId,
-            store: "FacebookStore",
-        });
-
-        let priceCurrencyStartValues: {
-            key: string,
-            value: number,
-        }[] = [];
-
-        let priceCurrencyAmountValues: {
-            key: string,
-            value: number,
-        }[] = [];
-
-        let priceCurrencyFinalValues: {
-            key: string,
-            value: number,
-        }[] = [];
-
-        let storeCurrencyStartValues: {
-            key: string,
-            value: number,
-        }[] = [];
-
-        let storeCurrencyAmountValues: {
-            key: string,
-            value: number,
-        }[] = [];
-
-        let storeCurrencyFinalValues: {
-            key: string,
-            value: number,
-        }[] = [];
-
-        let storeItemFinalValues: {
-            catalogId: string,
-            classId: string,
-            itemId: string,
-        }[] = [];
-
-        let allStoreCurrencies = storeInventory.getAllStoreCurrencies();
-        let allStoreItems = storeInventory.getAllStoreItems();
-
-        if (request.type == <number>OwnerType.CharacterPlayer) {
-            let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
-                playerCurrencies: true,
-                playerInventories: true,
-            });
-
-            if (characterPlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.BuyerNotFound);
-                return operationResponse;
-            }
-
-            let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
-
-            let gnInfoResponseParameters = new GNHashtable();
-
-            let gnPlayerCurrencies = new GNArray();
-            let gnPlayerInventories = new GNArray();
-
-            {
-                for (let i = 0; i < allStoreItems.length; i++) {
-                    let storeItem = allStoreItems[i];
-
-                    let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find(x => x.catalogId == storeItem.catalogId);
-
-                    if (playerItemCatalogSettingsItem != null) {
-                        let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
-                        if (itemClassSettingsItem != null) {
-                            let inventory = await this.grantItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
-                            characterPlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
-
-                            let gnPlayerInventory = new GNHashtable();
-
-                            gnPlayerInventory.add(GNParameterCode.ItemId, inventory.getItemId());
-                            gnPlayerInventory.add(GNParameterCode.CatalogId, inventory.getCatalogId());
-                            gnPlayerInventory.add(GNParameterCode.ClassId, inventory.getClassId());
-
-                            gnPlayerInventories.add(gnPlayerInventory);
-
-                            storeItemFinalValues.push({
-                                catalogId: inventory.getCatalogId(),
-                                classId: inventory.getClassId(),
-                                itemId: inventory.getItemId(),
-                            });
-                        }
-                    }
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreCurrencies.length; i++) {
-                    let storeCurrency = allStoreCurrencies[i];
-
-                    storeCurrencyAmountValues.push({
-                        key: storeCurrency.key,
-                        value: storeCurrency.value,
-                    });
-
-                    if (!characterPlayer.hasPlayerCurrency(storeCurrency.key)) {
-
-                        let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == storeCurrency.key);
-                        if (playerCurrencySettingsItem != null) {
-                            characterPlayer.setPlayerCurrency(storeCurrency.key, playerCurrencySettingsItem.initialValue);
-                        }
-                        else {
-                            characterPlayer.setPlayerCurrency(storeCurrency.key, 0);
-                        }
-                    }
-
-                    let playerCurrency = characterPlayer.getPlayerCurrency(storeCurrency.key);
-
-                    storeCurrencyStartValues.push({
-                        key: storeCurrency.key,
-                        value: playerCurrency.value,
-                    });
-
-                    let oldValue = playerCurrency.value;
-                    let serverValue = playerCurrency.value + storeCurrency.value;
-                    characterPlayer.setPlayerCurrency(storeCurrency.key, serverValue);
-
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(GNParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(GNParameterCode.Value, serverValue);
-
-                    storeCurrencyFinalValues.push({
-                        key: storeCurrency.key,
-                        value: serverValue,
-                    });
-
-                    gnPlayerCurrencies.add(gnPlayerCurrency);
-
-                    this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
-                }
-            }
-
-            characterPlayer.saveAsync();
-
-            gnInfoResponseParameters.add(GNParameterCode.Currencies, gnPlayerCurrencies);
-            gnInfoResponseParameters.add(GNParameterCode.Inventories, gnPlayerInventories);
-
-            operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        }
-        else if (request.type == <number>OwnerType.GamePlayer) {
-            let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
-                playerCurrencies: true,
-                playerInventories: true,
-            });
-
-            if (gamePlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.BuyerNotFound);
-                return operationResponse;
-            }
-
-            let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
-
-            let gnInfoResponseParameters = new GNHashtable();
-
-            let gnPlayerCurrencies = new GNArray();
-            let gnPlayerInventories = new GNArray();
-
-            {
-                for (let i = 0; i < allStoreItems.length; i++) {
-                    let storeItem = allStoreItems[i];
-
-                    let playerItemCatalogSettingsItem = gamePlayerSettings.playerItemCatalogSettings.find(x => x.catalogId == storeItem.catalogId);
-
-                    if (playerItemCatalogSettingsItem != null) {
-                        let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
-                        if (itemClassSettingsItem != null) {
-                            let inventory = await this.grantItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
-                            gamePlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
-
-                            let gnPlayerInventory = new GNHashtable();
-
-                            gnPlayerInventory.add(GNParameterCode.ItemId, inventory.getItemId());
-                            gnPlayerInventory.add(GNParameterCode.CatalogId, inventory.getCatalogId());
-                            gnPlayerInventory.add(GNParameterCode.ClassId, inventory.getClassId());
-
-                            gnPlayerInventories.add(gnPlayerInventory);
-
-                            storeItemFinalValues.push({
-                                catalogId: inventory.getCatalogId(),
-                                classId: inventory.getClassId(),
-                                itemId: inventory.getItemId(),
-                            });
-                        }
-                    }
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreCurrencies.length; i++) {
-                    let storeCurrency = allStoreCurrencies[i];
-
-                    storeCurrencyAmountValues.push({
-                        key: storeCurrency.key,
-                        value: storeCurrency.value,
-                    });
-
-                    if (!gamePlayer.hasPlayerCurrency(storeCurrency.key)) {
-
-                        let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings.find(x => x.key == storeCurrency.key);
-                        if (playerCurrencySettingsItem != null) {
-                            gamePlayer.setPlayerCurrency(storeCurrency.key, playerCurrencySettingsItem.initialValue);
-                        }
-                        else {
-                            gamePlayer.setPlayerCurrency(storeCurrency.key, 0);
-                        }
-                    }
-
-                    let playerCurrency = gamePlayer.getPlayerCurrency(storeCurrency.key);
-
-                    storeCurrencyStartValues.push({
-                        key: storeCurrency.key,
-                        value: playerCurrency.value,
-                    });
-
-                    let oldValue = playerCurrency.value;
-                    let serverValue = playerCurrency.value + storeCurrency.value;
-                    gamePlayer.setPlayerCurrency(storeCurrency.key, serverValue);
-
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(GNParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(GNParameterCode.Value, serverValue);
-
-                    storeCurrencyFinalValues.push({
-                        key: storeCurrency.key,
-                        value: serverValue,
-                    });
-
-                    gnPlayerCurrencies.add(gnPlayerCurrency);
-
-                    this.gnServer.getDatabase().insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
-                }
-            }
-
-            gamePlayer.saveAsync();
-
-            gnInfoResponseParameters.add(GNParameterCode.Currencies, gnPlayerCurrencies);
-            gnInfoResponseParameters.add(GNParameterCode.Inventories, gnPlayerInventories);
-
-            operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        }
-        else if (request.type == <number>OwnerType.Group) {
-            let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, secretInfo.getGameId(), {
-                groupCurrencies: true,
-                groupInventories: true,
-            });
-
-            if (group == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.BuyerNotFound);
-                return operationResponse;
-            }
-
-            let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
-
-            let gnInfoResponseParameters = new GNHashtable();
-
-            let gnCurrencies = new GNArray();
-            let gnInventories = new GNArray();
-
-            {
-                for (let i = 0; i < allStoreItems.length; i++) {
-                    let storeItem = allStoreItems[i];
-
-                    let groupItemCatalogSettingsItem = groupSettings.groupItemCatalogSettings.find(x => x.catalogId == storeItem.catalogId);
-
-                    if (groupItemCatalogSettingsItem != null) {
-                        let itemClassSettingsItem = groupItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
-                        if (itemClassSettingsItem != null) {
-                            let inventory = await this.grantItem(storeItem.catalogId, storeItem.classId, storeItem.amount, groupItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
-                            group.setGroupInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
-
-                            let gnGroupInventory = new GNHashtable();
-
-                            gnGroupInventory.add(GNParameterCode.ItemId, inventory.getItemId());
-                            gnGroupInventory.add(GNParameterCode.CatalogId, inventory.getCatalogId());
-                            gnGroupInventory.add(GNParameterCode.ClassId, inventory.getClassId());
-
-                            gnInventories.add(gnGroupInventory);
-
-                            storeItemFinalValues.push({
-                                catalogId: inventory.getCatalogId(),
-                                classId: inventory.getClassId(),
-                                itemId: inventory.getItemId(),
-                            });
-                        }
-                    }
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreCurrencies.length; i++) {
-                    let storeCurrency = allStoreCurrencies[i];
-
-                    storeCurrencyAmountValues.push({
-                        key: storeCurrency.key,
-                        value: storeCurrency.value,
-                    });
-
-                    if (!group.hasGroupCurrency(storeCurrency.key)) {
-
-                        let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == storeCurrency.key);
-                        if (groupCurrencySettingsItem != null) {
-                            group.setGroupCurrency(storeCurrency.key, groupCurrencySettingsItem.initialValue);
-                        }
-                        else {
-                            group.setGroupCurrency(storeCurrency.key, 0);
-                        }
-                    }
-
-                    let groupCurrency = group.getGroupCurrency(storeCurrency.key);
-
-                    storeCurrencyStartValues.push({
-                        key: storeCurrency.key,
-                        value: groupCurrency.value,
-                    });
-
-                    let oldValue = groupCurrency.value;
-                    let serverValue = groupCurrency.value + storeCurrency.value;
-                    group.setGroupCurrency(storeCurrency.key, serverValue);
-
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(GNParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(GNParameterCode.Value, serverValue);
-
-                    storeCurrencyFinalValues.push({
-                        key: storeCurrency.key,
-                        value: serverValue,
-                    });
-
-                    this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
-                    gnCurrencies.add(gnPlayerCurrency);
-                }
-            }
-
-            group.saveAsync();
-
-            gnInfoResponseParameters.add(GNParameterCode.Currencies, gnCurrencies);
-            gnInfoResponseParameters.add(GNParameterCode.Inventories, gnInventories);
-
-            operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        }
-
-        this.gnServer.getDatabase().insertStoreInventoryLogAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, transactionId, <number>StoreReceiveType.FacebookStore, request.log);
-
-        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
-
-        let inAppPurchase = storeInventory.getInAppPurchase();
-        if (inAppPurchase.analyticsPrice) {
-            this.gnServer.getDatabase().systemCollection("StoreAnalytics").insertOne({
-                tsCreate: xDatetime.getCurrentMilliseconds(),
-                price: inAppPurchase.analyticsPrice,
-                storeId: storeInventory.getStoreId(),
-            });
-        }
-
-        operationResponse.setParameter(GNParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));
-        operationResponse.setParameter(GNParameterCode.StoreItems, this.generateStoreItems(storeInventory));
-        operationResponse.setParameter(GNParameterCode.PriceCurrencies, this.generatePriceCurrencies(storeInventory));
-
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
-
-        await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_ValidateFacebookStoreReceipt", request, secretInfo, operationRequest, operationResponse);
-
-        return operationResponse;
-    }
+	public override getCode() {
+		return OperationCode.ValidateFacebookStoreReceipt;
+	}
+
+	public override getCommonOperationRequest() {
+		return ValidateFacebookStoreReceiptOperationRequest;
+	}
+
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		let allowMethod = false;
+
+		if (secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.otherSelfEnable) {
+			allowMethod = true;
+		}
+		else if (secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.selfEnable) {
+			if (request.type == <number>OwnerType.CharacterPlayer) {
+				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
+
+				if (gamePlayer != null) {
+					if (gamePlayer.hasPlayerCharacter(request.id)) {
+						allowMethod = true;
+					}
+				}
+			}
+			else if (request.type == <number>OwnerType.GamePlayer) {
+				if (request.id == authInfo.getUserId()) {
+					allowMethod = true;
+				}
+			}
+			else if (request.type == <number>OwnerType.Group) {
+				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
+
+				if (gamePlayer != null) {
+					let groupItem = gamePlayer.getPlayerGroup(request.id);
+
+					if (groupItem != null && groupItem.status == <number>GroupStatus.Member) {
+						allowMethod = true;
+					}
+				}
+			}
+		}
+
+		if (!allowMethod) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		return this.execute({
+			receipt: request.receipt,
+			id: request.id,
+			type: request.type,
+			log: request.log,
+		}, secretInfo, operationRequest);
+	}
+
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerValidateFacebookStoreReceiptOperationRequest);
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		return this.execute({
+			receipt: request.receipt,
+			id: request.id,
+			type: request.type,
+			log: request.log,
+		}, secretInfo, operationRequest);
+	}
+
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminValidateFacebookStoreReceiptOperationRequest);
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().storeInventory.validateFacebookStoreReceipt.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		return this.execute({
+			receipt: request.receipt,
+			id: request.id,
+			type: request.type,
+			log: request.log,
+		}, secretInfo, operationRequest);
+	}
+
+	private async execute(request: { receipt: string, id: string, type: number, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_ValidateFacebookStoreReceipt", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
+
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		let productId: string;
+		let payload: string;
+		let transactionId: string;
+
+		try {
+			let receiptJson = JSON.parse(request.receipt);
+
+			let store = receiptJson["Store"];
+			if (store != "FacebookStore") {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreInvalid);
+				return operationResponse;
+			}
+
+			payload = receiptJson["Payload"];
+
+			let receiptResult = await this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).findOne({
+				payloadMd5: Md5Generate.getMd5(payload)
+			});
+
+			if (receiptResult != null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ReceiptInvalid);
+				return operationResponse;
+			}
+
+			transactionId = receiptJson["TransactionID"];
+
+			let receiptStatus = await this.gnServer.getFacebookService().validateReceipt(payload);
+			if (!receiptStatus.success) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ReceiptInvalid);
+				return operationResponse;
+			}
+
+			productId = receiptStatus.productId;
+		}
+		catch (err) {
+			Debug.logException(err);
+
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExceptionWhenValidateReceipt);
+			return operationResponse;
+		}
+
+		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryByFacebookStoreAsync(productId, secretInfo.getGameId(), null);
+
+		if (storeInventory == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
+			return operationResponse;
+		}
+
+		if (storeInventory.getRemoveStatus().tsRemove != 0) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadBeenRemove);
+			return operationResponse;
+		}
+
+		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) {
+			let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id);
+
+			if (purchaseCount != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadPurchaseAndNonConsumable);
+				return operationResponse;
+			}
+		}
+
+		this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).insertOne({
+			payloadMd5: Md5Generate.getMd5(payload),
+			transactionId: transactionId,
+			payload: payload,
+			buyer: {
+				id: request.id,
+				type: request.type
+			},
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			productId: productId,
+			store: "FacebookStore",
+		});
+
+		let priceCurrencyStartValues: {
+			key: string,
+			value: number,
+		}[] = [];
+
+		let priceCurrencyAmountValues: {
+			key: string,
+			value: number,
+		}[] = [];
+
+		let priceCurrencyFinalValues: {
+			key: string,
+			value: number,
+		}[] = [];
+
+		let storeCurrencyStartValues: {
+			key: string,
+			value: number,
+		}[] = [];
+
+		let storeCurrencyAmountValues: {
+			key: string,
+			value: number,
+		}[] = [];
+
+		let storeCurrencyFinalValues: {
+			key: string,
+			value: number,
+		}[] = [];
+
+		let storeItemFinalValues: {
+			catalogId: string,
+			classId: string,
+			itemId: string,
+		}[] = [];
+
+		let allStoreCurrencies = storeInventory.getAllStoreCurrencies();
+		let allStoreItems = storeInventory.getAllStoreItems();
+
+		if (request.type == <number>OwnerType.CharacterPlayer) {
+			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
+				playerCurrencies: true,
+				playerInventories: true,
+			});
+
+			if (characterPlayer == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
+				return operationResponse;
+			}
+
+			let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+
+			let gnInfoResponseParameters = new GNHashtable();
+
+			let gnPlayerCurrencies = new GNArray();
+			let gnPlayerInventories = new GNArray();
+
+			{
+				for (let i = 0; i < allStoreItems.length; i++) {
+					let storeItem = allStoreItems[i];
+
+					let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find(x => x.catalogId == storeItem.catalogId);
+
+					if (playerItemCatalogSettingsItem != null) {
+						let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
+						if (itemClassSettingsItem != null) {
+							let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
+							characterPlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
+
+							let gnPlayerInventory = new GNHashtable();
+
+							gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
+							gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+							gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
+
+							gnPlayerInventories.add(gnPlayerInventory);
+
+							storeItemFinalValues.push({
+								catalogId: inventory.getCatalogId(),
+								classId: inventory.getClassId(),
+								itemId: inventory.getItemId(),
+							});
+						}
+					}
+				}
+			}
+
+			{
+				for (let i = 0; i < allStoreCurrencies.length; i++) {
+					let storeCurrency = allStoreCurrencies[i];
+
+					storeCurrencyAmountValues.push({
+						key: storeCurrency.key,
+						value: storeCurrency.value,
+					});
+
+					if (!characterPlayer.hasPlayerCurrency(storeCurrency.key)) {
+
+						let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == storeCurrency.key);
+						if (playerCurrencySettingsItem != null) {
+							characterPlayer.setPlayerCurrency(storeCurrency.key, playerCurrencySettingsItem.initialValue);
+						}
+						else {
+							characterPlayer.setPlayerCurrency(storeCurrency.key, 0);
+						}
+					}
+
+					let playerCurrency = characterPlayer.getPlayerCurrency(storeCurrency.key);
+
+					storeCurrencyStartValues.push({
+						key: storeCurrency.key,
+						value: playerCurrency.value,
+					});
+
+					let oldValue = playerCurrency.value;
+					let serverValue = playerCurrency.value + storeCurrency.value;
+					characterPlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+
+					let gnPlayerCurrency = new GNHashtable();
+
+					gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+					gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+					storeCurrencyFinalValues.push({
+						key: storeCurrency.key,
+						value: serverValue,
+					});
+
+					gnPlayerCurrencies.add(gnPlayerCurrency);
+
+					this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
+				}
+			}
+
+			characterPlayer.saveAsync();
+
+			gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
+			gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
+
+			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		}
+		else if (request.type == <number>OwnerType.GamePlayer) {
+			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
+				playerCurrencies: true,
+				playerInventories: true,
+			});
+
+			if (gamePlayer == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
+				return operationResponse;
+			}
+
+			let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+
+			let gnInfoResponseParameters = new GNHashtable();
+
+			let gnPlayerCurrencies = new GNArray();
+			let gnPlayerInventories = new GNArray();
+
+			{
+				for (let i = 0; i < allStoreItems.length; i++) {
+					let storeItem = allStoreItems[i];
+
+					let playerItemCatalogSettingsItem = gamePlayerSettings.playerItemCatalogSettings.find(x => x.catalogId == storeItem.catalogId);
+
+					if (playerItemCatalogSettingsItem != null) {
+						let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
+						if (itemClassSettingsItem != null) {
+							let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
+							gamePlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
+
+							let gnPlayerInventory = new GNHashtable();
+
+							gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
+							gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+							gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
+
+							gnPlayerInventories.add(gnPlayerInventory);
+
+							storeItemFinalValues.push({
+								catalogId: inventory.getCatalogId(),
+								classId: inventory.getClassId(),
+								itemId: inventory.getItemId(),
+							});
+						}
+					}
+				}
+			}
+
+			{
+				for (let i = 0; i < allStoreCurrencies.length; i++) {
+					let storeCurrency = allStoreCurrencies[i];
+
+					storeCurrencyAmountValues.push({
+						key: storeCurrency.key,
+						value: storeCurrency.value,
+					});
+
+					if (!gamePlayer.hasPlayerCurrency(storeCurrency.key)) {
+
+						let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings.find(x => x.key == storeCurrency.key);
+						if (playerCurrencySettingsItem != null) {
+							gamePlayer.setPlayerCurrency(storeCurrency.key, playerCurrencySettingsItem.initialValue);
+						}
+						else {
+							gamePlayer.setPlayerCurrency(storeCurrency.key, 0);
+						}
+					}
+
+					let playerCurrency = gamePlayer.getPlayerCurrency(storeCurrency.key);
+
+					storeCurrencyStartValues.push({
+						key: storeCurrency.key,
+						value: playerCurrency.value,
+					});
+
+					let oldValue = playerCurrency.value;
+					let serverValue = playerCurrency.value + storeCurrency.value;
+					gamePlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+
+					let gnPlayerCurrency = new GNHashtable();
+
+					gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+					gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+					storeCurrencyFinalValues.push({
+						key: storeCurrency.key,
+						value: serverValue,
+					});
+
+					gnPlayerCurrencies.add(gnPlayerCurrency);
+
+					this.gnServer.getDatabase().insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
+				}
+			}
+
+			gamePlayer.saveAsync();
+
+			gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
+			gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
+
+			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		}
+		else if (request.type == <number>OwnerType.Group) {
+			let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, secretInfo.getGameId(), {
+				groupCurrencies: true,
+				groupInventories: true,
+			});
+
+			if (group == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
+				return operationResponse;
+			}
+
+			let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+
+			let gnInfoResponseParameters = new GNHashtable();
+
+			let gnCurrencies = new GNArray();
+			let gnInventories = new GNArray();
+
+			{
+				for (let i = 0; i < allStoreItems.length; i++) {
+					let storeItem = allStoreItems[i];
+
+					let groupItemCatalogSettingsItem = groupSettings.groupItemCatalogSettings.find(x => x.catalogId == storeItem.catalogId);
+
+					if (groupItemCatalogSettingsItem != null) {
+						let itemClassSettingsItem = groupItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == storeItem.classId);
+						if (itemClassSettingsItem != null) {
+							let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, groupItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
+							group.setGroupInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
+
+							let gnGroupInventory = new GNHashtable();
+
+							gnGroupInventory.add(ParameterCode.ItemId, inventory.getItemId());
+							gnGroupInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+							gnGroupInventory.add(ParameterCode.ClassId, inventory.getClassId());
+
+							gnInventories.add(gnGroupInventory);
+
+							storeItemFinalValues.push({
+								catalogId: inventory.getCatalogId(),
+								classId: inventory.getClassId(),
+								itemId: inventory.getItemId(),
+							});
+						}
+					}
+				}
+			}
+
+			{
+				for (let i = 0; i < allStoreCurrencies.length; i++) {
+					let storeCurrency = allStoreCurrencies[i];
+
+					storeCurrencyAmountValues.push({
+						key: storeCurrency.key,
+						value: storeCurrency.value,
+					});
+
+					if (!group.hasGroupCurrency(storeCurrency.key)) {
+
+						let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == storeCurrency.key);
+						if (groupCurrencySettingsItem != null) {
+							group.setGroupCurrency(storeCurrency.key, groupCurrencySettingsItem.initialValue);
+						}
+						else {
+							group.setGroupCurrency(storeCurrency.key, 0);
+						}
+					}
+
+					let groupCurrency = group.getGroupCurrency(storeCurrency.key);
+
+					storeCurrencyStartValues.push({
+						key: storeCurrency.key,
+						value: groupCurrency.value,
+					});
+
+					let oldValue = groupCurrency.value;
+					let serverValue = groupCurrency.value + storeCurrency.value;
+					group.setGroupCurrency(storeCurrency.key, serverValue);
+
+					let gnPlayerCurrency = new GNHashtable();
+
+					gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+					gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+					storeCurrencyFinalValues.push({
+						key: storeCurrency.key,
+						value: serverValue,
+					});
+
+					this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
+					gnCurrencies.add(gnPlayerCurrency);
+				}
+			}
+
+			group.saveAsync();
+
+			gnInfoResponseParameters.add(ParameterCode.Currencies, gnCurrencies);
+			gnInfoResponseParameters.add(ParameterCode.Inventories, gnInventories);
+
+			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		}
+
+		this.gnServer.getDatabase().insertStoreInventoryLogAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, transactionId, <number>StoreReceiveType.FacebookStore, request.log);
+
+		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
+
+		let inAppPurchase = storeInventory.getInAppPurchase();
+		if (inAppPurchase.analyticsPrice) {
+			this.gnServer.getDatabase().systemCollection("StoreAnalytics").insertOne({
+				tsCreate: xDatetime.getCurrentMilliseconds(),
+				price: inAppPurchase.analyticsPrice,
+				storeId: storeInventory.getStoreId(),
+			});
+		}
+
+		operationResponse.setParameter(ParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));
+		operationResponse.setParameter(ParameterCode.StoreItems, this.generateStoreItems(storeInventory));
+		operationResponse.setParameter(ParameterCode.PriceCurrencies, this.generatePriceCurrencies(storeInventory));
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_ValidateFacebookStoreReceipt", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

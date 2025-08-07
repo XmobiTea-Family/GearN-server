@@ -10,7 +10,6 @@ export class Request {
 	private secretInfo: SecretInfo = null;
 	private ip: string;
 	private parameters: { [k: string]: any } = {};
-	private encrypted: boolean;
 
 	constructor(operationCode: string, requestType: number, role: number) {
 		this.operationCode = operationCode;
@@ -36,10 +35,6 @@ export class Request {
 
 	public setParameters(parameters: {}) {
 		this.parameters = parameters;
-	}
-
-	public setEncrypted(encrypted: boolean) {
-		this.encrypted = encrypted;
 	}
 
 	public getOperationCode(): string {
@@ -80,10 +75,6 @@ export class Request {
 
 	public getParameters(): { [k: string]: any } {
 		return this.parameters;
-	}
-
-	public isEncrypted(): boolean {
-		return this.encrypted;
 	}
 
 }

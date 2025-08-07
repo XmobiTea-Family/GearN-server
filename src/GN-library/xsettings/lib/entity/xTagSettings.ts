@@ -1,6 +1,6 @@
 export interface xTagSettings {
     key: string;
-    displayName: string;
+    description: string;
     index: boolean;
 
 }

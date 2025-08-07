@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from "express";
 
 export function wrap(fn: (req: Request, res: Response, next: NextFunction) => any): RequestHandler {
 	return (req, res, next) => {

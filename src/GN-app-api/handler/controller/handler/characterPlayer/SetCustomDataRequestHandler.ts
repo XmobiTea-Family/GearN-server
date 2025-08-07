@@ -6,21 +6,21 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CustomDataParam } from "./model/CustomDataParam";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
-import { DataValueType } from "../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 class SetCustomDataOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	characterId: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
+	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
 	customData: Array<CustomDataParam>;
 
 	public override isValidRequest() {
@@ -115,7 +115,7 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
@@ -125,7 +125,7 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.CharacterPlayerNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
 			return operationResponse;
 		}
 
@@ -157,19 +157,19 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 			}
 
 			let gnPlayerData = new GNHashtable();
-			gnPlayerData.add(GNParameterCode.Key, key);
-			gnPlayerData.add(GNParameterCode.Value, customDataParameter.value);
+			gnPlayerData.add(ParameterCode.Key, key);
+			gnPlayerData.add(ParameterCode.Value, customDataParameter.value);
 
 			gnCustomDatas.add(gnPlayerData);
 		}
 
 		characterPlayer.saveAsync();
 
-		gnInfoResponseParameters.add(GNParameterCode.CustomDatas, gnCustomDatas);
+		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_SetCustomData", request, secretInfo, operationRequest, operationResponse);
 

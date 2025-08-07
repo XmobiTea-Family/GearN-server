@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
@@ -25,24 +25,24 @@ import { xStatisticsSettings } from "./../../../../../GN-library/xsettings/lib/e
 import { xTagSettings } from "./../../../../../GN-library/xsettings/lib/entity/xTagSettings";
 import { xDataSettings } from "./../../../../../GN-library/xsettings/lib/entity/xDataSettings";
 import { xGenericServiceSettings } from "./../../../../../GN-library/xsettings/lib/entity/xGenericServiceSettings";
-import { GameCenterService } from "../../../../service/GameCenterService";
-import { GooglePlayGameService } from "../../../../service/GooglePlayGameService";
-import { Debug } from "../../../../../GN-library/xdebug/lib/xDebug";
-import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
-import { PushNotificationService } from "../../../../service/PushNotificationService";
-import { EmailService } from "../../../../service/EmailService";
+import { GameCenterService } from "./../../../../service/GameCenterService";
+import { GooglePlayGameService } from "./../../../../service/GooglePlayGameService";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { PushNotificationService } from "./../../../../service/PushNotificationService";
+import { EmailService } from "./../../../../service/EmailService";
 
 class SetMasterGameSettingsOperationRequest extends OperationRequest {
-    @GNHashtableDataMember({ code: GNParameterCode.ThirtPartySettings, isOptional: true })
+    @GNHashtableDataMember({ code: ParameterCode.ThirtPartySettings, isOptional: true })
     thirtPartySettings?: ThirtPartyParam;
 
-    @GNHashtableDataMember({ code: GNParameterCode.MasterPlayerSettings, isOptional: true })
+    @GNHashtableDataMember({ code: ParameterCode.MasterPlayerSettings, isOptional: true })
     masterPlayerSettings?: MasterPlayerSettingsParam;
 
-    @GNHashtableDataMember({ code: GNParameterCode.EmailSettings, isOptional: true })
+    @GNHashtableDataMember({ code: ParameterCode.EmailSettings, isOptional: true })
     emailSettings?: EmailSettingsParam;
 
-    @GNHashtableDataMember({ code: GNParameterCode.PushNotificationSettings, isOptional: true })
+    @GNHashtableDataMember({ code: ParameterCode.PushNotificationSettings, isOptional: true })
     pushNotificationSettings?: PushNotificationSettingsParam;
 
     public override isValidRequest() {
@@ -86,13 +86,13 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetMasterGameSettings", request);
         await this.applySettings(request);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest, operationResponse);
 
@@ -277,7 +277,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
                     playerCurrencySettings.push({
                         key: playerCurrencySetting.key,
                         initialValue: playerCurrencySetting.initialValue,
-                        displayName: playerCurrencySetting.displayName,
+                        description: playerCurrencySetting.description,
                         index: playerCurrencySetting.index,
                     });
 
@@ -353,7 +353,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
                         maximumValue: playerStatisticsSetting.maximumValue,
                         minimumValue: playerStatisticsSetting.minimumValue,
                         initialValue: playerStatisticsSetting.initialValue,
-                        displayName: playerStatisticsSetting.displayName,
+                        description: playerStatisticsSetting.description,
                         index: playerStatisticsSetting.index,
                     });
 
@@ -454,7 +454,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
                     playerDatasSettings.push({
                         key: playerDatasSetting.key,
                         permission: playerDatasSetting.permission,
-                        displayName: playerDatasSetting.displayName,
+                        description: playerDatasSetting.description,
                     });
                 }
 
@@ -471,7 +471,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
                     playerDatasSettings.push({
                         key: customDatasSetting.key,
                         permission: customDatasSetting.permission,
-                        displayName: customDatasSetting.displayName,
+                        description: customDatasSetting.description,
                     });
                 }
 
@@ -495,7 +495,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
                     tagsSettings.push({
                         key: tagsSetting.key,
-                        displayName: tagsSetting.displayName,
+                        description: tagsSetting.description,
                         index: tagsSetting.index,
                     });
 

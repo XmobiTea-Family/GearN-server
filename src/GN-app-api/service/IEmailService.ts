@@ -1,13 +1,13 @@
 export interface OnSendMailSuccess {
-    (): void;
+	(): void;
 }
 
 export interface OnSendMailError {
-    (error: string): void;
+	(error: string): void;
 }
 
 export interface IEmailService {
-    sendMail(toEmail: string, subject: string, contentHtml: string, onSendMailSuccess?: OnSendMailSuccess, onSendMailError?: OnSendMailError): void;
-    sendMailToMore(toEmails: string[], subject: string, contentHtml: string, onSendMailSuccess?: OnSendMailSuccess, onSendMailError?: OnSendMailError): void;
+	sendMail(toEmail: string, subject: string, contentHtml: string, onSendMailSuccess?: OnSendMailSuccess, onSendMailError?: OnSendMailError): void;
+	sendMailToMore(toEmails: string[], subject: string, contentHtml: string, onSendMailSuccess?: OnSendMailSuccess, onSendMailError?: OnSendMailError): void;
 
 }

@@ -6,21 +6,21 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CustomDataParam } from "./model/CustomDataParam";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
-import { DataValueType } from "../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 class SetCustomDataOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	itemId: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
+	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
 	customData: Array<CustomDataParam>;
 
 	public override isValidRequest() {
@@ -115,7 +115,7 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let inventoryFindOptions: InventoryFindOptions = {
@@ -125,7 +125,7 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
 		}
 
@@ -157,18 +157,18 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 			}
 
 			let gnItemData = new GNHashtable();
-			gnItemData.add(GNParameterCode.Key, key);
-			gnItemData.add(GNParameterCode.Value, customDataParameter.value);
+			gnItemData.add(ParameterCode.Key, key);
+			gnItemData.add(ParameterCode.Value, customDataParameter.value);
 
 			gnCustomDatas.add(gnItemData);
 		}
 
 		inventory.saveAsync();
 
-		gnInfoResponseParameters.add(GNParameterCode.CustomDatas, gnCustomDatas);
+		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetCustomData", request, secretInfo, operationRequest, operationResponse);
 

@@ -11,7 +11,7 @@ export class SecretInfoItem extends MasterAdminMongoObject {
     private static readonly _tsExpire: string = "tsExpire";
     private static readonly _permission: string = "permission";
     private static readonly _tsCreate: string = "tsCreate";
-    private static readonly _displayName: string = "displayName";
+    private static readonly _description: string = "description";
     private static readonly _creatorId: string = "creatorId";
 
     private readonly gameId: string;
@@ -22,7 +22,7 @@ export class SecretInfoItem extends MasterAdminMongoObject {
 
     private remove: boolean;
     private tsExpire: number;
-    private displayName: string;
+    private description: string;
     private permission: SecretPermissionItem;
 
     constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
@@ -40,7 +40,7 @@ export class SecretInfoItem extends MasterAdminMongoObject {
     private setDocumentMasterSecretInfoItem(result: mongoDB.WithId<mongoDB.Document>) {
         this.remove = result[SecretInfoItem._remove];
         this.tsExpire = result[SecretInfoItem._tsExpire];
-        this.displayName = result[SecretInfoItem._displayName];
+        this.description = result[SecretInfoItem._description];
         this.permission = result[SecretInfoItem._permission];
     }
 
@@ -84,14 +84,14 @@ export class SecretInfoItem extends MasterAdminMongoObject {
         this.set(SecretInfoItem._tsExpire, this.tsExpire);
     }
 
-    public getDisplayName(): string {
-        return this.displayName;
+    public getDescription(): string {
+        return this.description;
     }
 
-    public setDisplayName(displayName: string): void {
-        this.displayName = displayName;
+    public setDescription(description: string): void {
+        this.description = description;
 
-        this.set(SecretInfoItem._displayName, this.displayName);
+        this.set(SecretInfoItem._description, this.description);
     }
 
     public getPermission(): SecretPermissionItem {

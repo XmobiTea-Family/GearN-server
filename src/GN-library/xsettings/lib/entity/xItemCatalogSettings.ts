@@ -7,5 +7,5 @@ export interface xItemCatalogSettings {
 
 export interface xItemClassSettings {
     classId: string;
-    displayName?: string;
+    description?: string;
 }

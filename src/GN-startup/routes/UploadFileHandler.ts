@@ -7,7 +7,7 @@ import { wrap } from "./utils/wrap";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { AntiDdosMiddleware } from "./../middleware/AntiDdosMiddleware";
 import { Commands } from "./../../GN-common/constant/Commands";
-import { Debug } from "../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 
 export class UploadFileHandler {
 	private apiMiddleware: ApiMiddleware;

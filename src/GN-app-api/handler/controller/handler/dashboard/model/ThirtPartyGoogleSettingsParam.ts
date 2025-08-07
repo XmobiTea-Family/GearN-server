@@ -1,13 +1,13 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ThirtPartyGoogleSettingsParam {
-	@StringDataMember({ code: GNParameterCode.GoogleClientId })
+	@StringDataMember({ code: ParameterCode.GoogleClientId })
 	googleClientId: string;
 
-	@StringDataMember({ code: GNParameterCode.PackageId })
+	@StringDataMember({ code: ParameterCode.PackageId })
 	packageId: string;
 
-	@StringDataMember({ code: GNParameterCode.PublicRSAKey })
+	@StringDataMember({ code: ParameterCode.PublicRSAKey })
 	publicRSAKey: string;
 }

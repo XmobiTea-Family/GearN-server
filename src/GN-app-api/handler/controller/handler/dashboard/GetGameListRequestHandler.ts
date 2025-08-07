@@ -5,13 +5,13 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import { GameItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/GameItem";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 
 class GetGameListOperationRequest extends OperationRequest {
 	public override isValidRequest() {
@@ -50,7 +50,7 @@ export class GetGameListRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -64,14 +64,14 @@ export class GetGameListRequestHandler extends RequestHandler {
 
 			let gnGameItem = new GNHashtable();
 
-			gnGameItem.add(GNParameterCode.GameId, gameItem.getGameId());
+			gnGameItem.add(ParameterCode.GameId, gameItem.getGameId());
 
 			gnGameItems.add(gnGameItem);
 		}
 
-		operationResponse.setParameter(GNParameterCode.Results, gnGameItems);
+		operationResponse.setParameter(ParameterCode.Results, gnGameItems);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetGameList", request, secretInfo, operationRequest, operationResponse);
 

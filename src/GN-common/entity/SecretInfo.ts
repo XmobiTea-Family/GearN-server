@@ -276,9 +276,9 @@ export interface SecretPermissionItem {
 		removePlayerItem: GamePlayerPermissionRules,
 
 		getOnlineStatus: GamePlayerPermissionRules,
-		grantGroup: GamePlayerPermissionRules,
-		grantPlayerItem: GamePlayerPermissionRules,
-		grantPlayerCharacter: GamePlayerPermissionRules,
+		createGroup: GamePlayerPermissionRules,
+		createPlayerItem: GamePlayerPermissionRules,
+		createPlayerCharacter: GamePlayerPermissionRules,
 
 		addPlayerFriend: GamePlayerPermissionRules,
 		removePlayerFriend: GamePlayerPermissionRules,
@@ -353,9 +353,9 @@ export interface SecretPermissionItem {
 		getPlayerGroup: CharacterPlayerPermissionRules,
 		getPlayerInventory: CharacterPlayerPermissionRules,
 		removePlayerItem: CharacterPlayerPermissionRules,
-		grantPlayerItem: CharacterPlayerPermissionRules,
+		createPlayerItem: CharacterPlayerPermissionRules,
 
-		grantGroup: CharacterPlayerPermissionRules,
+		createGroup: CharacterPlayerPermissionRules,
 		joinGroup: CharacterPlayerPermissionRules,
 		leaveGroup: CharacterPlayerPermissionRules,
 
@@ -429,7 +429,7 @@ export interface SecretPermissionItem {
 
 		getGroupInventory: GroupPermissionRules,
 		removeGroupItem: GroupPermissionRules,
-		grantGroupItem: GroupPermissionRules,
+		createGroupItem: GroupPermissionRules,
 
 		getMembers: GroupPermissionRules,
 
@@ -502,7 +502,7 @@ export interface SecretPermissionItem {
 		buyStoreItem: StoreInventoryPermissionRules,
 		getStoreItemInformation: StoreInventoryPermissionRules,
 		getStoreItemsWithTag: StoreInventoryPermissionRules,
-		grantStoreItem: StoreInventoryPermissionRules,
+		createStoreItem: StoreInventoryPermissionRules,
 		setRemoveStatus: StoreInventoryPermissionRules,
 		setStoreItemInformation: StoreInventoryPermissionRules,
 		validateAppleAppStoreReceipt: StoreInventoryPermissionRules,
@@ -516,12 +516,12 @@ export interface SecretPermissionItem {
 	},
 	masterAdmin: {
 		setMasterGameSettings: MasterAdminPermissionRules,
-		grantAdminAccount: MasterAdminPermissionRules,
+		createAdminAccount: MasterAdminPermissionRules,
 		removeAdminAccount: MasterAdminPermissionRules,
 		setPasswordAdminAccount: MasterAdminPermissionRules,
 		setSecretKeyAdminAccount: MasterAdminPermissionRules,
 		setGameInformation: MasterAdminPermissionRules,
-		grantGame: MasterAdminPermissionRules,
+		createGame: MasterAdminPermissionRules,
 		changePasswordAdminAccount: MasterAdminPermissionRules,
 		getAdminAccountList: MasterAdminPermissionRules,
 		getGameInformation: MasterAdminPermissionRules,
@@ -530,7 +530,7 @@ export interface SecretPermissionItem {
 		getServerLog: MasterAdminPermissionRules,
 		getSecretInfoInformation: MasterAdminPermissionRules,
 		getSecretInfoList: MasterAdminPermissionRules,
-		grantSecretInfo: MasterAdminPermissionRules,
+		createSecretInfo: MasterAdminPermissionRules,
 		setSecretInfoInformation: MasterAdminPermissionRules,
 		getUsernameAdminAccount: MasterAdminPermissionRules,
 		getAnalytics: MasterAdminPermissionRules,
@@ -567,7 +567,7 @@ abstract class BuilderBase {
 	protected role: number;
 	protected remove: boolean;
 	protected tsExpire: number;
-	protected displayName: string;
+	protected description: string;
 	protected permission: SecretPermissionItem;
 	protected gameId: string;
 	protected isDefault: boolean;
@@ -593,8 +593,8 @@ abstract class BuilderBase {
 		return this.tsExpire;
 	}
 
-	public getDisplayName(): string {
-		return this.displayName;
+	public getDescription(): string {
+		return this.description;
 	}
 
 	public getGameId(): string {
@@ -645,7 +645,7 @@ abstract class BuilderBase {
 		return this as Builder;
 	}
 
-	public setDisplayName(displayName: string): Builder {
+	public setDescription(description: string): Builder {
 		return this as Builder;
 	}
 
@@ -675,8 +675,8 @@ class Builder extends BuilderBase implements IBuilder<SecretInfo> {
 		return this;
 	}
 
-	public setDisplayName(displayName: string): Builder {
-		this.displayName = displayName;
+	public setDescription(description: string): Builder {
+		this.description = description;
 		return this;
 	}
 
@@ -708,7 +708,7 @@ export class SecretInfo extends BuilderBase {
 		this.role = builder.getRole();
 		this.remove = builder.isRemove();
 		this.tsExpire = builder.getTsExpire();
-		this.displayName = builder.getDisplayName();
+		this.description = builder.getDescription();
 		this.permission = builder.getPermission();
 		this.gameId = builder.getGameId();
 		this.isDefault = builder.getIsDefault();
@@ -726,7 +726,7 @@ export class SecretInfo extends BuilderBase {
 			"role": this.role,
 			"isRemove": this.remove,
 			"tsExpire": this.tsExpire,
-			"displayName": this.displayName,
+			"description": this.description,
 			"permission": this.permission,
 			"gameId": this.gameId,
 		} as any;

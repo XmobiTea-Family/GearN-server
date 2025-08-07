@@ -5,29 +5,29 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/SecretInfoItem";
 import { PermissionParam } from "./model/PermissionParam";
 
 class SetSecretInfoInformationOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
 	secretKey: string;
 
-	@BooleanDataMember({ code: GNParameterCode.Remove, isOptional: true })
+	@BooleanDataMember({ code: ParameterCode.Remove, isOptional: true })
 	remove?: boolean;
 
-	@NumberDataMember({ code: GNParameterCode.TsExpire, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.TsExpire, isOptional: true })
 	tsExpire?: number;
 
-	@GNHashtableDataMember({ code: GNParameterCode.Permission, isOptional: true })
+	@GNHashtableDataMember({ code: ParameterCode.Permission, isOptional: true })
 	permissionParam?: PermissionParam;
 
-	@StringDataMember({ code: GNParameterCode.DisplayName, isOptional: true })
-	displayName?: string;
+	@StringDataMember({ code: ParameterCode.Description, isOptional: true })
+	description?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -61,17 +61,17 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			remove: request.remove,
 			tsExpire: request.tsExpire,
 			permissionParam: request.permissionParam,
-			displayName: request.displayName,
+			description: request.description,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { secretKey: string, remove: boolean, tsExpire: number, permissionParam: PermissionParam, displayName: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { secretKey: string, remove: boolean, tsExpire: number, permissionParam: PermissionParam, description: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetSecretInfoInformation", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -79,7 +79,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 		let result = await collection.findOne({ type: "secretInfo", secretKey: request.secretKey });
 
 		if (result == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.SecretInfoNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.SecretInfoNotFound);
 			return operationResponse;
 		}
 
@@ -93,8 +93,8 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			secretInfoItem.setTsExpire(request.tsExpire);
 		}
 
-		if (request.displayName != null) {
-			secretInfoItem.setDisplayName(request.displayName);
+		if (request.description != null) {
+			secretInfoItem.setDescription(request.description);
 		}
 
 		// let secretRole = <SecretRole>secretInfoItem.getRole();
@@ -179,12 +179,12 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			.setRole(secretInfoItem.getRole())
 			.setSecretKey(secretInfoItem.getSecretKey())
 			.setTsExpire(secretInfoItem.getTsExpire())
-			.setDisplayName(secretInfoItem.getDisplayName())
+			.setDescription(secretInfoItem.getDescription())
 			.build();
 
 		this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetSecretInformation", request, secretInfo, operationRequest, operationResponse);
 

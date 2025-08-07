@@ -6,19 +6,19 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class RemoveFileUploadInfoOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
+	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
 	fileId: string;
 
-	@StringDataMember({ code: GNParameterCode.Reason, isOptional: true, defaultValue: "" })
+	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
 	reason?: string;
 
 	public override isValidRequest() {
@@ -112,16 +112,16 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId, {
-            fileUpload: true,
-            removeStatus: true,
-        });
+			fileUpload: true,
+			removeStatus: true,
+		});
 
 		if (uploadFileInfo == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.FileNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
 			return operationResponse;
 		}
 
@@ -131,14 +131,14 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 
 			let fileUpload = uploadFileInfo.getFileUpload();
 			if (fileUpload != null) {
-                this.gnServer.getHttpApp().getUploadFileHandler().removeFile(fileUpload.fullPath);
+				this.gnServer.getHttpApp().getUploadFileHandler().removeFile(fileUpload.fullPath);
 				// remove khoi storage nao
 			}
 
 			uploadFileInfo.saveAsync();
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("content_RemoveFileUploadInfo", request, secretInfo, operationRequest, operationResponse);
 

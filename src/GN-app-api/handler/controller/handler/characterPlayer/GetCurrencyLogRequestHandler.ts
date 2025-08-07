@@ -6,24 +6,24 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
-import { RequestHandler } from "../base/RequestHandler";
+import { RequestHandler } from "./../base/RequestHandler";
 
 class GetCurrencyLogOperationRequest extends OperationRequest {
-    @GNArrayDataMember({ code: GNParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
+    @GNArrayDataMember({ code: ParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
     keys?: Array<string>;
 
-    @StringDataMember({ code: GNParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true, isOptional: true })
+    @StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true, isOptional: true })
     characterId?: string;
 
-    @NumberDataMember({ code: GNParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     limit?: number;
 
-    @StringDataMember({ code: GNParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
+    @StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
     token?: string;
 
     public override isValidRequest() {
@@ -124,7 +124,7 @@ export class GetCurrencyLogRequestHandler extends RequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
@@ -166,26 +166,26 @@ export class GetCurrencyLogRequestHandler extends RequestHandler {
 
             let gnResult = new GNHashtable();
 
-            gnResult.add(GNParameterCode.CharacterId, result["characterId"]);
-            gnResult.add(GNParameterCode.TsCreate, result["tsCreate"]);
-            gnResult.add(GNParameterCode.Log, result["log"]);
-            gnResult.add(GNParameterCode.Key, result["key"]);
-            gnResult.add(GNParameterCode.Amount, result["amount"]);
-            gnResult.add(GNParameterCode.StartValue, result["startValue"]);
-            gnResult.add(GNParameterCode.FinalValue, result["finalValue"]);
+            gnResult.add(ParameterCode.CharacterId, result["characterId"]);
+            gnResult.add(ParameterCode.TsCreate, result["tsCreate"]);
+            gnResult.add(ParameterCode.Log, result["log"]);
+            gnResult.add(ParameterCode.Key, result["key"]);
+            gnResult.add(ParameterCode.Amount, result["amount"]);
+            gnResult.add(ParameterCode.StartValue, result["startValue"]);
+            gnResult.add(ParameterCode.FinalValue, result["finalValue"]);
 
             gnResults.add(gnResult);
 
             token = result["_id"].toString();
         }
 
-        operationResponse.setParameter(GNParameterCode.Results, gnResults);
+        operationResponse.setParameter(ParameterCode.Results, gnResults);
 
         if (token) {
-            operationResponse.setParameter(GNParameterCode.Token, token);
+            operationResponse.setParameter(ParameterCode.Token, token);
         }
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetCurrencyLog", request, secretInfo, operationRequest, operationResponse);
 

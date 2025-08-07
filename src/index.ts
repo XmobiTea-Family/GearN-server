@@ -16,9 +16,6 @@ export { PostEventCallbackService, PreEventCallbackService };
 import { FacebookService } from "./GN-app-api/service/FacebookService";
 export { FacebookService };
 
-import { GenericService } from "./GN-app-api/service/GenericService";
-export { GenericService };
-
 import { GoogleService } from "./GN-app-api/service/GoogleService";
 export { GoogleService };
 
@@ -33,9 +30,6 @@ export { IPostEventCallbackService, OnPostCallbackFunction, OnPreCallbackFunctio
 
 import { IFacebookService } from "./GN-app-api/service/IFacebookService";
 export { IFacebookService };
-
-import { IGenericService, IGenericServiceHandler } from "./GN-app-api/service/IGenericService";
-export { IGenericService, IGenericServiceHandler };
 
 import { IGoogleService } from "./GN-app-api/service/IGoogleService";
 export { IGoogleService };
@@ -118,11 +112,8 @@ export { RequestRole };
 import { RequestType } from "./GN-common/constant/enumType/RequestType";
 export { RequestType };
 
-import { GNErrorCode } from "./GN-common/constant/errorCode/GNErrorCode";
-export { GNErrorCode };
-
-import { GNParameterCode } from "./GN-common/constant/parameterCode/GNParameterCode";
-export { GNParameterCode };
+import { ErrorCode } from "./GN-common/constant/errorCode/ErrorCode";
+export { ErrorCode };
 
 import { ParameterCode } from "./GN-common/constant/parameterCode/ParameterCode";
 export { ParameterCode };

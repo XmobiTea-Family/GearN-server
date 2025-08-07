@@ -6,19 +6,19 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class GetItemDataOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	itemId: string;
 
-	@GNArrayDataMember({ code: GNParameterCode.ItemDataKeys, isOptional: true, elementCls: String })
+	@GNArrayDataMember({ code: ParameterCode.ItemDataKeys, isOptional: true, elementCls: String })
 	inventoryDataKeys?: Array<string>;
 
 	public override isValidRequest() {
@@ -115,7 +115,7 @@ export class GetItemDataRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let inventoryFindOptions: InventoryFindOptions = {
@@ -125,17 +125,17 @@ export class GetItemDataRequestHandler extends ItemBaseRequestHandler {
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
 		}
 
 		let gnInfoResponseParameters = new GNHashtable();
 
-		gnInfoResponseParameters.add(GNParameterCode.ItemDatas, this.generateItemDatas(inventory, request.inventoryDataKeys, secretInfo.getGameId()));
+		gnInfoResponseParameters.add(ParameterCode.ItemDatas, this.generateItemDatas(inventory, request.inventoryDataKeys, secretInfo.getGameId()));
 
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("inventory_GetItemData", request, secretInfo, operationRequest, operationResponse);
 

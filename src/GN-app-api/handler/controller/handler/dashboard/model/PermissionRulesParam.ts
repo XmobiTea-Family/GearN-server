@@ -1,16 +1,16 @@
-import { GNParameterCode } from "./../../../../../../GN-common/constant/parameterCode/GNParameterCode";
+import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class PermissionRulesParam {
-    @BooleanDataMember({ code: GNParameterCode.SelfEnable, isOptional: true })
-    selfEnable?: boolean;
+	@BooleanDataMember({ code: ParameterCode.SelfEnable, isOptional: true })
+	selfEnable?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.OtherSelfEnable, isOptional: true })
-    otherSelfEnable?: boolean;
+	@BooleanDataMember({ code: ParameterCode.OtherSelfEnable, isOptional: true })
+	otherSelfEnable?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.AdminSelfEnable, isOptional: true })
-    adminSelfEnable?: boolean;
+	@BooleanDataMember({ code: ParameterCode.AdminSelfEnable, isOptional: true })
+	adminSelfEnable?: boolean;
 
-    @BooleanDataMember({ code: GNParameterCode.ServerSelfEnable, isOptional: true })
-    serverSelfEnable?: boolean;
+	@BooleanDataMember({ code: ParameterCode.ServerSelfEnable, isOptional: true })
+	serverSelfEnable?: boolean;
 }

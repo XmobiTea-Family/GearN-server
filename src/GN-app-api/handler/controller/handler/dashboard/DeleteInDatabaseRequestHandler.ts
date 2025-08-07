@@ -1,36 +1,36 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 
-import { SecretInfo, SecretRole } from "../../../../../GN-common/entity/SecretInfo";
-import { RequestHandler } from "../base/RequestHandler";
-import { OwnerType } from "../../../../../GN-common/constant/enumType/OwnerType";
-import { MasterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
-import { GamePlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/GamePlayer";
-import { CharacterPlayer } from "../../../../../GN-library/xdatabase/lib/entity/pro/CharacterPlayer";
-import { Group } from "../../../../../GN-library/xdatabase/lib/entity/pro/Group";
-import { Inventory } from "../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
-import { StoreInventory } from "../../../../../GN-library/xdatabase/lib/entity/pro/StoreInventory";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
+import { RequestHandler } from "./../base/RequestHandler";
+import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { MasterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
+import { GamePlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/GamePlayer";
+import { CharacterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/CharacterPlayer";
+import { Group } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Group";
+import { Inventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
+import { StoreInventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/StoreInventory";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class DeleteInDatabaseOperationRequest extends OperationRequest {
-    @NumberDataMember({ code: GNParameterCode.OwnerType, mustInt: true })
+    @NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
     type: number;
 
-    @StringDataMember({ code: GNParameterCode.Id, minLength: 2, maxLength: 15 })
+    @StringDataMember({ code: ParameterCode.Id, minLength: 2, maxLength: 15 })
     id: string;
 
-    @StringDataMember({ code: GNParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
     gameId: string;
 
-    @StringDataMember({ code: GNParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
+    @StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
     log?: string;
 
     public override isValidRequest() {
@@ -74,7 +74,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         if (request.type == OwnerType.MasterPlayer) {
@@ -82,7 +82,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.id);
 
             if (masterPlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
                 return operationResponse;
             }
 
@@ -100,7 +100,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.id, request.gameId);
 
             if (gamePlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
                 return operationResponse;
             }
 
@@ -119,7 +119,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, request.gameId);
 
             if (characterPlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
                 return operationResponse;
             }
 
@@ -146,7 +146,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.id, request.gameId);
 
             if (inventory == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
                 return operationResponse;
             }
 
@@ -194,7 +194,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, request.gameId);
 
             if (group == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
                 return operationResponse;
             }
 
@@ -242,7 +242,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.id, request.gameId);
 
             if (storeInventory == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
                 return operationResponse;
             }
 
@@ -262,11 +262,11 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
             this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
         }
         else {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.ItemNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
             return operationResponse;
         }
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_DeleteInDatabase", request, secretInfo, operationRequest, operationResponse);
 

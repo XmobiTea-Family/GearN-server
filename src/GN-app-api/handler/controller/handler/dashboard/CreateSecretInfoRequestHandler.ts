@@ -5,27 +5,27 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 import { SecretInfo, SecretPermissionItem, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/SecretInfoItem";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { PermissionParam } from "./model/PermissionParam";
 
-class GrantSecretInfoOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true, isOptional: true })
+class CreateSecretInfoOperationRequest extends OperationRequest {
+	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true, isOptional: true })
 	secretKey?: string;
 
-	@StringDataMember({ code: GNParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	gameId?: string;
 
-	@NumberDataMember({ code: GNParameterCode.Role, mustInt: true })
+	@NumberDataMember({ code: ParameterCode.Role, mustInt: true })
 	role: number;
 
-	@GNHashtableDataMember({ code: GNParameterCode.Permission, isOptional: true })
+	@GNHashtableDataMember({ code: ParameterCode.Permission, isOptional: true })
 	permissionParam?: PermissionParam;
 
 	public override isValidRequest() {
@@ -35,13 +35,13 @@ class GrantSecretInfoOperationRequest extends OperationRequest {
 	}
 }
 
-export class GrantSecretInfoRequestHandler extends RequestHandler {
+export class CreateSecretInfoRequestHandler extends RequestHandler {
 	public override getCode() {
-		return OperationCode.GrantSecretInfo;
+		return OperationCode.CreateSecretInfo;
 	}
 
 	public override getCommonOperationRequest() {
-		return GrantSecretInfoOperationRequest;
+		return CreateSecretInfoOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -51,7 +51,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(operationRequest);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.grantSecretInfo.selfEnable) {
+		if (!secretInfo.getPermission().masterAdmin.createSecretInfo.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -67,12 +67,12 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 	private async execute(request: { secretKey: string, gameId: string, role: number, creatorId: string, permissionParam: PermissionParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		if (!request.secretKey) request.secretKey = StringUtility.generateRandomString(20, 0);
 
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GrantSecretInfo", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_CreateSecretInfo", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -80,11 +80,11 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 		let result = await collection.findOne({ type: "secretInfo", secretKey: request.secretKey });
 
 		if (result != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.SecretInfoIsExists);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.SecretInfoIsExists);
 			return operationResponse;
 		}
 
-		let permission = request.permissionParam ?? (request.role == SecretRole.Player ? GrantSecretInfoRequestHandler.generateRecommendPlayerPermission() : request.role == SecretRole.Server ? GrantSecretInfoRequestHandler.generateRecommendServerPermission() : request.role == SecretRole.Admin ? GrantSecretInfoRequestHandler.generateRecommendAdminPermission() : GrantSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false));
+		let permission = request.permissionParam ?? (request.role == SecretRole.Player ? CreateSecretInfoRequestHandler.generateRecommendPlayerPermission() : request.role == SecretRole.Server ? CreateSecretInfoRequestHandler.generateRecommendServerPermission() : request.role == SecretRole.Admin ? CreateSecretInfoRequestHandler.generateRecommendAdminPermission() : CreateSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false));
 
 		result = {
 			type: "secretInfo",
@@ -113,11 +113,11 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 
 		this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
-		operationResponse.setParameter(GNParameterCode.SecretKey, request.secretKey);
+		operationResponse.setParameter(ParameterCode.SecretKey, request.secretKey);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GrantSecretInfo", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_CreateSecretInfo", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
@@ -288,9 +288,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				removePlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
 				getOnlineStatus: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantPlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantPlayerCharacter: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createPlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createPlayerCharacter: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
 				addPlayerFriend: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				removePlayerFriend: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -365,9 +365,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getPlayerGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerInventory: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				removePlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantPlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createPlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				grantGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				joinGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				leaveGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
@@ -440,7 +440,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 
 				getGroupInventory: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				removeGroupItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantGroupItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createGroupItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
 				getMembers: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
@@ -511,7 +511,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				buyStoreItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getStoreItemInformation: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getStoreItemsWithTag: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantStoreItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createStoreItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setRemoveStatus: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setStoreItemInformation: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				validateAppleAppStoreReceipt: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -525,12 +525,12 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 			},
 			masterAdmin: {
 				setMasterGameSettings: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				removeAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setPasswordAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setSecretKeyAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setGameInformation: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantGame: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createGame: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				changePasswordAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getAdminAccountList: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getGameInformation: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -539,7 +539,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getServerLog: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getSecretInfoInformation: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getSecretInfoList: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				grantSecretInfo: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				createSecretInfo: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setSecretInfoInformation: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getUsernameAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getAnalytics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -775,9 +775,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				removePlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getOnlineStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				grantGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				grantPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				grantPlayerCharacter: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				createGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				createPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				createPlayerCharacter: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				addPlayerFriend: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				removePlayerFriend: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -852,9 +852,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getPlayerGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getPlayerInventory: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				removePlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				grantPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				createPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				grantGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				createGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				joinGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				leaveGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
@@ -927,7 +927,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 
 				getGroupInventory: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				removeGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				grantGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				createGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getMembers: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
@@ -998,7 +998,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				buyStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getStoreItemInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getStoreItemsWithTag: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				grantStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				createStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				setRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				setStoreItemInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				validateAppleAppStoreReceipt: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -1012,12 +1012,12 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 			},
 			masterAdmin: {
 				setMasterGameSettings: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setPasswordAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setSecretKeyAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setGameInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantGame: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createGame: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				changePasswordAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAdminAccountList: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getGameInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1026,7 +1026,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getServerLog: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getSecretInfoInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getSecretInfoList: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantSecretInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createSecretInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setSecretInfoInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getUsernameAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAnalytics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1262,9 +1262,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				removePlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getOnlineStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				grantGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				grantPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				grantPlayerCharacter: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				createGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				createPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				createPlayerCharacter: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				addPlayerFriend: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				removePlayerFriend: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1339,9 +1339,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getPlayerGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getPlayerInventory: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				removePlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				grantPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				createPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				grantGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				createGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				joinGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				leaveGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
@@ -1414,7 +1414,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 
 				getGroupInventory: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				removeGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				grantGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				createGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getMembers: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
@@ -1485,7 +1485,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				buyStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getStoreItemInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getStoreItemsWithTag: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				grantStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				createStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				setRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				setStoreItemInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				validateAppleAppStoreReceipt: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1499,12 +1499,12 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 			},
 			masterAdmin: {
 				setMasterGameSettings: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setPasswordAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setSecretKeyAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setGameInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantGame: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createGame: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				changePasswordAdminAccount: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAdminAccountList: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getGameInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1513,7 +1513,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getServerLog: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getSecretInfoInformation: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getSecretInfoList: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantSecretInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createSecretInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setSecretInfoInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getUsernameAdminAccount: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAnalytics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1751,9 +1751,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				removePlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getOnlineStatus: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
-				grantGroup: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantPlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantPlayerCharacter: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createGroup: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createPlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createPlayerCharacter: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
 				addPlayerFriend: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removePlayerFriend: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1828,9 +1828,9 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getPlayerGroup: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				getPlayerInventory: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				removePlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantPlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createPlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
-				grantGroup: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createGroup: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				joinGroup: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				leaveGroup: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
@@ -1903,7 +1903,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 
 				getGroupInventory: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createGroupItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getMembers: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 
@@ -1974,7 +1974,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				buyStoreItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getStoreItemInformation: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				getStoreItemsWithTag: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
-				grantStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createStoreItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setStoreItemInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				validateAppleAppStoreReceipt: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1988,12 +1988,12 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 			},
 			masterAdmin: {
 				setMasterGameSettings: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setPasswordAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setSecretKeyAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setGameInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantGame: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createGame: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				changePasswordAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAdminAccountList: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getGameInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -2002,7 +2002,7 @@ export class GrantSecretInfoRequestHandler extends RequestHandler {
 				getServerLog: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getSecretInfoInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getSecretInfoList: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				grantSecretInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createSecretInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				setSecretInfoInformation: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getUsernameAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAnalytics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },

@@ -1,16 +1,13 @@
-import { CodeHelper } from "./../../helper/CodeHelper";
 import { GNHashtable } from "./../../common/GNData";
 
 export class OperationEvent {
 
 	private eventCode: string;
 	private parameters: GNHashtable;
-	private encrypted: boolean;
 
-	constructor(eventCode: string, parameters: GNHashtable = null, encrypted: boolean = true) {
+	constructor(eventCode: string, parameters: GNHashtable = null) {
 		this.eventCode = eventCode;
 		this.parameters = parameters;
-		this.encrypted = encrypted;
 	}
 
 	public getEventCode(): string {
@@ -19,10 +16,6 @@ export class OperationEvent {
 
 	public getParameters(): GNHashtable {
 		return this.parameters;
-	}
-
-	public isEncrypted(): boolean {
-		return this.encrypted;
 	}
 
 	public setParameter(k: string, value: any): OperationEvent {
@@ -37,13 +30,8 @@ export class OperationEvent {
 		return this;
 	}
 
-	public setEncrypted(encrypted: boolean): OperationEvent {
-		this.encrypted = encrypted;
-		return this;
-	}
-
 	public toString(): string {
-		return "Code: " + CodeHelper.getEventCodeName(this.eventCode) + " (" + this.eventCode + ")" + ", parameters " + this.parameters + ", encrypted " + this.encrypted;
+		return "EventCode: " + this.eventCode + ", parameters " + JSON.stringify(this.parameters?.toData());
 	}
 
 }

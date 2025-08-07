@@ -1,10 +1,10 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import {
     DataMember,
     BooleanDataMember,
@@ -12,16 +12,16 @@ import {
     StringDataMember,
     GNHashtableDataMember,
     GNArrayDataMember,
-} from "../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "../../../../../GN-common/constant/errorCode/GNErrorCode";
+} from "./../../../../../GN-common/entity/DataMember";
 
-import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+
+import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 
 class GetStoreUsedOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
+    @StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
     storeId: string;
 }
 
@@ -116,7 +116,7 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let gnResults = new GNArray();
@@ -129,17 +129,17 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 
                 let gnResult = new GNHashtable();
 
-                gnResult.add(GNParameterCode.OwnerId, useId.id);
-                gnResult.add(GNParameterCode.OwnerType, useId.type);
-                gnResult.add(GNParameterCode.TsCreate, useId.tsCreate);
+                gnResult.add(ParameterCode.OwnerId, useId.id);
+                gnResult.add(ParameterCode.OwnerType, useId.type);
+                gnResult.add(ParameterCode.TsCreate, useId.tsCreate);
 
                 gnResults.add(gnResult);
             }
         }
 
-        operationResponse.setParameter(GNParameterCode.Results, gnResults);
+        operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_GetStoreUsed", request, secretInfo, operationRequest, operationResponse);
 

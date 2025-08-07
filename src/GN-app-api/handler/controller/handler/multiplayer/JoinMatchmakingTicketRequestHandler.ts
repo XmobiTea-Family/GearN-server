@@ -6,8 +6,8 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MatchmakingTicketStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
@@ -17,10 +17,10 @@ import { GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class JoinMatchmakingTicketOperationRequest extends OperationRequest {
-    @StringDataMember({ code: GNParameterCode.TicketId, minLength: 10, maxLength: 10 })
+    @StringDataMember({ code: ParameterCode.TicketId, minLength: 10, maxLength: 10 })
     ticketId: string;
 
-    @GNHashtableDataMember({ code: GNParameterCode.Attribute, isOptional: true })
+    @GNHashtableDataMember({ code: ParameterCode.Attribute, isOptional: true })
     attribute?: GNHashtable;
 
     public override isValidRequest() {
@@ -31,7 +31,7 @@ class JoinMatchmakingTicketOperationRequest extends OperationRequest {
 }
 
 class ServerJoinMatchmakingTicketOperationRequest extends JoinMatchmakingTicketOperationRequest {
-    @StringDataMember({ code: GNParameterCode.UserId, minLength: 10, maxLength: 10 })
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
     userId: string;
 
     public override isValidRequest() {
@@ -119,7 +119,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
             return operationResponse;
         }
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
@@ -133,31 +133,31 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
         });
 
         if (result == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
             return operationResponse;
         }
 
         let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
         if (matchmakingTicket.getStatus() != MatchmakingTicketStatus.WaitingForMembers) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketAlreadyCompleted);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketAlreadyCompleted);
             return operationResponse;
         }
 
         let member = matchmakingTicket.getMember(request.userId);
         if (member == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
             return operationResponse;
         }
 
         if (member.status != <number>MatchmakingMemberStatus.Pending) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingTicketAlreadyCompleted);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketAlreadyCompleted);
             return operationResponse;
         }
 
         let matchmakingQueueSettings = this.getMatchmakingQueueSettings(matchmakingTicket.getQueueName(), secretInfo.getGameId());
 
         if (matchmakingQueueSettings == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingQueueNotFound);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingQueueNotFound);
             return operationResponse;
         }
 
@@ -180,7 +180,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
         }
 
         if (isJoinOtherTicket) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.MatchmakingPlayerHasJoinedOtherTicket);
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingPlayerHasJoinedOtherTicket);
             return operationResponse;
         }
 
@@ -194,7 +194,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 
         matchmakingTicket.saveAsync();
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_JoinMatchmakingTicket", request, secretInfo, operationRequest, operationResponse);
 

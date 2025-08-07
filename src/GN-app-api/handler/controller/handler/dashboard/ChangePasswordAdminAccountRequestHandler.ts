@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import bcrypt from "bcrypt";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
@@ -16,10 +16,10 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterAdminPlayer";
 
 class ChangePasswordAdminAccountOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.CurrentPassword, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.CurrentPassword, minLength: 6, maxLength: 64, mustNonNull: true })
 	currentPassword: string;
 
-	@StringDataMember({ code: GNParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	password: string;
 
 	public override isValidRequest() {
@@ -62,7 +62,7 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
@@ -70,7 +70,7 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		let result = await collection.findOne({ type: "account", userId: request.userId });
 
 		if (result == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 			return operationResponse;
 		}
 
@@ -81,14 +81,14 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		let isMatch = await bcrypt.compare(request.currentPassword, password);
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 			return operationResponse;
 		}
 
 		masterAdminPlayer.setPassword(await bcrypt.hash(request.password, 10));
 		masterAdminPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_ChangePasswordAdminAccount", request, secretInfo, operationRequest, operationResponse);
 

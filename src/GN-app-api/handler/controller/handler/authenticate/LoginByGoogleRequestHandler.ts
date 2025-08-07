@@ -6,9 +6,9 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { GNParameterCode } from "./../../../../../GN-common/constant/parameterCode/GNParameterCode";
+
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { GNErrorCode } from "./../../../../../GN-common/constant/errorCode/GNErrorCode";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
@@ -18,16 +18,16 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByGoogleOperationRequest extends OperationRequest {
-	@StringDataMember({ code: GNParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
 	token: string;
 
-	@NumberDataMember({ code: GNParameterCode.Type, minValue: 1, maxValue: 2, mustInt: true })
+	@NumberDataMember({ code: ParameterCode.Type, minValue: 1, maxValue: 2, mustInt: true })
 	type: number;
 
-	@BooleanDataMember({ code: GNParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
+	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
 	createPlayerIfNotExists?: boolean;
 
-	@GNHashtableDataMember({ code: GNParameterCode.InfoRequestParam, mustNonNull: true })
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
@@ -74,13 +74,13 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 			return operationResponse;
 		}
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let result = request.googleLoginType == GoogleLoginType.AccessToken ? await this.gnServer.getGoogleService().verifyGoogleTokenViaAccessToken(request.token) : request.googleLoginType == GoogleLoginType.IdToken ? await this.gnServer.getGoogleService().verifyGoogleTokenViaIdToken(request.token) : { "error": "Invalid GoogleLoginType" };
 
 		if (result["error"] != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.VerifyTokenError);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VerifyTokenError);
 			return operationResponse;
 		}
 
@@ -98,7 +98,7 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 
 		if (masterPlayer == null) {
 			if (!request.createPlayerIfNotExists) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.AccountNotFound);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 
 				return operationResponse;
 			}
@@ -124,7 +124,7 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 				}
 
 				masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
-				operationResponse.setParameter(GNParameterCode.NewlyCreated, true);
+				operationResponse.setParameter(ParameterCode.NewlyCreated, true);
 			}
 		}
 		else {
@@ -152,18 +152,18 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 			masterPlayer.saveAsync();
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, GNErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		operationResponse.setParameter(GNParameterCode.UserId, masterPlayer.getUserId());
-		operationResponse.setParameter(GNParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+		operationResponse.setParameter(ParameterCode.UserId, masterPlayer.getUserId());
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
 		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
-			authenticationType: "LoginByGoogle",
+			authenticationType: "loginByGoogle",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
-			isNewUser: operationResponse.getParameters().getBoolean(GNParameterCode.NewlyCreated, false),
+			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByGoogle", request, secretInfo, operationRequest, operationResponse);

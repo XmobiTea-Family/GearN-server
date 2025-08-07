@@ -9,14 +9,14 @@ import * as mongoDB from "mongodb";
 import fs from "fs";
 import { ExecuteResponseStatus } from "./ICloudScriptService";
 import { ChildProcess, fork, execSync } from "child_process";
-import { GNServer } from "../../GNServer";
+import { GNServer } from "./../../GNServer";
 import { GNServerSettingsOptions } from "@xmobitea/gn-typescript-client";
-import { StringUtility } from "../../GN-common/helper/StringUtility";
-import { OperationEvent } from "../../GN-common/entity/operationEvent/OperationEvent";
-import { GNParameterCode } from "../../GN-common/constant/parameterCode/GNParameterCode";
-import { GNHashtable } from "../../GN-common/common/GNData";
-import { MatchmakingTicketCanMatch } from "../handler/controller/handler/multiplayer/MatchmakingHandler";
-import { ServerDetail } from "../../GN-library/xdatabase/lib/entity/pro/ServerDetail";
+import { StringUtility } from "./../../GN-common/helper/StringUtility";
+import { OperationEvent } from "./../../GN-common/entity/operationEvent/OperationEvent";
+import { ParameterCode } from "./../../GN-common/constant/parameterCode/ParameterCode";
+import { GNHashtable } from "./../../GN-common/common/GNData";
+import { MatchmakingTicketCanMatch } from "./../handler/controller/handler/multiplayer/MatchmakingHandler";
+import { ServerDetail } from "./../../GN-library/xdatabase/lib/entity/pro/ServerDetail";
 
 enum EventCallbackType {
 	Pre = 0,
@@ -44,13 +44,11 @@ interface CloudScriptRequest {
 		operationCode: string;
 		requestId: number;
 		parameters: {};
-		encrypted: boolean;
 	};
 	operationResponse?: {
 		returnCode: number;
 		debugMessage: string;
 		parameters: {};
-		encrypted: boolean;
 	};
 }
 
@@ -65,7 +63,6 @@ interface CloudScriptResponse {
 			returnCode: number;
 			debugMessage: string;
 			parameters?: {};
-			encrypted: boolean;
 		} | null;
 		request: { [k: string]: any };
 		errorMessage: any;
@@ -85,7 +82,6 @@ interface CloudScriptEvent {
 	operationEvent: {
 		eventCode: string;
 		parameters: {};
-		encrypted: boolean;
 	};
 	receiver: string[] | string | null;
 }
@@ -120,6 +116,7 @@ export interface IEventCallbackCloudScriptService {
 	executeEvent(eventName: string, request: { [k: string]: any }, operationEvent: OperationEvent): Promise<void>;
 	executePre(eventName: string, request: { [k: string]: any }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
 	executeAuthenticate(eventName: string, request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void>;
+	executeVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>;
 
 	addCloudScriptFunction(eventName: string, script: string): Promise<{ success: boolean; errorMessage?: string; version?: string }>;
 	getAllCloudScriptFunction(): Promise<
@@ -428,7 +425,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			eventType: EventCallbackType.Event,
 			operationRequest: {
 				operationCode: operationEvent.getEventCode(),
-				encrypted: operationEvent.isEncrypted(),
 				parameters: operationEvent.getParameters(),
 				requestId: 0,
 			},
@@ -474,7 +470,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		if (cloudScriptResponse.response.status == ExecuteResponseStatus.Ok) {
 			operationEvent.setParameters(cloudScriptResponse.response.result.parameters ? GNHashtable.builder().addAll(cloudScriptResponse.response.result.parameters).build() : null);
-			operationEvent.setEncrypted(cloudScriptResponse.response.result.encrypted);
 			(operationEvent as any).eventCode = cloudScriptResponse.response.result.returnCode;
 
 			if (cloudScriptResponse.response.request.userId) request.userId = cloudScriptResponse.response.request.userId;
@@ -527,7 +522,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			eventType: EventCallbackType.Pre,
 			operationRequest: {
 				operationCode: operationRequest.getOperationCode(),
-				encrypted: operationRequest.isEncrypted(),
 				parameters: operationRequest.getParameters()?.toData(),
 				requestId: operationRequest.getRequestId(),
 			},
@@ -586,7 +580,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			if (cloudScriptResponse.response.result) {
 				let responseOperationResponse = cloudScriptResponse.response.result;
 
-				let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId(), operationRequest.isEncrypted());
+				let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 
 				operationResponse.setReturnCode(responseOperationResponse.returnCode);
 				operationResponse.setDebugMessage(responseOperationResponse.debugMessage);
@@ -598,6 +592,85 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		}
 
 		return null;
+	}
+
+	public async executeVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> {
+		let cloudFunction = this.cloudScriptFunctionDict.get("system");
+		if (cloudFunction == null) {
+			Debug.logError("[GearN] [SystemEventCallback] system not found");
+			return { success: false, serviceId: null, };
+		}
+		let eventName = "system_VerifyGenericService";
+		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+
+		if (cloudScriptWorker == null) {
+			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
+			return { success: false, serviceId: null, };
+		}
+
+		let requestId = StringUtility.generateRandomString(10, 0);
+
+		let cloudScriptRequest: CloudScriptRequest = {
+			requestId: requestId,
+			eventName: eventName,
+			eventType: EventCallbackType.System,
+			operationRequest: null,
+			request: {
+				serviceName: serviceName,
+				serviceData: serviceData,
+			},
+			secretInfo: null,
+		};
+
+		cloudScriptWorker.send(cloudScriptRequest);
+
+		let thiz = this;
+
+		let isResolved = false;
+		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
+			let timeout = setTimeout(() => {
+				if (isResolved) return;
+				isResolved = true;
+
+				resolve({
+					responseId: requestId,
+					response: {
+						status: ExecuteResponseStatus.Timeout,
+						errorMessage: "function execute timeout",
+						result: null,
+						request: null,
+					},
+					stats: null,
+					logs: [],
+				});
+			}, thiz.executeTimeoutInMs);
+
+			thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
+				if (isResolved) return;
+				isResolved = true;
+
+				clearTimeout(timeout);
+				resolve(cloudScriptResponse);
+			});
+		});
+
+		this.cloudScriptWaitingResponseCallbackDict.delete(requestId);
+
+		if (cloudScriptResponse.logs.length != 0) Debug.log(JSON.stringify(cloudScriptResponse.logs));
+
+		if (cloudScriptResponse.response.status == ExecuteResponseStatus.Ok) {
+			return {
+				success: cloudScriptResponse.response.request?.success ?? false,
+				serviceId: cloudScriptResponse.response.request?.serviceId,
+				someDatas: cloudScriptResponse.response.request?.someDatas,
+				errorMessage: cloudScriptResponse.response.request?.errorMessage,
+			}
+		}
+
+		return {
+			success: false,
+			serviceId: null,
+		};
 	}
 
 	public async executeAuthenticate(
@@ -649,13 +722,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			eventType: EventCallbackType.System,
 			operationRequest: {
 				operationCode: operationRequest.getOperationCode(),
-				encrypted: operationRequest.isEncrypted(),
 				parameters: operationRequest.getParameters()?.toData(),
 				requestId: operationRequest.getRequestId(),
 			},
 			operationResponse: {
 				debugMessage: operationResponse.getDebugMessage(),
-				encrypted: operationResponse.isEncrypted(),
 				parameters: operationResponse.getParameters()?.toData(),
 				returnCode: operationResponse.getReturnCode(),
 			},
@@ -705,13 +776,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 				operationResponse.setReturnCode(responseOperationResponse.returnCode);
 				operationResponse.setDebugMessage(responseOperationResponse.debugMessage);
-				operationResponse.setEncrypted(responseOperationResponse.encrypted);
 
 				if (responseOperationResponse.parameters) operationResponse.setParameters(GNHashtable.builder().addAll(responseOperationResponse.parameters).build());
 			}
 		} else if (cloudScriptResponse.response.status == ExecuteResponseStatus.FunctionNameNotFound) {
 		} else {
-			operationResponse.setParameter(GNParameterCode.Message, cloudScriptResponse.response.errorMessage);
+			operationResponse.setParameter(ParameterCode.ErrorMessage, cloudScriptResponse.response.errorMessage);
 		}
 	}
 
@@ -759,13 +829,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			eventType: EventCallbackType.Post,
 			operationRequest: {
 				operationCode: operationRequest.getOperationCode(),
-				encrypted: operationRequest.isEncrypted(),
 				parameters: operationRequest.getParameters()?.toData(),
 				requestId: operationRequest.getRequestId(),
 			},
 			operationResponse: {
 				debugMessage: operationResponse.getDebugMessage(),
-				encrypted: operationResponse.isEncrypted(),
 				parameters: operationResponse.getParameters()?.toData(),
 				returnCode: operationResponse.getReturnCode(),
 			},
@@ -815,13 +883,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 				operationResponse.setReturnCode(responseOperationResponse.returnCode);
 				operationResponse.setDebugMessage(responseOperationResponse.debugMessage);
-				operationResponse.setEncrypted(responseOperationResponse.encrypted);
 
 				if (responseOperationResponse.parameters) operationResponse.setParameters(GNHashtable.builder().addAll(responseOperationResponse.parameters).build());
 			}
 		} else if (cloudScriptResponse.response.status == ExecuteResponseStatus.FunctionNameNotFound) {
 		} else {
-			operationResponse.setParameter(GNParameterCode.Message, cloudScriptResponse.response.errorMessage);
+			operationResponse.setParameter(ParameterCode.ErrorMessage, cloudScriptResponse.response.errorMessage);
 		}
 	}
 
@@ -1026,8 +1093,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 				let operationEvent = new OperationEvent(
 					cloudScriptEvent.operationEvent.eventCode,
-					cloudScriptEvent.operationEvent.parameters != null ? GNHashtable.builder().addAll(cloudScriptEvent.operationEvent.parameters).build() : null,
-					cloudScriptEvent.operationEvent.encrypted
+					cloudScriptEvent.operationEvent.parameters != null ? GNHashtable.builder().addAll(cloudScriptEvent.operationEvent.parameters).build() : null
 				);
 
 				if (cloudScriptEvent.eventType == CloudScriptEventType.SendToUser) {
@@ -1195,7 +1261,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 			operationRequest: OperationHelper.toDataOperationRequest(operationRequest),
 			originRequest: OperationHelper.toDataFromRequest((operationRequest as any).originRequest),
 			operationResponse: operationResponseToData,
-			customTags: operationRequest.getParameters().getGNHashtable("CustomTags"),
+			customTags: operationRequest.getParameters().getGNHashtable("customTags"),
 			responseSize: Buffer.byteLength(JSON.stringify(operationResponseToData), "utf-8"),
 		});
 
@@ -1224,6 +1290,20 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 		}
 	}
 
+	public async onVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> {
+		if (this.cloudScriptService) {
+			let response = await this.cloudScriptService.executeVerifyGenericService(serviceName, serviceData);
+
+			if (response) return response;
+		}
+
+		return {
+			success: false,
+			serviceId: null,
+			errorMessage: "Service not ready",
+		};
+	}
+
 }
 
 export class PreEventCallbackService implements IPreEventCallbackService {
@@ -1248,9 +1328,9 @@ export class PreEventCallbackService implements IPreEventCallbackService {
 
 	public async onEvent(eventName: string, request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		if (this.cloudScriptService) {
-			let response = await this.cloudScriptService.executePre(eventName, request, secretInfo, operationRequest);
+			let operationResponse = await this.cloudScriptService.executePre(eventName, request, secretInfo, operationRequest);
 
-			if (response) return response;
+			if (operationResponse) return operationResponse;
 		}
 
 		if (!this.eventDict.has(eventName)) {

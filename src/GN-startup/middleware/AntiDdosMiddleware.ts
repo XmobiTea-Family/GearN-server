@@ -7,7 +7,7 @@ import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import * as mongoDB from "mongodb";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { Commands } from "./../../GN-common/constant/Commands";
-import { RequestRole } from "../../GN-common/constant/enumType/RequestRole";
+import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
 
 interface MaxRequestItem {
 	id: string;
@@ -122,7 +122,9 @@ export class AntiDdosMiddleware {
 		let returnCode = this.getReturnCodeForRequestSizeHttp(req);
 		if (returnCode != ReturnCode.Ok) {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-			return res.send([returnCode]);
+			return res.send({
+				returnCode: returnCode,
+			});
 		}
 
 		return next();
@@ -131,7 +133,7 @@ export class AntiDdosMiddleware {
 	public async checkRequestSizeBodyViaMsgPack(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = this.getReturnCodeForRequestSizeHttp(req);
 		if (returnCode != ReturnCode.Ok) {
-			let content = Buffer.from(encode([returnCode]));
+			let content = Buffer.from(encode({ returnCode: returnCode }));
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 			res.setHeader(Commands.CONTENT_LENGTH, content.length);
 			return res.send(content);
@@ -142,18 +144,18 @@ export class AntiDdosMiddleware {
 
 	private getReturnCodeForRequestSizeHttp(req: express.Request): number {
 		let url = req.url;
-		if (url == "/-18/9/3"
-			|| url == "/-5/9/3"
-			|| url == "/-17/9/3"
-			|| url == "/-11/9/3"
-			|| url == "/-22/9/3"
-			|| url == "/128/3/1"
-			|| url == "/167/11/1"
+		if (url == "/dashboard/setSecretInfoInformation/client"
+			|| url == "/dashboard/setMasterGameSettings/client"
+			|| url == "/dashboard/createSecretInfo/client"
+			|| url == "/dashboard/setGameInformation/client"
+			|| url == "/dashboard/setEventCallbackCloudScript/client"
+			|| url == "/content/setContentData/admin"
+			|| url == "/cloudscript/addFunction/admin"
 		) {
 			return ReturnCode.Ok;
 		}
 
-		let contentLengthStr: string = req.header("content-length");
+		let contentLengthStr: string = req.header(Commands.CONTENT_LENGTH);
 		if (contentLengthStr) {
 			let ip = req.xip;
 
@@ -315,7 +317,7 @@ export class AntiDdosMiddleware {
 		let returnCode = this.getReturnCodeForMaxRequestPerSecondPerIp(req);
 		if (returnCode != ReturnCode.Ok) {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-			return res.send([returnCode]);
+			return res.send({ returnCode: returnCode });
 		}
 
 		return next();
@@ -333,7 +335,7 @@ export class AntiDdosMiddleware {
 	public async checkMaxRequestPerSecondPerIpViaMsgPack(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = this.getReturnCodeForMaxRequestPerSecondPerIp(req);
 		if (returnCode != ReturnCode.Ok) {
-			let content = Buffer.from(encode([returnCode]));
+			let content = Buffer.from(encode({ returnCode: returnCode }));
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 			res.setHeader(Commands.CONTENT_LENGTH, content.length);
 			return res.send(content);
@@ -393,7 +395,7 @@ export class AntiDdosMiddleware {
 		let returnCode = this.getReturnCodeForMaxRequestPerSecondPerPeer(req);
 		if (returnCode != ReturnCode.Ok) {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-			return res.send([returnCode]);
+			return res.send({ returnCode: returnCode });
 		}
 
 		return next();
@@ -411,7 +413,7 @@ export class AntiDdosMiddleware {
 	public async checkMaxRequestPerSecondPerPeerViaMsgPack(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = this.getReturnCodeForMaxRequestPerSecondPerPeer(req);
 		if (returnCode != ReturnCode.Ok) {
-			let content = Buffer.from(encode([returnCode]));
+			let content = Buffer.from(encode({ returnCode: returnCode }));
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 			res.setHeader(Commands.CONTENT_LENGTH, content.length);
 			return res.send(content);
@@ -477,7 +479,7 @@ export class AntiDdosMiddleware {
 		let returnCode = this.getReturnCodeForPendingRequest(req);
 		if (returnCode != ReturnCode.Ok) {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
-			return res.send([returnCode]);
+			return res.send({ returnCode: returnCode });
 		}
 
 		return next();
@@ -486,7 +488,7 @@ export class AntiDdosMiddleware {
 	public async addPendingRequestViaMsgPack(req: express.Request, res: express.Response, next: Function) {
 		let returnCode = this.getReturnCodeForPendingRequest(req);
 		if (returnCode != ReturnCode.Ok) {
-			let content = Buffer.from(encode([returnCode]));
+			let content = Buffer.from(encode({ returnCode: returnCode }));
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 			res.setHeader(Commands.CONTENT_LENGTH, content.length);
 			return res.send(content);

@@ -1,7 +1,7 @@
 export interface xCurrencySettings {
     key: string;
     initialValue: number;
-    displayName: string;
+    description: string;
     index: boolean;
     
 }

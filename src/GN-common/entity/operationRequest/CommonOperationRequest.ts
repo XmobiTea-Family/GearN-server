@@ -7,8 +7,8 @@ export class CommonOperationRequest extends OperationRequest {
 
     private originRequest: Request;
 
-    constructor(operationCode: string, encrypted: boolean) {
-        super(operationCode, encrypted);
+    constructor(operationCode: string) {
+        super(operationCode);
 
         this.invalidMembers = [];
     }

@@ -38,6 +38,11 @@ docs.push({
       "hasEdit": false
     },
     {
+      "eventName": "system_VerifyGenericService",
+      "script": "\nsystemGenericServiceHandlers.system_VerifyGenericService = async (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> => {\n\n\treturn { success: false, serviceId: null, };\n}\n",
+      "hasEdit": false
+    },
+    {
       "eventName": "system_SendEventTo",
       "script": "\neventHandlers.system_SendEventTo = async (request: { userId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
       "hasEdit": false
@@ -116,9 +121,9 @@ function readAllTsFiles(name) {
           console.log("filePath not has data " + filePath);
         }
         else {
-          // line2 =     private async execute(request: { userId: string, eventCode: string, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+          // line2 =     private async execute(request: { userId: string, eventCode: string, eventParameters: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 
-          // line2.split("(")[1] = request: { userId: string, eventCode: string, eventParameters: { [k: string]: any }, eventEncrypted: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+          // line2.split("(")[1] = request: { userId: string, eventCode: string, eventParameters: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 
           // line2 = private async execute(request: { serviceName: string, serviceData: { [k: string]: any }, createPlayerIfNotExists: boolean, infoRequestParam: InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 
