@@ -15,11 +15,12 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class RemoveFileUploadInfoOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
-	fileId: string;
+	public fileId: string;
 
 	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
-	reason?: string;
+	public reason?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +48,7 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 }
 
 export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveFileUploadInfo;
 	}

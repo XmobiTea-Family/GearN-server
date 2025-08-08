@@ -67,8 +67,8 @@ export class UploadFileHandler {
 			this.uploadRouter
 		);
 
-        let downloadRouter = express.Router();
-        this.router.use(
+		let downloadRouter = express.Router();
+		this.router.use(
 			"/download",
 			wrap((req, res, next) => {
 				return this.apiMiddleware.getIP(req, res, next);
@@ -88,28 +88,28 @@ export class UploadFileHandler {
 			// }),
 
 			async (req: express.Request, res: express.Response): Promise<any> => {
-                // this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
+				// this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
 
 				let downloadToken = req.params.downloadToken;
 				if (!downloadToken) return res.sendStatus(400);
 
 				let downloadFileSessionResult = await this.downloadFileSessionCollection.findOne({ downloadToken: downloadToken }, {
-                    projection: {
-                        fileId: true,
-                        fileUpload: true,
-                    }
-                });
+					projection: {
+						fileId: true,
+						fileUpload: true,
+					}
+				});
 				if (!downloadFileSessionResult) return res.sendStatus(404);
 
-                let fileUpload = downloadFileSessionResult.fileUpload;
-                let fullPath = fileUpload.fullPath;
-                let folderFileName = fileUpload.folderFileName;
+				let fileUpload = downloadFileSessionResult.fileUpload;
+				let fullPath = fileUpload.fullPath;
+				let folderFileName = fileUpload.folderFileName;
 
-                return res.download(fullPath, folderFileName, (err) => {
-                    if (err) {
-                        res.status(500).send(err.message);
-                    }
-                });
+				return res.download(fullPath, folderFileName, (err) => {
+					if (err) {
+						res.status(500).send(err.message);
+					}
+				});
 
 				// fs.readFile(fullPath, (err, data) => {
 
@@ -130,8 +130,8 @@ export class UploadFileHandler {
 	}
 
 	public run(): void {
-        this.uploadRouter.use(express.json({ limit: "10mb" }));
-        this.uploadRouter.use(express.urlencoded({ extended: false, limit: "10mb" }));
+		this.uploadRouter.use(express.json({ limit: "10mb" }));
+		this.uploadRouter.use(express.urlencoded({ extended: false, limit: "10mb" }));
 		// this.uploadRouter.use(msgpack());
 
 		let configUploadPath = this.uploadPath;
@@ -188,10 +188,10 @@ export class UploadFileHandler {
 		);
 	}
 
-    public removeFile(fullPath: string): void {
-        fs.rm(fullPath, err => {
-            Debug.logError("[GearN] remove file at path " + fullPath + ", error " + err);
-        });
-    }
+	public removeFile(fullPath: string): void {
+		fs.rm(fullPath, err => {
+			Debug.logError("[GearN] remove file at path " + fullPath + ", error " + err);
+		});
+	}
 
 }

@@ -16,10 +16,10 @@ import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class SetDisplayNameOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, minLength: 5, maxLength: 32, mustNonNull: true })
-	displayName: string;
+	public displayName: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -38,6 +38,7 @@ class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationReques
 }
 
 class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +47,7 @@ class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationR
 }
 
 export class SetDisplayNameRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetDisplayName;
 	}

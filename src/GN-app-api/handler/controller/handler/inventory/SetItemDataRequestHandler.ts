@@ -18,11 +18,12 @@ import { ItemDataParam } from "./model/ItemDataParam";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class SetItemDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.ItemDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: ItemDataParam })
-	inventoryDataParams: Array<ItemDataParam>;
+	public inventoryDataParams: Array<ItemDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,6 +33,7 @@ class SetItemDataOperationRequest extends OperationRequest {
 }
 
 class ServerSetItemDataOperationRequest extends SetItemDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -40,6 +42,7 @@ class ServerSetItemDataOperationRequest extends SetItemDataOperationRequest {
 }
 
 class AdminSetItemDataOperationRequest extends ServerSetItemDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +51,7 @@ class AdminSetItemDataOperationRequest extends ServerSetItemDataOperationRequest
 }
 
 export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetItemData;
 	}

@@ -15,8 +15,9 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class GetMembersOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -35,6 +36,7 @@ class ServerGetMembersOperationRequest extends GetMembersOperationRequest {
 }
 
 class AdminGetMembersOperationRequest extends ServerGetMembersOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +45,7 @@ class AdminGetMembersOperationRequest extends ServerGetMembersOperationRequest {
 }
 
 export class GetMembersRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetMembers;
 	}

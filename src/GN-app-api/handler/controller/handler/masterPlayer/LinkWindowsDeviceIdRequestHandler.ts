@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkWindowsDeviceIdOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.WindowsDeviceId, minLength: 6, maxLength: 64, mustNonNull: true })
-	windowsDeviceId: string;
+	public windowsDeviceId: string;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,8 +33,9 @@ class LinkWindowsDeviceIdOperationRequest extends OperationRequest {
 }
 
 class ServerLinkWindowsDeviceIdOperationRequest extends LinkWindowsDeviceIdOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,6 +45,7 @@ class ServerLinkWindowsDeviceIdOperationRequest extends LinkWindowsDeviceIdOpera
 }
 
 class AdminLinkWindowsDeviceIdOperationRequest extends ServerLinkWindowsDeviceIdOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,6 +54,7 @@ class AdminLinkWindowsDeviceIdOperationRequest extends ServerLinkWindowsDeviceId
 }
 
 export class LinkWindowsDeviceIdRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkWindowsDeviceId;
 	}

@@ -18,11 +18,12 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType";
 
 class SetAmountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@NumberDataMember({ code: ParameterCode.Amount, mustInt: true })
-	amount: number;
+	public amount: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -41,6 +42,7 @@ class ServerSetAmountOperationRequest extends SetAmountOperationRequest {
 }
 
 class AdminSetAmountOperationRequest extends ServerSetAmountOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,6 +51,7 @@ class AdminSetAmountOperationRequest extends ServerSetAmountOperationRequest {
 }
 
 export class SetAmountRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetAmount;
 	}

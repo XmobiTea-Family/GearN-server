@@ -3,46 +3,47 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { PermissionRulesParam } from "./PermissionRulesParam";
 
 export class StoreInventoryPermissionRulesParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.BuyStoreItem, isOptional: true })
-	buyStoreItem?: PermissionRulesParam;
+	public buyStoreItem?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStoreItemInformation, isOptional: true })
-	getStoreItemInformation?: PermissionRulesParam;
+	public getStoreItemInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStoreItemsWithTag, isOptional: true })
-	getStoreItemsWithTag?: PermissionRulesParam;
+	public getStoreItemsWithTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CreateStoreItem, isOptional: true })
-	createStoreItem?: PermissionRulesParam;
+	public createStoreItem?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetRemoveStatus, isOptional: true })
-	setRemoveStatus?: PermissionRulesParam;
+	public setRemoveStatus?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetStoreItemInformation, isOptional: true })
-	setStoreItemInformation?: PermissionRulesParam;
+	public setStoreItemInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ValidateAppleAppStoreReceipt, isOptional: true })
-	validateAppleAppStoreReceipt?: PermissionRulesParam;
+	public validateAppleAppStoreReceipt?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ValidateGooglePlayStoreReceipt, isOptional: true })
-	validateGooglePlayStoreReceipt?: PermissionRulesParam;
+	public validateGooglePlayStoreReceipt?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ValidateFacebookStoreReceipt, isOptional: true })
-	validateFacebookStoreReceipt?: PermissionRulesParam;
+	public validateFacebookStoreReceipt?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCreateLeaderboard, isOptional: true })
-	getCreateLeaderboard?: PermissionRulesParam;
+	public getCreateLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.PresentStoreItem, isOptional: true })
-	presentStoreItem?: PermissionRulesParam;
+	public presentStoreItem?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStoreLog, isOptional: true })
-	getStoreLog?: PermissionRulesParam;
+	public getStoreLog?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStoreUsed, isOptional: true })
-	getStoreUsed?: PermissionRulesParam;
+	public getStoreUsed?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemoveStoreUsed, isOptional: true })
-	removeStoreUsed?: PermissionRulesParam;
+	public removeStoreUsed?: PermissionRulesParam;
 
 }

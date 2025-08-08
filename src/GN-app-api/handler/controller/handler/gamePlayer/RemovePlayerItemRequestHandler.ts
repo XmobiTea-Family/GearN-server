@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class RemovePlayerItemOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,8 +30,9 @@ class RemovePlayerItemOperationRequest extends OperationRequest {
 }
 
 class ServerRemovePlayerItemOperationRequest extends RemovePlayerItemOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -40,6 +42,7 @@ class ServerRemovePlayerItemOperationRequest extends RemovePlayerItemOperationRe
 }
 
 class AdminRemovePlayerItemOperationRequest extends ServerRemovePlayerItemOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +51,7 @@ class AdminRemovePlayerItemOperationRequest extends ServerRemovePlayerItemOperat
 }
 
 export class RemovePlayerItemRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemovePlayerItem;
 	}

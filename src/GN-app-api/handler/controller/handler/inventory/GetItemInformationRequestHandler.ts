@@ -17,11 +17,12 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 
 class GetItemInformationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -49,6 +50,7 @@ class AdminGetItemInformationOperationRequest extends ServerGetItemInformationOp
 }
 
 export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetItemInformation;
 	}

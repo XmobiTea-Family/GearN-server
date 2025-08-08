@@ -4,8 +4,8 @@ import { xGroupSettings } from "./xGroupSettings";
 import { xInventorySettings } from "./xInventorySettings";
 
 export interface xGameSettings {
-    characterPlayerSettings: xCharacterPlayerSettings;
-    gamePlayerSettings: xGamePlayerSettings;
-    groupSettings: xGroupSettings;
-    inventorySettings: xInventorySettings;
+	characterPlayerSettings: xCharacterPlayerSettings;
+	gamePlayerSettings: xGamePlayerSettings;
+	groupSettings: xGroupSettings;
+	inventorySettings: xInventorySettings;
 }

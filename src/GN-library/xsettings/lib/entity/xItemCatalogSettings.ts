@@ -1,11 +1,11 @@
 export interface xItemCatalogSettings {
-    catalogId: string;
-    itemType: number;
+	catalogId: string;
+	itemType: number;
 
-    itemClassSettings: Array<xItemClassSettings>;
+	itemClassSettings: Array<xItemClassSettings>;
 }
 
 export interface xItemClassSettings {
-    classId: string;
-    description?: string;
+	classId: string;
+	description?: string;
 }

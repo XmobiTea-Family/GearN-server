@@ -108,21 +108,21 @@ export class ApiMiddleware {
 
 			let startSize = this.authInfoDict.size;
 
-            let entries = this.authInfoDict.entries();
+			let entries = this.authInfoDict.entries();
 
-            let keysNeedRemove: string[] = [];
+			let keysNeedRemove: string[] = [];
 
-            for (let [key, authInfo] of entries) {
-                if (authInfo == null || authInfo.getTsLastUpdate() < tsRemove) {
-                    keysNeedRemove.push(key);
+			for (let [key, authInfo] of entries) {
+				if (authInfo == null || authInfo.getTsLastUpdate() < tsRemove) {
+					keysNeedRemove.push(key);
 
 					removeCount++;
 				}
-            }
+			}
 
-            for (let key of keysNeedRemove) {
-                this.authInfoDict.delete(key);
-            }
+			for (let key of keysNeedRemove) {
+				this.authInfoDict.delete(key);
+			}
 
 			Debug.log("[GearN] ApiMiddleware remove " + removeCount + "/" + startSize);
 		}

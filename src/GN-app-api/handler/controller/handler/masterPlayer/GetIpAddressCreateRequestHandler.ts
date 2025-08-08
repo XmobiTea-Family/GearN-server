@@ -16,8 +16,9 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { MasterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MasterPlayer";
 
 class GetIpAddressCreateOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -27,8 +28,9 @@ class GetIpAddressCreateOperationRequest extends OperationRequest {
 }
 
 class ServerGetIpAddressCreateOperationRequest extends GetIpAddressCreateOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

@@ -1,5 +1,5 @@
 export interface TokenPayload {
-    userId: string,
-    secretKey: string,
-    gnToken: string,
+	userId: string,
+	secretKey: string,
+	gnToken: string,
 }

@@ -39,7 +39,7 @@ export class ClusterHandler {
 
 	private onEventCallback: Map<string, (data: any) => void>;
 
-    private isSingleNode: boolean;
+	private isSingleNode: boolean;
 
 	public setRouter(router: express.Express): void {
 		this.router = router;
@@ -57,9 +57,9 @@ export class ClusterHandler {
 		return this.isPrimary;
 	}
 
-    public getIsSingleNode(): boolean {
-        return this.isSingleNode;
-    }
+	public getIsSingleNode(): boolean {
+		return this.isSingleNode;
+	}
 
 	public setPrivateKeyToken(privateKeyToken: string) {
 		this.privateKeyToken = privateKeyToken;
@@ -76,7 +76,7 @@ export class ClusterHandler {
 			wrap((req, res, next) => {
 				let pkt = req.header("privateKeyToken");
 				if (!pkt || pkt != this.privateKeyToken) {
-				    return res.sendStatus(401);
+					return res.sendStatus(401);
 				}
 
 				return next();
@@ -98,7 +98,7 @@ export class ClusterHandler {
 		}
 
 		let otherNode = this.allNodes.find(x => x.instanceId != this.instanceId);
-        if (otherNode == null) this.isSingleNode = true;
+		if (otherNode == null) this.isSingleNode = true;
 
 		if (this.isPrimary && otherNode == null) {
 			this.instanceInfoStatus.isPrimary = true;
@@ -141,19 +141,19 @@ export class ClusterHandler {
 		}, 5000);
 	}
 
-    private callbackInvoke(name: string, data: any): void {
-        let callback = this.onEventCallback.get(name);
-        if (!callback) {
-            return;
-        }
+	private callbackInvoke(name: string, data: any): void {
+		let callback = this.onEventCallback.get(name);
+		if (!callback) {
+			return;
+		}
 
-        try {
-            callback(data);
-        }
-        catch (err) {
-            Debug.logError("[GearN] ClusterHandler receive event failed " + err.message);
-        }
-    }
+		try {
+			callback(data);
+		}
+		catch (err) {
+			Debug.logError("[GearN] ClusterHandler receive event failed " + err.message);
+		}
+	}
 
 	private async update(): Promise<void> {
 		await this.checkInstanceStatus();
@@ -314,9 +314,9 @@ export class ClusterHandler {
 				});
 		}
 
-        if (includeMe) {
-            this.callbackInvoke(name, data);
-        }
+		if (includeMe) {
+			this.callbackInvoke(name, data);
+		}
 	}
 
 	constructor() {

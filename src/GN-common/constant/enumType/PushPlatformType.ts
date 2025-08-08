@@ -1,5 +1,5 @@
 export enum PushPlatformType {
-    Android = 1,
-    iOS = 2,
+	Android = 1,
+	iOS = 2,
 
 }

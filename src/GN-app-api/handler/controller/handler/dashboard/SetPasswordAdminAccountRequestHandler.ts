@@ -16,11 +16,12 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterAdminPlayer";
 
 class SetPasswordAdminAccountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	userId: string;
+	public userId: string;
 
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
-	password: string;
+	public password: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -30,6 +31,7 @@ class SetPasswordAdminAccountOperationRequest extends OperationRequest {
 }
 
 export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetPasswordAdminAccount;
 	}

@@ -845,7 +845,7 @@ export class ServerApplication extends BuilderBase {
 				let currencyLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.CurrencyLog");
 				await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 				await currencyLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
-				
+
 				Debug.log("create some indexes on Runtime.MasterPlayer.CurrencyLog success.");
 			}
 
@@ -859,28 +859,28 @@ export class ServerApplication extends BuilderBase {
 				let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.StatisticsLog");
 				await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 				await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
-			
+
 				Debug.log("create some indexes on Runtime.MasterPlayer.StatisticsLog success.");
 			}
 
 			{
 				let userIPAddressCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer.IPAddress");
 				await userIPAddressCollection.createIndex({ userId: 1 }, { background: true, name: "userId_1" });
-			
+
 				Debug.log("create some indexes on System.MasterPlayer.IPAddress success.");
 			}
 
 			{
 				let countryRegionCollection = this.gnServer.getDatabase().systemCollection("CountryRegion");
 				await countryRegionCollection.createIndex({ countryCode: 1 }, { background: true, name: "countryCode_1" });
-			
+
 				Debug.log("create some indexes on System.MasterPlayer.CountryRegion success.");
 			}
 
 			{
 				let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
 				await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
-			
+
 				Debug.log("create some indexes on Runtime.MasterPlayer.StatisticsBackup success.");
 			}
 

@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class UnlinkWindowsPhoneDeviceIdOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.WindowsPhoneDeviceId, minLength: 6, maxLength: 64, mustNonNull: true })
-	windowsPhoneDeviceId: string;
+	public windowsPhoneDeviceId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,8 +30,9 @@ class UnlinkWindowsPhoneDeviceIdOperationRequest extends OperationRequest {
 }
 
 class ServerUnlinkWindowsPhoneDeviceIdOperationRequest extends UnlinkWindowsPhoneDeviceIdOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

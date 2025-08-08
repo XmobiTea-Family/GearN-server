@@ -15,20 +15,21 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithTagOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-	key: string;
+	public key: string;
 
 	@StringDataMember({ code: ParameterCode.Value, minLength: 2, maxLength: 32, mustNonNull: true })
-	value: string;
+	public value: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-	skip?: number;
+	public skip?: number;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

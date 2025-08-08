@@ -14,11 +14,12 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 class GetContentDataOperationRequest extends OperationRequest {
+
 	@GNArrayDataMember({ code: ParameterCode.Keys, elementCls: String, isOptional: true })
-	keys?: Array<string>;
+	public keys?: Array<string>;
 
 	@StringDataMember({ code: ParameterCode.Label, minLength: 2, maxLength: 32, isOptional: true, defaultValue: "" })
-	label?: string;
+	public label?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -46,6 +47,7 @@ class AdminGetContentDataOperationRequest extends ServerGetContentDataOperationR
 }
 
 export class GetContentDataRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetContentData;
 	}

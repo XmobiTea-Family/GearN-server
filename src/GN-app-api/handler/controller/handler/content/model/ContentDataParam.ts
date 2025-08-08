@@ -3,9 +3,11 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, DataMember, GNArrayDataMember, GNHashtableDataMember, StringDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ContentDataParam {
+
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-	key: string;
+	public key: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.Data })
-	data: GNHashtable;
+	public data: GNHashtable;
+
 }

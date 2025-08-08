@@ -15,8 +15,9 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 
 class CreateNewFileUploadInfoOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.FileName, mustNonNull: true, minLength: 5, maxLength: 50 })
-	fileName: string;
+	public fileName: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +45,7 @@ class AdminCreateNewFileUploadInfoOperationRequest extends ServerCreateNewFileUp
 }
 
 export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateNewFileUploadInfo;
 	}

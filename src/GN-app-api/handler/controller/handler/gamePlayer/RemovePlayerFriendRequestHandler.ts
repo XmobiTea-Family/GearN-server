@@ -19,11 +19,12 @@ import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 
 class RemovePlayerFriendOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.FriendId, minLength: 10, maxLength: 10, mustNonNull: true })
-	friendId: string;
+	public friendId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -33,8 +34,9 @@ class RemovePlayerFriendOperationRequest extends OperationRequest {
 }
 
 class ServerRemovePlayerFriendOperationRequest extends RemovePlayerFriendOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +46,7 @@ class ServerRemovePlayerFriendOperationRequest extends RemovePlayerFriendOperati
 }
 
 class AdminRemovePlayerFriendOperationRequest extends ServerRemovePlayerFriendOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,6 +55,7 @@ class AdminRemovePlayerFriendOperationRequest extends ServerRemovePlayerFriendOp
 }
 
 export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemovePlayerFriend;
 	}

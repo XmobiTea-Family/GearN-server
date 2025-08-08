@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkGooglePlayGameServiceOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
-	token: string;
+	public token: string;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,8 +33,9 @@ class LinkGooglePlayGameServiceOperationRequest extends OperationRequest {
 }
 
 class ServerLinkGooglePlayGameServiceOperationRequest extends LinkGooglePlayGameServiceOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,6 +45,7 @@ class ServerLinkGooglePlayGameServiceOperationRequest extends LinkGooglePlayGame
 }
 
 class AdminLinkGooglePlayGameServiceOperationRequest extends ServerLinkGooglePlayGameServiceOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,6 +54,7 @@ class AdminLinkGooglePlayGameServiceOperationRequest extends ServerLinkGooglePla
 }
 
 export class LinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkGooglePlayGameService;
 	}

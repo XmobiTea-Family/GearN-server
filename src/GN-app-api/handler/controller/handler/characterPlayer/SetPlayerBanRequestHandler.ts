@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class SetPlayerBanOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@NumberDataMember({ code: ParameterCode.TsExpire })
-	tsExpire: number;
+	public tsExpire: number;
 
 	@StringDataMember({ code: ParameterCode.Reason })
-	reason: string;
+	public reason: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -50,6 +51,7 @@ class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationReque
 }
 
 export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetPlayerBan;
 	}

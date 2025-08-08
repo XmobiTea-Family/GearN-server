@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class GetPlayerDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@GNArrayDataMember({ code: ParameterCode.PlayerDataKeys, isOptional: true, elementCls: String })
-	playerDataKeys?: Array<string>;
+	public playerDataKeys?: Array<string>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,8 +30,9 @@ class GetPlayerDataOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayerDataOperationRequest extends GetPlayerDataOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

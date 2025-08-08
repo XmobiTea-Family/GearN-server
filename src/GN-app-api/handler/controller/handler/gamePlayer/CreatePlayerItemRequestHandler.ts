@@ -20,20 +20,21 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class CreatePlayerItemOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	catalogId: string;
+	public catalogId: string;
 
 	@StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
-	classId: string;
+	public classId: string;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-	displayName?: string;
+	public displayName?: string;
 
 	@NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, isOptional: true })
-	amount?: number;
+	public amount?: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,8 +44,9 @@ class CreatePlayerItemOperationRequest extends OperationRequest {
 }
 
 class ServerCreatePlayerItemOperationRequest extends CreatePlayerItemOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -54,6 +56,7 @@ class ServerCreatePlayerItemOperationRequest extends CreatePlayerItemOperationRe
 }
 
 class AdminCreatePlayerItemOperationRequest extends ServerCreatePlayerItemOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -62,6 +65,7 @@ class AdminCreatePlayerItemOperationRequest extends ServerCreatePlayerItemOperat
 }
 
 export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreatePlayerItem;
 	}

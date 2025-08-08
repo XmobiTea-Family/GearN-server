@@ -21,251 +21,253 @@ import { TagParam } from "./model/TagParam";
 import { InAppPurchaseParam } from "./model/InAppPurchaseParam";
 
 class SetStoreItemInformationOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
-    storeId: string;
 
-    @NumberDataMember({ code: ParameterCode.StoreItemType, minValue: 1, maxValue: 2, mustInt: true, isOptional: true, })
-    storeItemType?: number;
+	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
+	public storeId: string;
 
-    @GNArrayDataMember({ code: ParameterCode.StoreDatas, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreDataParam })
-    storeDataParams?: Array<StoreDataParam>;
+	@NumberDataMember({ code: ParameterCode.StoreItemType, minValue: 1, maxValue: 2, mustInt: true, isOptional: true, })
+	public storeItemType?: number;
 
-    @GNArrayDataMember({ code: ParameterCode.StoreItems, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreItemParam })
-    storeItemParams?: Array<StoreItemParam>;
+	@GNArrayDataMember({ code: ParameterCode.StoreDatas, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreDataParam })
+	public storeDataParams?: Array<StoreDataParam>;
 
-    @GNArrayDataMember({ code: ParameterCode.StoreCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
-    storeCurrencyParams?: Array<CurrencyParam>;
+	@GNArrayDataMember({ code: ParameterCode.StoreItems, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreItemParam })
+	public storeItemParams?: Array<StoreItemParam>;
 
-    @GNArrayDataMember({ code: ParameterCode.PriceCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
-    priceCurrencyParams?: Array<CurrencyParam>;
+	@GNArrayDataMember({ code: ParameterCode.StoreCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
+	public storeCurrencyParams?: Array<CurrencyParam>;
 
-    @GNHashtableDataMember({ code: ParameterCode.InAppPurchase, mustNonNull: true, isOptional: true, })
-    inAppPurchaseParam?: InAppPurchaseParam;
+	@GNArrayDataMember({ code: ParameterCode.PriceCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
+	public priceCurrencyParams?: Array<CurrencyParam>;
 
-    @StringDataMember({ code: ParameterCode.DisplayName, mustNonNull: true, isOptional: true, })
-    displayName?: string;
+	@GNHashtableDataMember({ code: ParameterCode.InAppPurchase, mustNonNull: true, isOptional: true, })
+	public inAppPurchaseParam?: InAppPurchaseParam;
 
-    @GNHashtableDataMember({ code: ParameterCode.Avatar, mustNonNull: true, isOptional: true, })
-    avatarParam?: AvatarParam;
+	@StringDataMember({ code: ParameterCode.DisplayName, mustNonNull: true, isOptional: true, })
+	public displayName?: string;
 
-    @GNArrayDataMember({ code: ParameterCode.Tags, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: TagParam })
-    tagParams?: Array<TagParam>;
+	@GNHashtableDataMember({ code: ParameterCode.Avatar, mustNonNull: true, isOptional: true, })
+	public avatarParam?: AvatarParam;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@GNArrayDataMember({ code: ParameterCode.Tags, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: TagParam })
+	public tagParams?: Array<TagParam>;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerSetStoreItemInformationOperationRequest extends SetStoreItemInformationOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminSetStoreItemInformationOperationRequest extends ServerSetStoreItemInformationOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.SetStoreItemInformation;
-    }
 
-    public override getCommonOperationRequest() {
-        return SetStoreItemInformationOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.SetStoreItemInformation;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return SetStoreItemInformationOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().storeInventory.setStoreItemInformation.otherSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            storeId: request.storeId,
-            storeItemType: request.storeItemType,
-            storeDataParams: request.storeDataParams,
-            storeItemParams: request.storeItemParams,
-            storeCurrencyParams: request.storeCurrencyParams,
-            priceCurrencyParams: request.priceCurrencyParams,
-            inAppPurchaseParam: request.inAppPurchaseParam,
-            displayName: request.displayName,
-            avatarParam: request.avatarParam,
-            tagParams: request.tagParams,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().storeInventory.setStoreItemInformation.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetStoreItemInformationOperationRequest);
+		return this.execute({
+			storeId: request.storeId,
+			storeItemType: request.storeItemType,
+			storeDataParams: request.storeDataParams,
+			storeItemParams: request.storeItemParams,
+			storeCurrencyParams: request.storeCurrencyParams,
+			priceCurrencyParams: request.priceCurrencyParams,
+			inAppPurchaseParam: request.inAppPurchaseParam,
+			displayName: request.displayName,
+			avatarParam: request.avatarParam,
+			tagParams: request.tagParams,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetStoreItemInformationOperationRequest);
 
-        if (!secretInfo.getPermission().storeInventory.setStoreItemInformation.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            storeId: request.storeId,
-            storeItemType: request.storeItemType,
-            storeDataParams: request.storeDataParams,
-            storeItemParams: request.storeItemParams,
-            storeCurrencyParams: request.storeCurrencyParams,
-            priceCurrencyParams: request.priceCurrencyParams,
-            inAppPurchaseParam: request.inAppPurchaseParam,
-            displayName: request.displayName,
-            avatarParam: request.avatarParam,
-            tagParams: request.tagParams,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().storeInventory.setStoreItemInformation.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetStoreItemInformationOperationRequest);
+		return this.execute({
+			storeId: request.storeId,
+			storeItemType: request.storeItemType,
+			storeDataParams: request.storeDataParams,
+			storeItemParams: request.storeItemParams,
+			storeCurrencyParams: request.storeCurrencyParams,
+			priceCurrencyParams: request.priceCurrencyParams,
+			inAppPurchaseParam: request.inAppPurchaseParam,
+			displayName: request.displayName,
+			avatarParam: request.avatarParam,
+			tagParams: request.tagParams,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetStoreItemInformationOperationRequest);
 
-        if (!secretInfo.getPermission().storeInventory.setStoreItemInformation.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            storeId: request.storeId,
-            storeItemType: request.storeItemType,
-            storeDataParams: request.storeDataParams,
-            storeItemParams: request.storeItemParams,
-            storeCurrencyParams: request.storeCurrencyParams,
-            priceCurrencyParams: request.priceCurrencyParams,
-            inAppPurchaseParam: request.inAppPurchaseParam,
-            displayName: request.displayName,
-            avatarParam: request.avatarParam,
-            tagParams: request.tagParams,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().storeInventory.setStoreItemInformation.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { storeId: string, storeItemType: number, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			storeId: request.storeId,
+			storeItemType: request.storeItemType,
+			storeDataParams: request.storeDataParams,
+			storeItemParams: request.storeItemParams,
+			storeCurrencyParams: request.storeCurrencyParams,
+			priceCurrencyParams: request.priceCurrencyParams,
+			inAppPurchaseParam: request.inAppPurchaseParam,
+			displayName: request.displayName,
+			avatarParam: request.avatarParam,
+			tagParams: request.tagParams,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { storeId: string, storeItemType: number, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        if (storeInventory == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
-            return operationResponse;
-        }
+		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
 
-        if (request.storeDataParams) {
-            storeInventory.clearStoreDatas();
-            for (let i = 0; i < request.storeDataParams.length; i++) {
-                let storeDataParam = request.storeDataParams[i];
+		if (storeInventory == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
+			return operationResponse;
+		}
 
-                let value = storeDataParam.value;
+		if (request.storeDataParams) {
+			storeInventory.clearStoreDatas();
+			for (let i = 0; i < request.storeDataParams.length; i++) {
+				let storeDataParam = request.storeDataParams[i];
 
-                if (value != null && value instanceof GNData) {
-                    value = (value as GNData).toData();
-                }
+				let value = storeDataParam.value;
 
-                storeInventory.setStoreData(storeDataParam.key, value as DataValueType);
-            }
-        }
+				if (value != null && value instanceof GNData) {
+					value = (value as GNData).toData();
+				}
 
-        if (request.storeItemParams != null) {
-            storeInventory.clearStoreItems();
-            for (let i = 0; i < request.storeItemParams.length; i++) {
-                let storeItemParam = request.storeItemParams[i];
-                storeInventory.setStoreItem(storeItemParam.catalogId, storeItemParam.classId, storeItemParam.amount);
-            }
-        }
+				storeInventory.setStoreData(storeDataParam.key, value as DataValueType);
+			}
+		}
 
-        if (request.storeCurrencyParams != null) {
-            storeInventory.clearStoreCurrencies();
-            for (let i = 0; i < request.storeCurrencyParams.length; i++) {
-                let storeCurrencyParam = request.storeCurrencyParams[i];
-                storeInventory.setStoreCurrency(storeCurrencyParam.key, storeCurrencyParam.value);
-            }
-        }
+		if (request.storeItemParams != null) {
+			storeInventory.clearStoreItems();
+			for (let i = 0; i < request.storeItemParams.length; i++) {
+				let storeItemParam = request.storeItemParams[i];
+				storeInventory.setStoreItem(storeItemParam.catalogId, storeItemParam.classId, storeItemParam.amount);
+			}
+		}
 
-        if (request.priceCurrencyParams != null) {
-            storeInventory.clearPriceCurrencies();
-            for (let i = 0; i < request.priceCurrencyParams.length; i++) {
-                let priceCurrencyParam = request.priceCurrencyParams[i];
-                storeInventory.setPriceCurrency(priceCurrencyParam.key, priceCurrencyParam.value);
-            }
-        }
+		if (request.storeCurrencyParams != null) {
+			storeInventory.clearStoreCurrencies();
+			for (let i = 0; i < request.storeCurrencyParams.length; i++) {
+				let storeCurrencyParam = request.storeCurrencyParams[i];
+				storeInventory.setStoreCurrency(storeCurrencyParam.key, storeCurrencyParam.value);
+			}
+		}
 
-        if (request.inAppPurchaseParam != null) {
-            let inAppPurchase = storeInventory.getInAppPurchase();
+		if (request.priceCurrencyParams != null) {
+			storeInventory.clearPriceCurrencies();
+			for (let i = 0; i < request.priceCurrencyParams.length; i++) {
+				let priceCurrencyParam = request.priceCurrencyParams[i];
+				storeInventory.setPriceCurrency(priceCurrencyParam.key, priceCurrencyParam.value);
+			}
+		}
 
-            storeInventory.setInAppPurchase({
-                appleAppStoreId: request.inAppPurchaseParam.appleAppStoreId ?? inAppPurchase.appleAppStoreId,
-                facebookStoreId: request.inAppPurchaseParam.facebookStoreId ?? inAppPurchase.facebookStoreId,
-                googlePlayStoreId: request.inAppPurchaseParam.googlePlayStoreId ?? inAppPurchase.googlePlayStoreId,
-                analyticsPrice: request.inAppPurchaseParam.analyticsPrice ?? inAppPurchase.analyticsPrice,
-            });
-        }
+		if (request.inAppPurchaseParam != null) {
+			let inAppPurchase = storeInventory.getInAppPurchase();
 
-        if (request.displayName != null) {
-            storeInventory.setDisplayName(request.displayName);
-        }
+			storeInventory.setInAppPurchase({
+				appleAppStoreId: request.inAppPurchaseParam.appleAppStoreId ?? inAppPurchase.appleAppStoreId,
+				facebookStoreId: request.inAppPurchaseParam.facebookStoreId ?? inAppPurchase.facebookStoreId,
+				googlePlayStoreId: request.inAppPurchaseParam.googlePlayStoreId ?? inAppPurchase.googlePlayStoreId,
+				analyticsPrice: request.inAppPurchaseParam.analyticsPrice ?? inAppPurchase.analyticsPrice,
+			});
+		}
 
-        if (request.avatarParam != null) {
-            storeInventory.setAvatar(request.avatarParam.type, request.avatarParam.value);
-        }
+		if (request.displayName != null) {
+			storeInventory.setDisplayName(request.displayName);
+		}
 
-        if (request.storeItemType != null) {
-            storeInventory.setStoreItemType(request.storeItemType);
-        }
+		if (request.avatarParam != null) {
+			storeInventory.setAvatar(request.avatarParam.type, request.avatarParam.value);
+		}
 
-        if (request.tagParams != null) {
-            storeInventory.clearTags();
-            for (let i = 0; i < request.tagParams.length; i++) {
-                let tagParam = request.tagParams[i];
-                storeInventory.setTag(tagParam.key, tagParam.value);
-            }
-        }
+		if (request.storeItemType != null) {
+			storeInventory.setStoreItemType(request.storeItemType);
+		}
 
-        storeInventory.saveAsync();
+		if (request.tagParams != null) {
+			storeInventory.clearTags();
+			for (let i = 0; i < request.tagParams.length; i++) {
+				let tagParam = request.tagParams[i];
+				storeInventory.setTag(tagParam.key, tagParam.value);
+			}
+		}
 
-        operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(storeInventory, {
-            storeItems: true,
-            storeItemType: true,
-            storeCurrencies: true,
-            priceCurrencies: true,
-            inAppPurchase: true,
-            removeStatus: true,
-            displayName: true,
-            avatar: true,
-            tsCreate: true,
-            tags: true,
-            storeDatas: true,
-        }, secretInfo.getGameId()));
+		storeInventory.saveAsync();
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(storeInventory, {
+			storeItems: true,
+			storeItemType: true,
+			storeCurrencies: true,
+			priceCurrencies: true,
+			inAppPurchase: true,
+			removeStatus: true,
+			displayName: true,
+			avatar: true,
+			tsCreate: true,
+			tags: true,
+			storeDatas: true,
+		}, secretInfo.getGameId()));
 
-        await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

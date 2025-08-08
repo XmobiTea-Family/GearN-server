@@ -2,15 +2,17 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class PermissionRulesParam {
+
 	@BooleanDataMember({ code: ParameterCode.SelfEnable, isOptional: true })
-	selfEnable?: boolean;
+	public selfEnable?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.OtherSelfEnable, isOptional: true })
-	otherSelfEnable?: boolean;
+	public otherSelfEnable?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.AdminSelfEnable, isOptional: true })
-	adminSelfEnable?: boolean;
+	public adminSelfEnable?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.ServerSelfEnable, isOptional: true })
-	serverSelfEnable?: boolean;
+	public serverSelfEnable?: boolean;
+
 }

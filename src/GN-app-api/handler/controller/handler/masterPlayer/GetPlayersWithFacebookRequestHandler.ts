@@ -15,11 +15,12 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithFacebookOperationRequest extends OperationRequest {
+
 	@GNArrayDataMember({ code: ParameterCode.FacebookIds, mustNonNull: true, elementCls: String })
-	facebookIds: Array<string>;
+	public facebookIds: Array<string>;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +48,7 @@ class AdminGetPlayersWithFacebookOperationRequest extends ServerGetPlayersWithFa
 }
 
 export class GetPlayersWithFacebookRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetPlayersWithFacebook;
 	}

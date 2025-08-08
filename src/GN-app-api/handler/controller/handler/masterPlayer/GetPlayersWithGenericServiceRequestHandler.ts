@@ -15,14 +15,15 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithGenericServiceOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ServiceName, minLength: 2, maxLength: 32, mustNonNull: true })
-	serviceName: string;
+	public serviceName: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GenericIds, mustNonNull: true, elementCls: String })
-	genericIds: Array<string>;
+	public genericIds: Array<string>;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -50,6 +51,7 @@ class AdminGetPlayersWithGenericServiceOperationRequest extends ServerGetPlayers
 }
 
 export class GetPlayersWithGenericServiceRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetPlayersWithGenericService;
 	}

@@ -6,12 +6,12 @@ import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import {
-    DataMember,
-    BooleanDataMember,
-    NumberDataMember,
-    StringDataMember,
-    GNHashtableDataMember,
-    GNArrayDataMember,
+	DataMember,
+	BooleanDataMember,
+	NumberDataMember,
+	StringDataMember,
+	GNHashtableDataMember,
+	GNArrayDataMember,
 } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
@@ -21,128 +21,138 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 
 class GetStoreUsedOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
-    storeId: string;
+
+	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
+	public storeId: string;
+
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerGetStoreUsedOperationRequest extends GetStoreUsedOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class AdminGetStoreUsedOperationRequest extends ServerGetStoreUsedOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.GetStoreUsed;
-    }
 
-    public override getCommonOperationRequest() {
-        return GetStoreUsedOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.GetStoreUsed;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return GetStoreUsedOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().storeInventory.getStoreUsed.otherSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute(
-            {
-                storeId: request.storeId,
-            },
-            secretInfo,
-            operationRequest
-        );
-    }
+		if (!secretInfo.getPermission().storeInventory.getStoreUsed.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStoreUsedOperationRequest);
+		return this.execute(
+			{
+				storeId: request.storeId,
+			},
+			secretInfo,
+			operationRequest
+		);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStoreUsedOperationRequest);
 
-        if (!secretInfo.getPermission().storeInventory.getStoreUsed.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute(
-            {
-                storeId: request.storeId,
-            },
-            secretInfo,
-            operationRequest
-        );
-    }
+		if (!secretInfo.getPermission().storeInventory.getStoreUsed.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStoreUsedOperationRequest);
+		return this.execute(
+			{
+				storeId: request.storeId,
+			},
+			secretInfo,
+			operationRequest
+		);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStoreUsedOperationRequest);
 
-        if (!secretInfo.getPermission().storeInventory.getStoreUsed.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute(
-            {
-                storeId: request.storeId,
-            },
-            secretInfo,
-            operationRequest
-        );
-    }
+		if (!secretInfo.getPermission().storeInventory.getStoreUsed.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { storeId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_GetStoreUsed", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute(
+			{
+				storeId: request.storeId,
+			},
+			secretInfo,
+			operationRequest
+		);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { storeId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_GetStoreUsed", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let gnResults = new GNArray();
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let result = await this.gnServer.getDatabase().getStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId());
+		let gnResults = new GNArray();
 
-        if (result != null) {
-            for (let i = 0; i < result.useIds.length; i++) {
-                let useId = result.useIds[i];
+		let result = await this.gnServer.getDatabase().getStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId());
 
-                let gnResult = new GNHashtable();
+		if (result != null) {
+			for (let i = 0; i < result.useIds.length; i++) {
+				let useId = result.useIds[i];
 
-                gnResult.add(ParameterCode.OwnerId, useId.id);
-                gnResult.add(ParameterCode.OwnerType, useId.type);
-                gnResult.add(ParameterCode.TsCreate, useId.tsCreate);
+				let gnResult = new GNHashtable();
 
-                gnResults.add(gnResult);
-            }
-        }
+				gnResult.add(ParameterCode.OwnerId, useId.id);
+				gnResult.add(ParameterCode.OwnerType, useId.type);
+				gnResult.add(ParameterCode.TsCreate, useId.tsCreate);
 
-        operationResponse.setParameter(ParameterCode.Results, gnResults);
+				gnResults.add(gnResult);
+			}
+		}
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_GetStoreUsed", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_GetStoreUsed", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

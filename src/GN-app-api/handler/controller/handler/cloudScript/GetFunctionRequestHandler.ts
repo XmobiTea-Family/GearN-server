@@ -13,8 +13,9 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class GetFunctionOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Version, minLength: 7, maxLength: 7, mustNonNull: true })
-	version: string;
+	public version: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -42,6 +43,7 @@ class AdminGetFunctionOperationRequest extends ServerGetFunctionOperationRequest
 }
 
 export class GetFunctionRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetFunction;
 	}

@@ -17,11 +17,12 @@ import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 class SetCustomDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
-	customData: Array<CustomDataParam>;
+	public customData: Array<CustomDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -40,6 +41,7 @@ class ServerSetCustomDataOperationRequest extends SetCustomDataOperationRequest 
 }
 
 class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +50,7 @@ class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationReq
 }
 
 export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetCustomData;
 	}
@@ -152,7 +155,7 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 				if (value instanceof GNData) {
 					value = (value as GNData).toData();
 				}
-				
+
 				inventory.setCustomData(key, value as DataValueType);
 			}
 

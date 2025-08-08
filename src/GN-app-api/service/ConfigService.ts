@@ -3,7 +3,7 @@ import { IConfigService, ConfigItem } from "./IConfigService";
 import * as mongoDB from "mongodb";
 
 export class ConfigService implements IConfigService {
-    private configDic: Map<string, Map<string, ConfigItem>> = new Map();
+	private configDic: Map<string, Map<string, ConfigItem>> = new Map();
 
 	private gameId: string;
 	private configCollection: mongoDB.Collection<mongoDB.Document>;
@@ -84,9 +84,9 @@ export class ConfigService implements IConfigService {
 					"data": data
 				}
 			},
-			{
-				upsert: true
-			});
+				{
+					upsert: true
+				});
 		}
 
 		Debug.log("Update success online config " + configName + " on " + this.gameId);

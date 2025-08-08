@@ -16,11 +16,12 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 
 class SetOwnerOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 10, mustNonNull: true })
-	newOwnerId: string;
+	public newOwnerId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

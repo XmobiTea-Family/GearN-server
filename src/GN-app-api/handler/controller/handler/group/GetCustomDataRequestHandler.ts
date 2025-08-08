@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class GetCustomDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDataKeys, isOptional: true, elementCls: String })
-	customDataKeys?: Array<string>;
+	public customDataKeys?: Array<string>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +48,7 @@ class AdminGetCustomDataOperationRequest extends ServerGetCustomDataOperationReq
 }
 
 export class GetCustomDataRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetCustomData;
 	}

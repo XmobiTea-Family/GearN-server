@@ -14,8 +14,9 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 class GetFileUploadInfoOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
-	fileId: string;
+	public fileId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -26,6 +27,7 @@ class GetFileUploadInfoOperationRequest extends OperationRequest {
 }
 
 class ServerGetFileUploadInfoOperationRequest extends GetFileUploadInfoOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +45,7 @@ class AdminGetFileUploadInfoOperationRequest extends ServerGetFileUploadInfoOper
 }
 
 export class GetFileUploadInfoRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetFileUploadInfo;
 	}

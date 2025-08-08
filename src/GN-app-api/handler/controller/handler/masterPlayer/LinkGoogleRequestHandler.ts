@@ -16,17 +16,18 @@ import { GoogleLoginType } from "./../../../../../GN-common/constant/enumType/Go
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkGoogleOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
-	token: string;
+	public token: string;
 
 	@NumberDataMember({ code: ParameterCode.Type, minValue: 1, maxValue: 2 })
-	type: number;
+	public type: number;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -36,8 +37,9 @@ class LinkGoogleOperationRequest extends OperationRequest {
 }
 
 class ServerLinkGoogleOperationRequest extends LinkGoogleOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +49,7 @@ class ServerLinkGoogleOperationRequest extends LinkGoogleOperationRequest {
 }
 
 class AdminLinkGoogleOperationRequest extends ServerLinkGoogleOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,6 +58,7 @@ class AdminLinkGoogleOperationRequest extends ServerLinkGoogleOperationRequest {
 }
 
 export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkGoogle;
 	}

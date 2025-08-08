@@ -3,19 +3,20 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { PermissionRulesParam } from "./PermissionRulesParam";
 
 export class CloudScriptPermissionRulesParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.AddFunction, isOptional: true })
-	addFunction?: PermissionRulesParam;
+	public addFunction?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetFunctions, isOptional: true })
-	getFunctions?: PermissionRulesParam;
+	public getFunctions?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.EditFunction, isOptional: true })
-	editFunction?: PermissionRulesParam;
+	public editFunction?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ExecuteFunction, isOptional: true })
-	executeFunction?: PermissionRulesParam;
+	public executeFunction?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetFunction, isOptional: true })
-	getFunction?: PermissionRulesParam;
+	public getFunction?: PermissionRulesParam;
 
 }

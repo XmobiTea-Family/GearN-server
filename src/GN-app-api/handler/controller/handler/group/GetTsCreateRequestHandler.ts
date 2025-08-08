@@ -15,8 +15,9 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class GetTsCreateOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -35,6 +36,7 @@ class ServerGetTsCreateOperationRequest extends GetTsCreateOperationRequest {
 }
 
 class AdminGetTsCreateOperationRequest extends ServerGetTsCreateOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +45,7 @@ class AdminGetTsCreateOperationRequest extends ServerGetTsCreateOperationRequest
 }
 
 export class GetTsCreateRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetTsCreate;
 	}

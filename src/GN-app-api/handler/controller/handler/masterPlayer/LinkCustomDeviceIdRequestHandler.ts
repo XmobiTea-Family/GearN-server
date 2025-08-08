@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkCustomDeviceIdOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.CustomDeviceId, minLength: 6, maxLength: 64, mustNonNull: true })
-	customDeviceId: string;
+	public customDeviceId: string;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,8 +33,9 @@ class LinkCustomDeviceIdOperationRequest extends OperationRequest {
 }
 
 class ServerLinkCustomDeviceIdOperationRequest extends LinkCustomDeviceIdOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,6 +45,7 @@ class ServerLinkCustomDeviceIdOperationRequest extends LinkCustomDeviceIdOperati
 }
 
 class AdminLinkCustomDeviceIdOperationRequest extends ServerLinkCustomDeviceIdOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,6 +54,7 @@ class AdminLinkCustomDeviceIdOperationRequest extends ServerLinkCustomDeviceIdOp
 }
 
 export class LinkCustomDeviceIdRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkCustomDeviceId;
 	}

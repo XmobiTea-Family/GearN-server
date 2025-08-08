@@ -3,12 +3,14 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { ItemClassSettingsParam } from "./ItemClassSettingsParam";
 
 export class ItemCatalogSettingsParam {
+
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32 })
-	catalogId: string;
+	public catalogId: string;
 
 	@NumberDataMember({ code: ParameterCode.ItemType, mustInt: true })
-	itemType: number;
+	public itemType: number;
 
 	@GNArrayDataMember({ code: ParameterCode.ItemClassSettings, elementCls: ItemClassSettingsParam })
-	itemClassSettings: Array<ItemClassSettingsParam>;
+	public itemClassSettings: Array<ItemClassSettingsParam>;
+
 }

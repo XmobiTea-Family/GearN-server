@@ -15,8 +15,9 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler as MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class GetAvatarOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -26,8 +27,9 @@ class GetAvatarOperationRequest extends OperationRequest {
 }
 
 class ServerGetAvatarOperationRequest extends GetAvatarOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -46,6 +48,7 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 }
 
 export class GetAvatarRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetAvatar;
 	}

@@ -1,3 +1,3 @@
 export interface CurrencyItem {
-    value: number;
+	value: number;
 }

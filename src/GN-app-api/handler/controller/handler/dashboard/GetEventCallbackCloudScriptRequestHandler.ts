@@ -13,6 +13,7 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 class GetEventCallbackCloudScriptOperationRequest extends OperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -21,6 +22,7 @@ class GetEventCallbackCloudScriptOperationRequest extends OperationRequest {
 }
 
 export class GetEventCallbackCloudScriptRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetEventCallbackCloudScript;
 	}

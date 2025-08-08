@@ -19,14 +19,15 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 
 class SetOwnerOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 11, maxLength: 11, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 12, mustNonNull: true })
-	newOwnerId: string;
+	public newOwnerId: string;
 
 	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
-	newOwnerType: number;
+	public newOwnerType: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

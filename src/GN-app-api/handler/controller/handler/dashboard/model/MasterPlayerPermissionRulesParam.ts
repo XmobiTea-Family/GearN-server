@@ -3,262 +3,263 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { PermissionRulesParam } from "./PermissionRulesParam";
 
 export class MasterPlayerPermissionRulesParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.LinkAccount, isOptional: true })
-	linkAccount?: PermissionRulesParam;
+	public linkAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkAndroidDeviceId, isOptional: true })
-	linkAndroidDeviceId?: PermissionRulesParam;
+	public linkAndroidDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkApple, isOptional: true })
-	linkApple?: PermissionRulesParam;
+	public linkApple?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkCustomDeviceId, isOptional: true })
-	linkCustomDeviceId?: PermissionRulesParam;
+	public linkCustomDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkCustomId, isOptional: true })
-	linkCustomId?: PermissionRulesParam;
+	public linkCustomId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkEditorDeviceId, isOptional: true })
-	linkEditorDeviceId?: PermissionRulesParam;
+	public linkEditorDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkFacebook, isOptional: true })
-	linkFacebook?: PermissionRulesParam;
+	public linkFacebook?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkGenericService, isOptional: true })
-	linkGenericService?: PermissionRulesParam;
+	public linkGenericService?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkGoogle, isOptional: true })
-	linkGoogle?: PermissionRulesParam;
+	public linkGoogle?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkGooglePlayGameService, isOptional: true })
-	linkGooglePlayGameService?: PermissionRulesParam;
+	public linkGooglePlayGameService?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkGameCenter, isOptional: true })
-	linkGameCenter?: PermissionRulesParam;
+	public linkGameCenter?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkiOSDeviceId, isOptional: true })
-	linkiOSDeviceId?: PermissionRulesParam;
+	public linkiOSDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkLinuxDeviceId, isOptional: true })
-	linkLinuxDeviceId?: PermissionRulesParam;
+	public linkLinuxDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkMacOSDeviceId, isOptional: true })
-	linkMacOSDeviceId?: PermissionRulesParam;
+	public linkMacOSDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkWindowsDeviceId, isOptional: true })
-	linkWindowsDeviceId?: PermissionRulesParam;
+	public linkWindowsDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.LinkWindowsPhoneDeviceId, isOptional: true })
-	linkWindowsPhoneDeviceId?: PermissionRulesParam;
+	public linkWindowsPhoneDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkAccount, isOptional: true })
-	unlinkAccount?: PermissionRulesParam;
+	public unlinkAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkAndroidDeviceId, isOptional: true })
-	unlinkAndroidDeviceId?: PermissionRulesParam;
+	public unlinkAndroidDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkApple, isOptional: true })
-	unlinkApple?: PermissionRulesParam;
+	public unlinkApple?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkCustomDeviceId, isOptional: true })
-	unlinkCustomDeviceId?: PermissionRulesParam;
+	public unlinkCustomDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkCustomId, isOptional: true })
-	unlinkCustomId?: PermissionRulesParam;
+	public unlinkCustomId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkEditorDeviceId, isOptional: true })
-	unlinkEditorDeviceId?: PermissionRulesParam;
+	public unlinkEditorDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkFacebook, isOptional: true })
-	unlinkFacebook?: PermissionRulesParam;
+	public unlinkFacebook?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkGenericService, isOptional: true })
-	unlinkGenericService?: PermissionRulesParam;
+	public unlinkGenericService?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkGoogle, isOptional: true })
-	unlinkGoogle?: PermissionRulesParam;
+	public unlinkGoogle?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkGooglePlayGameService, isOptional: true })
-	unlinkGooglePlayGameService?: PermissionRulesParam;
+	public unlinkGooglePlayGameService?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkGameCenter, isOptional: true })
-	unlinkGameCenter?: PermissionRulesParam;
+	public unlinkGameCenter?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkiOSDeviceId, isOptional: true })
-	unlinkiOSDeviceId?: PermissionRulesParam;
+	public unlinkiOSDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkLinuxDeviceId, isOptional: true })
-	unlinkLinuxDeviceId?: PermissionRulesParam;
+	public unlinkLinuxDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkMacOSDeviceId, isOptional: true })
-	unlinkMacOSDeviceId?: PermissionRulesParam;
+	public unlinkMacOSDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkWindowsDeviceId, isOptional: true })
-	unlinkWindowsDeviceId?: PermissionRulesParam;
+	public unlinkWindowsDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.UnlinkWindowsPhoneDeviceId, isOptional: true })
-	unlinkWindowsPhoneDeviceId?: PermissionRulesParam;
+	public unlinkWindowsPhoneDeviceId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.AddSegment, isOptional: true })
-	addSegment?: PermissionRulesParam;
+	public addSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemoveSegment, isOptional: true })
-	removeSegment?: PermissionRulesParam;
+	public removeSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetSegment, isOptional: true })
-	getSegment?: PermissionRulesParam;
+	public getSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetTag, isOptional: true })
-	setTag?: PermissionRulesParam;
+	public setTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemoveTag, isOptional: true })
-	removeTag?: PermissionRulesParam;
+	public removeTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetTag, isOptional: true })
-	getTag?: PermissionRulesParam;
+	public getTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetDisplayName, isOptional: true })
-	getDisplayName?: PermissionRulesParam;
+	public getDisplayName?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetDisplayName, isOptional: true })
-	setDisplayName?: PermissionRulesParam;
+	public setDisplayName?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetTsCreate, isOptional: true })
-	getTsCreate?: PermissionRulesParam;
+	public getTsCreate?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetIpAddressCreate, isOptional: true })
-	getIpAddressCreate?: PermissionRulesParam;
+	public getIpAddressCreate?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetTsLastLogin, isOptional: true })
-	setTsLastLogin?: PermissionRulesParam;
+	public setTsLastLogin?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetTsLastLogin, isOptional: true })
-	getTsLastLogin?: PermissionRulesParam;
+	public getTsLastLogin?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetPlayerBan, isOptional: true })
-	setPlayerBan?: PermissionRulesParam;
+	public setPlayerBan?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayerBan, isOptional: true })
-	getPlayerBan?: PermissionRulesParam;
+	public getPlayerBan?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetCountryCode, isOptional: true })
-	setCountryCode?: PermissionRulesParam;
+	public setCountryCode?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCountryCode, isOptional: true })
-	getCountryCode?: PermissionRulesParam;
+	public getCountryCode?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ChangeAccountPassword, isOptional: true })
-	changeAccountPassword?: PermissionRulesParam;
+	public changeAccountPassword?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ResetAccountPassword, isOptional: true })
-	resetAccountPassword?: PermissionRulesParam;
+	public resetAccountPassword?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetAvatar, isOptional: true })
-	setAvatar?: PermissionRulesParam;
+	public setAvatar?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetAvatar, isOptional: true })
-	getAvatar?: PermissionRulesParam;
+	public getAvatar?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetPlayerCurrency, isOptional: true })
-	setPlayerCurrency?: PermissionRulesParam;
+	public setPlayerCurrency?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayerCurrency, isOptional: true })
-	getPlayerCurrency?: PermissionRulesParam;
+	public getPlayerCurrency?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetPlayerStatistics, isOptional: true })
-	setPlayerStatistics?: PermissionRulesParam;
+	public setPlayerStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayerStatistics, isOptional: true })
-	getPlayerStatistics?: PermissionRulesParam;
+	public getPlayerStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStatisticsLeaderboard, isOptional: true })
-	getStatisticsLeaderboard?: PermissionRulesParam;
+	public getStatisticsLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStatisticsLeaderboardAroundPlayer, isOptional: true })
-	getStatisticsLeaderboardAroundPlayer?: PermissionRulesParam;
+	public getStatisticsLeaderboardAroundPlayer?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCustomData, isOptional: true })
-	getCustomData?: PermissionRulesParam;
+	public getCustomData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetCustomData, isOptional: true })
-	setCustomData?: PermissionRulesParam;
+	public setCustomData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetPlayerData, isOptional: true })
-	setPlayerData?: PermissionRulesParam;
+	public setPlayerData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayerData, isOptional: true })
-	getPlayerData?: PermissionRulesParam;
+	public getPlayerData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayerInformation, isOptional: true })
-	getPlayerInformation?: PermissionRulesParam;
+	public getPlayerInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithApple, isOptional: true })
-	getPlayersWithApple?: PermissionRulesParam;
+	public getPlayersWithApple?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithFacebook, isOptional: true })
-	getPlayersWithFacebook?: PermissionRulesParam;
+	public getPlayersWithFacebook?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithGoogle, isOptional: true })
-	getPlayersWithGoogle?: PermissionRulesParam;
+	public getPlayersWithGoogle?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithGenericService, isOptional: true })
-	getPlayersWithGenericService?: PermissionRulesParam;
+	public getPlayersWithGenericService?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithSegment, isOptional: true })
-	getPlayersWithSegment?: PermissionRulesParam;
+	public getPlayersWithSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithTag, isOptional: true })
-	getPlayersWithTag?: PermissionRulesParam;
+	public getPlayersWithTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithGooglePlayGameService, isOptional: true })
-	getPlayersWithGooglePlayGameService?: PermissionRulesParam;
+	public getPlayersWithGooglePlayGameService?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithGameCenter, isOptional: true })
-	getPlayersWithGameCenter?: PermissionRulesParam;
+	public getPlayersWithGameCenter?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetExternal, isOptional: true })
-	getExternal?: PermissionRulesParam;
+	public getExternal?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayersWithDisplayName, isOptional: true })
-	getPlayersWithDisplayName?: PermissionRulesParam;
+	public getPlayersWithDisplayName?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetEmail, isOptional: true })
-	getEmail?: PermissionRulesParam;
+	public getEmail?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetEmail, isOptional: true })
-	setEmail?: PermissionRulesParam;
+	public setEmail?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCurrencyLeaderboard, isOptional: true })
-	getCurrencyLeaderboard?: PermissionRulesParam;
+	public getCurrencyLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetLastLoginLeaderboard, isOptional: true })
-	getLastLoginLeaderboard?: PermissionRulesParam;
+	public getLastLoginLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCreateLeaderboard, isOptional: true })
-	getCreateLeaderboard?: PermissionRulesParam;
+	public getCreateLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStatisticsLog, isOptional: true })
-	getStatisticsLog?: PermissionRulesParam;
+	public getStatisticsLog?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCurrencyLog, isOptional: true })
-	getCurrencyLog?: PermissionRulesParam;
+	public getCurrencyLog?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SendSocketOperationEvent, isOptional: true })
-	sendSocketOperationEvent?: PermissionRulesParam;
+	public sendSocketOperationEvent?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SendEmail, isOptional: true })
-	sendEmail?: PermissionRulesParam;
+	public sendEmail?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SendPushNotification, isOptional: true })
-	sendPushNotification?: PermissionRulesParam;
+	public sendPushNotification?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.AddPushNotification, isOptional: true })
-	addPushNotification?: PermissionRulesParam;
+	public addPushNotification?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemovePushNotification, isOptional: true })
-	removePushNotification?: PermissionRulesParam;
+	public removePushNotification?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPushNotification, isOptional: true })
-	getPushNotification?: PermissionRulesParam;
+	public getPushNotification?: PermissionRulesParam;
 
 }

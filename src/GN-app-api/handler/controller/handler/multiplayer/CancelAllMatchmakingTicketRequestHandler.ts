@@ -16,8 +16,9 @@ import { MatchmakingTicket } from "./../../../../../GN-library/xdatabase/lib/ent
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class CancelAllMatchmakingTicketOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
-	queueName: string;
+	public queueName: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -27,8 +28,9 @@ class CancelAllMatchmakingTicketOperationRequest extends OperationRequest {
 }
 
 class ServerCancelAllMatchmakingTicketOperationRequest extends CancelAllMatchmakingTicketOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
-	userId: string;
+	public userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +49,7 @@ class AdminCancelAllMatchmakingTicketOperationRequest extends ServerCancelAllMat
 }
 
 export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CancelAllMatchmakingTicket;
 	}

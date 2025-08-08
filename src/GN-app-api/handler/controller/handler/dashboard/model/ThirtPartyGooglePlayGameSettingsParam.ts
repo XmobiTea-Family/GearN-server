@@ -2,15 +2,17 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ThirtPartyGooglePlayGameSettingsParam {
+
 	@StringDataMember({ code: ParameterCode.RedirectUri })
-	redirectUri: string;
+	public redirectUri: string;
 
 	@StringDataMember({ code: ParameterCode.ClientId })
-	clientId: string;
+	public clientId: string;
 
 	@StringDataMember({ code: ParameterCode.ClientSecret })
-	clientSecret: string;
+	public clientSecret: string;
 
 	@StringDataMember({ code: ParameterCode.ApplicationId })
-	applicationId: string;
+	public applicationId: string;
+
 }

@@ -3,106 +3,107 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { PermissionRulesParam } from "./PermissionRulesParam";
 
 export class InventoryPermissionRulesParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.AddSegment, isOptional: true })
-	addSegment?: PermissionRulesParam;
+	public addSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemoveSegment, isOptional: true })
-	removeSegment?: PermissionRulesParam;
+	public removeSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetSegment, isOptional: true })
-	getSegment?: PermissionRulesParam;
+	public getSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetTag, isOptional: true })
-	setTag?: PermissionRulesParam;
+	public setTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemoveTag, isOptional: true })
-	removeTag?: PermissionRulesParam;
+	public removeTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetTag, isOptional: true })
-	getTag?: PermissionRulesParam;
+	public getTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetDisplayName, isOptional: true })
-	getDisplayName?: PermissionRulesParam;
+	public getDisplayName?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetDisplayName, isOptional: true })
-	setDisplayName?: PermissionRulesParam;
+	public setDisplayName?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetTsCreate, isOptional: true })
-	getTsCreate?: PermissionRulesParam;
+	public getTsCreate?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetAvatar, isOptional: true })
-	setAvatar?: PermissionRulesParam;
+	public setAvatar?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetAvatar, isOptional: true })
-	getAvatar?: PermissionRulesParam;
+	public getAvatar?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetItemStatistics, isOptional: true })
-	setItemStatistics?: PermissionRulesParam;
+	public setItemStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemStatistics, isOptional: true })
-	getItemStatistics?: PermissionRulesParam;
+	public getItemStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStatisticsLeaderboard, isOptional: true })
-	getStatisticsLeaderboard?: PermissionRulesParam;
+	public getStatisticsLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStatisticsLeaderboardAroundItem, isOptional: true })
-	getStatisticsLeaderboardAroundItem?: PermissionRulesParam;
+	public getStatisticsLeaderboardAroundItem?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCustomData, isOptional: true })
-	getCustomData?: PermissionRulesParam;
+	public getCustomData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetCustomData, isOptional: true })
-	setCustomData?: PermissionRulesParam;
+	public setCustomData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetItemData, isOptional: true })
-	setItemData?: PermissionRulesParam;
+	public setItemData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemData, isOptional: true })
-	getItemData?: PermissionRulesParam;
+	public getItemData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemInformation, isOptional: true })
-	getItemInformation?: PermissionRulesParam;
+	public getItemInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemsWithSegment, isOptional: true })
-	getItemsWithSegment?: PermissionRulesParam;
+	public getItemsWithSegment?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemsWithTag, isOptional: true })
-	getItemsWithTag?: PermissionRulesParam;
+	public getItemsWithTag?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCatalogId, isOptional: true })
-	getCatalogId?: PermissionRulesParam;
+	public getCatalogId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetClassId, isOptional: true })
-	getClassId?: PermissionRulesParam;
+	public getClassId?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemType, isOptional: true })
-	getItemType?: PermissionRulesParam;
+	public getItemType?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetAmount, isOptional: true })
-	getAmount?: PermissionRulesParam;
+	public getAmount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetOwner, isOptional: true })
-	getOwner?: PermissionRulesParam;
+	public getOwner?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetRemoveStatus, isOptional: true })
-	getRemoveStatus?: PermissionRulesParam;
+	public getRemoveStatus?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetAmount, isOptional: true })
-	setAmount?: PermissionRulesParam;
+	public setAmount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetOwner, isOptional: true })
-	setOwner?: PermissionRulesParam;
+	public setOwner?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetRemoveStatus, isOptional: true })
-	setRemoveStatus?: PermissionRulesParam;
+	public setRemoveStatus?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemsWithDisplayName, isOptional: true })
-	getItemsWithDisplayName?: PermissionRulesParam;
+	public getItemsWithDisplayName?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetCreateLeaderboard, isOptional: true })
-	getCreateLeaderboard?: PermissionRulesParam;
+	public getCreateLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetStatisticsLog, isOptional: true })
-	getStatisticsLog?: PermissionRulesParam;
+	public getStatisticsLog?: PermissionRulesParam;
 
 }

@@ -19,17 +19,18 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class CreatePlayerCharacterOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	catalogId: string;
+	public catalogId: string;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true, mustNonNull: true })
-	displayName?: string;
+	public displayName?: string;
 
 	@BooleanDataMember({ code: ParameterCode.UniqueDisplayName, defaultValue: false, isOptional: true })
-	uniqueDisplayName?: boolean;
+	public uniqueDisplayName?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -39,8 +40,9 @@ class CreatePlayerCharacterOperationRequest extends OperationRequest {
 }
 
 class ServerCreatePlayerCharacterOperationRequest extends CreatePlayerCharacterOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -50,6 +52,7 @@ class ServerCreatePlayerCharacterOperationRequest extends CreatePlayerCharacterO
 }
 
 class AdminCreatePlayerCharacterOperationRequest extends ServerCreatePlayerCharacterOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -58,6 +61,7 @@ class AdminCreatePlayerCharacterOperationRequest extends ServerCreatePlayerChara
 }
 
 export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreatePlayerCharacter;
 	}

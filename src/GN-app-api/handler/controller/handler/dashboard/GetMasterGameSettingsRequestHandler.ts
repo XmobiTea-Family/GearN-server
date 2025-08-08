@@ -24,6 +24,7 @@ class GetMasterGameSettingsOperationRequest extends OperationRequest {
 }
 
 export class GetMasterGameSettingsRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetMasterGameSettings;
 	}

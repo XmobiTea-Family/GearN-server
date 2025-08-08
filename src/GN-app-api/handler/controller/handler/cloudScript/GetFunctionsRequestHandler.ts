@@ -41,6 +41,7 @@ class AdminGetFunctionsOperationRequest extends ServerGetFunctionsOperationReque
 }
 
 export class GetFunctionsRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetFunctions;
 	}

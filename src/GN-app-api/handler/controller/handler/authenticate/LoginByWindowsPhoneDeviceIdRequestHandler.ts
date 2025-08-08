@@ -17,14 +17,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByWindowsPhoneDeviceIdOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.WindowsPhoneDeviceId, minLength: 6, maxLength: 64, mustNonNull: true })
-	windowsPhoneDeviceId: string;
+	public windowsPhoneDeviceId: string;
 
 	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
-	createPlayerIfNotExists?: boolean;
+	public createPlayerIfNotExists?: boolean;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -34,6 +35,7 @@ class LoginByWindowsPhoneDeviceIdOperationRequest extends OperationRequest {
 }
 
 export class LoginByWindowsPhoneDeviceIdRequestHandler extends LoginBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LoginByWindowsPhoneDeviceId;
 	}

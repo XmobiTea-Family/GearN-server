@@ -16,14 +16,15 @@ import * as mongoDB from "mongodb";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class GetBackupStatisticsLeaderboardVersionOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
-	gameId: string;
+	public gameId: string;
 
 	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
-	type: number;
+	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
-	key: string;
+	public key: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -33,6 +34,7 @@ class GetBackupStatisticsLeaderboardVersionOperationRequest extends OperationReq
 }
 
 export class GetBackupStatisticsLeaderboardVersionRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetBackupStatisticsLeaderboardVersion;
 	}

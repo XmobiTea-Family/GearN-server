@@ -5,10 +5,10 @@ import { xStatisticsSettings } from "./xStatisticsSettings";
 import { xTagSettings } from "./xTagSettings";
 
 export interface xGroupSettings {
-    groupCurrencySettings: Array<xCurrencySettings>;
-    groupStatisticsSettings: Array<xStatisticsSettings>;
-    groupDatasSettings: Array<xDataSettings>;
-    customDatasSettings: Array<xDataSettings>;
-    tagsSettings: Array<xTagSettings>;
-    groupItemCatalogSettings: Array<xItemCatalogSettings>;
+	groupCurrencySettings: Array<xCurrencySettings>;
+	groupStatisticsSettings: Array<xStatisticsSettings>;
+	groupDatasSettings: Array<xDataSettings>;
+	customDatasSettings: Array<xDataSettings>;
+	tagsSettings: Array<xTagSettings>;
+	groupItemCatalogSettings: Array<xItemCatalogSettings>;
 }

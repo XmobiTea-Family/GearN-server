@@ -16,8 +16,9 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetTsLastLoginOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,7 +30,7 @@ class SetTsLastLoginOperationRequest extends OperationRequest {
 class ServerSetTsLastLoginOperationRequest extends SetTsLastLoginOperationRequest {
 
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -39,6 +40,7 @@ class ServerSetTsLastLoginOperationRequest extends SetTsLastLoginOperationReques
 }
 
 class AdminSetTsLastLoginOperationRequest extends ServerSetTsLastLoginOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -47,6 +49,7 @@ class AdminSetTsLastLoginOperationRequest extends ServerSetTsLastLoginOperationR
 }
 
 export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetTsLastLogin;
 	}

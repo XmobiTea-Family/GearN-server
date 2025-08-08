@@ -2,9 +2,11 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ItemClassSettingsParam {
+
 	@StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32 })
-	classId: string;
+	public classId: string;
 
 	@StringDataMember({ code: ParameterCode.Description, isOptional: true })
-	description?: string;
+	public description?: string;
+
 }

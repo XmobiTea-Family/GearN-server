@@ -17,17 +17,18 @@ import bcrypt from "bcrypt";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkAccountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
-	username: string;
+	public username: string;
 
 	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 64, mustNonNull: true })
-	password: string;
+	public password: string;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -37,8 +38,9 @@ class LinkAccountOperationRequest extends OperationRequest {
 }
 
 class ServerLinkAccountOperationRequest extends LinkAccountOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -48,6 +50,7 @@ class ServerLinkAccountOperationRequest extends LinkAccountOperationRequest {
 }
 
 class AdminLinkAccountOperationRequest extends ServerLinkAccountOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -56,6 +59,7 @@ class AdminLinkAccountOperationRequest extends ServerLinkAccountOperationRequest
 }
 
 export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkAccount;
 	}

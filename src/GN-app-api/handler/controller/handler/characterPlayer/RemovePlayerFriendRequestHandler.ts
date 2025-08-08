@@ -19,11 +19,12 @@ import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 
 class RemovePlayerFriendOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@StringDataMember({ code: ParameterCode.FriendId, minLength: 11, maxLength: 11, mustNonNull: true })
-	friendId: string;
+	public friendId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -42,6 +43,7 @@ class ServerRemovePlayerFriendOperationRequest extends RemovePlayerFriendOperati
 }
 
 class AdminRemovePlayerFriendOperationRequest extends ServerRemovePlayerFriendOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,6 +52,7 @@ class AdminRemovePlayerFriendOperationRequest extends ServerRemovePlayerFriendOp
 }
 
 export class RemovePlayerFriendRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemovePlayerFriend;
 	}

@@ -22,14 +22,15 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 
 class RemoveStoreUsedOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
-	storeId: string;
+	public storeId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.OwnerIds, elementCls: String, isOptional: true })
-	ownerIds?: Array<string>;
+	public ownerIds?: Array<string>;
 
 }
 
 class ServerRemoveStoreUsedOperationRequest extends RemoveStoreUsedOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -38,6 +39,7 @@ class ServerRemoveStoreUsedOperationRequest extends RemoveStoreUsedOperationRequ
 }
 
 class AdminRemoveStoreUsedOperationRequest extends ServerRemoveStoreUsedOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +48,7 @@ class AdminRemoveStoreUsedOperationRequest extends ServerRemoveStoreUsedOperatio
 }
 
 export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveStoreUsed;
 	}

@@ -3,34 +3,35 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { PermissionRulesParam } from "./PermissionRulesParam";
 
 export class MultiplayerPermissionRulesParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.CancelAllMatchmakingTicket, isOptional: true })
-	cancelAllMatchmakingTicket?: PermissionRulesParam;
+	public cancelAllMatchmakingTicket?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CancelMatchmakingTicket, isOptional: true })
-	cancelMatchmakingTicket?: PermissionRulesParam;
+	public cancelMatchmakingTicket?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CreateMatchmakingTicket, isOptional: true })
-	createMatchmakingTicket?: PermissionRulesParam;
+	public createMatchmakingTicket?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetMatchmakingTicket, isOptional: true })
-	getMatchmakingTicket?: PermissionRulesParam;
+	public getMatchmakingTicket?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetMatch, isOptional: true })
-	getMatch?: PermissionRulesParam;
+	public getMatch?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetQueueStatistics, isOptional: true })
-	getQueueStatistics?: PermissionRulesParam;
+	public getQueueStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.JoinMatchmakingTicket, isOptional: true })
-	joinMatchmakingTicket?: PermissionRulesParam;
+	public joinMatchmakingTicket?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ListMatchmakingTicketsForPlayer, isOptional: true })
-	listMatchmakingTicketsForPlayer?: PermissionRulesParam;
+	public listMatchmakingTicketsForPlayer?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetAllMatchmakingTicket, isOptional: true })
-	getAllMatchmakingTicket?: PermissionRulesParam;
+	public getAllMatchmakingTicket?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetAllMatch, isOptional: true })
-	getAllMatch?: PermissionRulesParam;
+	public getAllMatch?: PermissionRulesParam;
 
 }

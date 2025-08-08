@@ -75,7 +75,7 @@ export class SocketApp {
 		if (this.appSettings.getUseEmitter()) {
 			this.socketAppHandler.setEmitter(this.emitter);
 		}
-		
+
 		this.socketAppHandler.setServer(this.io);
 		this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
 		this.socketAppHandler.setAntiDdosMiddleware(this.antiDdosMiddleware);

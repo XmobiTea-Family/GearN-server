@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class RemoveTagOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-	key: string;
+	public key: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,8 +30,9 @@ class RemoveTagOperationRequest extends OperationRequest {
 }
 
 class ServerRemoveTagOperationRequest extends RemoveTagOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -40,6 +42,7 @@ class ServerRemoveTagOperationRequest extends RemoveTagOperationRequest {
 }
 
 class AdminRemoveTagOperationRequest extends ServerRemoveTagOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +51,7 @@ class AdminRemoveTagOperationRequest extends ServerRemoveTagOperationRequest {
 }
 
 export class RemoveTagRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveTag;
 	}

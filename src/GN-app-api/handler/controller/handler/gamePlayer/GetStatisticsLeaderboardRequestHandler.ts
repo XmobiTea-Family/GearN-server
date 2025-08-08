@@ -18,23 +18,24 @@ import { GamePlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro
 import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 
 class GetStatisticsLeaderboardOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-	key: string;
+	public key: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-	skip?: number;
+	public skip?: number;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
-	loadFromCache?: boolean;
+	public loadFromCache?: boolean;
 
 	@StringDataMember({ code: ParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
-	version?: string;
+	public version?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -62,6 +63,7 @@ class AdminGetStatisticsLeaderboardOperationRequest extends ServerGetStatisticsL
 }
 
 export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetStatisticsLeaderboard;
 	}

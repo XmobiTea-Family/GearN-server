@@ -14,6 +14,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/SecretInfoItem";
 
 class GetSecretInfoListOperationRequest extends OperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -22,6 +23,7 @@ class GetSecretInfoListOperationRequest extends OperationRequest {
 }
 
 export class GetSecretInfoListRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetSecretInfoList;
 	}

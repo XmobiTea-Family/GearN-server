@@ -14,181 +14,182 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class GetCurrencyLogOperationRequest extends OperationRequest {
-    @GNArrayDataMember({ code: ParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
-    keys?: Array<string>;
 
-    @StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true, isOptional: true })
-    characterId?: string;
+	@GNArrayDataMember({ code: ParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
+	public keys?: Array<string>;
 
-    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-    limit?: number;
+	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true, isOptional: true })
+	public characterId?: string;
 
-    @StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
-    token?: string;
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	public limit?: number;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
+	public token?: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerGetCurrencyLogOperationRequest extends GetCurrencyLogOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminGetCurrencyLogOperationRequest extends ServerGetCurrencyLogOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetCurrencyLogRequestHandler extends RequestHandler {
 
-    public override getCode() {
-        return OperationCode.GetCurrencyLog;
-    }
+	public override getCode() {
+		return OperationCode.GetCurrencyLog;
+	}
 
-    public override getCommonOperationRequest() {
-        return GetCurrencyLogOperationRequest;
-    }
+	public override getCommonOperationRequest() {
+		return GetCurrencyLogOperationRequest;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().characterPlayer.getCurrencyLog.otherSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().characterPlayer.getCurrencyLog.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            keys: request.keys,
-            token: request.token,
-            limit: request.limit,
-            characterId: request.characterId,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			keys: request.keys,
+			token: request.token,
+			limit: request.limit,
+			characterId: request.characterId,
+		}, secretInfo, operationRequest);
+	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCurrencyLogOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCurrencyLogOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().characterPlayer.getCurrencyLog.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().characterPlayer.getCurrencyLog.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            keys: request.keys,
-            token: request.token,
-            limit: request.limit,
-            characterId: request.characterId,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			keys: request.keys,
+			token: request.token,
+			limit: request.limit,
+			characterId: request.characterId,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCurrencyLogOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCurrencyLogOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().characterPlayer.getCurrencyLog.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().characterPlayer.getCurrencyLog.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            keys: request.keys,
-            token: request.token,
-            limit: request.limit,
-            characterId: request.characterId,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			keys: request.keys,
+			token: request.token,
+			limit: request.limit,
+			characterId: request.characterId,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(request: { keys: Array<string>, token: string, limit: number, characterId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetCurrencyLog", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+	private async execute(request: { keys: Array<string>, token: string, limit: number, characterId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetCurrencyLog", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 
-        let keys: string[] = [];
-        if (request.keys) {
-            for (let i = 0; i < request.keys.length; i++) {
-                let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == request.keys[i]);
+		let keys: string[] = [];
+		if (request.keys) {
+			for (let i = 0; i < request.keys.length; i++) {
+				let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == request.keys[i]);
 
-                if (playerCurrencySettingsItem != null) {
-                    keys.push(playerCurrencySettingsItem.key);
-                }
-            }
-        }
+				if (playerCurrencySettingsItem != null) {
+					keys.push(playerCurrencySettingsItem.key);
+				}
+			}
+		}
 
-        let $filter = {} as any;
+		let $filter = {} as any;
 
-        if (request.characterId) {
-            $filter["characterId"] = request.characterId;
-        }
+		if (request.characterId) {
+			$filter["characterId"] = request.characterId;
+		}
 
-        if (keys.length != 0) {
-            if (keys.length == 1) $filter["key"] = keys[0];
-            else $filter["key"] = { $in: keys };
-        }
+		if (keys.length != 0) {
+			if (keys.length == 1) $filter["key"] = keys[0];
+			else $filter["key"] = { $in: keys };
+		}
 
-        if (request.token) {
-            $filter["_id"] = { $lt: request.token };
-        }
+		if (request.token) {
+			$filter["_id"] = { $lt: request.token };
+		}
 
-        let gnResults = new GNArray();
+		let gnResults = new GNArray();
 
-        let results = await this.gnServer.getDatabase().loadCharacterPlayerCurrencyLogAsync($filter, secretInfo.getGameId(), request.limit);
+		let results = await this.gnServer.getDatabase().loadCharacterPlayerCurrencyLogAsync($filter, secretInfo.getGameId(), request.limit);
 
-        let token: string;
+		let token: string;
 
-        while (await results.hasNext()) {
-            let result = await results.next();
+		while (await results.hasNext()) {
+			let result = await results.next();
 
-            let gnResult = new GNHashtable();
+			let gnResult = new GNHashtable();
 
-            gnResult.add(ParameterCode.CharacterId, result["characterId"]);
-            gnResult.add(ParameterCode.TsCreate, result["tsCreate"]);
-            gnResult.add(ParameterCode.Log, result["log"]);
-            gnResult.add(ParameterCode.Key, result["key"]);
-            gnResult.add(ParameterCode.Amount, result["amount"]);
-            gnResult.add(ParameterCode.StartValue, result["startValue"]);
-            gnResult.add(ParameterCode.FinalValue, result["finalValue"]);
+			gnResult.add(ParameterCode.CharacterId, result["characterId"]);
+			gnResult.add(ParameterCode.TsCreate, result["tsCreate"]);
+			gnResult.add(ParameterCode.Log, result["log"]);
+			gnResult.add(ParameterCode.Key, result["key"]);
+			gnResult.add(ParameterCode.Amount, result["amount"]);
+			gnResult.add(ParameterCode.StartValue, result["startValue"]);
+			gnResult.add(ParameterCode.FinalValue, result["finalValue"]);
 
-            gnResults.add(gnResult);
+			gnResults.add(gnResult);
 
-            token = result["_id"].toString();
-        }
+			token = result["_id"].toString();
+		}
 
-        operationResponse.setParameter(ParameterCode.Results, gnResults);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-        if (token) {
-            operationResponse.setParameter(ParameterCode.Token, token);
-        }
+		if (token) {
+			operationResponse.setParameter(ParameterCode.Token, token);
+		}
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetCurrencyLog", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetCurrencyLog", request, secretInfo, operationRequest, operationResponse);
 
-        return operationResponse;
-    }
+		return operationResponse;
+	}
 }

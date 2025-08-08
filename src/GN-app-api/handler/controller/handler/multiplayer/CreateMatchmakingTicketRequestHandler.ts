@@ -20,17 +20,18 @@ import { MatchmakingTicketMember } from "./../../../../../GN-library/xdatabase/l
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class CreateMatchmakingTicketOperationRequest extends OperationRequest {
+
 	@NumberDataMember({ code: ParameterCode.GiveUpAfterSeconds, mustInt: true, minValue: 20 })
-	giveUpAfterSeconds: number;
+	public giveUpAfterSeconds: number;
 
 	@StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
-	queueName: string;
+	public queueName: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.Attribute, isOptional: true })
-	attribute?: GNHashtable;
+	public attribute?: GNHashtable;
 
 	@GNArrayDataMember({ code: ParameterCode.Members, isOptional: true, elementCls: String })
-	members?: string[];
+	public members?: string[];
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -40,8 +41,9 @@ class CreateMatchmakingTicketOperationRequest extends OperationRequest {
 }
 
 class ServerCreateMatchmakingTicketOperationRequest extends CreateMatchmakingTicketOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
-	userId: string;
+	public userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -60,6 +62,7 @@ class AdminCreateMatchmakingTicketOperationRequest extends ServerCreateMatchmaki
 }
 
 export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateMatchmakingTicket;
 	}

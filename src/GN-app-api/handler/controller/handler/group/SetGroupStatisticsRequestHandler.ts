@@ -18,14 +18,15 @@ import { GroupStatisticsParam } from "./model/GroupStatisticsParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class SetGroupStatisticsOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GroupStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupStatisticsParam })
-	groupStatisticsParams: Array<GroupStatisticsParam>;
+	public groupStatisticsParams: Array<GroupStatisticsParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-	log?: string;
+	public log?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +45,7 @@ class ServerSetGroupStatisticsOperationRequest extends SetGroupStatisticsOperati
 }
 
 class AdminSetGroupStatisticsOperationRequest extends ServerSetGroupStatisticsOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,6 +54,7 @@ class AdminSetGroupStatisticsOperationRequest extends ServerSetGroupStatisticsOp
 }
 
 export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetGroupStatistics;
 	}

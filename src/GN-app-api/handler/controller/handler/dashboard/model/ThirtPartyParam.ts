@@ -7,18 +7,20 @@ import { ThirtPartyGooglePlayGameSettingsParam } from "./ThirtPartyGooglePlayGam
 import { ThirtPartyGoogleSettingsParam } from "./ThirtPartyGoogleSettingsParam";
 
 export class ThirtPartyParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.GoogleSettings, isOptional: true })
-	googleSettings?: ThirtPartyGoogleSettingsParam;
+	public googleSettings?: ThirtPartyGoogleSettingsParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.FacebookSettings, isOptional: true })
-	facebookSettings?: ThirtPartyFacebookSettingsParam;
+	public facebookSettings?: ThirtPartyFacebookSettingsParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.AppleSettings, isOptional: true })
-	appleSettings?: ThirtPartyAppleSettingsParam;
+	public appleSettings?: ThirtPartyAppleSettingsParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GooglePlayGameSettings, isOptional: true })
-	googlePlayGameSettings?: ThirtPartyGooglePlayGameSettingsParam;
+	public googlePlayGameSettings?: ThirtPartyGooglePlayGameSettingsParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GameCenterSettings, isOptional: true })
-	gameCenterSettings?: ThirtPartyGameCenterSettingsParam;
+	public gameCenterSettings?: ThirtPartyGameCenterSettingsParam;
+
 }

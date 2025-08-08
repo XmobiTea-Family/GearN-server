@@ -14,8 +14,9 @@ import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity
 import { GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 class GetSecretInfoInformationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
-	secretKey: string;
+	public secretKey: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -25,6 +26,7 @@ class GetSecretInfoInformationOperationRequest extends OperationRequest {
 }
 
 export class GetSecretInfoInformationRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetSecretInfoInformation;
 	}

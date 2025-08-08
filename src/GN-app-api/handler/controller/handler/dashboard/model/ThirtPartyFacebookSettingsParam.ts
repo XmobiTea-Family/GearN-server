@@ -2,12 +2,14 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class ThirtPartyFacebookSettingsParam {
+
 	@StringDataMember({ code: ParameterCode.FacebookAppId })
-	facebookAppId: string;
+	public facebookAppId: string;
 
 	@StringDataMember({ code: ParameterCode.FacebookAppToken })
-	facebookAppToken: string;
+	public facebookAppToken: string;
 
 	@StringDataMember({ code: ParameterCode.FacebookInappSecret })
-	facebookInappSecret: string;
+	public facebookInappSecret: string;
+
 }

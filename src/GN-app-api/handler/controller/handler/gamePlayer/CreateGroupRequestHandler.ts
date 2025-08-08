@@ -21,19 +21,18 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class CreateGroupOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	catalogId: string;
+	public catalogId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GroupMembers, isOptional: true, elementCls: GroupMemberParam })
-	groupMembers?: Array<GroupMemberParam>;
+	public groupMembers?: Array<GroupMemberParam>;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-	displayName?: string;
-
-	// them data vao day
+	public displayName?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,8 +42,9 @@ class CreateGroupOperationRequest extends OperationRequest {
 }
 
 class ServerCreateGroupOperationRequest extends CreateGroupOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -54,6 +54,7 @@ class ServerCreateGroupOperationRequest extends CreateGroupOperationRequest {
 }
 
 class AdminCreateGroupOperationRequest extends ServerCreateGroupOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -62,6 +63,7 @@ class AdminCreateGroupOperationRequest extends ServerCreateGroupOperationRequest
 }
 
 export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateGroup;
 	}

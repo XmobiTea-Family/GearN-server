@@ -15,11 +15,12 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetStoreItemInformationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
-	storeId: string;
+	public storeId: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +48,7 @@ class AdminGetStoreItemInformationOperationRequest extends ServerGetStoreItemInf
 }
 
 export class GetStoreItemInformationRequestHandler extends StoreItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetStoreItemInformation;
 	}

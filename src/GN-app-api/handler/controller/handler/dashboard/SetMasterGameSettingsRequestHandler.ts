@@ -33,557 +33,559 @@ import { PushNotificationService } from "./../../../../service/PushNotificationS
 import { EmailService } from "./../../../../service/EmailService";
 
 class SetMasterGameSettingsOperationRequest extends OperationRequest {
-    @GNHashtableDataMember({ code: ParameterCode.ThirtPartySettings, isOptional: true })
-    thirtPartySettings?: ThirtPartyParam;
 
-    @GNHashtableDataMember({ code: ParameterCode.MasterPlayerSettings, isOptional: true })
-    masterPlayerSettings?: MasterPlayerSettingsParam;
+	@GNHashtableDataMember({ code: ParameterCode.ThirtPartySettings, isOptional: true })
+	public thirtPartySettings?: ThirtPartyParam;
 
-    @GNHashtableDataMember({ code: ParameterCode.EmailSettings, isOptional: true })
-    emailSettings?: EmailSettingsParam;
+	@GNHashtableDataMember({ code: ParameterCode.MasterPlayerSettings, isOptional: true })
+	public masterPlayerSettings?: MasterPlayerSettingsParam;
 
-    @GNHashtableDataMember({ code: ParameterCode.PushNotificationSettings, isOptional: true })
-    pushNotificationSettings?: PushNotificationSettingsParam;
+	@GNHashtableDataMember({ code: ParameterCode.EmailSettings, isOptional: true })
+	public emailSettings?: EmailSettingsParam;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@GNHashtableDataMember({ code: ParameterCode.PushNotificationSettings, isOptional: true })
+	public pushNotificationSettings?: PushNotificationSettingsParam;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 export class SetMasterGameSettingsRequestHandler extends RequestHandler {
-    public override getCode() {
-        return OperationCode.SetMasterGameSettings;
-    }
 
-    public override getCommonOperationRequest() {
-        return SetMasterGameSettingsOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.SetMasterGameSettings;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return SetMasterGameSettingsOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(operationRequest);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().masterAdmin.setMasterGameSettings.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(operationRequest);
+		}
 
-        return this.execute({
-            thirtPartySettings: request.thirtPartySettings,
-            masterPlayerSettings: request.masterPlayerSettings,
-            emailSettings: request.emailSettings,
-            pushNotificationSettings: request.pushNotificationSettings,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().masterAdmin.setMasterGameSettings.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			thirtPartySettings: request.thirtPartySettings,
+			masterPlayerSettings: request.masterPlayerSettings,
+			emailSettings: request.emailSettings,
+			pushNotificationSettings: request.pushNotificationSettings,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetMasterGameSettings", request);
-        await this.applySettings(request);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetMasterGameSettings", request);
+		await this.applySettings(request);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest, operationResponse);
 
-    private async applySettings(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }) {
+		return operationResponse;
+	}
 
-        let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
+	private async applySettings(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }) {
 
-        let result = await collection.findOne({ type: "masterGameSettings" });
+		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
-        let masterGameSettings = new MasterGameSettings(result, collection);
+		let result = await collection.findOne({ type: "masterGameSettings" });
 
-        if (request.thirtPartySettings != null) {
-            let thirtPartySettings = masterGameSettings.getThirtPartySettings();
+		let masterGameSettings = new MasterGameSettings(result, collection);
 
-            if (request.thirtPartySettings.googleSettings != null) {
-                if (request.thirtPartySettings.googleSettings.googleClientId != null)
-                    thirtPartySettings.googleSettings.googleClientId = request.thirtPartySettings.googleSettings.googleClientId;
+		if (request.thirtPartySettings != null) {
+			let thirtPartySettings = masterGameSettings.getThirtPartySettings();
 
-                if (request.thirtPartySettings.googleSettings.packageId != null)
-                    thirtPartySettings.googleSettings.packageId = request.thirtPartySettings.googleSettings.packageId;
+			if (request.thirtPartySettings.googleSettings != null) {
+				if (request.thirtPartySettings.googleSettings.googleClientId != null)
+					thirtPartySettings.googleSettings.googleClientId = request.thirtPartySettings.googleSettings.googleClientId;
 
-                if (request.thirtPartySettings.googleSettings.publicRSAKey != null)
-                    thirtPartySettings.googleSettings.publicRSAKey = request.thirtPartySettings.googleSettings.publicRSAKey;
+				if (request.thirtPartySettings.googleSettings.packageId != null)
+					thirtPartySettings.googleSettings.packageId = request.thirtPartySettings.googleSettings.packageId;
 
-                (<GoogleService>this.gnServer.getGoogleService()).init({
-                    googleClientId: thirtPartySettings.googleSettings.googleClientId,
-                    packageId: thirtPartySettings.googleSettings.packageId,
-                    publicRSAKey: thirtPartySettings.googleSettings.publicRSAKey,
-                });
-            }
+				if (request.thirtPartySettings.googleSettings.publicRSAKey != null)
+					thirtPartySettings.googleSettings.publicRSAKey = request.thirtPartySettings.googleSettings.publicRSAKey;
 
-            if (request.thirtPartySettings.facebookSettings != null) {
-                if (request.thirtPartySettings.facebookSettings.facebookAppId != null)
-                    thirtPartySettings.facebookSettings.facebookAppId = request.thirtPartySettings.facebookSettings.facebookAppId;
+				(<GoogleService>this.gnServer.getGoogleService()).init({
+					googleClientId: thirtPartySettings.googleSettings.googleClientId,
+					packageId: thirtPartySettings.googleSettings.packageId,
+					publicRSAKey: thirtPartySettings.googleSettings.publicRSAKey,
+				});
+			}
 
-                if (request.thirtPartySettings.facebookSettings.facebookAppToken != null)
-                    thirtPartySettings.facebookSettings.facebookAppToken = request.thirtPartySettings.facebookSettings.facebookAppToken;
+			if (request.thirtPartySettings.facebookSettings != null) {
+				if (request.thirtPartySettings.facebookSettings.facebookAppId != null)
+					thirtPartySettings.facebookSettings.facebookAppId = request.thirtPartySettings.facebookSettings.facebookAppId;
 
-                if (request.thirtPartySettings.facebookSettings.facebookInappSecret != null)
-                    thirtPartySettings.facebookSettings.facebookInappSecret = request.thirtPartySettings.facebookSettings.facebookInappSecret;
+				if (request.thirtPartySettings.facebookSettings.facebookAppToken != null)
+					thirtPartySettings.facebookSettings.facebookAppToken = request.thirtPartySettings.facebookSettings.facebookAppToken;
 
-                (<FacebookService>this.gnServer.getFacebookService()).init({
-                    facebookAppId: thirtPartySettings.facebookSettings.facebookAppId,
-                    facebookAppToken: thirtPartySettings.facebookSettings.facebookAppToken,
-                    facebookInappSecret: thirtPartySettings.facebookSettings.facebookInappSecret,
-                });
-            }
+				if (request.thirtPartySettings.facebookSettings.facebookInappSecret != null)
+					thirtPartySettings.facebookSettings.facebookInappSecret = request.thirtPartySettings.facebookSettings.facebookInappSecret;
 
-            if (request.thirtPartySettings.appleSettings != null) {
-                if (request.thirtPartySettings.appleSettings.appleClientId != null)
-                    thirtPartySettings.appleSettings.appleClientId = request.thirtPartySettings.appleSettings.appleClientId;
+				(<FacebookService>this.gnServer.getFacebookService()).init({
+					facebookAppId: thirtPartySettings.facebookSettings.facebookAppId,
+					facebookAppToken: thirtPartySettings.facebookSettings.facebookAppToken,
+					facebookInappSecret: thirtPartySettings.facebookSettings.facebookInappSecret,
+				});
+			}
 
-                if (request.thirtPartySettings.appleSettings.issuerId != null)
-                    thirtPartySettings.appleSettings.issuerId = request.thirtPartySettings.appleSettings.issuerId;
+			if (request.thirtPartySettings.appleSettings != null) {
+				if (request.thirtPartySettings.appleSettings.appleClientId != null)
+					thirtPartySettings.appleSettings.appleClientId = request.thirtPartySettings.appleSettings.appleClientId;
 
-                if (request.thirtPartySettings.appleSettings.keyId != null)
-                    thirtPartySettings.appleSettings.keyId = request.thirtPartySettings.appleSettings.keyId;
+				if (request.thirtPartySettings.appleSettings.issuerId != null)
+					thirtPartySettings.appleSettings.issuerId = request.thirtPartySettings.appleSettings.issuerId;
 
-                if (request.thirtPartySettings.appleSettings.p8Content != null)
-                    thirtPartySettings.appleSettings.p8Content = request.thirtPartySettings.appleSettings.p8Content;
+				if (request.thirtPartySettings.appleSettings.keyId != null)
+					thirtPartySettings.appleSettings.keyId = request.thirtPartySettings.appleSettings.keyId;
 
-                if (request.thirtPartySettings.appleSettings.sandboxEnable != null)
-                    thirtPartySettings.appleSettings.sandboxEnable = request.thirtPartySettings.appleSettings.sandboxEnable;
+				if (request.thirtPartySettings.appleSettings.p8Content != null)
+					thirtPartySettings.appleSettings.p8Content = request.thirtPartySettings.appleSettings.p8Content;
 
-                (<AppleService>this.gnServer.getAppleService()).init({
-                    appleClientId: thirtPartySettings.appleSettings.appleClientId,
-                    sandboxEnable: thirtPartySettings.appleSettings.sandboxEnable,
-                    issuerId: thirtPartySettings.appleSettings.issuerId,
-                    keyId: thirtPartySettings.appleSettings.keyId,
-                    p8Content: thirtPartySettings.appleSettings.p8Content,
-                });
-            }
+				if (request.thirtPartySettings.appleSettings.sandboxEnable != null)
+					thirtPartySettings.appleSettings.sandboxEnable = request.thirtPartySettings.appleSettings.sandboxEnable;
 
-            if (request.thirtPartySettings.gameCenterSettings != null) {
-                if (request.thirtPartySettings.gameCenterSettings.packageId != null)
-                    thirtPartySettings.gameCenterSettings.packageId = request.thirtPartySettings.gameCenterSettings.packageId;
+				(<AppleService>this.gnServer.getAppleService()).init({
+					appleClientId: thirtPartySettings.appleSettings.appleClientId,
+					sandboxEnable: thirtPartySettings.appleSettings.sandboxEnable,
+					issuerId: thirtPartySettings.appleSettings.issuerId,
+					keyId: thirtPartySettings.appleSettings.keyId,
+					p8Content: thirtPartySettings.appleSettings.p8Content,
+				});
+			}
 
-                (<GameCenterService>this.gnServer.getGameCenterService()).init({
-                    bundleId: thirtPartySettings.gameCenterSettings.packageId,
-                });
-            }
+			if (request.thirtPartySettings.gameCenterSettings != null) {
+				if (request.thirtPartySettings.gameCenterSettings.packageId != null)
+					thirtPartySettings.gameCenterSettings.packageId = request.thirtPartySettings.gameCenterSettings.packageId;
 
-            if (request.thirtPartySettings.googlePlayGameSettings != null) {
-                if (request.thirtPartySettings.googlePlayGameSettings.applicationId != null)
-                    thirtPartySettings.googlePlayGameSettings.applicationId = request.thirtPartySettings.googlePlayGameSettings.applicationId;
+				(<GameCenterService>this.gnServer.getGameCenterService()).init({
+					bundleId: thirtPartySettings.gameCenterSettings.packageId,
+				});
+			}
 
-                if (request.thirtPartySettings.googlePlayGameSettings.clientId != null)
-                    thirtPartySettings.googlePlayGameSettings.clientId = request.thirtPartySettings.googlePlayGameSettings.clientId;
+			if (request.thirtPartySettings.googlePlayGameSettings != null) {
+				if (request.thirtPartySettings.googlePlayGameSettings.applicationId != null)
+					thirtPartySettings.googlePlayGameSettings.applicationId = request.thirtPartySettings.googlePlayGameSettings.applicationId;
 
-                if (request.thirtPartySettings.googlePlayGameSettings.clientSecret != null)
-                    thirtPartySettings.googlePlayGameSettings.clientSecret = request.thirtPartySettings.googlePlayGameSettings.clientSecret;
+				if (request.thirtPartySettings.googlePlayGameSettings.clientId != null)
+					thirtPartySettings.googlePlayGameSettings.clientId = request.thirtPartySettings.googlePlayGameSettings.clientId;
 
-                if (request.thirtPartySettings.googlePlayGameSettings.redirectUri != null)
-                    thirtPartySettings.googlePlayGameSettings.redirectUri = request.thirtPartySettings.googlePlayGameSettings.redirectUri;
+				if (request.thirtPartySettings.googlePlayGameSettings.clientSecret != null)
+					thirtPartySettings.googlePlayGameSettings.clientSecret = request.thirtPartySettings.googlePlayGameSettings.clientSecret;
 
-                (<GooglePlayGameService>this.gnServer.getGooglePlayGameService()).init({
-                    applicationId: thirtPartySettings.googlePlayGameSettings.applicationId,
-                    clientId: thirtPartySettings.googlePlayGameSettings.clientId,
-                    clientSecret: thirtPartySettings.googlePlayGameSettings.clientSecret,
-                    redirectUri: thirtPartySettings.googlePlayGameSettings.redirectUri,
-                });
-            }
+				if (request.thirtPartySettings.googlePlayGameSettings.redirectUri != null)
+					thirtPartySettings.googlePlayGameSettings.redirectUri = request.thirtPartySettings.googlePlayGameSettings.redirectUri;
 
-            masterGameSettings.setThirtPartySettings(thirtPartySettings);
-        }
+				(<GooglePlayGameService>this.gnServer.getGooglePlayGameService()).init({
+					applicationId: thirtPartySettings.googlePlayGameSettings.applicationId,
+					clientId: thirtPartySettings.googlePlayGameSettings.clientId,
+					clientSecret: thirtPartySettings.googlePlayGameSettings.clientSecret,
+					redirectUri: thirtPartySettings.googlePlayGameSettings.redirectUri,
+				});
+			}
 
-        if (request.masterPlayerSettings != null) {
-            let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
-            let masterPlayerCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
+			masterGameSettings.setThirtPartySettings(thirtPartySettings);
+		}
 
-            if (request.masterPlayerSettings.genericServiceSettings != null) {
-                let genericServiceSettings = new Array<xGenericServiceSettings>();
+		if (request.masterPlayerSettings != null) {
+			let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
+			let masterPlayerCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
 
-                let removeKeyLst = new Array<string>();
-                let addKeyLst = new Array<string>();
+			if (request.masterPlayerSettings.genericServiceSettings != null) {
+				let genericServiceSettings = new Array<xGenericServiceSettings>();
 
-                for (let i = 0; i < masterPlayerSettings.genericServiceSettings.length; i++) {
-                    let playerCurrencySetting = masterPlayerSettings.genericServiceSettings[i];
-                    removeKeyLst.push(playerCurrencySetting.serviceName);
-                }
+				let removeKeyLst = new Array<string>();
+				let addKeyLst = new Array<string>();
 
-                for (let i = 0; i < request.masterPlayerSettings.genericServiceSettings.length; i++) {
-                    let genericServiceSetting = request.masterPlayerSettings.genericServiceSettings[i];
+				for (let i = 0; i < masterPlayerSettings.genericServiceSettings.length; i++) {
+					let playerCurrencySetting = masterPlayerSettings.genericServiceSettings[i];
+					removeKeyLst.push(playerCurrencySetting.serviceName);
+				}
 
-                    genericServiceSettings.push({
-                        serviceName: genericServiceSetting.serviceName
-                    });
+				for (let i = 0; i < request.masterPlayerSettings.genericServiceSettings.length; i++) {
+					let genericServiceSetting = request.masterPlayerSettings.genericServiceSettings[i];
 
-                    addKeyLst.push(genericServiceSetting.serviceName);
-                }
+					genericServiceSettings.push({
+						serviceName: genericServiceSetting.serviceName
+					});
 
-                this.gnServer.getGNSettings().getMasterPlayerSettings().genericServiceSettings = genericServiceSettings;
+					addKeyLst.push(genericServiceSetting.serviceName);
+				}
 
-                for (let i = 0; i < addKeyLst.length; i++) {
-                    let key = addKeyLst[i];
+				this.gnServer.getGNSettings().getMasterPlayerSettings().genericServiceSettings = genericServiceSettings;
 
-                    let removeIndexOf = removeKeyLst.indexOf(key);
+				for (let i = 0; i < addKeyLst.length; i++) {
+					let key = addKeyLst[i];
 
-                    if (removeIndexOf != -1) {
-                        removeKeyLst.splice(removeIndexOf, 1);
+					let removeIndexOf = removeKeyLst.indexOf(key);
 
-                        addKeyLst.splice(i, 1);
-                        i -= 1;
-                    }
-                }
+					if (removeIndexOf != -1) {
+						removeKeyLst.splice(removeIndexOf, 1);
 
-                if (this.gnServer.isPrimary()) {
-                    for (let i = 0; i < removeKeyLst.length; i++) {
-                        let key = removeKeyLst[i];
-                        masterPlayerCollection.dropIndex("external.genericService.genericServices." + key + ".serviceId_1");
-                    }
+						addKeyLst.splice(i, 1);
+						i -= 1;
+					}
+				}
 
-                    for (let i = 0; i < addKeyLst.length; i++) {
-                        let key = addKeyLst[i];
-                        let indexDoc = {} as any;
-                        indexDoc["external.genericService.genericServices." + key + ".serviceId"] = 1;
+				if (this.gnServer.isPrimary()) {
+					for (let i = 0; i < removeKeyLst.length; i++) {
+						let key = removeKeyLst[i];
+						masterPlayerCollection.dropIndex("external.genericService.genericServices." + key + ".serviceId_1");
+					}
 
-                        masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: "external.genericService.genericServices." + key + ".serviceId_1" });
-                    }
-                }
+					for (let i = 0; i < addKeyLst.length; i++) {
+						let key = addKeyLst[i];
+						let indexDoc = {} as any;
+						indexDoc["external.genericService.genericServices." + key + ".serviceId"] = 1;
 
-                masterPlayerSettings.genericServiceSettings = genericServiceSettings;
-            }
+						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: "external.genericService.genericServices." + key + ".serviceId_1" });
+					}
+				}
 
-            if (request.masterPlayerSettings.playerCurrencySettings != null) {
-                let playerCurrencySettings = new Array<xCurrencySettings>();
+				masterPlayerSettings.genericServiceSettings = genericServiceSettings;
+			}
 
-                let removeKeyLst = new Array<string>();
-                let addKeyLst = new Array<string>();
+			if (request.masterPlayerSettings.playerCurrencySettings != null) {
+				let playerCurrencySettings = new Array<xCurrencySettings>();
 
-                for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
-                    let playerCurrencySetting = masterPlayerSettings.playerCurrencySettings[i];
-                    removeKeyLst.push(playerCurrencySetting.key);
-                }
+				let removeKeyLst = new Array<string>();
+				let addKeyLst = new Array<string>();
 
-                for (let i = 0; i < request.masterPlayerSettings.playerCurrencySettings.length; i++) {
-                    let playerCurrencySetting = request.masterPlayerSettings.playerCurrencySettings[i];
+				for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
+					let playerCurrencySetting = masterPlayerSettings.playerCurrencySettings[i];
+					removeKeyLst.push(playerCurrencySetting.key);
+				}
 
-                    playerCurrencySettings.push({
-                        key: playerCurrencySetting.key,
-                        initialValue: playerCurrencySetting.initialValue,
-                        description: playerCurrencySetting.description,
-                        index: playerCurrencySetting.index,
-                    });
+				for (let i = 0; i < request.masterPlayerSettings.playerCurrencySettings.length; i++) {
+					let playerCurrencySetting = request.masterPlayerSettings.playerCurrencySettings[i];
 
-                    if (playerCurrencySetting.index)
-                        addKeyLst.push(playerCurrencySetting.key);
-                }
+					playerCurrencySettings.push({
+						key: playerCurrencySetting.key,
+						initialValue: playerCurrencySetting.initialValue,
+						description: playerCurrencySetting.description,
+						index: playerCurrencySetting.index,
+					});
 
-                this.gnServer.getGNSettings().getMasterPlayerSettings().playerCurrencySettings = playerCurrencySettings;
+					if (playerCurrencySetting.index)
+						addKeyLst.push(playerCurrencySetting.key);
+				}
 
-                for (let i = 0; i < addKeyLst.length; i++) {
-                    let key = addKeyLst[i];
+				this.gnServer.getGNSettings().getMasterPlayerSettings().playerCurrencySettings = playerCurrencySettings;
 
-                    let removeIndexOf = removeKeyLst.indexOf(key);
+				for (let i = 0; i < addKeyLst.length; i++) {
+					let key = addKeyLst[i];
 
-                    if (removeIndexOf != -1) {
-                        removeKeyLst.splice(removeIndexOf, 1);
+					let removeIndexOf = removeKeyLst.indexOf(key);
 
-                        addKeyLst.splice(i, 1);
-                        i -= 1;
-                    }
-                }
+					if (removeIndexOf != -1) {
+						removeKeyLst.splice(removeIndexOf, 1);
 
-                if (this.gnServer.isPrimary()) {
-                    for (let i = 0; i < removeKeyLst.length; i++) {
-                        let key = removeKeyLst[i];
+						addKeyLst.splice(i, 1);
+						i -= 1;
+					}
+				}
 
-                        let indexName = "playerCurrencies." + key + ".value_-1";
-                        masterPlayerCollection.dropIndex(indexName);
+				if (this.gnServer.isPrimary()) {
+					for (let i = 0; i < removeKeyLst.length; i++) {
+						let key = removeKeyLst[i];
 
-                        Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-                    }
+						let indexName = "playerCurrencies." + key + ".value_-1";
+						masterPlayerCollection.dropIndex(indexName);
 
-                    for (let i = 0; i < addKeyLst.length; i++) {
-                        let key = addKeyLst[i];
-                        let indexDoc = {} as any;
-                        indexDoc["playerCurrencies." + key + ".value"] = -1;
+						Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
 
-                        let indexName = "playerCurrencies." + key + ".value_-1";
-                        masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+					for (let i = 0; i < addKeyLst.length; i++) {
+						let key = addKeyLst[i];
+						let indexDoc = {} as any;
+						indexDoc["playerCurrencies." + key + ".value"] = -1;
 
-                        Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
-                    }
-                }
+						let indexName = "playerCurrencies." + key + ".value_-1";
+						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-                masterPlayerSettings.playerCurrencySettings = playerCurrencySettings;
-            }
+						Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
+				}
 
-            if (request.masterPlayerSettings.playerStatisticsSettings != null) {
-                let playerStatisticsSettings = new Array<xStatisticsSettings>();
+				masterPlayerSettings.playerCurrencySettings = playerCurrencySettings;
+			}
 
-                let removeKeyAscLst = new Array<string>();
-                let removeKeyLst = new Array<string>();
+			if (request.masterPlayerSettings.playerStatisticsSettings != null) {
+				let playerStatisticsSettings = new Array<xStatisticsSettings>();
 
-                let addKeyAscLst = new Array<string>();
-                let addKeyLst = new Array<string>();
+				let removeKeyAscLst = new Array<string>();
+				let removeKeyLst = new Array<string>();
 
-                for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
-                    let playerStatisticsSetting = masterPlayerSettings.playerStatisticsSettings[i];
+				let addKeyAscLst = new Array<string>();
+				let addKeyLst = new Array<string>();
 
-                    if (playerStatisticsSetting.index) {
-                        if (playerStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
-                            removeKeyAscLst.push(playerStatisticsSetting.key);
-                        else removeKeyLst.push(playerStatisticsSetting.key);
-                    }
-                }
+				for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
+					let playerStatisticsSetting = masterPlayerSettings.playerStatisticsSettings[i];
 
-                for (let i = 0; i < request.masterPlayerSettings.playerStatisticsSettings.length; i++) {
-                    let playerStatisticsSetting = request.masterPlayerSettings.playerStatisticsSettings[i];
+					if (playerStatisticsSetting.index) {
+						if (playerStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
+							removeKeyAscLst.push(playerStatisticsSetting.key);
+						else removeKeyLst.push(playerStatisticsSetting.key);
+					}
+				}
 
-                    playerStatisticsSettings.push({
-                        key: playerStatisticsSetting.key,
-                        statisticsAggregationMethod: playerStatisticsSetting.statisticsAggregationMethod,
-                        maximumValue: playerStatisticsSetting.maximumValue,
-                        minimumValue: playerStatisticsSetting.minimumValue,
-                        initialValue: playerStatisticsSetting.initialValue,
-                        description: playerStatisticsSetting.description,
-                        index: playerStatisticsSetting.index,
-                    });
+				for (let i = 0; i < request.masterPlayerSettings.playerStatisticsSettings.length; i++) {
+					let playerStatisticsSetting = request.masterPlayerSettings.playerStatisticsSettings[i];
 
-                    if (playerStatisticsSetting.index) {
-                        if (playerStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
-                            addKeyAscLst.push(playerStatisticsSetting.key);
-                        else addKeyLst.push(playerStatisticsSetting.key);
-                    }
-                }
+					playerStatisticsSettings.push({
+						key: playerStatisticsSetting.key,
+						statisticsAggregationMethod: playerStatisticsSetting.statisticsAggregationMethod,
+						maximumValue: playerStatisticsSetting.maximumValue,
+						minimumValue: playerStatisticsSetting.minimumValue,
+						initialValue: playerStatisticsSetting.initialValue,
+						description: playerStatisticsSetting.description,
+						index: playerStatisticsSetting.index,
+					});
 
-                this.gnServer.getGNSettings().getMasterPlayerSettings().playerStatisticsSettings = playerStatisticsSettings;
+					if (playerStatisticsSetting.index) {
+						if (playerStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
+							addKeyAscLst.push(playerStatisticsSetting.key);
+						else addKeyLst.push(playerStatisticsSetting.key);
+					}
+				}
 
-                {
-                    for (let i = 0; i < addKeyLst.length; i++) {
-                        let key = addKeyLst[i];
+				this.gnServer.getGNSettings().getMasterPlayerSettings().playerStatisticsSettings = playerStatisticsSettings;
 
-                        let removeIndexOf = removeKeyLst.indexOf(key);
+				{
+					for (let i = 0; i < addKeyLst.length; i++) {
+						let key = addKeyLst[i];
 
-                        if (removeIndexOf != -1) {
-                            removeKeyLst.splice(removeIndexOf, 1);
+						let removeIndexOf = removeKeyLst.indexOf(key);
 
-                            addKeyLst.splice(i, 1);
-                            i -= 1;
-                        }
-                    }
+						if (removeIndexOf != -1) {
+							removeKeyLst.splice(removeIndexOf, 1);
 
-                    if (this.gnServer.isPrimary()) {
-                        for (let i = 0; i < removeKeyLst.length; i++) {
-                            let key = removeKeyLst[i];
+							addKeyLst.splice(i, 1);
+							i -= 1;
+						}
+					}
 
-                            let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-                            masterPlayerCollection.dropIndex(indexName);
+					if (this.gnServer.isPrimary()) {
+						for (let i = 0; i < removeKeyLst.length; i++) {
+							let key = removeKeyLst[i];
 
-                            Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-                        }
+							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.dropIndex(indexName);
 
-                        for (let i = 0; i < addKeyLst.length; i++) {
-                            let key = addKeyLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["playerStatistics." + key + ".value"] = -1;
-                            indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
+							Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
 
-                            let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-                            masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+						for (let i = 0; i < addKeyLst.length; i++) {
+							let key = addKeyLst[i];
+							let indexDoc = {} as any;
+							indexDoc["playerStatistics." + key + ".value"] = -1;
+							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
-                        }
-                    }
-                }
+							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-                {
-                    for (let i = 0; i < addKeyAscLst.length; i++) {
-                        let key = addKeyAscLst[i];
+							Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
+					}
+				}
 
-                        let removeIndexOf = removeKeyAscLst.indexOf(key);
+				{
+					for (let i = 0; i < addKeyAscLst.length; i++) {
+						let key = addKeyAscLst[i];
 
-                        if (removeIndexOf != -1) {
-                            removeKeyAscLst.splice(removeIndexOf, 1);
+						let removeIndexOf = removeKeyAscLst.indexOf(key);
 
-                            addKeyAscLst.splice(i, 1);
-                            i -= 1;
-                        }
-                    }
+						if (removeIndexOf != -1) {
+							removeKeyAscLst.splice(removeIndexOf, 1);
 
-                    if (this.gnServer.isPrimary()) {
-                        for (let i = 0; i < removeKeyAscLst.length; i++) {
-                            let key = removeKeyAscLst[i];
+							addKeyAscLst.splice(i, 1);
+							i -= 1;
+						}
+					}
 
-                            let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-                            masterPlayerCollection.dropIndex(indexName);
+					if (this.gnServer.isPrimary()) {
+						for (let i = 0; i < removeKeyAscLst.length; i++) {
+							let key = removeKeyAscLst[i];
 
-                            Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-                        }
+							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.dropIndex(indexName);
 
-                        for (let i = 0; i < addKeyAscLst.length; i++) {
-                            let key = addKeyAscLst[i];
-                            let indexDoc = {} as any;
-                            indexDoc["playerStatistics." + key + ".value"] = 1;
-                            indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
+							Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
 
-                            let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-                            masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+						for (let i = 0; i < addKeyAscLst.length; i++) {
+							let key = addKeyAscLst[i];
+							let indexDoc = {} as any;
+							indexDoc["playerStatistics." + key + ".value"] = 1;
+							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-                            Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
-                        }
-                    }
-                }
+							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+							masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-                masterPlayerSettings.playerStatisticsSettings = playerStatisticsSettings;
-            }
+							Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+						}
+					}
+				}
 
-            if (request.masterPlayerSettings.playerDatasSettings != null) {
-                let playerDatasSettings = new Array<xDataSettings>();
+				masterPlayerSettings.playerStatisticsSettings = playerStatisticsSettings;
+			}
 
-                for (let i = 0; i < request.masterPlayerSettings.playerDatasSettings.length; i++) {
-                    let playerDatasSetting = request.masterPlayerSettings.playerDatasSettings[i];
+			if (request.masterPlayerSettings.playerDatasSettings != null) {
+				let playerDatasSettings = new Array<xDataSettings>();
 
-                    playerDatasSettings.push({
-                        key: playerDatasSetting.key,
-                        permission: playerDatasSetting.permission,
-                        description: playerDatasSetting.description,
-                    });
-                }
+				for (let i = 0; i < request.masterPlayerSettings.playerDatasSettings.length; i++) {
+					let playerDatasSetting = request.masterPlayerSettings.playerDatasSettings[i];
 
-                this.gnServer.getGNSettings().getMasterPlayerSettings().playerDatasSettings = playerDatasSettings;
-                masterPlayerSettings.playerDatasSettings = playerDatasSettings;
-            }
+					playerDatasSettings.push({
+						key: playerDatasSetting.key,
+						permission: playerDatasSetting.permission,
+						description: playerDatasSetting.description,
+					});
+				}
 
-            if (request.masterPlayerSettings.customDatasSettings != null) {
-                let playerDatasSettings = new Array<xDataSettings>();
+				this.gnServer.getGNSettings().getMasterPlayerSettings().playerDatasSettings = playerDatasSettings;
+				masterPlayerSettings.playerDatasSettings = playerDatasSettings;
+			}
 
-                for (let i = 0; i < request.masterPlayerSettings.customDatasSettings.length; i++) {
-                    let customDatasSetting = request.masterPlayerSettings.customDatasSettings[i];
+			if (request.masterPlayerSettings.customDatasSettings != null) {
+				let playerDatasSettings = new Array<xDataSettings>();
 
-                    playerDatasSettings.push({
-                        key: customDatasSetting.key,
-                        permission: customDatasSetting.permission,
-                        description: customDatasSetting.description,
-                    });
-                }
+				for (let i = 0; i < request.masterPlayerSettings.customDatasSettings.length; i++) {
+					let customDatasSetting = request.masterPlayerSettings.customDatasSettings[i];
 
-                this.gnServer.getGNSettings().getMasterPlayerSettings().customDatasSettings = playerDatasSettings;
-                masterPlayerSettings.customDatasSettings = playerDatasSettings;
-            }
+					playerDatasSettings.push({
+						key: customDatasSetting.key,
+						permission: customDatasSetting.permission,
+						description: customDatasSetting.description,
+					});
+				}
 
-            if (request.masterPlayerSettings.tagsSettings != null) {
-                let tagsSettings = new Array<xTagSettings>();
+				this.gnServer.getGNSettings().getMasterPlayerSettings().customDatasSettings = playerDatasSettings;
+				masterPlayerSettings.customDatasSettings = playerDatasSettings;
+			}
 
-                let removeKeyLst = new Array<string>();
-                let addKeyLst = new Array<string>();
+			if (request.masterPlayerSettings.tagsSettings != null) {
+				let tagsSettings = new Array<xTagSettings>();
 
-                for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
-                    let tagsSetting = masterPlayerSettings.tagsSettings[i];
-                    removeKeyLst.push(tagsSetting.key);
-                }
+				let removeKeyLst = new Array<string>();
+				let addKeyLst = new Array<string>();
 
-                for (let i = 0; i < request.masterPlayerSettings.tagsSettings.length; i++) {
-                    let tagsSetting = request.masterPlayerSettings.tagsSettings[i];
+				for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
+					let tagsSetting = masterPlayerSettings.tagsSettings[i];
+					removeKeyLst.push(tagsSetting.key);
+				}
 
-                    tagsSettings.push({
-                        key: tagsSetting.key,
-                        description: tagsSetting.description,
-                        index: tagsSetting.index,
-                    });
+				for (let i = 0; i < request.masterPlayerSettings.tagsSettings.length; i++) {
+					let tagsSetting = request.masterPlayerSettings.tagsSettings[i];
 
-                    if (tagsSetting.index)
-                        addKeyLst.push(tagsSetting.key);
+					tagsSettings.push({
+						key: tagsSetting.key,
+						description: tagsSetting.description,
+						index: tagsSetting.index,
+					});
 
-                    addKeyLst.push(tagsSetting.key);
-                }
+					if (tagsSetting.index)
+						addKeyLst.push(tagsSetting.key);
 
-                this.gnServer.getGNSettings().getMasterPlayerSettings().tagsSettings = tagsSettings;
+					addKeyLst.push(tagsSetting.key);
+				}
 
-                for (let i = 0; i < addKeyLst.length; i++) {
-                    let key = addKeyLst[i];
+				this.gnServer.getGNSettings().getMasterPlayerSettings().tagsSettings = tagsSettings;
 
-                    let removeIndexOf = removeKeyLst.indexOf(key);
+				for (let i = 0; i < addKeyLst.length; i++) {
+					let key = addKeyLst[i];
 
-                    if (removeIndexOf != -1) {
-                        removeKeyLst.splice(removeIndexOf, 1);
+					let removeIndexOf = removeKeyLst.indexOf(key);
 
-                        addKeyLst.splice(i, 1);
-                        i -= 1;
-                    }
-                }
+					if (removeIndexOf != -1) {
+						removeKeyLst.splice(removeIndexOf, 1);
 
-                if (this.gnServer.isPrimary()) {
-                    for (let i = 0; i < removeKeyLst.length; i++) {
-                        let key = removeKeyLst[i];
+						addKeyLst.splice(i, 1);
+						i -= 1;
+					}
+				}
 
-                        let indexName = "tags." + key + "_1";
-                        masterPlayerCollection.dropIndex(indexName);
+				if (this.gnServer.isPrimary()) {
+					for (let i = 0; i < removeKeyLst.length; i++) {
+						let key = removeKeyLst[i];
 
-                        Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-                    }
+						let indexName = "tags." + key + "_1";
+						masterPlayerCollection.dropIndex(indexName);
 
-                    for (let i = 0; i < addKeyLst.length; i++) {
-                        let key = addKeyLst[i];
-                        let indexDoc = {} as any;
-                        indexDoc["tags." + key] = 1;
+						Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
 
-                        let indexName = "tags." + key + "_1";
-                        masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
+					for (let i = 0; i < addKeyLst.length; i++) {
+						let key = addKeyLst[i];
+						let indexDoc = {} as any;
+						indexDoc["tags." + key] = 1;
 
-                        Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
-                    }
-                }
+						let indexName = "tags." + key + "_1";
+						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
-                masterPlayerSettings.tagsSettings = tagsSettings;
-            }
+						Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
+					}
+				}
 
-            masterGameSettings.setMasterPlayerSettings(masterPlayerSettings);
-        }
+				masterPlayerSettings.tagsSettings = tagsSettings;
+			}
 
-        if (request.emailSettings != null) {
-            let emailSettings = masterGameSettings.getEmailSettings();
+			masterGameSettings.setMasterPlayerSettings(masterPlayerSettings);
+		}
 
-            if (request.emailSettings.sendFrom) emailSettings.sendFrom = request.emailSettings.sendFrom;
-            if (request.emailSettings.secure != null) emailSettings.secure = request.emailSettings.secure;
-            if (request.emailSettings.host) emailSettings.host = request.emailSettings.host;
-            if (request.emailSettings.port) emailSettings.port = request.emailSettings.port;
-            if (request.emailSettings.username) emailSettings.username = request.emailSettings.username;
-            if (request.emailSettings.password) emailSettings.password = request.emailSettings.password;
+		if (request.emailSettings != null) {
+			let emailSettings = masterGameSettings.getEmailSettings();
 
-            (<EmailService>this.gnServer.getEmailService()).init(emailSettings.host, emailSettings.port, emailSettings.secure, emailSettings.username, emailSettings.password, emailSettings.sendFrom);
-            (<EmailService>this.gnServer.getEmailService()).run();
+			if (request.emailSettings.sendFrom) emailSettings.sendFrom = request.emailSettings.sendFrom;
+			if (request.emailSettings.secure != null) emailSettings.secure = request.emailSettings.secure;
+			if (request.emailSettings.host) emailSettings.host = request.emailSettings.host;
+			if (request.emailSettings.port) emailSettings.port = request.emailSettings.port;
+			if (request.emailSettings.username) emailSettings.username = request.emailSettings.username;
+			if (request.emailSettings.password) emailSettings.password = request.emailSettings.password;
 
-            masterGameSettings.setEmailSettings(emailSettings);
-        }
+			(<EmailService>this.gnServer.getEmailService()).init(emailSettings.host, emailSettings.port, emailSettings.secure, emailSettings.username, emailSettings.password, emailSettings.sendFrom);
+			(<EmailService>this.gnServer.getEmailService()).run();
 
-        if (request.pushNotificationSettings != null) {
-            let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
+			masterGameSettings.setEmailSettings(emailSettings);
+		}
 
-            if (request.pushNotificationSettings.projectId) pushNotificationSettings.projectId = request.pushNotificationSettings.projectId;
-            if (request.pushNotificationSettings.clientEmail) pushNotificationSettings.clientEmail = request.pushNotificationSettings.clientEmail;
-            if (request.pushNotificationSettings.privateKey) pushNotificationSettings.privateKey = request.pushNotificationSettings.privateKey;
+		if (request.pushNotificationSettings != null) {
+			let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
 
-            (<PushNotificationService>this.gnServer.getPushNotificationService()).init(request.pushNotificationSettings.projectId, request.pushNotificationSettings.clientEmail, request.pushNotificationSettings.privateKey);
-            (<PushNotificationService>this.gnServer.getPushNotificationService()).run();
+			if (request.pushNotificationSettings.projectId) pushNotificationSettings.projectId = request.pushNotificationSettings.projectId;
+			if (request.pushNotificationSettings.clientEmail) pushNotificationSettings.clientEmail = request.pushNotificationSettings.clientEmail;
+			if (request.pushNotificationSettings.privateKey) pushNotificationSettings.privateKey = request.pushNotificationSettings.privateKey;
 
-            masterGameSettings.setPushNotificationSettings(pushNotificationSettings);
-        }
+			(<PushNotificationService>this.gnServer.getPushNotificationService()).init(request.pushNotificationSettings.projectId, request.pushNotificationSettings.clientEmail, request.pushNotificationSettings.privateKey);
+			(<PushNotificationService>this.gnServer.getPushNotificationService()).run();
 
-        masterGameSettings.saveAsync();
-    }
+			masterGameSettings.setPushNotificationSettings(pushNotificationSettings);
+		}
 
-    protected override init(): void {
-        let thiz = this;
-        this.gnServer.getHttpApp().getClusterHandler().onEvent("dashboard_SetMasterGameSettings", data => {
-            thiz.applySettings(data);
-        });
-    }
+		masterGameSettings.saveAsync();
+	}
+
+	protected override init(): void {
+		let thiz = this;
+		this.gnServer.getHttpApp().getClusterHandler().onEvent("dashboard_SetMasterGameSettings", data => {
+			thiz.applySettings(data);
+		});
+	}
 }

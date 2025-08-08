@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class SetCountryCodeOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.CountryCode, minLength: 2, maxLength: 32 })
-	countryCode: string;
+	public countryCode: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,8 +30,9 @@ class SetCountryCodeOperationRequest extends OperationRequest {
 }
 
 class ServerGetCountryCodeOperationRequest extends SetCountryCodeOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -49,6 +51,7 @@ class AdminGetCountryCodeOperationRequest extends ServerGetCountryCodeOperationR
 }
 
 export class SetCountryCodeRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetCountryCode;
 	}

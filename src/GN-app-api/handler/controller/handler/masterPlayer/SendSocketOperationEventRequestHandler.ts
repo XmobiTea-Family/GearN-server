@@ -15,133 +15,137 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 
 class SendSocketOperationEventOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-    userId?: string;
 
-    @StringDataMember({ code: ParameterCode.EventCode, minLength: 1, maxLength: 100 })
-    eventCode: string;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	public userId?: string;
 
-    @GNHashtableDataMember({ code: ParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })
-    eventParameters?: GNHashtable;
+	@StringDataMember({ code: ParameterCode.EventCode, minLength: 1, maxLength: 100 })
+	public eventCode: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@GNHashtableDataMember({ code: ParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })
+	public eventParameters?: GNHashtable;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerSendSocketOperationEventOperationRequest extends SendSocketOperationEventOperationRequest {
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-    declare userId: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	public declare userId: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class AdminSendSocketOperationEventOperationRequest extends ServerSendSocketOperationEventOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 export class SendSocketOperationEventRequestHandler extends MasterPlayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.SendSocketOperationEvent;
-    }
 
-    public override getCommonOperationRequest() {
-        return SendSocketOperationEventOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.SendSocketOperationEvent;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return SendSocketOperationEventOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.userId) {
-            if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-            request.userId = authInfo.getUserId();
-        }
-        else if (request.userId != authInfo.getUserId()) {
-            if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.otherSelfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
-        else {
-            if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
+		if (!request.userId) {
+			if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 
-        return this.execute({
-            userId: request.userId,
-            eventCode: request.eventCode,
-            eventParameters: request.eventParameters?.toData() ?? null,
-        }, secretInfo, operationRequest);
-    }
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSendSocketOperationEventOperationRequest);
+		return this.execute({
+			userId: request.userId,
+			eventCode: request.eventCode,
+			eventParameters: request.eventParameters?.toData() ?? null,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSendSocketOperationEventOperationRequest);
 
-        if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            eventCode: request.eventCode,
-            eventParameters: request.eventParameters?.toData() ?? null,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSendSocketOperationEventOperationRequest);
+		return this.execute({
+			userId: request.userId,
+			eventCode: request.eventCode,
+			eventParameters: request.eventParameters?.toData() ?? null,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSendSocketOperationEventOperationRequest);
 
-        if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            eventCode: request.eventCode,
-            eventParameters: request.eventParameters?.toData() ?? null,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().masterPlayer.sendSocketOperationEvent.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { userId: string, eventCode: string, eventParameters: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SendSocketOperationEvent", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			userId: request.userId,
+			eventCode: request.eventCode,
+			eventParameters: request.eventParameters?.toData() ?? null,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { userId: string, eventCode: string, eventParameters: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SendSocketOperationEvent", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        this.gnServer.sendEventTo(request.userId, new OperationEvent(request.eventCode, request.eventParameters != null ? GNHashtable.builder().addAll(request.eventParameters).build() : null));
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		this.gnServer.sendEventTo(request.userId, new OperationEvent(request.eventCode, request.eventParameters != null ? GNHashtable.builder().addAll(request.eventParameters).build() : null));
 
-        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SendSocketOperationEvent", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SendSocketOperationEvent", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

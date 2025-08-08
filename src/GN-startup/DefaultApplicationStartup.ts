@@ -22,7 +22,7 @@ export class DefaultApplicationStartup {
 			.setOrigins("*")
 			.addMethods(["GET", "POST"])
 			.setCredentials(true)
-			.addAllowedHeaders(["a", "content-type"])
+			.addAllowedHeaders(["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent"])
 			.setEnableSendAndReceiveDebug(true)
 			.setEnablePostViaJson(true)
 			.setEnablePostViaMsgPack(true)
@@ -85,15 +85,15 @@ export class DefaultApplicationStartup {
 			.setIPWhiteList(["127.0.0.1"])
 			.build();
 
-        let clusterSettings = ClusterSettings.Builder()
-            .setInstanceId("node_0")
-            .setIsPrimary(true)
-            .setPrivateKeyToken("defaultApplicationStartup")
-            .setAllNodes([{
-                instanceId: "node_0",
-                fullUrl: "http://127.0.0.1:2202"
-            }])
-            .build();
+		let clusterSettings = ClusterSettings.Builder()
+			.setInstanceId("node_0")
+			.setIsPrimary(true)
+			.setPrivateKeyToken("defaultApplicationStartup")
+			.setAllNodes([{
+				instanceId: "node_0",
+				fullUrl: "http://127.0.0.1:2202"
+			}])
+			.build();
 
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
@@ -104,7 +104,7 @@ export class DefaultApplicationStartup {
 			logSettings,
 			uploadFileSettings,
 			ddosSettings,
-            clusterSettings,
+			clusterSettings,
 		);
 
 		this.serverApplication.run(() => {
@@ -121,7 +121,7 @@ export class DefaultApplicationStartup {
 		logSettings: LogSettings,
 		uploadFileSettings: UploadFileSettings,
 		ddosSettings: DdosSettings,
-        clusterSettings: ClusterSettings,
+		clusterSettings: ClusterSettings,
 	) {
 		return ServerApplication.Builder()
 			.setApplicationSettings(applicationSettings)
@@ -132,7 +132,7 @@ export class DefaultApplicationStartup {
 			.setLogSettings(logSettings)
 			.setUploadFileSettings(uploadFileSettings)
 			.setDdosSettings(ddosSettings)
-            .setClusterSettings(clusterSettings)
+			.setClusterSettings(clusterSettings)
 			.build();
 	}
 

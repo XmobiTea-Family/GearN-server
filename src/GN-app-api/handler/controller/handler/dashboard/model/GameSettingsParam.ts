@@ -6,15 +6,17 @@ import { GroupSettingsParam } from "./GroupSettingsParam";
 import { InventorySettingsParam } from "./InventorySettingsParam";
 
 export class GameSettingsParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.GamePlayerSettings, isOptional: true })
-	gamePlayerSettings?: GamePlayerSettingsParam;
+	public gamePlayerSettings?: GamePlayerSettingsParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CharacterPlayerSettings, isOptional: true })
-	characterPlayerSettings?: CharacterPlayerSettingsParam;
+	public characterPlayerSettings?: CharacterPlayerSettingsParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GroupSettings, isOptional: true })
-	groupSettings?: GroupSettingsParam;
+	public groupSettings?: GroupSettingsParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.InventorySettings, isOptional: true })
-	inventorySettings?: InventorySettingsParam;
+	public inventorySettings?: InventorySettingsParam;
+
 }

@@ -3,76 +3,77 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { PermissionRulesParam } from "./PermissionRulesParam";
 
 export class MasterAdminPermissionRulesParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.SetMasterGameSettings, isOptional: true })
-	setMasterGameSettings?: PermissionRulesParam;
+	public setMasterGameSettings?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CreateAdminAccount, isOptional: true })
-	createAdminAccount?: PermissionRulesParam;
+	public createAdminAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemoveAdminAccount, isOptional: true })
-	removeAdminAccount?: PermissionRulesParam;
+	public removeAdminAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetPasswordAdminAccount, isOptional: true })
-	setPasswordAdminAccount?: PermissionRulesParam;
+	public setPasswordAdminAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetSecretKeyAdminAccount, isOptional: true })
-	setSecretKeyAdminAccount?: PermissionRulesParam;
+	public setSecretKeyAdminAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetGameInformation, isOptional: true })
-	setGameInformation?: PermissionRulesParam;
+	public setGameInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CreateGame, isOptional: true })
-	createGame?: PermissionRulesParam;
+	public createGame?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ChangePasswordAdminAccount, isOptional: true })
-	changePasswordAdminAccount?: PermissionRulesParam;
+	public changePasswordAdminAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetAdminAccountList, isOptional: true })
-	getAdminAccountList?: PermissionRulesParam;
+	public getAdminAccountList?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetGameInformation, isOptional: true })
-	getGameInformation?: PermissionRulesParam;
+	public getGameInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetGameList, isOptional: true })
-	getGameList?: PermissionRulesParam;
+	public getGameList?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetMasterGameSettings, isOptional: true })
-	getMasterGameSettings?: PermissionRulesParam;
+	public getMasterGameSettings?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetServerLog, isOptional: true })
-	getServerLog?: PermissionRulesParam;
+	public getServerLog?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetSecretInfoInformation, isOptional: true })
-	getSecretInfoInformation?: PermissionRulesParam;
+	public getSecretInfoInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetSecretInfoList, isOptional: true })
-	getSecretInfoList?: PermissionRulesParam;
+	public getSecretInfoList?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CreateSecretInfo, isOptional: true })
-	createSecretInfo?: PermissionRulesParam;
+	public createSecretInfo?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetSecretInfoInformation, isOptional: true })
-	setSecretInfoInformation?: PermissionRulesParam;
+	public setSecretInfoInformation?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetUsernameAdminAccount, isOptional: true })
-	getUsernameAdminAccount?: PermissionRulesParam;
+	public getUsernameAdminAccount?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetAnalytics, isOptional: true })
-	getAnalytics?: PermissionRulesParam;
+	public getAnalytics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetEventCallbackCloudScript, isOptional: true })
-	getEventCallbackCloudScript?: PermissionRulesParam;
+	public getEventCallbackCloudScript?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetEventCallbackCloudScript, isOptional: true })
-	setEventCallbackCloudScript?: PermissionRulesParam;
+	public setEventCallbackCloudScript?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.ResetStatisticsLeaderboard, isOptional: true })
-	resetStatisticsLeaderboard?: PermissionRulesParam;
+	public resetStatisticsLeaderboard?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetBackupStatisticsLeaderboardVersion, isOptional: true })
-	getBackupStatisticsLeaderboardVersion?: PermissionRulesParam;
+	public getBackupStatisticsLeaderboardVersion?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.DeleteInDatabase, isOptional: true })
-	deleteInDatabase?: PermissionRulesParam;
+	public deleteInDatabase?: PermissionRulesParam;
 
 }

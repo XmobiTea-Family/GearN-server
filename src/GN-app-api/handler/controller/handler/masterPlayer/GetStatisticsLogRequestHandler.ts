@@ -14,181 +14,182 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class GetStatisticsLogOperationRequest extends OperationRequest {
-    @GNArrayDataMember({ code: ParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
-    keys?: Array<string>;
 
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true, isOptional: true })
-    userId?: string;
+	@GNArrayDataMember({ code: ParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
+	public keys?: Array<string>;
 
-    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-    limit?: number;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true, isOptional: true })
+	public userId?: string;
 
-    @StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
-    token?: string;
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	public limit?: number;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
+	public token?: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerGetStatisticsLogOperationRequest extends GetStatisticsLogOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminGetStatisticsLogOperationRequest extends ServerGetStatisticsLogOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetStatisticsLogRequestHandler extends RequestHandler {
 
-    public override getCode() {
-        return OperationCode.GetStatisticsLog;
-    }
+	public override getCode() {
+		return OperationCode.GetStatisticsLog;
+	}
 
-    public override getCommonOperationRequest() {
-        return GetStatisticsLogOperationRequest;
-    }
+	public override getCommonOperationRequest() {
+		return GetStatisticsLogOperationRequest;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().masterPlayer.getStatisticsLog.otherSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getStatisticsLog.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            keys: request.keys,
-            token: request.token,
-            limit: request.limit,
-            userId: request.userId,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			keys: request.keys,
+			token: request.token,
+			limit: request.limit,
+			userId: request.userId,
+		}, secretInfo, operationRequest);
+	}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStatisticsLogOperationRequest);
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStatisticsLogOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().masterPlayer.getStatisticsLog.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getStatisticsLog.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            keys: request.keys,
-            token: request.token,
-            limit: request.limit,
-            userId: request.userId,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			keys: request.keys,
+			token: request.token,
+			limit: request.limit,
+			userId: request.userId,
+		}, secretInfo, operationRequest);
+	}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStatisticsLogOperationRequest);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStatisticsLogOperationRequest);
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!secretInfo.getPermission().masterPlayer.getStatisticsLog.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!secretInfo.getPermission().masterPlayer.getStatisticsLog.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            keys: request.keys,
-            token: request.token,
-            limit: request.limit,
-            userId: request.userId,
-        }, secretInfo, operationRequest);
-    }
+		return this.execute({
+			keys: request.keys,
+			token: request.token,
+			limit: request.limit,
+			userId: request.userId,
+		}, secretInfo, operationRequest);
+	}
 
-    private async execute(request: { keys: Array<string>, token: string, limit: number, userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetStatisticsLog", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+	private async execute(request: { keys: Array<string>, token: string, limit: number, userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetStatisticsLog", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
-        
-        let keys: string[] = [];
-        if (request.keys) {
-            for (let i = 0; i < request.keys.length; i++) {
-                let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.keys[i]);
+		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-                if (playerStatisticsSettingsItem != null) {
-                    keys.push(playerStatisticsSettingsItem.key);
-                }
-            }
-        }
-        
-        let $filter = {} as any;
+		let keys: string[] = [];
+		if (request.keys) {
+			for (let i = 0; i < request.keys.length; i++) {
+				let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.keys[i]);
 
-        if (request.userId) {
-            $filter["userId"] = request.userId;
-        }
+				if (playerStatisticsSettingsItem != null) {
+					keys.push(playerStatisticsSettingsItem.key);
+				}
+			}
+		}
 
-        if (keys.length != 0) {
-            if (keys.length == 1) $filter["key"] = keys[0];
-            else $filter["key"] = { $in: keys };
-        }
-        
-        if (request.token) {
-            $filter["_id"] = { $lt: request.token };
-        }
+		let $filter = {} as any;
 
-        let gnResults = new GNArray();
+		if (request.userId) {
+			$filter["userId"] = request.userId;
+		}
 
-        let results = await this.gnServer.getDatabase().loadMasterPlayerStatisticsLogAsync($filter, request.limit);
+		if (keys.length != 0) {
+			if (keys.length == 1) $filter["key"] = keys[0];
+			else $filter["key"] = { $in: keys };
+		}
 
-        let token: string;
-        
-        while (await results.hasNext()) {
-            let result = await results.next();
+		if (request.token) {
+			$filter["_id"] = { $lt: request.token };
+		}
 
-            let gnResult = new GNHashtable();
+		let gnResults = new GNArray();
 
-            gnResult.add(ParameterCode.UserId, result["userId"]);
-            gnResult.add(ParameterCode.TsCreate, result["tsCreate"]);
-            gnResult.add(ParameterCode.Log, result["log"]);
-            gnResult.add(ParameterCode.Key, result["key"]);
-            gnResult.add(ParameterCode.Amount, result["amount"]);
-            gnResult.add(ParameterCode.StartValue, result["startValue"]);
-            gnResult.add(ParameterCode.FinalValue, result["finalValue"]);
+		let results = await this.gnServer.getDatabase().loadMasterPlayerStatisticsLogAsync($filter, request.limit);
 
-            gnResults.add(gnResult);
+		let token: string;
 
-            token = result["_id"].toString();
-        }
+		while (await results.hasNext()) {
+			let result = await results.next();
 
-        operationResponse.setParameter(ParameterCode.Results, gnResults);
+			let gnResult = new GNHashtable();
 
-        if (token) {
-            operationResponse.setParameter(ParameterCode.Token, token);
-        }
+			gnResult.add(ParameterCode.UserId, result["userId"]);
+			gnResult.add(ParameterCode.TsCreate, result["tsCreate"]);
+			gnResult.add(ParameterCode.Log, result["log"]);
+			gnResult.add(ParameterCode.Key, result["key"]);
+			gnResult.add(ParameterCode.Amount, result["amount"]);
+			gnResult.add(ParameterCode.StartValue, result["startValue"]);
+			gnResult.add(ParameterCode.FinalValue, result["finalValue"]);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+			gnResults.add(gnResult);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetStatisticsLog", request, secretInfo, operationRequest, operationResponse);
+			token = result["_id"].toString();
+		}
 
-        return operationResponse;
-    }
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
+
+		if (token) {
+			operationResponse.setParameter(ParameterCode.Token, token);
+		}
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetStatisticsLog", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

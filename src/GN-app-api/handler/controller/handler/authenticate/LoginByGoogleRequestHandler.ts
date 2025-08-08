@@ -18,17 +18,18 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByGoogleOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
-	token: string;
+	public token: string;
 
 	@NumberDataMember({ code: ParameterCode.Type, minValue: 1, maxValue: 2, mustInt: true })
-	type: number;
+	public type: number;
 
 	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
-	createPlayerIfNotExists?: boolean;
+	public createPlayerIfNotExists?: boolean;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -38,6 +39,7 @@ class LoginByGoogleOperationRequest extends OperationRequest {
 }
 
 export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LoginByGoogle;
 	}

@@ -17,11 +17,12 @@ import fs from "fs";
 import readline from "readline";
 
 class GetServerLogOperationRequest extends OperationRequest {
+
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-	skip?: number;
+	public skip?: number;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 50, minValue: 5, maxValue: 200, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -31,6 +32,7 @@ class GetServerLogOperationRequest extends OperationRequest {
 }
 
 export class GetServerLogRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetServerLog;
 	}

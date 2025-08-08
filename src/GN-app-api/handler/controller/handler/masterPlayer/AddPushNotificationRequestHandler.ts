@@ -17,14 +17,15 @@ import { PushNotificationItem } from "./../../../../../GN-library/xdatabase/lib/
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 class AddPushNotificationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Token, minLength: 10, maxLength: 256, mustNonNull: true })
-	token: string;
+	public token: string;
 
 	@NumberDataMember({ code: ParameterCode.PlatformType, minValue: 1 })
-	platformType: number;
+	public platformType: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -34,8 +35,9 @@ class AddPushNotificationOperationRequest extends OperationRequest {
 }
 
 class ServerAddPushNotificationOperationRequest extends AddPushNotificationOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

@@ -21,20 +21,21 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 
 class GetStoreLogOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true, isOptional: true })
-	storeId?: string;
+	public storeId?: string;
 
 	@GNArrayDataMember({ code: ParameterCode.StoreReceiveTypes, minLength: 1, maxLength: 10, mustNonNull: true, elementCls: Number, isOptional: true })
-	storeReceiveTypes?: Array<number>;
+	public storeReceiveTypes?: Array<number>;
 
 	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true, isOptional: true })
-	id?: string;
+	public id?: string;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	@StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
-	token?: string;
+	public token?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +45,7 @@ class GetStoreLogOperationRequest extends OperationRequest {
 }
 
 class ServerGetStoreLogOperationRequest extends GetStoreLogOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,6 +54,7 @@ class ServerGetStoreLogOperationRequest extends GetStoreLogOperationRequest {
 }
 
 class AdminGetStoreLogOperationRequest extends ServerGetStoreLogOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -60,6 +63,7 @@ class AdminGetStoreLogOperationRequest extends ServerGetStoreLogOperationRequest
 }
 
 export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetStoreLog;
 	}

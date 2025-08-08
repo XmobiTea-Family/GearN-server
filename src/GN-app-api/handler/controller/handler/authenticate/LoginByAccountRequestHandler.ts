@@ -18,14 +18,15 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByAccountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
-	username: string;
+	public username: string;
 
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
-	password: string;
+	public password: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -35,6 +36,7 @@ class LoginByAccountOperationRequest extends OperationRequest {
 }
 
 export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LoginByAccount;
 	}

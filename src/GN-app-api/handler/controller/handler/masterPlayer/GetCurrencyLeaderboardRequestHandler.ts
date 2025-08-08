@@ -17,230 +17,232 @@ import { MasterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/p
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-    key: string;
 
-    @GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-    infoRequestParam: InfoRequestParam;
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	public key: string;
 
-    @NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-    skip?: number;
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
+	public infoRequestParam: InfoRequestParam;
 
-    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-    limit?: number;
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	public skip?: number;
 
-    @BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
-    loadFromCache?: boolean;
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	public limit?: number;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	public loadFromCache?: boolean;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerGetCurrencyLeaderboardOperationRequest extends GetCurrencyLeaderboardOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminGetCurrencyLeaderboardOperationRequest extends ServerGetCurrencyLeaderboardOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetCurrencyLeaderboardRequestHandler extends MasterPlayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.GetCurrencyLeaderboard;
-    }
 
-    public override getCommonOperationRequest() {
-        return GetCurrencyLeaderboardOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.GetCurrencyLeaderboard;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return GetCurrencyLeaderboardOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().masterPlayer.getCurrencyLeaderboard.otherSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+		if (!secretInfo.getPermission().masterPlayer.getCurrencyLeaderboard.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            key: request.key,
-            skip: request.skip,
-            limit: request.limit,
-            infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-        }, secretInfo, operationRequest);
-    }
+		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCurrencyLeaderboardOperationRequest);
+		return this.execute({
+			key: request.key,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCurrencyLeaderboardOperationRequest);
 
-        if (!secretInfo.getPermission().masterPlayer.getCurrencyLeaderboard.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
+		if (!secretInfo.getPermission().masterPlayer.getCurrencyLeaderboard.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            key: request.key,
-            skip: request.skip,
-            limit: request.limit,
-            infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-        }, secretInfo, operationRequest);
-    }
+		this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCurrencyLeaderboardOperationRequest);
+		return this.execute({
+			key: request.key,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCurrencyLeaderboardOperationRequest);
 
-        if (!secretInfo.getPermission().masterPlayer.getCurrencyLeaderboard.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
+		if (!secretInfo.getPermission().masterPlayer.getCurrencyLeaderboard.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            key: request.key,
-            skip: request.skip,
-            limit: request.limit,
-            infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-        }, secretInfo, operationRequest);
-    }
+		this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-    private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetCurrencyLeaderboard", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			key: request.key,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetCurrencyLeaderboard", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
-        let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        if (playerCurrencySettingsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
+		let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
 
-            return operationResponse;
-        }
+		if (playerCurrencySettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
-        let cacheKey = "masterPlayerCurrencyLeaderboard_" + request.key;
+			return operationResponse;
+		}
 
-        if (request.loadFromCache) {
-            if (request.skip + request.limit > 100) {
-                request.loadFromCache = false;
-            }
-        }
+		let cacheKey = "masterPlayerCurrencyLeaderboard_" + request.key;
 
-        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+		if (request.loadFromCache) {
+			if (request.skip + request.limit > 100) {
+				request.loadFromCache = false;
+			}
+		}
 
-        if (request.loadFromCache) {
-            if (!(await cacheData.isValid(cacheKey))) {
-                request.loadFromCache = false;
-            }
-        }
+		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-        let gnResults = new GNArray();
+		if (request.loadFromCache) {
+			if (!(await cacheData.isValid(cacheKey))) {
+				request.loadFromCache = false;
+			}
+		}
 
-        let masterPlayers: MasterPlayer[];
+		let gnResults = new GNArray();
 
-        if (request.loadFromCache) {
-            masterPlayers = await cacheData.getData(cacheKey);
+		let masterPlayers: MasterPlayer[];
 
-            for (let i = request.skip; i < request.skip + request.limit; i++) {
-                if (i >= masterPlayers.length) break;
+		if (request.loadFromCache) {
+			masterPlayers = await cacheData.getData(cacheKey);
 
-                let masterPlayer = masterPlayers[i];
+			for (let i = request.skip; i < request.skip + request.limit; i++) {
+				if (i >= masterPlayers.length) break;
 
-                let gnResult = new GNHashtable();
+				let masterPlayer = masterPlayers[i];
 
-                gnResult.add(ParameterCode.Position, i);
+				let gnResult = new GNHashtable();
 
-                gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+				gnResult.add(ParameterCode.Position, i);
 
-                gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+				gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
 
-                gnResults.add(gnResult);
-            }
-        }
-        else {
-            let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+				gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
-            if (request.skip + request.limit <= 100) {
-                masterPlayerFindOptions = null;
+				gnResults.add(gnResult);
+			}
+		}
+		else {
+			let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 
-                masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithCurrenciesAsync(request.key, 0, 100, masterPlayerFindOptions);
+			if (request.skip + request.limit <= 100) {
+				masterPlayerFindOptions = null;
 
-                for (let i = request.skip; i < request.skip + request.limit; i++) {
-                    if (i >= masterPlayers.length) break;
+				masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithCurrenciesAsync(request.key, 0, 100, masterPlayerFindOptions);
 
-                    let masterPlayer = masterPlayers[i];
+				for (let i = request.skip; i < request.skip + request.limit; i++) {
+					if (i >= masterPlayers.length) break;
 
-                    let gnResult = new GNHashtable();
+					let masterPlayer = masterPlayers[i];
 
-                    gnResult.add(ParameterCode.Position, i);
+					let gnResult = new GNHashtable();
 
-                    gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+					gnResult.add(ParameterCode.Position, i);
 
-                    gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+					gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
 
-                    gnResults.add(gnResult);
-                }
+					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
-                await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-            }
-            else {
-                masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, masterPlayerFindOptions);
+					gnResults.add(gnResult);
+				}
 
-                for (let i = 0; i < masterPlayers.length; i++) {
+				await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+			}
+			else {
+				masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, masterPlayerFindOptions);
 
-                    let masterPlayer = masterPlayers[i];
+				for (let i = 0; i < masterPlayers.length; i++) {
 
-                    let gnResult = new GNHashtable();
+					let masterPlayer = masterPlayers[i];
 
-                    gnResult.add(ParameterCode.Position, i + request.skip);
+					let gnResult = new GNHashtable();
 
-                    gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+					gnResult.add(ParameterCode.Position, i + request.skip);
 
-                    gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+					gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
 
-                    gnResults.add(gnResult);
-                }
-            }
-        }
+					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
-        operationResponse.setParameter(ParameterCode.Results, gnResults);
+					gnResults.add(gnResult);
+				}
+			}
+		}
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetCurrencyLeaderboard", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetCurrencyLeaderboard", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

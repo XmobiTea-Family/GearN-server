@@ -2,36 +2,38 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNArrayDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class InfoRequestParam {
+
 	@BooleanDataMember({ code: ParameterCode.StoreItems, isOptional: true, defaultValue: false })
-	storeItems?: boolean;
+	public storeItems?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.StoreItemType, isOptional: true, defaultValue: false })
-	storeItemType?: boolean;
+	public storeItemType?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.StoreCurrencies, isOptional: true, defaultValue: false })
-	storeCurrencies?: boolean;
+	public storeCurrencies?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.PriceCurrencies, isOptional: true, defaultValue: false })
-	priceCurrencies?: boolean;
+	public priceCurrencies?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.InAppPurchase, isOptional: true, defaultValue: false })
-	inAppPurchase?: boolean;
+	public inAppPurchase?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.RemoveStatus, isOptional: true, defaultValue: false })
-	removeStatus?: boolean;
+	public removeStatus?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.DisplayName, isOptional: true, defaultValue: false })
-	displayName?: boolean;
+	public displayName?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.Avatar, isOptional: true, defaultValue: false })
-	avatar?: boolean;
+	public avatar?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.TsCreate, isOptional: true, defaultValue: false })
-	tsCreate?: boolean;
+	public tsCreate?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.Tags, isOptional: true, defaultValue: false })
-	tags?: boolean;
+	public tags?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.StoreDatas, isOptional: true, defaultValue: false })
-	storeDatas?: boolean;
+	public storeDatas?: boolean;
+
 }

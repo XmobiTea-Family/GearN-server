@@ -19,375 +19,377 @@ import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent
 import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 
 class AddPlayerFriendOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-    characterId: string;
 
-    @StringDataMember({ code: ParameterCode.FriendId, minLength: 11, maxLength: 11, mustNonNull: true })
-    friendId: string;
+	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+	public characterId: string;
 
-    @StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-    catalogId: string;
+	@StringDataMember({ code: ParameterCode.FriendId, minLength: 11, maxLength: 11, mustNonNull: true })
+	public friendId: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
+	public catalogId: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerAddPlayerFriendOperationRequest extends AddPlayerFriendOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminAddPlayerFriendOperationRequest extends ServerAddPlayerFriendOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.AddPlayerFriend;
-    }
-
-    public override getCommonOperationRequest() {
-        return AddPlayerFriendOperationRequest;
-    }
-
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
-
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
-
-        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.addPlayerFriend);
-
-        if (!allowMethod) {
-            return this.newOperationNotAllowError(request);
-        }
-
-        return this.execute({
-            characterId: request.characterId,
-            friendId: request.friendId,
-            catalogId: request.catalogId,
-        }, secretInfo, operationRequest);
-    }
-
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerAddPlayerFriendOperationRequest);
-
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
-
-        if (!secretInfo.getPermission().characterPlayer.addPlayerFriend.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
-
-        return this.execute({
-            characterId: request.characterId,
-            friendId: request.friendId,
-            catalogId: request.catalogId,
-        }, secretInfo, operationRequest);
-    }
-
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminAddPlayerFriendOperationRequest);
-
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
-
-        if (!secretInfo.getPermission().characterPlayer.addPlayerFriend.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
-
-        return this.execute({
-            characterId: request.characterId,
-            friendId: request.friendId,
-            catalogId: request.catalogId,
-        }, secretInfo, operationRequest);
-    }
-
-    private async execute(request: { characterId: string, friendId: string, catalogId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_AddPlayerFriend", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
-
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let gamePlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
-        let playerFriendCatalogSettingsItem = gamePlayerSettings.playerFriendCatalogSettings.find(x => x.catalogId == request.catalogId);
+	public override getCode() {
+		return OperationCode.AddPlayerFriend;
+	}
 
-        if (playerFriendCatalogSettingsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
-
-            return operationResponse;
-        }
-
-        if (request.characterId != request.friendId) {
-            let gamePlayerFindOptions: CharacterPlayerFindOptions = {
-                playerFriends: true,
-                owner: true
-            }
+	public override getCommonOperationRequest() {
+		return AddPlayerFriendOperationRequest;
+	}
+
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-            let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), gamePlayerFindOptions);
-            let friendPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
-
-            if (characterPlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
-                return operationResponse;
-            }
-
-            if (friendPlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
-                return operationResponse;
-            }
-
-            let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.addPlayerFriend);
+
+		if (!allowMethod) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		return this.execute({
+			characterId: request.characterId,
+			friendId: request.friendId,
+			catalogId: request.catalogId,
+		}, secretInfo, operationRequest);
+	}
 
-            if (!characterPlayer.hasPlayerFriend(request.friendId)) {
-                if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
-                    characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
-                    characterPlayer.saveAsync();
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerAddPlayerFriendOperationRequest);
 
-                    friendPlayer.setPlayerFriend(request.characterId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
-                    friendPlayer.saveAsync();
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-                    {
-                        let gnPlayerFriends = new GNArray();
+		if (!secretInfo.getPermission().characterPlayer.addPlayerFriend.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		return this.execute({
+			characterId: request.characterId,
+			friendId: request.friendId,
+			catalogId: request.catalogId,
+		}, secretInfo, operationRequest);
+	}
 
-                        let gnPlayerFriend = new GNHashtable();
-                        gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                        gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                        gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
-                        gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                        gnPlayerFriends.add(gnPlayerFriend);
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminAddPlayerFriendOperationRequest);
+
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
+
+		if (!secretInfo.getPermission().characterPlayer.addPlayerFriend.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
+
+		return this.execute({
+			characterId: request.characterId,
+			friendId: request.friendId,
+			catalogId: request.catalogId,
+		}, secretInfo, operationRequest);
+	}
+
+	private async execute(request: { characterId: string, friendId: string, catalogId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_AddPlayerFriend", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-                        let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
+		let gamePlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		let playerFriendCatalogSettingsItem = gamePlayerSettings.playerFriendCatalogSettings.find(x => x.catalogId == request.catalogId);
 
-                        this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                    }
+		if (playerFriendCatalogSettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
 
-                    {
-                        let gnPlayerFriends = new GNArray();
+			return operationResponse;
+		}
+
+		if (request.characterId != request.friendId) {
+			let gamePlayerFindOptions: CharacterPlayerFindOptions = {
+				playerFriends: true,
+				owner: true
+			}
 
-                        let gnPlayerFriend = new GNHashtable();
-                        gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                        gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                        gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
-                        gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                        gnPlayerFriends.add(gnPlayerFriend);
+			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let friendPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
 
-                        let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+			if (characterPlayer == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+				return operationResponse;
+			}
 
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
+			if (friendPlayer == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+				return operationResponse;
+			}
 
-                        this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                    }
-                }
-                else {
-                    characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
-                    characterPlayer.saveAsync();
+			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-                    friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.WaitingAccept, currentMilliseconds);
-                    friendPlayer.saveAsync();
+			if (!characterPlayer.hasPlayerFriend(request.friendId)) {
+				if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
+					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+					characterPlayer.saveAsync();
 
-                    {
-                        let gnPlayerFriends = new GNArray();
+					friendPlayer.setPlayerFriend(request.characterId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+					friendPlayer.saveAsync();
 
-                        let gnPlayerFriend = new GNHashtable();
-                        gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                        gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                        gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.SentRequestAndWaitingAccept);
-                        gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                        gnPlayerFriends.add(gnPlayerFriend);
+					{
+						let gnPlayerFriends = new GNArray();
 
-                        let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+						let gnPlayerFriend = new GNHashtable();
+						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+						gnPlayerFriends.add(gnPlayerFriend);
 
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
+						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                        this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                    }
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
 
-                    {
-                        let gnPlayerFriends = new GNArray();
+						this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+					}
 
-                        let gnPlayerFriend = new GNHashtable();
-                        gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                        gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                        gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.WaitingAccept);
-                        gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                        gnPlayerFriends.add(gnPlayerFriend);
+					{
+						let gnPlayerFriends = new GNArray();
 
-                        let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+						let gnPlayerFriend = new GNHashtable();
+						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+						gnPlayerFriends.add(gnPlayerFriend);
 
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
+						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                        this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                    }
-                }
-            }
-            else {
-                let friendItem = characterPlayer.getPlayerFriend(request.friendId);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
 
-                if (friendItem.status == <number>FriendStatus.WaitingAccept) {
-                    characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
-                    characterPlayer.saveAsync();
+						this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+					}
+				}
+				else {
+					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+					characterPlayer.saveAsync();
 
-                    friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
-                    friendPlayer.saveAsync();
+					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.WaitingAccept, currentMilliseconds);
+					friendPlayer.saveAsync();
 
-                    {
-                        let gnPlayerFriends = new GNArray();
+					{
+						let gnPlayerFriends = new GNArray();
 
-                        let gnPlayerFriend = new GNHashtable();
-                        gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                        gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                        gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
-                        gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                        gnPlayerFriends.add(gnPlayerFriend);
+						let gnPlayerFriend = new GNHashtable();
+						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.SentRequestAndWaitingAccept);
+						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+						gnPlayerFriends.add(gnPlayerFriend);
 
-                        let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
 
-                        this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                    }
+						this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+					}
 
-                    {
-                        let gnPlayerFriends = new GNArray();
+					{
+						let gnPlayerFriends = new GNArray();
 
-                        let gnPlayerFriend = new GNHashtable();
-                        gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                        gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                        gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
-                        gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                        gnPlayerFriends.add(gnPlayerFriend);
+						let gnPlayerFriend = new GNHashtable();
+						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.WaitingAccept);
+						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+						gnPlayerFriends.add(gnPlayerFriend);
 
-                        let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                        characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
 
-                        this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                    }
-                }
-                else {
-                    if (friendItem.catalogId != request.catalogId) {
-                        if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
-                            characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
-                            characterPlayer.saveAsync();
+						this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+					}
+				}
+			}
+			else {
+				let friendItem = characterPlayer.getPlayerFriend(request.friendId);
 
-                            friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
-                            friendPlayer.saveAsync();
+				if (friendItem.status == <number>FriendStatus.WaitingAccept) {
+					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+					characterPlayer.saveAsync();
 
-                            {
-                                let gnPlayerFriends = new GNArray();
+					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+					friendPlayer.saveAsync();
 
-                                let gnPlayerFriend = new GNHashtable();
-                                gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                                gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                                gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
-                                gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                                gnPlayerFriends.add(gnPlayerFriend);
+					{
+						let gnPlayerFriends = new GNArray();
 
-                                let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+						let gnPlayerFriend = new GNHashtable();
+						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+						gnPlayerFriends.add(gnPlayerFriend);
 
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
+						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                                this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                            }
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
 
-                            {
-                                let gnPlayerFriends = new GNArray();
+						this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+					}
 
-                                let gnPlayerFriend = new GNHashtable();
-                                gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                                gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                                gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
-                                gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                                gnPlayerFriends.add(gnPlayerFriend);
+					{
+						let gnPlayerFriends = new GNArray();
 
-                                let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+						let gnPlayerFriend = new GNHashtable();
+						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+						gnPlayerFriends.add(gnPlayerFriend);
 
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
+						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                                this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                            }
-                        }
-                        else {
-                            characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
-                            characterPlayer.saveAsync();
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
 
-                            friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.WaitingAccept, currentMilliseconds);
-                            friendPlayer.saveAsync();
+						this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+					}
+				}
+				else {
+					if (friendItem.catalogId != request.catalogId) {
+						if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
+							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+							characterPlayer.saveAsync();
 
-                            {
-                                let gnPlayerFriends = new GNArray();
+							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+							friendPlayer.saveAsync();
 
-                                let gnPlayerFriend = new GNHashtable();
-                                gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                                gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                                gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.SentRequestAndWaitingAccept);
-                                gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                                gnPlayerFriends.add(gnPlayerFriend);
+							{
+								let gnPlayerFriends = new GNArray();
 
-                                let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+								let gnPlayerFriend = new GNHashtable();
+								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+								gnPlayerFriends.add(gnPlayerFriend);
 
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
+								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                                this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                            }
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
 
-                            {
-                                let gnPlayerFriends = new GNArray();
+								this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+							}
 
-                                let gnPlayerFriend = new GNHashtable();
-                                gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-                                gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-                                gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.WaitingAccept);
-                                gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                                gnPlayerFriends.add(gnPlayerFriend);
+							{
+								let gnPlayerFriends = new GNArray();
 
-                                let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+								let gnPlayerFriend = new GNHashtable();
+								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+								gnPlayerFriends.add(gnPlayerFriend);
 
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
-                                characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
+								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
-                                this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+								this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+							}
+						}
+						else {
+							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+							characterPlayer.saveAsync();
 
-        await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_AddPlayerFriend", request, secretInfo, operationRequest, operationResponse);
+							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.WaitingAccept, currentMilliseconds);
+							friendPlayer.saveAsync();
 
-        return operationResponse;
-    }
+							{
+								let gnPlayerFriends = new GNArray();
+
+								let gnPlayerFriend = new GNHashtable();
+								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.SentRequestAndWaitingAccept);
+								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+								gnPlayerFriends.add(gnPlayerFriend);
+
+								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
+
+								this.gnServer.sendEventTo(characterPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+							}
+
+							{
+								let gnPlayerFriends = new GNArray();
+
+								let gnPlayerFriend = new GNHashtable();
+								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
+								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.WaitingAccept);
+								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+								gnPlayerFriends.add(gnPlayerFriend);
+
+								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
+
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);
+
+								this.gnServer.sendEventTo(friendPlayer.getOwner().id, characterPlayerFriendUpdateOperationEvent);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_AddPlayerFriend", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

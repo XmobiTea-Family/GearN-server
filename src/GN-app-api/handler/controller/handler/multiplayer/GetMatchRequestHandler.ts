@@ -16,10 +16,10 @@ import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetMatchOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.MatchId, minLength: 15, maxLength: 15 })
-	matchId: string;
+	public matchId: string;
 
 	@BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
-	returnMember?: boolean;
+	public returnMember?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +47,7 @@ class AdminGetMatchOperationRequest extends ServerGetMatchOperationRequest {
 }
 
 export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetMatch;
 	}

@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkLinuxDeviceIdOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.LinuxDeviceId, minLength: 6, maxLength: 64, mustNonNull: true })
-	linuxDeviceId: string;
+	public linuxDeviceId: string;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,8 +33,9 @@ class LinkLinuxDeviceIdOperationRequest extends OperationRequest {
 }
 
 class ServerLinkLinuxDeviceIdOperationRequest extends LinkLinuxDeviceIdOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,6 +45,7 @@ class ServerLinkLinuxDeviceIdOperationRequest extends LinkLinuxDeviceIdOperation
 }
 
 class AdminLinkLinuxDeviceIdOperationRequest extends ServerLinkLinuxDeviceIdOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,6 +54,7 @@ class AdminLinkLinuxDeviceIdOperationRequest extends ServerLinkLinuxDeviceIdOper
 }
 
 export class LinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkLinuxDeviceId;
 	}

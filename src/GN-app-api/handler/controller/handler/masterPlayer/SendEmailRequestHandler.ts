@@ -14,150 +14,154 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class SendEmailOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-    userId?: string;
 
-    @StringDataMember({ code: ParameterCode.Subject, minLength: 2, maxLength: 256, mustNonNull: true })
-    subject: string;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	public userId?: string;
 
-    @StringDataMember({ code: ParameterCode.ContentHtml, minLength: 2, maxLength: 8192, mustNonNull: true })
-    contentHtml: string;
+	@StringDataMember({ code: ParameterCode.Subject, minLength: 2, maxLength: 256, mustNonNull: true })
+	public subject: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.ContentHtml, minLength: 2, maxLength: 8192, mustNonNull: true })
+	public contentHtml: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerSendEmailOperationRequest extends SendEmailOperationRequest {
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-    declare userId: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	public declare userId: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class AdminSendEmailOperationRequest extends ServerSendEmailOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 export class SendEmailRequestHandler extends MasterPlayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.SendEmail;
-    }
 
-    public override getCommonOperationRequest() {
-        return SendEmailOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.SendEmail;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return SendEmailOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.userId) {
-            if (!secretInfo.getPermission().masterPlayer.sendEmail.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-            request.userId = authInfo.getUserId();
-        }
-        else if (request.userId != authInfo.getUserId()) {
-            if (!secretInfo.getPermission().masterPlayer.sendEmail.otherSelfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
-        else {
-            if (!secretInfo.getPermission().masterPlayer.sendEmail.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
+		if (!request.userId) {
+			if (!secretInfo.getPermission().masterPlayer.sendEmail.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 
-        return this.execute({
-            userId: request.userId,
-            subject: request.subject,
-            contentHtml: request.contentHtml,
-        }, secretInfo, operationRequest);
-    }
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().masterPlayer.sendEmail.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().masterPlayer.sendEmail.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSendEmailOperationRequest);
+		return this.execute({
+			userId: request.userId,
+			subject: request.subject,
+			contentHtml: request.contentHtml,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSendEmailOperationRequest);
 
-        if (!secretInfo.getPermission().masterPlayer.sendEmail.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            subject: request.subject,
-            contentHtml: request.contentHtml,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().masterPlayer.sendEmail.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSendEmailOperationRequest);
+		return this.execute({
+			userId: request.userId,
+			subject: request.subject,
+			contentHtml: request.contentHtml,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSendEmailOperationRequest);
 
-        if (!secretInfo.getPermission().masterPlayer.sendEmail.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            subject: request.subject,
-            contentHtml: request.contentHtml,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().masterPlayer.sendEmail.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { userId: string, subject: string, contentHtml: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SendEmail", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			userId: request.userId,
+			subject: request.subject,
+			contentHtml: request.contentHtml,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { userId: string, subject: string, contentHtml: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SendEmail", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {
-            email: true,
-        });
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {
+			email: true,
+		});
 
-            return operationResponse;
-        }
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 
-        let email = masterPlayer.getEmail();
-        if (!email) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.EmailInvalid);
+			return operationResponse;
+		}
 
-            return operationResponse;
-        }
+		let email = masterPlayer.getEmail();
+		if (!email) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.EmailInvalid);
 
-        this.gnServer.getEmailService().sendMail(email, request.subject, request.contentHtml);
+			return operationResponse;
+		}
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		this.gnServer.getEmailService().sendMail(email, request.subject, request.contentHtml);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SendEmail", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SendEmail", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

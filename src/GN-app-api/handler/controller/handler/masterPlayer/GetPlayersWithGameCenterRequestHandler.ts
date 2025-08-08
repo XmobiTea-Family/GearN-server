@@ -15,11 +15,12 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithGameCenterOperationRequest extends OperationRequest {
+
 	@GNArrayDataMember({ code: ParameterCode.PlayerIds, mustNonNull: true, elementCls: String })
-	playerIds: Array<string>;
+	public playerIds: Array<string>;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +48,7 @@ class AdminGetPlayersWithGameCenterOperationRequest extends ServerGetPlayersWith
 }
 
 export class GetPlayersWithGameCenterRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetPlayersWithGameCenter;
 	}

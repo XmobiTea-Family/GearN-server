@@ -15,29 +15,30 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkGameCenterOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.PlayerId, minLength: 2, maxLength: 64, mustNonNull: true })
-	playerId: string;
+	public playerId: string;
 
 	@StringDataMember({ code: ParameterCode.Name, minLength: 2, maxLength: 128, mustNonNull: true })
-	name: string;
+	public name: string;
 
 	@StringDataMember({ code: ParameterCode.PublicKeyUrl, minLength: 2, maxLength: 2048, mustNonNull: true })
-	publicKeyUrl: string;
+	public publicKeyUrl: string;
 
 	@StringDataMember({ code: ParameterCode.Signature, minLength: 2, maxLength: 2048, mustNonNull: true })
-	signature: string;
+	public signature: string;
 
 	@StringDataMember({ code: ParameterCode.Salt, minLength: 2, maxLength: 256, mustNonNull: true })
-	salt: string;
+	public salt: string;
 
 	@NumberDataMember({ code: ParameterCode.Timestamp })
-	timestamp: number;
+	public timestamp: number;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,8 +48,9 @@ class LinkGameCenterOperationRequest extends OperationRequest {
 }
 
 class ServerLinkGameCenterOperationRequest extends LinkGameCenterOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -58,6 +60,7 @@ class ServerLinkGameCenterOperationRequest extends LinkGameCenterOperationReques
 }
 
 class AdminLinkGameCenterOperationRequest extends ServerLinkGameCenterOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -66,6 +69,7 @@ class AdminLinkGameCenterOperationRequest extends ServerLinkGameCenterOperationR
 }
 
 export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkGameCenter;
 	}

@@ -17,11 +17,12 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
-	reason?: string;
+	public reason?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -49,6 +50,7 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 }
 
 export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetRemoveStatus;
 	}

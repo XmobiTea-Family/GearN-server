@@ -15,17 +15,18 @@ import { ExecuteResponseStatus } from "./../../../../service/ICloudScriptService
 import { GNData } from "./../../../../../GN-common/common/GNData";
 
 class ExecuteFunctionOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.FunctionName, minLength: 3, maxLength: 30, mustNonNull: true })
-	functionName: string;
+	public functionName: string;
 
 	@DataMember({ code: ParameterCode.FunctionParameters, isOptional: true })
-	functionParameters?: object;
+	public functionParameters?: object;
 
 	@StringDataMember({ code: ParameterCode.Version, minLength: 7, maxLength: 7, isOptional: true })
-	version?: string;
+	public version?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -36,7 +37,7 @@ class ExecuteFunctionOperationRequest extends OperationRequest {
 
 class ServerExecuteFunctionOperationRequest extends ExecuteFunctionOperationRequest {
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -55,6 +56,7 @@ class AdminExecuteFunctionOperationRequest extends ServerExecuteFunctionOperatio
 }
 
 export class ExecuteFunctionRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.ExecuteFunction;
 	}

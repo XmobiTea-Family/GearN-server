@@ -19,155 +19,157 @@ import { MatchmakingTicket } from "./../../../../../GN-library/xdatabase/lib/ent
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetQueueStatisticsOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
-    queueName: string;
 
-    @NumberDataMember({ code: ParameterCode.TimeInSeconds, mustInt: true, minValue: 20 })
-    timeInSeconds: number;
+	@StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
+	public queueName: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@NumberDataMember({ code: ParameterCode.TimeInSeconds, mustInt: true, minValue: 20 })
+	public timeInSeconds: number;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerGetQueueStatisticsOperationRequest extends GetQueueStatisticsOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminGetQueueStatisticsOperationRequest extends ServerGetQueueStatisticsOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetQueueStatisticsRequestHandler extends MultiplayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.GetQueueStatistics;
-    }
 
-    public override getCommonOperationRequest() {
-        return GetQueueStatisticsOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.GetQueueStatistics;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return GetQueueStatisticsOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().multiplayer.getQueueStatistics.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            queueName: request.queueName,
-            timeInSeconds: request.timeInSeconds,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getQueueStatistics.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetQueueStatisticsOperationRequest);
+		return this.execute({
+			queueName: request.queueName,
+			timeInSeconds: request.timeInSeconds,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetQueueStatisticsOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.getQueueStatistics.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            queueName: request.queueName,
-            timeInSeconds: request.timeInSeconds,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getQueueStatistics.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetQueueStatisticsOperationRequest);
+		return this.execute({
+			queueName: request.queueName,
+			timeInSeconds: request.timeInSeconds,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetQueueStatisticsOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.getQueueStatistics.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            queueName: request.queueName,
-            timeInSeconds: request.timeInSeconds,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getQueueStatistics.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { queueName: string, timeInSeconds: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetQueueStatistics", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			queueName: request.queueName,
+			timeInSeconds: request.timeInSeconds,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { queueName: string, timeInSeconds: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetQueueStatistics", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", secretInfo.getGameId());
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-        let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
+		let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", secretInfo.getGameId());
 
-        let results = await matchmakingTicketCollection.find({ queueName: request.queueName, status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] }, tsCreate: { $gt: currentMilliseconds - request.timeInSeconds * 1000 } }, {
-            projection: {
-                members: true,
-            }
-        });
+		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
-        let pendingMemberCount = 0;
-        let pendingTicketCount = 0;
-        while (await results.hasNext()) {
-            let matchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
-            pendingTicketCount += 1;
+		let results = await matchmakingTicketCollection.find({ queueName: request.queueName, status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] }, tsCreate: { $gt: currentMilliseconds - request.timeInSeconds * 1000 } }, {
+			projection: {
+				members: true,
+			}
+		});
 
-            matchmakingTicket.getMembers().forEach(member => {
-                if (member.status == MatchmakingMemberStatus.Joined) {
-                    pendingMemberCount += 1;
-                }
-            });
-        }
+		let pendingMemberCount = 0;
+		let pendingTicketCount = 0;
+		while (await results.hasNext()) {
+			let matchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
+			pendingTicketCount += 1;
 
-        let results2 = await matchCollection.find({ queueName: request.queueName, tsCreate: { $gt: currentMilliseconds - request.timeInSeconds * 1000 } }, {
-            projection: {
-                timeToMatchInSeconds: true,
-            }
-        });
+			matchmakingTicket.getMembers().forEach(member => {
+				if (member.status == MatchmakingMemberStatus.Joined) {
+					pendingMemberCount += 1;
+				}
+			});
+		}
 
-        let totalMatchSuccess = 0;
-        let totalMatchSuccessTimeInSeconds = 0;
+		let results2 = await matchCollection.find({ queueName: request.queueName, tsCreate: { $gt: currentMilliseconds - request.timeInSeconds * 1000 } }, {
+			projection: {
+				timeToMatchInSeconds: true,
+			}
+		});
 
-        while (await results2.hasNext()) {
-            let match = new Match(await results2.next(), matchCollection);
+		let totalMatchSuccess = 0;
+		let totalMatchSuccessTimeInSeconds = 0;
 
-            totalMatchSuccessTimeInSeconds += match.getTimeToMatchInSeconds();
-            totalMatchSuccess += 1;
-        }
+		while (await results2.hasNext()) {
+			let match = new Match(await results2.next(), matchCollection);
 
-        let averageMatchmakingTimeInSeconds = totalMatchSuccess == 0 ? -1 : totalMatchSuccessTimeInSeconds / totalMatchSuccess;
+			totalMatchSuccessTimeInSeconds += match.getTimeToMatchInSeconds();
+			totalMatchSuccess += 1;
+		}
 
-        operationResponse.setParameter(ParameterCode.PendingMemberCount, pendingMemberCount);
-        operationResponse.setParameter(ParameterCode.PendingTicketCount, pendingTicketCount);
-        operationResponse.setParameter(ParameterCode.AverageMatchmakingTimeInSeconds, averageMatchmakingTimeInSeconds);
+		let averageMatchmakingTimeInSeconds = totalMatchSuccess == 0 ? -1 : totalMatchSuccessTimeInSeconds / totalMatchSuccess;
 
-        await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetQueueStatistics", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.PendingMemberCount, pendingMemberCount);
+		operationResponse.setParameter(ParameterCode.PendingTicketCount, pendingTicketCount);
+		operationResponse.setParameter(ParameterCode.AverageMatchmakingTimeInSeconds, averageMatchmakingTimeInSeconds);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetQueueStatistics", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

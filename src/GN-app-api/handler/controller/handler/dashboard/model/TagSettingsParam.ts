@@ -2,13 +2,14 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class TagSettingsParam {
+
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
-	key: string;
+	public key: string;
 
 	@StringDataMember({ code: ParameterCode.Description, isOptional: true })
-	description?: string;
+	public description?: string;
 
 	@BooleanDataMember({ code: ParameterCode.Index })
-	index: boolean;
+	public index: boolean;
 
 }

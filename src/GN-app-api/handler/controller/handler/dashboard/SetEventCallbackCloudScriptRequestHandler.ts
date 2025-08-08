@@ -14,11 +14,12 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { StringDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 class SetEventCallbackCloudScriptOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.EventName, minLength: 6, maxLength: 128, mustNonNull: true })
-	eventName: string;
+	public eventName: string;
 
 	@StringDataMember({ code: ParameterCode.Script, minLength: 6, maxLength: 40960, mustNonNull: true })
-	script: string;
+	public script: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -28,6 +29,7 @@ class SetEventCallbackCloudScriptOperationRequest extends OperationRequest {
 }
 
 export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetEventCallbackCloudScript;
 	}

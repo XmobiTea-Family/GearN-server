@@ -16,17 +16,18 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 
 class GetPlayersWithDisplayNameOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Keyword, minLength: 2, maxLength: 32 })
-	keyword: string;
+	public keyword: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-	skip?: number;
+	public skip?: number;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -54,6 +55,7 @@ class AdminGetPlayersWithDisplayNameOperationRequest extends ServerGetPlayersWit
 }
 
 export class GetPlayersWithDisplayNameRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetPlayersWithDisplayName;
 	}

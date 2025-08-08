@@ -15,8 +15,9 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterAdminPlayer";
 
 class GetUsernameAdminAccountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	userId: string;
+	public userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -26,6 +27,7 @@ class GetUsernameAdminAccountOperationRequest extends OperationRequest {
 }
 
 export class GetUsernameAdminAccountRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetUsernameAdminAccount;
 	}

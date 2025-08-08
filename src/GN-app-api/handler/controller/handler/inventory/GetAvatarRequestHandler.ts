@@ -15,8 +15,9 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class GetAvatarOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +45,7 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 }
 
 export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetAvatar;
 	}

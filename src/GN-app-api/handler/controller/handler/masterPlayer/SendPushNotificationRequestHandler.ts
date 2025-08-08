@@ -15,26 +15,27 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 
 class SendPushNotificationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Title })
-	title: string;
+	public title: string;
 
 	@StringDataMember({ code: ParameterCode.Body })
-	body: string;
+	public body: string;
 
 	@NumberDataMember({ code: ParameterCode.Badge, mustInt: true, isOptional: true, defaultValue: null })
-	badge?: number;
+	public badge?: number;
 
 	@StringDataMember({ code: ParameterCode.Sound, isOptional: true })
-	sound?: string;
+	public sound?: string;
 
 	@StringDataMember({ code: ParameterCode.Icon, isOptional: true })
-	icon?: string;
+	public icon?: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.Data, isOptional: true })
-	data?: GNHashtable;
+	public data?: GNHashtable;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,8 +45,9 @@ class SendPushNotificationOperationRequest extends OperationRequest {
 }
 
 class ServerSendPushNotificationOperationRequest extends SendPushNotificationOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -55,6 +57,7 @@ class ServerSendPushNotificationOperationRequest extends SendPushNotificationOpe
 }
 
 class AdminSendPushNotificationOperationRequest extends ServerSendPushNotificationOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -63,6 +66,7 @@ class AdminSendPushNotificationOperationRequest extends ServerSendPushNotificati
 }
 
 export class SendPushNotificationRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SendPushNotification;
 	}

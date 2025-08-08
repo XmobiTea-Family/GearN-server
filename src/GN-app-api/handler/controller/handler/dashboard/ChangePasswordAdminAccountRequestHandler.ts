@@ -16,11 +16,12 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/MasterAdminPlayer";
 
 class ChangePasswordAdminAccountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CurrentPassword, minLength: 6, maxLength: 64, mustNonNull: true })
-	currentPassword: string;
+	public currentPassword: string;
 
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
-	password: string;
+	public password: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -30,6 +31,7 @@ class ChangePasswordAdminAccountOperationRequest extends OperationRequest {
 }
 
 export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.ChangePasswordAdminAccount;
 	}

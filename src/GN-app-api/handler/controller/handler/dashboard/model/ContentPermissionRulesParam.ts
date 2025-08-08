@@ -3,25 +3,26 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 import { PermissionRulesParam } from "./PermissionRulesParam";
 
 export class ContentPermissionRulesParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.GetContentData, isOptional: true })
-	getContentData?: PermissionRulesParam;
+	public getContentData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.SetContentData, isOptional: true })
-	setContentData?: PermissionRulesParam;
+	public setContentData?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CreateNewFileUploadInfo, isOptional: true })
-	createNewFileUploadInfo?: PermissionRulesParam;
+	public createNewFileUploadInfo?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetFileUploadInfoList, isOptional: true })
-	getFileUploadInfoList?: PermissionRulesParam;
+	public getFileUploadInfoList?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetFileUploadInfo, isOptional: true })
-	getFileUploadInfo?: PermissionRulesParam;
+	public getFileUploadInfo?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RemoveFileUploadInfo, isOptional: true })
-	removeFileUploadInfo?: PermissionRulesParam;
+	public removeFileUploadInfo?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.RequestDownloadFileUploadInfo, isOptional: true })
-	requestDownloadFileUploadInfo?: PermissionRulesParam;
+	public requestDownloadFileUploadInfo?: PermissionRulesParam;
 
 }

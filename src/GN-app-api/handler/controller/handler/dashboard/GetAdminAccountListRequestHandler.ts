@@ -14,6 +14,7 @@ import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/ent
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 class GetAdminAccountListOperationRequest extends OperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -22,6 +23,7 @@ class GetAdminAccountListOperationRequest extends OperationRequest {
 }
 
 export class GetAdminAccountListRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetAdminAccountList;
 	}

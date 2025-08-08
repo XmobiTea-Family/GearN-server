@@ -17,132 +17,135 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class ListMatchmakingTicketsForPlayerOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
-    queueName: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
+	public queueName: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerListMatchmakingTicketsForPlayerOperationRequest extends ListMatchmakingTicketsForPlayerOperationRequest {
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
-    userId: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
+	public userId: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class AdminListMatchmakingTicketsForPlayerOperationRequest extends ServerListMatchmakingTicketsForPlayerOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class ListMatchmakingTicketsForPlayerRequestHandler extends MultiplayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.ListMatchmakingTicketsForPlayer;
-    }
 
-    public override getCommonOperationRequest() {
-        return ListMatchmakingTicketsForPlayerOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.ListMatchmakingTicketsForPlayer;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return ListMatchmakingTicketsForPlayerOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().multiplayer.listMatchmakingTicketsForPlayer.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: authInfo.getUserId(),
-            queueName: request.queueName,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.listMatchmakingTicketsForPlayer.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerListMatchmakingTicketsForPlayerOperationRequest);
+		return this.execute({
+			userId: authInfo.getUserId(),
+			queueName: request.queueName,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerListMatchmakingTicketsForPlayerOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.listMatchmakingTicketsForPlayer.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            queueName: request.queueName,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.listMatchmakingTicketsForPlayer.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminListMatchmakingTicketsForPlayerOperationRequest);
+		return this.execute({
+			userId: request.userId,
+			queueName: request.queueName,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminListMatchmakingTicketsForPlayerOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.listMatchmakingTicketsForPlayer.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            queueName: request.queueName,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.listMatchmakingTicketsForPlayer.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { userId: string, queueName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_ListMatchmakingTicketsForPlayer", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			userId: request.userId,
+			queueName: request.queueName,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { userId: string, queueName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_ListMatchmakingTicketsForPlayer", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        // find tat ca nhung cai ticket nay
-        let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: <number>MatchmakingTicketStatus.WaitingForMembers }, {
-            projection: {
-                ticketId: true,
-                members: true,
-            }
-        });
+		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
-        let ticketIds: string[] = [];
+		// find tat ca nhung cai ticket nay
+		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: <number>MatchmakingTicketStatus.WaitingForMembers }, {
+			projection: {
+				ticketId: true,
+				members: true,
+			}
+		});
 
-        while (await results.hasNext()) {
-            let matchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
+		let ticketIds: string[] = [];
 
-            let member = matchmakingTicket.getMember(request.userId);
+		while (await results.hasNext()) {
+			let matchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
 
-            if (member.status == MatchmakingMemberStatus.Pending) {
-                ticketIds.push(matchmakingTicket.getTicketId());
-            }
-        }
+			let member = matchmakingTicket.getMember(request.userId);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-        operationResponse.setParameter(ParameterCode.TicketIds, ticketIds);
+			if (member.status == MatchmakingMemberStatus.Pending) {
+				ticketIds.push(matchmakingTicket.getTicketId());
+			}
+		}
 
-        await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_ListMatchmakingTicketsForPlayer", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.TicketIds, ticketIds);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_ListMatchmakingTicketsForPlayer", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

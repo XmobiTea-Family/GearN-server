@@ -16,10 +16,10 @@ import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class GetCustomDataOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDataKeys, isOptional: true, elementCls: String })
-	customDataKeys?: Array<string>;
+	public customDataKeys?: Array<string>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +47,7 @@ class AdminGetCustomDataOperationRequest extends ServerGetCustomDataOperationReq
 }
 
 export class GetCustomDataRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetCustomData;
 	}

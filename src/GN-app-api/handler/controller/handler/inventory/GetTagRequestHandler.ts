@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class GetTagOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.TagKeys, elementCls: String })
-	tagKeys: Array<string>;
+	public tagKeys: Array<string>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +48,7 @@ class AdminGetTagOperationRequest extends ServerGetTagOperationRequest {
 }
 
 export class GetTagRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetTag;
 	}

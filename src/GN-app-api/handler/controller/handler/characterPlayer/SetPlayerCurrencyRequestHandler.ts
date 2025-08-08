@@ -16,14 +16,15 @@ import { PlayerCurrencyParam } from "./model/PlayerCurrencyParam";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class SetPlayerCurrenciesOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.PlayerCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerCurrencyParam })
-	playerCurrencyParams: Array<PlayerCurrencyParam>;
+	public playerCurrencyParams: Array<PlayerCurrencyParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-	log?: string;
+	public log?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -51,6 +52,7 @@ class AdminSetPlayerCurrenciesOperationRequest extends ServerSetPlayerCurrencies
 }
 
 export class SetPlayerCurrencyRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetPlayerCurrency;
 	}

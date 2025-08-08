@@ -16,11 +16,12 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetPlayerInformationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -48,6 +49,7 @@ class AdminGetPlayerInformationOperationRequest extends ServerGetPlayerInformati
 }
 
 export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetPlayerInformation;
 	}

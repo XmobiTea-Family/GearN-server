@@ -32,7 +32,6 @@ import { PushNotificationService } from "./GN-app-api/service/PushNotificationSe
 import { IEmailService } from "./GN-app-api/service/IEmailService";
 import { EmailService } from "./GN-app-api/service/EmailService";
 import { ICacheService } from "./GN-app-api/service/ICacheService";
-import { ConfigService } from "./GN-app-api/service/ConfigService";
 import { IConfigService } from "./GN-app-api/service/IConfigService";
 
 import { RequestType } from "./GN-common/constant/enumType/RequestType";

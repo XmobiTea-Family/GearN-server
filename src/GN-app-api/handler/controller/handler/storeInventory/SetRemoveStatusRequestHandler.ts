@@ -16,11 +16,12 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
-	storeId: string;
+	public storeId: string;
 
 	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
-	reason?: string;
+	public reason?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -48,6 +49,7 @@ class AdminSetRemoveStatusOperationRequest extends ServerSetRemoveStatusOperatio
 }
 
 export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetRemoveStatus;
 	}

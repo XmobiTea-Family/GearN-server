@@ -16,7 +16,7 @@ export class MongoObject {
 	private static readonly EMPTY_STR: string = "";
 
 	private readonly collection: mongoDB.Collection<mongoDB.Document>;
-	
+
 	protected readonly _id: mongoDB.ObjectId;
 	protected readonly originResult: mongoDB.WithId<mongoDB.Document>;
 

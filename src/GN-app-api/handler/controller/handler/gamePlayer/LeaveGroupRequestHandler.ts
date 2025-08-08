@@ -21,216 +21,220 @@ import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class LeaveGroupOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-    userId?: string;
 
-    @StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-    groupId: string;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+	public userId?: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+	public groupId: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerLeaveGroupOperationRequest extends LeaveGroupOperationRequest {
-    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-    declare userId: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+	public declare userId: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class AdminLeaveGroupOperationRequest extends ServerLeaveGroupOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.LeaveGroup;
-    }
 
-    public override getCommonOperationRequest() {
-        return LeaveGroupOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.LeaveGroup;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return LeaveGroupOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!request.userId) {
-            if (!secretInfo.getPermission().gamePlayer.leaveGroup.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-            request.userId = authInfo.getUserId();
-        }
-        else if (request.userId != authInfo.getUserId()) {
-            if (!secretInfo.getPermission().gamePlayer.leaveGroup.otherSelfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
-        else {
-            if (!secretInfo.getPermission().gamePlayer.leaveGroup.selfEnable) {
-                return this.newOperationNotAllowError(request);
-            }
-        }
+		if (!request.userId) {
+			if (!secretInfo.getPermission().gamePlayer.leaveGroup.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 
-        return this.execute({
-            userId: request.userId,
-            groupId: request.groupId,
-        }, secretInfo, operationRequest);
-    }
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().gamePlayer.leaveGroup.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().gamePlayer.leaveGroup.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLeaveGroupOperationRequest);
+		return this.execute({
+			userId: request.userId,
+			groupId: request.groupId,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLeaveGroupOperationRequest);
 
-        if (!secretInfo.getPermission().gamePlayer.leaveGroup.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            groupId: request.groupId,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().gamePlayer.leaveGroup.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLeaveGroupOperationRequest);
+		return this.execute({
+			userId: request.userId,
+			groupId: request.groupId,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLeaveGroupOperationRequest);
 
-        if (!secretInfo.getPermission().gamePlayer.leaveGroup.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: request.userId,
-            groupId: request.groupId,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().gamePlayer.leaveGroup.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { userId: string, groupId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_LeaveGroup", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			userId: request.userId,
+			groupId: request.groupId,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { userId: string, groupId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_LeaveGroup", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let groupFindOptions: GroupFindOptions = {
-            members: true,
-            groupType: true,
-            catalogId: true,
-        }
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
-        if (group == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
-            return operationResponse;
-        }
+		let groupFindOptions: GroupFindOptions = {
+			members: true,
+			groupType: true,
+			catalogId: true,
+		}
 
-        let groupType = <OwnerType>group.getGroupType();
-        if (groupType != OwnerType.GamePlayer) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
-            return operationResponse;
-        }
+		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
+		if (group == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+			return operationResponse;
+		}
 
-        let removeStatus = group.getRemoveStatus();
-        if (removeStatus.tsRemove != 0) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
-            return operationResponse;
-        }
+		let groupType = <OwnerType>group.getGroupType();
+		if (groupType != OwnerType.GamePlayer) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+			return operationResponse;
+		}
 
-        let catalogId = group.getCatalogId();
-        let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
-        let playerGroupCatalogSettingsItem = gamePlayerSettings.playerGroupCatalogSettings.find(x => x.catalogId == catalogId);
-        if (playerGroupCatalogSettingsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
-            return operationResponse;
-        }
+		let removeStatus = group.getRemoveStatus();
+		if (removeStatus.tsRemove != 0) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+			return operationResponse;
+		}
 
-        let gamePlayerFindOptions: GamePlayerFindOptions = {
-            playerGroups: true
-        }
+		let catalogId = group.getCatalogId();
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+		let playerGroupCatalogSettingsItem = gamePlayerSettings.playerGroupCatalogSettings.find(x => x.catalogId == catalogId);
+		if (playerGroupCatalogSettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+			return operationResponse;
+		}
 
-        let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayerFindOptions: GamePlayerFindOptions = {
+			playerGroups: true
+		}
 
-        if (gamePlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
-            return operationResponse;
-        }
+		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
-        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		if (gamePlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
+			return operationResponse;
+		}
 
-        if (gamePlayer.hasPlayerGroup(request.groupId)) {
-            gamePlayer.removePlayerGroup(request.groupId);
-            gamePlayer.saveAsync();
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-            {
-                let gnPlayerGroups = new GNArray();
+		if (gamePlayer.hasPlayerGroup(request.groupId)) {
+			gamePlayer.removePlayerGroup(request.groupId);
+			gamePlayer.saveAsync();
 
-                let gnPlayerGroup = new GNHashtable();
-                gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
-                gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-                gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.NotMember);
-                gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-                gnPlayerGroups.add(gnPlayerGroup);
+			{
+				let gnPlayerGroups = new GNArray();
 
-                let gamePlayerGroupUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerGroupUpdate, null);
+				let gnPlayerGroup = new GNHashtable();
+				gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
+				gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
+				gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+				gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+				gnPlayerGroups.add(gnPlayerGroup);
 
-                gamePlayerGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
+				let gamePlayerGroupUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerGroupUpdate, null);
 
-                this.gnServer.sendEventTo(request.userId, gamePlayerGroupUpdateOperationEvent);
-            }
-        }
+				gamePlayerGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
 
-        if (group.hasMember(request.userId)) {
-            group.removeMember(request.userId);
-            group.saveAsync();
+				this.gnServer.sendEventTo(request.userId, gamePlayerGroupUpdateOperationEvent);
+			}
+		}
 
-            {
-                let gnMembers = new GNArray();
+		if (group.hasMember(request.userId)) {
+			group.removeMember(request.userId);
+			group.saveAsync();
 
-                let gnMember = new GNHashtable();
+			{
+				let gnMembers = new GNArray();
 
-                gnMember.add(ParameterCode.UserId, request.userId);
-                gnMember.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+				let gnMember = new GNHashtable();
 
-                gnMembers.add(gnMember);
+				gnMember.add(ParameterCode.UserId, request.userId);
+				gnMember.add(ParameterCode.Status, <number>GroupStatus.NotMember);
 
-                let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
+				gnMembers.add(gnMember);
 
-                groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+				let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
-                this.gnServer.leaveRoom(request.userId, request.groupId);
+				groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
 
-                this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
-            }
-        }
+				this.gnServer.leaveRoom(request.userId, request.groupId);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+				this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
+			}
+		}
 
-        await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_LeaveGroup", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_LeaveGroup", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

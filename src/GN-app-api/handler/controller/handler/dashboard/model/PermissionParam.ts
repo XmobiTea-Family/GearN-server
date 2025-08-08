@@ -13,37 +13,38 @@ import { StoreInventoryPermissionRulesParam } from "./StoreInventoryPermissionRu
 import { CloudScriptPermissionRulesParam } from "./CloudScriptPermissionRulesParam";
 
 export class PermissionParam {
+
 	@GNHashtableDataMember({ code: ParameterCode.Authenticate, isOptional: true })
-	authenticate?: AuthenticatePermissionRulesParam;
+	public authenticate?: AuthenticatePermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.MasterPlayer, isOptional: true })
-	masterPlayer?: MasterPlayerPermissionRulesParam;
+	public masterPlayer?: MasterPlayerPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GamePlayer, isOptional: true })
-	gamePlayer?: GamePlayerPermissionRulesParam;
+	public gamePlayer?: GamePlayerPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CharacterPlayer, isOptional: true })
-	characterPlayer?: CharacterPlayerPermissionRulesParam;
+	public characterPlayer?: CharacterPlayerPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.Content, isOptional: true })
-	content?: ContentPermissionRulesParam;
+	public content?: ContentPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.Group, isOptional: true })
-	group?: GroupPermissionRulesParam;
+	public group?: GroupPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.Inventory, isOptional: true })
-	inventory?: InventoryPermissionRulesParam;
+	public inventory?: InventoryPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.StoreInventory, isOptional: true })
-	storeInventory?: StoreInventoryPermissionRulesParam;
+	public storeInventory?: StoreInventoryPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.MasterAdmin, isOptional: true })
-	masterAdmin?: MasterAdminPermissionRulesParam;
+	public masterAdmin?: MasterAdminPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.Multiplayer, isOptional: true })
-	multiplayer?: MultiplayerPermissionRulesParam;
+	public multiplayer?: MultiplayerPermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.CloudScript, isOptional: true })
-	cloudScript?: CloudScriptPermissionRulesParam;
+	public cloudScript?: CloudScriptPermissionRulesParam;
 
 }

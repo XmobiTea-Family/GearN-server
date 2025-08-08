@@ -16,17 +16,18 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetAllMatchmakingTicketOperationRequest extends OperationRequest {
+
 	@NumberDataMember({ code: ParameterCode.Status, minValue: 1, maxValue: 5, isOptional: true, mustInt: true })
-	status?: number;
+	public status?: number;
 
 	@BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
-	returnMember?: boolean;
+	public returnMember?: boolean;
 
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-	skip?: number;
+	public skip?: number;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -54,6 +55,7 @@ class AdminGetAllMatchmakingTicketOperationRequest extends ServerGetAllMatchmaki
 }
 
 export class GetAllMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetAllMatchmakingTicket;
 	}

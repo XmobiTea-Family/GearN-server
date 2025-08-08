@@ -16,165 +16,168 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetMatchmakingTicketOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.TicketId, minLength: 10, maxLength: 10 })
-    ticketId: string;
 
-    @BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
-    returnMember?: boolean;
+	@StringDataMember({ code: ParameterCode.TicketId, minLength: 10, maxLength: 10 })
+	public ticketId: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
+	public returnMember?: boolean;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerGetMatchmakingTicketOperationRequest extends GetMatchmakingTicketOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class AdminGetMatchmakingTicketOperationRequest extends ServerGetMatchmakingTicketOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.GetMatchmakingTicket;
-    }
 
-    public override getCommonOperationRequest() {
-        return GetMatchmakingTicketOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.GetMatchmakingTicket;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return GetMatchmakingTicketOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().multiplayer.getMatchmakingTicket.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: authInfo.getUserId(),
-            ticketId: request.ticketId,
-            returnMember: request.returnMember,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getMatchmakingTicket.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetMatchmakingTicketOperationRequest);
+		return this.execute({
+			userId: authInfo.getUserId(),
+			ticketId: request.ticketId,
+			returnMember: request.returnMember,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetMatchmakingTicketOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.getMatchmakingTicket.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: "",
-            ticketId: request.ticketId,
-            returnMember: request.returnMember,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getMatchmakingTicket.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetMatchmakingTicketOperationRequest);
+		return this.execute({
+			userId: "",
+			ticketId: request.ticketId,
+			returnMember: request.returnMember,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetMatchmakingTicketOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.getMatchmakingTicket.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: "",
-            ticketId: request.ticketId,
-            returnMember: request.returnMember,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getMatchmakingTicket.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { userId: string, ticketId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			userId: "",
+			ticketId: request.ticketId,
+			returnMember: request.returnMember,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { userId: string, ticketId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        // find tat ca nhung cai ticket nay
-        let result = await matchmakingTicketCollection.findOne({ ticketId: request.ticketId });
+		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
-        if (result == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
-            return operationResponse;
-        }
+		// find tat ca nhung cai ticket nay
+		let result = await matchmakingTicketCollection.findOne({ ticketId: request.ticketId });
 
-        let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
+		if (result == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
+			return operationResponse;
+		}
 
-        if (secretInfo.getRole() == SecretRole.Player) {
-            let member = matchmakingTicket.getMember(request.userId);
-            if (member == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
-                return operationResponse;
-            }
-        }
+		let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		if (secretInfo.getRole() == SecretRole.Player) {
+			let member = matchmakingTicket.getMember(request.userId);
+			if (member == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
+				return operationResponse;
+			}
+		}
 
-        let gnMatchmakingTicket = new GNHashtable();
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        gnMatchmakingTicket.add(ParameterCode.TsCreate, matchmakingTicket.getTsCreate());
-        gnMatchmakingTicket.add(ParameterCode.CreatorId, matchmakingTicket.getCreatorId());
-        gnMatchmakingTicket.add(ParameterCode.GiveUpAfterSeconds, matchmakingTicket.getGiveUpAfterSeconds());
-        gnMatchmakingTicket.add(ParameterCode.QueueName, matchmakingTicket.getQueueName());
-        gnMatchmakingTicket.add(ParameterCode.Status, matchmakingTicket.getStatus());
+		let gnMatchmakingTicket = new GNHashtable();
 
-        if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.Matched) {
-            gnMatchmakingTicket.add(ParameterCode.MatchId, matchmakingTicket.getMatchId());
-        }
+		gnMatchmakingTicket.add(ParameterCode.TsCreate, matchmakingTicket.getTsCreate());
+		gnMatchmakingTicket.add(ParameterCode.CreatorId, matchmakingTicket.getCreatorId());
+		gnMatchmakingTicket.add(ParameterCode.GiveUpAfterSeconds, matchmakingTicket.getGiveUpAfterSeconds());
+		gnMatchmakingTicket.add(ParameterCode.QueueName, matchmakingTicket.getQueueName());
+		gnMatchmakingTicket.add(ParameterCode.Status, matchmakingTicket.getStatus());
 
-        if (request.returnMember) {
-            let gnMembers = new GNArray();
+		if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.Matched) {
+			gnMatchmakingTicket.add(ParameterCode.MatchId, matchmakingTicket.getMatchId());
+		}
 
-            let members = matchmakingTicket.getMembers();
-            for (let i = 0; i < members.length; i++) {
-                let member = members[i];
+		if (request.returnMember) {
+			let gnMembers = new GNArray();
 
-                let gnMember = new GNHashtable();
+			let members = matchmakingTicket.getMembers();
+			for (let i = 0; i < members.length; i++) {
+				let member = members[i];
 
-                gnMember.add(ParameterCode.UserId, member.userId);
-                gnMember.add(ParameterCode.Status, member.status);
-                gnMember.add(ParameterCode.Attribute, member.attribute);
+				let gnMember = new GNHashtable();
 
-                gnMembers.add(gnMember);
-            }
+				gnMember.add(ParameterCode.UserId, member.userId);
+				gnMember.add(ParameterCode.Status, member.status);
+				gnMember.add(ParameterCode.Attribute, member.attribute);
 
-            gnMatchmakingTicket.add(ParameterCode.Members, gnMembers);
-        }
+				gnMembers.add(gnMember);
+			}
 
-        operationResponse.setParameter(ParameterCode.MatchmakingTicket, gnMatchmakingTicket);
+			gnMatchmakingTicket.add(ParameterCode.Members, gnMembers);
+		}
 
-        await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.MatchmakingTicket, gnMatchmakingTicket);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

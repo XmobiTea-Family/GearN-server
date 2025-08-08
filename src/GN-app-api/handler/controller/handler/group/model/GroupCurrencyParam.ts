@@ -2,9 +2,11 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, DataMember, GNArrayDataMember, NumberDataMember, StringDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class GroupCurrencyParam {
+
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-	key: string;
+	public key: string;
 
 	@NumberDataMember({ code: ParameterCode.Amount })
-	amount: number;
+	public amount: number;
+
 }

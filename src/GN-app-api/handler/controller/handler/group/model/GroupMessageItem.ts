@@ -3,4 +3,5 @@ export interface GroupMessageItem {
 	message: string,
 	senderId: string,
 	senderType: number,
+
 }

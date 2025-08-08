@@ -22,11 +22,12 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class RemoveMemberOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 11, mustNonNull: true })
-	userId: string;
+	public userId: string;
 
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -54,6 +55,7 @@ class AdminRemoveMemberOperationRequest extends ServerRemoveMemberOperationReque
 }
 
 export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveMember;
 	}

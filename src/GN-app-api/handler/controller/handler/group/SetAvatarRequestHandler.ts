@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class SetAvatarOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
-	type: number;
+	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Value, minLength: 1, maxLength: 128, mustNonNull: true })
-	value: string;
+	public value: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -41,6 +42,7 @@ class ServerGetAvatarOperationRequest extends SetAvatarOperationRequest {
 }
 
 class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,6 +51,7 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 }
 
 export class SetAvatarRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetAvatar;
 	}

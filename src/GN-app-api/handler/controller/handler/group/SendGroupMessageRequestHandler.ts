@@ -20,14 +20,15 @@ import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent
 import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 
 class SendGroupMessageOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.SenderId, minLength: 10, maxLength: 11, mustNonNull: true })
-	senderId: string;
+	public senderId: string;
 
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@StringDataMember({ code: ParameterCode.Message, minLength: 2, maxLength: 256, mustNonNull: true })
-	message: string;
+	public message: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

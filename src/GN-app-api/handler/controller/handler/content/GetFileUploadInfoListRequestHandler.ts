@@ -15,11 +15,12 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { UploadFileInfo } from "./../../../../../GN-library/xdatabase/lib/entity/pro/UploadFileInfo";
 
 class GetFileUploadInfoListOperationRequest extends OperationRequest {
+
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-	skip?: number;
+	public skip?: number;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -30,6 +31,7 @@ class GetFileUploadInfoListOperationRequest extends OperationRequest {
 }
 
 class ServerGetFileUploadInfoListOperationRequest extends GetFileUploadInfoListOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -47,6 +49,7 @@ class AdminGetFileUploadInfoListOperationRequest extends ServerGetFileUploadInfo
 }
 
 export class GetFileUploadInfoListRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetFileUploadInfoList;
 	}

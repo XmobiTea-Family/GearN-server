@@ -17,237 +17,239 @@ import { Group } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Grou
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-    key: string;
 
-    @GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-    infoRequestParam: InfoRequestParam;
+	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+	public key: string;
 
-    @NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-    skip?: number;
+	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
+	public infoRequestParam: InfoRequestParam;
 
-    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-    limit?: number;
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	public skip?: number;
 
-    @BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
-    loadFromCache?: boolean;
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	public limit?: number;
+
+	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+	public loadFromCache?: boolean;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
-	catalogId?: string;
+	public catalogId?: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class ServerGetCurrencyLeaderboardOperationRequest extends GetCurrencyLeaderboardOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminGetCurrencyLeaderboardOperationRequest extends ServerGetCurrencyLeaderboardOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.GetCurrencyLeaderboard;
-    }
 
-    public override getCommonOperationRequest() {
-        return GetCurrencyLeaderboardOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.GetCurrencyLeaderboard;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return GetCurrencyLeaderboardOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().group.getCurrencyLeaderboard.otherSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+		if (!secretInfo.getPermission().group.getCurrencyLeaderboard.otherSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            key: request.key,
-            skip: request.skip,
-            limit: request.limit,
-            infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
-        }, secretInfo, operationRequest);
-    }
+		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCurrencyLeaderboardOperationRequest);
+		return this.execute({
+			key: request.key,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCurrencyLeaderboardOperationRequest);
 
-        if (!secretInfo.getPermission().group.getCurrencyLeaderboard.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
+		if (!secretInfo.getPermission().group.getCurrencyLeaderboard.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            key: request.key,
-            skip: request.skip,
-            limit: request.limit,
-            infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
-        }, secretInfo, operationRequest);
-    }
+		this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCurrencyLeaderboardOperationRequest);
+		return this.execute({
+			key: request.key,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCurrencyLeaderboardOperationRequest);
 
-        if (!secretInfo.getPermission().group.getCurrencyLeaderboard.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
+		if (!secretInfo.getPermission().group.getCurrencyLeaderboard.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-        return this.execute({
-            key: request.key,
-            skip: request.skip,
-            limit: request.limit,
-            infoRequestParam: request.infoRequestParam,
-            loadFromCache: request.loadFromCache,
-            catalogId: request.catalogId,
-        }, secretInfo, operationRequest);
-    }
+		this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-    private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetCurrencyLeaderboard", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			key: request.key,
+			skip: request.skip,
+			limit: request.limit,
+			infoRequestParam: request.infoRequestParam,
+			loadFromCache: request.loadFromCache,
+			catalogId: request.catalogId,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetCurrencyLeaderboard", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
-        let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == request.key);
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        if (groupCurrencySettingsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+		let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == request.key);
 
-            return operationResponse;
-        }
+		if (groupCurrencySettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
-        let cacheKey = "groupCurrencyLeaderboard_" + request.key;
-        if (request.catalogId) cacheKey += "_" + request.catalogId;
+			return operationResponse;
+		}
 
-        if (request.loadFromCache) {
-            if (request.skip + request.limit > 100) {
-                request.loadFromCache = false;
-            }
-        }
+		let cacheKey = "groupCurrencyLeaderboard_" + request.key;
+		if (request.catalogId) cacheKey += "_" + request.catalogId;
 
-        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+		if (request.loadFromCache) {
+			if (request.skip + request.limit > 100) {
+				request.loadFromCache = false;
+			}
+		}
 
-        if (request.loadFromCache) {
-            if (!(await cacheData.isValid(cacheKey))) {
-                request.loadFromCache = false;
-            }
-        }
+		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-        let gnResults = new GNArray();
+		if (request.loadFromCache) {
+			if (!(await cacheData.isValid(cacheKey))) {
+				request.loadFromCache = false;
+			}
+		}
 
-        let groups: Group[];
+		let gnResults = new GNArray();
 
-        if (request.loadFromCache) {
-            groups = await cacheData.getData(cacheKey);
+		let groups: Group[];
 
-            for (let i = request.skip; i < request.skip + request.limit; i++) {
-                if (i >= groups.length) break;
+		if (request.loadFromCache) {
+			groups = await cacheData.getData(cacheKey);
 
-                let group = groups[i];
+			for (let i = request.skip; i < request.skip + request.limit; i++) {
+				if (i >= groups.length) break;
 
-                let gnResult = new GNHashtable();
+				let group = groups[i];
 
-                gnResult.add(ParameterCode.Position, i);
+				let gnResult = new GNHashtable();
 
-                gnResult.add(ParameterCode.GroupId, group.getGroupId());
+				gnResult.add(ParameterCode.Position, i);
 
-                gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+				gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-                gnResults.add(gnResult);
-            }
-        }
-        else {
-            let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
+				gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
-            if (request.skip + request.limit <= 100) {
-                groupFindOptions = null;
+				gnResults.add(gnResult);
+			}
+		}
+		else {
+			let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
 
-                groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), groupFindOptions);
+			if (request.skip + request.limit <= 100) {
+				groupFindOptions = null;
 
-                for (let i = request.skip; i < request.skip + request.limit; i++) {
-                    if (i >= groups.length) break;
+				groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), groupFindOptions);
 
-                    let group = groups[i];
+				for (let i = request.skip; i < request.skip + request.limit; i++) {
+					if (i >= groups.length) break;
 
-                    let gnResult = new GNHashtable();
+					let group = groups[i];
 
-                    gnResult.add(ParameterCode.Position, i);
+					let gnResult = new GNHashtable();
 
-                    gnResult.add(ParameterCode.GroupId, group.getGroupId());
+					gnResult.add(ParameterCode.Position, i);
 
-                    gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+					gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-                    gnResults.add(gnResult);
-                }
+					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
-                await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-            }
-            else {
-                groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), groupFindOptions);
+					gnResults.add(gnResult);
+				}
 
-                for (let i = 0; i < groups.length; i++) {
+				await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+			}
+			else {
+				groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), groupFindOptions);
 
-                    let group = groups[i];
+				for (let i = 0; i < groups.length; i++) {
 
-                    let gnResult = new GNHashtable();
+					let group = groups[i];
 
-                    gnResult.add(ParameterCode.Position, i + request.skip);
+					let gnResult = new GNHashtable();
 
-                    gnResult.add(ParameterCode.GroupId, group.getGroupId());
+					gnResult.add(ParameterCode.Position, i + request.skip);
 
-                    gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
+					gnResult.add(ParameterCode.GroupId, group.getGroupId());
 
-                    gnResults.add(gnResult);
-                }
-            }
-        }
+					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, secretInfo.getGameId()));
 
-        operationResponse.setParameter(ParameterCode.Results, gnResults);
+					gnResults.add(gnResult);
+				}
+			}
+		}
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("group_GetCurrencyLeaderboard", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("group_GetCurrencyLeaderboard", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

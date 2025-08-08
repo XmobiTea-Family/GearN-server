@@ -16,11 +16,12 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
-	reason?: string;
+	public reason?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -48,6 +49,7 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 }
 
 export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetRemoveStatus;
 	}

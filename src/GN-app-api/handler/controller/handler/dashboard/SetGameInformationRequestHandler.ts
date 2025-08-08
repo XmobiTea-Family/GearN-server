@@ -27,23 +27,24 @@ import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 
 class SetGameInformationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
-	gameId: string;
+	public gameId: string;
 
 	@StringDataMember({ code: ParameterCode.GameName, isOptional: true })
-	gameName?: string;
+	public gameName?: string;
 
 	@StringDataMember({ code: ParameterCode.GameDescription, isOptional: true })
-	gameDescription?: string;
+	public gameDescription?: string;
 
 	@StringDataMember({ code: ParameterCode.GameIconUrl, isOptional: true })
-	gameIconUrl?: string;
+	public gameIconUrl?: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.GameSettings, isOptional: true })
-	gameSettings?: GameSettingsParam;
+	public gameSettings?: GameSettingsParam;
 
 	@GNArrayDataMember({ code: ParameterCode.MatchmakingQueueSettings, isOptional: true, elementCls: MatchmakingQueueSettingsParam })
-	matchmakingQueueSettings?: MatchmakingQueueSettingsParam[];
+	public matchmakingQueueSettings?: MatchmakingQueueSettingsParam[];
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -53,6 +54,7 @@ class SetGameInformationOperationRequest extends OperationRequest {
 }
 
 export class SetGameInformationRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetGameInformation;
 	}

@@ -16,7 +16,7 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 
 class GetDisplayNameOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

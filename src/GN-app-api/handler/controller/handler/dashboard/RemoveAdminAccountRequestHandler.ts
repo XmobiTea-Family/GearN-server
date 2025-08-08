@@ -14,8 +14,9 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { RequestHandler } from "./../base/RequestHandler";
 
 class RemoveAdminAccountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	userId: string;
+	public userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -25,6 +26,7 @@ class RemoveAdminAccountOperationRequest extends OperationRequest {
 }
 
 export class RemoveAdminAccountRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveAdminAccount;
 	}

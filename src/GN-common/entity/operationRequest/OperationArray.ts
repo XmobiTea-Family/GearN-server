@@ -1,33 +1,33 @@
 import { InvalidMember } from "./../InvalidMember";
 
 export class OperationArray<T> {
-    private invalidMembers: InvalidMember[];
+	private invalidMembers: InvalidMember[];
 
-    private isValid: boolean;
+	private isValid: boolean;
 
-    public isValidObject(): boolean {
-        return this.isValid;
-    }
+	public isValidObject(): boolean {
+		return this.isValid;
+	}
 
-    private tArray: T[];
+	private tArray: T[];
 
-    constructor() {
-        this.invalidMembers = [];
-    }
+	constructor() {
+		this.invalidMembers = [];
+	}
 
-    public addInvalidMember(invalidMember: InvalidMember) {
-        this.invalidMembers.push(invalidMember);
-    }
+	public addInvalidMember(invalidMember: InvalidMember) {
+		this.invalidMembers.push(invalidMember);
+	}
 
-    public getInvalidMembers(): InvalidMember[] {
-        return this.invalidMembers;
-    }
+	public getInvalidMembers(): InvalidMember[] {
+		return this.invalidMembers;
+	}
 
-    public setArray(tArray: T[]) {
-        this.tArray = tArray;
-    }
+	public setArray(tArray: T[]) {
+		this.tArray = tArray;
+	}
 
-    public getArray() {
-        return this.tArray;
-    }
+	public getArray() {
+		return this.tArray;
+	}
 }

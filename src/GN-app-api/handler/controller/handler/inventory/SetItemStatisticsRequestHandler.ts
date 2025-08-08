@@ -18,14 +18,15 @@ import { ItemStatisticsParam } from "./model/ItemStatisticsParam";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class SetItemStatisticsOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.ItemStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: ItemStatisticsParam })
-	inventoryStatisticsParams: Array<ItemStatisticsParam>;
+	public inventoryStatisticsParams: Array<ItemStatisticsParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-	log?: string;
+	public log?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +45,7 @@ class ServerSetItemStatisticsOperationRequest extends SetItemStatisticsOperation
 }
 
 class AdminSetItemStatisticsOperationRequest extends ServerSetItemStatisticsOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,6 +54,7 @@ class AdminSetItemStatisticsOperationRequest extends ServerSetItemStatisticsOper
 }
 
 export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetItemStatistics;
 	}

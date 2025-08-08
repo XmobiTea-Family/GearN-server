@@ -18,8 +18,9 @@ import { GNServerSettingsOptions, LogType } from "@xmobitea/gn-typescript-client
 import { ConfigService } from "./../../../../service/ConfigService";
 
 class CreateGameOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
-	gameId: string;
+	public gameId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,6 +30,7 @@ class CreateGameOperationRequest extends OperationRequest {
 }
 
 export class CreateGameRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateGame;
 	}

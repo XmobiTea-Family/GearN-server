@@ -18,11 +18,12 @@ import { GroupDataParam } from "./model/GroupDataParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class SetGroupDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GroupDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupDataParam })
-	groupDataParams: Array<GroupDataParam>;
+	public groupDataParams: Array<GroupDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,6 +33,7 @@ class SetGroupDataOperationRequest extends OperationRequest {
 }
 
 class ServerSetGroupDataOperationRequest extends SetGroupDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -40,6 +42,7 @@ class ServerSetGroupDataOperationRequest extends SetGroupDataOperationRequest {
 }
 
 class AdminSetGroupDataOperationRequest extends ServerSetGroupDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +51,7 @@ class AdminSetGroupDataOperationRequest extends ServerSetGroupDataOperationReque
 }
 
 export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetGroupData;
 	}

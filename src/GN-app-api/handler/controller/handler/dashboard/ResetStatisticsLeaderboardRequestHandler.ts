@@ -23,23 +23,24 @@ import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/enti
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 
 class ResetStatisticsLeaderboardOperationRequest extends OperationRequest {
+
 	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
-	type: number;
+	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
-	key: string;
+	public key: string;
 
 	@StringDataMember({ code: ParameterCode.Version, minLength: 2, maxLength: 32 })
-	version: string;
+	public version: string;
 
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
-	gameId: string;
+	public gameId: string;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-	log?: string;
+	public log?: string;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
-	catalogId?: string;
+	public catalogId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -49,6 +50,7 @@ class ResetStatisticsLeaderboardOperationRequest extends OperationRequest {
 }
 
 export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.ResetStatisticsLeaderboard;
 	}

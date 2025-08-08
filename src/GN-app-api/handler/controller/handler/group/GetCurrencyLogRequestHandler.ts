@@ -14,17 +14,18 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class GetCurrencyLogOperationRequest extends OperationRequest {
+
 	@GNArrayDataMember({ code: ParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
-	keys?: Array<string>;
+	public keys?: Array<string>;
 
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true, isOptional: true })
-	groupId?: string;
+	public groupId?: string;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	@StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
-	token?: string;
+	public token?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;

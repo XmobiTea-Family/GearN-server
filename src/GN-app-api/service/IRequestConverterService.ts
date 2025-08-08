@@ -8,10 +8,10 @@ import { GNEnhancedObjectFieldMetadata } from "./../../GN-common/entity/DataMemb
 export type Constructor<T> = { new(...args: any[]): T };
 
 export interface IRequestConverterService {
-    getGNEnhancedObjectFieldMetadata<T>(cls: Constructor<T>): GNEnhancedObjectFieldMetadata[];
-    createTOperationRequest<T extends OperationRequest>(operationRequest: OperationRequest, cls: Constructor<T>): T;
-    createTObject<T>(gnHashtable: GNHashtable, cls: Constructor<T>): OperationObject<T>;
-    createTArray<T>(gnArray: GNArray, cls: Constructor<T>): OperationArray<T>;
-    newOperationRequest(request: Request): OperationRequest;
+	getGNEnhancedObjectFieldMetadata<T>(cls: Constructor<T>): GNEnhancedObjectFieldMetadata[];
+	createTOperationRequest<T extends OperationRequest>(operationRequest: OperationRequest, cls: Constructor<T>): T;
+	createTObject<T>(gnHashtable: GNHashtable, cls: Constructor<T>): OperationObject<T>;
+	createTArray<T>(gnArray: GNArray, cls: Constructor<T>): OperationArray<T>;
+	newOperationRequest(request: Request): OperationRequest;
 
 }

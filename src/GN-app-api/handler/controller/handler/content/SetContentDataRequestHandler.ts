@@ -16,11 +16,12 @@ import { ContentDataParam } from "./model/ContentDataParam";
 import { ConfigService } from "./../../../../service/ConfigService";
 
 class SetContentDataOperationRequest extends OperationRequest {
+
 	@GNArrayDataMember({ code: ParameterCode.Configs, elementCls: ContentDataParam, mustNonNull: true })
-	configs: Array<ContentDataParam>;
+	public configs: Array<ContentDataParam>;
 
 	@StringDataMember({ code: ParameterCode.Label, minLength: 2, maxLength: 32, isOptional: true })
-	label?: string;
+	public label?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -48,6 +49,7 @@ class AdminSetContentDataOperationRequest extends ServerSetContentDataOperationR
 }
 
 export class SetContentDataRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetContentData;
 	}

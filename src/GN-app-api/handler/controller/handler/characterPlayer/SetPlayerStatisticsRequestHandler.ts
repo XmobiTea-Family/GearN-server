@@ -18,14 +18,15 @@ import { PlayerStatisticsParam } from "./model/PlayerStatisticsParam";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class SetPlayerStatisticsOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.PlayerStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerStatisticsParam })
-	playerStatisticsParams: Array<PlayerStatisticsParam>;
+	public playerStatisticsParams: Array<PlayerStatisticsParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-	log?: string;
+	public log?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +45,7 @@ class ServerSetPlayerStatisticsOperationRequest extends SetPlayerStatisticsOpera
 }
 
 class AdminSetPlayerStatisticsOperationRequest extends ServerSetPlayerStatisticsOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,6 +54,7 @@ class AdminSetPlayerStatisticsOperationRequest extends ServerSetPlayerStatistics
 }
 
 export class SetPlayerStatisticsRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetPlayerStatistics;
 	}

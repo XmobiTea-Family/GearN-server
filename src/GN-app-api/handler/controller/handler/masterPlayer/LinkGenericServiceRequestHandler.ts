@@ -16,17 +16,18 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class LinkGenericServiceOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.ServiceName, minLength: 6, maxLength: 32, mustNonNull: true })
-	serviceName: string;
+	public serviceName: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.ServiceData, mustNonNull: true })
-	serviceData: GNHashtable;
+	public serviceData: GNHashtable;
 
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	forceLink?: boolean;
+	public forceLink?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -36,8 +37,9 @@ class LinkGenericServiceOperationRequest extends OperationRequest {
 }
 
 class ServerLinkGenericServiceOperationRequest extends LinkGenericServiceOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +49,7 @@ class ServerLinkGenericServiceOperationRequest extends LinkGenericServiceOperati
 }
 
 class AdminLinkGenericServiceOperationRequest extends ServerLinkGenericServiceOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,6 +58,7 @@ class AdminLinkGenericServiceOperationRequest extends ServerLinkGenericServiceOp
 }
 
 export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LinkGenericService;
 	}

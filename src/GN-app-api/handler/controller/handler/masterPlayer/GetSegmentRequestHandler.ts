@@ -15,8 +15,9 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class GetSegmentOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -26,8 +27,9 @@ class GetSegmentOperationRequest extends OperationRequest {
 }
 
 class ServerGetSegmentOperationRequest extends GetSegmentOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -37,6 +39,7 @@ class ServerGetSegmentOperationRequest extends GetSegmentOperationRequest {
 }
 
 class AdminGetSegmentOperationRequest extends ServerGetSegmentOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -45,6 +48,7 @@ class AdminGetSegmentOperationRequest extends ServerGetSegmentOperationRequest {
 }
 
 export class GetSegmentRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetSegment;
 	}

@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class RemoveSegmentOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@StringDataMember({ code: ParameterCode.Value, minLength: 2, maxLength: 32, mustNonNull: true })
-	value: string;
+	public value: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -38,6 +39,7 @@ class ServerRemoveSegmentOperationRequest extends RemoveSegmentOperationRequest 
 }
 
 class AdminRemoveSegmentOperationRequest extends ServerRemoveSegmentOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +48,7 @@ class AdminRemoveSegmentOperationRequest extends ServerRemoveSegmentOperationReq
 }
 
 export class RemoveSegmentRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveSegment;
 	}

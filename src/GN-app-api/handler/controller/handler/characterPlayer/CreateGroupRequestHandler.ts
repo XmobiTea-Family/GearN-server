@@ -21,17 +21,18 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class CreateGroupOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	catalogId: string;
+	public catalogId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GroupMembers, isOptional: true, elementCls: GroupMemberParam })
-	groupMembers?: Array<GroupMemberParam>;
+	public groupMembers?: Array<GroupMemberParam>;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-	displayName?: string;
+	public displayName?: string;
 
 	// them data vao day
 
@@ -44,7 +45,6 @@ class CreateGroupOperationRequest extends OperationRequest {
 
 class ServerCreateGroupOperationRequest extends CreateGroupOperationRequest {
 
-
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -53,6 +53,7 @@ class ServerCreateGroupOperationRequest extends CreateGroupOperationRequest {
 }
 
 class AdminCreateGroupOperationRequest extends ServerCreateGroupOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -61,6 +62,7 @@ class AdminCreateGroupOperationRequest extends ServerCreateGroupOperationRequest
 }
 
 export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateGroup;
 	}

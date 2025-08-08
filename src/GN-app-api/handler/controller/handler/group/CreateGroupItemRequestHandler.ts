@@ -20,20 +20,21 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class CreateGroupItemOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	catalogId: string;
+	public catalogId: string;
 
 	@StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
-	classId: string;
+	public classId: string;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-	displayName?: string;
+	public displayName?: string;
 
 	@NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, isOptional: true })
-	amount?: number;
+	public amount?: number;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,7 +45,6 @@ class CreateGroupItemOperationRequest extends OperationRequest {
 
 class ServerCreateGroupItemOperationRequest extends CreateGroupItemOperationRequest {
 
-
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -53,6 +53,7 @@ class ServerCreateGroupItemOperationRequest extends CreateGroupItemOperationRequ
 }
 
 class AdminCreateGroupItemOperationRequest extends ServerCreateGroupItemOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -61,6 +62,7 @@ class AdminCreateGroupItemOperationRequest extends ServerCreateGroupItemOperatio
 }
 
 export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateGroupItem;
 	}

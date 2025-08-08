@@ -16,82 +16,84 @@ import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 class RefreshAuthTokenOperationRequest extends OperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.RefreshAuthToken;
-    }
 
-    public override getCommonOperationRequest() {
-        return RefreshAuthTokenOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.RefreshAuthToken;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return RefreshAuthTokenOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().authenticate.refreshAuthToken.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            userId: authInfo.getUserId(),
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().authenticate.refreshAuthToken.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			userId: authInfo.getUserId(),
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let masterPlayerFindOptions: MasterPlayerFindOptions = {
-            playerBan: true
-        }
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+			playerBan: true
+		}
 
-        if (masterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
+		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
-            return operationResponse;
-        }
+		if (masterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 
-        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-        masterPlayer.setTsLastLogin(currentMilliseconds);
-        masterPlayer.saveAsync();
+			return operationResponse;
+		}
 
-        let playerBan = masterPlayer.getPlayerBan();
-        if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
-            operationResponse.setParameter(ParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
-        }
-        else {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		masterPlayer.setTsLastLogin(currentMilliseconds);
+		masterPlayer.saveAsync();
 
-            let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
-                gnToken: null,
-                secretKey: secretInfo.getSecretKey(),
-                userId: request.userId,
-            });
+		let playerBan = masterPlayer.getPlayerBan();
+		if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+			operationResponse.setParameter(ParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+		}
+		else {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-            operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
-        }
+			let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
+				gnToken: null,
+				secretKey: secretInfo.getSecretKey(),
+				userId: request.userId,
+			});
 
-        await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, secretInfo, operationRequest, operationResponse);
+			operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
+		}
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

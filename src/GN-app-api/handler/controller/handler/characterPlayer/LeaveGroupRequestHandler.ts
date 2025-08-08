@@ -21,11 +21,12 @@ import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class LeaveGroupOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,6 +45,7 @@ class ServerLeaveGroupOperationRequest extends LeaveGroupOperationRequest {
 }
 
 class AdminLeaveGroupOperationRequest extends ServerLeaveGroupOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,6 +54,7 @@ class AdminLeaveGroupOperationRequest extends ServerLeaveGroupOperationRequest {
 }
 
 export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LeaveGroup;
 	}

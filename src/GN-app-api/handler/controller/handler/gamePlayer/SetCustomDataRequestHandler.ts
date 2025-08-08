@@ -17,11 +17,12 @@ import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 class SetCustomDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
-	customData: Array<CustomDataParam>;
+	public customData: Array<CustomDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -31,8 +32,9 @@ class SetCustomDataOperationRequest extends OperationRequest {
 }
 
 class ServerSetCustomDataOperationRequest extends SetCustomDataOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -42,6 +44,7 @@ class ServerSetCustomDataOperationRequest extends SetCustomDataOperationRequest 
 }
 
 class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,6 +53,7 @@ class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationReq
 }
 
 export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetCustomData;
 	}

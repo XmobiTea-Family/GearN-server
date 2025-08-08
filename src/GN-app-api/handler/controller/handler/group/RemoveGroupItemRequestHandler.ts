@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class RemoveGroupItemOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	itemId: string;
+	public itemId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,6 +30,7 @@ class RemoveGroupItemOperationRequest extends OperationRequest {
 }
 
 class ServerRemoveGroupItemOperationRequest extends RemoveGroupItemOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,6 +39,7 @@ class ServerRemoveGroupItemOperationRequest extends RemoveGroupItemOperationRequ
 }
 
 class AdminRemoveGroupItemOperationRequest extends ServerRemoveGroupItemOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -45,6 +48,7 @@ class AdminRemoveGroupItemOperationRequest extends ServerRemoveGroupItemOperatio
 }
 
 export class RemoveGroupItemRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveGroupItem;
 	}

@@ -19,14 +19,15 @@ import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent
 import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 
 class AddPlayerFriendOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.FriendId, minLength: 10, maxLength: 10, mustNonNull: true })
-	friendId: string;
+	public friendId: string;
 
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	catalogId: string;
+	public catalogId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -36,8 +37,9 @@ class AddPlayerFriendOperationRequest extends OperationRequest {
 }
 
 class ServerAddPlayerFriendOperationRequest extends AddPlayerFriendOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -47,6 +49,7 @@ class ServerAddPlayerFriendOperationRequest extends AddPlayerFriendOperationRequ
 }
 
 class AdminAddPlayerFriendOperationRequest extends ServerAddPlayerFriendOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,6 +58,7 @@ class AdminAddPlayerFriendOperationRequest extends ServerAddPlayerFriendOperatio
 }
 
 export class AddPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.AddPlayerFriend;
 	}

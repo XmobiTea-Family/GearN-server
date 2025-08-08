@@ -14,20 +14,21 @@ import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity
 import { PermissionParam } from "./model/PermissionParam";
 
 class SetSecretInfoInformationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
-	secretKey: string;
+	public secretKey: string;
 
 	@BooleanDataMember({ code: ParameterCode.Remove, isOptional: true })
-	remove?: boolean;
+	public remove?: boolean;
 
 	@NumberDataMember({ code: ParameterCode.TsExpire, isOptional: true })
-	tsExpire?: number;
+	public tsExpire?: number;
 
 	@GNHashtableDataMember({ code: ParameterCode.Permission, isOptional: true })
-	permissionParam?: PermissionParam;
+	public permissionParam?: PermissionParam;
 
 	@StringDataMember({ code: ParameterCode.Description, isOptional: true })
-	description?: string;
+	public description?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -37,6 +38,7 @@ class SetSecretInfoInformationOperationRequest extends OperationRequest {
 }
 
 export class SetSecretInfoInformationRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetSecretInfoInformation;
 	}

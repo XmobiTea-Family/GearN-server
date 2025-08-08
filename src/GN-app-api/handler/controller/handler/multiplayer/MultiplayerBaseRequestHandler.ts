@@ -16,170 +16,170 @@ import { GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
-    protected getMatchmakingQueueSettings(queueName: string, gameId: string): xMatchmakingQueueSettings {
-        let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
-        return matchmakingQueueSettings.find(x => x.queueName == queueName);
-    }
+	protected getMatchmakingQueueSettings(queueName: string, gameId: string): xMatchmakingQueueSettings {
+		let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
+		return matchmakingQueueSettings.find(x => x.queueName == queueName);
+	}
 
-    protected async getAttributeForQueue(userId: string, gameId: string, attribute: GNHashtable, matchmakingQueueSettings: xMatchmakingQueueSettings): Promise<{ [k: string]: DataValueType }> {
-        let answer: { [k: string]: DataValueType } = {};
+	protected async getAttributeForQueue(userId: string, gameId: string, attribute: GNHashtable, matchmakingQueueSettings: xMatchmakingQueueSettings): Promise<{ [k: string]: DataValueType }> {
+		let answer: { [k: string]: DataValueType } = {};
 
-        if (attribute != null && matchmakingQueueSettings.rules != null) {
-            let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, {
-                playerDatas: true,
-                
-            });
+		if (attribute != null && matchmakingQueueSettings.rules != null) {
+			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, {
+				playerDatas: true,
 
-            if (gamePlayer != null) {
-                for (let i = 0; i < matchmakingQueueSettings.rules.length; i++) {
-                    let matchmakingRules = matchmakingQueueSettings.rules[i];
+			});
 
-                    if (matchmakingRules.type == RuleType.String) {
-                        let stringRule = <StringRule>matchmakingRules;
+			if (gamePlayer != null) {
+				for (let i = 0; i < matchmakingQueueSettings.rules.length; i++) {
+					let matchmakingRules = matchmakingQueueSettings.rules[i];
 
-                        let value: string = null;
+					if (matchmakingRules.type == RuleType.String) {
+						let stringRule = <StringRule>matchmakingRules;
 
-                        if (stringRule.attributeSource == RuleAttributeSource.UserInput) {
-                            value = attribute.getString(stringRule.attributePath, null);
-                        }
-                        else if (stringRule.attributeSource == RuleAttributeSource.PlayerData) {
-                            let tempValue = gamePlayer.getPlayerData(stringRule.attributePath);
+						let value: string = null;
 
-                            if (typeof (tempValue) == "string") {
-                                value = <string>tempValue;
-                            }
-                        }
+						if (stringRule.attributeSource == RuleAttributeSource.UserInput) {
+							value = attribute.getString(stringRule.attributePath, null);
+						}
+						else if (stringRule.attributeSource == RuleAttributeSource.PlayerData) {
+							let tempValue = gamePlayer.getPlayerData(stringRule.attributePath);
 
-                        if (value == null) {
-                            value = stringRule.defaultValue;
-                        }
+							if (typeof (tempValue) == "string") {
+								value = <string>tempValue;
+							}
+						}
 
-                        answer[matchmakingRules.name] = value;
-                    }
-                    else if (matchmakingRules.type == RuleType.Difference) {
-                        let differenceRule = <DifferenceRule>matchmakingRules;
+						if (value == null) {
+							value = stringRule.defaultValue;
+						}
 
-                        let value: number = 0;
+						answer[matchmakingRules.name] = value;
+					}
+					else if (matchmakingRules.type == RuleType.Difference) {
+						let differenceRule = <DifferenceRule>matchmakingRules;
 
-                        if (differenceRule.attributeSource == RuleAttributeSource.UserInput) {
-                            value = attribute.getNumber(differenceRule.attributePath, 0);
-                        }
-                        else if (differenceRule.attributeSource == RuleAttributeSource.PlayerData) {
-                            let tempValue = gamePlayer.getPlayerData(differenceRule.attributePath);
+						let value: number = 0;
 
-                            if (typeof (tempValue) == "number") {
-                                value = <number>tempValue;
-                            }
-                        }
+						if (differenceRule.attributeSource == RuleAttributeSource.UserInput) {
+							value = attribute.getNumber(differenceRule.attributePath, 0);
+						}
+						else if (differenceRule.attributeSource == RuleAttributeSource.PlayerData) {
+							let tempValue = gamePlayer.getPlayerData(differenceRule.attributePath);
 
-                        if (value == null) {
-                            value = differenceRule.defaultValue;
-                        }
+							if (typeof (tempValue) == "number") {
+								value = <number>tempValue;
+							}
+						}
 
-                        answer[matchmakingRules.name] = value;
-                    }
-                    else if (matchmakingRules.type == RuleType.SetIntersection) {
-                        let setIntersectionRule = <SetIntersectionRule>matchmakingRules;
+						if (value == null) {
+							value = differenceRule.defaultValue;
+						}
 
-                        let value: string[] = [];
+						answer[matchmakingRules.name] = value;
+					}
+					else if (matchmakingRules.type == RuleType.SetIntersection) {
+						let setIntersectionRule = <SetIntersectionRule>matchmakingRules;
 
-                        if (setIntersectionRule.attributeSource == RuleAttributeSource.UserInput) {
-                            let tempValue = attribute.getGNArray(setIntersectionRule.attributePath, null);
+						let value: string[] = [];
 
-                            if (tempValue != null) {
-                                value = tempValue.toData();
-                            }
-                        }
-                        else if (setIntersectionRule.attributeSource == RuleAttributeSource.PlayerData) {
-                            let tempValue = gamePlayer.getPlayerData(setIntersectionRule.attributePath);
+						if (setIntersectionRule.attributeSource == RuleAttributeSource.UserInput) {
+							let tempValue = attribute.getGNArray(setIntersectionRule.attributePath, null);
 
-                            if (typeof (tempValue) == "object") {
-                                if (Array.isArray(tempValue)) {
-                                    value = <any>tempValue;
-                                }
-                            }
-                        }
+							if (tempValue != null) {
+								value = tempValue.toData();
+							}
+						}
+						else if (setIntersectionRule.attributeSource == RuleAttributeSource.PlayerData) {
+							let tempValue = gamePlayer.getPlayerData(setIntersectionRule.attributePath);
 
-                        if (value == null) {
-                            if (setIntersectionRule.defaultValue == null) setIntersectionRule.defaultValue = [];
+							if (typeof (tempValue) == "object") {
+								if (Array.isArray(tempValue)) {
+									value = <any>tempValue;
+								}
+							}
+						}
 
-                            for (let i = 0; i < setIntersectionRule.defaultValue.length; i++) {
-                                value.push(setIntersectionRule.defaultValue[i]);
-                            }
-                        }
+						if (value == null) {
+							if (setIntersectionRule.defaultValue == null) setIntersectionRule.defaultValue = [];
 
-                        answer[matchmakingRules.name] = value;
-                    }
-                    else if (matchmakingRules.type == RuleType.MatchTotal) {
-                        let matchTotalRule = <MatchTotalRule>matchmakingRules;
+							for (let i = 0; i < setIntersectionRule.defaultValue.length; i++) {
+								value.push(setIntersectionRule.defaultValue[i]);
+							}
+						}
 
-                        let value: number = 0;
+						answer[matchmakingRules.name] = value;
+					}
+					else if (matchmakingRules.type == RuleType.MatchTotal) {
+						let matchTotalRule = <MatchTotalRule>matchmakingRules;
 
-                        if (matchTotalRule.attributeSource == RuleAttributeSource.UserInput) {
-                            value = attribute.getNumber(matchTotalRule.attributePath, 0);
-                        }
-                        else if (matchTotalRule.attributeSource == RuleAttributeSource.PlayerData) {
-                            let tempValue = gamePlayer.getPlayerData(matchTotalRule.attributePath);
+						let value: number = 0;
 
-                            if (typeof (tempValue) == "number") {
-                                value = <number>tempValue;
-                            }
-                        }
+						if (matchTotalRule.attributeSource == RuleAttributeSource.UserInput) {
+							value = attribute.getNumber(matchTotalRule.attributePath, 0);
+						}
+						else if (matchTotalRule.attributeSource == RuleAttributeSource.PlayerData) {
+							let tempValue = gamePlayer.getPlayerData(matchTotalRule.attributePath);
 
-                        answer[matchmakingRules.name] = value;
-                    }
-                    else if (matchmakingRules.type == RuleType.RegionSelection) {
-                        let regionSelectionRule = <RegionSelectionRule>matchmakingRules;
+							if (typeof (tempValue) == "number") {
+								value = <number>tempValue;
+							}
+						}
 
-                        let value = {
-                            region: "",
-                            ping: 0
-                        };
+						answer[matchmakingRules.name] = value;
+					}
+					else if (matchmakingRules.type == RuleType.RegionSelection) {
+						let regionSelectionRule = <RegionSelectionRule>matchmakingRules;
 
-                        let tempValue = attribute.getGNHashtable(regionSelectionRule.attributePath, null);
+						let value = {
+							region: "",
+							ping: 0
+						};
 
-                        if (tempValue != null) {
-                            value.region = tempValue.getString("region", "");
-                            value.ping = tempValue.getNumber("ping", 0);
-                        }
+						let tempValue = attribute.getGNHashtable(regionSelectionRule.attributePath, null);
 
-                        answer[matchmakingRules.name] = value as any;
-                    }
-                    // else if (matchmakingRules.type == RuleType.TeamSizeBalance) {
-                    //     let teamSizeBalanceRule = <TeamSizeBalanceRule>matchmakingRules;
+						if (tempValue != null) {
+							value.region = tempValue.getString("region", "");
+							value.ping = tempValue.getNumber("ping", 0);
+						}
 
-                    //     answer[matchmakingRules.name] = value as any;
-                    // }
-                    else if (matchmakingRules.type == RuleType.TeamDifference) {
-                        let teamDifferenceRule = <TeamDifferenceRule>matchmakingRules;
+						answer[matchmakingRules.name] = value as any;
+					}
+					// else if (matchmakingRules.type == RuleType.TeamSizeBalance) {
+					//     let teamSizeBalanceRule = <TeamSizeBalanceRule>matchmakingRules;
 
-                        let value: number = 0;
+					//     answer[matchmakingRules.name] = value as any;
+					// }
+					else if (matchmakingRules.type == RuleType.TeamDifference) {
+						let teamDifferenceRule = <TeamDifferenceRule>matchmakingRules;
 
-                        if (teamDifferenceRule.attributeSource == RuleAttributeSource.UserInput) {
-                            value = attribute.getNumber(teamDifferenceRule.attributePath, 0);
-                        }
-                        else if (teamDifferenceRule.attributeSource == RuleAttributeSource.PlayerData) {
-                            let tempValue = gamePlayer.getPlayerData(teamDifferenceRule.attributePath);
+						let value: number = 0;
 
-                            if (typeof (tempValue) == "number") {
-                                value = <number>tempValue;
-                            }
-                        }
+						if (teamDifferenceRule.attributeSource == RuleAttributeSource.UserInput) {
+							value = attribute.getNumber(teamDifferenceRule.attributePath, 0);
+						}
+						else if (teamDifferenceRule.attributeSource == RuleAttributeSource.PlayerData) {
+							let tempValue = gamePlayer.getPlayerData(teamDifferenceRule.attributePath);
 
-                        if (value == null) {
-                            value = teamDifferenceRule.defaultValue;
-                        }
+							if (typeof (tempValue) == "number") {
+								value = <number>tempValue;
+							}
+						}
 
-                        answer[matchmakingRules.name] = value;
-                    }
-                    // else if (matchmakingRules.type == RuleType.TeamTicketSizeSimilarity) {
-                    //     let teamTicketSizeSimilarityRule = <TeamTicketSizeSimilarityRule>matchmakingRules;
+						if (value == null) {
+							value = teamDifferenceRule.defaultValue;
+						}
 
-                    // }
-                }
-            }
-        }
+						answer[matchmakingRules.name] = value;
+					}
+					// else if (matchmakingRules.type == RuleType.TeamTicketSizeSimilarity) {
+					//     let teamTicketSizeSimilarityRule = <TeamTicketSizeSimilarityRule>matchmakingRules;
 
-        return answer;
-    }
+					// }
+				}
+			}
+		}
+
+		return answer;
+	}
 }

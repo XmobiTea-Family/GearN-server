@@ -1,12 +1,12 @@
 export interface xStatisticsSettings {
-    key: string;
-    statisticsAggregationMethod: number;
+	key: string;
+	statisticsAggregationMethod: number;
 
-    maximumValue?: number;
-    minimumValue?: number;
+	maximumValue?: number;
+	minimumValue?: number;
 
-    description: string;
-    initialValue: number;
-    index: boolean;
-    
+	description: string;
+	initialValue: number;
+	index: boolean;
+
 }

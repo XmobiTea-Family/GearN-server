@@ -16,17 +16,18 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { PermissionParam } from "./model/PermissionParam";
 
 class CreateSecretInfoOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true, isOptional: true })
-	secretKey?: string;
+	public secretKey?: string;
 
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
-	gameId?: string;
+	public gameId?: string;
 
 	@NumberDataMember({ code: ParameterCode.Role, mustInt: true })
-	role: number;
+	public role: number;
 
 	@GNHashtableDataMember({ code: ParameterCode.Permission, isOptional: true })
-	permissionParam?: PermissionParam;
+	public permissionParam?: PermissionParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -36,6 +37,7 @@ class CreateSecretInfoOperationRequest extends OperationRequest {
 }
 
 export class CreateSecretInfoRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateSecretInfo;
 	}
@@ -520,7 +522,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getCreateLeaderboard: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getStoreLog: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				presentStoreItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-                getStoreUsed:  { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				getStoreUsed: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				removeStoreUsed: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 			},
 			masterAdmin: {
@@ -710,7 +712,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getCurrencyLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getCreateLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getLastLoginLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				
+
 				getStatisticsLog: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getCurrencyLog: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
@@ -1197,7 +1199,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getCurrencyLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getCreateLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getLastLoginLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				
+
 				getStatisticsLog: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getCurrencyLog: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
@@ -1686,7 +1688,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getCurrencyLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				getCreateLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				getLastLoginLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
-				
+
 				getStatisticsLog: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getCurrencyLog: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 

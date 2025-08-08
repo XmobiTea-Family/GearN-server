@@ -2,146 +2,132 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember, DataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 class SizeParam {
-    @NumberDataMember({ code: ParameterCode.Min, minValue: 1, mustInt: true })
-    min: number;
 
-    @NumberDataMember({ code: ParameterCode.Max, minValue: 1, mustInt: true })
-    max: number;
+	@NumberDataMember({ code: ParameterCode.Min, minValue: 1, mustInt: true })
+	public min: number;
+
+	@NumberDataMember({ code: ParameterCode.Max, minValue: 1, mustInt: true })
+	public max: number;
 
 }
 
 class TeamParam {
-    @StringDataMember({ code: ParameterCode.TeamId, minLength: 1, maxLength: 32 })
-    teamId: string;
 
-    @GNHashtableDataMember({ code: ParameterCode.TeamSize })
-    teamSize: SizeParam;
+	@StringDataMember({ code: ParameterCode.TeamId, minLength: 1, maxLength: 32 })
+	public teamId: string;
+
+	@GNHashtableDataMember({ code: ParameterCode.TeamSize })
+	public teamSize: SizeParam;
 
 }
 
 class LinearExpansionsParam {
-    @NumberDataMember({ code: ParameterCode.SecondsBetweenExpansions, minValue: 1 })
-    secondsBetweenExpansions: number;
 
-    @NumberDataMember({ code: ParameterCode.Delta, isOptional: true })
-    delta?: number;
+	@NumberDataMember({ code: ParameterCode.SecondsBetweenExpansions, minValue: 1 })
+	public secondsBetweenExpansions: number;
 
-    @NumberDataMember({ code: ParameterCode.Limit, isOptional: true })
-    limit?: number;
+	@NumberDataMember({ code: ParameterCode.Delta, isOptional: true })
+	public delta?: number;
+
+	@NumberDataMember({ code: ParameterCode.Limit, isOptional: true })
+	public limit?: number;
 
 }
 
 class CustomExpansionsParam {
-    @NumberDataMember({ code: ParameterCode.SecondsBetweenExpansions, minValue: 1 })
-    secondsBetweenExpansions: number;
 
-    @GNArrayDataMember({ code: ParameterCode.OverrideValue, isOptional: true, elementCls: Object })
-    overrideValue?: any[];
+	@NumberDataMember({ code: ParameterCode.SecondsBetweenExpansions, minValue: 1 })
+	public secondsBetweenExpansions: number;
 
-    @GNArrayDataMember({ code: ParameterCode.OverrideMin, isOptional: true, elementCls: Object })
-    overrideMin?: any[];
+	@GNArrayDataMember({ code: ParameterCode.OverrideValue, isOptional: true, elementCls: Object })
+	public overrideValue?: any[];
 
-    @GNArrayDataMember({ code: ParameterCode.OverrideMax, isOptional: true, elementCls: Object })
-    overrideMax?: any[];
+	@GNArrayDataMember({ code: ParameterCode.OverrideMin, isOptional: true, elementCls: Object })
+	public overrideMin?: any[];
+
+	@GNArrayDataMember({ code: ParameterCode.OverrideMax, isOptional: true, elementCls: Object })
+	public overrideMax?: any[];
 
 }
 
 class AdvancedSettingsParam {
-    @NumberDataMember({ code: ParameterCode.SecondsUntilOptional, minValue: 1 })
-    secondsUntilOptional: number;
 
-    @NumberDataMember({ code: ParameterCode.ExpansionType, minValue: 1, maxValue: 3, isOptional: true, mustInt: true })
-    expansionType?: number;
+	@NumberDataMember({ code: ParameterCode.SecondsUntilOptional, minValue: 1 })
+	public secondsUntilOptional: number;
 
-    @GNHashtableDataMember({ code: ParameterCode.LinearExpansions, isOptional: true })
-    linearExpansions?: LinearExpansionsParam;
+	@NumberDataMember({ code: ParameterCode.ExpansionType, minValue: 1, maxValue: 3, isOptional: true, mustInt: true })
+	public expansionType?: number;
 
-    @GNHashtableDataMember({ code: ParameterCode.CustomExpansions, isOptional: true })
-    customExpansions?: CustomExpansionsParam;
+	@GNHashtableDataMember({ code: ParameterCode.LinearExpansions, isOptional: true })
+	public linearExpansions?: LinearExpansionsParam;
+
+	@GNHashtableDataMember({ code: ParameterCode.CustomExpansions, isOptional: true })
+	public customExpansions?: CustomExpansionsParam;
 
 }
 
 class RuleParam {
-    @StringDataMember({ code: ParameterCode.Name, minLength: 1, maxLength: 32 })
-    name: string;
 
-    @NumberDataMember({ code: ParameterCode.Type, minValue: 1, maxValue: 8, mustInt: true })
-    type: number;
+	@StringDataMember({ code: ParameterCode.Name, minLength: 1, maxLength: 32 })
+	public name: string;
 
-    @NumberDataMember({ code: ParameterCode.AttributeSource, minValue: 1, maxValue: 2, isOptional: true })
-    attributeSource?: number;
+	@NumberDataMember({ code: ParameterCode.Type, minValue: 1, maxValue: 8, mustInt: true })
+	public type: number;
 
-    @StringDataMember({ code: ParameterCode.AttributePath, minLength: 1, maxLength: 32, isOptional: true })
-    attributePath?: string;
+	@NumberDataMember({ code: ParameterCode.AttributeSource, minValue: 1, maxValue: 2, isOptional: true })
+	public attributeSource?: number;
 
-    @DataMember({ code: ParameterCode.DefaultValue, isOptional: true })
-    defaultValue?: any;
+	@StringDataMember({ code: ParameterCode.AttributePath, minLength: 1, maxLength: 32, isOptional: true })
+	public attributePath?: string;
 
-    @NumberDataMember({ code: ParameterCode.CompairType, minValue: 1, maxValue: 2, isOptional: true, mustInt: true })
-    compairType?: number;
+	@DataMember({ code: ParameterCode.DefaultValue, isOptional: true })
+	public defaultValue?: any;
 
-    @NumberDataMember({ code: ParameterCode.AllowedDifference, minValue: 0, isOptional: true })
-    allowedDifference?: number;
+	@NumberDataMember({ code: ParameterCode.CompairType, minValue: 1, maxValue: 2, isOptional: true, mustInt: true })
+	public compairType?: number;
 
-    @NumberDataMember({ code: ParameterCode.Min, isOptional: true })
-    min?: number;
+	@NumberDataMember({ code: ParameterCode.AllowedDifference, minValue: 0, isOptional: true })
+	public allowedDifference?: number;
 
-    @NumberDataMember({ code: ParameterCode.Max, isOptional: true })
-    max?: number;
+	@NumberDataMember({ code: ParameterCode.Min, isOptional: true })
+	public min?: number;
 
-    @GNHashtableDataMember({ code: ParameterCode.AdvancedSettings, isOptional: true })
-    advancedSettings?: AdvancedSettingsParam;
+	@NumberDataMember({ code: ParameterCode.Max, isOptional: true })
+	public max?: number;
+
+	@GNHashtableDataMember({ code: ParameterCode.AdvancedSettings, isOptional: true })
+	public advancedSettings?: AdvancedSettingsParam;
 
 }
 
 class ServerAllocationParam {
-    @BooleanDataMember({ code: ParameterCode.Enable })
-    enable: boolean;
+
+	@BooleanDataMember({ code: ParameterCode.Enable })
+	public enable: boolean;
 
 }
 
 export class MatchmakingQueueSettingsParam {
-    @StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
-    queueName: string;
 
-    @GNHashtableDataMember({ code: ParameterCode.MatchSize })
-    matchSize: SizeParam;
+	@StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
+	public queueName: string;
 
-    @GNHashtableDataMember({ code: ParameterCode.TicketSize })
-    ticketSize: SizeParam;
+	@GNHashtableDataMember({ code: ParameterCode.MatchSize })
+	public matchSize: SizeParam;
 
-    @GNHashtableDataMember({ code: ParameterCode.ServerAllocation })
-    serverAllocation: ServerAllocationParam;
+	@GNHashtableDataMember({ code: ParameterCode.TicketSize })
+	public ticketSize: SizeParam;
 
-    @GNArrayDataMember({ code: ParameterCode.Teams, isOptional: true, elementCls: TeamParam })
-    teams?: TeamParam[];
+	@GNHashtableDataMember({ code: ParameterCode.ServerAllocation })
+	public serverAllocation: ServerAllocationParam;
 
-    @GNArrayDataMember({ code: ParameterCode.Rules, isOptional: true, elementCls: RuleParam })
-    rules?: RuleParam[];
+	@GNArrayDataMember({ code: ParameterCode.Teams, isOptional: true, elementCls: TeamParam })
+	public teams?: TeamParam[];
 
-    @BooleanDataMember({ code: ParameterCode.Remove, isOptional: true })
-    remove?: boolean;
+	@GNArrayDataMember({ code: ParameterCode.Rules, isOptional: true, elementCls: RuleParam })
+	public rules?: RuleParam[];
+
+	@BooleanDataMember({ code: ParameterCode.Remove, isOptional: true })
+	public remove?: boolean;
 
 }
-
-// queueName: string;
-//     matchSize: {
-//         min: number,
-//         max: number
-//     },
-//     ticketSize: {
-//         min: number,
-//         max: number
-//     },
-//     serverAllocation: {
-//         enable: boolean,
-
-//     },
-//     teams?: {
-//         name: string,
-//         teamSize: {
-//             min: number,
-//             max: number
-//         },
-//     }[],
-//     rules?: (StringRule | DifferenceRule | SetIntersectionRule | MatchTotalRule | RegionSelectionRule | TeamSizeBalanceRule | TeamDifferenceRule | TeamTicketSizeSimilarityRule)[]

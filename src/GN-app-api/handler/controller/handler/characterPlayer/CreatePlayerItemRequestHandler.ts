@@ -20,202 +20,204 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class CreatePlayerItemOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-    characterId: string;
 
-    @StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-    catalogId: string;
+	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+	public characterId: string;
 
-    @StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
-    classId: string;
+	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
+	public catalogId: string;
 
-    @StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-    displayName?: string;
+	@StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
+	public classId: string;
 
-    @NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, isOptional: true })
-    amount?: number;
+	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
+	public displayName?: string;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, isOptional: true })
+	public amount?: number;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerCreatePlayerItemOperationRequest extends CreatePlayerItemOperationRequest {
 
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
-
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminCreatePlayerItemOperationRequest extends ServerCreatePlayerItemOperationRequest {
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.CreatePlayerItem;
-    }
 
-    public override getCommonOperationRequest() {
-        return CreatePlayerItemOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.CreatePlayerItem;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return CreatePlayerItemOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.createPlayerItem);
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!allowMethod) {
-            return this.newOperationNotAllowError(request);
-        }
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.createPlayerItem);
 
-        return this.execute({
-            characterId: request.characterId,
-            catalogId: request.catalogId,
-            classId: request.classId,
-            displayName: request.displayName,
-            amount: request.amount,
-        }, secretInfo, operationRequest);
-    }
+		if (!allowMethod) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreatePlayerItemOperationRequest);
+		return this.execute({
+			characterId: request.characterId,
+			catalogId: request.catalogId,
+			classId: request.classId,
+			displayName: request.displayName,
+			amount: request.amount,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreatePlayerItemOperationRequest);
 
-        if (!secretInfo.getPermission().characterPlayer.createPlayerItem.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            characterId: request.characterId,
-            catalogId: request.catalogId,
-            classId: request.classId,
-            displayName: request.displayName,
-            amount: request.amount,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().characterPlayer.createPlayerItem.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreatePlayerItemOperationRequest);
+		return this.execute({
+			characterId: request.characterId,
+			catalogId: request.catalogId,
+			classId: request.classId,
+			displayName: request.displayName,
+			amount: request.amount,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreatePlayerItemOperationRequest);
 
-        if (!secretInfo.getPermission().characterPlayer.createPlayerItem.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            characterId: request.characterId,
-            catalogId: request.catalogId,
-            classId: request.classId,
-            displayName: request.displayName,
-            amount: request.amount,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().characterPlayer.createPlayerItem.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { characterId: string, catalogId: string, classId: string, displayName: string, amount: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			characterId: request.characterId,
+			catalogId: request.catalogId,
+			classId: request.classId,
+			displayName: request.displayName,
+			amount: request.amount,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { characterId: string, catalogId: string, classId: string, displayName: string, amount: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-            playerInventories: true,
-        }
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
-        let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find(x => x.catalogId == request.catalogId);
+		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+			playerInventories: true,
+		}
 
-        if (playerItemCatalogSettingsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
-            return operationResponse;
-        }
+		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find(x => x.catalogId == request.catalogId);
 
-        let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == request.classId);
-        if (itemClassSettingsItem == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ClassIdNotFound);
-            return operationResponse;
-        }
+		if (playerItemCatalogSettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
+			return operationResponse;
+		}
 
-        let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+		let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == request.classId);
+		if (itemClassSettingsItem == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ClassIdNotFound);
+			return operationResponse;
+		}
 
-        if (characterPlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
-            return operationResponse;
-        }
+		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
-        let amount = request.amount;
+		if (characterPlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+			return operationResponse;
+		}
 
-        if (playerItemCatalogSettingsItem.itemType == <number>ItemType.NonStackable) {
-            amount = 1;
-        }
+		let amount = request.amount;
 
-        let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
-        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		if (playerItemCatalogSettingsItem.itemType == <number>ItemType.NonStackable) {
+			amount = 1;
+		}
 
-        let result = {} as any;
-        result["itemId"] = itemId;
-        result["catalogId"] = request.catalogId;
-        result["classId"] = request.classId;
-        result["amount"] = amount;
-        result["itemType"] = playerItemCatalogSettingsItem.itemType;
-        result["owner"] = { "id": request.characterId, "type": <number>OwnerType.CharacterPlayer };
-        result["itemDatas"] = [];
-        result["itemStatistics"] = {};
-        result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-        result["segments"] = [];
-        result["customDatas"] = {};
-        result["tsCreate"] = currentMilliseconds;
-        result["displayName"] = request.displayName;
-        result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
-        result["avatar"] = { "type": 0, "value": "0" };
-        result["tags"] = {};
+		let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-        let inventory = await this.gnServer.getDatabase().createInventoryAsync(result, secretInfo.getGameId());
+		let result = {} as any;
+		result["itemId"] = itemId;
+		result["catalogId"] = request.catalogId;
+		result["classId"] = request.classId;
+		result["amount"] = amount;
+		result["itemType"] = playerItemCatalogSettingsItem.itemType;
+		result["owner"] = { "id": request.characterId, "type": <number>OwnerType.CharacterPlayer };
+		result["itemDatas"] = [];
+		result["itemStatistics"] = {};
+		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
+		result["segments"] = [];
+		result["customDatas"] = {};
+		result["tsCreate"] = currentMilliseconds;
+		result["displayName"] = request.displayName;
+		result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
+		result["avatar"] = { "type": 0, "value": "0" };
+		result["tags"] = {};
 
-        characterPlayer.setPlayerInventory(itemId, request.catalogId, request.classId);
-        characterPlayer.saveAsync();
+		let inventory = await this.gnServer.getDatabase().createInventoryAsync(result, secretInfo.getGameId());
 
-        let gnPlayerInventories = new GNArray();
+		characterPlayer.setPlayerInventory(itemId, request.catalogId, request.classId);
+		characterPlayer.saveAsync();
 
-        let gnPlayerInventory = new GNHashtable();
+		let gnPlayerInventories = new GNArray();
 
-        gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
-        gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
-        gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
+		let gnPlayerInventory = new GNHashtable();
 
-        gnPlayerInventories.add(gnPlayerInventory);
+		gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
+		gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+		gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
 
-        let gnInfoResponseParameters = new GNHashtable();
-        gnInfoResponseParameters.add(ParameterCode.PlayerInventories, gnPlayerInventories);
+		gnPlayerInventories.add(gnPlayerInventory);
 
-        operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(ParameterCode.PlayerInventories, gnPlayerInventories);
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

@@ -16,14 +16,15 @@ import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/ent
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 class CreateAdminAccountOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
-	username: string;
+	public username: string;
 
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
-	password: string;
+	public password: string;
 
 	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
-	secretKey: string;
+	public secretKey: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -33,6 +34,7 @@ class CreateAdminAccountOperationRequest extends OperationRequest {
 }
 
 export class CreateAdminAccountRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateAdminAccount;
 	}

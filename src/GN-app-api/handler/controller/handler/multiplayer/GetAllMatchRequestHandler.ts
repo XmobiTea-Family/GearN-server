@@ -15,196 +15,198 @@ import { Match } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Matc
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetAllMatchOperationRequest extends OperationRequest {
-    @BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
-    returnMember?: boolean;
 
-    @NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-    skip?: number;
+	@BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
+	public returnMember?: boolean;
 
-    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-    limit?: number;
+	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+	public skip?: number;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+	public limit?: number;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerGetAllMatchOperationRequest extends GetAllMatchOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminGetAllMatchOperationRequest extends ServerGetAllMatchOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.GetAllMatch;
-    }
 
-    public override getCommonOperationRequest() {
-        return GetAllMatchOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.GetAllMatch;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return GetAllMatchOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        if (!secretInfo.getPermission().multiplayer.getAllMatch.selfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            returnMember: request.returnMember,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getAllMatch.selfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAllMatchOperationRequest);
+		return this.execute({
+			returnMember: request.returnMember,
+			skip: request.skip,
+			limit: request.limit,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAllMatchOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.getAllMatch.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            returnMember: request.returnMember,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getAllMatch.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAllMatchOperationRequest);
+		return this.execute({
+			returnMember: request.returnMember,
+			skip: request.skip,
+			limit: request.limit,
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAllMatchOperationRequest);
 
-        if (!secretInfo.getPermission().multiplayer.getAllMatch.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            returnMember: request.returnMember,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().multiplayer.getAllMatch.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetAllMatch", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			returnMember: request.returnMember,
+			skip: request.skip,
+			limit: request.limit,
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetAllMatch", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", secretInfo.getGameId());
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let projection: any = null;
-        if (!request.returnMember) {
-            projection = {
-                members: false
-            }
-        }
+		let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", secretInfo.getGameId());
 
-        // find tat ca nhung cai ticket nay
-        let results = await matchCollection
-            .find({}, {
-                projection: projection
-            })
-            .sort({ "_id": -1 }).skip(request.skip).limit(request.limit);
+		let projection: any = null;
+		if (!request.returnMember) {
+			projection = {
+				members: false
+			}
+		}
 
-        let gnResults = new GNArray();
+		// find tat ca nhung cai ticket nay
+		let results = await matchCollection
+			.find({}, {
+				projection: projection
+			})
+			.sort({ "_id": -1 }).skip(request.skip).limit(request.limit);
 
-        while (await results.hasNext()) {
-            let result = await results.next();
+		let gnResults = new GNArray();
 
-            let match = new Match(result, matchCollection);
+		while (await results.hasNext()) {
+			let result = await results.next();
 
-            let gnMatch = new GNHashtable();
+			let match = new Match(result, matchCollection);
 
-            gnMatch.add(ParameterCode.MatchId, match.getMatchId());
-            gnMatch.add(ParameterCode.TsCreate, match.getTsCreate());
-            gnMatch.add(ParameterCode.QueueName, match.getQueueName());
-            gnMatch.add(ParameterCode.TimeToMatchInSeconds, match.getTimeToMatchInSeconds());
+			let gnMatch = new GNHashtable();
 
-            if (request.returnMember) {
-                let gnMembers = new GNArray();
+			gnMatch.add(ParameterCode.MatchId, match.getMatchId());
+			gnMatch.add(ParameterCode.TsCreate, match.getTsCreate());
+			gnMatch.add(ParameterCode.QueueName, match.getQueueName());
+			gnMatch.add(ParameterCode.TimeToMatchInSeconds, match.getTimeToMatchInSeconds());
 
-                let members = match.getMembers();
-                for (let i = 0; i < members.length; i++) {
-                    let member = members[i];
+			if (request.returnMember) {
+				let gnMembers = new GNArray();
 
-                    let gnMember = new GNHashtable();
+				let members = match.getMembers();
+				for (let i = 0; i < members.length; i++) {
+					let member = members[i];
 
-                    gnMember.add(ParameterCode.UserId, member.userId);
-                    gnMember.add(ParameterCode.TeamId, member.teamId);
-                    gnMember.add(ParameterCode.Attribute, member.attribute);
+					let gnMember = new GNHashtable();
 
-                    gnMembers.add(gnMember);
-                }
+					gnMember.add(ParameterCode.UserId, member.userId);
+					gnMember.add(ParameterCode.TeamId, member.teamId);
+					gnMember.add(ParameterCode.Attribute, member.attribute);
 
-                gnMatch.add(ParameterCode.Members, gnMembers);
-            }
+					gnMembers.add(gnMember);
+				}
 
-            let serverDetail = match.getServerDetail();
-            if (serverDetail != null) {
-                let gnServerDetail = new GNHashtable();
+				gnMatch.add(ParameterCode.Members, gnMembers);
+			}
 
-                gnServerDetail.add(ParameterCode.IpV4Address, serverDetail.ipV4Address);
+			let serverDetail = match.getServerDetail();
+			if (serverDetail != null) {
+				let gnServerDetail = new GNHashtable();
 
-                let gnPorts = new GNArray();
-                let ports = serverDetail.ports;
+				gnServerDetail.add(ParameterCode.IpV4Address, serverDetail.ipV4Address);
 
-                for (let i = 0; i < ports.length; i++) {
-                    let port = ports[i];
+				let gnPorts = new GNArray();
+				let ports = serverDetail.ports;
 
-                    let gnPort = new GNHashtable();
+				for (let i = 0; i < ports.length; i++) {
+					let port = ports[i];
 
-                    gnPort.add(ParameterCode.Name, port.name);
-                    gnPort.add(ParameterCode.PublicPort, port.publicPort);
-                    gnPort.add(ParameterCode.PrivatePort, port.privatePort);
-                    gnPort.add(ParameterCode.Protocol, port.protocol);
+					let gnPort = new GNHashtable();
 
-                    gnPorts.add(gnPort);
-                }
+					gnPort.add(ParameterCode.Name, port.name);
+					gnPort.add(ParameterCode.PublicPort, port.publicPort);
+					gnPort.add(ParameterCode.PrivatePort, port.privatePort);
+					gnPort.add(ParameterCode.Protocol, port.protocol);
 
-                gnServerDetail.add(ParameterCode.Ports, gnPorts);
+					gnPorts.add(gnPort);
+				}
 
-                gnMatch.add(ParameterCode.ServerDetail, gnServerDetail);
-            }
+				gnServerDetail.add(ParameterCode.Ports, gnPorts);
 
-            gnResults.add(gnMatch);
-        }
+				gnMatch.add(ParameterCode.ServerDetail, gnServerDetail);
+			}
 
-        operationResponse.setParameter(ParameterCode.Results, gnResults);
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+			gnResults.add(gnMatch);
+		}
 
-        await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetAllMatch", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.Results, gnResults);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetAllMatch", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

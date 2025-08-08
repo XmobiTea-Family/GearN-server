@@ -18,11 +18,12 @@ import { PlayerDataParam } from "./model/PlayerDataParam";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class SetPlayerDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@GNArrayDataMember({ code: ParameterCode.PlayerDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerDataParam })
-	playerDataParams: Array<PlayerDataParam>;
+	public playerDataParams: Array<PlayerDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,8 +33,9 @@ class SetPlayerDataOperationRequest extends OperationRequest {
 }
 
 class ServerSetPlayerDataOperationRequest extends SetPlayerDataOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,6 +45,7 @@ class ServerSetPlayerDataOperationRequest extends SetPlayerDataOperationRequest 
 }
 
 class AdminSetPlayerDataOperationRequest extends ServerSetPlayerDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,6 +54,7 @@ class AdminSetPlayerDataOperationRequest extends ServerSetPlayerDataOperationReq
 }
 
 export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetPlayerData;
 	}

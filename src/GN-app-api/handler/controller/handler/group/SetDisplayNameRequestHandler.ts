@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class SetDisplayNameOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, minLength: 5, maxLength: 32, mustNonNull: true })
-	displayName: string;
+	public displayName: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -38,6 +39,7 @@ class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationReques
 }
 
 class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +48,7 @@ class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationR
 }
 
 export class SetDisplayNameRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetDisplayName;
 	}

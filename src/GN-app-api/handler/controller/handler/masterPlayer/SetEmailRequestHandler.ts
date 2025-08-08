@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class SetEmailOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Email, minLength: 5, maxLength: 128, mustNonNull: true })
-	email: string;
+	public email: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -29,8 +30,9 @@ class SetEmailOperationRequest extends OperationRequest {
 }
 
 class ServerGetEmailOperationRequest extends SetEmailOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -40,6 +42,7 @@ class ServerGetEmailOperationRequest extends SetEmailOperationRequest {
 }
 
 class AdminGetEmailOperationRequest extends ServerGetEmailOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +51,7 @@ class AdminGetEmailOperationRequest extends ServerGetEmailOperationRequest {
 }
 
 export class SetEmailRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetEmail;
 	}

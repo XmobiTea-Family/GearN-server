@@ -16,8 +16,9 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class RequestDownloadFileUploadInfoOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
-	fileId: string;
+	public fileId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -28,6 +29,7 @@ class RequestDownloadFileUploadInfoOperationRequest extends OperationRequest {
 }
 
 class ServerRequestDownloadFileUploadInfoOperationRequest extends RequestDownloadFileUploadInfoOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -45,6 +47,7 @@ class AdminRequestDownloadFileUploadInfoOperationRequest extends ServerRequestDo
 }
 
 export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.RequestDownloadFileUploadInfo;
 	}

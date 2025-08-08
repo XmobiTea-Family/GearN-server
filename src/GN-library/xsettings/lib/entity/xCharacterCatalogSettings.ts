@@ -1,4 +1,4 @@
 export interface xCharacterCatalogSettings {
-    catalogId: string;
-    description: string;
+	catalogId: string;
+	description: string;
 }

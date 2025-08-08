@@ -17,29 +17,30 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByGameCenterOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.PlayerId, minLength: 2, maxLength: 64, mustNonNull: true })
-	playerId: string;
+	public playerId: string;
 
 	@StringDataMember({ code: ParameterCode.Name, minLength: 2, maxLength: 128, mustNonNull: true })
-	name: string;
+	public name: string;
 
 	@StringDataMember({ code: ParameterCode.PublicKeyUrl, minLength: 2, maxLength: 2048, mustNonNull: true })
-	publicKeyUrl: string;
+	public publicKeyUrl: string;
 
 	@StringDataMember({ code: ParameterCode.Signature, minLength: 2, maxLength: 2048, mustNonNull: true })
-	signature: string;
+	public signature: string;
 
 	@StringDataMember({ code: ParameterCode.Salt, minLength: 2, maxLength: 256, mustNonNull: true })
-	salt: string;
+	public salt: string;
 
 	@NumberDataMember({ code: ParameterCode.Timestamp })
-	timestamp: number;
+	public timestamp: number;
 
 	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
-	createPlayerIfNotExists?: boolean;
+	public createPlayerIfNotExists?: boolean;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -49,6 +50,7 @@ class LoginByGameCenterOperationRequest extends OperationRequest {
 }
 
 export class LoginByGameCenterRequestHandler extends LoginBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LoginByGameCenter;
 	}

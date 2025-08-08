@@ -18,17 +18,18 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class LoginByGenericServiceOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.ServiceName, minLength: 6, maxLength: 32, mustNonNull: true })
-	serviceName: string;
+	public serviceName: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.ServiceData, mustNonNull: true })
-	serviceData: GNHashtable;
+	public serviceData: GNHashtable;
 
 	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
-	createPlayerIfNotExists?: boolean;
+	public createPlayerIfNotExists?: boolean;
 
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	infoRequestParam: InfoRequestParam;
+	public infoRequestParam: InfoRequestParam;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -38,6 +39,7 @@ class LoginByGenericServiceOperationRequest extends OperationRequest {
 }
 
 export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.LoginByGenericService;
 	}

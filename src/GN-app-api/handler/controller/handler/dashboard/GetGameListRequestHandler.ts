@@ -12,8 +12,8 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { GameItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/GameItem";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
-
 class GetGameListOperationRequest extends OperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -22,6 +22,7 @@ class GetGameListOperationRequest extends OperationRequest {
 }
 
 export class GetGameListRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetGameList;
 	}

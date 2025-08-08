@@ -16,172 +16,174 @@ import { GroupCurrencyParam } from "./model/GroupCurrencyParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class SetGroupCurrenciesOperationRequest extends OperationRequest {
-    @StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-    groupId: string;
 
-    @GNArrayDataMember({ code: ParameterCode.GroupCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupCurrencyParam })
-    groupCurrencyParams: Array<GroupCurrencyParam>;
+	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+	public groupId: string;
 
-    @StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-    log?: string;
+	@GNArrayDataMember({ code: ParameterCode.GroupCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupCurrencyParam })
+	public groupCurrencyParams: Array<GroupCurrencyParam>;
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
+	public log?: string;
 
-        return true;
-    }
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerSetGroupCurrenciesOperationRequest extends SetGroupCurrenciesOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 class AdminSetGroupCurrenciesOperationRequest extends ServerSetGroupCurrenciesOperationRequest {
 
-    public override isValidRequest() {
-        if (!super.isValidRequest()) return false;
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
 
-        return true;
-    }
+		return true;
+	}
 }
 
 export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
-    public override getCode() {
-        return OperationCode.SetGroupCurrency;
-    }
 
-    public override getCommonOperationRequest() {
-        return SetGroupCurrenciesOperationRequest;
-    }
+	public override getCode() {
+		return OperationCode.SetGroupCurrency;
+	}
 
-    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+	public override getCommonOperationRequest() {
+		return SetGroupCurrenciesOperationRequest;
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.setGroupCurrency);
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        if (!allowMethod) {
-            return this.newOperationNotAllowError(request);
-        }
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.setGroupCurrency);
 
-        return this.execute({
-            groupId: request.groupId,
-            groupCurrencyParams: request.groupCurrencyParams
-        }, secretInfo, operationRequest);
-    }
+		if (!allowMethod) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetGroupCurrenciesOperationRequest);
+		return this.execute({
+			groupId: request.groupId,
+			groupCurrencyParams: request.groupCurrencyParams
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetGroupCurrenciesOperationRequest);
 
-        if (!secretInfo.getPermission().group.setGroupCurrency.serverSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            groupId: request.groupId,
-            groupCurrencyParams: request.groupCurrencyParams
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().group.setGroupCurrency.serverSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetGroupCurrenciesOperationRequest);
+		return this.execute({
+			groupId: request.groupId,
+			groupCurrencyParams: request.groupCurrencyParams
+		}, secretInfo, operationRequest);
+	}
 
-        if (!request.isValidRequest()) {
-            return this.newInvalidRequestParameters(request);
-        }
+	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetGroupCurrenciesOperationRequest);
 
-        if (!secretInfo.getPermission().group.setGroupCurrency.adminSelfEnable) {
-            return this.newOperationNotAllowError(request);
-        }
+		if (!request.isValidRequest()) {
+			return this.newInvalidRequestParameters(request);
+		}
 
-        return this.execute({
-            groupId: request.groupId,
-            groupCurrencyParams: request.groupCurrencyParams
-        }, secretInfo, operationRequest);
-    }
+		if (!secretInfo.getPermission().group.setGroupCurrency.adminSelfEnable) {
+			return this.newOperationNotAllowError(request);
+		}
 
-    private async execute(request: { groupId: string, groupCurrencyParams: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest);
-        if (operationResponse != null) {
-            return operationResponse;
-        }
+		return this.execute({
+			groupId: request.groupId,
+			groupCurrencyParams: request.groupCurrencyParams
+		}, secretInfo, operationRequest);
+	}
 
-        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-        operationResponse.setReturnCode(ReturnCode.Ok);
+	private async execute(request: { groupId: string, groupCurrencyParams: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest);
+		if (operationResponse != null) {
+			return operationResponse;
+		}
 
-        let groupFindOptions: GroupFindOptions = {
-            groupCurrencies: true,
-        }
+		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+		operationResponse.setReturnCode(ReturnCode.Ok);
 
-        let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
+		let groupFindOptions: GroupFindOptions = {
+			groupCurrencies: true,
+		}
 
-        if (group == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
-            return operationResponse;
-        }
+		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
-        let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+		if (group == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+			return operationResponse;
+		}
 
-        let gnInfoResponseParameters = new GNHashtable();
-        let gnGroupCurrencies = new GNArray();
+		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
-        for (let i = 0; i < request.groupCurrencyParams.length; i++) {
-            let groupCurrencyParam = request.groupCurrencyParams[i];
+		let gnInfoResponseParameters = new GNHashtable();
+		let gnGroupCurrencies = new GNArray();
 
-            let key = groupCurrencyParam.key;
+		for (let i = 0; i < request.groupCurrencyParams.length; i++) {
+			let groupCurrencyParam = request.groupCurrencyParams[i];
 
-            let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == key);
-            if (groupCurrencySettingsItem == null) continue;
+			let key = groupCurrencyParam.key;
 
-            let initialValue = groupCurrencySettingsItem.initialValue;
+			let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == key);
+			if (groupCurrencySettingsItem == null) continue;
 
-            let amount = groupCurrencyParam.amount;
-            let serverValue = 0;
+			let initialValue = groupCurrencySettingsItem.initialValue;
 
-            if (!group.hasGroupCurrency(key)) {
-                serverValue = initialValue;
-            }
-            else {
-                serverValue = group.getGroupCurrency(key).value;
-            }
+			let amount = groupCurrencyParam.amount;
+			let serverValue = 0;
 
-            serverValue += amount;
-            if (serverValue <= 0) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
-                return operationResponse;
-            }
+			if (!group.hasGroupCurrency(key)) {
+				serverValue = initialValue;
+			}
+			else {
+				serverValue = group.getGroupCurrency(key).value;
+			}
 
-            let gnGroupCurrency = new GNHashtable();
+			serverValue += amount;
+			if (serverValue <= 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
+				return operationResponse;
+			}
 
-            gnGroupCurrency.add(ParameterCode.Key, key);
-            gnGroupCurrency.add(ParameterCode.Value, serverValue);
+			let gnGroupCurrency = new GNHashtable();
 
-            gnGroupCurrencies.add(gnGroupCurrency);
+			gnGroupCurrency.add(ParameterCode.Key, key);
+			gnGroupCurrency.add(ParameterCode.Value, serverValue);
 
-            group.setGroupCurrency(key, serverValue);
-        }
+			gnGroupCurrencies.add(gnGroupCurrency);
 
-        group.saveAsync();
+			group.setGroupCurrency(key, serverValue);
+		}
 
-        gnInfoResponseParameters.add(ParameterCode.GroupCurrencies, gnGroupCurrencies);
+		group.saveAsync();
 
-        operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		gnInfoResponseParameters.add(ParameterCode.GroupCurrencies, gnGroupCurrencies);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest, operationResponse);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        return operationResponse;
-    }
+		await this.gnServer.getPostEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
 }

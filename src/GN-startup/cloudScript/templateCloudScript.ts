@@ -59,14 +59,14 @@ import {
 	GroupStatus,
 	GNDebug,
 	ItemType,
-    StoreItemType,
+	StoreItemType,
 	LogType,
 	GNSupport,
 	PostType,
-    GetAuthInfoResponse,
-    PushPlatformType,
-    StoreReceiveType,
-    GNUtils,
+	GetAuthInfoResponse,
+	PushPlatformType,
+	StoreReceiveType,
+	GNUtils,
 } from "@xmobitea/gn-typescript-client";
 
 import * as mongodb from "mongodb";
@@ -98,35 +98,35 @@ class CloudScriptAdmin {
 	public readonly multiplayer = GNNetwork.multiplayer.admin;
 	public readonly cloudScript = GNNetwork.cloudScript.admin;
 	public readonly dashboard = {
-        getAdminAccountList: GNNetwork.dashboard.getAdminAccountList,
-        getAdminAccountListAsync: GNNetwork.dashboard.getAdminAccountListAsync,
-        getGameInformation: GNNetwork.dashboard.getGameInformation,
-        getGameInformationAsync: GNNetwork.dashboard.getGameInformationAsync,
-        getGameList: GNNetwork.dashboard.getGameList,
-        getGameListAsync: GNNetwork.dashboard.getGameListAsync,
-        getMasterGameSettings: GNNetwork.dashboard.getMasterGameSettings,
-        getMasterGameSettingsAsync: GNNetwork.dashboard.getMasterGameSettingsAsync,
-        getSecretInfoInformation: GNNetwork.dashboard.getSecretInfoInformation,
-        getSecretInfoInformationAsync: GNNetwork.dashboard.getSecretInfoInformationAsync,
-        getSecretInfoList: GNNetwork.dashboard.getSecretInfoList,
-        getSecretInfoListAsync: GNNetwork.dashboard.getSecretInfoListAsync,
-        getServerLog: GNNetwork.dashboard.getServerLog,
-        getServerLogAsync: GNNetwork.dashboard.getServerLogAsync,
-        setGameInformation: GNNetwork.dashboard.setGameInformation,
-        setGameInformationAsync: GNNetwork.dashboard.setGameInformationAsync,
-        getUsernameAdminAccount: GNNetwork.dashboard.getUsernameAdminAccount,
-        getUsernameAdminAccountAsync: GNNetwork.dashboard.getUsernameAdminAccountAsync,
-        getAnalytics: GNNetwork.dashboard.getAnalytics,
-        getAnalyticsAsync: GNNetwork.dashboard.getAnalyticsAsync,
-        resetStatisticsLeaderboard: GNNetwork.dashboard.resetStatisticsLeaderboard,
-        resetStatisticsLeaderboardAsync: GNNetwork.dashboard.resetStatisticsLeaderboardAsync,
-        getBackupStatisticsLeaderboardVersion: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersion,
-        getBackupStatisticsLeaderboardVersionAsync: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersionAsync,
-        getServerGameData: GNNetwork.dashboard.getServerGameData,
-        getServerGameDataAsync: GNNetwork.dashboard.getServerGameDataAsync,
-        deleteInDatabase: GNNetwork.dashboard.deleteInDatabase,
-        deleteInDatabaseAsync: GNNetwork.dashboard.deleteInDatabaseAsync,
-    };
+		getAdminAccountList: GNNetwork.dashboard.getAdminAccountList,
+		getAdminAccountListAsync: GNNetwork.dashboard.getAdminAccountListAsync,
+		getGameInformation: GNNetwork.dashboard.getGameInformation,
+		getGameInformationAsync: GNNetwork.dashboard.getGameInformationAsync,
+		getGameList: GNNetwork.dashboard.getGameList,
+		getGameListAsync: GNNetwork.dashboard.getGameListAsync,
+		getMasterGameSettings: GNNetwork.dashboard.getMasterGameSettings,
+		getMasterGameSettingsAsync: GNNetwork.dashboard.getMasterGameSettingsAsync,
+		getSecretInfoInformation: GNNetwork.dashboard.getSecretInfoInformation,
+		getSecretInfoInformationAsync: GNNetwork.dashboard.getSecretInfoInformationAsync,
+		getSecretInfoList: GNNetwork.dashboard.getSecretInfoList,
+		getSecretInfoListAsync: GNNetwork.dashboard.getSecretInfoListAsync,
+		getServerLog: GNNetwork.dashboard.getServerLog,
+		getServerLogAsync: GNNetwork.dashboard.getServerLogAsync,
+		setGameInformation: GNNetwork.dashboard.setGameInformation,
+		setGameInformationAsync: GNNetwork.dashboard.setGameInformationAsync,
+		getUsernameAdminAccount: GNNetwork.dashboard.getUsernameAdminAccount,
+		getUsernameAdminAccountAsync: GNNetwork.dashboard.getUsernameAdminAccountAsync,
+		getAnalytics: GNNetwork.dashboard.getAnalytics,
+		getAnalyticsAsync: GNNetwork.dashboard.getAnalyticsAsync,
+		resetStatisticsLeaderboard: GNNetwork.dashboard.resetStatisticsLeaderboard,
+		resetStatisticsLeaderboardAsync: GNNetwork.dashboard.resetStatisticsLeaderboardAsync,
+		getBackupStatisticsLeaderboardVersion: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersion,
+		getBackupStatisticsLeaderboardVersionAsync: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersionAsync,
+		getServerGameData: GNNetwork.dashboard.getServerGameData,
+		getServerGameDataAsync: GNNetwork.dashboard.getServerGameDataAsync,
+		deleteInDatabase: GNNetwork.dashboard.deleteInDatabase,
+		deleteInDatabaseAsync: GNNetwork.dashboard.deleteInDatabaseAsync,
+	};
 	public send(
 		requestType: RequestType,
 		requestRole: RequestRole,
@@ -309,133 +309,133 @@ class CloudScriptSocket {
 
 	private async sendEvent(event: CloudScriptEvent) {
 		if (process?.send)
-            process.send(event);
+			process.send(event);
 	}
 }
 
 class CloudScriptMail {
 	public async send(email: string, subject: string, contentHtml: string) {
 		if (process?.send)
-            process.send({
-                eventType: 20,
-                receiver: null,
-                operationEvent: {
-                    eventCode: 0,
-                    parameters: {
-                        email: email,
-                        subject: subject,
-                        contentHtml: contentHtml,
-                    },
-                },
-            });
+			process.send({
+				eventType: 20,
+				receiver: null,
+				operationEvent: {
+					eventCode: 0,
+					parameters: {
+						email: email,
+						subject: subject,
+						contentHtml: contentHtml,
+					},
+				},
+			});
 	}
 
 	public async sendToMore(emails: string[], subject: string, contentHtml: string) {
-        if (process?.send)
-            process.send({
-                eventType: 21,
-                receiver: null,
-                operationEvent: {
-                    eventCode: 0,
-                    parameters: {
-                        emails: emails,
-                        subject: subject,
-                        contentHtml: contentHtml,
-                    },
-                },
-            });
+		if (process?.send)
+			process.send({
+				eventType: 21,
+				receiver: null,
+				operationEvent: {
+					eventCode: 0,
+					parameters: {
+						emails: emails,
+						subject: subject,
+						contentHtml: contentHtml,
+					},
+				},
+			});
 	}
 }
 
 class CloudScriptPushNotification {
 	public async send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
 		if (process?.send)
-            process.send({
-                eventType: 30,
-                receiver: null,
-                operationEvent: {
-                    eventCode: 0,
-                    parameters: {
-                        token: token,
-                        title: title,
-                        body: body,
-                        badge: badge,
-                        sound: sound,
-                        icon: icon,
-                        data: data,
-                    },
-                },
-            });
+			process.send({
+				eventType: 30,
+				receiver: null,
+				operationEvent: {
+					eventCode: 0,
+					parameters: {
+						token: token,
+						title: title,
+						body: body,
+						badge: badge,
+						sound: sound,
+						icon: icon,
+						data: data,
+					},
+				},
+			});
 	}
 
 	public async sendToMore(tokens: string[], title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
 		if (process?.send)
-            process.send({
-                eventType: 31,
-                receiver: null,
-                operationEvent: {
-                    eventCode: 0,
-                    parameters: {
-                        tokens: tokens,
-                        title: title,
-                        body: body,
-                        badge: badge,
-                        sound: sound,
-                        icon: icon,
-                        data: data,
-                    },
-                },
-            });
+			process.send({
+				eventType: 31,
+				receiver: null,
+				operationEvent: {
+					eventCode: 0,
+					parameters: {
+						tokens: tokens,
+						title: title,
+						body: body,
+						badge: badge,
+						sound: sound,
+						icon: icon,
+						data: data,
+					},
+				},
+			});
 	}
 
 	public async sendToTopic(topic: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
 		if (process?.send)
-            process.send({
-                eventType: 32,
-                receiver: null,
-                operationEvent: {
-                    eventCode: 0,
-                    parameters: {
-                        topic: topic,
-                        title: title,
-                        body: body,
-                        badge: badge,
-                        sound: sound,
-                        icon: icon,
-                        data: data,
-                    },
-                },
-            });
+			process.send({
+				eventType: 32,
+				receiver: null,
+				operationEvent: {
+					eventCode: 0,
+					parameters: {
+						topic: topic,
+						title: title,
+						body: body,
+						badge: badge,
+						sound: sound,
+						icon: icon,
+						data: data,
+					},
+				},
+			});
 	}
 
-    public async subscribeToTopic(tokens: string[], topic: string) {
+	public async subscribeToTopic(tokens: string[], topic: string) {
 		if (process?.send)
-            process.send({
-                eventType: 33,
-                receiver: null,
-                operationEvent: {
-                    eventCode: 0,
-                    parameters: {
-                        tokens: tokens,
-                        topic: topic,
-                    },
-                },
-            });
+			process.send({
+				eventType: 33,
+				receiver: null,
+				operationEvent: {
+					eventCode: 0,
+					parameters: {
+						tokens: tokens,
+						topic: topic,
+					},
+				},
+			});
 	}
 
-    public async unsubscribeFromTopic(tokens: string[], topic: string) {
+	public async unsubscribeFromTopic(tokens: string[], topic: string) {
 		if (process?.send)
-            process.send({
-                eventType: 34,
-                receiver: null,
-                operationEvent: {
-                    eventCode: 0,
-                    parameters: {
-                        tokens: tokens,
-                        topic: topic,
-                    },
-                },
-            });
+			process.send({
+				eventType: 34,
+				receiver: null,
+				operationEvent: {
+					eventCode: 0,
+					parameters: {
+						tokens: tokens,
+						topic: topic,
+					},
+				},
+			});
 	}
 }
 
@@ -531,82 +531,82 @@ const ConvertArray = (results: any[]) => {
 }
 
 process?.on("message", async (request: CloudScriptRequest) => {
-    let startTime = performance.now();
-    let startMemoryUsage = process.memoryUsage();
+	let startTime = performance.now();
+	let startMemoryUsage = process.memoryUsage();
 
-    let logs: string[] = [];
-    let functionRequest: FunctionRequest = {
-        userId: request.userId,
-        name: request.name,
-        parameters: request.parameters,
-        context: {},
-        customTags: request.customTags,
-        log(log: any) {
-            logs.push(JSON.stringify(log));
-        },
-    };
+	let logs: string[] = [];
+	let functionRequest: FunctionRequest = {
+		userId: request.userId,
+		name: request.name,
+		parameters: request.parameters,
+		context: {},
+		customTags: request.customTags,
+		log(log: any) {
+			logs.push(JSON.stringify(log));
+		},
+	};
 
-    let handleResponse = await ___handleFunction(functionRequest);
+	let handleResponse = await ___handleFunction(functionRequest);
 
-    if (handleResponse.result) {
-        if (handleResponse.result instanceof GNHashtable) {
-            handleResponse.result = (<GNHashtable>handleResponse.result).toData();
-        }
-        else if (handleResponse.result instanceof GNArray) {
-            handleResponse.result = (<GNArray>handleResponse.result).toData();
-        }
-        else {
-            let typeofResult = typeof (handleResponse.result);
+	if (handleResponse.result) {
+		if (handleResponse.result instanceof GNHashtable) {
+			handleResponse.result = (<GNHashtable>handleResponse.result).toData();
+		}
+		else if (handleResponse.result instanceof GNArray) {
+			handleResponse.result = (<GNArray>handleResponse.result).toData();
+		}
+		else {
+			let typeofResult = typeof (handleResponse.result);
 
-            if (typeofResult == "boolean") {
+			if (typeofResult == "boolean") {
 
-            }
-            else if (typeofResult == "number") {
+			}
+			else if (typeofResult == "number") {
 
-            }
-            else if (typeofResult == "object") {
-                if (Array.isArray(handleResponse.result)) {
+			}
+			else if (typeofResult == "object") {
+				if (Array.isArray(handleResponse.result)) {
 
-                    handleResponse.result = ConvertArray(handleResponse.result as any[]);
-                    //answer.push(this.deserializeArray(gnArray.getGNArray(i), cls));
-                }
-                else {
-                    handleResponse.result = ConvertObject(handleResponse.result);
-                }
-            }
-            else if (typeofResult == "string") {
+					handleResponse.result = ConvertArray(handleResponse.result as any[]);
+					//answer.push(this.deserializeArray(gnArray.getGNArray(i), cls));
+				}
+				else {
+					handleResponse.result = ConvertObject(handleResponse.result);
+				}
+			}
+			else if (typeofResult == "string") {
 
-            }
-            else {
-                handleResponse.result = null;
+			}
+			else {
+				handleResponse.result = null;
 
-                handleResponse.errorMessage = "CloudScript must return void, number, string, boolean, null, json dictionary, json array, GNHashtable or GNArray";
-                handleResponse.status = ExecuteResponseStatus.Exception;
-            }
-        }
-    }
+				handleResponse.errorMessage = "CloudScript must return void, number, string, boolean, null, json dictionary, json array, GNHashtable or GNArray";
+				handleResponse.status = ExecuteResponseStatus.Exception;
+			}
+		}
+	}
 
-    let endTime = performance.now();
-    let endMemoryUsage = process.memoryUsage();
+	let endTime = performance.now();
+	let endMemoryUsage = process.memoryUsage();
 
-    let memoryUsedInBytes = endMemoryUsage.heapUsed - startMemoryUsage.heapUsed;
-    if (memoryUsedInBytes <= 0) memoryUsedInBytes = 8192;
-    let executeTimeInMs = endTime - startTime;
+	let memoryUsedInBytes = endMemoryUsage.heapUsed - startMemoryUsage.heapUsed;
+	if (memoryUsedInBytes <= 0) memoryUsedInBytes = 8192;
+	let executeTimeInMs = endTime - startTime;
 
-    //let cost = (memoryUsedInGb * executeTime) / 1000 * 0.022;
+	//let cost = (memoryUsedInGb * executeTime) / 1000 * 0.022;
 
-    let response: CloudScriptResponse = {
-        responseId: request.requestId,
-        response: handleResponse,
-        stats: {
-            executeTimeInMs: executeTimeInMs,
-            memoryUsedInBytes: memoryUsedInBytes,
-        },
-        logs: logs,
-    };
+	let response: CloudScriptResponse = {
+		responseId: request.requestId,
+		response: handleResponse,
+		stats: {
+			executeTimeInMs: executeTimeInMs,
+			memoryUsedInBytes: memoryUsedInBytes,
+		},
+		logs: logs,
+	};
 
-    if (process?.send)
-        process.send(response);
+	if (process?.send)
+		process.send(response);
 });
 
 async function ___handleFunction(request: FunctionRequest): Promise<FunctionResponse> {

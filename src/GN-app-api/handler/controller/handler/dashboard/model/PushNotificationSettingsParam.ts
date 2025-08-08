@@ -2,13 +2,14 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class PushNotificationSettingsParam {
+
 	@StringDataMember({ code: ParameterCode.ProjectId })
-	projectId: string;
+	public projectId: string;
 
 	@StringDataMember({ code: ParameterCode.ClientEmail })
-	clientEmail: string;
+	public clientEmail: string;
 
 	@StringDataMember({ code: ParameterCode.PrivateKey })
-	privateKey: string;
+	public privateKey: string;
 
 }

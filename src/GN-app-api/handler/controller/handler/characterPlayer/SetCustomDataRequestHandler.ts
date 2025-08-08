@@ -17,11 +17,12 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 class SetCustomDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
-	customData: Array<CustomDataParam>;
+	public customData: Array<CustomDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -40,6 +41,7 @@ class ServerSetCustomDataOperationRequest extends SetCustomDataOperationRequest 
 }
 
 class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +50,7 @@ class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationReq
 }
 
 export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetCustomData;
 	}

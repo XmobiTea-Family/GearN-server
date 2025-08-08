@@ -17,11 +17,12 @@ import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNam
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 class CreateStoreItemOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true, isOptional: true })
-	storeId?: string;
+	public storeId?: string;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-	displayName?: string;
+	public displayName?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -49,6 +50,7 @@ class AdminCreateStoreItemOperationRequest extends ServerCreateStoreItemOperatio
 }
 
 export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.CreateStoreItem;
 	}

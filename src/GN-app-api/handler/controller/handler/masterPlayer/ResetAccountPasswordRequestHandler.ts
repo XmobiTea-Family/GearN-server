@@ -16,11 +16,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class ResetAccountPasswordOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
-	password: string;
+	public password: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -30,8 +31,9 @@ class ResetAccountPasswordOperationRequest extends OperationRequest {
 }
 
 class ServerResetAccountPasswordOperationRequest extends ResetAccountPasswordOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -41,6 +43,7 @@ class ServerResetAccountPasswordOperationRequest extends ResetAccountPasswordOpe
 }
 
 class AdminResetAccountPasswordOperationRequest extends ServerResetAccountPasswordOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,6 +52,7 @@ class AdminResetAccountPasswordOperationRequest extends ServerResetAccountPasswo
 }
 
 export class ResetAccountPasswordRequestHandler extends MasterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.ResetAccountPassword;
 	}

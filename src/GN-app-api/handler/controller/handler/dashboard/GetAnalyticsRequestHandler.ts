@@ -14,32 +14,33 @@ import { GNArray, GNHashtable, GNHashtableBuilder } from "./../../../../../GN-co
 import { BooleanDataMember, NumberDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 class GetAnalyticsOperationRequest extends OperationRequest {
+
 	@NumberDataMember({ code: ParameterCode.Timestamp, minValue: 0, isOptional: true })
-	timestamp?: number;
+	public timestamp?: number;
 
 	@BooleanDataMember({ code: ParameterCode.AnalyticsItem, isOptional: true })
-	analyticsItem?: boolean;
+	public analyticsItem?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.Country, isOptional: true })
-	country?: boolean;
+	public country?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.RequestComplete, isOptional: true })
-	requestComplete?: boolean;
+	public requestComplete?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.OperationSystem, isOptional: true })
-	operationSystem?: boolean;
+	public operationSystem?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.DatabaseSystem, isOptional: true })
-	databaseSystem?: boolean;
+	public databaseSystem?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.LogDatabaseSystem, isOptional: true })
-	logDatabaseSystem?: boolean;
+	public logDatabaseSystem?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.Cost, isOptional: true })
-	cost?: boolean;
+	public cost?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.MonthlyCost, isOptional: true })
-	monthlyCost?: boolean;
+	public monthlyCost?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -60,6 +61,7 @@ export interface AnalyticsRequestParams {
 }
 
 export class GetAnalyticsRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetAnalytics;
 	}

@@ -7,21 +7,23 @@ import { StatisticsSettingsParam } from "./StatisticsSettingsParam";
 import { TagSettingsParam } from "./TagSettingsParam";
 
 export class GroupSettingsParam {
+
 	@GNArrayDataMember({ code: ParameterCode.CurrencySettings, elementCls: CurrencySettingsParam, isOptional: true })
-	groupCurrencySettings?: Array<CurrencySettingsParam>;
+	public groupCurrencySettings?: Array<CurrencySettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.StatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true })
-	groupStatisticsSettings?: Array<StatisticsSettingsParam>;
+	public groupStatisticsSettings?: Array<StatisticsSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.DatasSettings, elementCls: DataSettingsParam, isOptional: true })
-	groupDatasSettings?: Array<DataSettingsParam>;
+	public groupDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatasSettings, elementCls: DataSettingsParam, isOptional: true })
-	customDatasSettings?: Array<DataSettingsParam>;
+	public customDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.TagsSettings, elementCls: TagSettingsParam, isOptional: true })
-	tagsSettings?: Array<TagSettingsParam>;
+	public tagsSettings?: Array<TagSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.ItemCatalogSettings, elementCls: ItemCatalogSettingsParam, isOptional: true })
-	groupItemCatalogSettings?: Array<ItemCatalogSettingsParam>;
+	public groupItemCatalogSettings?: Array<ItemCatalogSettingsParam>;
+
 }

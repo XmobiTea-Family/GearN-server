@@ -15,11 +15,12 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class RemoveTagOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	groupId: string;
+	public groupId: string;
 
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-	key: string;
+	public key: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -38,6 +39,7 @@ class ServerRemoveTagOperationRequest extends RemoveTagOperationRequest {
 }
 
 class AdminRemoveTagOperationRequest extends ServerRemoveTagOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +48,7 @@ class AdminRemoveTagOperationRequest extends ServerRemoveTagOperationRequest {
 }
 
 export class RemoveTagRequestHandler extends GroupBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.RemoveTag;
 	}

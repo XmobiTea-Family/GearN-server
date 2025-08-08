@@ -15,32 +15,33 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { GNServer } from "./../../../../../GNServer";
 
 class GetServerGameDataOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
-	gameId: string;
+	public gameId: string;
 
 	@BooleanDataMember({ code: ParameterCode.MasterPlayerCount, isOptional: true })
-	masterPlayerCount?: boolean;
+	public masterPlayerCount?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.GamePlayerCount, isOptional: true })
-	gamePlayerCount?: boolean;
+	public gamePlayerCount?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.CharacterPlayerCount, isOptional: true })
-	characterPlayerCount?: boolean;
+	public characterPlayerCount?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.InventoryCount, isOptional: true })
-	inventoryCount?: boolean;
+	public inventoryCount?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.StoreInventoryCount, isOptional: true })
-	storeInventoryCount?: boolean;
+	public storeInventoryCount?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.GroupCount, isOptional: true })
-	groupCount?: boolean;
+	public groupCount?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.Country, isOptional: true })
-	country?: boolean;
+	public country?: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.Version, isOptional: true })
-	version?: boolean;
+	public version?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -62,6 +63,7 @@ export interface ServerGameDataRequestParams {
 }
 
 export class GetServerGameDataRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetServerGameData;
 	}

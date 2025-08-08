@@ -16,8 +16,9 @@ import { GNArray, GNHashtable, GNHashtableBuilder } from "./../../../../../GN-co
 import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleExpansionType, RuleType, SetIntersectionRule, StringRule, TeamDifferenceRule, TeamSizeBalanceRule, TeamTicketSizeSimilarityRule } from "./../../../../../GN-library/xsettings/lib/entity/xMatchmakingQueueSettings";
 
 class GetGameInformationOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
-	gameId: string;
+	public gameId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -27,6 +28,7 @@ class GetGameInformationOperationRequest extends OperationRequest {
 }
 
 export class GetGameInformationRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.GetGameInformation;
 	}

@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class SetDisplayNameOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	characterId: string;
+	public characterId: string;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, minLength: 5, maxLength: 32, mustNonNull: true })
-	displayName: string;
+	public displayName: string;
 
 	@BooleanDataMember({ code: ParameterCode.UniqueDisplayName, defaultValue: false, isOptional: true })
-	uniqueDisplayName?: boolean;
+	public uniqueDisplayName?: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -41,6 +42,7 @@ class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationReques
 }
 
 class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,6 +51,7 @@ class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationR
 }
 
 export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetDisplayName;
 	}

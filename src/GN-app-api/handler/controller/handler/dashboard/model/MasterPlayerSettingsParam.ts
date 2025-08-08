@@ -8,21 +8,21 @@ import { TagSettingsParam } from "./TagSettingsParam";
 
 export class MasterPlayerSettingsParam {
 	@GNArrayDataMember({ code: ParameterCode.GenericServiceSettings, elementCls: GenericServiceSettingsParam, isOptional: true, })
-	genericServiceSettings?: Array<GenericServiceSettingsParam>;
+	public genericServiceSettings?: Array<GenericServiceSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.CurrencySettings, elementCls: CurrencySettingsParam, isOptional: true, })
-	playerCurrencySettings?: Array<CurrencySettingsParam>;
+	public playerCurrencySettings?: Array<CurrencySettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.StatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true, })
-	playerStatisticsSettings?: Array<StatisticsSettingsParam>;
+	public playerStatisticsSettings?: Array<StatisticsSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.DatasSettings, elementCls: DataSettingsParam, isOptional: true, })
-	playerDatasSettings?: Array<DataSettingsParam>;
+	public playerDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatasSettings, elementCls: DataSettingsParam, isOptional: true, })
-	customDatasSettings?: Array<DataSettingsParam>;
+	public customDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.TagsSettings, elementCls: TagSettingsParam, isOptional: true, })
-	tagsSettings?: Array<TagSettingsParam>;
+	public tagsSettings?: Array<TagSettingsParam>;
 
 }

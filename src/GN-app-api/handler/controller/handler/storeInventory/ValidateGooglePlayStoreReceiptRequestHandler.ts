@@ -21,17 +21,18 @@ import { StoreReceiveType } from "./../../../../../GN-common/constant/enumType/S
 import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
 
 class ValidateGooglePlayStoreReceiptOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Receipt, minLength: 10, maxLength: 2048, mustNonNull: true })
-	receipt: string;
+	public receipt: string;
 
 	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
-	id: string;
+	public id: string;
 
 	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
-	type: number;
+	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
-	log?: string;
+	public log?: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -59,6 +60,7 @@ class AdminValidateGooglePlayStoreReceiptOperationRequest extends ServerValidate
 }
 
 export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.ValidateGooglePlayStoreReceipt;
 	}

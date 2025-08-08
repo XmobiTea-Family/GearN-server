@@ -15,14 +15,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class SetPlayerBanOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	userId?: string;
+	public userId?: string;
 
 	@NumberDataMember({ code: ParameterCode.TsExpire })
-	tsExpire: number;
+	public tsExpire: number;
 
 	@StringDataMember({ code: ParameterCode.Reason })
-	reason: string;
+	public reason: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -32,8 +33,9 @@ class SetPlayerBanOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
+
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	declare userId: string;
+	public declare userId: string;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -43,6 +45,7 @@ class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 }
 
 class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationRequest {
+
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,6 +54,7 @@ class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationReque
 }
 
 export class SetPlayerBanRequestHandler extends GamePlayerBaseRequestHandler {
+
 	public override getCode() {
 		return OperationCode.SetPlayerBan;
 	}

@@ -13,14 +13,15 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class AddFunctionOperationRequest extends OperationRequest {
+
 	@StringDataMember({ code: ParameterCode.Script, minLength: 0, maxLength: Number.MAX_SAFE_INTEGER, mustNonNull: true })
-	script: string;
+	public script: string;
 
 	@BooleanDataMember({ code: ParameterCode.CanExecute })
-	canExecute: boolean;
+	public canExecute: boolean;
 
 	@BooleanDataMember({ code: ParameterCode.IsLive })
-	isLive: boolean;
+	public isLive: boolean;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -48,6 +49,7 @@ class AdminAddFunctionOperationRequest extends ServerAddFunctionOperationRequest
 }
 
 export class AddFunctionRequestHandler extends RequestHandler {
+
 	public override getCode() {
 		return OperationCode.AddFunction;
 	}
