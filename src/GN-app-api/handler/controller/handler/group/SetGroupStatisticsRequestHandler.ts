@@ -23,7 +23,7 @@ class SetGroupStatisticsOperationRequest extends OperationRequest {
 	public groupId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GroupStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupStatisticsParam })
-	public groupStatisticsParams: Array<GroupStatisticsParam>;
+	public groupStatistics: Array<GroupStatisticsParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
@@ -78,7 +78,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupStatisticsParams: request.groupStatisticsParams,
+			groupStatistics: request.groupStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
@@ -96,7 +96,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupStatisticsParams: request.groupStatisticsParams,
+			groupStatistics: request.groupStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
@@ -114,12 +114,12 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupStatisticsParams: request.groupStatisticsParams,
+			groupStatistics: request.groupStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { groupId: string, groupStatisticsParams: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, groupStatistics: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -146,8 +146,8 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		for (let i = 0; i < request.groupStatisticsParams.length; i++) {
-			let groupStatisticsParam = request.groupStatisticsParams[i];
+		for (let i = 0; i < request.groupStatistics.length; i++) {
+			let groupStatisticsParam = request.groupStatistics[i];
 
 			let key = groupStatisticsParam.key;
 

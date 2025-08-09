@@ -23,7 +23,7 @@ class SetGroupDataOperationRequest extends OperationRequest {
 	public groupId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GroupDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupDataParam })
-	public groupDataParams: Array<GroupDataParam>;
+	public groupDatas: Array<GroupDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -75,7 +75,7 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupDataParams: request.groupDataParams
+			groupDatas: request.groupDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -92,7 +92,7 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupDataParams: request.groupDataParams
+			groupDatas: request.groupDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -109,11 +109,11 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupDataParams: request.groupDataParams
+			groupDatas: request.groupDatas
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { groupId: string, groupDataParams: Array<GroupDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, groupDatas: Array<GroupDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -138,8 +138,8 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnGroupDatas = new GNArray();
 
-		for (let i = 0; i < request.groupDataParams.length; i++) {
-			let groupDataParam = request.groupDataParams[i];
+		for (let i = 0; i < request.groupDatas.length; i++) {
+			let groupDataParam = request.groupDatas[i];
 
 			let key = groupDataParam.key;
 			let groupDatasSettingsItem = groupSettings.groupDatasSettings.find(x => x.key == key);

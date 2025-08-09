@@ -15,13 +15,13 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupCurrencyParam } from "./model/GroupCurrencyParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
-class SetGroupCurrenciesOperationRequest extends OperationRequest {
+class SetGroupCurrencyOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public groupId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.GroupCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupCurrencyParam })
-	public groupCurrencyParams: Array<GroupCurrencyParam>;
+	public groupCurrencies: Array<GroupCurrencyParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
@@ -33,7 +33,7 @@ class SetGroupCurrenciesOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetGroupCurrenciesOperationRequest extends SetGroupCurrenciesOperationRequest {
+class ServerSetGroupCurrencyOperationRequest extends SetGroupCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -42,7 +42,7 @@ class ServerSetGroupCurrenciesOperationRequest extends SetGroupCurrenciesOperati
 	}
 }
 
-class AdminSetGroupCurrenciesOperationRequest extends ServerSetGroupCurrenciesOperationRequest {
+class AdminSetGroupCurrencyOperationRequest extends ServerSetGroupCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -58,7 +58,7 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 	}
 
 	public override getCommonOperationRequest() {
-		return SetGroupCurrenciesOperationRequest;
+		return SetGroupCurrencyOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -76,12 +76,12 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupCurrencyParams: request.groupCurrencyParams
+			groupCurrencies: request.groupCurrencies
 		}, secretInfo, operationRequest);
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetGroupCurrenciesOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetGroupCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -93,12 +93,12 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupCurrencyParams: request.groupCurrencyParams
+			groupCurrencies: request.groupCurrencies
 		}, secretInfo, operationRequest);
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetGroupCurrenciesOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetGroupCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -110,11 +110,11 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupCurrencyParams: request.groupCurrencyParams
+			groupCurrencies: request.groupCurrencies
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { groupId: string, groupCurrencyParams: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -139,8 +139,8 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnGroupCurrencies = new GNArray();
 
-		for (let i = 0; i < request.groupCurrencyParams.length; i++) {
-			let groupCurrencyParam = request.groupCurrencyParams[i];
+		for (let i = 0; i < request.groupCurrencies.length; i++) {
+			let groupCurrencyParam = request.groupCurrencies[i];
 
 			let key = groupCurrencyParam.key;
 
