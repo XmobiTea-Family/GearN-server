@@ -23,7 +23,7 @@ class SetPlayerStatisticsOperationRequest extends OperationRequest {
 	public userId?: string;
 
 	@GNArrayDataMember({ code: ParameterCode.PlayerStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerStatisticsParam })
-	public playerStatisticsParams: Array<PlayerStatisticsParam>;
+	public playerStatistics: Array<PlayerStatisticsParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
@@ -93,7 +93,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 
 		return this.execute({
 			userId: request.userId,
-			playerStatisticsParams: request.playerStatisticsParams,
+			playerStatistics: request.playerStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
@@ -111,7 +111,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 
 		return this.execute({
 			userId: request.userId,
-			playerStatisticsParams: request.playerStatisticsParams,
+			playerStatistics: request.playerStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
@@ -129,12 +129,12 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 
 		return this.execute({
 			userId: request.userId,
-			playerStatisticsParams: request.playerStatisticsParams,
+			playerStatistics: request.playerStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, playerStatistics: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_SetPlayerStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -161,8 +161,8 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		for (let i = 0; i < request.playerStatisticsParams.length; i++) {
-			let playerStatisticsParam = request.playerStatisticsParams[i];
+		for (let i = 0; i < request.playerStatistics.length; i++) {
+			let playerStatisticsParam = request.playerStatistics[i];
 
 			let key = playerStatisticsParam.key;
 
