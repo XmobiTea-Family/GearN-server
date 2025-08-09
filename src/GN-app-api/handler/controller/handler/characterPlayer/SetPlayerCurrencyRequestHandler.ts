@@ -15,7 +15,7 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { PlayerCurrencyParam } from "./model/PlayerCurrencyParam";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
-class SetPlayerCurrenciesOperationRequest extends OperationRequest {
+class SetPlayerCurrencyOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
@@ -33,7 +33,7 @@ class SetPlayerCurrenciesOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetPlayerCurrenciesOperationRequest extends SetPlayerCurrenciesOperationRequest {
+class ServerSetPlayerCurrencyOperationRequest extends SetPlayerCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -42,7 +42,7 @@ class ServerSetPlayerCurrenciesOperationRequest extends SetPlayerCurrenciesOpera
 	}
 }
 
-class AdminSetPlayerCurrenciesOperationRequest extends ServerSetPlayerCurrenciesOperationRequest {
+class AdminSetPlayerCurrencyOperationRequest extends ServerSetPlayerCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -58,7 +58,7 @@ export class SetPlayerCurrencyRequestHandler extends CharacterPlayerBaseRequestH
 	}
 
 	public override getCommonOperationRequest() {
-		return SetPlayerCurrenciesOperationRequest;
+		return SetPlayerCurrencyOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -82,7 +82,7 @@ export class SetPlayerCurrencyRequestHandler extends CharacterPlayerBaseRequestH
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerCurrenciesOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -100,7 +100,7 @@ export class SetPlayerCurrencyRequestHandler extends CharacterPlayerBaseRequestH
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerCurrenciesOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
