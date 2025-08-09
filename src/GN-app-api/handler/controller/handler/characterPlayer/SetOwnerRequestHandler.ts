@@ -20,7 +20,7 @@ class SetOwnerOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
-	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 10, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.NewOwnerId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public newOwnerId: string;
 
 	public override isValidRequest() {

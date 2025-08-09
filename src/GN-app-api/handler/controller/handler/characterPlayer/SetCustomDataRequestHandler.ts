@@ -22,7 +22,7 @@ class SetCustomDataOperationRequest extends OperationRequest {
 	public characterId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
-	public customData: Array<CustomDataParam>;
+	public customDatas: Array<CustomDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -74,7 +74,7 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 		return this.execute({
 			characterId: request.characterId,
-			customDataParameters: request.customData
+			customDatas: request.customDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -91,7 +91,7 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 		return this.execute({
 			characterId: request.characterId,
-			customDataParameters: request.customData
+			customDatas: request.customDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -108,11 +108,11 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 		return this.execute({
 			characterId: request.characterId,
-			customDataParameters: request.customData
+			customDatas: request.customDatas
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { characterId: string, customDataParameters: Array<CustomDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { characterId: string, customDatas: Array<CustomDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetCustomData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -137,9 +137,9 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnCustomDatas = new GNArray();
 
-		for (let i = 0; i < request.customDataParameters.length; i++) {
+		for (let i = 0; i < request.customDatas.length; i++) {
 
-			let customDataParameter = request.customDataParameters[i];
+			let customDataParameter = request.customDatas[i];
 
 			let key = customDataParameter.key;
 

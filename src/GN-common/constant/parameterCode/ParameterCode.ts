@@ -116,6 +116,7 @@ export class ParameterCode {
 	public static readonly GroupStatistics: string = "groupStatistics";
 	public static readonly Members: string = "members";
 	public static readonly OwnerId: string = "ownerId";
+	public static readonly NewOwnerId: string = "newOwnerId";
 	public static readonly OwnerType: string = "ownerType";
 	public static readonly Keys: string = "keys";
 	public static readonly Label: string = "label";

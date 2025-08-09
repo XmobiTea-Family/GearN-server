@@ -23,7 +23,7 @@ class SetPlayerDataOperationRequest extends OperationRequest {
 	public characterId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.PlayerDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerDataParam })
-	public playerDataParams: Array<PlayerDataParam>;
+	public playerDatas: Array<PlayerDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -75,7 +75,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 		return this.execute({
 			characterId: request.characterId,
-			playerDataParams: request.playerDataParams
+			playerDatas: request.playerDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -92,7 +92,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 		return this.execute({
 			characterId: request.characterId,
-			playerDataParams: request.playerDataParams
+			playerDatas: request.playerDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -109,11 +109,11 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 		return this.execute({
 			characterId: request.characterId,
-			playerDataParams: request.playerDataParams
+			playerDatas: request.playerDatas
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { characterId: string, playerDataParams: Array<PlayerDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { characterId: string, playerDatas: Array<PlayerDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetPlayerData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -138,8 +138,8 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnPlayerDatas = new GNArray();
 
-		for (let i = 0; i < request.playerDataParams.length; i++) {
-			let playerDataParam = request.playerDataParams[i];
+		for (let i = 0; i < request.playerDatas.length; i++) {
+			let playerDataParam = request.playerDatas[i];
 
 			let key = playerDataParam.key;
 			let playerDatasSettingsItem = characterPlayerSettings.playerDatasSettings.find(x => x.key == key);
