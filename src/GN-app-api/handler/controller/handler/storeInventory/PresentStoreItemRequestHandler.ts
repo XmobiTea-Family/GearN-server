@@ -22,10 +22,10 @@ class PresentStoreItemOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
 	public storeId: string;
 
-	@StringDataMember({ code: ParameterCode.OwnerId, minLength: 10, maxLength: 11, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Id, minLength: 10, maxLength: 11, mustNonNull: true })
 	public id: string;
 
-	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
+	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
 	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })

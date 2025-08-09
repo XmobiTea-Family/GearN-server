@@ -29,28 +29,28 @@ class SetStoreItemInformationOperationRequest extends OperationRequest {
 	public storeItemType?: number;
 
 	@GNArrayDataMember({ code: ParameterCode.StoreDatas, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreDataParam })
-	public storeDataParams?: Array<StoreDataParam>;
+	public storeDatas?: Array<StoreDataParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.StoreItems, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: StoreItemParam })
-	public storeItemParams?: Array<StoreItemParam>;
+	public storeItems?: Array<StoreItemParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.StoreCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
-	public storeCurrencyParams?: Array<CurrencyParam>;
+	public storeCurrencies?: Array<CurrencyParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.PriceCurrencies, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: CurrencyParam })
-	public priceCurrencyParams?: Array<CurrencyParam>;
+	public priceCurrencies?: Array<CurrencyParam>;
 
 	@GNHashtableDataMember({ code: ParameterCode.InAppPurchase, mustNonNull: true, isOptional: true, })
-	public inAppPurchaseParam?: InAppPurchaseParam;
+	public inAppPurchase?: InAppPurchaseParam;
 
 	@StringDataMember({ code: ParameterCode.DisplayName, mustNonNull: true, isOptional: true, })
 	public displayName?: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.Avatar, mustNonNull: true, isOptional: true, })
-	public avatarParam?: AvatarParam;
+	public avatar?: AvatarParam;
 
 	@GNArrayDataMember({ code: ParameterCode.Tags, minLength: 0, maxLength: 32, mustNonNull: true, isOptional: true, elementCls: TagParam })
-	public tagParams?: Array<TagParam>;
+	public tags?: Array<TagParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -101,14 +101,14 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		return this.execute({
 			storeId: request.storeId,
 			storeItemType: request.storeItemType,
-			storeDataParams: request.storeDataParams,
-			storeItemParams: request.storeItemParams,
-			storeCurrencyParams: request.storeCurrencyParams,
-			priceCurrencyParams: request.priceCurrencyParams,
-			inAppPurchaseParam: request.inAppPurchaseParam,
+			storeDatas: request.storeDatas,
+			storeItems: request.storeItems,
+			storeCurrencies: request.storeCurrencies,
+			priceCurrencies: request.priceCurrencies,
+			inAppPurchase: request.inAppPurchase,
 			displayName: request.displayName,
-			avatarParam: request.avatarParam,
-			tagParams: request.tagParams,
+			avatar: request.avatar,
+			tags: request.tags,
 		}, secretInfo, operationRequest);
 	}
 
@@ -126,14 +126,14 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		return this.execute({
 			storeId: request.storeId,
 			storeItemType: request.storeItemType,
-			storeDataParams: request.storeDataParams,
-			storeItemParams: request.storeItemParams,
-			storeCurrencyParams: request.storeCurrencyParams,
-			priceCurrencyParams: request.priceCurrencyParams,
-			inAppPurchaseParam: request.inAppPurchaseParam,
+			storeDatas: request.storeDatas,
+			storeItems: request.storeItems,
+			storeCurrencies: request.storeCurrencies,
+			priceCurrencies: request.priceCurrencies,
+			inAppPurchase: request.inAppPurchase,
 			displayName: request.displayName,
-			avatarParam: request.avatarParam,
-			tagParams: request.tagParams,
+			avatar: request.avatar,
+			tags: request.tags,
 		}, secretInfo, operationRequest);
 	}
 
@@ -151,18 +151,18 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		return this.execute({
 			storeId: request.storeId,
 			storeItemType: request.storeItemType,
-			storeDataParams: request.storeDataParams,
-			storeItemParams: request.storeItemParams,
-			storeCurrencyParams: request.storeCurrencyParams,
-			priceCurrencyParams: request.priceCurrencyParams,
-			inAppPurchaseParam: request.inAppPurchaseParam,
+			storeDatas: request.storeDatas,
+			storeItems: request.storeItems,
+			storeCurrencies: request.storeCurrencies,
+			priceCurrencies: request.priceCurrencies,
+			inAppPurchase: request.inAppPurchase,
 			displayName: request.displayName,
-			avatarParam: request.avatarParam,
-			tagParams: request.tagParams,
+			avatar: request.avatar,
+			tags: request.tags,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { storeId: string, storeItemType: number, storeDataParams: Array<StoreDataParam>, storeItemParams: Array<StoreItemParam>, storeCurrencyParams: Array<CurrencyParam>, priceCurrencyParams: Array<CurrencyParam>, inAppPurchaseParam: InAppPurchaseParam, displayName: string, avatarParam: AvatarParam, tagParams: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { storeId: string, storeItemType: number, storeDatas: Array<StoreDataParam>, storeItems: Array<StoreItemParam>, storeCurrencies: Array<CurrencyParam>, priceCurrencies: Array<CurrencyParam>, inAppPurchase: InAppPurchaseParam, displayName: string, avatar: AvatarParam, tags: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -178,10 +178,10 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			return operationResponse;
 		}
 
-		if (request.storeDataParams) {
+		if (request.storeDatas) {
 			storeInventory.clearStoreDatas();
-			for (let i = 0; i < request.storeDataParams.length; i++) {
-				let storeDataParam = request.storeDataParams[i];
+			for (let i = 0; i < request.storeDatas.length; i++) {
+				let storeDataParam = request.storeDatas[i];
 
 				let value = storeDataParam.value;
 
@@ -193,38 +193,38 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			}
 		}
 
-		if (request.storeItemParams != null) {
+		if (request.storeItems != null) {
 			storeInventory.clearStoreItems();
-			for (let i = 0; i < request.storeItemParams.length; i++) {
-				let storeItemParam = request.storeItemParams[i];
+			for (let i = 0; i < request.storeItems.length; i++) {
+				let storeItemParam = request.storeItems[i];
 				storeInventory.setStoreItem(storeItemParam.catalogId, storeItemParam.classId, storeItemParam.amount);
 			}
 		}
 
-		if (request.storeCurrencyParams != null) {
+		if (request.storeCurrencies != null) {
 			storeInventory.clearStoreCurrencies();
-			for (let i = 0; i < request.storeCurrencyParams.length; i++) {
-				let storeCurrencyParam = request.storeCurrencyParams[i];
+			for (let i = 0; i < request.storeCurrencies.length; i++) {
+				let storeCurrencyParam = request.storeCurrencies[i];
 				storeInventory.setStoreCurrency(storeCurrencyParam.key, storeCurrencyParam.value);
 			}
 		}
 
-		if (request.priceCurrencyParams != null) {
+		if (request.priceCurrencies != null) {
 			storeInventory.clearPriceCurrencies();
-			for (let i = 0; i < request.priceCurrencyParams.length; i++) {
-				let priceCurrencyParam = request.priceCurrencyParams[i];
+			for (let i = 0; i < request.priceCurrencies.length; i++) {
+				let priceCurrencyParam = request.priceCurrencies[i];
 				storeInventory.setPriceCurrency(priceCurrencyParam.key, priceCurrencyParam.value);
 			}
 		}
 
-		if (request.inAppPurchaseParam != null) {
+		if (request.inAppPurchase != null) {
 			let inAppPurchase = storeInventory.getInAppPurchase();
 
 			storeInventory.setInAppPurchase({
-				appleAppStoreId: request.inAppPurchaseParam.appleAppStoreId ?? inAppPurchase.appleAppStoreId,
-				facebookStoreId: request.inAppPurchaseParam.facebookStoreId ?? inAppPurchase.facebookStoreId,
-				googlePlayStoreId: request.inAppPurchaseParam.googlePlayStoreId ?? inAppPurchase.googlePlayStoreId,
-				analyticsPrice: request.inAppPurchaseParam.analyticsPrice ?? inAppPurchase.analyticsPrice,
+				appleAppStoreId: request.inAppPurchase.appleAppStoreId ?? inAppPurchase.appleAppStoreId,
+				facebookStoreId: request.inAppPurchase.facebookStoreId ?? inAppPurchase.facebookStoreId,
+				googlePlayStoreId: request.inAppPurchase.googlePlayStoreId ?? inAppPurchase.googlePlayStoreId,
+				analyticsPrice: request.inAppPurchase.analyticsPrice ?? inAppPurchase.analyticsPrice,
 			});
 		}
 
@@ -232,18 +232,18 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			storeInventory.setDisplayName(request.displayName);
 		}
 
-		if (request.avatarParam != null) {
-			storeInventory.setAvatar(request.avatarParam.type, request.avatarParam.value);
+		if (request.avatar != null) {
+			storeInventory.setAvatar(request.avatar.type, request.avatar.value);
 		}
 
 		if (request.storeItemType != null) {
 			storeInventory.setStoreItemType(request.storeItemType);
 		}
 
-		if (request.tagParams != null) {
+		if (request.tags != null) {
 			storeInventory.clearTags();
-			for (let i = 0; i < request.tagParams.length; i++) {
-				let tagParam = request.tagParams[i];
+			for (let i = 0; i < request.tags.length; i++) {
+				let tagParam = request.tags[i];
 				storeInventory.setTag(tagParam.key, tagParam.value);
 			}
 		}
