@@ -15,13 +15,13 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { PlayerCurrencyParam } from "./model/PlayerCurrencyParam";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
-class SetPlayerCurrenciesOperationRequest extends OperationRequest {
+class SetPlayerCurrencyOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
 	@GNArrayDataMember({ code: ParameterCode.PlayerCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerCurrencyParam })
-	public playerCurrencyParams: Array<PlayerCurrencyParam>;
+	public playerCurrencies: Array<PlayerCurrencyParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
@@ -33,7 +33,7 @@ class SetPlayerCurrenciesOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetPlayerCurrenciesOperationRequest extends SetPlayerCurrenciesOperationRequest {
+class ServerSetPlayerCurrencyOperationRequest extends SetPlayerCurrencyOperationRequest {
 
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
@@ -45,7 +45,7 @@ class ServerSetPlayerCurrenciesOperationRequest extends SetPlayerCurrenciesOpera
 	}
 }
 
-class AdminSetPlayerCurrenciesOperationRequest extends ServerSetPlayerCurrenciesOperationRequest {
+class AdminSetPlayerCurrencyOperationRequest extends ServerSetPlayerCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -61,7 +61,7 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 	}
 
 	public override getCommonOperationRequest() {
-		return SetPlayerCurrenciesOperationRequest;
+		return SetPlayerCurrencyOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -91,13 +91,13 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 
 		return this.execute({
 			userId: request.userId,
-			playerCurrencyParams: request.playerCurrencyParams,
+			playerCurrencies: request.playerCurrencies,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerCurrenciesOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -109,13 +109,13 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 
 		return this.execute({
 			userId: request.userId,
-			playerCurrencyParams: request.playerCurrencyParams,
+			playerCurrencies: request.playerCurrencies,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerCurrenciesOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -127,12 +127,12 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 
 		return this.execute({
 			userId: request.userId,
-			playerCurrencyParams: request.playerCurrencyParams,
+			playerCurrencies: request.playerCurrencies,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, playerCurrencies: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SetPlayerCurrency", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -157,8 +157,8 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnPlayerCurrencies = new GNArray();
 
-		for (let i = 0; i < request.playerCurrencyParams.length; i++) {
-			let playerCurrencyParam = request.playerCurrencyParams[i];
+		for (let i = 0; i < request.playerCurrencies.length; i++) {
+			let playerCurrencyParam = request.playerCurrencies[i];
 
 			let key = playerCurrencyParam.key;
 

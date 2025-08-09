@@ -22,7 +22,7 @@ class SetCustomDataOperationRequest extends OperationRequest {
 	public userId?: string;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
-	public customData: Array<CustomDataParam>;
+	public customDatas: Array<CustomDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -89,7 +89,7 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 
 		return this.execute({
 			userId: request.userId,
-			customDataParameters: request.customData
+			customDatas: request.customDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -107,7 +107,7 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 
 		return this.execute({
 			userId: request.userId,
-			customDataParameters: request.customData
+			customDatas: request.customDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -124,11 +124,11 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 
 		return this.execute({
 			userId: request.userId,
-			customDataParameters: request.customData
+			customDatas: request.customDatas
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, customDataParameters: Array<CustomDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, customDatas: Array<CustomDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SetCustomData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -153,9 +153,9 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnCustomDatas = new GNArray();
 
-		for (let i = 0; i < request.customDataParameters.length; i++) {
+		for (let i = 0; i < request.customDatas.length; i++) {
 
-			let customDataParameter = request.customDataParameters[i];
+			let customDataParameter = request.customDatas[i];
 
 			let key = customDataParameter.key;
 
