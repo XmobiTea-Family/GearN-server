@@ -6,11 +6,11 @@ import { TagSettingsParam } from "./TagSettingsParam";
 
 export class InventorySettingsParam {
 
-	@GNArrayDataMember({ code: ParameterCode.StatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true })
-	public inventoryStatisticsSettings?: Array<StatisticsSettingsParam>;
+	@GNArrayDataMember({ code: ParameterCode.ItemStatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true })
+	public itemStatisticsSettings?: Array<StatisticsSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.DatasSettings, elementCls: DataSettingsParam, isOptional: true })
-	public inventoryDatasSettings?: Array<DataSettingsParam>;
+	@GNArrayDataMember({ code: ParameterCode.ItemDatasSettings, elementCls: DataSettingsParam, isOptional: true })
+	public itemDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatasSettings, elementCls: DataSettingsParam, isOptional: true })
 	public customDatasSettings?: Array<DataSettingsParam>;

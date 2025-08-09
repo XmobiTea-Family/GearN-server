@@ -1,6 +1,5 @@
 import { ParameterCode } from "./../../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayDataMember, NumberDataMember } from "./../../../../../../GN-common/entity/DataMember";
-import { CharacterCatalogSettingsParam } from "./CharacterCatalogSettingsParam";
 import { CurrencySettingsParam } from "./CurrencySettingsParam";
 import { DataSettingsParam } from "./DataSettingsParam";
 import { FriendCatalogSettingsParam } from "./FriendCatalogSettingsParam";
@@ -11,13 +10,13 @@ import { TagSettingsParam } from "./TagSettingsParam";
 
 export class CharacterPlayerSettingsParam {
 
-	@GNArrayDataMember({ code: ParameterCode.CurrencySettings, elementCls: CurrencySettingsParam, isOptional: true })
-	public playerCurrencySettings?: Array<CurrencySettingsParam>;
+	@GNArrayDataMember({ code: ParameterCode.PlayerCurrenciesSettings, elementCls: CurrencySettingsParam, isOptional: true })
+	public playerCurrenciesSettings?: Array<CurrencySettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.StatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.PlayerStatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true })
 	public playerStatisticsSettings?: Array<StatisticsSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.DatasSettings, elementCls: DataSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.PlayerDatasSettings, elementCls: DataSettingsParam, isOptional: true })
 	public playerDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatasSettings, elementCls: DataSettingsParam, isOptional: true })
@@ -26,13 +25,13 @@ export class CharacterPlayerSettingsParam {
 	@GNArrayDataMember({ code: ParameterCode.TagsSettings, elementCls: TagSettingsParam, isOptional: true })
 	public tagsSettings?: Array<TagSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.GroupCatalogSettings, elementCls: GroupCatalogSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.PlayerGroupCatalogSettings, elementCls: GroupCatalogSettingsParam, isOptional: true })
 	public playerGroupCatalogSettings?: Array<GroupCatalogSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.ItemCatalogSettings, elementCls: ItemCatalogSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.PlayerItemCatalogSettings, elementCls: ItemCatalogSettingsParam, isOptional: true })
 	public playerItemCatalogSettings?: Array<ItemCatalogSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.FriendCatalogSettings, elementCls: FriendCatalogSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.PlayerFriendCatalogSettings, elementCls: FriendCatalogSettingsParam, isOptional: true })
 	public playerFriendCatalogSettings?: Array<FriendCatalogSettingsParam>;
 
 }

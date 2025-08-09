@@ -144,9 +144,9 @@ export class GetCurrencyLeaderboardRequestHandler extends MasterPlayerBaseReques
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
-		let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == request.key);
+		let playerCurrenciesSettingsItem = masterPlayerSettings.playerCurrenciesSettings.find(x => x.key == request.key);
 
-		if (playerCurrencySettingsItem == null) {
+		if (playerCurrenciesSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;

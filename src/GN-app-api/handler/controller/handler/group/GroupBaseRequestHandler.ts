@@ -533,17 +533,17 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(gameId);
 
-		for (let i = 0; i < groupSettings.groupCurrencySettings.length; i++) {
-			let groupCurrencySettingsItem = groupSettings.groupCurrencySettings[i];
+		for (let i = 0; i < groupSettings.groupCurrenciesSettings.length; i++) {
+			let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings[i];
 
-			if (groupCurrencyKeys == null || groupCurrencyKeys.indexOf(groupCurrencySettingsItem.key) != -1) {
-				let groupCurrency = group.getGroupCurrency(groupCurrencySettingsItem.key);
+			if (groupCurrencyKeys == null || groupCurrencyKeys.indexOf(groupCurrenciesSettingsItem.key) != -1) {
+				let groupCurrency = group.getGroupCurrency(groupCurrenciesSettingsItem.key);
 
 				let gnGroupCurrency = new GNHashtable();
-				gnGroupCurrency.add(ParameterCode.Key, groupCurrencySettingsItem.key);
+				gnGroupCurrency.add(ParameterCode.Key, groupCurrenciesSettingsItem.key);
 
 				if (groupCurrency != null) gnGroupCurrency.add(ParameterCode.Value, groupCurrency.value);
-				else gnGroupCurrency.add(ParameterCode.Value, groupCurrencySettingsItem.initialValue);
+				else gnGroupCurrency.add(ParameterCode.Value, groupCurrenciesSettingsItem.initialValue);
 
 				gnGroupCurrencies.add(gnGroupCurrency);
 			}

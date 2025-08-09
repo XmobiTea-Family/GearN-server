@@ -184,9 +184,14 @@ export class ParameterCode {
 	public static readonly InitialValue: string = "initialValue";
 	public static readonly GameName: string = "gameName";
 
-	public static readonly CurrencySettings: string = "currencySettings";
-	public static readonly StatisticsSettings: string = "statisticsSettings";
-	public static readonly DatasSettings: string = "datasSettings";
+	public static readonly PlayerCurrenciesSettings: string = "playerCurrenciesSettings";
+	public static readonly GroupCurrenciesSettings: string = "groupCurrenciesSettings";
+	public static readonly PlayerStatisticsSettings: string = "playerStatisticsSettings";
+	public static readonly GroupStatisticsSettings: string = "groupStatisticsSettings";
+	public static readonly ItemStatisticsSettings: string = "itemStatisticsSettings";
+	public static readonly PlayerDatasSettings: string = "playerDatasSettings";
+	public static readonly GroupDatasSettings: string = "groupDatasSettings";
+	public static readonly ItemDatasSettings: string = "itemDatasSettings";
 	public static readonly CustomDatasSettings: string = "customDatasSettings";
 	public static readonly TagsSettings: string = "tagsSettings";
 	public static readonly MasterPlayerSettings: string = "masterPlayerSettings";
@@ -196,10 +201,11 @@ export class ParameterCode {
 	public static readonly GroupSettings: string = "groupSettings";
 	public static readonly InventorySettings: string = "inventorySettings";
 
-	public static readonly CharacterCatalogSettings: string = "characterCatalogSettings";
-	public static readonly GroupCatalogSettings: string = "groupCatalogSettings";
-	public static readonly ItemCatalogSettings: string = "itemCatalogSettings";
-	public static readonly FriendCatalogSettings: string = "friendCatalogSettings";
+	public static readonly PlayerCharacterCatalogSettings: string = "playerCharacterCatalogSettings";
+	public static readonly PlayerGroupCatalogSettings: string = "playerGroupCatalogSettings";
+	public static readonly PlayerItemCatalogSettings: string = "playerItemCatalogSettings";
+	public static readonly GroupItemCatalogSettings: string = "groupItemCatalogSettings";
+	public static readonly PlayerFriendCatalogSettings: string = "playerFriendCatalogSettings";
 	public static readonly ItemClassSettings: string = "itemClassSettings";
 	public static readonly Remove: string = "remove";
 	public static readonly SelfEnable: string = "selfEnable";

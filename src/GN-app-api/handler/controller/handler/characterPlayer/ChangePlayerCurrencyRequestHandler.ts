@@ -147,14 +147,14 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 
 			let key = playerCurrencyParam.key;
 
-			let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == key);
-			if (playerCurrencySettingsItem == null) continue;
+			let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find(x => x.key == key);
+			if (playerCurrenciesSettingsItem == null) continue;
 
 			let amount = playerCurrencyParam.amount;
 			let serverValue = 0;
 
 			if (!characterPlayer.hasPlayerCurrency(key)) {
-				serverValue = playerCurrencySettingsItem.initialValue;
+				serverValue = playerCurrenciesSettingsItem.initialValue;
 			}
 			else {
 				serverValue = characterPlayer.getPlayerCurrency(key).value;

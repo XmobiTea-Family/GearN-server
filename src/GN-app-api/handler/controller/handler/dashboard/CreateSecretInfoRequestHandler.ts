@@ -97,6 +97,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 			creatorId: request.creatorId,
 			remove: false,
 			tsExpire: -1,
+			description: "",
 			tsCreate: xDatetime.getCurrentMilliseconds(),
 		} as any;
 
@@ -111,6 +112,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 			.setRole(secretInfoItem.getRole())
 			.setSecretKey(secretInfoItem.getSecretKey())
 			.setTsExpire(secretInfoItem.getTsExpire())
+			.setDescription(secretInfoItem.getDescription())
 			.build();
 
 		this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);

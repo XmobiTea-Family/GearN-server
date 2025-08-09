@@ -254,9 +254,9 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 				if (!characterPlayer.hasPlayerCurrency(priceCurrency.key)) {
 
-					let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == priceCurrency.key);
-					if (playerCurrencySettingsItem != null) {
-						characterPlayer.changePlayerCurrency(priceCurrency.key, playerCurrencySettingsItem.initialValue);
+					let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find(x => x.key == priceCurrency.key);
+					if (playerCurrenciesSettingsItem != null) {
+						characterPlayer.changePlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
 					}
 					else {
 						characterPlayer.changePlayerCurrency(priceCurrency.key, 0);
@@ -357,9 +357,9 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					if (!characterPlayer.hasPlayerCurrency(storeCurrency.key)) {
 
-						let playerCurrencySettingsItem = characterPlayerSettings.playerCurrencySettings.find(x => x.key == storeCurrency.key);
-						if (playerCurrencySettingsItem != null) {
-							characterPlayer.changePlayerCurrency(storeCurrency.key, playerCurrencySettingsItem.initialValue);
+						let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find(x => x.key == storeCurrency.key);
+						if (playerCurrenciesSettingsItem != null) {
+							characterPlayer.changePlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
 						}
 						else {
 							characterPlayer.changePlayerCurrency(storeCurrency.key, 0);
@@ -419,9 +419,9 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 				if (!gamePlayer.hasPlayerCurrency(priceCurrency.key)) {
 
-					let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings.find(x => x.key == priceCurrency.key);
-					if (playerCurrencySettingsItem != null) {
-						gamePlayer.changePlayerCurrency(priceCurrency.key, playerCurrencySettingsItem.initialValue);
+					let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find(x => x.key == priceCurrency.key);
+					if (playerCurrenciesSettingsItem != null) {
+						gamePlayer.changePlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
 					}
 					else {
 						gamePlayer.changePlayerCurrency(priceCurrency.key, 0);
@@ -523,9 +523,9 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					if (!gamePlayer.hasPlayerCurrency(storeCurrency.key)) {
 
-						let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings.find(x => x.key == storeCurrency.key);
-						if (playerCurrencySettingsItem != null) {
-							gamePlayer.changePlayerCurrency(storeCurrency.key, playerCurrencySettingsItem.initialValue);
+						let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find(x => x.key == storeCurrency.key);
+						if (playerCurrenciesSettingsItem != null) {
+							gamePlayer.changePlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
 						}
 						else {
 							gamePlayer.changePlayerCurrency(storeCurrency.key, 0);
@@ -585,9 +585,9 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 				if (!group.hasGroupCurrency(priceCurrency.key)) {
 
-					let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == priceCurrency.key);
-					if (groupCurrencySettingsItem != null) {
-						group.changeGroupCurrency(priceCurrency.key, groupCurrencySettingsItem.initialValue);
+					let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == priceCurrency.key);
+					if (groupCurrenciesSettingsItem != null) {
+						group.changeGroupCurrency(priceCurrency.key, groupCurrenciesSettingsItem.initialValue);
 					}
 					else {
 						group.changeGroupCurrency(priceCurrency.key, 0);
@@ -687,9 +687,9 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					if (!group.hasGroupCurrency(storeCurrency.key)) {
 
-						let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == storeCurrency.key);
-						if (groupCurrencySettingsItem != null) {
-							group.changeGroupCurrency(storeCurrency.key, groupCurrencySettingsItem.initialValue);
+						let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == storeCurrency.key);
+						if (groupCurrenciesSettingsItem != null) {
+							group.changeGroupCurrency(storeCurrency.key, groupCurrenciesSettingsItem.initialValue);
 						}
 						else {
 							group.changeGroupCurrency(storeCurrency.key, 0);

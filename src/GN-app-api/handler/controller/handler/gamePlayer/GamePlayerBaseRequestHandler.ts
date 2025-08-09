@@ -524,17 +524,17 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(gameId);
 
-		for (let i = 0; i < gamePlayerSettings.playerCurrencySettings.length; i++) {
-			let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings[i];
+		for (let i = 0; i < gamePlayerSettings.playerCurrenciesSettings.length; i++) {
+			let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings[i];
 
-			if (playerCurrencyKeys == null || playerCurrencyKeys.indexOf(playerCurrencySettingsItem.key) != -1) {
-				let playerCurrency = gamePlayer.getPlayerCurrency(playerCurrencySettingsItem.key);
+			if (playerCurrencyKeys == null || playerCurrencyKeys.indexOf(playerCurrenciesSettingsItem.key) != -1) {
+				let playerCurrency = gamePlayer.getPlayerCurrency(playerCurrenciesSettingsItem.key);
 
 				let gnPlayerCurrency = new GNHashtable();
-				gnPlayerCurrency.add(ParameterCode.Key, playerCurrencySettingsItem.key);
+				gnPlayerCurrency.add(ParameterCode.Key, playerCurrenciesSettingsItem.key);
 
 				if (playerCurrency != null) gnPlayerCurrency.add(ParameterCode.Value, playerCurrency.value);
-				else gnPlayerCurrency.add(ParameterCode.Value, playerCurrencySettingsItem.initialValue);
+				else gnPlayerCurrency.add(ParameterCode.Value, playerCurrenciesSettingsItem.initialValue);
 
 				gnPlayerCurrencies.add(gnPlayerCurrency);
 			}

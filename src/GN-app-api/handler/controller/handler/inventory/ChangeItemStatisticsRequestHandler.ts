@@ -147,126 +147,126 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		for (let i = 0; i < request.itemStatistics.length; i++) {
-			let inventoryStatisticsParam = request.itemStatistics[i];
+			let itemStatisticsParam = request.itemStatistics[i];
 
-			let key = inventoryStatisticsParam.key;
+			let key = itemStatisticsParam.key;
 
-			let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == key);
-			if (inventoryStatisticsSettingsItem == null) continue;
+			let itemStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == key);
+			if (itemStatisticsSettingsItem == null) continue;
 
-			let value = inventoryStatisticsParam.value;
+			let value = itemStatisticsParam.value;
 
 			let gnItemStatistic = new GNHashtable();
 			gnItemStatistic.add(ParameterCode.Key, key);
 
 			if (!inventory.hasItemStatistics(key))
-				inventory.changeItemStatistics(key, inventoryStatisticsSettingsItem.initialValue, currentMilliseconds);
+				inventory.changeItemStatistics(key, itemStatisticsSettingsItem.initialValue, currentMilliseconds);
 
-			let inventoryStatistics = inventory.getItemStatistics(key);
-			let oldValue = inventoryStatistics.value;
+			let itemStatistics = inventory.getItemStatistics(key);
+			let oldValue = itemStatistics.value;
 
-			let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
+			let statisticsAggregationMethod = <xStatisticsAggregationMethod>itemStatisticsSettingsItem.statisticsAggregationMethod;
 
 			if (statisticsAggregationMethod == xStatisticsAggregationMethod.Sum) {
-				let newValue = value + inventoryStatistics.value;
+				let newValue = value + itemStatistics.value;
 
-				if (inventoryStatisticsSettingsItem.maximumValue != null) {
-					if (value > inventoryStatisticsSettingsItem.maximumValue) value = inventoryStatisticsSettingsItem.maximumValue;
+				if (itemStatisticsSettingsItem.maximumValue != null) {
+					if (value > itemStatisticsSettingsItem.maximumValue) value = itemStatisticsSettingsItem.maximumValue;
 				}
 
-				if (inventoryStatisticsSettingsItem.minimumValue != null) {
-					if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
+				if (itemStatisticsSettingsItem.minimumValue != null) {
+					if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
 				}
 
 				inventory.changeItemStatistics(key, newValue, currentMilliseconds);
 				gnItemStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, newValue, request.log);
+				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, newValue, request.log);
 
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
-				if (value > inventoryStatistics.value) {
-					if (inventoryStatisticsSettingsItem.maximumValue != null) {
-						if (value > inventoryStatisticsSettingsItem.maximumValue) value = inventoryStatisticsSettingsItem.maximumValue;
+				if (value > itemStatistics.value) {
+					if (itemStatisticsSettingsItem.maximumValue != null) {
+						if (value > itemStatisticsSettingsItem.maximumValue) value = itemStatisticsSettingsItem.maximumValue;
 					}
 
-					if (inventoryStatisticsSettingsItem.minimumValue != null) {
-						if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
+					if (itemStatisticsSettingsItem.minimumValue != null) {
+						if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
 					}
 
 					inventory.changeItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
-					if (inventoryStatisticsSettingsItem.maximumValue != null) {
-						if (inventoryStatistics.value > inventoryStatisticsSettingsItem.maximumValue) {
-							inventoryStatistics.value = inventoryStatisticsSettingsItem.maximumValue;
-							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+					if (itemStatisticsSettingsItem.maximumValue != null) {
+						if (itemStatistics.value > itemStatisticsSettingsItem.maximumValue) {
+							itemStatistics.value = itemStatisticsSettingsItem.maximumValue;
+							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
-					if (inventoryStatisticsSettingsItem.minimumValue != null) {
-						if (inventoryStatistics.value < inventoryStatisticsSettingsItem.minimumValue) {
-							inventoryStatistics.value = inventoryStatisticsSettingsItem.minimumValue;
-							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+					if (itemStatisticsSettingsItem.minimumValue != null) {
+						if (itemStatistics.value < itemStatisticsSettingsItem.minimumValue) {
+							itemStatistics.value = itemStatisticsSettingsItem.minimumValue;
+							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
-					gnItemStatistic.add(ParameterCode.Value, inventoryStatistics.value);
+					gnItemStatistic.add(ParameterCode.Value, itemStatistics.value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, inventoryStatistics.value, request.log);
+					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, itemStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
-				if (value < inventoryStatistics.value) {
-					if (inventoryStatisticsSettingsItem.maximumValue != null) {
-						if (value > inventoryStatisticsSettingsItem.maximumValue) value = inventoryStatisticsSettingsItem.maximumValue;
+				if (value < itemStatistics.value) {
+					if (itemStatisticsSettingsItem.maximumValue != null) {
+						if (value > itemStatisticsSettingsItem.maximumValue) value = itemStatisticsSettingsItem.maximumValue;
 					}
 
-					if (inventoryStatisticsSettingsItem.minimumValue != null) {
-						if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
+					if (itemStatisticsSettingsItem.minimumValue != null) {
+						if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
 					}
 
 					inventory.changeItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
-					if (inventoryStatisticsSettingsItem.maximumValue != null) {
-						if (inventoryStatistics.value > inventoryStatisticsSettingsItem.maximumValue) {
-							inventoryStatistics.value = inventoryStatisticsSettingsItem.maximumValue;
-							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+					if (itemStatisticsSettingsItem.maximumValue != null) {
+						if (itemStatistics.value > itemStatisticsSettingsItem.maximumValue) {
+							itemStatistics.value = itemStatisticsSettingsItem.maximumValue;
+							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
-					if (inventoryStatisticsSettingsItem.minimumValue != null) {
-						if (inventoryStatistics.value < inventoryStatisticsSettingsItem.minimumValue) {
-							inventoryStatistics.value = inventoryStatisticsSettingsItem.minimumValue;
-							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+					if (itemStatisticsSettingsItem.minimumValue != null) {
+						if (itemStatistics.value < itemStatisticsSettingsItem.minimumValue) {
+							itemStatistics.value = itemStatisticsSettingsItem.minimumValue;
+							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
-					gnItemStatistic.add(ParameterCode.Value, inventoryStatistics.value);
+					gnItemStatistic.add(ParameterCode.Value, itemStatistics.value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, inventoryStatistics.value, request.log);
+					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, itemStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
-				if (inventoryStatisticsSettingsItem.maximumValue != null) {
-					if (value > inventoryStatisticsSettingsItem.maximumValue) value = inventoryStatisticsSettingsItem.maximumValue;
+				if (itemStatisticsSettingsItem.maximumValue != null) {
+					if (value > itemStatisticsSettingsItem.maximumValue) value = itemStatisticsSettingsItem.maximumValue;
 				}
 
-				if (inventoryStatisticsSettingsItem.minimumValue != null) {
-					if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
+				if (itemStatisticsSettingsItem.minimumValue != null) {
+					if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
 				}
 
 				inventory.changeItemStatistics(key, value, currentMilliseconds);
 				gnItemStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, value, request.log);
+				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
 			}
 
 			gnItemStatistics.add(gnItemStatistic);

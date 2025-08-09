@@ -144,10 +144,10 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 			let key = groupCurrencyParam.key;
 
-			let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == key);
-			if (groupCurrencySettingsItem == null) continue;
+			let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == key);
+			if (groupCurrenciesSettingsItem == null) continue;
 
-			let initialValue = groupCurrencySettingsItem.initialValue;
+			let initialValue = groupCurrenciesSettingsItem.initialValue;
 
 			let amount = groupCurrencyParam.amount;
 			let serverValue = 0;

@@ -416,17 +416,17 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-		for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
-			let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings[i];
+		for (let i = 0; i < masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+			let playerCurrenciesSettingsItem = masterPlayerSettings.playerCurrenciesSettings[i];
 
-			if (playerCurrencyKeys == null || playerCurrencyKeys.indexOf(playerCurrencySettingsItem.key) != -1) {
-				let playerCurrency = masterPlayer.getPlayerCurrency(playerCurrencySettingsItem.key);
+			if (playerCurrencyKeys == null || playerCurrencyKeys.indexOf(playerCurrenciesSettingsItem.key) != -1) {
+				let playerCurrency = masterPlayer.getPlayerCurrency(playerCurrenciesSettingsItem.key);
 
 				let gnPlayerCurrency = new GNHashtable();
-				gnPlayerCurrency.add(ParameterCode.Key, playerCurrencySettingsItem.key);
+				gnPlayerCurrency.add(ParameterCode.Key, playerCurrenciesSettingsItem.key);
 
 				if (playerCurrency != null) gnPlayerCurrency.add(ParameterCode.Value, playerCurrency.value);
-				else gnPlayerCurrency.add(ParameterCode.Value, playerCurrencySettingsItem.initialValue);
+				else gnPlayerCurrency.add(ParameterCode.Value, playerCurrenciesSettingsItem.initialValue);
 
 				gnPlayerCurrencies.add(gnPlayerCurrency);
 			}

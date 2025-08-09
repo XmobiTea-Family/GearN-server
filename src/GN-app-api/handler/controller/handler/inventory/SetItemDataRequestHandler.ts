@@ -139,14 +139,14 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 		let gnItemDatas = new GNArray();
 
 		for (let i = 0; i < request.itemDatas.length; i++) {
-			let inventoryDataParam = request.itemDatas[i];
+			let itemDataParam = request.itemDatas[i];
 
-			let key = inventoryDataParam.key;
-			let inventoryDatasSettingsItem = inventorySettings.inventoryDatasSettings.find(x => x.key == key);
-			if (inventoryDatasSettingsItem == null) continue;
+			let key = itemDataParam.key;
+			let itemDatasSettingsItem = inventorySettings.itemDatasSettings.find(x => x.key == key);
+			if (itemDatasSettingsItem == null) continue;
 
-			let value = inventoryDataParam.value;
-			let permission = <PermissionDataItem>inventoryDatasSettingsItem.permission;
+			let value = itemDataParam.value;
+			let permission = <PermissionDataItem>itemDatasSettingsItem.permission;
 
 			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
 
@@ -160,7 +160,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 				let gnItemData = new GNHashtable();
 				gnItemData.add(ParameterCode.Key, key);
-				gnItemData.add(ParameterCode.Value, inventoryDataParam.value);
+				gnItemData.add(ParameterCode.Value, itemDataParam.value);
 
 				gnItemDatas.add(gnItemData);
 			}

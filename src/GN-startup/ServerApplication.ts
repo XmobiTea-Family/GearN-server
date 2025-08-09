@@ -812,7 +812,7 @@ export class ServerApplication extends BuilderBase {
 				masterPlayerSettings: {
 					genericServiceSettings: [],
 
-					playerCurrencySettings: [],
+					playerCurrenciesSettings: [],
 					playerStatisticsSettings: [],
 					playerDatasSettings: [],
 					customDatasSettings: [],
@@ -926,7 +926,7 @@ export class ServerApplication extends BuilderBase {
 					gameSettings: {
 						gamePlayerSettings: {
 							customDatasSettings: [],
-							playerCurrencySettings: [],
+							playerCurrenciesSettings: [],
 							playerDatasSettings: [],
 							playerFriendCatalogSettings: [],
 							playerGroupCatalogSettings: [],
@@ -937,7 +937,7 @@ export class ServerApplication extends BuilderBase {
 						},
 						characterPlayerSettings: {
 							customDatasSettings: [],
-							playerCurrencySettings: [],
+							playerCurrenciesSettings: [],
 							playerDatasSettings: [],
 							playerFriendCatalogSettings: [],
 							playerGroupCatalogSettings: [],
@@ -947,7 +947,7 @@ export class ServerApplication extends BuilderBase {
 						},
 						groupSettings: {
 							customDatasSettings: [],
-							groupCurrencySettings: [],
+							groupCurrenciesSettings: [],
 							groupDatasSettings: [],
 							groupItemCatalogSettings: [],
 							groupStatisticsSettings: [],
@@ -955,8 +955,8 @@ export class ServerApplication extends BuilderBase {
 						},
 						inventorySettings: {
 							customDatasSettings: [],
-							inventoryDatasSettings: [],
-							inventoryStatisticsSettings: [],
+							itemDatasSettings: [],
+							itemStatisticsSettings: [],
 							tagsSettings: []
 						}
 					},
@@ -1259,7 +1259,7 @@ export class ServerApplication extends BuilderBase {
 					gameSettings: {
 						gamePlayerSettings: {
 							customDatasSettings: [],
-							playerCurrencySettings: [],
+							playerCurrenciesSettings: [],
 							playerDatasSettings: [],
 							playerFriendCatalogSettings: [],
 							playerGroupCatalogSettings: [],
@@ -1270,7 +1270,7 @@ export class ServerApplication extends BuilderBase {
 						},
 						characterPlayerSettings: {
 							customDatasSettings: [],
-							playerCurrencySettings: [],
+							playerCurrenciesSettings: [],
 							playerDatasSettings: [],
 							playerFriendCatalogSettings: [],
 							playerGroupCatalogSettings: [],
@@ -1280,7 +1280,7 @@ export class ServerApplication extends BuilderBase {
 						},
 						groupSettings: {
 							customDatasSettings: [],
-							groupCurrencySettings: [],
+							groupCurrenciesSettings: [],
 							groupDatasSettings: [],
 							groupItemCatalogSettings: [],
 							groupStatisticsSettings: [],
@@ -1288,8 +1288,8 @@ export class ServerApplication extends BuilderBase {
 						},
 						inventorySettings: {
 							customDatasSettings: [],
-							inventoryDatasSettings: [],
-							inventoryStatisticsSettings: [],
+							itemDatasSettings: [],
+							itemStatisticsSettings: [],
 							tagsSettings: []
 						}
 					},
@@ -1693,7 +1693,7 @@ export class ServerApplication extends BuilderBase {
 				let currentMasterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 				currentMasterPlayerSettings.genericServiceSettings = masterPlayerSettings.genericServiceSettings;
-				currentMasterPlayerSettings.playerCurrencySettings = masterPlayerSettings.playerCurrencySettings;
+				currentMasterPlayerSettings.playerCurrenciesSettings = masterPlayerSettings.playerCurrenciesSettings;
 				currentMasterPlayerSettings.playerStatisticsSettings = masterPlayerSettings.playerStatisticsSettings;
 				currentMasterPlayerSettings.playerDatasSettings = masterPlayerSettings.playerDatasSettings;
 				currentMasterPlayerSettings.customDatasSettings = masterPlayerSettings.customDatasSettings;
@@ -1737,7 +1737,7 @@ export class ServerApplication extends BuilderBase {
 
 					let currentGamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(gameId);
 
-					currentGamePlayerSettings.playerCurrencySettings = gamePlayerSettings.playerCurrencySettings;
+					currentGamePlayerSettings.playerCurrenciesSettings = gamePlayerSettings.playerCurrenciesSettings;
 					currentGamePlayerSettings.playerStatisticsSettings = gamePlayerSettings.playerStatisticsSettings;
 					currentGamePlayerSettings.playerDatasSettings = gamePlayerSettings.playerDatasSettings;
 					currentGamePlayerSettings.customDatasSettings = gamePlayerSettings.customDatasSettings;
@@ -1754,7 +1754,7 @@ export class ServerApplication extends BuilderBase {
 
 					let currentCharacterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
 
-					currentCharacterPlayerSettings.playerCurrencySettings = characterPlayerSettings.playerCurrencySettings;
+					currentCharacterPlayerSettings.playerCurrenciesSettings = characterPlayerSettings.playerCurrenciesSettings;
 					currentCharacterPlayerSettings.playerStatisticsSettings = characterPlayerSettings.playerStatisticsSettings;
 					currentCharacterPlayerSettings.playerDatasSettings = characterPlayerSettings.playerDatasSettings;
 					currentCharacterPlayerSettings.customDatasSettings = characterPlayerSettings.customDatasSettings;
@@ -1770,7 +1770,7 @@ export class ServerApplication extends BuilderBase {
 
 					let currentGroupSettings = this.gnServer.getGNSettings().getGroupSettings(gameId);
 
-					currentGroupSettings.groupCurrencySettings = groupSettings.groupCurrencySettings;
+					currentGroupSettings.groupCurrenciesSettings = groupSettings.groupCurrenciesSettings;
 					currentGroupSettings.groupStatisticsSettings = groupSettings.groupStatisticsSettings;
 					currentGroupSettings.groupDatasSettings = groupSettings.groupDatasSettings;
 					currentGroupSettings.customDatasSettings = groupSettings.customDatasSettings;
@@ -1783,8 +1783,8 @@ export class ServerApplication extends BuilderBase {
 
 					let currentInventorySettings = this.gnServer.getGNSettings().getInventorySettings(gameId);
 
-					currentInventorySettings.inventoryStatisticsSettings = inventorySettings.inventoryStatisticsSettings;
-					currentInventorySettings.inventoryDatasSettings = inventorySettings.inventoryDatasSettings;
+					currentInventorySettings.itemStatisticsSettings = inventorySettings.itemStatisticsSettings;
+					currentInventorySettings.itemDatasSettings = inventorySettings.itemDatasSettings;
 					currentInventorySettings.customDatasSettings = inventorySettings.customDatasSettings;
 					currentInventorySettings.tagsSettings = inventorySettings.tagsSettings;
 				}

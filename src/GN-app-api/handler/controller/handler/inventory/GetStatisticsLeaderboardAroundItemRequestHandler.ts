@@ -159,9 +159,9 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
-		let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == request.key);
+		let itemStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == request.key);
 
-		if (inventoryStatisticsSettingsItem == null) {
+		if (itemStatisticsSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;
@@ -214,10 +214,10 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			}
 		}
 		else {
-			let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
+			let statisticsAggregationMethod = <xStatisticsAggregationMethod>itemStatisticsSettingsItem.statisticsAggregationMethod;
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-			thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), inventoryStatisticsSettingsItem.initialValue, direction);
+			thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), itemStatisticsSettingsItem.initialValue, direction);
 
 			if (thisPosition != -1) {
 				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);

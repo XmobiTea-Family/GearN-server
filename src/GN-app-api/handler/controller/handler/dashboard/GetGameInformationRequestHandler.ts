@@ -87,21 +87,21 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			let gnCharacterPlayerSettings = new GNHashtable();
 
 			{
-				let playerCurrencySettings = characterPlayerSettings.playerCurrencySettings;
-				let gnPlayerCurrencySettings = new GNArray();
-				for (let i = 0; i < playerCurrencySettings.length; i++) {
-					let playerCurrencySetting = playerCurrencySettings[i];
-					let gnPlayerCurrencySetting = new GNHashtable();
+				let playerCurrenciesSettings = characterPlayerSettings.playerCurrenciesSettings;
+				let gnPlayerCurrenciesSettings = new GNArray();
+				for (let i = 0; i < playerCurrenciesSettings.length; i++) {
+					let playerCurrenciesSetting = playerCurrenciesSettings[i];
+					let gnPlayerCurrenciesSetting = new GNHashtable();
 
-					gnPlayerCurrencySetting.add(ParameterCode.Key, playerCurrencySetting.key);
-					gnPlayerCurrencySetting.add(ParameterCode.InitialValue, playerCurrencySetting.initialValue);
-					gnPlayerCurrencySetting.add(ParameterCode.Description, playerCurrencySetting.description);
-					gnPlayerCurrencySetting.add(ParameterCode.Index, playerCurrencySetting.index);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Key, playerCurrenciesSetting.key);
+					gnPlayerCurrenciesSetting.add(ParameterCode.InitialValue, playerCurrenciesSetting.initialValue);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Description, playerCurrenciesSetting.description);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Index, playerCurrenciesSetting.index);
 
-					gnPlayerCurrencySettings.add(gnPlayerCurrencySetting);
+					gnPlayerCurrenciesSettings.add(gnPlayerCurrenciesSetting);
 				}
 
-				gnCharacterPlayerSettings.add(ParameterCode.CurrencySettings, gnPlayerCurrencySettings);
+				gnCharacterPlayerSettings.add(ParameterCode.PlayerCurrenciesSettings, gnPlayerCurrenciesSettings);
 			}
 
 			{
@@ -122,7 +122,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
 				}
 
-				gnCharacterPlayerSettings.add(ParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.PlayerStatisticsSettings, gnPlayerStatisticsSettings);
 			}
 
 			{
@@ -139,7 +139,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
 				}
 
-				gnCharacterPlayerSettings.add(ParameterCode.DatasSettings, gnPlayerDatasSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.PlayerDatasSettings, gnPlayerDatasSettings);
 			}
 
 			{
@@ -177,35 +177,35 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let groupCatalogSettings = characterPlayerSettings.playerGroupCatalogSettings;
-				let gnGroupCatalogSettings = new GNArray();
-				for (let i = 0; i < groupCatalogSettings.length; i++) {
-					let groupCatalogSetting = groupCatalogSettings[i];
-					let gnGroupCatalogSetting = new GNHashtable();
+				let playerGroupCatalogSettings = characterPlayerSettings.playerGroupCatalogSettings;
+				let gnPlayerGroupCatalogSettings = new GNArray();
+				for (let i = 0; i < playerGroupCatalogSettings.length; i++) {
+					let playerGroupCatalogSetting = playerGroupCatalogSettings[i];
+					let gnPlayerGroupCatalogSetting = new GNHashtable();
 
-					gnGroupCatalogSetting.add(ParameterCode.CatalogId, groupCatalogSetting.catalogId);
-					gnGroupCatalogSetting.add(ParameterCode.Description, groupCatalogSetting.description);
-					gnGroupCatalogSetting.add(ParameterCode.ForceAcceptMember, groupCatalogSetting.forceAcceptMember);
+					gnPlayerGroupCatalogSetting.add(ParameterCode.CatalogId, playerGroupCatalogSetting.catalogId);
+					gnPlayerGroupCatalogSetting.add(ParameterCode.Description, playerGroupCatalogSetting.description);
+					gnPlayerGroupCatalogSetting.add(ParameterCode.ForceAcceptMember, playerGroupCatalogSetting.forceAcceptMember);
 
-					gnGroupCatalogSettings.add(gnGroupCatalogSetting);
+					gnPlayerGroupCatalogSettings.add(gnPlayerGroupCatalogSetting);
 				}
 
-				gnCharacterPlayerSettings.add(ParameterCode.GroupCatalogSettings, gnGroupCatalogSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.PlayerGroupCatalogSettings, gnPlayerGroupCatalogSettings);
 			}
 
 			{
-				let itemCatalogSettings = characterPlayerSettings.playerItemCatalogSettings;
-				let gnItemCatalogSettings = new GNArray();
-				for (let i = 0; i < itemCatalogSettings.length; i++) {
-					let itemCatalogSetting = itemCatalogSettings[i];
-					let gnItemCatalogSetting = new GNHashtable();
+				let playerItemCatalogSettings = characterPlayerSettings.playerItemCatalogSettings;
+				let gnPlayerItemCatalogSettings = new GNArray();
+				for (let i = 0; i < playerItemCatalogSettings.length; i++) {
+					let playerItemCatalogSetting = playerItemCatalogSettings[i];
+					let gnPlayerItemCatalogSetting = new GNHashtable();
 
-					gnItemCatalogSetting.add(ParameterCode.CatalogId, itemCatalogSetting.catalogId);
+					gnPlayerItemCatalogSetting.add(ParameterCode.CatalogId, playerItemCatalogSetting.catalogId);
 
 					let gnItemClassSettings = new GNArray();
 
-					for (let j = 0; j < itemCatalogSetting.itemClassSettings.length; j++) {
-						let itemClassSetting = itemCatalogSetting.itemClassSettings[j];
+					for (let j = 0; j < playerItemCatalogSetting.itemClassSettings.length; j++) {
+						let itemClassSetting = playerItemCatalogSetting.itemClassSettings[j];
 
 						let gnItemClassSetting = new GNHashtable();
 						gnItemClassSetting.add(ParameterCode.ClassId, itemClassSetting.classId);
@@ -214,29 +214,29 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 						gnItemClassSettings.add(gnItemClassSetting);
 					}
 
-					gnItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
-					gnItemCatalogSetting.add(ParameterCode.ItemType, itemCatalogSetting.itemType);
+					gnPlayerItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
+					gnPlayerItemCatalogSetting.add(ParameterCode.ItemType, playerItemCatalogSetting.itemType);
 
-					gnItemCatalogSettings.add(gnItemCatalogSetting);
+					gnPlayerItemCatalogSettings.add(gnPlayerItemCatalogSetting);
 				}
 
-				gnCharacterPlayerSettings.add(ParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.PlayerItemCatalogSettings, gnPlayerItemCatalogSettings);
 			}
 
 			{
-				let friendCatalogSettings = characterPlayerSettings.playerFriendCatalogSettings;
-				let gnFriendCatalogSettings = new GNArray();
-				for (let i = 0; i < friendCatalogSettings.length; i++) {
-					let friendCatalogSetting = friendCatalogSettings[i];
-					let gnFriendCatalogSetting = new GNHashtable();
+				let playerFriendCatalogSettings = characterPlayerSettings.playerFriendCatalogSettings;
+				let gnPlayerFriendCatalogSettings = new GNArray();
+				for (let i = 0; i < playerFriendCatalogSettings.length; i++) {
+					let playerFriendCatalogSetting = playerFriendCatalogSettings[i];
+					let gnPlayerFriendCatalogSetting = new GNHashtable();
 
-					gnFriendCatalogSetting.add(ParameterCode.CatalogId, friendCatalogSetting.catalogId);
-					gnFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, friendCatalogSetting.forceAcceptFriend);
+					gnPlayerFriendCatalogSetting.add(ParameterCode.CatalogId, playerFriendCatalogSetting.catalogId);
+					gnPlayerFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, playerFriendCatalogSetting.forceAcceptFriend);
 
-					gnFriendCatalogSettings.add(gnFriendCatalogSetting);
+					gnPlayerFriendCatalogSettings.add(gnPlayerFriendCatalogSetting);
 				}
 
-				gnCharacterPlayerSettings.add(ParameterCode.FriendCatalogSettings, gnFriendCatalogSettings);
+				gnCharacterPlayerSettings.add(ParameterCode.PlayerFriendCatalogSettings, gnPlayerFriendCatalogSettings);
 			}
 
 			gnGameSettings.add(ParameterCode.CharacterPlayerSettings, gnCharacterPlayerSettings);
@@ -247,21 +247,21 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			let gnGamePlayerSettings = new GNHashtable();
 
 			{
-				let playerCurrencySettings = gamePlayerSettings.playerCurrencySettings;
-				let gnPlayerCurrencySettings = new GNArray();
-				for (let i = 0; i < playerCurrencySettings.length; i++) {
-					let playerCurrencySetting = playerCurrencySettings[i];
-					let gnPlayerCurrencySetting = new GNHashtable();
+				let playerCurrenciesSettings = gamePlayerSettings.playerCurrenciesSettings;
+				let gnPlayerCurrenciesSettings = new GNArray();
+				for (let i = 0; i < playerCurrenciesSettings.length; i++) {
+					let playerCurrenciesSetting = playerCurrenciesSettings[i];
+					let gnPlayerCurrenciesSetting = new GNHashtable();
 
-					gnPlayerCurrencySetting.add(ParameterCode.Key, playerCurrencySetting.key);
-					gnPlayerCurrencySetting.add(ParameterCode.InitialValue, playerCurrencySetting.initialValue);
-					gnPlayerCurrencySetting.add(ParameterCode.Description, playerCurrencySetting.description);
-					gnPlayerCurrencySetting.add(ParameterCode.Index, playerCurrencySetting.index);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Key, playerCurrenciesSetting.key);
+					gnPlayerCurrenciesSetting.add(ParameterCode.InitialValue, playerCurrenciesSetting.initialValue);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Description, playerCurrenciesSetting.description);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Index, playerCurrenciesSetting.index);
 
-					gnPlayerCurrencySettings.add(gnPlayerCurrencySetting);
+					gnPlayerCurrenciesSettings.add(gnPlayerCurrenciesSetting);
 				}
 
-				gnGamePlayerSettings.add(ParameterCode.CurrencySettings, gnPlayerCurrencySettings);
+				gnGamePlayerSettings.add(ParameterCode.PlayerCurrenciesSettings, gnPlayerCurrenciesSettings);
 			}
 
 			{
@@ -282,7 +282,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
 				}
 
-				gnGamePlayerSettings.add(ParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
+				gnGamePlayerSettings.add(ParameterCode.PlayerStatisticsSettings, gnPlayerStatisticsSettings);
 			}
 
 			{
@@ -299,7 +299,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
 				}
 
-				gnGamePlayerSettings.add(ParameterCode.DatasSettings, gnPlayerDatasSettings);
+				gnGamePlayerSettings.add(ParameterCode.PlayerDatasSettings, gnPlayerDatasSettings);
 			}
 
 			{
@@ -337,19 +337,19 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let characterCatalogSettings = gamePlayerSettings.playerCharacterCatalogSettings;
-				let gnCharacterCatalogSettings = new GNArray();
-				for (let i = 0; i < characterCatalogSettings.length; i++) {
-					let characterCatalogSetting = characterCatalogSettings[i];
-					let gnCharacterCatalogSetting = new GNHashtable();
+				let playerCharacterCatalogSettings = gamePlayerSettings.playerCharacterCatalogSettings;
+				let gnPlayerCharacterCatalogSettings = new GNArray();
+				for (let i = 0; i < playerCharacterCatalogSettings.length; i++) {
+					let playerCharacterCatalogSetting = playerCharacterCatalogSettings[i];
+					let gnPlayerCharacterCatalogSetting = new GNHashtable();
 
-					gnCharacterCatalogSetting.add(ParameterCode.CatalogId, characterCatalogSetting.catalogId);
-					gnCharacterCatalogSetting.add(ParameterCode.Description, characterCatalogSetting.description);
+					gnPlayerCharacterCatalogSetting.add(ParameterCode.CatalogId, playerCharacterCatalogSetting.catalogId);
+					gnPlayerCharacterCatalogSetting.add(ParameterCode.Description, playerCharacterCatalogSetting.description);
 
-					gnCharacterCatalogSettings.add(gnCharacterCatalogSetting);
+					gnPlayerCharacterCatalogSettings.add(gnPlayerCharacterCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(ParameterCode.CharacterCatalogSettings, gnCharacterCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.PlayerCharacterCatalogSettings, gnPlayerCharacterCatalogSettings);
 			}
 
 			{
@@ -366,22 +366,22 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnGroupCatalogSettings.add(gnGroupCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(ParameterCode.GroupCatalogSettings, gnGroupCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.PlayerGroupCatalogSettings, gnGroupCatalogSettings);
 			}
 
 			{
-				let itemCatalogSettings = gamePlayerSettings.playerItemCatalogSettings;
-				let gnItemCatalogSettings = new GNArray();
-				for (let i = 0; i < itemCatalogSettings.length; i++) {
-					let itemCatalogSetting = itemCatalogSettings[i];
-					let gnItemCatalogSetting = new GNHashtable();
+				let playerItemCatalogSettings = gamePlayerSettings.playerItemCatalogSettings;
+				let gnPlayerItemCatalogSettings = new GNArray();
+				for (let i = 0; i < playerItemCatalogSettings.length; i++) {
+					let playerItemCatalogSetting = playerItemCatalogSettings[i];
+					let gnPlayerItemCatalogSetting = new GNHashtable();
 
-					gnItemCatalogSetting.add(ParameterCode.CatalogId, itemCatalogSetting.catalogId);
+					gnPlayerItemCatalogSetting.add(ParameterCode.CatalogId, playerItemCatalogSetting.catalogId);
 
 					let gnItemClassSettings = new GNArray();
 
-					for (let j = 0; j < itemCatalogSetting.itemClassSettings.length; j++) {
-						let itemClassSetting = itemCatalogSetting.itemClassSettings[j];
+					for (let j = 0; j < playerItemCatalogSetting.itemClassSettings.length; j++) {
+						let itemClassSetting = playerItemCatalogSetting.itemClassSettings[j];
 
 						let gnItemClassSetting = new GNHashtable();
 						gnItemClassSetting.add(ParameterCode.ClassId, itemClassSetting.classId);
@@ -390,29 +390,29 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 						gnItemClassSettings.add(gnItemClassSetting);
 					}
 
-					gnItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
-					gnItemCatalogSetting.add(ParameterCode.ItemType, itemCatalogSetting.itemType);
+					gnPlayerItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
+					gnPlayerItemCatalogSetting.add(ParameterCode.ItemType, playerItemCatalogSetting.itemType);
 
-					gnItemCatalogSettings.add(gnItemCatalogSetting);
+					gnPlayerItemCatalogSettings.add(gnPlayerItemCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(ParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.PlayerItemCatalogSettings, gnPlayerItemCatalogSettings);
 			}
 
 			{
-				let friendCatalogSettings = gamePlayerSettings.playerFriendCatalogSettings;
-				let gnFriendCatalogSettings = new GNArray();
-				for (let i = 0; i < friendCatalogSettings.length; i++) {
-					let friendCatalogSetting = friendCatalogSettings[i];
-					let gnFriendCatalogSetting = new GNHashtable();
+				let playerFriendCatalogSettings = gamePlayerSettings.playerFriendCatalogSettings;
+				let gnPlayerFriendCatalogSettings = new GNArray();
+				for (let i = 0; i < playerFriendCatalogSettings.length; i++) {
+					let playerFriendCatalogSetting = playerFriendCatalogSettings[i];
+					let gnPlayerFriendCatalogSetting = new GNHashtable();
 
-					gnFriendCatalogSetting.add(ParameterCode.CatalogId, friendCatalogSetting.catalogId);
-					gnFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, friendCatalogSetting.forceAcceptFriend);
+					gnPlayerFriendCatalogSetting.add(ParameterCode.CatalogId, playerFriendCatalogSetting.catalogId);
+					gnPlayerFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, playerFriendCatalogSetting.forceAcceptFriend);
 
-					gnFriendCatalogSettings.add(gnFriendCatalogSetting);
+					gnPlayerFriendCatalogSettings.add(gnPlayerFriendCatalogSetting);
 				}
 
-				gnGamePlayerSettings.add(ParameterCode.FriendCatalogSettings, gnFriendCatalogSettings);
+				gnGamePlayerSettings.add(ParameterCode.PlayerFriendCatalogSettings, gnPlayerFriendCatalogSettings);
 			}
 
 			gnGameSettings.add(ParameterCode.GamePlayerSettings, gnGamePlayerSettings);
@@ -423,21 +423,21 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			let gnGroupSettings = new GNHashtable();
 
 			{
-				let groupCurrencySettings = groupSettings.groupCurrencySettings;
-				let gnGroupCurrencySettings = new GNArray();
-				for (let i = 0; i < groupCurrencySettings.length; i++) {
-					let groupCurrencySetting = groupCurrencySettings[i];
-					let gnGroupCurrencySetting = new GNHashtable();
+				let groupCurrenciesSettings = groupSettings.groupCurrenciesSettings;
+				let gnGroupCurrenciesSettings = new GNArray();
+				for (let i = 0; i < groupCurrenciesSettings.length; i++) {
+					let groupCurrenciesSetting = groupCurrenciesSettings[i];
+					let gnGroupCurrenciesSetting = new GNHashtable();
 
-					gnGroupCurrencySetting.add(ParameterCode.Key, groupCurrencySetting.key);
-					gnGroupCurrencySetting.add(ParameterCode.InitialValue, groupCurrencySetting.initialValue);
-					gnGroupCurrencySetting.add(ParameterCode.Description, groupCurrencySetting.description);
-					gnGroupCurrencySetting.add(ParameterCode.Index, groupCurrencySetting.index);
+					gnGroupCurrenciesSetting.add(ParameterCode.Key, groupCurrenciesSetting.key);
+					gnGroupCurrenciesSetting.add(ParameterCode.InitialValue, groupCurrenciesSetting.initialValue);
+					gnGroupCurrenciesSetting.add(ParameterCode.Description, groupCurrenciesSetting.description);
+					gnGroupCurrenciesSetting.add(ParameterCode.Index, groupCurrenciesSetting.index);
 
-					gnGroupCurrencySettings.add(gnGroupCurrencySetting);
+					gnGroupCurrenciesSettings.add(gnGroupCurrenciesSetting);
 				}
 
-				gnGroupSettings.add(ParameterCode.CurrencySettings, gnGroupCurrencySettings);
+				gnGroupSettings.add(ParameterCode.GroupCurrenciesSettings, gnGroupCurrenciesSettings);
 			}
 
 			{
@@ -458,7 +458,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnGroupStatisticsSettings.add(gnGroupStatisticsSetting);
 				}
 
-				gnGroupSettings.add(ParameterCode.StatisticsSettings, gnGroupStatisticsSettings);
+				gnGroupSettings.add(ParameterCode.GroupStatisticsSettings, gnGroupStatisticsSettings);
 			}
 
 			{
@@ -475,7 +475,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					gnGroupDatasSettings.add(gnGroupDatasSetting);
 				}
 
-				gnGroupSettings.add(ParameterCode.DatasSettings, gnGroupDatasSettings);
+				gnGroupSettings.add(ParameterCode.GroupDatasSettings, gnGroupDatasSettings);
 			}
 
 			{
@@ -513,18 +513,18 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let itemCatalogSettings = groupSettings.groupItemCatalogSettings;
-				let gnItemCatalogSettings = new GNArray();
-				for (let i = 0; i < itemCatalogSettings.length; i++) {
-					let itemCatalogSetting = itemCatalogSettings[i];
-					let gnItemCatalogSetting = new GNHashtable();
+				let groupItemCatalogSettings = groupSettings.groupItemCatalogSettings;
+				let gnGroupItemCatalogSettings = new GNArray();
+				for (let i = 0; i < groupItemCatalogSettings.length; i++) {
+					let groupItemCatalogSetting = groupItemCatalogSettings[i];
+					let gnGroupItemCatalogSetting = new GNHashtable();
 
-					gnItemCatalogSetting.add(ParameterCode.CatalogId, itemCatalogSetting.catalogId);
+					gnGroupItemCatalogSetting.add(ParameterCode.CatalogId, groupItemCatalogSetting.catalogId);
 
 					let gnItemClassSettings = new GNArray();
 
-					for (let j = 0; j < itemCatalogSetting.itemClassSettings.length; j++) {
-						let itemClassSetting = itemCatalogSetting.itemClassSettings[j];
+					for (let j = 0; j < groupItemCatalogSetting.itemClassSettings.length; j++) {
+						let itemClassSetting = groupItemCatalogSetting.itemClassSettings[j];
 
 						let gnItemClassSetting = new GNHashtable();
 						gnItemClassSetting.add(ParameterCode.ClassId, itemClassSetting.classId);
@@ -533,13 +533,13 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 						gnItemClassSettings.add(gnItemClassSetting);
 					}
 
-					gnItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
-					gnItemCatalogSetting.add(ParameterCode.ItemType, itemCatalogSetting.itemType);
+					gnGroupItemCatalogSetting.add(ParameterCode.ItemClassSettings, gnItemClassSettings);
+					gnGroupItemCatalogSetting.add(ParameterCode.ItemType, groupItemCatalogSetting.itemType);
 
-					gnItemCatalogSettings.add(gnItemCatalogSetting);
+					gnGroupItemCatalogSettings.add(gnGroupItemCatalogSetting);
 				}
 
-				gnGroupSettings.add(ParameterCode.ItemCatalogSettings, gnItemCatalogSettings);
+				gnGroupSettings.add(ParameterCode.GroupItemCatalogSettings, gnGroupItemCatalogSettings);
 			}
 
 			gnGameSettings.add(ParameterCode.GroupSettings, gnGroupSettings);
@@ -550,41 +550,41 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 			let gnInventorySettings = new GNHashtable();
 
 			{
-				let inventoryStatisticsSettings = inventorySettings.inventoryStatisticsSettings;
-				let gnInventoryStatisticsSettings = new GNArray();
-				for (let i = 0; i < inventoryStatisticsSettings.length; i++) {
-					let inventoryStatisticsSetting = inventoryStatisticsSettings[i];
-					let gnInventoryStatisticsSetting = new GNHashtable();
+				let itemStatisticsSettings = inventorySettings.itemStatisticsSettings;
+				let gnItemStatisticsSettings = new GNArray();
+				for (let i = 0; i < itemStatisticsSettings.length; i++) {
+					let itemStatisticsSetting = itemStatisticsSettings[i];
+					let gnItemStatisticsSetting = new GNHashtable();
 
-					gnInventoryStatisticsSetting.add(ParameterCode.Key, inventoryStatisticsSetting.key);
-					gnInventoryStatisticsSetting.add(ParameterCode.StatisticsAggregationMethod, inventoryStatisticsSetting.statisticsAggregationMethod);
-					gnInventoryStatisticsSetting.add(ParameterCode.MinimumValue, inventoryStatisticsSetting.minimumValue);
-					gnInventoryStatisticsSetting.add(ParameterCode.MaximumValue, inventoryStatisticsSetting.maximumValue);
-					gnInventoryStatisticsSetting.add(ParameterCode.InitialValue, inventoryStatisticsSetting.initialValue);
-					gnInventoryStatisticsSetting.add(ParameterCode.Description, inventoryStatisticsSetting.description);
-					gnInventoryStatisticsSetting.add(ParameterCode.Index, inventoryStatisticsSetting.index);
+					gnItemStatisticsSetting.add(ParameterCode.Key, itemStatisticsSetting.key);
+					gnItemStatisticsSetting.add(ParameterCode.StatisticsAggregationMethod, itemStatisticsSetting.statisticsAggregationMethod);
+					gnItemStatisticsSetting.add(ParameterCode.MinimumValue, itemStatisticsSetting.minimumValue);
+					gnItemStatisticsSetting.add(ParameterCode.MaximumValue, itemStatisticsSetting.maximumValue);
+					gnItemStatisticsSetting.add(ParameterCode.InitialValue, itemStatisticsSetting.initialValue);
+					gnItemStatisticsSetting.add(ParameterCode.Description, itemStatisticsSetting.description);
+					gnItemStatisticsSetting.add(ParameterCode.Index, itemStatisticsSetting.index);
 
-					gnInventoryStatisticsSettings.add(gnInventoryStatisticsSetting);
+					gnItemStatisticsSettings.add(gnItemStatisticsSetting);
 				}
 
-				gnInventorySettings.add(ParameterCode.StatisticsSettings, gnInventoryStatisticsSettings);
+				gnInventorySettings.add(ParameterCode.ItemStatisticsSettings, gnItemStatisticsSettings);
 			}
 
 			{
-				let inventoryDatasSettings = inventorySettings.inventoryDatasSettings;
-				let gnInventoryDatasSettings = new GNArray();
-				for (let i = 0; i < inventoryDatasSettings.length; i++) {
-					let inventoryDatasSetting = inventoryDatasSettings[i];
-					let gnInventoryDatasSetting = new GNHashtable();
+				let itemDatasSettings = inventorySettings.itemDatasSettings;
+				let gnItemDatasSettings = new GNArray();
+				for (let i = 0; i < itemDatasSettings.length; i++) {
+					let itemDatasSetting = itemDatasSettings[i];
+					let gnItemDatasSetting = new GNHashtable();
 
-					gnInventoryDatasSetting.add(ParameterCode.Key, inventoryDatasSetting.key);
-					gnInventoryDatasSetting.add(ParameterCode.Permission, inventoryDatasSetting.permission);
-					gnInventoryDatasSetting.add(ParameterCode.Description, inventoryDatasSetting.description);
+					gnItemDatasSetting.add(ParameterCode.Key, itemDatasSetting.key);
+					gnItemDatasSetting.add(ParameterCode.Permission, itemDatasSetting.permission);
+					gnItemDatasSetting.add(ParameterCode.Description, itemDatasSetting.description);
 
-					gnInventoryDatasSettings.add(gnInventoryDatasSetting);
+					gnItemDatasSettings.add(gnItemDatasSetting);
 				}
 
-				gnInventorySettings.add(ParameterCode.DatasSettings, gnInventoryDatasSettings);
+				gnInventorySettings.add(ParameterCode.ItemDatasSettings, gnItemDatasSettings);
 			}
 
 			{

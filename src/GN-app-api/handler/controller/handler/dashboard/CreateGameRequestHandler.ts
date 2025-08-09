@@ -84,7 +84,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 			gameSettings: {
 				gamePlayerSettings: {
 					customDatasSettings: [],
-					playerCurrencySettings: [],
+					playerCurrenciesSettings: [],
 					playerDatasSettings: [],
 					playerFriendCatalogSettings: [],
 					playerGroupCatalogSettings: [],
@@ -95,7 +95,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 				},
 				characterPlayerSettings: {
 					customDatasSettings: [],
-					playerCurrencySettings: [],
+					playerCurrenciesSettings: [],
 					playerDatasSettings: [],
 					playerFriendCatalogSettings: [],
 					playerGroupCatalogSettings: [],
@@ -105,7 +105,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 				},
 				groupSettings: {
 					customDatasSettings: [],
-					groupCurrencySettings: [],
+					groupCurrenciesSettings: [],
 					groupDatasSettings: [],
 					groupItemCatalogSettings: [],
 					groupStatisticsSettings: [],
@@ -113,8 +113,8 @@ export class CreateGameRequestHandler extends RequestHandler {
 				},
 				inventorySettings: {
 					customDatasSettings: [],
-					inventoryDatasSettings: [],
-					inventoryStatisticsSettings: [],
+					itemDatasSettings: [],
+					itemStatisticsSettings: [],
 					tagsSettings: []
 				},
 			},

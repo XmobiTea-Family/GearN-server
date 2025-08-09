@@ -439,33 +439,33 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 				let currentCharacterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(request.gameId);
 				let characterPlayerCollection = this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", request.gameId);
 
-				if (request.gameSettings.characterPlayerSettings.playerCurrencySettings != null) {
-					let playerCurrencySettings = new Array<xCurrencySettings>();
+				if (request.gameSettings.characterPlayerSettings.playerCurrenciesSettings != null) {
+					let playerCurrenciesSettings = new Array<xCurrencySettings>();
 
 					let removeKeyLst = new Array<string>();
 					let addKeyLst = new Array<string>();
 
-					for (let i = 0; i < currentCharacterPlayerSettings.playerCurrencySettings.length; i++) {
-						let playerCurrencySetting = currentCharacterPlayerSettings.playerCurrencySettings[i];
-						removeKeyLst.push(playerCurrencySetting.key);
+					for (let i = 0; i < currentCharacterPlayerSettings.playerCurrenciesSettings.length; i++) {
+						let playerCurrenciesSetting = currentCharacterPlayerSettings.playerCurrenciesSettings[i];
+						removeKeyLst.push(playerCurrenciesSetting.key);
 					}
 
-					for (let i = 0; i < request.gameSettings.characterPlayerSettings.playerCurrencySettings.length; i++) {
-						let playerCurrencySetting = request.gameSettings.characterPlayerSettings.playerCurrencySettings[i];
+					for (let i = 0; i < request.gameSettings.characterPlayerSettings.playerCurrenciesSettings.length; i++) {
+						let playerCurrenciesSetting = request.gameSettings.characterPlayerSettings.playerCurrenciesSettings[i];
 
-						playerCurrencySettings.push({
-							key: playerCurrencySetting.key,
-							initialValue: playerCurrencySetting.initialValue,
-							description: playerCurrencySetting.description,
-							index: playerCurrencySetting.index,
+						playerCurrenciesSettings.push({
+							key: playerCurrenciesSetting.key,
+							initialValue: playerCurrenciesSetting.initialValue,
+							description: playerCurrenciesSetting.description,
+							index: playerCurrenciesSetting.index,
 						});
 
-						if (playerCurrencySetting.index)
-							addKeyLst.push(playerCurrencySetting.key);
+						if (playerCurrenciesSetting.index)
+							addKeyLst.push(playerCurrenciesSetting.key);
 					}
 
-					currentCharacterPlayerSettings.playerCurrencySettings = playerCurrencySettings;
-					characterPlayerSettings.playerCurrencySettings = playerCurrencySettings;
+					currentCharacterPlayerSettings.playerCurrenciesSettings = playerCurrenciesSettings;
+					characterPlayerSettings.playerCurrenciesSettings = playerCurrenciesSettings;
 
 					for (let i = 0; i < addKeyLst.length; i++) {
 						let key = addKeyLst[i];
@@ -838,33 +838,33 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 				let currentGamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(request.gameId);
 				let gamePlayerCollection = this.gnServer.getDatabase().systemGameCollection("GamePlayer", request.gameId);
 
-				if (request.gameSettings.gamePlayerSettings.playerCurrencySettings != null) {
-					let playerCurrencySettings = new Array<xCurrencySettings>();
+				if (request.gameSettings.gamePlayerSettings.playerCurrenciesSettings != null) {
+					let playerCurrenciesSettings = new Array<xCurrencySettings>();
 
 					let removeKeyLst = new Array<string>();
 					let addKeyLst = new Array<string>();
 
-					for (let i = 0; i < currentGamePlayerSettings.playerCurrencySettings.length; i++) {
-						let playerCurrencySetting = currentGamePlayerSettings.playerCurrencySettings[i];
-						removeKeyLst.push(playerCurrencySetting.key);
+					for (let i = 0; i < currentGamePlayerSettings.playerCurrenciesSettings.length; i++) {
+						let playerCurrenciesSetting = currentGamePlayerSettings.playerCurrenciesSettings[i];
+						removeKeyLst.push(playerCurrenciesSetting.key);
 					}
 
-					for (let i = 0; i < request.gameSettings.gamePlayerSettings.playerCurrencySettings.length; i++) {
-						let playerCurrencySetting = request.gameSettings.gamePlayerSettings.playerCurrencySettings[i];
+					for (let i = 0; i < request.gameSettings.gamePlayerSettings.playerCurrenciesSettings.length; i++) {
+						let playerCurrenciesSetting = request.gameSettings.gamePlayerSettings.playerCurrenciesSettings[i];
 
-						playerCurrencySettings.push({
-							key: playerCurrencySetting.key,
-							initialValue: playerCurrencySetting.initialValue,
-							description: playerCurrencySetting.description,
-							index: playerCurrencySetting.index,
+						playerCurrenciesSettings.push({
+							key: playerCurrenciesSetting.key,
+							initialValue: playerCurrenciesSetting.initialValue,
+							description: playerCurrenciesSetting.description,
+							index: playerCurrenciesSetting.index,
 						});
 
-						if (playerCurrencySetting.index)
-							addKeyLst.push(playerCurrencySetting.key);
+						if (playerCurrenciesSetting.index)
+							addKeyLst.push(playerCurrenciesSetting.key);
 					}
 
-					currentGamePlayerSettings.playerCurrencySettings = playerCurrencySettings;
-					gamePlayerSettings.playerCurrencySettings = playerCurrencySettings;
+					currentGamePlayerSettings.playerCurrenciesSettings = playerCurrenciesSettings;
+					gamePlayerSettings.playerCurrenciesSettings = playerCurrenciesSettings;
 
 					for (let i = 0; i < addKeyLst.length; i++) {
 						let key = addKeyLst[i];
@@ -1182,33 +1182,33 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 				let currentGroupSettings = this.gnServer.getGNSettings().getGroupSettings(request.gameId);
 				let groupCollection = this.gnServer.getDatabase().systemGameCollection("Group", request.gameId);
 
-				if (request.gameSettings.groupSettings.groupCurrencySettings != null) {
-					let groupCurrencySettings = new Array<xCurrencySettings>();
+				if (request.gameSettings.groupSettings.groupCurrenciesSettings != null) {
+					let groupCurrenciesSettings = new Array<xCurrencySettings>();
 
 					let removeKeyLst = new Array<string>();
 					let addKeyLst = new Array<string>();
 
-					for (let i = 0; i < groupSettings.groupCurrencySettings.length; i++) {
-						let groupCurrencySetting = groupSettings.groupCurrencySettings[i];
-						removeKeyLst.push(groupCurrencySetting.key);
+					for (let i = 0; i < groupSettings.groupCurrenciesSettings.length; i++) {
+						let groupCurrenciesSetting = groupSettings.groupCurrenciesSettings[i];
+						removeKeyLst.push(groupCurrenciesSetting.key);
 					}
 
-					for (let i = 0; i < request.gameSettings.groupSettings.groupCurrencySettings.length; i++) {
-						let groupCurrencySetting = request.gameSettings.groupSettings.groupCurrencySettings[i];
+					for (let i = 0; i < request.gameSettings.groupSettings.groupCurrenciesSettings.length; i++) {
+						let groupCurrenciesSetting = request.gameSettings.groupSettings.groupCurrenciesSettings[i];
 
-						groupCurrencySettings.push({
-							key: groupCurrencySetting.key,
-							initialValue: groupCurrencySetting.initialValue,
-							description: groupCurrencySetting.description,
-							index: groupCurrencySetting.index,
+						groupCurrenciesSettings.push({
+							key: groupCurrenciesSetting.key,
+							initialValue: groupCurrenciesSetting.initialValue,
+							description: groupCurrenciesSetting.description,
+							index: groupCurrenciesSetting.index,
 						});
 
-						if (groupCurrencySetting.index)
-							addKeyLst.push(groupCurrencySetting.key);
+						if (groupCurrenciesSetting.index)
+							addKeyLst.push(groupCurrenciesSetting.key);
 					}
 
-					currentGroupSettings.groupCurrencySettings = groupCurrencySettings;
-					groupSettings.groupCurrencySettings = groupCurrencySettings;
+					currentGroupSettings.groupCurrenciesSettings = groupCurrenciesSettings;
+					groupSettings.groupCurrenciesSettings = groupCurrenciesSettings;
 
 					for (let i = 0; i < addKeyLst.length; i++) {
 						let key = addKeyLst[i];
@@ -1549,8 +1549,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 				let currentInventorySettings = this.gnServer.getGNSettings().getInventorySettings(request.gameId);
 				let inventoryCollection = this.gnServer.getDatabase().systemGameCollection("Inventory", request.gameId);
 
-				if (request.gameSettings.inventorySettings.inventoryStatisticsSettings != null) {
-					let inventoryStatisticsSettings = new Array<xStatisticsSettings>();
+				if (request.gameSettings.inventorySettings.itemStatisticsSettings != null) {
+					let itemStatisticsSettings = new Array<xStatisticsSettings>();
 
 					let removeKeyAscLst = new Array<string>();
 					let removeKeyLst = new Array<string>();
@@ -1558,38 +1558,38 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 					let addKeyAscLst = new Array<string>();
 					let addKeyLst = new Array<string>();
 
-					for (let i = 0; i < inventorySettings.inventoryStatisticsSettings.length; i++) {
-						let inventoryStatisticsSetting = inventorySettings.inventoryStatisticsSettings[i];
+					for (let i = 0; i < inventorySettings.itemStatisticsSettings.length; i++) {
+						let itemStatisticsSetting = inventorySettings.itemStatisticsSettings[i];
 
-						if (inventoryStatisticsSetting.index) {
-							if (inventoryStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
-								removeKeyAscLst.push(inventoryStatisticsSetting.key);
-							else removeKeyLst.push(inventoryStatisticsSetting.key);
+						if (itemStatisticsSetting.index) {
+							if (itemStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
+								removeKeyAscLst.push(itemStatisticsSetting.key);
+							else removeKeyLst.push(itemStatisticsSetting.key);
 						}
 					}
 
-					for (let i = 0; i < request.gameSettings.inventorySettings.inventoryStatisticsSettings.length; i++) {
-						let inventoryStatisticsSetting = request.gameSettings.inventorySettings.inventoryStatisticsSettings[i];
+					for (let i = 0; i < request.gameSettings.inventorySettings.itemStatisticsSettings.length; i++) {
+						let itemStatisticsSetting = request.gameSettings.inventorySettings.itemStatisticsSettings[i];
 
-						inventoryStatisticsSettings.push({
-							key: inventoryStatisticsSetting.key,
-							statisticsAggregationMethod: inventoryStatisticsSetting.statisticsAggregationMethod,
-							maximumValue: inventoryStatisticsSetting.maximumValue,
-							minimumValue: inventoryStatisticsSetting.minimumValue,
-							initialValue: inventoryStatisticsSetting.initialValue,
-							description: inventoryStatisticsSetting.description,
-							index: inventoryStatisticsSetting.index,
+						itemStatisticsSettings.push({
+							key: itemStatisticsSetting.key,
+							statisticsAggregationMethod: itemStatisticsSetting.statisticsAggregationMethod,
+							maximumValue: itemStatisticsSetting.maximumValue,
+							minimumValue: itemStatisticsSetting.minimumValue,
+							initialValue: itemStatisticsSetting.initialValue,
+							description: itemStatisticsSetting.description,
+							index: itemStatisticsSetting.index,
 						});
 
-						if (inventoryStatisticsSetting.index) {
-							if (inventoryStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
-								addKeyAscLst.push(inventoryStatisticsSetting.key);
-							else addKeyLst.push(inventoryStatisticsSetting.key);
+						if (itemStatisticsSetting.index) {
+							if (itemStatisticsSetting.statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum)
+								addKeyAscLst.push(itemStatisticsSetting.key);
+							else addKeyLst.push(itemStatisticsSetting.key);
 						}
 					}
 
-					currentInventorySettings.inventoryStatisticsSettings = inventoryStatisticsSettings;
-					inventorySettings.inventoryStatisticsSettings = inventoryStatisticsSettings;
+					currentInventorySettings.itemStatisticsSettings = itemStatisticsSettings;
+					inventorySettings.itemStatisticsSettings = itemStatisticsSettings;
 
 					{
 						for (let i = 0; i < addKeyLst.length; i++) {
@@ -1711,21 +1711,21 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 					}
 				}
 
-				if (request.gameSettings.inventorySettings.inventoryDatasSettings != null) {
-					let inventoryDatasSettings = new Array<xDataSettings>();
+				if (request.gameSettings.inventorySettings.itemDatasSettings != null) {
+					let itemDatasSettings = new Array<xDataSettings>();
 
-					for (let i = 0; i < request.gameSettings.inventorySettings.inventoryDatasSettings.length; i++) {
-						let inventoryDatasSetting = request.gameSettings.inventorySettings.inventoryDatasSettings[i];
+					for (let i = 0; i < request.gameSettings.inventorySettings.itemDatasSettings.length; i++) {
+						let itemDatasSetting = request.gameSettings.inventorySettings.itemDatasSettings[i];
 
-						inventoryDatasSettings.push({
-							key: inventoryDatasSetting.key,
-							permission: inventoryDatasSetting.permission,
-							description: inventoryDatasSetting.description,
+						itemDatasSettings.push({
+							key: itemDatasSetting.key,
+							permission: itemDatasSetting.permission,
+							description: itemDatasSetting.description,
 						});
 					}
 
-					currentInventorySettings.inventoryDatasSettings = inventoryDatasSettings;
-					inventorySettings.inventoryDatasSettings = inventoryDatasSettings;
+					currentInventorySettings.itemDatasSettings = itemDatasSettings;
+					inventorySettings.itemDatasSettings = itemDatasSettings;
 				}
 
 				if (request.gameSettings.inventorySettings.customDatasSettings != null) {

@@ -157,9 +157,9 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
-		let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == request.key);
+		let itemStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == request.key);
 
-		if (inventoryStatisticsSettingsItem == null) {
+		if (itemStatisticsSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;
@@ -209,7 +209,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 			else {
 				let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
 
-				let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
+				let statisticsAggregationMethod = <xStatisticsAggregationMethod>itemStatisticsSettingsItem.statisticsAggregationMethod;
 				let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
 				if (request.skip + request.limit <= 100) {

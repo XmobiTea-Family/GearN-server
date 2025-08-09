@@ -8,13 +8,13 @@ import { TagSettingsParam } from "./TagSettingsParam";
 
 export class GroupSettingsParam {
 
-	@GNArrayDataMember({ code: ParameterCode.CurrencySettings, elementCls: CurrencySettingsParam, isOptional: true })
-	public groupCurrencySettings?: Array<CurrencySettingsParam>;
+	@GNArrayDataMember({ code: ParameterCode.GroupCurrenciesSettings, elementCls: CurrencySettingsParam, isOptional: true })
+	public groupCurrenciesSettings?: Array<CurrencySettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.StatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.GroupStatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true })
 	public groupStatisticsSettings?: Array<StatisticsSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.DatasSettings, elementCls: DataSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.GroupDatasSettings, elementCls: DataSettingsParam, isOptional: true })
 	public groupDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatasSettings, elementCls: DataSettingsParam, isOptional: true })
@@ -23,7 +23,7 @@ export class GroupSettingsParam {
 	@GNArrayDataMember({ code: ParameterCode.TagsSettings, elementCls: TagSettingsParam, isOptional: true })
 	public tagsSettings?: Array<TagSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.ItemCatalogSettings, elementCls: ItemCatalogSettingsParam, isOptional: true })
+	@GNArrayDataMember({ code: ParameterCode.GroupItemCatalogSettings, elementCls: ItemCatalogSettingsParam, isOptional: true })
 	public groupItemCatalogSettings?: Array<ItemCatalogSettingsParam>;
 
 }

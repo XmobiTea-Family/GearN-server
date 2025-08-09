@@ -508,22 +508,22 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 		return gnTags;
 	}
 
-	protected generateItemDatas(inventory: Inventory, inventoryDataKeys: Array<string>, gameId: string): GNArray {
+	protected generateItemDatas(inventory: Inventory, itemDataKeys: Array<string>, gameId: string): GNArray {
 		let gnItemDatas = new GNArray();
 
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(gameId);
 
-		for (let i = 0; i < inventorySettings.inventoryDatasSettings.length; i++) {
-			let inventoryDatasSettingsItem = inventorySettings.inventoryDatasSettings[i];
+		for (let i = 0; i < inventorySettings.itemDatasSettings.length; i++) {
+			let itemDatasSettingsItem = inventorySettings.itemDatasSettings[i];
 
-			if (inventoryDataKeys == null || inventoryDataKeys.indexOf(inventoryDatasSettingsItem.key) != -1) {
-				let inventoryData = inventory.getItemData(inventoryDatasSettingsItem.key);
+			if (itemDataKeys == null || itemDataKeys.indexOf(itemDatasSettingsItem.key) != -1) {
+				let itemData = inventory.getItemData(itemDatasSettingsItem.key);
 
-				if (inventoryData != null) {
+				if (itemData != null) {
 					let gnItemData = new GNHashtable();
 
-					gnItemData.add(ParameterCode.Key, inventoryData.key);
-					gnItemData.add(ParameterCode.Value, inventoryData.value);
+					gnItemData.add(ParameterCode.Key, itemData.key);
+					gnItemData.add(ParameterCode.Value, itemData.value);
 
 					gnItemDatas.add(gnItemData);
 				}
@@ -533,22 +533,22 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 		return gnItemDatas;
 	}
 
-	protected generateItemStatistics(inventory: Inventory, inventoryStatisticsKeys: Array<string>, gameId: string): GNArray {
+	protected generateItemStatistics(inventory: Inventory, itemStatisticsKeys: Array<string>, gameId: string): GNArray {
 		let gnItemStatistics = new GNArray();
 
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(gameId);
 
-		for (let i = 0; i < inventorySettings.inventoryStatisticsSettings.length; i++) {
-			let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings[i];
+		for (let i = 0; i < inventorySettings.itemStatisticsSettings.length; i++) {
+			let itemStatisticsSettingsItem = inventorySettings.itemStatisticsSettings[i];
 
-			if (inventoryStatisticsKeys == null || inventoryStatisticsKeys.indexOf(inventoryStatisticsSettingsItem.key) != -1) {
-				let inventoryStatistics = inventory.getItemStatistics(inventoryStatisticsSettingsItem.key);
+			if (itemStatisticsKeys == null || itemStatisticsKeys.indexOf(itemStatisticsSettingsItem.key) != -1) {
+				let itemStatistics = inventory.getItemStatistics(itemStatisticsSettingsItem.key);
 
 				let gnItemStatistic = new GNHashtable();
-				gnItemStatistic.add(ParameterCode.Key, inventoryStatisticsSettingsItem.key);
+				gnItemStatistic.add(ParameterCode.Key, itemStatisticsSettingsItem.key);
 
-				if (inventoryStatistics != null) gnItemStatistic.add(ParameterCode.Value, inventoryStatistics.value);
-				else gnItemStatistic.add(ParameterCode.Value, inventoryStatisticsSettingsItem.initialValue);
+				if (itemStatistics != null) gnItemStatistic.add(ParameterCode.Value, itemStatistics.value);
+				else gnItemStatistic.add(ParameterCode.Value, itemStatisticsSettingsItem.initialValue);
 
 				gnItemStatistics.add(gnItemStatistic);
 			}

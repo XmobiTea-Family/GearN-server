@@ -8,14 +8,14 @@ import { xStatisticsSettings } from "./xStatisticsSettings";
 import { xTagSettings } from "./xTagSettings";
 
 export interface xGamePlayerSettings {
-    playerCurrencySettings: Array<xCurrencySettings>;
-    playerStatisticsSettings: Array<xStatisticsSettings>;
-    playerDatasSettings: Array<xDataSettings>;
-    customDatasSettings: Array<xDataSettings>;
-    tagsSettings: Array<xTagSettings>;
+	playerCurrenciesSettings: Array<xCurrencySettings>;
+	playerStatisticsSettings: Array<xStatisticsSettings>;
+	playerDatasSettings: Array<xDataSettings>;
+	customDatasSettings: Array<xDataSettings>;
+	tagsSettings: Array<xTagSettings>;
 
-    playerCharacterCatalogSettings: Array<xCharacterCatalogSettings>;
-    playerGroupCatalogSettings: Array<xGroupCatalogSettings>;
-    playerItemCatalogSettings: Array<xItemCatalogSettings>;
-    playerFriendCatalogSettings: Array<xFriendCatalogSettings>;
+	playerCharacterCatalogSettings: Array<xCharacterCatalogSettings>;
+	playerGroupCatalogSettings: Array<xGroupCatalogSettings>;
+	playerItemCatalogSettings: Array<xItemCatalogSettings>;
+	playerFriendCatalogSettings: Array<xFriendCatalogSettings>;
 }

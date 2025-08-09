@@ -215,8 +215,8 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 				let addKeyLst = new Array<string>();
 
 				for (let i = 0; i < masterPlayerSettings.genericServiceSettings.length; i++) {
-					let playerCurrencySetting = masterPlayerSettings.genericServiceSettings[i];
-					removeKeyLst.push(playerCurrencySetting.serviceName);
+					let genericServiceSetting = masterPlayerSettings.genericServiceSettings[i];
+					removeKeyLst.push(genericServiceSetting.serviceName);
 				}
 
 				for (let i = 0; i < request.masterPlayerSettings.genericServiceSettings.length; i++) {
@@ -262,32 +262,32 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 				masterPlayerSettings.genericServiceSettings = genericServiceSettings;
 			}
 
-			if (request.masterPlayerSettings.playerCurrencySettings != null) {
-				let playerCurrencySettings = new Array<xCurrencySettings>();
+			if (request.masterPlayerSettings.playerCurrenciesSettings != null) {
+				let playerCurrenciesSettings = new Array<xCurrencySettings>();
 
 				let removeKeyLst = new Array<string>();
 				let addKeyLst = new Array<string>();
 
-				for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
-					let playerCurrencySetting = masterPlayerSettings.playerCurrencySettings[i];
-					removeKeyLst.push(playerCurrencySetting.key);
+				for (let i = 0; i < masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+					let playerCurrenciesSetting = masterPlayerSettings.playerCurrenciesSettings[i];
+					removeKeyLst.push(playerCurrenciesSetting.key);
 				}
 
-				for (let i = 0; i < request.masterPlayerSettings.playerCurrencySettings.length; i++) {
-					let playerCurrencySetting = request.masterPlayerSettings.playerCurrencySettings[i];
+				for (let i = 0; i < request.masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+					let playerCurrenciesSetting = request.masterPlayerSettings.playerCurrenciesSettings[i];
 
-					playerCurrencySettings.push({
-						key: playerCurrencySetting.key,
-						initialValue: playerCurrencySetting.initialValue,
-						description: playerCurrencySetting.description,
-						index: playerCurrencySetting.index,
+					playerCurrenciesSettings.push({
+						key: playerCurrenciesSetting.key,
+						initialValue: playerCurrenciesSetting.initialValue,
+						description: playerCurrenciesSetting.description,
+						index: playerCurrenciesSetting.index,
 					});
 
-					if (playerCurrencySetting.index)
-						addKeyLst.push(playerCurrencySetting.key);
+					if (playerCurrenciesSetting.index)
+						addKeyLst.push(playerCurrenciesSetting.key);
 				}
 
-				this.gnServer.getGNSettings().getMasterPlayerSettings().playerCurrencySettings = playerCurrencySettings;
+				this.gnServer.getGNSettings().getMasterPlayerSettings().playerCurrenciesSettings = playerCurrenciesSettings;
 
 				for (let i = 0; i < addKeyLst.length; i++) {
 					let key = addKeyLst[i];
@@ -324,7 +324,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					}
 				}
 
-				masterPlayerSettings.playerCurrencySettings = playerCurrencySettings;
+				masterPlayerSettings.playerCurrenciesSettings = playerCurrenciesSettings;
 			}
 
 			if (request.masterPlayerSettings.playerStatisticsSettings != null) {

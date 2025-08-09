@@ -508,9 +508,9 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsBackup", gameId);
 
 				let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(gameId);
-				let inventoryStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == key);
+				let itemStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == key);
 
-				if (inventoryStatisticsSettingsItem == null) {
+				if (itemStatisticsSettingsItem == null) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 					return operationResponse;
 				}
@@ -520,7 +520,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 					itemStatistics: true,
 				}
 
-				let statisticsAggregationMethod = <xStatisticsAggregationMethod>inventoryStatisticsSettingsItem.statisticsAggregationMethod;
+				let statisticsAggregationMethod = <xStatisticsAggregationMethod>itemStatisticsSettingsItem.statisticsAggregationMethod;
 				let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
 				let inventoryCollection = await this.gnServer.getDatabase().systemGameCollection("Inventory", gameId);
@@ -554,7 +554,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 					let itemStatistics = inventory.getItemStatistics(key);
 
-					let value = inventoryStatisticsSettingsItem.initialValue;
+					let value = itemStatisticsSettingsItem.initialValue;
 					let tsLastUpdate = currentMilliseconds;
 
 					if (itemStatistics != null) {
@@ -572,13 +572,13 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 					});
 
 					if (itemStatistics != null) {
-						let amount = value - inventoryStatisticsSettingsItem.initialValue;
+						let amount = value - itemStatisticsSettingsItem.initialValue;
 
 						logRequests.push({
 							itemId: itemId,
 							amount: -amount,
 							startValue: value,
-							finalValue: inventoryStatisticsSettingsItem.initialValue,
+							finalValue: itemStatisticsSettingsItem.initialValue,
 							key: key,
 							log: log,
 							tsCreate: currentMilliseconds,

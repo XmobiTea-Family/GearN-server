@@ -162,10 +162,10 @@ export class ChangePlayerCurrencyRequestHandler extends MasterPlayerBaseRequestH
 
 			let key = playerCurrencyParam.key;
 
-			let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == key);
-			if (playerCurrencySettingsItem == null) continue;
+			let playerCurrenciesSettingsItem = masterPlayerSettings.playerCurrenciesSettings.find(x => x.key == key);
+			if (playerCurrenciesSettingsItem == null) continue;
 
-			let initialValue = playerCurrencySettingsItem.initialValue;
+			let initialValue = playerCurrenciesSettingsItem.initialValue;
 
 			let amount = playerCurrencyParam.amount;
 			let serverValue = 0;

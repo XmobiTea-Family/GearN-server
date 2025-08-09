@@ -150,9 +150,9 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
-		let groupCurrencySettingsItem = groupSettings.groupCurrencySettings.find(x => x.key == request.key);
+		let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == request.key);
 
-		if (groupCurrencySettingsItem == null) {
+		if (groupCurrenciesSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
 			return operationResponse;

@@ -133,10 +133,10 @@ export class GetCurrencyLogRequestHandler extends RequestHandler {
 		let keys: string[] = [];
 		if (request.keys) {
 			for (let i = 0; i < request.keys.length; i++) {
-				let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings.find(x => x.key == request.keys[i]);
+				let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find(x => x.key == request.keys[i]);
 
-				if (playerCurrencySettingsItem != null) {
-					keys.push(playerCurrencySettingsItem.key);
+				if (playerCurrenciesSettingsItem != null) {
+					keys.push(playerCurrenciesSettingsItem.key);
 				}
 			}
 		}

@@ -133,7 +133,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 		let keys: string[] = [];
 		if (request.keys) {
 			for (let i = 0; i < request.keys.length; i++) {
-				let playerStatisticsSettingsItem = inventorySettings.inventoryStatisticsSettings.find(x => x.key == request.keys[i]);
+				let playerStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == request.keys[i]);
 
 				if (playerStatisticsSettingsItem != null) {
 					keys.push(playerStatisticsSettingsItem.key);

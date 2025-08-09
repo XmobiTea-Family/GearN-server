@@ -10,13 +10,13 @@ export class MasterPlayerSettingsParam {
 	@GNArrayDataMember({ code: ParameterCode.GenericServiceSettings, elementCls: GenericServiceSettingsParam, isOptional: true, })
 	public genericServiceSettings?: Array<GenericServiceSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.CurrencySettings, elementCls: CurrencySettingsParam, isOptional: true, })
-	public playerCurrencySettings?: Array<CurrencySettingsParam>;
+	@GNArrayDataMember({ code: ParameterCode.PlayerCurrenciesSettings, elementCls: CurrencySettingsParam, isOptional: true, })
+	public playerCurrenciesSettings?: Array<CurrencySettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.StatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true, })
+	@GNArrayDataMember({ code: ParameterCode.PlayerStatisticsSettings, elementCls: StatisticsSettingsParam, isOptional: true, })
 	public playerStatisticsSettings?: Array<StatisticsSettingsParam>;
 
-	@GNArrayDataMember({ code: ParameterCode.DatasSettings, elementCls: DataSettingsParam, isOptional: true, })
+	@GNArrayDataMember({ code: ParameterCode.PlayerDatasSettings, elementCls: DataSettingsParam, isOptional: true, })
 	public playerDatasSettings?: Array<DataSettingsParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.CustomDatasSettings, elementCls: DataSettingsParam, isOptional: true, })

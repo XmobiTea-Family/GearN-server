@@ -245,6 +245,7 @@ export class ApiMiddleware {
 					.setPermission(defaultSecretPermissionItem)
 					.setIsOnlyMasterAdmin(secretInfoResult["onlyMasterAdmin"] == true)
 					.setIsDefault(secretInfoResult["isDefault"] == true)
+					.setDescription(secretInfoResult["description"])
 					.build();
 
 				this.secretInfoDict.set(secretKey, secretInfo);
@@ -447,6 +448,8 @@ export class ApiMiddleware {
 				secretInfoAny.getIsOnlyMasterAdmin = secretInfo.getIsOnlyMasterAdmin;
 				secretInfoAny.setIsOnlyMasterAdmin = secretInfo.setIsOnlyMasterAdmin;
 				secretInfoAny.toDocumentData = secretInfo.toDocumentData;
+				secretInfoAny.setDescription = secretInfo.setDescription;
+				secretInfoAny.getDescription = secretInfo.getDescription;
 
 				secretInfo = secretInfoAny;
 				secretInfo.setGameId(gameId);
@@ -545,6 +548,8 @@ export class ApiMiddleware {
 				secretInfoAny.getIsOnlyMasterAdmin = secretInfo.getIsOnlyMasterAdmin;
 				secretInfoAny.setIsOnlyMasterAdmin = secretInfo.setIsOnlyMasterAdmin;
 				secretInfoAny.toDocumentData = secretInfo.toDocumentData;
+				secretInfoAny.setDescription = secretInfo.setDescription;
+				secretInfoAny.getDescription = secretInfo.getDescription;
 
 				secretInfo = secretInfoAny;
 				secretInfo.setGameId(gameId);

@@ -144,22 +144,22 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			{
-				let gnPlayerCurrencySettings = new GNArray();
+				let gnPlayerCurrenciesSettings = new GNArray();
 
-				for (let i = 0; i < masterPlayerSettings.playerCurrencySettings.length; i++) {
-					let playerCurrencySetting = masterPlayerSettings.playerCurrencySettings[i];
+				for (let i = 0; i < masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+					let playerCurrenciesSetting = masterPlayerSettings.playerCurrenciesSettings[i];
 
-					let gnPlayerCurrencySetting = new GNHashtable();
+					let gnPlayerCurrenciesSetting = new GNHashtable();
 
-					gnPlayerCurrencySetting.add(ParameterCode.Key, playerCurrencySetting.key);
-					gnPlayerCurrencySetting.add(ParameterCode.InitialValue, playerCurrencySetting.initialValue);
-					gnPlayerCurrencySetting.add(ParameterCode.Description, playerCurrencySetting.description);
-					gnPlayerCurrencySetting.add(ParameterCode.Index, playerCurrencySetting.index);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Key, playerCurrenciesSetting.key);
+					gnPlayerCurrenciesSetting.add(ParameterCode.InitialValue, playerCurrenciesSetting.initialValue);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Description, playerCurrenciesSetting.description);
+					gnPlayerCurrenciesSetting.add(ParameterCode.Index, playerCurrenciesSetting.index);
 
-					gnPlayerCurrencySettings.add(gnPlayerCurrencySetting);
+					gnPlayerCurrenciesSettings.add(gnPlayerCurrenciesSetting);
 				}
 
-				gnMasterPlayerSettings.add(ParameterCode.CurrencySettings, gnPlayerCurrencySettings);
+				gnMasterPlayerSettings.add(ParameterCode.PlayerCurrenciesSettings, gnPlayerCurrenciesSettings);
 			}
 
 			{
@@ -181,7 +181,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 					gnPlayerStatisticsSettings.add(gnPlayerStatisticsSetting);
 				}
 
-				gnMasterPlayerSettings.add(ParameterCode.StatisticsSettings, gnPlayerStatisticsSettings);
+				gnMasterPlayerSettings.add(ParameterCode.PlayerStatisticsSettings, gnPlayerStatisticsSettings);
 			}
 
 			{
@@ -199,7 +199,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 					gnPlayerDatasSettings.add(gnPlayerDatasSetting);
 				}
 
-				gnMasterPlayerSettings.add(ParameterCode.DatasSettings, gnPlayerDatasSettings);
+				gnMasterPlayerSettings.add(ParameterCode.PlayerDatasSettings, gnPlayerDatasSettings);
 			}
 
 			{
