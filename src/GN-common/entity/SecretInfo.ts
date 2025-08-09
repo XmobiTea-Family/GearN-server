@@ -1,9 +1,9 @@
 import { IBuilder } from "./../../GN-library/xbuilder/lib/IBuilder";
 
 export enum SecretRole {
-	Admin = 0,
-	Server = 1,
-	Player = 2,
+	Admin = 1,
+	Server = 2,
+	Player = 3,
 }
 
 export interface PermissionRules {

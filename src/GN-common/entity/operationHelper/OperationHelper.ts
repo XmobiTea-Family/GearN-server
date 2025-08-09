@@ -5,14 +5,11 @@ import { OperationRequest } from "./../operationRequest/OperationRequest";
 import { OperationEvent } from "./../operationEvent/OperationEvent";
 import { CodeHelper } from "./../../helper/CodeHelper";
 import { Request } from "./../operationRequest/base/Request";
-import { RequestType } from "./../../constant/enumType/RequestType";
-import { RequestRole } from "./../../constant/enumType/RequestRole";
 import { SecretInfo } from "./../SecretInfo";
 import { AuthInfo } from "./../AuthInfo";
 import { GNHashtable } from "./../../common/GNData";
 
 export class OperationHelper {
-
 	public static toResponseSocketData(operationResponse: OperationResponse): {
 		returnCode: number,
 		parameters: {},
@@ -86,8 +83,8 @@ export class OperationHelper {
 	public static toDataFromRequest(request: Request) {
 		return {
 			operationCode: request.getOperationCode(),
-			requestType: RequestType[request.getRequestType()],
-			role: RequestRole[request.getRole()],
+			requestType: CodeHelper.getRequestTypeName(request.getRequestType()),
+			role: CodeHelper.getRequestRoleName(request.getRole()),
 			ip: request.getIP(),
 			secretInfo: OperationHelper.toDataSecretInfo(request.getSecretInfo()),
 			authInfo: OperationHelper.toAuthInfo(request.getAuthInfo()),
@@ -98,7 +95,7 @@ export class OperationHelper {
 		if (secretInfo == null) return null;
 
 		return {
-			role: RequestRole[secretInfo.getRole()],
+			role: CodeHelper.getSecretRoleName(secretInfo.getRole()),
 			gameId: secretInfo.getGameId(),
 		}
 	}

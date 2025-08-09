@@ -78,9 +78,9 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 		operationResponse.setParameter(ParameterCode.TsExpire, secretInfoItem.getTsExpire());
 		operationResponse.setParameter(ParameterCode.Description, secretInfoItem.getDescription());
 
-		let gnPermission = GetSecretInfoInformationRequestHandler.getPermissionHashtable(secretInfoItem.getPermission());
+		let gnPermissionParam = GetSecretInfoInformationRequestHandler.getPermissionParam(secretInfoItem.getPermission());
 
-		operationResponse.setParameter(ParameterCode.Permission, gnPermission);
+		operationResponse.setParameter(ParameterCode.PermissionParam, gnPermissionParam);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
@@ -89,7 +89,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 		return operationResponse;
 	}
 
-	public static getPermissionHashtable(permission: SecretPermissionItem): GNHashtable {
+	public static getPermissionParam(permission: SecretPermissionItem): GNHashtable {
 		let gnPermission = new GNHashtable();
 
 		{
