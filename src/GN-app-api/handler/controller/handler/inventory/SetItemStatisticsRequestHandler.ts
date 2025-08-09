@@ -23,7 +23,7 @@ class SetItemStatisticsOperationRequest extends OperationRequest {
 	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.ItemStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: ItemStatisticsParam })
-	public inventoryStatisticsParams: Array<ItemStatisticsParam>;
+	public itemStatistics: Array<ItemStatisticsParam>;
 
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
@@ -78,7 +78,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryStatisticsParams: request.inventoryStatisticsParams,
+			itemStatistics: request.itemStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
@@ -96,7 +96,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryStatisticsParams: request.inventoryStatisticsParams,
+			itemStatistics: request.itemStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
@@ -114,12 +114,12 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryStatisticsParams: request.inventoryStatisticsParams,
+			itemStatistics: request.itemStatistics,
 			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { itemId: string, inventoryStatisticsParams: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { itemId: string, itemStatistics: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetItemStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -146,8 +146,8 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		for (let i = 0; i < request.inventoryStatisticsParams.length; i++) {
-			let inventoryStatisticsParam = request.inventoryStatisticsParams[i];
+		for (let i = 0; i < request.itemStatistics.length; i++) {
+			let inventoryStatisticsParam = request.itemStatistics[i];
 
 			let key = inventoryStatisticsParam.key;
 

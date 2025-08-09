@@ -23,7 +23,7 @@ class SetItemDataOperationRequest extends OperationRequest {
 	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.ItemDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: ItemDataParam })
-	public inventoryDataParams: Array<ItemDataParam>;
+	public itemDatas: Array<ItemDataParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -75,7 +75,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryDataParams: request.inventoryDataParams
+			itemDatas: request.itemDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -92,7 +92,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryDataParams: request.inventoryDataParams
+			itemDatas: request.itemDatas
 		}, secretInfo, operationRequest);
 	}
 
@@ -109,11 +109,11 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryDataParams: request.inventoryDataParams
+			itemDatas: request.itemDatas
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { itemId: string, inventoryDataParams: Array<ItemDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { itemId: string, itemDatas: Array<ItemDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetItemData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -138,8 +138,8 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnItemDatas = new GNArray();
 
-		for (let i = 0; i < request.inventoryDataParams.length; i++) {
-			let inventoryDataParam = request.inventoryDataParams[i];
+		for (let i = 0; i < request.itemDatas.length; i++) {
+			let inventoryDataParam = request.itemDatas[i];
 
 			let key = inventoryDataParam.key;
 			let inventoryDatasSettingsItem = inventorySettings.inventoryDatasSettings.find(x => x.key == key);

@@ -20,7 +20,7 @@ class GetItemDataOperationRequest extends OperationRequest {
 	public itemId: string;
 
 	@GNArrayDataMember({ code: ParameterCode.ItemDataKeys, isOptional: true, elementCls: String })
-	public inventoryDataKeys?: Array<string>;
+	public itemDataKeys?: Array<string>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -72,7 +72,7 @@ export class GetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryDataKeys: request.inventoryDataKeys,
+			itemDataKeys: request.itemDataKeys,
 		}, secretInfo, operationRequest);
 	}
 
@@ -89,7 +89,7 @@ export class GetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryDataKeys: request.inventoryDataKeys,
+			itemDataKeys: request.itemDataKeys,
 		}, secretInfo, operationRequest);
 	}
 
@@ -106,11 +106,11 @@ export class GetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-			inventoryDataKeys: request.inventoryDataKeys,
+			itemDataKeys: request.itemDataKeys,
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { itemId: string, inventoryDataKeys: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { itemId: string, itemDataKeys: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetItemData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -132,7 +132,7 @@ export class GetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 		let gnInfoResponseParameters = new GNHashtable();
 
-		gnInfoResponseParameters.add(ParameterCode.ItemDatas, this.generateItemDatas(inventory, request.inventoryDataKeys, secretInfo.getGameId()));
+		gnInfoResponseParameters.add(ParameterCode.ItemDatas, this.generateItemDatas(inventory, request.itemDataKeys, secretInfo.getGameId()));
 
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
