@@ -118,7 +118,7 @@ export class PlayerBase extends DataObjectBase {
 		return this.playerCurrencies.get(key);
 	}
 
-	public setPlayerCurrency(key: string, value: number): void {
+	public changePlayerCurrency(key: string, value: number): void {
 		this.playerCurrencies.set(key, {
 			value: value
 		});
@@ -151,7 +151,7 @@ export class PlayerBase extends DataObjectBase {
 		return this.playerStatistics.get(key);
 	}
 
-	public setPlayerStatistics(key: string, value: number, tsLastUpdate: number): void {
+	public changePlayerStatistics(key: string, value: number, tsLastUpdate: number): void {
 		this.playerStatistics.set(key, {
 			value: value,
 			tsLastUpdate: tsLastUpdate

@@ -1,23 +1,23 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
-import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { InventoryFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 import { ItemStatisticsParam } from "./model/ItemStatisticsParam";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
-class SetItemStatisticsOperationRequest extends OperationRequest {
+class ChangeItemStatisticsOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	public itemId: string;
@@ -35,7 +35,7 @@ class SetItemStatisticsOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetItemStatisticsOperationRequest extends SetItemStatisticsOperationRequest {
+class ServerChangeItemStatisticsOperationRequest extends ChangeItemStatisticsOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,7 +44,7 @@ class ServerSetItemStatisticsOperationRequest extends SetItemStatisticsOperation
 	}
 }
 
-class AdminSetItemStatisticsOperationRequest extends ServerSetItemStatisticsOperationRequest {
+class AdminChangeItemStatisticsOperationRequest extends ServerChangeItemStatisticsOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -53,14 +53,14 @@ class AdminSetItemStatisticsOperationRequest extends ServerSetItemStatisticsOper
 	}
 }
 
-export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
+export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 	public override getCode() {
-		return OperationCode.SetItemStatistics;
+		return OperationCode.ChangeItemStatistics;
 	}
 
 	public override getCommonOperationRequest() {
-		return SetItemStatisticsOperationRequest;
+		return ChangeItemStatisticsOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -70,7 +70,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setItemStatistics);
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.changeItemStatistics);
 
 		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
@@ -84,13 +84,13 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetItemStatisticsOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangeItemStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().inventory.setItemStatistics.serverSelfEnable) {
+		if (!secretInfo.getPermission().inventory.changeItemStatistics.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -102,13 +102,13 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetItemStatisticsOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangeItemStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().inventory.setItemStatistics.adminSelfEnable) {
+		if (!secretInfo.getPermission().inventory.changeItemStatistics.adminSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -120,7 +120,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 	}
 
 	private async execute(request: { itemId: string, itemStatistics: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetItemStatistics", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_ChangeItemStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -160,7 +160,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			gnItemStatistic.add(ParameterCode.Key, key);
 
 			if (!inventory.hasItemStatistics(key))
-				inventory.setItemStatistics(key, inventoryStatisticsSettingsItem.initialValue, currentMilliseconds);
+				inventory.changeItemStatistics(key, inventoryStatisticsSettingsItem.initialValue, currentMilliseconds);
 
 			let inventoryStatistics = inventory.getItemStatistics(key);
 			let oldValue = inventoryStatistics.value;
@@ -178,7 +178,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
 				}
 
-				inventory.setItemStatistics(key, newValue, currentMilliseconds);
+				inventory.changeItemStatistics(key, newValue, currentMilliseconds);
 				gnItemStatistic.add(ParameterCode.Value, newValue);
 
 				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, newValue, request.log);
@@ -194,7 +194,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 						if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
 					}
 
-					inventory.setItemStatistics(key, value, currentMilliseconds);
+					inventory.changeItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, value, request.log);
@@ -203,14 +203,14 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					if (inventoryStatisticsSettingsItem.maximumValue != null) {
 						if (inventoryStatistics.value > inventoryStatisticsSettingsItem.maximumValue) {
 							inventoryStatistics.value = inventoryStatisticsSettingsItem.maximumValue;
-							inventory.setItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (inventoryStatisticsSettingsItem.minimumValue != null) {
 						if (inventoryStatistics.value < inventoryStatisticsSettingsItem.minimumValue) {
 							inventoryStatistics.value = inventoryStatisticsSettingsItem.minimumValue;
-							inventory.setItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -229,7 +229,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 						if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
 					}
 
-					inventory.setItemStatistics(key, value, currentMilliseconds);
+					inventory.changeItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, value, request.log);
@@ -238,14 +238,14 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					if (inventoryStatisticsSettingsItem.maximumValue != null) {
 						if (inventoryStatistics.value > inventoryStatisticsSettingsItem.maximumValue) {
 							inventoryStatistics.value = inventoryStatisticsSettingsItem.maximumValue;
-							inventory.setItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (inventoryStatisticsSettingsItem.minimumValue != null) {
 						if (inventoryStatistics.value < inventoryStatisticsSettingsItem.minimumValue) {
 							inventoryStatistics.value = inventoryStatisticsSettingsItem.minimumValue;
-							inventory.setItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
+							inventory.changeItemStatistics(key, inventoryStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -263,7 +263,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					if (value < inventoryStatisticsSettingsItem.minimumValue) value = inventoryStatisticsSettingsItem.minimumValue;
 				}
 
-				inventory.setItemStatistics(key, value, currentMilliseconds);
+				inventory.changeItemStatistics(key, value, currentMilliseconds);
 				gnItemStatistic.add(ParameterCode.Value, value);
 
 				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, inventoryStatisticsParam.value, oldValue, value, request.log);
@@ -279,7 +279,7 @@ export class SetItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetItemStatistics", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("inventory_ChangeItemStatistics", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

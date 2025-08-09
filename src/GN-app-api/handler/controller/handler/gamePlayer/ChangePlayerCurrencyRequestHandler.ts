@@ -1,21 +1,21 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { GamePlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 import { PlayerCurrencyParam } from "./model/PlayerCurrencyParam";
-import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
-class SetPlayerCurrencyOperationRequest extends OperationRequest {
+class ChangePlayerCurrencyOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
@@ -33,7 +33,7 @@ class SetPlayerCurrencyOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetPlayerCurrencyOperationRequest extends SetPlayerCurrencyOperationRequest {
+class ServerChangePlayerCurrencyOperationRequest extends ChangePlayerCurrencyOperationRequest {
 
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
@@ -45,7 +45,7 @@ class ServerSetPlayerCurrencyOperationRequest extends SetPlayerCurrencyOperation
 	}
 }
 
-class AdminSetPlayerCurrencyOperationRequest extends ServerSetPlayerCurrencyOperationRequest {
+class AdminChangePlayerCurrencyOperationRequest extends ServerChangePlayerCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -54,14 +54,14 @@ class AdminSetPlayerCurrencyOperationRequest extends ServerSetPlayerCurrencyOper
 	}
 }
 
-export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHandler {
+export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHandler {
 
 	public override getCode() {
-		return OperationCode.SetPlayerCurrency;
+		return OperationCode.ChangePlayerCurrency;
 	}
 
 	public override getCommonOperationRequest() {
-		return SetPlayerCurrencyOperationRequest;
+		return ChangePlayerCurrencyOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -72,19 +72,19 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 		}
 
 		if (!request.userId) {
-			if (!secretInfo.getPermission().masterPlayer.setPlayerCurrency.selfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.changePlayerCurrency.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 
 			request.userId = authInfo.getUserId();
 		}
 		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().masterPlayer.setPlayerCurrency.otherSelfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.changePlayerCurrency.otherSelfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
 		else {
-			if (!secretInfo.getPermission().masterPlayer.setPlayerCurrency.selfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.changePlayerCurrency.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
@@ -97,13 +97,13 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerCurrencyOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangePlayerCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.setPlayerCurrency.serverSelfEnable) {
+		if (!secretInfo.getPermission().gamePlayer.changePlayerCurrency.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -115,13 +115,13 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerCurrencyOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangePlayerCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.setPlayerCurrency.adminSelfEnable) {
+		if (!secretInfo.getPermission().gamePlayer.changePlayerCurrency.adminSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -133,7 +133,7 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 	}
 
 	private async execute(request: { userId: string, playerCurrencies: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SetPlayerCurrency", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_ChangePlayerCurrency", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -141,18 +141,18 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		let masterPlayerFindOptions: MasterPlayerFindOptions = {
+		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerCurrencies: true,
 		}
 
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
-		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
+		if (gamePlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
 		}
 
-		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
 		let gnInfoResponseParameters = new GNHashtable();
 		let gnPlayerCurrencies = new GNArray();
@@ -162,7 +162,7 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 
 			let key = playerCurrencyParam.key;
 
-			let playerCurrencySettingsItem = masterPlayerSettings.playerCurrencySettings.find(x => x.key == key);
+			let playerCurrencySettingsItem = gamePlayerSettings.playerCurrencySettings.find(x => x.key == key);
 			if (playerCurrencySettingsItem == null) continue;
 
 			let initialValue = playerCurrencySettingsItem.initialValue;
@@ -170,11 +170,11 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 			let amount = playerCurrencyParam.amount;
 			let serverValue = 0;
 
-			if (!masterPlayer.hasPlayerCurrency(key)) {
+			if (!gamePlayer.hasPlayerCurrency(key)) {
 				serverValue = initialValue;
 			}
 			else {
-				serverValue = masterPlayer.getPlayerCurrency(key).value;
+				serverValue = gamePlayer.getPlayerCurrency(key).value;
 			}
 
 			let startValue = serverValue;
@@ -185,7 +185,7 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 				return operationResponse;
 			}
 
-			this.gnServer.getDatabase().insertMasterPlayerCurrencyLogAsync(request.userId, key, amount, startValue, serverValue, request.log);
+			this.gnServer.getDatabase().insertGamePlayerCurrencyLogAsync(request.userId, secretInfo.getGameId(), key, amount, startValue, serverValue, request.log);
 
 			let gnPlayerCurrency = new GNHashtable();
 
@@ -194,17 +194,17 @@ export class SetPlayerCurrencyRequestHandler extends MasterPlayerBaseRequestHand
 
 			gnPlayerCurrencies.add(gnPlayerCurrency);
 
-			masterPlayer.setPlayerCurrency(key, serverValue);
+			gamePlayer.changePlayerCurrency(key, serverValue);
 		}
 
-		masterPlayer.saveAsync();
+		gamePlayer.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.PlayerCurrencies, gnPlayerCurrencies);
 
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SetPlayerCurrency", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_ChangePlayerCurrency", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

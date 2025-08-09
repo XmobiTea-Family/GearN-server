@@ -282,9 +282,9 @@ export class ParameterCode {
 	public static readonly ResetAccountPassword: string = "resetAccountPassword";
 	public static readonly SetAvatar: string = "setAvatar";
 	public static readonly GetAvatar: string = "getAvatar";
-	public static readonly SetPlayerCurrency: string = "setPlayerCurrency";
+	public static readonly ChangePlayerCurrency: string = "changePlayerCurrency";
 	public static readonly GetPlayerCurrency: string = "getPlayerCurrency";
-	public static readonly SetPlayerStatistics: string = "setPlayerStatistics";
+	public static readonly ChangePlayerStatistics: string = "changePlayerStatistics";
 	public static readonly GetPlayerStatistics: string = "getPlayerStatistics";
 	public static readonly GetStatisticsLeaderboard: string = "getStatisticsLeaderboard";
 	public static readonly GetStatisticsLeaderboardAroundPlayer: string = "getStatisticsLeaderboardAroundPlayer";
@@ -328,9 +328,9 @@ export class ParameterCode {
 	public static readonly GetContentData: string = "getContentData";
 	public static readonly SetContentData: string = "setContentData";
 
-	public static readonly SetGroupCurrency: string = "setGroupCurrency";
+	public static readonly ChangeGroupCurrency: string = "changeGroupCurrency";
 	public static readonly GetGroupCurrency: string = "getGroupCurrency";
-	public static readonly SetGroupStatistics: string = "setGroupStatistics";
+	public static readonly ChangeGroupStatistics: string = "changeGroupStatistics";
 	public static readonly GetGroupStatistics: string = "getGroupStatistics";
 	public static readonly GetStatisticsLeaderboardAroundGroup: string = "getStatisticsLeaderboardAroundGroup";
 	public static readonly SetGroupData: string = "setGroupData";
@@ -348,7 +348,7 @@ export class ParameterCode {
 	public static readonly GetGroupMessage: string = "getGroupMessage";
 	public static readonly GetGroupsWithDisplayName: string = "getGroupsWithDisplayName";
 
-	public static readonly SetItemStatistics: string = "setItemStatistics";
+	public static readonly ChangeItemStatistics: string = "changeItemStatistics";
 	public static readonly GetItemStatistics: string = "getItemStatistics";
 	public static readonly GetStatisticsLeaderboardAroundItem: string = "getStatisticsLeaderboardAroundItem";
 	public static readonly SetItemData: string = "setItemData";

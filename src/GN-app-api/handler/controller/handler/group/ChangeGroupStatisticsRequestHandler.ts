@@ -1,23 +1,23 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
-import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { GroupFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 import { GroupStatisticsParam } from "./model/GroupStatisticsParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
-class SetGroupStatisticsOperationRequest extends OperationRequest {
+class ChangeGroupStatisticsOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public groupId: string;
@@ -35,7 +35,7 @@ class SetGroupStatisticsOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetGroupStatisticsOperationRequest extends SetGroupStatisticsOperationRequest {
+class ServerChangeGroupStatisticsOperationRequest extends ChangeGroupStatisticsOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -44,7 +44,7 @@ class ServerSetGroupStatisticsOperationRequest extends SetGroupStatisticsOperati
 	}
 }
 
-class AdminSetGroupStatisticsOperationRequest extends ServerSetGroupStatisticsOperationRequest {
+class AdminChangeGroupStatisticsOperationRequest extends ServerChangeGroupStatisticsOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -53,14 +53,14 @@ class AdminSetGroupStatisticsOperationRequest extends ServerSetGroupStatisticsOp
 	}
 }
 
-export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
+export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 
 	public override getCode() {
-		return OperationCode.SetGroupStatistics;
+		return OperationCode.ChangeGroupStatistics;
 	}
 
 	public override getCommonOperationRequest() {
-		return SetGroupStatisticsOperationRequest;
+		return ChangeGroupStatisticsOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -70,7 +70,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.setGroupStatistics);
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.changeGroupStatistics);
 
 		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
@@ -84,13 +84,13 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetGroupStatisticsOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangeGroupStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().group.setGroupStatistics.serverSelfEnable) {
+		if (!secretInfo.getPermission().group.changeGroupStatistics.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -102,13 +102,13 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetGroupStatisticsOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangeGroupStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().group.setGroupStatistics.adminSelfEnable) {
+		if (!secretInfo.getPermission().group.changeGroupStatistics.adminSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -120,7 +120,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 	}
 
 	private async execute(request: { groupId: string, groupStatistics: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupStatistics", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_ChangeGroupStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -160,7 +160,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 			gnGroupStatistic.add(ParameterCode.Key, key);
 
 			if (!group.hasGroupStatistics(key))
-				group.setGroupStatistics(key, groupStatisticsSettingsItem.initialValue, currentMilliseconds);
+				group.changeGroupStatistics(key, groupStatisticsSettingsItem.initialValue, currentMilliseconds);
 
 			let groupStatistics = group.getGroupStatistics(key);
 			let oldValue = groupStatistics.value;
@@ -178,7 +178,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 					if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
 				}
 
-				group.setGroupStatistics(key, newValue, currentMilliseconds);
+				group.changeGroupStatistics(key, newValue, currentMilliseconds);
 				gnGroupStatistic.add(ParameterCode.Value, newValue);
 
 				this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, newValue, request.log);
@@ -193,7 +193,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 						if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
 					}
 
-					group.setGroupStatistics(key, value, currentMilliseconds);
+					group.changeGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
@@ -202,14 +202,14 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 					if (groupStatisticsSettingsItem.maximumValue != null) {
 						if (groupStatistics.value > groupStatisticsSettingsItem.maximumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.maximumValue;
-							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (groupStatisticsSettingsItem.minimumValue != null) {
 						if (groupStatistics.value < groupStatisticsSettingsItem.minimumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.minimumValue;
-							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -228,7 +228,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 						if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
 					}
 
-					group.setGroupStatistics(key, value, currentMilliseconds);
+					group.changeGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
@@ -237,14 +237,14 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 					if (groupStatisticsSettingsItem.maximumValue != null) {
 						if (groupStatistics.value > groupStatisticsSettingsItem.maximumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.maximumValue;
-							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (groupStatisticsSettingsItem.minimumValue != null) {
 						if (groupStatistics.value < groupStatisticsSettingsItem.minimumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.minimumValue;
-							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -262,7 +262,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 					if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
 				}
 
-				group.setGroupStatistics(key, value, currentMilliseconds);
+				group.changeGroupStatistics(key, value, currentMilliseconds);
 				gnGroupStatistic.add(ParameterCode.Value, value);
 
 				this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
@@ -278,7 +278,7 @@ export class SetGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("group_SetGroupStatistics", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("group_ChangeGroupStatistics", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

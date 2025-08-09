@@ -55,14 +55,14 @@ export class GamePlayerPermissionRulesParam {
 	@GNHashtableDataMember({ code: ParameterCode.GetAvatar, isOptional: true })
 	public getAvatar?: PermissionRulesParam;
 
-	@GNHashtableDataMember({ code: ParameterCode.SetPlayerCurrency, isOptional: true })
-	public setPlayerCurrency?: PermissionRulesParam;
+	@GNHashtableDataMember({ code: ParameterCode.ChangePlayerCurrency, isOptional: true })
+	public changePlayerCurrency?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayerCurrency, isOptional: true })
 	public getPlayerCurrency?: PermissionRulesParam;
 
-	@GNHashtableDataMember({ code: ParameterCode.SetPlayerStatistics, isOptional: true })
-	public setPlayerStatistics?: PermissionRulesParam;
+	@GNHashtableDataMember({ code: ParameterCode.ChangePlayerStatistics, isOptional: true })
+	public changePlayerStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetPlayerStatistics, isOptional: true })
 	public getPlayerStatistics?: PermissionRulesParam;

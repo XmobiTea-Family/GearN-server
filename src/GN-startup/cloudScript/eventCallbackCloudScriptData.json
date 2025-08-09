@@ -402,8 +402,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "characterPlayer_SetPlayerCurrency",
-                "script": "\npreHandlers.characterPlayer_SetPlayerCurrency = async (request: { characterId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_SetPlayerCurrency = async (request: { characterId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "characterPlayer_ChangePlayerCurrency",
+                "script": "\npreHandlers.characterPlayer_ChangePlayerCurrency = async (request: { characterId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_ChangePlayerCurrency = async (request: { characterId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -412,8 +412,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "characterPlayer_SetPlayerStatistics",
-                "script": "\npreHandlers.characterPlayer_SetPlayerStatistics = async (request: { characterId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_SetPlayerStatistics = async (request: { characterId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "characterPlayer_ChangePlayerStatistics",
+                "script": "\npreHandlers.characterPlayer_ChangePlayerStatistics = async (request: { characterId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.characterPlayer_ChangePlayerStatistics = async (request: { characterId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -889,8 +889,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "gamePlayer_SetPlayerCurrency",
-                "script": "\npreHandlers.gamePlayer_SetPlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_SetPlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "gamePlayer_ChangePlayerCurrency",
+                "script": "\npreHandlers.gamePlayer_ChangePlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_ChangePlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -899,8 +899,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "gamePlayer_SetPlayerStatistics",
-                "script": "\npreHandlers.gamePlayer_SetPlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_SetPlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "gamePlayer_ChangePlayerStatistics",
+                "script": "\npreHandlers.gamePlayer_ChangePlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_ChangePlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1092,8 +1092,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "group_SetGroupCurrency",
-                "script": "\npreHandlers.group_SetGroupCurrency = async (request: { groupId: string, groupCurrencyParams: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_SetGroupCurrency = async (request: { groupId: string, groupCurrencyParams: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "group_ChangeGroupCurrency",
+                "script": "\npreHandlers.group_ChangeGroupCurrency = async (request: { groupId: string, groupCurrencyParams: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_ChangeGroupCurrency = async (request: { groupId: string, groupCurrencyParams: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1102,8 +1102,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "group_SetGroupStatistics",
-                "script": "\npreHandlers.group_SetGroupStatistics = async (request: { groupId: string, groupStatisticsParams: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_SetGroupStatistics = async (request: { groupId: string, groupStatisticsParams: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "group_ChangeGroupStatistics",
+                "script": "\npreHandlers.group_ChangeGroupStatistics = async (request: { groupId: string, groupStatisticsParams: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_ChangeGroupStatistics = async (request: { groupId: string, groupStatisticsParams: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1275,8 +1275,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "inventory_SetItemStatistics",
-                "script": "\npreHandlers.inventory_SetItemStatistics = async (request: { itemId: string, inventoryStatisticsParams: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_SetItemStatistics = async (request: { itemId: string, inventoryStatisticsParams: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "inventory_ChangeItemStatistics",
+                "script": "\npreHandlers.inventory_ChangeItemStatistics = async (request: { itemId: string, inventoryStatisticsParams: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.inventory_ChangeItemStatistics = async (request: { itemId: string, inventoryStatisticsParams: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1628,8 +1628,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "masterPlayer_SetPlayerCurrency",
-                "script": "\npreHandlers.masterPlayer_SetPlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SetPlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "masterPlayer_ChangePlayerCurrency",
+                "script": "\npreHandlers.masterPlayer_ChangePlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_ChangePlayerCurrency = async (request: { userId: string, playerCurrencyParams: Array<PlayerCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1638,8 +1638,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "masterPlayer_SetPlayerStatistics",
-                "script": "\npreHandlers.masterPlayer_SetPlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SetPlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "masterPlayer_ChangePlayerStatistics",
+                "script": "\npreHandlers.masterPlayer_ChangePlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_ChangePlayerStatistics = async (request: { userId: string, playerStatisticsParams: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

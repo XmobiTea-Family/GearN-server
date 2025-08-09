@@ -148,7 +148,7 @@ export class Inventory extends DataObjectBase {
 		return this.itemStatistics.get(key);
 	}
 
-	public setItemStatistics(key: string, value: number, tsLastUpdate: number): void {
+	public changeItemStatistics(key: string, value: number, tsLastUpdate: number): void {
 		this.itemStatistics.set(key, {
 			tsLastUpdate: tsLastUpdate,
 			value: value

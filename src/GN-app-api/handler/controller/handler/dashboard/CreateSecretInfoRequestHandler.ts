@@ -201,10 +201,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				resetAccountPassword: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				setPlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changePlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				setPlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changePlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getStatisticsLeaderboard: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getStatisticsLeaderboardAroundPlayer: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getCustomData: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -262,10 +262,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				setPlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changePlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				setPlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changePlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
 				getStatisticsLeaderboard: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -339,10 +339,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				setPlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changePlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				setPlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changePlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
 				getStatisticsLeaderboard: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -417,10 +417,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				setGroupCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changeGroupCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getGroupCurrency: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				setGroupStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changeGroupStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getGroupStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
 				getStatisticsLeaderboard: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -476,7 +476,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getAvatar: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
-				setItemStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				changeItemStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getItemStatistics: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 
 				getStatisticsLeaderboard: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -677,11 +677,11 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changePlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
-				setPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changePlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getStatisticsLeaderboardAroundPlayer: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -749,10 +749,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changePlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changePlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -826,10 +826,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changePlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changePlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -904,10 +904,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setGroupCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changeGroupCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getGroupCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setGroupStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changeGroupStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getGroupStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -963,7 +963,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setItemStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				changeItemStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getItemStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -1164,11 +1164,11 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changePlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
-				setPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changePlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getStatisticsLeaderboardAroundPlayer: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1236,10 +1236,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changePlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changePlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1313,10 +1313,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changePlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getPlayerCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changePlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getPlayerStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1391,10 +1391,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setGroupCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changeGroupCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getGroupCurrency: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setGroupStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changeGroupStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getGroupStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1450,7 +1450,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getAvatar: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setItemStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				changeItemStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getItemStatistics: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1653,11 +1653,11 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAvatar: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setPlayerCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changePlayerCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getPlayerCurrency: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getPlayerStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				setPlayerStatistics: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
+				changePlayerStatistics: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				getStatisticsLeaderboardAroundPlayer: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1725,10 +1725,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAvatar: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setPlayerCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changePlayerCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getPlayerCurrency: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setPlayerStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changePlayerStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getPlayerStatistics: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1802,10 +1802,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAvatar: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setPlayerCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changePlayerCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getPlayerCurrency: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setPlayerStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changePlayerStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getPlayerStatistics: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1880,10 +1880,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAvatar: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setGroupCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changeGroupCurrency: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getGroupCurrency: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setGroupStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changeGroupStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getGroupStatistics: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1939,7 +1939,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setAvatar: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getAvatar: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setItemStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				changeItemStatistics: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getItemStatistics: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
 				getStatisticsLeaderboard: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },

@@ -1,23 +1,23 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
-import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
+import { GamePlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xStatisticsAggregationMethod } from "../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 import { PlayerStatisticsParam } from "./model/PlayerStatisticsParam";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
-class SetPlayerStatisticsOperationRequest extends OperationRequest {
+class ChangePlayerStatisticsOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
@@ -35,7 +35,7 @@ class SetPlayerStatisticsOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetPlayerStatisticsOperationRequest extends SetPlayerStatisticsOperationRequest {
+class ServerChangePlayerStatisticsOperationRequest extends ChangePlayerStatisticsOperationRequest {
 
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
@@ -47,7 +47,7 @@ class ServerSetPlayerStatisticsOperationRequest extends SetPlayerStatisticsOpera
 	}
 }
 
-class AdminSetPlayerStatisticsOperationRequest extends ServerSetPlayerStatisticsOperationRequest {
+class AdminChangePlayerStatisticsOperationRequest extends ServerChangePlayerStatisticsOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -56,14 +56,14 @@ class AdminSetPlayerStatisticsOperationRequest extends ServerSetPlayerStatistics
 	}
 }
 
-export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHandler {
+export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestHandler {
 
 	public override getCode() {
-		return OperationCode.SetPlayerStatistics;
+		return OperationCode.ChangePlayerStatistics;
 	}
 
 	public override getCommonOperationRequest() {
-		return SetPlayerStatisticsOperationRequest;
+		return ChangePlayerStatisticsOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -74,19 +74,19 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 		}
 
 		if (!request.userId) {
-			if (!secretInfo.getPermission().gamePlayer.setPlayerStatistics.selfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.changePlayerStatistics.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 
 			request.userId = authInfo.getUserId();
 		}
 		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().gamePlayer.setPlayerStatistics.otherSelfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.changePlayerStatistics.otherSelfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
 		else {
-			if (!secretInfo.getPermission().gamePlayer.setPlayerStatistics.selfEnable) {
+			if (!secretInfo.getPermission().gamePlayer.changePlayerStatistics.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
@@ -99,13 +99,13 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerStatisticsOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangePlayerStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().gamePlayer.setPlayerStatistics.serverSelfEnable) {
+		if (!secretInfo.getPermission().gamePlayer.changePlayerStatistics.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -117,13 +117,13 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerStatisticsOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangePlayerStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().gamePlayer.setPlayerStatistics.adminSelfEnable) {
+		if (!secretInfo.getPermission().gamePlayer.changePlayerStatistics.adminSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -135,7 +135,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 	}
 
 	private async execute(request: { userId: string, playerStatistics: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_SetPlayerStatistics", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_ChangePlayerStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -175,7 +175,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 			gnPlayerStatistic.add(ParameterCode.Key, key);
 
 			if (!gamePlayer.hasPlayerStatistics(key))
-				gamePlayer.setPlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
+				gamePlayer.changePlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
 
 			let playerStatistics = gamePlayer.getPlayerStatistics(key);
 			let oldValue = playerStatistics.value;
@@ -193,7 +193,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 					if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 				}
 
-				gamePlayer.setPlayerStatistics(key, newValue, currentMilliseconds);
+				gamePlayer.changePlayerStatistics(key, newValue, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, newValue);
 
 				this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, newValue, request.log);
@@ -208,7 +208,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 						if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 					}
 
-					gamePlayer.setPlayerStatistics(key, value, currentMilliseconds);
+					gamePlayer.changePlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
@@ -217,14 +217,14 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 					if (playerStatisticsSettingsItem.maximumValue != null) {
 						if (playerStatistics.value > playerStatisticsSettingsItem.maximumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.maximumValue;
-							gamePlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							gamePlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (playerStatisticsSettingsItem.minimumValue != null) {
 						if (playerStatistics.value < playerStatisticsSettingsItem.minimumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.minimumValue;
-							gamePlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							gamePlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -243,7 +243,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 						if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 					}
 
-					gamePlayer.setPlayerStatistics(key, value, currentMilliseconds);
+					gamePlayer.changePlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
@@ -252,14 +252,14 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 					if (playerStatisticsSettingsItem.maximumValue != null) {
 						if (playerStatistics.value > playerStatisticsSettingsItem.maximumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.maximumValue;
-							gamePlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							gamePlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (playerStatisticsSettingsItem.minimumValue != null) {
 						if (playerStatistics.value < playerStatisticsSettingsItem.minimumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.minimumValue;
-							gamePlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							gamePlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -277,7 +277,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 					if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 				}
 
-				gamePlayer.setPlayerStatistics(key, value, currentMilliseconds);
+				gamePlayer.changePlayerStatistics(key, value, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, value);
 
 				this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
@@ -293,7 +293,7 @@ export class SetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_SetPlayerStatistics", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_ChangePlayerStatistics", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

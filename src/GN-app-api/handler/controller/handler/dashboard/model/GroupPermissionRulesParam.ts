@@ -37,14 +37,14 @@ export class GroupPermissionRulesParam {
 	@GNHashtableDataMember({ code: ParameterCode.GetAvatar, isOptional: true })
 	public getAvatar?: PermissionRulesParam;
 
-	@GNHashtableDataMember({ code: ParameterCode.SetGroupCurrency, isOptional: true })
-	public setGroupCurrency?: PermissionRulesParam;
+	@GNHashtableDataMember({ code: ParameterCode.ChangeGroupCurrency, isOptional: true })
+	public changeGroupCurrency?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetGroupCurrency, isOptional: true })
 	public getGroupCurrency?: PermissionRulesParam;
 
-	@GNHashtableDataMember({ code: ParameterCode.SetGroupStatistics, isOptional: true })
-	public setGroupStatistics?: PermissionRulesParam;
+	@GNHashtableDataMember({ code: ParameterCode.ChangeGroupStatistics, isOptional: true })
+	public changeGroupStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetGroupStatistics, isOptional: true })
 	public getGroupStatistics?: PermissionRulesParam;

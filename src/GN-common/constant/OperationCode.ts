@@ -98,10 +98,10 @@ export class OperationCode {
 	public static readonly SetAvatar: string = "setAvatar";
 	public static readonly GetAvatar: string = "getAvatar";
 
-	public static readonly SetPlayerCurrency: string = "setPlayerCurrency";
+	public static readonly ChangePlayerCurrency: string = "changePlayerCurrency";
 	public static readonly GetPlayerCurrency: string = "getPlayerCurrency";
 
-	public static readonly SetPlayerStatistics: string = "setPlayerStatistics";
+	public static readonly ChangePlayerStatistics: string = "changePlayerStatistics";
 	public static readonly GetPlayerStatistics: string = "getPlayerStatistics";
 
 	public static readonly GetStatisticsLeaderboard: string = "getStatisticsLeaderboard";
@@ -139,10 +139,10 @@ export class OperationCode {
 	public static readonly CreatePlayerCharacter: string = "createPlayerCharacter";
 	public static readonly GetOwner: string = "getOwner";
 	public static readonly GetRemoveStatus: string = "getRemoveStatus";
-	public static readonly SetGroupStatistics: string = "setGroupStatistics";
+	public static readonly ChangeGroupStatistics: string = "changeGroupStatistics";
 	public static readonly SetGroupData: string = "setGroupData";
 	public static readonly GetGroupCurrency: string = "getGroupCurrency";
-	public static readonly SetGroupCurrency: string = "setGroupCurrency";
+	public static readonly ChangeGroupCurrency: string = "changeGroupCurrency";
 	public static readonly CreateGroupItem: string = "createGroupItem";
 	public static readonly GetStatisticsLeaderboardAroundGroup: string = "getStatisticsLeaderboardAroundGroup";
 	public static readonly GetGroupsWithTag: string = "getGroupsWithTag";
@@ -152,7 +152,7 @@ export class OperationCode {
 	public static readonly GetGroupData: string = "getGroupData";
 	public static readonly GetGroupInformation: string = "getGroupInformation";
 	public static readonly GetMembers: string = "getMembers";
-	public static readonly SetItemStatistics: string = "setItemStatistics";
+	public static readonly ChangeItemStatistics: string = "changeItemStatistics";
 	public static readonly SetItemData: string = "setItemData";
 	public static readonly GetItemData: string = "getItemData";
 	public static readonly GetStatisticsLeaderboardAroundItem: string = "getStatisticsLeaderboardAroundItem";

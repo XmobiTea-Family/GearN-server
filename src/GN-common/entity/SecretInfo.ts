@@ -175,10 +175,10 @@ export interface SecretPermissionItem {
 		setAvatar: MasterPlayerPermissionRules,
 		getAvatar: MasterPlayerPermissionRules,
 
-		setPlayerCurrency: MasterPlayerPermissionRules,
+		changePlayerCurrency: MasterPlayerPermissionRules,
 		getPlayerCurrency: MasterPlayerPermissionRules,
 
-		setPlayerStatistics: MasterPlayerPermissionRules,
+		changePlayerStatistics: MasterPlayerPermissionRules,
 		getPlayerStatistics: MasterPlayerPermissionRules,
 
 		getStatisticsLeaderboard: MasterPlayerPermissionRules,
@@ -248,10 +248,10 @@ export interface SecretPermissionItem {
 		setAvatar: GamePlayerPermissionRules,
 		getAvatar: GamePlayerPermissionRules,
 
-		setPlayerCurrency: GamePlayerPermissionRules,
+		changePlayerCurrency: GamePlayerPermissionRules,
 		getPlayerCurrency: GamePlayerPermissionRules,
 
-		setPlayerStatistics: GamePlayerPermissionRules,
+		changePlayerStatistics: GamePlayerPermissionRules,
 		getPlayerStatistics: GamePlayerPermissionRules,
 
 		getStatisticsLeaderboard: GamePlayerPermissionRules,
@@ -325,10 +325,10 @@ export interface SecretPermissionItem {
 		setAvatar: CharacterPlayerPermissionRules,
 		getAvatar: CharacterPlayerPermissionRules,
 
-		setPlayerCurrency: CharacterPlayerPermissionRules,
+		changePlayerCurrency: CharacterPlayerPermissionRules,
 		getPlayerCurrency: CharacterPlayerPermissionRules,
 
-		setPlayerStatistics: CharacterPlayerPermissionRules,
+		changePlayerStatistics: CharacterPlayerPermissionRules,
 		getPlayerStatistics: CharacterPlayerPermissionRules,
 
 		getStatisticsLeaderboard: CharacterPlayerPermissionRules,
@@ -404,10 +404,10 @@ export interface SecretPermissionItem {
 		setAvatar: GroupPermissionRules,
 		getAvatar: GroupPermissionRules,
 
-		setGroupCurrency: GroupPermissionRules,
+		changeGroupCurrency: GroupPermissionRules,
 		getGroupCurrency: GroupPermissionRules,
 
-		setGroupStatistics: GroupPermissionRules,
+		changeGroupStatistics: GroupPermissionRules,
 		getGroupStatistics: GroupPermissionRules,
 
 		getStatisticsLeaderboard: GroupPermissionRules,
@@ -464,7 +464,7 @@ export interface SecretPermissionItem {
 		setAvatar: InventoryPermissionRules,
 		getAvatar: InventoryPermissionRules,
 
-		setItemStatistics: InventoryPermissionRules,
+		changeItemStatistics: InventoryPermissionRules,
 		getItemStatistics: InventoryPermissionRules,
 
 		getStatisticsLeaderboard: InventoryPermissionRules,

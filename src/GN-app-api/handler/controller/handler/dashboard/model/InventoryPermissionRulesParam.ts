@@ -37,8 +37,8 @@ export class InventoryPermissionRulesParam {
 	@GNHashtableDataMember({ code: ParameterCode.GetAvatar, isOptional: true })
 	public getAvatar?: PermissionRulesParam;
 
-	@GNHashtableDataMember({ code: ParameterCode.SetItemStatistics, isOptional: true })
-	public setItemStatistics?: PermissionRulesParam;
+	@GNHashtableDataMember({ code: ParameterCode.ChangeItemStatistics, isOptional: true })
+	public changeItemStatistics?: PermissionRulesParam;
 
 	@GNHashtableDataMember({ code: ParameterCode.GetItemStatistics, isOptional: true })
 	public getItemStatistics?: PermissionRulesParam;

@@ -944,7 +944,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = masterPlayer.setPlayerCurrency;
+				let permissionRules = masterPlayer.changePlayerCurrency;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -952,7 +952,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterPlayer.add(ParameterCode.SetPlayerCurrency, gnPermissionRules);
+				gnMasterPlayer.add(ParameterCode.ChangePlayerCurrency, gnPermissionRules);
 			}
 
 			{
@@ -968,7 +968,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = masterPlayer.setPlayerStatistics;
+				let permissionRules = masterPlayer.changePlayerStatistics;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -976,7 +976,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterPlayer.add(ParameterCode.SetPlayerStatistics, gnPermissionRules);
+				gnMasterPlayer.add(ParameterCode.ChangePlayerStatistics, gnPermissionRules);
 			}
 
 			{
@@ -1563,7 +1563,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = gamePlayer.setPlayerCurrency;
+				let permissionRules = gamePlayer.changePlayerCurrency;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -1571,7 +1571,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnGamePlayer.add(ParameterCode.SetPlayerCurrency, gnPermissionRules);
+				gnGamePlayer.add(ParameterCode.ChangePlayerCurrency, gnPermissionRules);
 			}
 
 			{
@@ -1587,7 +1587,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = gamePlayer.setPlayerStatistics;
+				let permissionRules = gamePlayer.changePlayerStatistics;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -1595,7 +1595,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnGamePlayer.add(ParameterCode.SetPlayerStatistics, gnPermissionRules);
+				gnGamePlayer.add(ParameterCode.ChangePlayerStatistics, gnPermissionRules);
 			}
 
 			{
@@ -2202,7 +2202,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = characterPlayer.setPlayerCurrency;
+				let permissionRules = characterPlayer.changePlayerCurrency;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -2210,7 +2210,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnCharacterPlayer.add(ParameterCode.SetPlayerCurrency, gnPermissionRules);
+				gnCharacterPlayer.add(ParameterCode.ChangePlayerCurrency, gnPermissionRules);
 			}
 
 			{
@@ -2226,7 +2226,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = characterPlayer.setPlayerStatistics;
+				let permissionRules = characterPlayer.changePlayerStatistics;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -2234,7 +2234,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnCharacterPlayer.add(ParameterCode.SetPlayerStatistics, gnPermissionRules);
+				gnCharacterPlayer.add(ParameterCode.ChangePlayerStatistics, gnPermissionRules);
 			}
 
 			{
@@ -2864,7 +2864,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = group.setGroupCurrency;
+				let permissionRules = group.changeGroupCurrency;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -2872,7 +2872,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnGroup.add(ParameterCode.SetGroupCurrency, gnPermissionRules);
+				gnGroup.add(ParameterCode.ChangeGroupCurrency, gnPermissionRules);
 			}
 
 			{
@@ -2888,7 +2888,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = group.setGroupStatistics;
+				let permissionRules = group.changeGroupStatistics;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -2896,7 +2896,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnGroup.add(ParameterCode.SetGroupStatistics, gnPermissionRules);
+				gnGroup.add(ParameterCode.ChangeGroupStatistics, gnPermissionRules);
 			}
 
 			{
@@ -3351,7 +3351,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			}
 
 			{
-				let permissionRules = inventory.setItemStatistics;
+				let permissionRules = inventory.changeItemStatistics;
 				let gnPermissionRules = new GNHashtable();
 
 				gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
@@ -3359,7 +3359,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnInventory.add(ParameterCode.SetItemStatistics, gnPermissionRules);
+				gnInventory.add(ParameterCode.ChangeItemStatistics, gnPermissionRules);
 			}
 
 			{

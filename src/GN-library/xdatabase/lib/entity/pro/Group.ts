@@ -122,7 +122,7 @@ export class Group extends DataObjectBase {
 		return this.groupCurrencies.get(key);
 	}
 
-	public setGroupCurrency(key: string, value: number): void {
+	public changeGroupCurrency(key: string, value: number): void {
 		this.groupCurrencies.set(key, {
 			value: value
 		});
@@ -198,7 +198,7 @@ export class Group extends DataObjectBase {
 		return this.groupStatistics.get(key);
 	}
 
-	public setGroupStatistics(key: string, value: number, tsLastUpdate: number): void {
+	public changeGroupStatistics(key: string, value: number, tsLastUpdate: number): void {
 		this.groupStatistics.set(key, {
 			tsLastUpdate: tsLastUpdate,
 			value: value

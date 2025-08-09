@@ -1,21 +1,21 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { GroupFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
+import { SecretInfo } from "../../../../../GN-common/entity/SecretInfo";
 import { GroupCurrencyParam } from "./model/GroupCurrencyParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
-class SetGroupCurrencyOperationRequest extends OperationRequest {
+class ChangeGroupCurrencyOperationRequest extends OperationRequest {
 
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public groupId: string;
@@ -33,7 +33,7 @@ class SetGroupCurrencyOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetGroupCurrencyOperationRequest extends SetGroupCurrencyOperationRequest {
+class ServerChangeGroupCurrencyOperationRequest extends ChangeGroupCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -42,7 +42,7 @@ class ServerSetGroupCurrencyOperationRequest extends SetGroupCurrencyOperationRe
 	}
 }
 
-class AdminSetGroupCurrencyOperationRequest extends ServerSetGroupCurrencyOperationRequest {
+class AdminChangeGroupCurrencyOperationRequest extends ServerChangeGroupCurrencyOperationRequest {
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -51,14 +51,14 @@ class AdminSetGroupCurrencyOperationRequest extends ServerSetGroupCurrencyOperat
 	}
 }
 
-export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
+export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 	public override getCode() {
-		return OperationCode.SetGroupCurrency;
+		return OperationCode.ChangeGroupCurrency;
 	}
 
 	public override getCommonOperationRequest() {
-		return SetGroupCurrencyOperationRequest;
+		return ChangeGroupCurrencyOperationRequest;
 	}
 
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
@@ -68,7 +68,7 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.setGroupCurrency);
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.changeGroupCurrency);
 
 		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
@@ -81,13 +81,13 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 	}
 
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetGroupCurrencyOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangeGroupCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().group.setGroupCurrency.serverSelfEnable) {
+		if (!secretInfo.getPermission().group.changeGroupCurrency.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -98,13 +98,13 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 	}
 
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetGroupCurrencyOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangeGroupCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().group.setGroupCurrency.adminSelfEnable) {
+		if (!secretInfo.getPermission().group.changeGroupCurrency.adminSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -115,7 +115,7 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 	}
 
 	private async execute(request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_ChangeGroupCurrency", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -172,7 +172,7 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 			gnGroupCurrencies.add(gnGroupCurrency);
 
-			group.setGroupCurrency(key, serverValue);
+			group.changeGroupCurrency(key, serverValue);
 		}
 
 		group.saveAsync();
@@ -182,7 +182,7 @@ export class SetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("group_SetGroupCurrency", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("group_ChangeGroupCurrency", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
