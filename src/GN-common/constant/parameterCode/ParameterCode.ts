@@ -55,6 +55,7 @@ export class ParameterCode {
 	public static readonly Reason: string = "reason";
 	public static readonly Key: string = "key";
 	public static readonly Permission: string = "permission";
+	public static readonly PermissionParam: string = "permissionParam";
 
 	public static readonly NewlyCreated: string = "newlyCreated";
 	public static readonly Token: string = "token";

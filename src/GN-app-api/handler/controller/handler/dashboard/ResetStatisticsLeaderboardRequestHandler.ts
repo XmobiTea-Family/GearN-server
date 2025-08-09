@@ -24,7 +24,7 @@ import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/
 
 class ResetStatisticsLeaderboardOperationRequest extends OperationRequest {
 
-	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
+	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
 	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })

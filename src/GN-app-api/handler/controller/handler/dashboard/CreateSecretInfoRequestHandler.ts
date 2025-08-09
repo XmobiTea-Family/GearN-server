@@ -26,7 +26,7 @@ class CreateSecretInfoOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: ParameterCode.Role, mustInt: true })
 	public role: number;
 
-	@GNHashtableDataMember({ code: ParameterCode.Permission, isOptional: true })
+	@GNHashtableDataMember({ code: ParameterCode.PermissionParam, isOptional: true })
 	public permissionParam?: PermissionParam;
 
 	public override isValidRequest() {

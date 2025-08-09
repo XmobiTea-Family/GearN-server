@@ -22,7 +22,7 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class DeleteInDatabaseOperationRequest extends OperationRequest {
 
-	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
+	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
 	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Id, minLength: 2, maxLength: 15 })

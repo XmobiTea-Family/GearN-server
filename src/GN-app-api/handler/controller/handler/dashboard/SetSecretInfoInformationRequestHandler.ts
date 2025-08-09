@@ -24,7 +24,7 @@ class SetSecretInfoInformationOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: ParameterCode.TsExpire, isOptional: true })
 	public tsExpire?: number;
 
-	@GNHashtableDataMember({ code: ParameterCode.Permission, isOptional: true })
+	@GNHashtableDataMember({ code: ParameterCode.PermissionParam, isOptional: true })
 	public permissionParam?: PermissionParam;
 
 	@StringDataMember({ code: ParameterCode.Description, isOptional: true })

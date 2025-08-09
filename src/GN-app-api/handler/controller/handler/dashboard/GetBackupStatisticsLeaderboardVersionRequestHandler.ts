@@ -20,7 +20,7 @@ class GetBackupStatisticsLeaderboardVersionOperationRequest extends OperationReq
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
 	public gameId: string;
 
-	@NumberDataMember({ code: ParameterCode.OwnerType, mustInt: true })
+	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
 	public type: number;
 
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
