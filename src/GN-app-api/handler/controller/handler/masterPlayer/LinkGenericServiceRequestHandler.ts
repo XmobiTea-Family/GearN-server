@@ -155,7 +155,8 @@ export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHan
 		let genericServiceSettingsItem = masterPlayerSettings.genericServiceSettings.find(x => x.serviceName == request.serviceName);
 
 		if (genericServiceSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VerifyFailed);
+			operationResponse.setParameter(ParameterCode.ErrorMessage, "GenericServiceSettings not found");
 
 			return operationResponse;
 		}
@@ -178,7 +179,7 @@ export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHan
 		if (!serviceResponse.success) {
 			Debug.log("service name error " + serviceResponse.errorMessage);
 
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VerifyFailed);
 			operationResponse.setParameter(ParameterCode.ErrorMessage, serviceResponse.errorMessage);
 			return operationResponse;
 		}

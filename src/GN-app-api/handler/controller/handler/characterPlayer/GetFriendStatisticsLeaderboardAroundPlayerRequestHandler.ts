@@ -34,7 +34,7 @@ class GetFriendStatisticsLeaderboardAroundPlayerOperationRequest extends Operati
 	public skip?: number;
 
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	limit?: number;
+	public limit?: number;
 
 	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	public loadFromCache?: boolean;

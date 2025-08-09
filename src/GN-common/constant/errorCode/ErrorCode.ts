@@ -5,7 +5,7 @@ export class ErrorCode {
 	public static readonly AccountPasswordWrong: number = 3;
 	public static readonly AccountUsernameExists: number = 4;
 	public static readonly VerifyTokenError: number = 5;
-	public static readonly ServiceNameNotFound: number = 6;
+	public static readonly VerifyFailed: number = 6;
 	public static readonly CharacterPlayerNotFound: number = 7;
 	public static readonly NotEnoughCurrency: number = 8;
 	public static readonly KeyNotFound: number = 9;
