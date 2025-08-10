@@ -824,6 +824,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 
 						characterPlayerSettings.playerFriendCatalogSettings.push({
 							catalogId: playerFriendCatalogSetting.catalogId,
+							description: playerFriendCatalogSetting.description,
 							forceAcceptFriend: playerFriendCatalogSetting.forceAcceptFriend,
 						});
 					}
@@ -1168,6 +1169,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 
 						playerFriendCatalogSettings.push({
 							catalogId: playerFriendCatalogSetting.catalogId,
+							description: playerFriendCatalogSetting.description,
 							forceAcceptFriend: playerFriendCatalogSetting.forceAcceptFriend,
 						});
 					}

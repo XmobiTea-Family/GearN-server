@@ -144,13 +144,13 @@ export class AntiDdosMiddleware {
 
 	private getReturnCodeForRequestSizeHttp(req: express.Request): number {
 		let url = req.url;
-		if (url == "/dashboard/setSecretInfoInformation/client"
-			|| url == "/dashboard/setMasterGameSettings/client"
-			|| url == "/dashboard/createSecretInfo/client"
-			|| url == "/dashboard/setGameInformation/client"
-			|| url == "/dashboard/setEventCallbackCloudScript/client"
-			|| url == "/content/setContentData/admin"
-			|| url == "/cloudscript/addFunction/admin"
+		if (url == "/dashboard/client/setSecretInfoInformation"
+			|| url == "/dashboard/client/setMasterGameSettings"
+			|| url == "/dashboard/client/createSecretInfo"
+			|| url == "/dashboard/client/setGameInformation"
+			|| url == "/dashboard/client/setEventCallbackCloudScript"
+			|| url == "/content/admin/setContentData/admin"
+			|| url == "/cloudscript/admin/addFunction/admin"
 		) {
 			return ReturnCode.Ok;
 		}

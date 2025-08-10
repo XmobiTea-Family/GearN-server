@@ -400,7 +400,7 @@ export class ApiMiddleware {
 
 		if (!secretKey) {
 			if (!req.isAuthenticated) {
-				if (req.url != "/dashboard/loginByAdminAccount/client") {
+				if (req.url != "/dashboard/client/loginByAdminAccount") {
 					return ReturnCode.SecretInvalid;
 				}
 			}

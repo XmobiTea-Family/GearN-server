@@ -231,6 +231,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let gnPlayerFriendCatalogSetting = new GNHashtable();
 
 					gnPlayerFriendCatalogSetting.add(ParameterCode.CatalogId, playerFriendCatalogSetting.catalogId);
+					gnPlayerFriendCatalogSetting.add(ParameterCode.Description, playerFriendCatalogSetting.description);
 					gnPlayerFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, playerFriendCatalogSetting.forceAcceptFriend);
 
 					gnPlayerFriendCatalogSettings.add(gnPlayerFriendCatalogSetting);
@@ -407,6 +408,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 					let gnPlayerFriendCatalogSetting = new GNHashtable();
 
 					gnPlayerFriendCatalogSetting.add(ParameterCode.CatalogId, playerFriendCatalogSetting.catalogId);
+					gnPlayerFriendCatalogSetting.add(ParameterCode.Description, playerFriendCatalogSetting.description);
 					gnPlayerFriendCatalogSetting.add(ParameterCode.ForceAcceptFriend, playerFriendCatalogSetting.forceAcceptFriend);
 
 					gnPlayerFriendCatalogSettings.add(gnPlayerFriendCatalogSetting);

@@ -9,7 +9,7 @@ export class CurrencySettingsParam {
 	@NumberDataMember({ code: ParameterCode.InitialValue })
 	public initialValue: number;
 
-	@StringDataMember({ code: ParameterCode.Description, minLength: 2, maxLength: 64 })
+	@StringDataMember({ code: ParameterCode.Description })
 	public description: string;
 
 	@BooleanDataMember({ code: ParameterCode.Index })

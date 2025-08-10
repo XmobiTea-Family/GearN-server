@@ -6,7 +6,7 @@ export class DataSettingsParam {
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
 	public key: string;
 
-	@StringDataMember({ code: ParameterCode.Description, minLength: 2, maxLength: 64 })
+	@StringDataMember({ code: ParameterCode.Description })
 	public description: string;
 
 	@NumberDataMember({ code: ParameterCode.Permission, mustInt: true })

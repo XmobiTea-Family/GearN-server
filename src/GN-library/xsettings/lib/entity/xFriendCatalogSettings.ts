@@ -1,4 +1,5 @@
 export interface xFriendCatalogSettings {
-    catalogId: string;
-    forceAcceptFriend: boolean;
+	catalogId: string;
+	description: string;
+	forceAcceptFriend: boolean;
 }

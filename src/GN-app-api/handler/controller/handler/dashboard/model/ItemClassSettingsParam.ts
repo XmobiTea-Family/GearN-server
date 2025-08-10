@@ -6,7 +6,7 @@ export class ItemClassSettingsParam {
 	@StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32 })
 	public classId: string;
 
-	@StringDataMember({ code: ParameterCode.Description, isOptional: true })
-	public description?: string;
+	@StringDataMember({ code: ParameterCode.Description })
+	public description: string;
 
 }

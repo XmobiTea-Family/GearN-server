@@ -307,14 +307,14 @@ export class SocketAppHandler {
 
 	private async onSocketResponse(socket: Socket, requestData: any, returnCode: number): Promise<OperationResponse> {
 		let requestTypeStr = requestData[0] as string;
-		let operationCodeStr = requestData[1] as string;
-		let roleStr = requestData[2] as string;
-		
+		let roleStr = requestData[1] as string;
+		let operationCodeStr = requestData[2] as string;
+
 		if (!operationCodeStr || !requestTypeStr || !roleStr) return null;
 
 		let requestType = EnumUtility.parse(RequestType, requestTypeStr, true);
 		let role = EnumUtility.parse(RequestRole, roleStr, true);
-		
+
 		if (requestType == null || role == null) return null;
 
 		let params = requestData.length > 3 ? (requestData[3] as {}) : {};
@@ -366,7 +366,7 @@ export class SocketAppHandler {
 
 	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse, useMsgPack: boolean) {
 		let socketData = OperationHelper.toResponseSocketData(operationResponse);
-		
+
 		let finalData = {
 			returnCode: socketData.returnCode,
 			responseId: socketData.responseId,
@@ -386,14 +386,14 @@ export class SocketAppHandler {
 
 		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(finalData));
 
-        if (useMsgPack) {
-            let socketDataMsgPack = encode(finalData);
+		if (useMsgPack) {
+			let socketDataMsgPack = encode(finalData);
 
-            socket.emit(Commands.ResponseCmd_MsgPack, socketDataMsgPack);
-        }
-        else {
-            socket.emit(Commands.ResponseCmd_Json, finalData);
-        }
+			socket.emit(Commands.ResponseCmd_MsgPack, socketDataMsgPack);
+		}
+		else {
+			socket.emit(Commands.ResponseCmd_Json, finalData);
+		}
 	}
 
 	// private sendEventForSocket(socket: Socket, operationEvent: OperationEvent, useMsgPack: boolean = true) {
@@ -416,32 +416,32 @@ export class SocketAppHandler {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] " + userId + " %O", JSON.stringify(socketData));
 
-        if (useMsgPack) {
-            let socketDataMsgPack = encode(socketData);
+		if (useMsgPack) {
+			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 			else this.server.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-        }
-        else {
-            if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
+		}
+		else {
+			if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
 			else this.server.to(userId).emit(Commands.EventCmd_Json, socketData);
-        }
+		}
 	}
 
 	public sendEventToRoom(roomId: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] " + roomId + " %O", JSON.stringify(socketData));
 
-        if (useMsgPack) {
-            let socketDataMsgPack = encode(socketData);
+		if (useMsgPack) {
+			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 			else this.server.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-        }
-        else {
-            if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
+		}
+		else {
+			if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
 			else this.server.to(roomId).emit(Commands.EventCmd_Json, socketData);
-        }
+		}
 	}
 
 	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent, useMsgPack: boolean = true): void {
@@ -464,15 +464,13 @@ export class SocketAppHandler {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ALL PLAYER] %O", JSON.stringify(socketData));
 
-		if (useMsgPack)
-		{
+		if (useMsgPack) {
 			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 			else this.server.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 		}
-		else
-		{
+		else {
 			if (this.emitter != null) this.emitter.emit(Commands.EventCmd_Json, socketData);
 			else this.server.emit(Commands.EventCmd_Json, socketData);
 		}
@@ -482,15 +480,13 @@ export class SocketAppHandler {
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
 
-		if (useMsgPack)
-		{
+		if (useMsgPack) {
 			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 			else this.server.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
 		}
-		else
-		{
+		else {
 			if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
 			else this.server.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
 		}

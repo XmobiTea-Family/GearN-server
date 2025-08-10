@@ -6,6 +6,9 @@ export class FriendCatalogSettingsParam {
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32 })
 	public catalogId: string;
 
+	@StringDataMember({ code: ParameterCode.Description })
+	public description: string;
+
 	@BooleanDataMember({ code: ParameterCode.ForceAcceptFriend })
 	public forceAcceptFriend: boolean;
 
