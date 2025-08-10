@@ -334,9 +334,10 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		let dbConnection = {
-			dbName: this.databaseSettings.getDatabaseName(),
 			url: this.databaseSettings.getConnectionString(),
+			dbName: this.databaseSettings.getDatabaseName(),
 			logUrl: this.databaseSettings.getLogConnectionString(),
+			logDbName: this.databaseSettings.getLogDatabaseName(),
 			options: this.databaseSettings.getOptions(),
 		}
 
@@ -361,6 +362,13 @@ export class ServerApplication extends BuilderBase {
 
 		server.listen(port, "0.0.0.0", () => {
 			Debug.log("[GearN XmobiTea] -->>==>>>--<<<==<<-- [GearN XmobiTea]");
+			let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
+
+			let bannerTxt = fs.readFileSync(bannerPath, "utf8");
+
+			Debug.log('\n' + bannerTxt + '\n\n');
+			Debug.log("[GearN XmobiTea] -->>==>>>--<<<==<<-- [GearN XmobiTea]");
+
 			Debug.log("[GearN] Server Application running on 0.0.0.0 the port " + port + " with sessionId: " + this.sessionId);
 
 			if (useOtherSocketServer) {
@@ -370,12 +378,6 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			if (onRunSuccess != null) onRunSuccess();
-
-			let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
-
-			let bannerTxt = fs.readFileSync(bannerPath, "utf8");
-
-			Debug.log('\n' + bannerTxt + '\n\n');
 
 		});
 
@@ -1847,11 +1849,12 @@ export class ServerApplication extends BuilderBase {
 		// settings database
 		{
 			let connectionString = this.databaseSettings.getConnectionString();
-			let logConnectionString = this.databaseSettings.getLogConnectionString();
 			let databaseName = this.databaseSettings.getDatabaseName();
+			let logConnectionString = this.databaseSettings.getLogConnectionString();
+			let logDatabaseName = this.databaseSettings.getLogDatabaseName();
 
 			let options = this.databaseSettings.getOptions();
-			gnServer.getDatabase().init(connectionString, logConnectionString, databaseName, options);
+			gnServer.getDatabase().init(connectionString, databaseName, logConnectionString, logDatabaseName, options);
 		}
 
 		return gnServer;

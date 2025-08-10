@@ -41,7 +41,7 @@ export class xDatabase {
 		return this.logDb;
 	}
 
-	public init(url: string, logUrl: string, dbName: string, options?: mongoDB.MongoClientOptions): void {
+	public init(url: string, dbName: string, logUrl: string, logDbName: string, options?: mongoDB.MongoClientOptions): void {
 		this.client = new mongoDB.MongoClient(url, options);
 
 		this.db = this.client.db(dbName);
@@ -52,7 +52,7 @@ export class xDatabase {
 		}
 		else {
 			this.logClient = new mongoDB.MongoClient(logUrl, options);
-			this.logDb = this.logClient.db(dbName);
+			this.logDb = this.logClient.db(logDbName);
 		}
 	}
 

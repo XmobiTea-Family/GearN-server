@@ -163,7 +163,7 @@ class CloudScriptDatabase {
 	private logClient: mongodb.MongoClient;
 	private logDb: mongodb.Db;
 
-	init(url: string, logUrl: string, dbName: string, options?: mongodb.MongoClientOptions): void {
+	init(url: string, dbName: string, logUrl: string, logDbName: string, options?: mongodb.MongoClientOptions): void {
 		this.client = new mongodb.MongoClient(url, options);
 
 		this.db = this.client.db(dbName);
@@ -174,7 +174,7 @@ class CloudScriptDatabase {
 		}
 		else {
 			this.logClient = new mongodb.MongoClient(logUrl, options);
-			this.logDb = this.logClient.db(dbName);
+			this.logDb = this.logClient.db(logDbName);
 		}
 	}
 
@@ -657,7 +657,7 @@ const pushNotification = new CloudScriptPushNotification();
 
 {
 	let dbConnection = JSON.parse(process.env.dbConnection ?? "");
-	database.init(dbConnection.url, dbConnection.logUrl, dbConnection.dbName, dbConnection.options);
+	database.init(dbConnection.url, dbConnection.dbName, dbConnection.logUrl, dbConnection.logDbName, dbConnection.options);
 }
 
 process.env.dbConnection = "";

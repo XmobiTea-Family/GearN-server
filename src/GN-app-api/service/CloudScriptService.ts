@@ -52,6 +52,8 @@ interface CloudScriptEvent {
 interface DbConnection {
 	url: string,
 	dbName: string,
+	logUrl: string,
+	logDbName: string,
 	options?: { [k: string]: any },
 }
 

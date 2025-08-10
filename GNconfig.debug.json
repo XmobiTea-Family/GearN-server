@@ -53,9 +53,10 @@
 			]
 		},
 		"databaseSettings": {
-			"connectionString": "mongodb://saroot:passhere@192.168.0.200:38017/admin",
-			"logConnectionString": null,
-			"databaseName": "GN_IdleRPG",
+			"connectionString": "mongodb://gearn_test:wLDxPACDrHB2mjnX@192.168.1.200:27017/gearn_test",
+			"databaseName": "gearn_test",
+			"logConnectionString": "mongodb://gearn_test_log:fKXTZ453a3MAz2az@192.168.1.200:27017/gearn_test_log",
+			"logDatabaseName": "gearn_test_log",
 			"options": {}
 		},
 		"otherSettings": {

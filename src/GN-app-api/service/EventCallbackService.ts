@@ -87,9 +87,11 @@ interface CloudScriptEvent {
 }
 
 interface DbConnection {
-	url: string;
-	dbName: string;
-	options?: { [k: string]: any };
+	url: string,
+	dbName: string,
+	logUrl: string,
+	logDbName: string,
+	options?: { [k: string]: any },
 }
 
 export interface EventCallbackCloudScriptFunction {

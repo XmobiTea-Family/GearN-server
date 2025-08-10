@@ -3,7 +3,7 @@
   "version": "2.6.4",
   "description": "GearN Server by XmobiTea (Pro)",
   "types": "dist/index.d.ts",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "dev": "npm run build && npm run debug",
     "debug": "node index.js",

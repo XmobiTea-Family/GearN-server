@@ -382,8 +382,10 @@ export class CreateGameRequestHandler extends RequestHandler {
 					let dbConnection = (oldCloudScriptService as any).dbConnection;
 
 					cloudScriptService.init(gameId, gnServerSettingsOptions, {
-						dbName: dbConnection.dbName,
 						url: dbConnection.url,
+						dbName: dbConnection.dbName,
+						logUrl: dbConnection.logUrl,
+						logDbName: dbConnection.logDbName,
 						options: dbConnection.options,
 					}, this.gnServer, (oldCloudScriptService as any).executeTimeoutInMs);
 					cloudScriptService.run();
