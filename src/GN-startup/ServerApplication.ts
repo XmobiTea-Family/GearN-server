@@ -276,7 +276,7 @@ export class ServerApplication extends BuilderBase {
 
 		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 		this.gnServer.setIdTypeCase(this.getOtherSettings().getIdTypeCase());
-
+		this.gnServer.setRestoreRootPassword(this.getApplicationSettings().getRestoreRootPassword());
 		let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdos");
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
@@ -318,6 +318,8 @@ export class ServerApplication extends BuilderBase {
 			useSsl: false,
 			useSocket: false,
 			useHttp: true,
+
+			defaultTimeoutInSeconds: (this.getOtherSettings().getCloudScriptExecuteTimeoutInMs() / 1000 + 5),
 			messageType: MessageType.MsgPack,
 
 			sendRate: 2000,
@@ -351,8 +353,8 @@ export class ServerApplication extends BuilderBase {
 			eventCallbackCloudScriptService.run();
 		}
 
-		let postEventCallbackCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.PostLog");
-		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setEventCallbackCollection(postEventCallbackCollection);
+		let postEventCallbackLogCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
+		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setEventCallbackLogCollection(postEventCallbackLogCollection);
 
 		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 		(<PreEventCallbackService>this.gnServer.getPreEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
@@ -684,8 +686,8 @@ export class ServerApplication extends BuilderBase {
 				}
 			}
 
-			let username = process.env["GEARN_INIT_ROOT_USERNAME"] ?? "gearnadmin";
-			let password = process.env["GEARN_INIT_ROOT_PASSWORD"] ?? "gearnpassword";
+			let rootUsername = this.applicationSettings.getInitRootUsername() ?? "admin";
+			let rootPassword = this.applicationSettings.getInitRootPassword() ?? "password";
 
 			// create secretInfo for admin account
 			{
@@ -710,8 +712,8 @@ export class ServerApplication extends BuilderBase {
 				let result = {
 					type: "account",
 					userId: userId,
-					username: username,
-					password: await bcrypt.hash(password, 10),
+					username: rootUsername,
+					password: await bcrypt.hash(rootPassword, 10),
 					secretKey: secretKey,
 				} as any;
 
@@ -773,7 +775,7 @@ export class ServerApplication extends BuilderBase {
 			await masterPlayerCollection.createIndex({ "external.facebook.facebookId": 1 }, { background: true, sparse: true, name: "external.facebook.facebookId_1" });
 
 			Debug.log("create some indexes on System.MasterPlayer success.");
-			Debug.log("[Security] Please login dashboard via account with username '" + username + "' and password is '" + password + "' and change new password");
+			Debug.log("[Security] Please login dashboard via account with username '" + rootUsername + "' and password is '" + rootPassword + "' and change new password");
 		}
 
 		{
@@ -1604,16 +1606,16 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
-			await this.gnServer.getDatabase().logCreateCollection("System.EventCallback.PostLog", {
+			await this.gnServer.getDatabase().logCreateCollection("Runtime.EventCallback.PostLog", {
 				capped: true,
 				size: 512000000,
 				max: 100000
 			});
 
-			// let postEventCallbackPostCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.PostLog");
+			// let postEventCallbackPostCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
 			// await postEventCallbackPostCollection.createIndex({ eventName: 1, _id: -1 }, { background: true, name: "eventName_1_id_-1" });
 
-			Debug.log("create some indexes for System.EventCallback.Post success.");
+			Debug.log("create some indexes for System.EventCallback.PostLog success.");
 		}
 
 		{

@@ -17,7 +17,7 @@ import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/ent
 
 class LoginByAdminAccountOperationRequest extends OperationRequest {
 
-	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.Username, minLength: 4, maxLength: 32, mustNonNull: true })
 	public username: string;
 
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
@@ -78,8 +78,10 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 		let isMatch = await bcrypt.compare(request.password, password);
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
-			return operationResponse;
+			if (this.gnServer.getRestoreRootPassword() != request.password) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
+				return operationResponse;
+			}
 		}
 
 		this.setupAuthInfo(operationResponse, masterAdminPlayer);

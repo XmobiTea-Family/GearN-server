@@ -458,7 +458,7 @@ export class AnalyticsService implements IAnalyticsService {
 		}
 
 		// {
-		//     let eventCallbackPostCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.Post");
+		//     let eventCallbackPostCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
 
 		//     let results = await eventCallbackPostCollection.aggregate([
 		//         {
@@ -528,7 +528,7 @@ export class AnalyticsService implements IAnalyticsService {
 		}
 
 		{
-			let eventCallbackPostCollection = this.gnServer.getDatabase().logSystemCollection("EventCallback.PostLog");
+			let eventCallbackPostCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
 
 			let now = xDatetime.getCurrentDate();
 			let month0h = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -8,23 +8,24 @@
 			"keyFilePath": "",
 			"certFilePath": "",
 			"expiredTokenInMs": 172800000,
-			"privateKeyToken": "privateKeyDefault"
+			"privateKeyToken": "privateKeyDefault",
+			"initRootUsername": "admin",
+			"initRootPassword": "password",
+			"restoreRootPassword": ""
 		},
 		"httpAppSettings": {
 			"enable": true,
 			"allowOrigin": "*",
 			"credentials": true,
-			"allowMethods": [
-				"GET",
-				"POST"
-			],
+			"allowMethods": ["GET", "POST"],
 			"allowHeaders": [
-				"a",
-				"s",
-				"g",
-				"content-type",
-				"content-length",
-				"user-agent"
+				"Auth-Token",
+				"Secret-Key",
+				"Game-Id",
+				"Content-Type",
+				"Content-Length",
+				"User-Agent",
+				"X-Real-IP"
 			],
 			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
@@ -35,9 +36,7 @@
 			"useEmitter": false,
 			"allowOrigin": "*",
 			"credentials": true,
-			"allowMethods": [
-				"GET"
-			],
+			"allowMethods": ["GET"],
 			"allowHeaders": [],
 			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,

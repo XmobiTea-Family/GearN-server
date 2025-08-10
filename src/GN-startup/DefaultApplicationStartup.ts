@@ -15,14 +15,25 @@ export class DefaultApplicationStartup {
 	protected serverApplication: ServerApplication;
 
 	public run(onRunSuccess?: OnRunSuccess): void {
-		let applicationSettings = ApplicationSettings.Builder().setUseSSL(false).setCertFilePath("").setKeyFilePath("").setPort(2202).setSocketPort(2901).setExpiredToken(2 * 24 * 60 * 60 * 1000).setPrivateKeyToken("defaultApplicationStartup").build();
+		let applicationSettings = ApplicationSettings.Builder()
+			.setUseSSL(false)
+			.setCertFilePath("")
+			.setKeyFilePath("")
+			.setPort(2202)
+			.setSocketPort(2901)
+			.setExpiredToken(2 * 24 * 60 * 60 * 1000)
+			.setPrivateKeyToken("defaultApplicationStartup")
+			.setInitRootUsername("admin")
+			.setInitRootPassword("password")
+			.setRestoreRootUsername("")
+			.build();
 
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(true)
 			.setOrigins("*")
 			.addMethods(["GET", "POST"])
 			.setCredentials(true)
-			.addAllowedHeaders(["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent"])
+			.addAllowedHeaders(["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"])
 			.setEnableSendAndReceiveDebug(true)
 			.setEnablePostViaJson(true)
 			.setEnablePostViaMsgPack(true)

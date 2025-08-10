@@ -12,7 +12,7 @@
     "push": "npm run build && npm publish && git push"
   },
   "author": "Chang X <changx.develop@gmail.com> (https://xmobitea.com)",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
@@ -31,7 +31,7 @@
     "@msgpack/msgpack": "^2.8.0",
     "@socket.io/mongo-adapter": "^0.3.2",
     "@socket.io/mongo-emitter": "^0.2.0",
-    "@xmobitea/gn-typescript-client": "^2.6.4",
+    "@xmobitea/gn-typescript-client": "^2.6.6",
     "axios": "^1.10.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
@@ -49,16 +49,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/XmobiTea-Family/GN-Server.git"
+    "url": "git+https://github.com/XmobiTea-Family/GearN-Server.git"
   },
   "keywords": [
     "GN",
+    "GearN",
     "Server",
     "Pro",
     "XmobiTea"
   ],
   "bugs": {
-    "url": "https://github.com/XmobiTea-Family/GN-Server/issues"
+    "url": "https://github.com/XmobiTea-Family/GearN-Server/issues"
   },
-  "homepage": "https://gearn.net"
+  "homepage": "https://gearn.net",
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }

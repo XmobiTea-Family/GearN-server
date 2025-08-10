@@ -1211,7 +1211,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 		this.eventLstDict = new Map();
 	}
 
-	private eventCallbackCollection: mongoDB.Collection<mongoDB.Document>;
+	private eventCallbackLogCollection: mongoDB.Collection<mongoDB.Document>;
 	private cloudScriptService: IEventCallbackCloudScriptService;
 
 	public subscriberEvent(eventName: string, callbackFunction: OnPostCallbackFunction) {
@@ -1237,8 +1237,8 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 		}
 	}
 
-	public setEventCallbackCollection(eventCallbackCollection: mongoDB.Collection<mongoDB.Document>): void {
-		this.eventCallbackCollection = eventCallbackCollection;
+	public setEventCallbackLogCollection(eventCallbackLogCollection: mongoDB.Collection<mongoDB.Document>): void {
+		this.eventCallbackLogCollection = eventCallbackLogCollection;
 	}
 
 	public setCloudScriptService(cloudScriptService: IEventCallbackCloudScriptService): void {
@@ -1254,7 +1254,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 	): Promise<void> {
 		let operationResponseToData = OperationHelper.toDataOperationResponse(operationResponse)
 
-		this.eventCallbackCollection.insertOne({
+		this.eventCallbackLogCollection.insertOne({
 			eventName: eventName,
 			tsCreate: xDatetime.getCurrentMilliseconds(),
 			request: request,

@@ -96,7 +96,10 @@ init_create_GNConfigDebugJson() {
 			"keyFilePath": "",
 			"certFilePath": "",
 			"expiredTokenInMs": 172800000,
-            "privateKeyToken": "privateKeyDefault"
+            "privateKeyToken": "privateKeyDefault",
+            "initRootUsername": "admin",
+			"initRootPassword": "password",
+			"restoreRootPassword": ""
 		},
 
 		"httpAppSettings": {
@@ -104,7 +107,7 @@ init_create_GNConfigDebugJson() {
 			"allowOrigin": "*",
 			"credentials": true,
 			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent"],
+			"allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"],
 			"enableSendAndReceiveDebug": true,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true
@@ -117,7 +120,7 @@ init_create_GNConfigDebugJson() {
 			"credentials": true,
 			"allowMethods": ["GET"],
 			"allowHeaders": [],
-			"enableSendAndReceiveDebug": true,
+			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true,
 			"pingInterval": 50000,
@@ -301,20 +304,21 @@ import { OperationCodeExtensions } from "./../../common/constant/OperationCode.e
 import { TestParameterCode } from "./../../common/constant/parameterCode/TestParameterCode";
 
 class TestOperationRequest extends OperationRequest {
+
     @BooleanDataMember({ code: TestParameterCode.Boolean, isOptional: true })
-    booleanValue?: boolean;
+    public booleanValue?: boolean;
 	
     @NumberDataMember({ code: TestParameterCode.Number, isOptional: true })
-    numberValue?: number;
+    public numberValue?: number;
 	
     @StringDataMember({ code: TestParameterCode.String, isOptional: true })
-    stringValue?: string;
+    public stringValue?: string;
 	
     @GNHashtableDataMember({ code: TestParameterCode.GNHashtable, isOptional: true })
-    gnHashtableValue?: GNHashtable;
+    public gnHashtableValue?: GNHashtable;
 	
     @GNArrayDataMember({ code: TestParameterCode.GNArray, isOptional: true })
-    gnArrayValue?: GNArray;
+    public gnArrayValue?: GNArray;
 
     public override isValidRequest() {
         return true;
@@ -322,6 +326,7 @@ class TestOperationRequest extends OperationRequest {
 }
 
 export class TestRequestHandler extends RequestHandler {
+
     public getCode() {
         return OperationCodeExtensions.Test;
     }
@@ -434,11 +439,11 @@ export class OperationCodeExtensions extends OperationCode {
 
     cd "$DIR_PARAMETER_CODE"
     echo 'export class TestParameterCode {
-    public static readonly String: string = "1";
-    public static readonly Number: string = "2";
-    public static readonly Boolean: string = "3";
-    public static readonly GNHashtable: string = "4";
-    public static readonly GNArray: string = "5";
+    public static readonly String: string = "string";
+    public static readonly Number: string = "number";
+    public static readonly Boolean: string = "boolean";
+    public static readonly GNHashtable: string = "gnHashtable";
+    public static readonly GNArray: string = "gnArray";
 }' > TestParameterCode.ts
     echo 'create TestParameterCode.ts file success'
 
@@ -647,8 +652,9 @@ import { '$REQUEST_NAME'ErrorCode } from "./../../common/constant/errorCode/'$RE
 import { '$REQUEST_NAME'ParameterCode } from "./../../common/constant/parameterCode/'$REQUEST_NAME'ParameterCode";
 
 class '$REQUEST_NAME'OperationRequest extends OperationRequest {
+    
     @DataMember({ code: '$REQUEST_NAME'ParameterCode.Var1, isOptional: true })
-    var1: number;
+    public var1: number;
 
     public override isValidRequest() {
         return true;
@@ -656,6 +662,7 @@ class '$REQUEST_NAME'OperationRequest extends OperationRequest {
 }
 
 export class '$REQUEST_NAME'RequestHandler extends RequestHandler {
+
     public getCode() {
         return OperationCodeExtensions.'$REQUEST_NAME';
     }

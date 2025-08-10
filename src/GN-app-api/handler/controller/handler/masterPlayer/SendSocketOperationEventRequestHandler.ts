@@ -19,7 +19,7 @@ class SendSocketOperationEventOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
-	@StringDataMember({ code: ParameterCode.EventCode, minLength: 1, maxLength: 100 })
+	@StringDataMember({ code: ParameterCode.EventCode, minLength: 1, maxLength: 64 })
 	public eventCode: string;
 
 	@GNHashtableDataMember({ code: ParameterCode.EventParameters, mustNonNull: true, minLength: 0, maxLength: 128, isOptional: true })

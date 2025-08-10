@@ -83,8 +83,10 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		let isMatch = await bcrypt.compare(request.currentPassword, password);
 
 		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
-			return operationResponse;
+			if (this.gnServer.getRestoreRootPassword() != request.currentPassword) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
+				return operationResponse;
+			}
 		}
 
 		masterAdminPlayer.setPassword(await bcrypt.hash(request.password, 10));

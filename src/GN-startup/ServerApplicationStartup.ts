@@ -28,8 +28,12 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"keyFilePath": "",
 			"certFilePath": "",
 			"expiredTokenInMs": 172800000,
+			"privateKeyToken": "",
+			"initRootUsername": "admin",
+			"initRootPassword": "password",
+			"restoreRootPassword": "",
 		}
-		
+
 		let applicationSettings = ApplicationSettings.Builder()
 			.setUseSSL(gnApplicationSettings["useSsl"] ?? false)
 			.setCertFilePath(gnApplicationSettings["keyFilePath"] ?? "")
@@ -37,7 +41,10 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setPort(gnApplicationSettings["port"] ?? 2202)
 			.setSocketPort(gnApplicationSettings["socketPort"] ?? 2901)
 			.setExpiredToken(gnApplicationSettings["expiredTokenInMs"] ?? 172800000)
-			.setPrivateKeyToken(process.env["GEARN_TOKEN_PRIVATE_KEY"] ?? gnApplicationSettings["privateKeyToken"] ?? "")
+			.setPrivateKeyToken(gnApplicationSettings["privateKeyToken"] ?? "privateKeyToken")
+			.setInitRootUsername(gnApplicationSettings["initRootUsername"] ?? "admin")
+			.setInitRootPassword(gnApplicationSettings["initRootPassword"] ?? "password")
+			.setRestoreRootUsername(gnApplicationSettings["restoreRootPassword"] ?? "")
 			.build();
 
 		let gnHttpAppSettings = this.gnConfig["httpAppSettings"];
@@ -46,7 +53,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"allowOrigin": "*",
 			"credentials": true,
 			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent"],
+			"allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"],
 			"enableSendAndReceiveDebug": true,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true,
@@ -56,7 +63,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setOrigins(gnHttpAppSettings["allowOrigin"] ?? "*")
 			.addMethods(gnHttpAppSettings["allowMethods"] ?? ["GET", "POST"])
 			.setCredentials(gnHttpAppSettings["credentials"] ?? true)
-			.addAllowedHeaders(gnHttpAppSettings["allowHeaders"] ?? ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent"])
+			.addAllowedHeaders(gnHttpAppSettings["allowHeaders"] ?? ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"])
 			.setEnableSendAndReceiveDebug(gnHttpAppSettings["enableSendAndReceiveDebug"] ?? true)
 			.setEnablePostViaMsgPack(gnHttpAppSettings["enablePostViaMsgPack"] ?? true)
 			.setEnablePostViaJson(gnHttpAppSettings["enablePostViaJson"] ?? true)
@@ -183,7 +190,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		let clusterSettings = ClusterSettings.Builder()
 			.setInstanceId(gnClusterSettings["instanceId"] ?? "node_0")
 			.setIsPrimary(gnClusterSettings["isPrimary"] ?? true)
-			.setPrivateKeyToken(process.env["GEARN_CLUSTER_PRIVATE_KEY"] ?? gnClusterSettings["privateKeyToken"] ?? "privateKeyDefault")
+			.setPrivateKeyToken(gnClusterSettings["privateKeyToken"] ?? "privateKeyDefault")
 			.setAllNodes(gnClusterSettings["allNodes"] ?? [{ instanceId: "node_0", fullUrl: "http://127.0.0.1:2202" }])
 
 		this.serverApplication = this.newServerApplication(

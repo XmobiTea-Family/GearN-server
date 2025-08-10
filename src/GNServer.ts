@@ -426,6 +426,7 @@ export class GNServer {
 	private requestController: RequestController;
 
 	private idTypeCase: number;
+	private restoreRootPassword: string;
 	private xGNSettings: xGNSettings;
 	private xDatabase: xDatabase;
 
@@ -469,6 +470,7 @@ export class GNServer {
 		this.emailService = new EmailService();
 
 		this.idTypeCase = 0;
+		this.restoreRootPassword = "";
 		this.configServiceDic = new Map();
 		this.xGNSettings = new xGNSettings();
 		this.xDatabase = new xDatabase();
@@ -926,7 +928,7 @@ export class GNServer {
 		tempAnalyticsService.run();
 		this.analyticsService = tempAnalyticsService;
 
-		this.postEventCallbackCollection = this.xDatabase.logSystemCollection("EventCallback.PostLog");
+		this.postEventCallbackCollection = this.xDatabase.logRuntimeCollection("EventCallback.PostLog");
 
 		this.getHttpApp().getClusterHandler().onEvent("sendEventTo", data => {
 			this.executeSendEventTo(data);
@@ -1009,6 +1011,14 @@ export class GNServer {
 
 	public getIdTypeCase() {
 		return this.idTypeCase;
+	}
+
+	public setRestoreRootPassword(restoreRootPassword: string) {
+		this.restoreRootPassword = restoreRootPassword;
+	}
+
+	public getRestoreRootPassword() {
+		return this.restoreRootPassword;
 	}
 
 	public getGNSettings(): xGNSettings {
