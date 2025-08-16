@@ -349,7 +349,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 			await cacheCollection.createIndex({ key: 1 }, { background: true, name: "key_1" });
 		}
 
-		this.gnServer.getHttpApp().getClusterHandler().sendEvent("addGameId", { gameId: gameId });
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_addGameId", { gameId: gameId });
 
 		operationResponse.setParameter(ParameterCode.GameId, gameId);
 
@@ -419,7 +419,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 	protected init(): void {
 		let thiz = this;
 
-		this.gnServer.getHttpApp().getClusterHandler().onEvent("addGameId", (data) => {
+		this.gnServer.getHttpApp().getClusterHandler().onEvent("dashboard_addGameId", (data) => {
 			let gameId = data.gameId as string;
 
 			thiz.addGameId(gameId);

@@ -44,7 +44,7 @@ class SetGameInformationOperationRequest extends OperationRequest {
 	public gameSettings?: GameSettingsParam;
 
 	@GNArrayDataMember({ code: ParameterCode.MatchmakingQueueSettings, isOptional: true, elementCls: MatchmakingQueueSettingsParam })
-	public matchmakingQueueSettings?: MatchmakingQueueSettingsParam[];
+	public matchmakingQueueSettings?: Array<MatchmakingQueueSettingsParam>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -402,7 +402,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { gameId: string, gameName: string, gameDescription: string, gameIconUrl: string, gameSettings: GameSettingsParam, matchmakingQueueSettings: MatchmakingQueueSettingsParam[] }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { gameId: string, gameName: string, gameDescription: string, gameIconUrl: string, gameSettings: GameSettingsParam, matchmakingQueueSettings: Array<MatchmakingQueueSettingsParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetGameInformation", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;

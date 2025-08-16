@@ -280,6 +280,18 @@ export class ApiMiddleware {
 		return authInfo;
 	}
 
+	public getAuthInfosByUserIdInMemCache(userId: string): AuthInfo[] {
+		let answer: AuthInfo[] = [];
+
+		for (const authInfo of this.authInfoDict.values()) {
+			if (authInfo != null && authInfo.getUserId() == userId) {
+				answer.push(authInfo);
+			}
+		}
+
+		return answer;
+	}
+
 	public async updateSecretInfo(secretInfo: SecretInfo): Promise<void> {
 		let secretKey = secretInfo.getSecretKey();
 

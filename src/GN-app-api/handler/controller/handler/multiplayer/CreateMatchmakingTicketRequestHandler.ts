@@ -31,7 +31,7 @@ class CreateMatchmakingTicketOperationRequest extends OperationRequest {
 	public attribute?: GNHashtable;
 
 	@GNArrayDataMember({ code: ParameterCode.Members, isOptional: true, elementCls: String })
-	public members?: string[];
+	public members?: Array<string>;
 
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
@@ -82,18 +82,6 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			return this.newOperationNotAllowError(request);
 		}
 
-		// @NumberDataMember({ code: ParameterCode.GiveUpAfterSeconds, mustInt: true })
-		// giveUpAfterSeconds: number;
-
-		// @StringDataMember({ code: ParameterCode.QueueName, minLength: 6, maxLength: 32 })
-		// queueName: string;
-
-		// @GNHashtableDataMember({ code: ParameterCode.Attribute })
-		// attribute: string;
-
-		// @GNArrayDataMember({ code: ParameterCode.Members, isOptional: true })
-		// members?: string[];
-
 		return this.execute({
 			userId: authInfo.getUserId(),
 			giveUpAfterSeconds: request.giveUpAfterSeconds,
@@ -143,7 +131,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, giveUpAfterSeconds: number, queueName: string, attribute: GNHashtable, members: string[] }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, giveUpAfterSeconds: number, queueName: string, attribute: GNHashtable, members: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_CreateMatchmakingTicket", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;

@@ -13,6 +13,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetPlayerBanOperationRequest extends OperationRequest {
 
@@ -154,10 +155,35 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 		masterPlayer.setPlayerBan(request.tsExpire, request.reason);
 		masterPlayer.saveAsync();
 
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("masterPlayer_SetPlayerBan", request);
+
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SetPlayerBan", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
+	}
+
+	private setPlayerBan(data: { userId: string, tsExpire: number, reason: string, }) {
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		if (data.tsExpire == -1 || data.tsExpire > currentMilliseconds) {
+			let authInfos = this.gnServer.getApiMiddleware().getAuthInfosByUserIdInMemCache(data.userId);
+
+			for (const authInfo of authInfos) {
+				authInfo.setIsRemove(true);
+				authInfo.setTsLastUpdate(currentMilliseconds);
+				authInfo.setTsExpire(currentMilliseconds);
+
+				this.gnServer.getApiMiddleware().updateAuthInfo(authInfo);
+			}
+		}
+	}
+
+	protected override init(): void {
+		let thiz = this;
+		this.gnServer.getHttpApp().getClusterHandler().onEvent("masterPlayer_SetPlayerBan", data => {
+			thiz.setPlayerBan(data);
+		});
 	}
 }

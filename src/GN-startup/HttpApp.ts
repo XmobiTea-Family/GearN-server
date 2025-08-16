@@ -103,20 +103,77 @@ export class HttpApp {
 	public run(): void {
 		this.app.use(express.urlencoded({ extended: false }));
 
+		this.app.get("/", (req: express.Request, res: express.Response): any => {
+			return res.sendStatus(403);
+		});
+
 		this.app.post("/", (req: express.Request, res: express.Response): any => {
 			return res.sendStatus(403);
 		});
 
-		this.app.get("/", (req: express.Request, res: express.Response): any => {
-			return res.sendStatus(403);
+		this.app.post("/ping", (req: express.Request, res: express.Response): any => {
+			return res.sendStatus(200);
 		});
 
 		this.app.get("/ping", (req: express.Request, res: express.Response): any => {
 			return res.sendStatus(200);
 		});
 
-		this.app.post("/ping", (req: express.Request, res: express.Response): any => {
-			return res.sendStatus(200);
+		this.app.get("/healthCheck", (req: express.Request, res: express.Response): any => {
+
+			let thisInstance = this.clusterHandler.getInstanceInfoStatus();
+			let otherInstances = this.clusterHandler.getInstanceInfos();
+
+			let thisInstanceResponseData: {
+				instanceId: string,
+				isPrimary: boolean,
+				currentInstanceIdPrimary: string,
+				currentTsPrimary: number,
+				currentTsPrimaryToDate: string,
+				tsPrimary: number,
+				tsPrimaryToDate: string,
+			} = {
+				instanceId: thisInstance.instanceId,
+				isPrimary: thisInstance.isPrimary,
+				currentInstanceIdPrimary: thisInstance.currentInstanceIdPrimary,
+				currentTsPrimary: thisInstance.currentTsPrimary,
+				currentTsPrimaryToDate: new Date(thisInstance.currentTsPrimary).toLocaleString(),
+				tsPrimary: thisInstance.tsPrimary,
+				tsPrimaryToDate: new Date(thisInstance.tsPrimary).toLocaleString(),
+			};
+
+			let otherInstancesResponseData: {
+				instanceId: string,
+				isPrimary: boolean,
+				currentInstanceIdPrimary: string,
+				currentTsPrimary: number,
+				currentTsPrimaryToDate: string,
+				tsPrimary: number,
+				tsPrimaryToDate: string,
+				lostPing: number,
+			}[] = [];
+
+			for (let i = 0; i < otherInstances.length; i++) {
+				let otherInstance = otherInstances[i];
+
+				otherInstancesResponseData.push({
+					instanceId: otherInstance.instanceId,
+					isPrimary: otherInstance.isPrimary,
+					currentInstanceIdPrimary: otherInstance.currentInstanceIdPrimary,
+					currentTsPrimary: otherInstance.currentTsPrimary,
+					currentTsPrimaryToDate: new Date(otherInstance.currentTsPrimary).toLocaleString(),
+					tsPrimary: otherInstance.tsPrimary,
+					tsPrimaryToDate: new Date(otherInstance.tsPrimary).toLocaleString(),
+					lostPing: otherInstance.lostPing,
+				});
+			}
+
+			return res.status(200).json({
+				data: {
+					thisInstance: thisInstanceResponseData,
+					otherInstances: otherInstancesResponseData,
+				}
+			});
 		});
 
 		let allowedHeaders = this.appSettings.getAllowedHeaders();

@@ -205,25 +205,25 @@ class CloudScriptAdmin {
 	};
 	public send(
 		requestType: RequestType,
-		requestRole: RequestRole,
+		role: RequestRole,
 		request: OperationRequest,
 		onResponse: Action1<OperationResponse>,
 		overrideAuthToken: string,
 		overrideSecretKey: string,
 		customTags: GNHashtable
 	): void {
-		GNNetwork.sendViaHttp(requestType, requestRole, request, onResponse, overrideAuthToken, overrideSecretKey, customTags);
+		GNNetwork.sendViaHttp(requestType, role, request, onResponse, overrideAuthToken, overrideSecretKey, customTags);
 	}
 
 	public sendAsync(
 		requestType: RequestType,
-		requestRole: RequestRole,
+		role: RequestRole,
 		request: OperationRequest,
 		overrideAuthToken: string,
 		overrideSecretKey: string,
 		customTags: GNHashtable
 	): Promise<OperationResponse> {
-		return GNNetwork.sendViaHttpAsync(requestType, requestRole, request, overrideAuthToken, overrideSecretKey, customTags);
+		return GNNetwork.sendViaHttpAsync(requestType, role, request, overrideAuthToken, overrideSecretKey, customTags);
 	}
 }
 

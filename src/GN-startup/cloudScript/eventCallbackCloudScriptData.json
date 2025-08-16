@@ -617,7 +617,7 @@
             },
             {
                 "eventName": "dashboard_SetGameInformation",
-                "script": "\npreHandlers.dashboard_SetGameInformation = async (request: { gameId: string, gameName: string, gameDescription: string, gameIconUrl: string, gameSettings: GameSettingsParam, matchmakingQueueSettings: MatchmakingQueueSettingsParam[] }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_SetGameInformation = async (request: { gameId: string, gameName: string, gameDescription: string, gameIconUrl: string, gameSettings: GameSettingsParam, matchmakingQueueSettings: MatchmakingQueueSettingsParam[] }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.dashboard_SetGameInformation = async (request: { gameId: string, gameName: string, gameDescription: string, gameIconUrl: string, gameSettings: GameSettingsParam, matchmakingQueueSettings: Array<MatchmakingQueueSettingsParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_SetGameInformation = async (request: { gameId: string, gameName: string, gameDescription: string, gameIconUrl: string, gameSettings: GameSettingsParam, matchmakingQueueSettings: Array<MatchmakingQueueSettingsParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1752,7 +1752,7 @@
             },
             {
                 "eventName": "multiplayer_CreateMatchmakingTicket",
-                "script": "\npreHandlers.multiplayer_CreateMatchmakingTicket = async (request: { userId: string, giveUpAfterSeconds: number, queueName: string, attribute: GNHashtable, members: string[] }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_CreateMatchmakingTicket = async (request: { userId: string, giveUpAfterSeconds: number, queueName: string, attribute: GNHashtable, members: string[] }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.multiplayer_CreateMatchmakingTicket = async (request: { userId: string, giveUpAfterSeconds: number, queueName: string, attribute: GNHashtable, members: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_CreateMatchmakingTicket = async (request: { userId: string, giveUpAfterSeconds: number, queueName: string, attribute: GNHashtable, members: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

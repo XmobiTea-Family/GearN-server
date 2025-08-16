@@ -61,6 +61,14 @@ export class ClusterHandler {
 		return this.isSingleNode;
 	}
 
+	public getInstanceInfoStatus(): InstanceInfoStatus {
+		return this.instanceInfoStatus;
+	}
+
+	public getInstanceInfos(): InstanceInfo[] {
+		return this.instanceInfos;
+	}
+
 	public setPrivateKeyToken(privateKeyToken: string) {
 		this.privateKeyToken = privateKeyToken;
 	}

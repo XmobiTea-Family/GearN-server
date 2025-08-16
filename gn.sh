@@ -137,6 +137,8 @@ init_create_GNConfigDebugJson() {
 		"databaseSettings": {
 			"connectionString": "mongodb://127.0.0.1:27017/",
 			"databaseName": "XmobiTea",
+            "logConnectionString": null,
+			"logDatabaseName": "XmobiTea",
 			"options": {
 			}
 		},
@@ -327,7 +329,7 @@ class TestOperationRequest extends OperationRequest {
 
 export class TestRequestHandler extends RequestHandler {
 
-    public getCode() {
+    public override getCode() {
         return OperationCodeExtensions.Test;
     }
 
@@ -587,22 +589,10 @@ createRequestHandler() {
     arrOPERATION_CMD_COUNT=(${OPERATION_CMD_COUNT// / })
     OPERATION_COUNT=${arrOPERATION_CMD_COUNT[0]}
 
-    CONTENT_OPERATION=""
-    MAX_VALUE=50
-
     n=0
     while read line; do
         if [ $n -ge 3 ]; then
             CONTENT_OPERATION+="\t"$line
-
-            arrTEMP=(${line//=/ })
-            TEMP_CURRENT_VALUE=${arrTEMP[5]}
-            arrTEMP_CURRENT_VALUE=(${TEMP_CURRENT_VALUE//;/ })
-            CURRENT_VALUE=${arrTEMP_CURRENT_VALUE[0]}
-
-            if [ $MAX_VALUE -lt $CURRENT_VALUE ]; then
-                MAX_VALUE=$CURRENT_VALUE
-            fi
         else
             CONTENT_OPERATION+=$line
         fi
@@ -612,7 +602,7 @@ createRequestHandler() {
         fi
 
         if [ $n == $((OPERATION_COUNT - 2)) ]; then
-            CONTENT_OPERATION+="\tpublic static readonly "$REQUEST_NAME": number = "$((MAX_VALUE + 1))";"
+            CONTENT_OPERATION+="\tpublic static readonly "$REQUEST_NAME": string = "$REQUEST_NAME";"
             CONTENT_OPERATION+="\n"
             CONTENT_OPERATION+="}"
             break
@@ -663,7 +653,7 @@ class '$REQUEST_NAME'OperationRequest extends OperationRequest {
 
 export class '$REQUEST_NAME'RequestHandler extends RequestHandler {
 
-    public getCode() {
+    public override getCode() {
         return OperationCodeExtensions.'$REQUEST_NAME';
     }
 

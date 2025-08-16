@@ -40,13 +40,13 @@ class CustomExpansionsParam {
 	public secondsBetweenExpansions: number;
 
 	@GNArrayDataMember({ code: ParameterCode.OverrideValue, isOptional: true, elementCls: Object })
-	public overrideValue?: any[];
+	public overrideValue?: Array<any>;
 
 	@GNArrayDataMember({ code: ParameterCode.OverrideMin, isOptional: true, elementCls: Object })
-	public overrideMin?: any[];
+	public overrideMin?: Array<any>;
 
 	@GNArrayDataMember({ code: ParameterCode.OverrideMax, isOptional: true, elementCls: Object })
-	public overrideMax?: any[];
+	public overrideMax?: Array<any>;
 
 }
 
@@ -122,10 +122,10 @@ export class MatchmakingQueueSettingsParam {
 	public serverAllocation: ServerAllocationParam;
 
 	@GNArrayDataMember({ code: ParameterCode.Teams, isOptional: true, elementCls: TeamParam })
-	public teams?: TeamParam[];
+	public teams?: Array<TeamParam>;
 
 	@GNArrayDataMember({ code: ParameterCode.Rules, isOptional: true, elementCls: RuleParam })
-	public rules?: RuleParam[];
+	public rules?: Array<RuleParam>;
 
 	@BooleanDataMember({ code: ParameterCode.Remove, isOptional: true })
 	public remove?: boolean;

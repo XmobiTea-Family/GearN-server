@@ -361,12 +361,10 @@ export class ServerApplication extends BuilderBase {
 		(<PreEventCallbackService>this.gnServer.getPreEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 
 		server.listen(port, "0.0.0.0", () => {
-			Debug.log("[GearN XmobiTea] -->>==>>>--<<<==<<-- [GearN XmobiTea]");
 			let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
-
 			let bannerTxt = fs.readFileSync(bannerPath, "utf8");
+			console.log('\n\n' + bannerTxt + '\n\n');
 
-			Debug.log('\n' + bannerTxt + '\n\n');
 			Debug.log("[GearN XmobiTea] -->>==>>>--<<<==<<-- [GearN XmobiTea]");
 
 			Debug.log("[GearN] Server Application running on 0.0.0.0 the port " + port + " with sessionId: " + this.sessionId);
