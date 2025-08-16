@@ -1,9 +1,9 @@
 {
   "name": "@xmobitea/gn-server",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "description": "GearN Server by XmobiTea (Pro)",
   "types": "dist/index.d.ts",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "npm run build && npm run debug",
     "debug": "node index.js",
