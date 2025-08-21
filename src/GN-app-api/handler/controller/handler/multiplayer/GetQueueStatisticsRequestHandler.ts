@@ -164,6 +164,7 @@ export class GetQueueStatisticsRequestHandler extends MultiplayerBaseRequestHand
 
 		let averageMatchmakingTimeInSeconds = totalMatchSuccess == 0 ? -1 : totalMatchSuccessTimeInSeconds / totalMatchSuccess;
 
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 		operationResponse.setParameter(ParameterCode.PendingMemberCount, pendingMemberCount);
 		operationResponse.setParameter(ParameterCode.PendingTicketCount, pendingTicketCount);
 		operationResponse.setParameter(ParameterCode.AverageMatchmakingTimeInSeconds, averageMatchmakingTimeInSeconds);

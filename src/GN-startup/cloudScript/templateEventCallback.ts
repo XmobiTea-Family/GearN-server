@@ -148,412 +148,38 @@ import {
 import * as mongodb from "mongodb";
 import * as axios from "axios";
 
-enum CloudScriptEventType {
-	SendToUser = 0,
-	SendToMore = 1,
-	SendToAll = 2,
-}
-
-interface CloudScriptEvent {
-	eventType: CloudScriptEventType;
-	operationEvent: {
-		eventCode: string;
-		parameters: {} | null;
-	};
-	receiver: string[] | string | null;
-}
-
-class CloudScriptAdmin {
-	public readonly characterPlayer = GNNetwork.characterPlayer.admin;
-	public readonly content = GNNetwork.content.admin;
-	public readonly gamePlayer = GNNetwork.gamePlayer.admin;
-	public readonly group = GNNetwork.group.admin;
-	public readonly inventory = GNNetwork.inventory.admin;
-	public readonly masterPlayer = GNNetwork.masterPlayer.admin;
-	public readonly storeInventory = GNNetwork.storeInventory.admin;
-	public readonly multiplayer = GNNetwork.multiplayer.admin;
-	public readonly cloudScript = GNNetwork.cloudScript.admin;
-	public readonly dashboard = {
-		getAdminAccountList: GNNetwork.dashboard.getAdminAccountList,
-		getAdminAccountListAsync: GNNetwork.dashboard.getAdminAccountListAsync,
-		getGameInformation: GNNetwork.dashboard.getGameInformation,
-		getGameInformationAsync: GNNetwork.dashboard.getGameInformationAsync,
-		getGameList: GNNetwork.dashboard.getGameList,
-		getGameListAsync: GNNetwork.dashboard.getGameListAsync,
-		getMasterGameSettings: GNNetwork.dashboard.getMasterGameSettings,
-		getMasterGameSettingsAsync: GNNetwork.dashboard.getMasterGameSettingsAsync,
-		getSecretInfoInformation: GNNetwork.dashboard.getSecretInfoInformation,
-		getSecretInfoInformationAsync: GNNetwork.dashboard.getSecretInfoInformationAsync,
-		getSecretInfoList: GNNetwork.dashboard.getSecretInfoList,
-		getSecretInfoListAsync: GNNetwork.dashboard.getSecretInfoListAsync,
-		getServerLog: GNNetwork.dashboard.getServerLog,
-		getServerLogAsync: GNNetwork.dashboard.getServerLogAsync,
-		setGameInformation: GNNetwork.dashboard.setGameInformation,
-		setGameInformationAsync: GNNetwork.dashboard.setGameInformationAsync,
-		getUsernameAdminAccount: GNNetwork.dashboard.getUsernameAdminAccount,
-		getUsernameAdminAccountAsync: GNNetwork.dashboard.getUsernameAdminAccountAsync,
-		getAnalytics: GNNetwork.dashboard.getAnalytics,
-		getAnalyticsAsync: GNNetwork.dashboard.getAnalyticsAsync,
-		resetStatisticsLeaderboard: GNNetwork.dashboard.resetStatisticsLeaderboard,
-		resetStatisticsLeaderboardAsync: GNNetwork.dashboard.resetStatisticsLeaderboardAsync,
-		getBackupStatisticsLeaderboardVersion: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersion,
-		getBackupStatisticsLeaderboardVersionAsync: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersionAsync,
-		getServerGameData: GNNetwork.dashboard.getServerGameData,
-		getServerGameDataAsync: GNNetwork.dashboard.getServerGameDataAsync,
-		deleteInDatabase: GNNetwork.dashboard.deleteInDatabase,
-		deleteInDatabaseAsync: GNNetwork.dashboard.deleteInDatabaseAsync,
-	};
-	public send(
-		requestType: RequestType,
-		role: RequestRole,
-		request: OperationRequest,
-		onResponse: Action1<OperationResponse>,
-		overrideAuthToken: string,
-		overrideSecretKey: string,
-		customTags: GNHashtable
-	): void {
-		GNNetwork.sendViaHttp(requestType, role, request, onResponse, overrideAuthToken, overrideSecretKey, customTags);
-	}
-
-	public sendAsync(
-		requestType: RequestType,
-		role: RequestRole,
-		request: OperationRequest,
-		overrideAuthToken: string,
-		overrideSecretKey: string,
-		customTags: GNHashtable
-	): Promise<OperationResponse> {
-		return GNNetwork.sendViaHttpAsync(requestType, role, request, overrideAuthToken, overrideSecretKey, customTags);
-	}
-}
-
-class CloudScriptDatabase {
-	private static readonly DOT: string = ".";
-	private static readonly RUNTIME: string = "Runtime" + CloudScriptDatabase.DOT;
-	private static readonly META: string = "Meta" + CloudScriptDatabase.DOT;
-	private static readonly SYSTEM: string = "System" + CloudScriptDatabase.DOT;
-
-	private client: mongodb.MongoClient;
-	private db: mongodb.Db;
-
-	private logClient: mongodb.MongoClient;
-	private logDb: mongodb.Db;
-
-	init(url: string, dbName: string, logUrl: string, logDbName: string, options?: mongodb.MongoClientOptions): void {
-		this.client = new mongodb.MongoClient(url, options);
-
-		this.db = this.client.db(dbName);
-
-		if (!logUrl || logUrl == "" || logUrl == url) {
-			this.logClient = this.client;
-			this.logDb = this.db;
-		}
-		else {
-			this.logClient = new mongodb.MongoClient(logUrl, options);
-			this.logDb = this.logClient.db(logDbName);
-		}
-	}
-
-	public runtimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.RUNTIME + collectionName);
-	}
-
-	public metaCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.META + collectionName);
-	}
-
-	public systemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.SYSTEM + collectionName);
-	}
-
-	public runtimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.RUNTIME + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public metaGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.META + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public systemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.SYSTEM + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public collection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
-		return this.db.collection<TSchema>(fullCollectionName);
-	}
-
-	public createCollection(name: string, options?: mongodb.CreateCollectionOptions): Promise<mongodb.Collection<mongodb.BSON.Document>> {
-		return this.db.createCollection(name, options);
-	}
-
-	public logRuntimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.RUNTIME + collectionName);
-	}
-
-	public logMetaCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.META + collectionName);
-	}
-
-	public logSystemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.SYSTEM + collectionName);
-	}
-
-	public logRuntimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.RUNTIME + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public logMetaGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.META + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public logSystemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.SYSTEM + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public logCollection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
-		return this.logDb.collection<TSchema>(fullCollectionName);
-	}
-
-	public logCreateCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, options?: mongodb.CreateCollectionOptions) {
-		return this.logDb.createCollection<TSchema>(collectionName, options)
-	}
-}
-
-class CloudScriptHttp {
-	public async get<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.get<T, R, D>(url, config);
-	}
-
-	public async delete<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.delete<T, R, D>(url, config);
-	}
-
-	public async head<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.head<T, R, D>(url, config);
-	}
-
-	public async options<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.options<T, R, D>(url, config);
-	}
-
-	public async post<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.post<T, R, D>(url, data, config);
-	}
-
-	public async put<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.put<T, R, D>(url, data, config);
-	}
-
-	public async patch<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.patch<T, R, D>(url, data, config);
-	}
-}
-
-class CloudScriptSocket {
-	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
-		return await this.sendEvent({
-			eventType: CloudScriptEventType.SendToUser,
-			receiver: userId,
-			operationEvent: {
-				eventCode: operationEvent.getEventCode(),
-				parameters: operationEvent.getParameters()?.toData() ?? null,
-			},
-		});
-	}
-
-	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
-		return await this.sendEvent({
-			eventType: CloudScriptEventType.SendToMore,
-			receiver: userIds,
-			operationEvent: {
-				eventCode: operationEvent.getEventCode(),
-				parameters: operationEvent.getParameters()?.toData() ?? null,
-			},
-		});
-	}
-
-	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
-		return await this.sendEvent({
-			eventType: CloudScriptEventType.SendToAll,
-			receiver: null,
-			operationEvent: {
-				eventCode: operationEvent.getEventCode(),
-				parameters: operationEvent.getParameters()?.toData() ?? null,
-			},
-		});
-	}
-
-	private async sendEvent(event: CloudScriptEvent) {
-		if (process?.send)
-			process.send(event);
-	}
-}
-
-class CloudScriptMatchmaking {
-	public async confirmServerDetail(gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, serverDetail: ServerDetail) {
-		if (process?.send)
-			process.send({
-				eventType: 10,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						gameId: gameId,
-						matchmakingTicketCanMatch: matchmakingTicketCanMatch,
-						serverDetail: serverDetail,
-					},
-				},
-			});
-	}
-}
-
-class CloudScriptMail {
-	public async send(email: string, subject: string, contentHtml: string) {
-		if (process?.send)
-			process.send({
-				eventType: 20,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						email: email,
-						subject: subject,
-						contentHtml: contentHtml,
-					},
-				},
-			});
-	}
-
-	public async sendToMore(emails: string[], subject: string, contentHtml: string) {
-		if (process?.send)
-			process.send({
-				eventType: 21,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						emails: emails,
-						subject: subject,
-						contentHtml: contentHtml,
-					},
-				},
-			});
-	}
-}
-
-class CloudScriptPushNotification {
-	public async send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
-		if (process?.send)
-			process.send({
-				eventType: 30,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						token: token,
-						title: title,
-						body: body,
-						badge: badge,
-						sound: sound,
-						icon: icon,
-						data: data,
-					},
-				},
-			});
-	}
-
-	public async sendToMore(tokens: string[], title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
-		if (process?.send)
-			process.send({
-				eventType: 31,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						tokens: tokens,
-						title: title,
-						body: body,
-						badge: badge,
-						sound: sound,
-						icon: icon,
-						data: data,
-					},
-				},
-			});
-	}
-
-	public async sendToTopic(topic: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
-		if (process?.send)
-			process.send({
-				eventType: 32,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						topic: topic,
-						title: title,
-						body: body,
-						badge: badge,
-						sound: sound,
-						icon: icon,
-						data: data,
-					},
-				},
-			});
-	}
-
-	public async subscribeToTopic(tokens: string[], topic: string) {
-		if (process?.send)
-			process.send({
-				eventType: 33,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						tokens: tokens,
-						topic: topic,
-					},
-				},
-			});
-	}
-
-	public async unsubscribeFromTopic(tokens: string[], topic: string) {
-		if (process?.send)
-			process.send({
-				eventType: 34,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						tokens: tokens,
-						topic: topic,
-					},
-				},
-			});
-	}
-}
+import { CloudScriptAdmin } from "./CloudScriptAdmin";
+import { CloudScriptDatabase } from "./CloudScriptDatabase";
+import { CloudScriptHttp } from "./CloudScriptHttp";
+import { CloudScriptSocket } from "./CloudScriptSocket";
+import { CloudScriptMatchmaking } from "./CloudScriptMatchmaking";
+import { CloudScriptMail } from "./CloudScriptMail";
+import { CloudScriptPushNotification } from "./CloudScriptPushNotification";
 
 enum EventCallbackType {
 	Pre = 0,
 	Post = 1,
 	System = 2,
-	Event = 3,
+	SystemRequestServerDetail = 3,
+	SystemVerifyGenericService = 4,
+	SystemAuthenticate = 5,
+	SystemEvent = 6,
 }
 
-interface CloudScriptRequest {
+interface CloudScriptRequestPre {
 	requestId: string;
-	eventType: EventCallbackType;
+	eventType: EventCallbackType.Pre;
 	eventName: string;
 	request: { [k: string]: any };
 	secretInfo: {
 		secretKey: string;
+		description: string;
 		role: number;
 		remove: boolean;
 		tsExpire: number;
 		permission: SecretPermissionItem;
 		gameId: string;
 		isDefault: boolean;
-		description: string;
 		onlyMasterAdmin: boolean;
 	};
 	operationRequest: {
@@ -561,13 +187,102 @@ interface CloudScriptRequest {
 		requestId: number;
 		parameters: {};
 	};
-	operationResponse?: {
+}
+
+interface CloudScriptRequestPost {
+	requestId: string;
+	eventType: EventCallbackType.Post;
+	eventName: string;
+	request: { [k: string]: any };
+	secretInfo: {
+		secretKey: string;
+		description: string;
+		role: number;
+		remove: boolean;
+		tsExpire: number;
+		permission: SecretPermissionItem;
+		gameId: string;
+		isDefault: boolean;
+		onlyMasterAdmin: boolean;
+	};
+	operationRequest: {
+		operationCode: string;
+		requestId: number;
+		parameters: {};
+	};
+	operationResponse: {
 		returnCode: number;
 		debugMessage: string;
 		parameters: {};
 	};
-	log: (log: any) => void;
 }
+
+interface CloudScriptRequestSystem {
+	requestId: string;
+	eventType: EventCallbackType.System;
+	eventName: string;
+}
+
+interface CloudScriptRequestSystemRequestServerDetail {
+	requestId: string;
+	eventType: EventCallbackType.SystemRequestServerDetail;
+	eventName: string;
+	request: {
+		gameId: string;
+		matchmakingTicketCanMatch: MatchmakingTicketCanMatch;
+	};
+}
+
+interface CloudScriptRequestSystemVerifyGenericService {
+	requestId: string;
+	eventType: EventCallbackType.SystemVerifyGenericService;
+	eventName: string;
+	request: {
+		serviceName: string;
+		serviceData: { [k: string]: any; };
+	};
+}
+
+interface CloudScriptRequestSystemAuthenticate {
+	requestId: string;
+	eventType: EventCallbackType.SystemAuthenticate;
+	eventName: string;
+	request: { [k: string]: any };
+	operationRequest: {
+		operationCode: string;
+		requestId: number;
+		parameters: {};
+	};
+	operationResponse: {
+		returnCode: number;
+		debugMessage: string;
+		parameters: {};
+	};
+	secretInfo: {
+		secretKey: string;
+		description: string;
+		role: number;
+		remove: boolean;
+		tsExpire: number;
+		permission: SecretPermissionItem;
+		gameId: string;
+		isDefault: boolean;
+		onlyMasterAdmin: boolean;
+	};
+}
+
+interface CloudScriptRequestSystemEvent {
+	requestId: string;
+	eventType: EventCallbackType.SystemEvent;
+	eventName: string;
+	request: { [k: string]: any };
+	operationEvent: {
+		eventCode: string;
+		parameters: {};
+	};
+}
+
+type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemRequestServerDetail | CloudScriptRequestSystemVerifyGenericService | CloudScriptRequestSystemAuthenticate | CloudScriptRequestSystemEvent;
 
 interface CloudScriptResponse {
 	stats: {
@@ -579,12 +294,52 @@ interface CloudScriptResponse {
 	logs: string[];
 }
 
-interface FunctionRequest {
-	eventName: string;
+interface FunctionRequestPre {
 	request: { [k: string]: any };
 	secretInfo: SecretInfo;
 	operationRequest: OperationRequest;
-	operationResponse?: OperationResponse;
+	log: (log: any) => void;
+}
+
+interface FunctionRequestPost {
+	request: { [k: string]: any };
+	secretInfo: SecretInfo;
+	operationRequest: OperationRequest;
+	operationResponse: OperationResponse;
+	log: (log: any) => void;
+}
+
+interface FunctionRequestSystem {
+	log: (log: any) => void;
+}
+
+interface FunctionRequestSystemEvent {
+	request: { [k: string]: any };
+	operationEvent: OperationEvent;
+	log: (log: any) => void;
+}
+
+interface FunctionRequestSystemRequestServerDetail {
+	request: { gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch };
+	log: (log: any) => void;
+}
+
+interface FunctionRequestSystemAuthenticate {
+	request: { [k: string]: any };
+	secretInfo: SecretInfo;
+	operationRequest: OperationRequest;
+	operationResponse: OperationResponse;
+	log: (log: any) => void;
+}
+
+interface FunctionRequestSystemVerifyGenericService {
+	request: {
+		serviceName: string;
+		serviceData: {
+			[k: string]: any;
+		};
+	};
+
 	log: (log: any) => void;
 }
 
@@ -599,6 +354,9 @@ interface FunctionResponse {
 	result: {
 		returnCode: number;
 		debugMessage: string;
+		parameters?: {};
+	} | {
+		eventCode: string;
 		parameters?: {};
 	} | null;
 	request: {
@@ -616,114 +374,15 @@ process?.on("message", async (request: CloudScriptRequest) => {
 	let handleResponse: FunctionResponse = null as any;
 
 	if (request.eventType == EventCallbackType.System) {
-		if (request.eventName == "system_RequestServerDetail") {
-			let functionRequest: FunctionRequest = {
-				eventName: request.eventName,
-				operationRequest: null as any,
-				secretInfo: null as any,
-				request: request.request,
-				log(log: any) {
-					logs.push(JSON.stringify(log));
-				},
-			};
-
-			handleResponse = await ___handleMatchmakingFunction(functionRequest);
-		}
-		else if (request.eventName == "system_VerifyGenericService") {
-			let functionRequest: FunctionRequest = {
-				eventName: request.eventName,
-				operationRequest: null as any,
-				secretInfo: null as any,
-				request: request.request,
-				log(log: any) {
-					logs.push(JSON.stringify(log));
-				},
-			};
-
-			handleResponse = await ___handleGenericServiceFunction(functionRequest);
-		}
-		else if (request.eventName == "system_OnAuthenticateSuccess") {
-			let originOperationRequest = request.operationRequest;
-			let operationRequest = new OperationRequest(originOperationRequest.operationCode);
-			if (originOperationRequest.parameters) {
-				operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
-			}
-
-			let originSecretInfo = request.secretInfo;
-			let secretInfo: SecretInfo = null as any;
-			if (originSecretInfo) {
-				secretInfo = SecretInfo.Builder()
-					.setSecretKey(originSecretInfo.secretKey)
-					.setDescription(originSecretInfo.description)
-					.setRole(originSecretInfo.role)
-					.setIsRemove(originSecretInfo.remove)
-					.setTsExpire(originSecretInfo.tsExpire)
-					.setPermission(originSecretInfo.permission)
-					.setGameId(originSecretInfo.gameId)
-					.setIsDefault(originSecretInfo.isDefault)
-					.setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
-					.build();
-			}
-
-			let originOperationResponse = request.operationResponse;
-			let operationResponse: OperationResponse = null as any;
-
-			if (originOperationResponse) {
-				operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId);
-				operationResponse.setReturnCode(originOperationResponse.returnCode);
-				operationResponse.setDebugMessage(originOperationResponse.debugMessage);
-
-				if (originOperationResponse.parameters) {
-					operationResponse.setParameters(GNHashtable.builder().addAll(originOperationResponse.parameters).build());
-				}
-			}
-
-			let functionRequest: FunctionRequest = {
-				eventName: request.eventName,
-				operationRequest: operationRequest,
-				operationResponse: operationResponse,
-				secretInfo: secretInfo,
-				request: request.request,
-				log(log: any) {
-					logs.push(JSON.stringify(log));
-				},
-			};
-
-			handleResponse = await ___handleSystemAuthenticateFunction(functionRequest);
-		}
-		else {
-			let functionRequest: FunctionRequest = {
-				eventName: request.eventName,
-				operationRequest: null as any,
-				secretInfo: null as any,
-				request: null as any,
-				log(log: any) {
-					logs.push(JSON.stringify(log));
-				},
-			};
-
-			handleResponse = await ___handleSystemFunction(functionRequest);
-		}
-	} else if (request.eventType == EventCallbackType.Event) {
-		let originOperationEvent = request.operationRequest;
-
-		let operationEvent = new OperationEvent(originOperationEvent.operationCode, (originOperationEvent.parameters ? GNHashtable.builder().addAll(originOperationEvent.parameters).build() : null as any));
-
-		let functionRequest: FunctionRequest = {
-			eventName: request.eventName,
-			operationRequest: null as any,
-			secretInfo: null as any,
-			request: {
-				operationEvent: operationEvent,
-				request: request.request,
-			},
+		let functionRequest: FunctionRequestSystem = {
 			log(log: any) {
 				logs.push(JSON.stringify(log));
 			},
 		};
 
-		handleResponse = await ___handleEventFunction(functionRequest);
-	} else {
+		handleResponse = await ___handleSystemFunction(request.eventName, functionRequest);
+	}
+	else if (request.eventType == EventCallbackType.Pre || request.eventType == EventCallbackType.Post) {
 		let originOperationRequest = request.operationRequest;
 		let operationRequest = new OperationRequest(originOperationRequest.operationCode);
 		if (originOperationRequest.parameters) {
@@ -747,8 +406,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 		}
 
 		if (request.eventType == EventCallbackType.Pre) {
-			let functionRequest: FunctionRequest = {
-				eventName: request.eventName,
+			let functionRequest: FunctionRequestPre = {
 				operationRequest: operationRequest,
 				secretInfo: secretInfo,
 				request: request.request,
@@ -757,8 +415,9 @@ process?.on("message", async (request: CloudScriptRequest) => {
 				},
 			};
 
-			handleResponse = await ___handlePreFunction(functionRequest);
-		} else if (request.eventType == EventCallbackType.Post) {
+			handleResponse = await ___handlePreFunction(request.eventName, functionRequest);
+		}
+		else if (request.eventType == EventCallbackType.Post) {
 			let originOperationResponse = request.operationResponse;
 			let operationResponse: OperationResponse = null as any;
 
@@ -772,8 +431,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 				}
 			}
 
-			let functionRequest: FunctionRequest = {
-				eventName: request.eventName,
+			let functionRequest: FunctionRequestPost = {
 				operationRequest: operationRequest,
 				operationResponse: operationResponse,
 				secretInfo: secretInfo,
@@ -783,8 +441,91 @@ process?.on("message", async (request: CloudScriptRequest) => {
 				},
 			};
 
-			handleResponse = await ___handlePostFunction(functionRequest);
+			handleResponse = await ___handlePostFunction(request.eventName, functionRequest);
 		}
+	}
+	else if (request.eventType == EventCallbackType.SystemEvent) {
+		let originOperationEvent = request.operationEvent;
+
+		let operationEvent = new OperationEvent(originOperationEvent.eventCode, (originOperationEvent.parameters ? GNHashtable.builder().addAll(originOperationEvent.parameters).build() : null as any));
+
+		let functionRequest: FunctionRequestSystemEvent = {
+			operationEvent: operationEvent,
+			request: request.request,
+			log(log: any) {
+				logs.push(JSON.stringify(log));
+			},
+		};
+
+		handleResponse = await ___handleEventFunction(request.eventName, functionRequest);
+	}
+	else if (request.eventType == EventCallbackType.SystemRequestServerDetail) {
+		let functionRequest: FunctionRequestSystemRequestServerDetail = {
+			request: request.request,
+			log(log: any) {
+				logs.push(JSON.stringify(log));
+			},
+		};
+
+		handleResponse = await ___handleMatchmakingFunction(request.eventName, functionRequest);
+	}
+	else if (request.eventType == EventCallbackType.SystemAuthenticate) {
+		let originOperationRequest = request.operationRequest;
+		let operationRequest = new OperationRequest(originOperationRequest.operationCode);
+		if (originOperationRequest.parameters) {
+			operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
+		}
+
+		let originSecretInfo = request.secretInfo;
+		let secretInfo: SecretInfo = null as any;
+		if (originSecretInfo) {
+			secretInfo = SecretInfo.Builder()
+				.setSecretKey(originSecretInfo.secretKey)
+				.setDescription(originSecretInfo.description)
+				.setRole(originSecretInfo.role)
+				.setIsRemove(originSecretInfo.remove)
+				.setTsExpire(originSecretInfo.tsExpire)
+				.setPermission(originSecretInfo.permission)
+				.setGameId(originSecretInfo.gameId)
+				.setIsDefault(originSecretInfo.isDefault)
+				.setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
+				.build();
+		}
+
+		let originOperationResponse = request.operationResponse;
+		let operationResponse: OperationResponse = null as any;
+
+		if (originOperationResponse) {
+			operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId);
+			operationResponse.setReturnCode(originOperationResponse.returnCode);
+			operationResponse.setDebugMessage(originOperationResponse.debugMessage);
+
+			if (originOperationResponse.parameters) {
+				operationResponse.setParameters(GNHashtable.builder().addAll(originOperationResponse.parameters).build());
+			}
+		}
+
+		let functionRequest: FunctionRequestSystemAuthenticate = {
+			operationRequest: operationRequest,
+			operationResponse: operationResponse,
+			secretInfo: secretInfo,
+			request: request.request,
+			log(log: any) {
+				logs.push(JSON.stringify(log));
+			},
+		};
+
+		handleResponse = await ___handleSystemAuthenticateFunction(request.eventName, functionRequest);
+	}
+	else if (request.eventType == EventCallbackType.SystemVerifyGenericService) {
+		let functionRequest: FunctionRequestSystemVerifyGenericService = {
+			request: request.request,
+			log(log: any) {
+				logs.push(JSON.stringify(log));
+			},
+		};
+
+		handleResponse = await ___handleGenericServiceFunction(request.eventName, functionRequest);
 	}
 
 	let endTime = performance.now();
@@ -810,8 +551,8 @@ process?.on("message", async (request: CloudScriptRequest) => {
 		process.send(response);
 });
 
-async function ___handleMatchmakingFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = systemMatchmakingHandlers[request.eventName];
+async function ___handleMatchmakingFunction(name: string, request: FunctionRequestSystemRequestServerDetail): Promise<FunctionResponse> {
+	let handler = systemMatchmakingHandlers[name];
 
 	if (handler == null) {
 		return {
@@ -842,8 +583,8 @@ async function ___handleMatchmakingFunction(request: FunctionRequest): Promise<F
 	return answer;
 }
 
-async function ___handleGenericServiceFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = systemGenericServiceHandlers[request.eventName];
+async function ___handleGenericServiceFunction(name: string, request: FunctionRequestSystemVerifyGenericService): Promise<FunctionResponse> {
+	let handler = systemGenericServiceHandlers[name];
 
 	if (handler == null) {
 		return {
@@ -874,8 +615,8 @@ async function ___handleGenericServiceFunction(request: FunctionRequest): Promis
 	return answer;
 }
 
-async function ___handleSystemAuthenticateFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = systemAuthenticateHandlers[request.eventName];
+async function ___handleSystemAuthenticateFunction(name: string, request: FunctionRequestSystemAuthenticate): Promise<FunctionResponse> {
+	let handler = systemAuthenticateHandlers[name];
 
 	if (handler == null) {
 		return {
@@ -912,8 +653,8 @@ async function ___handleSystemAuthenticateFunction(request: FunctionRequest): Pr
 	return answer;
 }
 
-async function ___handleSystemFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = systemHandlers[request.eventName];
+async function ___handleSystemFunction(name: string, request: FunctionRequestSystem): Promise<FunctionResponse> {
+	let handler = systemHandlers[name];
 
 	if (handler == null) {
 		return {
@@ -941,8 +682,8 @@ async function ___handleSystemFunction(request: FunctionRequest): Promise<Functi
 	return answer;
 }
 
-async function ___handleEventFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = eventHandlers[request.eventName];
+async function ___handleEventFunction(name: string, request: FunctionRequestSystemEvent): Promise<FunctionResponse> {
+	let handler = eventHandlers[name];
 
 	if (handler == null) {
 		return {
@@ -961,13 +702,12 @@ async function ___handleEventFunction(request: FunctionRequest): Promise<Functio
 	};
 
 	try {
-		await handler(request.request.request, request.request.operationEvent, request.log);
+		await handler(request.request, request.operationEvent, request.log);
 
-		let operationEvent = request.request.operationEvent;
+		let operationEvent = request.operationEvent;
 
 		answer.result = {
-			returnCode: operationEvent.getEventCode(),
-			debugMessage: null as any,
+			eventCode: operationEvent.getEventCode(),
 			parameters: operationEvent.getParameters()?.toData(),
 		};
 
@@ -980,8 +720,8 @@ async function ___handleEventFunction(request: FunctionRequest): Promise<Functio
 	return answer;
 }
 
-async function ___handlePreFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = preHandlers[request.eventName];
+async function ___handlePreFunction(name: string, request: FunctionRequestPre): Promise<FunctionResponse> {
+	let handler = preHandlers[name];
 
 	if (handler == null) {
 		return {
@@ -1002,7 +742,7 @@ async function ___handlePreFunction(request: FunctionRequest): Promise<FunctionR
 	try {
 		let result = await handler(request.request, request.secretInfo, request.operationRequest, request.log);
 
-		if (result != null)
+		if (result)
 			answer.result = {
 				returnCode: result.getReturnCode(),
 				debugMessage: result.getDebugMessage(),
@@ -1018,8 +758,8 @@ async function ___handlePreFunction(request: FunctionRequest): Promise<FunctionR
 	return answer;
 }
 
-async function ___handlePostFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = postHandlers[request.eventName];
+async function ___handlePostFunction(name: string, request: FunctionRequestPost): Promise<FunctionResponse> {
+	let handler = postHandlers[name];
 
 	if (handler == null) {
 		return {
@@ -1077,6 +817,7 @@ const pushNotification = new CloudScriptPushNotification();
 	database.init(dbConnection.url, dbConnection.dbName, dbConnection.logUrl, dbConnection.logDbName, dbConnection.options);
 }
 
+// release after init success
 process.env.dbConnection = "";
 process.env.gnServerSettingsOptions = "";
 

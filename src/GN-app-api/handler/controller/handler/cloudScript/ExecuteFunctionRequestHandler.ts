@@ -23,7 +23,7 @@ class ExecuteFunctionOperationRequest extends OperationRequest {
 	public functionName: string;
 
 	@DataMember({ code: ParameterCode.FunctionParameters, isOptional: true })
-	public functionParameters?: object;
+	public functionParameters?: any;
 
 	@StringDataMember({ code: ParameterCode.Version, minLength: 7, maxLength: 7, isOptional: true })
 	public version?: string;
@@ -136,7 +136,7 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
-	private async execute(request: { userId: string, functionName: string, functionParameters: object, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, functionName: string, functionParameters: any, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_ExecuteFunction", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;

@@ -446,7 +446,7 @@
             },
             {
                 "eventName": "cloudScript_ExecuteFunction",
-                "script": "\npreHandlers.cloudScript_ExecuteFunction = async (request: { userId: string, functionName: string, functionParameters: object, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.cloudScript_ExecuteFunction = async (request: { userId: string, functionName: string, functionParameters: object, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.cloudScript_ExecuteFunction = async (request: { userId: string, functionName: string, functionParameters: any, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.cloudScript_ExecuteFunction = async (request: { userId: string, functionName: string, functionParameters: any, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

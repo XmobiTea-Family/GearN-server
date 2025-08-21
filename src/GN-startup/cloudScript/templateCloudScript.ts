@@ -69,382 +69,25 @@ import {
 	GNUtils,
 } from "@xmobitea/gn-typescript-client";
 
+// dont remove this import 
+
 import * as mongodb from "mongodb";
 import * as axios from "axios";
 
-enum CloudScriptEventType {
-	SendToUser = 0,
-	SendToMore = 1,
-	SendToAll = 2,
-}
-
-interface CloudScriptEvent {
-	eventType: CloudScriptEventType;
-	operationEvent: {
-		eventCode: string;
-		parameters: {} | null;
-	};
-	receiver: string[] | string | null;
-}
-
-class CloudScriptAdmin {
-	public readonly characterPlayer = GNNetwork.characterPlayer.admin;
-	public readonly content = GNNetwork.content.admin;
-	public readonly gamePlayer = GNNetwork.gamePlayer.admin;
-	public readonly group = GNNetwork.group.admin;
-	public readonly inventory = GNNetwork.inventory.admin;
-	public readonly masterPlayer = GNNetwork.masterPlayer.admin;
-	public readonly storeInventory = GNNetwork.storeInventory.admin;
-	public readonly multiplayer = GNNetwork.multiplayer.admin;
-	public readonly cloudScript = GNNetwork.cloudScript.admin;
-	public readonly dashboard = {
-		getAdminAccountList: GNNetwork.dashboard.getAdminAccountList,
-		getAdminAccountListAsync: GNNetwork.dashboard.getAdminAccountListAsync,
-		getGameInformation: GNNetwork.dashboard.getGameInformation,
-		getGameInformationAsync: GNNetwork.dashboard.getGameInformationAsync,
-		getGameList: GNNetwork.dashboard.getGameList,
-		getGameListAsync: GNNetwork.dashboard.getGameListAsync,
-		getMasterGameSettings: GNNetwork.dashboard.getMasterGameSettings,
-		getMasterGameSettingsAsync: GNNetwork.dashboard.getMasterGameSettingsAsync,
-		getSecretInfoInformation: GNNetwork.dashboard.getSecretInfoInformation,
-		getSecretInfoInformationAsync: GNNetwork.dashboard.getSecretInfoInformationAsync,
-		getSecretInfoList: GNNetwork.dashboard.getSecretInfoList,
-		getSecretInfoListAsync: GNNetwork.dashboard.getSecretInfoListAsync,
-		getServerLog: GNNetwork.dashboard.getServerLog,
-		getServerLogAsync: GNNetwork.dashboard.getServerLogAsync,
-		setGameInformation: GNNetwork.dashboard.setGameInformation,
-		setGameInformationAsync: GNNetwork.dashboard.setGameInformationAsync,
-		getUsernameAdminAccount: GNNetwork.dashboard.getUsernameAdminAccount,
-		getUsernameAdminAccountAsync: GNNetwork.dashboard.getUsernameAdminAccountAsync,
-		getAnalytics: GNNetwork.dashboard.getAnalytics,
-		getAnalyticsAsync: GNNetwork.dashboard.getAnalyticsAsync,
-		resetStatisticsLeaderboard: GNNetwork.dashboard.resetStatisticsLeaderboard,
-		resetStatisticsLeaderboardAsync: GNNetwork.dashboard.resetStatisticsLeaderboardAsync,
-		getBackupStatisticsLeaderboardVersion: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersion,
-		getBackupStatisticsLeaderboardVersionAsync: GNNetwork.dashboard.getBackupStatisticsLeaderboardVersionAsync,
-		getServerGameData: GNNetwork.dashboard.getServerGameData,
-		getServerGameDataAsync: GNNetwork.dashboard.getServerGameDataAsync,
-		deleteInDatabase: GNNetwork.dashboard.deleteInDatabase,
-		deleteInDatabaseAsync: GNNetwork.dashboard.deleteInDatabaseAsync,
-	};
-	public send(
-		requestType: RequestType,
-		role: RequestRole,
-		request: OperationRequest,
-		onResponse: Action1<OperationResponse>,
-		overrideAuthToken: string,
-		overrideSecretKey: string,
-		customTags: GNHashtable
-	): void {
-		GNNetwork.sendViaHttp(requestType, role, request, onResponse, overrideAuthToken, overrideSecretKey, customTags);
-	}
-
-	public sendAsync(
-		requestType: RequestType,
-		role: RequestRole,
-		request: OperationRequest,
-		overrideAuthToken: string,
-		overrideSecretKey: string,
-		customTags: GNHashtable
-	): Promise<OperationResponse> {
-		return GNNetwork.sendViaHttpAsync(requestType, role, request, overrideAuthToken, overrideSecretKey, customTags);
-	}
-}
-
-class CloudScriptDatabase {
-	private static readonly DOT: string = ".";
-	private static readonly RUNTIME: string = "Runtime" + CloudScriptDatabase.DOT;
-	private static readonly META: string = "Meta" + CloudScriptDatabase.DOT;
-	private static readonly SYSTEM: string = "System" + CloudScriptDatabase.DOT;
-
-	private client: mongodb.MongoClient;
-	private db: mongodb.Db;
-
-	private logClient: mongodb.MongoClient;
-	private logDb: mongodb.Db;
-
-	init(url: string, dbName: string, logUrl: string, logDbName: string, options?: mongodb.MongoClientOptions): void {
-		this.client = new mongodb.MongoClient(url, options);
-
-		this.db = this.client.db(dbName);
-
-		if (!logUrl || logUrl == "" || logUrl == url) {
-			this.logClient = this.client;
-			this.logDb = this.db;
-		}
-		else {
-			this.logClient = new mongodb.MongoClient(logUrl, options);
-			this.logDb = this.logClient.db(logDbName);
-		}
-	}
-
-	public runtimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.RUNTIME + collectionName);
-	}
-
-	public metaCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.META + collectionName);
-	}
-
-	public systemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.SYSTEM + collectionName);
-	}
-
-	public runtimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.RUNTIME + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public metaGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.META + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public systemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.collection<TSchema>(CloudScriptDatabase.SYSTEM + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public collection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
-		return this.db.collection<TSchema>(fullCollectionName);
-	}
-
-	public createCollection(name: string, options?: mongodb.CreateCollectionOptions): Promise<mongodb.Collection<mongodb.BSON.Document>> {
-		return this.db.createCollection(name, options);
-	}
-
-	public logRuntimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.RUNTIME + collectionName);
-	}
-
-	public logMetaCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.META + collectionName);
-	}
-
-	public logSystemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.SYSTEM + collectionName);
-	}
-
-	public logRuntimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.RUNTIME + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public logMetaGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.META + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public logSystemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
-		return this.logCollection<TSchema>(CloudScriptDatabase.SYSTEM + gameId + CloudScriptDatabase.DOT + collectionName);
-	}
-
-	public logCollection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
-		return this.logDb.collection<TSchema>(fullCollectionName);
-	}
-
-	public logCreateCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, options?: mongodb.CreateCollectionOptions) {
-		return this.logDb.createCollection<TSchema>(collectionName, options)
-	}
-}
-
-class CloudScriptHttp {
-	public async get<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.get<T, R, D>(url, config);
-	}
-
-	public async delete<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.delete<T, R, D>(url, config);
-	}
-
-	public async head<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.head<T, R, D>(url, config);
-	}
-
-	public async options<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.options<T, R, D>(url, config);
-	}
-
-	public async post<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.post<T, R, D>(url, data, config);
-	}
-
-	public async put<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.put<T, R, D>(url, data, config);
-	}
-
-	public async patch<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R> {
-		return await axios.default.patch<T, R, D>(url, data, config);
-	}
-}
-
-class CloudScriptSocket {
-	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
-		return await this.sendEvent({
-			eventType: CloudScriptEventType.SendToUser,
-			receiver: userId,
-			operationEvent: {
-				eventCode: operationEvent.getEventCode(),
-				parameters: operationEvent.getParameters()?.toData() ?? null,
-			}
-		});
-	}
-
-	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
-		return await this.sendEvent({
-			eventType: CloudScriptEventType.SendToMore,
-			receiver: userIds,
-			operationEvent: {
-				eventCode: operationEvent.getEventCode(),
-				parameters: operationEvent.getParameters()?.toData() ?? null,
-			}
-		});
-	}
-
-	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
-		return await this.sendEvent({
-			eventType: CloudScriptEventType.SendToAll,
-			receiver: null,
-			operationEvent: {
-				eventCode: operationEvent.getEventCode(),
-				parameters: operationEvent.getParameters()?.toData() ?? null,
-			}
-		});
-	}
-
-	private async sendEvent(event: CloudScriptEvent) {
-		if (process?.send)
-			process.send(event);
-	}
-}
-
-class CloudScriptMail {
-	public async send(email: string, subject: string, contentHtml: string) {
-		if (process?.send)
-			process.send({
-				eventType: 20,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						email: email,
-						subject: subject,
-						contentHtml: contentHtml,
-					},
-				},
-			});
-	}
-
-	public async sendToMore(emails: string[], subject: string, contentHtml: string) {
-		if (process?.send)
-			process.send({
-				eventType: 21,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						emails: emails,
-						subject: subject,
-						contentHtml: contentHtml,
-					},
-				},
-			});
-	}
-}
-
-class CloudScriptPushNotification {
-	public async send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
-		if (process?.send)
-			process.send({
-				eventType: 30,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						token: token,
-						title: title,
-						body: body,
-						badge: badge,
-						sound: sound,
-						icon: icon,
-						data: data,
-					},
-				},
-			});
-	}
-
-	public async sendToMore(tokens: string[], title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
-		if (process?.send)
-			process.send({
-				eventType: 31,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						tokens: tokens,
-						title: title,
-						body: body,
-						badge: badge,
-						sound: sound,
-						icon: icon,
-						data: data,
-					},
-				},
-			});
-	}
-
-	public async sendToTopic(topic: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }) {
-		if (process?.send)
-			process.send({
-				eventType: 32,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						topic: topic,
-						title: title,
-						body: body,
-						badge: badge,
-						sound: sound,
-						icon: icon,
-						data: data,
-					},
-				},
-			});
-	}
-
-	public async subscribeToTopic(tokens: string[], topic: string) {
-		if (process?.send)
-			process.send({
-				eventType: 33,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						tokens: tokens,
-						topic: topic,
-					},
-				},
-			});
-	}
-
-	public async unsubscribeFromTopic(tokens: string[], topic: string) {
-		if (process?.send)
-			process.send({
-				eventType: 34,
-				receiver: null,
-				operationEvent: {
-					eventCode: 0,
-					parameters: {
-						tokens: tokens,
-						topic: topic,
-					},
-				},
-			});
-	}
-}
+import { CloudScriptAdmin } from "./CloudScriptAdmin";
+import { CloudScriptDatabase } from "./CloudScriptDatabase";
+import { CloudScriptHttp } from "./CloudScriptHttp";
+import { CloudScriptSocket } from "./CloudScriptSocket";
+import { CloudScriptMail } from "./CloudScriptMail";
+import { CloudScriptPushNotification } from "./CloudScriptPushNotification";
 
 interface CloudScriptRequest {
 	requestId: string;
 	userId: string;
 	name: string;
-	parameters: object;
+	parameters: any;
 	customTags: { [k: string]: any };
+	context: { [k: string]: any };
 }
 
 interface CloudScriptResponse {
@@ -452,17 +95,17 @@ interface CloudScriptResponse {
 		memoryUsedInBytes: number;
 		executeTimeInMs: number;
 	};
-	response: FunctionResponse;
 	responseId: string;
+	response: FunctionResponse;
 	logs: string[];
 }
 
 interface FunctionRequest {
-	userId: string;
-	name: string;
-	parameters: any;
-	customTags: { [k: string]: any };
-	context: {};
+	args: any,
+	context: {
+		userId: string,
+		customTags: { [k: string]: any };
+	},
 	log: (log: any) => void;
 }
 
@@ -475,7 +118,7 @@ enum ExecuteResponseStatus {
 interface FunctionResponse {
 	status: ExecuteResponseStatus;
 	result: any;
-	errorMessage: any;
+	errorMessage: string;
 }
 
 const ConvertObject = (result: any) => {
@@ -536,17 +179,14 @@ process?.on("message", async (request: CloudScriptRequest) => {
 
 	let logs: string[] = [];
 	let functionRequest: FunctionRequest = {
-		userId: request.userId,
-		name: request.name,
-		parameters: request.parameters,
-		context: {},
-		customTags: request.customTags,
+		args: request.parameters,
+		context: { ...request.context, userId: request.userId, customTags: request.customTags },
 		log(log: any) {
 			logs.push(JSON.stringify(log));
 		},
 	};
 
-	let handleResponse = await ___handleFunction(functionRequest);
+	let handleResponse = await ___handleCloudScriptFunction(request.name, functionRequest);
 
 	if (handleResponse.result) {
 		if (handleResponse.result instanceof GNHashtable) {
@@ -609,25 +249,25 @@ process?.on("message", async (request: CloudScriptRequest) => {
 		process.send(response);
 });
 
-async function ___handleFunction(request: FunctionRequest): Promise<FunctionResponse> {
-	let handler = handlers[request.name];
+async function ___handleCloudScriptFunction(name: string, request: FunctionRequest): Promise<FunctionResponse> {
+	let handler = handlers[name];
 
 	if (handler == null) {
 		return {
 			status: ExecuteResponseStatus.FunctionNameNotFound,
 			result: null,
-			errorMessage: null,
+			errorMessage: null as any,
 		};
 	}
 
 	let answer: FunctionResponse = {
 		status: ExecuteResponseStatus.Ok,
-		errorMessage: null,
+		errorMessage: null as any,
 		result: null,
 	};
 
 	try {
-		answer.result = await handler(request.parameters, { userId: request.userId, customTags: request.customTags }, request.log);
+		answer.result = await handler(request.args, request.context, request.log);
 	} catch (err: any) {
 		answer.status = ExecuteResponseStatus.Exception;
 		answer.errorMessage = err.message;
@@ -660,6 +300,7 @@ const pushNotification = new CloudScriptPushNotification();
 	database.init(dbConnection.url, dbConnection.dbName, dbConnection.logUrl, dbConnection.logDbName, dbConnection.options);
 }
 
+// release for the security
 process.env.dbConnection = "";
 process.env.gnServerSettingsOptions = "";
 

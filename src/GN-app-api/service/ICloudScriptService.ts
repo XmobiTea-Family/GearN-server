@@ -15,13 +15,13 @@ export interface ExecuteResult {
 	response: {
 		status: ExecuteResponseStatus,
 		result: any,
-		errorMessage: any,
+		errorMessage: string,
 	},
 	logs: string[],
 }
 
 export interface ICloudScriptService {
-	executeCloudScriptFunction(userId: string, functionName: string, functionParameters: object, version: string, customTags: { [k: string]: any }): Promise<ExecuteResult>;
+	executeCloudScriptFunction(userId: string, functionName: string, functionParameters: any, version: string, customTags: { [k: string]: any }): Promise<ExecuteResult>;
 	addCloudScriptFunction(script: string, isLive: boolean, canExecute: boolean): Promise<{ success: boolean, errorMessage?: string, version?: string }>;
 	editCloudScriptFunction(version: string, isLive: boolean, canExecute: boolean): Promise<{ success: boolean, errorMessage?: string }>;
 	getCloudScriptFunction(version: string): Promise<{

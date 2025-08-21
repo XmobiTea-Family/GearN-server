@@ -16,38 +16,144 @@ interface CloudScriptRequest {
 	requestId: string,
 	userId: string,
 	name: string,
-	parameters: object,
-	customTags: { [k: string]: any }
+	parameters: any,
+	customTags: { [k: string]: any },
+	context: { [k: string]: any },
 }
 
-interface CloudScriptResponse {
-	stats: {
-		memoryUsedInBytes: number,
-		executeTimeInMs: number,
-	},
-	response: {
-		status: ExecuteResponseStatus,
-		result: any,
-		errorMessage: any,
-	},
+interface CloudScriptResponse extends ExecuteResult {
 	responseId: string,
-	logs: string[],
 }
 
 enum CloudScriptEventType {
-	SendToUser = 0,
-	SendToMore = 1,
-	SendToAll = 2,
+	SendEventToOne = 0,
+	SendEventToMore = 1,
+	SendEventToAll = 2,
+
+	ConfirmServerDetail = 10,
+
+	SendMailToOne = 20,
+	SendMailToMore = 21,
+
+	SendPushNotificationToOne = 30,
+	SendPushNotificationToMore = 31,
+	SendPushNotificationToTopic = 32,
+	SubscribeToTopic = 33,
+	UnsubscribeFromTopic = 34,
+
 }
 
-interface CloudScriptEvent {
-	eventType: CloudScriptEventType;
+interface CloudScriptEventSendEventToOne {
+	eventType: CloudScriptEventType.SendEventToOne;
 	operationEvent: {
 		eventCode: string;
 		parameters: {};
 	};
-	receiver: string[] | string | null;
+	userId: string;
 }
+
+interface CloudScriptEventSendEventToMore {
+	eventType: CloudScriptEventType.SendEventToMore;
+	operationEvent: {
+		eventCode: string;
+		parameters: {};
+	};
+	userIds: string[];
+}
+
+interface CloudScriptEventSendEventToAll {
+	eventType: CloudScriptEventType.SendEventToAll;
+	operationEvent: {
+		eventCode: string;
+		parameters: {};
+	};
+}
+
+interface CloudScriptEventConfirmServerDetail {
+	eventType: CloudScriptEventType.ConfirmServerDetail;
+	gameId: string;
+	matchmakingTicketCanMatch: MatchmakingTicketCanMatch;
+	serverDetail: ServerDetail;
+}
+
+interface CloudScriptEventSendMailToOne {
+	eventType: CloudScriptEventType.SendMailToOne;
+	mailData: {
+		subject: string;
+		contentHtml: string;
+	};
+	email: string;
+}
+
+interface CloudScriptEventSendMailToMore {
+	eventType: CloudScriptEventType.SendMailToMore;
+	mailData: {
+		subject: string;
+		contentHtml: string;
+	};
+	emails: string[];
+}
+
+interface CloudScriptEventSendPushNotificationToOne {
+	eventType: CloudScriptEventType.SendPushNotificationToOne;
+	pushData: {
+		title: string;
+		body: string;
+		badge?: number;
+		sound?: string;
+		icon?: string;
+		data?: { [k: string]: any };
+	};
+	token: string;
+}
+
+interface CloudScriptEventSendPushNotificationToMore {
+	eventType: CloudScriptEventType.SendPushNotificationToMore;
+	pushData: {
+		title: string;
+		body: string;
+		badge?: number;
+		sound?: string;
+		icon?: string;
+		data?: { [k: string]: any };
+	};
+	tokens: string[];
+}
+
+interface CloudScriptEventSendPushNotificationToTopic {
+	eventType: CloudScriptEventType.SendPushNotificationToTopic;
+	pushData: {
+		title: string;
+		body: string;
+		badge?: number;
+		sound?: string;
+		icon?: string;
+		data?: { [k: string]: any };
+	};
+	topic: string;
+}
+
+interface CloudScriptEventSubscribeToTopic {
+	eventType: CloudScriptEventType.SubscribeToTopic;
+	tokens: string[];
+	topic: string;
+}
+
+interface CloudScriptEventUnsubscribeFromTopic {
+	eventType: CloudScriptEventType.UnsubscribeFromTopic;
+	tokens: string[];
+	topic: string;
+}
+
+type CloudScriptEvent = CloudScriptEventSendEventToOne | CloudScriptEventSendEventToMore | CloudScriptEventSendEventToAll
+	| CloudScriptEventConfirmServerDetail
+	| CloudScriptEventSendMailToOne
+	| CloudScriptEventSendMailToMore
+	| CloudScriptEventSendPushNotificationToOne
+	| CloudScriptEventSendPushNotificationToMore
+	| CloudScriptEventSendPushNotificationToTopic
+	| CloudScriptEventSubscribeToTopic
+	| CloudScriptEventUnsubscribeFromTopic;
 
 interface DbConnection {
 	url: string,
@@ -145,7 +251,7 @@ export class CloudScriptService implements ICloudScriptService {
 		}
 	}
 
-	public async executeCloudScriptFunction(userId: string, functionName: string, functionParameters: object, version: string, customTags: { [k: string]: any }): Promise<ExecuteResult> {
+	public async executeCloudScriptFunction(userId: string, functionName: string, functionParameters: any, version: string, customTags: { [k: string]: any }): Promise<ExecuteResult> {
 		if (!version) version = this.liveLatestVersion;
 
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(version);
@@ -172,6 +278,7 @@ export class CloudScriptService implements ICloudScriptService {
 			userId: userId,
 			parameters: functionParameters,
 			customTags: customTags,
+			context: {},
 		}
 
 		cloudScriptWorker.send(cloudScriptRequest);
@@ -509,105 +616,56 @@ export class CloudScriptService implements ICloudScriptService {
 			else {
 				let cloudScriptEvent: CloudScriptEvent = cloudScriptResponse as any;
 
-				let operationEvent = new OperationEvent(
-					cloudScriptEvent.operationEvent.eventCode,
-					cloudScriptEvent.operationEvent.parameters != null ? GNHashtable.builder().addAll(cloudScriptEvent.operationEvent.parameters).build() : null
-				);
+				if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToOne || cloudScriptEvent.eventType == CloudScriptEventType.SendEventToMore || cloudScriptEvent.eventType == CloudScriptEventType.SendEventToAll) {
+					let operationEvent = new OperationEvent(
+						cloudScriptEvent.operationEvent.eventCode,
+						cloudScriptEvent.operationEvent.parameters != null ? GNHashtable.builder().addAll(cloudScriptEvent.operationEvent.parameters).build() : null
+					);
 
-				if (cloudScriptEvent.eventType == CloudScriptEventType.SendToUser) {
-					thiz.gnServer.sendEventTo(cloudScriptEvent.receiver as string, operationEvent);
-				} else if (cloudScriptEvent.eventType == CloudScriptEventType.SendToMore) {
-					thiz.gnServer.sendEventToMoreUser(cloudScriptEvent.receiver as string[], operationEvent);
-				} else if (cloudScriptEvent.eventType == CloudScriptEventType.SendToAll) {
-					thiz.gnServer.sendEventToAllPlayer(operationEvent);
+					if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToOne) {
+						thiz.gnServer.sendEventTo(cloudScriptEvent.userId, operationEvent);
+					} else if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToMore) {
+						thiz.gnServer.sendEventToMoreUser(cloudScriptEvent.userIds, operationEvent);
+					} else if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToAll) {
+						thiz.gnServer.sendEventToAllPlayer(operationEvent);
+					}
 				}
-				else {
-					let eventTypeAny = cloudScriptEvent.eventType as any;
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.ConfirmServerDetail) {
+					thiz.gnServer.setMatchServerDetail(cloudScriptEvent.gameId, cloudScriptEvent.matchmakingTicketCanMatch.matchId, cloudScriptEvent.serverDetail, cloudScriptEvent.matchmakingTicketCanMatch.ticketIds);
+				}
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendMailToOne) {
+					let mailData = cloudScriptEvent.mailData;
 
-					if (eventTypeAny == 10) {
-						let parameters: {
-							gameId: string,
-							matchmakingTicketCanMatch: MatchmakingTicketCanMatch,
-							serverDetail: ServerDetail,
-						} = cloudScriptEvent.operationEvent.parameters as any;
+					thiz.gnServer.getEmailService().sendMail(cloudScriptEvent.email, mailData.subject, mailData.contentHtml);
+				}
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendMailToMore) {
+					let mailData = cloudScriptEvent.mailData;
 
-						thiz.gnServer.setMatchServerDetail(parameters.gameId, parameters.matchmakingTicketCanMatch.matchId, parameters.serverDetail, parameters.matchmakingTicketCanMatch.ticketIds);
-					}
-					else if (eventTypeAny == 20) {
-						let parameters: {
-							email: string,
-							subject: string,
-							contentHtml: string,
-						} = cloudScriptEvent.operationEvent.parameters as any;
+					thiz.gnServer.getEmailService().sendMailToMore(cloudScriptEvent.emails, mailData.subject, mailData.contentHtml);
+				}
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendPushNotificationToOne) {
+					let pushData = cloudScriptEvent.pushData;
 
-						thiz.gnServer.getEmailService().sendMail(parameters.email, parameters.subject, parameters.contentHtml);
-					}
-					else if (eventTypeAny == 21) {
-						let parameters: {
-							emails: string[],
-							subject: string,
-							contentHtml: string,
-						} = cloudScriptEvent.operationEvent.parameters as any;
+					thiz.gnServer.getPushNotificationService().sendNotification(cloudScriptEvent.token, pushData.title, pushData.body, pushData.badge, pushData.sound, pushData.icon, pushData.data);
+				}
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendPushNotificationToMore) {
+					let pushData = cloudScriptEvent.pushData;
 
-						thiz.gnServer.getEmailService().sendMailToMore(parameters.emails, parameters.subject, parameters.contentHtml);
-					}
-					else if (eventTypeAny == 30) {
-						let parameters: {
-							token: string,
-							title: string,
-							body: string,
-							badge?: number,
-							sound?: string,
-							icon?: string,
-							data?: { [k: string]: any },
-						} = cloudScriptEvent.operationEvent.parameters as any;
+					thiz.gnServer.getPushNotificationService().sendNotificationToMore(cloudScriptEvent.tokens, pushData.title, pushData.body, pushData.badge, pushData.sound, pushData.icon, pushData.data);
+				}
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendPushNotificationToTopic) {
+					let pushData = cloudScriptEvent.pushData;
 
-						thiz.gnServer.getPushNotificationService().sendNotification(parameters.token, parameters.title, parameters.body, parameters.badge, parameters.sound, parameters.icon, parameters.data);
-					}
-					else if (eventTypeAny == 31) {
-						let parameters: {
-							tokens: string[],
-							title: string,
-							body: string,
-							badge?: number,
-							sound?: string,
-							icon?: string,
-							data?: { [k: string]: any },
-						} = cloudScriptEvent.operationEvent.parameters as any;
-
-						thiz.gnServer.getPushNotificationService().sendNotificationToMore(parameters.tokens, parameters.title, parameters.body, parameters.badge, parameters.sound, parameters.icon, parameters.data);
-					}
-					else if (eventTypeAny == 32) {
-						let parameters: {
-							topic: string,
-							title: string,
-							body: string,
-							badge?: number,
-							sound?: string,
-							icon?: string,
-							data?: { [k: string]: any },
-						} = cloudScriptEvent.operationEvent.parameters as any;
-
-						thiz.gnServer.getPushNotificationService().sendNotificationToTopic(parameters.topic, parameters.title, parameters.body, parameters.badge, parameters.sound, parameters.icon, parameters.data);
-					}
-					else if (eventTypeAny == 33) {
-						let parameters: {
-							tokens: string[],
-							topic: string,
-						} = cloudScriptEvent.operationEvent.parameters as any;
-
-						thiz.gnServer.getPushNotificationService().subscribeToTopic(parameters.tokens, parameters.topic);
-					}
-					else if (eventTypeAny == 34) {
-						let parameters: {
-							tokens: string[],
-							topic: string,
-						} = cloudScriptEvent.operationEvent.parameters as any;
-
-						thiz.gnServer.getPushNotificationService().unsubscribeFromTopic(parameters.tokens, parameters.topic);
-					}
+					thiz.gnServer.getPushNotificationService().sendNotificationToTopic(cloudScriptEvent.topic, pushData.title, pushData.body, pushData.badge, pushData.sound, pushData.icon, pushData.data);
+				}
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.SubscribeToTopic) {
+					thiz.gnServer.getPushNotificationService().subscribeToTopic(cloudScriptEvent.tokens, cloudScriptEvent.topic);
+				}
+				else if (cloudScriptEvent.eventType == CloudScriptEventType.UnsubscribeFromTopic) {
+					thiz.gnServer.getPushNotificationService().unsubscribeFromTopic(cloudScriptEvent.tokens, cloudScriptEvent.topic);
 				}
 			}
+
 		});
 
 		cloudScriptWorker.on("exit", (code) => {
