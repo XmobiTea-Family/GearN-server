@@ -1,53 +1,13 @@
-import { MatchmakingTicketStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
-import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
-import { MatchmakingTicket } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
-import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
-import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
-import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleExpansionType, RuleType, SetIntersectionRule, StringRule, TeamDifferenceRule, TeamSizeBalanceRule, xMatchmakingQueueSettings, RuleStringCompairType, TeamTicketSizeSimilarityRule } from "./../../../../../GN-library/xsettings/lib/entity/xMatchmakingQueueSettings";
-import { GNServer } from "./../../../../../GNServer";
+import { MatchmakingTicketStatus } from "./../../GN-common/constant/enumType/MatchmakingTicketStatus";
+import { StringUtility } from "./../../GN-common/helper/StringUtility";
+import { MatchmakingTicket } from "./../../GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
+import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleExpansionType, RuleType, SetIntersectionRule, StringRule, TeamDifferenceRule, TeamSizeBalanceRule, xMatchmakingQueueSettings, RuleStringCompairType, TeamTicketSizeSimilarityRule } from "./../../GN-library/xsettings/lib/entity/xMatchmakingQueueSettings";
+import { GNServer } from "./../../GNServer";
+import { IMatchmakingService, MatchmakingTicketCanMatch } from "./IMatchmakingService";
 
-export interface MatchmakingTicketCanMatch {
-	matchId: string;
-	queueName: string;
-	matchSize: {
-		min: number;
-		max: number;
-	};
-	ticketIds: string[];
-	memberIds: string[];
-	tempTicketIds: string[];
-	tempMemberIds: string[];
-	tsCreate: number;
-	status: number;
-	matchmakingTicketTeams: {
-		teamId: string,
-		tickets: {
-			ticketId: string;
-			memberCount: number;
-		}[];
-		members: {
-			userId: string;
-			attributeForQueue: { [k: string]: DataValueType };
-		}[];
-
-		tempTickets: {
-			ticketId: string;
-			memberCount: number;
-		}[],
-		tempMembers: {
-			userId: string;
-			attributeForQueue: { [k: string]: DataValueType };
-		}[],
-
-		teamSize: {
-			min: number;
-			max: number;
-		};
-	}[];
-}
-
-export class MatchmakingHandler {
+export class MatchmakingService implements IMatchmakingService {
 	private gnServer: GNServer;
 
 	public setGNServer(gnServer: GNServer): void {

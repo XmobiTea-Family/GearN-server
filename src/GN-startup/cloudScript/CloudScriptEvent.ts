@@ -4,6 +4,9 @@ export enum CloudScriptEventType {
 	SendEventToOne = 0,
 	SendEventToMore = 1,
 	SendEventToAll = 2,
+	JoinRoom = 3,
+	LeaveRoom = 4,
+	SendEventToRoom = 5,
 
 	ConfirmServerDetail = 10,
 
@@ -15,7 +18,6 @@ export enum CloudScriptEventType {
 	SendPushNotificationToTopic = 32,
 	SubscribeToTopic = 33,
 	UnsubscribeFromTopic = 34,
-
 
 }
 
@@ -39,6 +41,27 @@ interface CloudScriptEventSendEventToMore {
 
 interface CloudScriptEventSendEventToAll {
 	eventType: CloudScriptEventType.SendEventToAll;
+	operationEvent: {
+		eventCode: string;
+		parameters: {};
+	};
+}
+
+interface CloudScriptEventJoinRoom {
+	eventType: CloudScriptEventType.JoinRoom;
+	userId: string;
+	roomId: string;
+}
+
+interface CloudScriptEventLeaveRoom {
+	eventType: CloudScriptEventType.LeaveRoom;
+	userId: string;
+	roomId: string;
+}
+
+interface CloudScriptEventSendEventToRoom {
+	eventType: CloudScriptEventType.SendEventToRoom;
+	roomId: string;
 	operationEvent: {
 		eventCode: string;
 		parameters: {};
@@ -121,15 +144,10 @@ interface CloudScriptEventUnsubscribeFromTopic {
 	topic: string;
 }
 
-type CloudScriptEvent = CloudScriptEventSendEventToOne | CloudScriptEventSendEventToMore | CloudScriptEventSendEventToAll
+type CloudScriptEvent = CloudScriptEventSendEventToOne | CloudScriptEventSendEventToMore | CloudScriptEventSendEventToAll | CloudScriptEventJoinRoom | CloudScriptEventLeaveRoom | CloudScriptEventSendEventToRoom
 	| CloudScriptEventConfirmServerDetail
-	| CloudScriptEventSendMailToOne
-	| CloudScriptEventSendMailToMore
-	| CloudScriptEventSendPushNotificationToOne
-	| CloudScriptEventSendPushNotificationToMore
-	| CloudScriptEventSendPushNotificationToTopic
-	| CloudScriptEventSubscribeToTopic
-	| CloudScriptEventUnsubscribeFromTopic;
+	| CloudScriptEventSendMailToOne | CloudScriptEventSendMailToMore
+	| CloudScriptEventSendPushNotificationToOne | CloudScriptEventSendPushNotificationToMore | CloudScriptEventSendPushNotificationToTopic | CloudScriptEventSubscribeToTopic | CloudScriptEventUnsubscribeFromTopic;
 
 export class CloudScriptProcessBase {
 	protected async sendEvent(event: CloudScriptEvent) {

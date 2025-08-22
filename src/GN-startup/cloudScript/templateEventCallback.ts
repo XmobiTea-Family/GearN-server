@@ -160,10 +160,10 @@ enum EventCallbackType {
 	Pre = 0,
 	Post = 1,
 	System = 2,
-	SystemRequestServerDetail = 3,
-	SystemVerifyGenericService = 4,
+	SystemMatchmaking = 3,
 	SystemAuthenticate = 5,
-	SystemEvent = 6,
+	Event = 6,
+	Socket = 7,
 }
 
 interface CloudScriptRequestPre {
@@ -223,23 +223,13 @@ interface CloudScriptRequestSystem {
 	eventName: string;
 }
 
-interface CloudScriptRequestSystemRequestServerDetail {
+interface CloudScriptRequestSystemMatchmaking {
 	requestId: string;
-	eventType: EventCallbackType.SystemRequestServerDetail;
+	eventType: EventCallbackType.SystemMatchmaking;
 	eventName: string;
 	request: {
 		gameId: string;
 		matchmakingTicketCanMatch: MatchmakingTicketCanMatch;
-	};
-}
-
-interface CloudScriptRequestSystemVerifyGenericService {
-	requestId: string;
-	eventType: EventCallbackType.SystemVerifyGenericService;
-	eventName: string;
-	request: {
-		serviceName: string;
-		serviceData: { [k: string]: any; };
 	};
 }
 
@@ -248,17 +238,17 @@ interface CloudScriptRequestSystemAuthenticate {
 	eventType: EventCallbackType.SystemAuthenticate;
 	eventName: string;
 	request: { [k: string]: any };
-	operationRequest: {
+	operationRequest?: {
 		operationCode: string;
 		requestId: number;
 		parameters: {};
 	};
-	operationResponse: {
+	operationResponse?: {
 		returnCode: number;
 		debugMessage: string;
 		parameters: {};
 	};
-	secretInfo: {
+	secretInfo?: {
 		secretKey: string;
 		description: string;
 		role: number;
@@ -269,11 +259,11 @@ interface CloudScriptRequestSystemAuthenticate {
 		isDefault: boolean;
 		onlyMasterAdmin: boolean;
 	};
-}
+};
 
-interface CloudScriptRequestSystemEvent {
+interface CloudScriptRequestEvent {
 	requestId: string;
-	eventType: EventCallbackType.SystemEvent;
+	eventType: EventCallbackType.Event;
 	eventName: string;
 	request: { [k: string]: any };
 	operationEvent: {
@@ -282,7 +272,14 @@ interface CloudScriptRequestSystemEvent {
 	};
 }
 
-type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemRequestServerDetail | CloudScriptRequestSystemVerifyGenericService | CloudScriptRequestSystemAuthenticate | CloudScriptRequestSystemEvent;
+interface CloudScriptRequestSocket {
+	requestId: string;
+	eventType: EventCallbackType.Socket;
+	eventName: string;
+	request: { [k: string]: any };
+}
+
+type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket;
 
 interface CloudScriptResponse {
 	stats: {
@@ -313,13 +310,13 @@ interface FunctionRequestSystem {
 	log: (log: any) => void;
 }
 
-interface FunctionRequestSystemEvent {
+interface FunctionRequestEvent {
 	request: { [k: string]: any };
 	operationEvent: OperationEvent;
 	log: (log: any) => void;
 }
 
-interface FunctionRequestSystemRequestServerDetail {
+interface FunctionRequestSystemMatchmaking {
 	request: { gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch };
 	log: (log: any) => void;
 }
@@ -330,7 +327,7 @@ interface FunctionRequestSystemAuthenticate {
 	operationRequest: OperationRequest;
 	operationResponse: OperationResponse;
 	log: (log: any) => void;
-}
+};
 
 interface FunctionRequestSystemVerifyGenericService {
 	request: {
@@ -338,6 +335,14 @@ interface FunctionRequestSystemVerifyGenericService {
 		serviceData: {
 			[k: string]: any;
 		};
+	};
+
+	log: (log: any) => void;
+}
+
+interface FunctionRequestSocket {
+	request: {
+		[k: string]: any;
 	};
 
 	log: (log: any) => void;
@@ -444,12 +449,12 @@ process?.on("message", async (request: CloudScriptRequest) => {
 			handleResponse = await ___handlePostFunction(request.eventName, functionRequest);
 		}
 	}
-	else if (request.eventType == EventCallbackType.SystemEvent) {
+	else if (request.eventType == EventCallbackType.Event) {
 		let originOperationEvent = request.operationEvent;
 
 		let operationEvent = new OperationEvent(originOperationEvent.eventCode, (originOperationEvent.parameters ? GNHashtable.builder().addAll(originOperationEvent.parameters).build() : null as any));
 
-		let functionRequest: FunctionRequestSystemEvent = {
+		let functionRequest: FunctionRequestEvent = {
 			operationEvent: operationEvent,
 			request: request.request,
 			log(log: any) {
@@ -459,73 +464,88 @@ process?.on("message", async (request: CloudScriptRequest) => {
 
 		handleResponse = await ___handleEventFunction(request.eventName, functionRequest);
 	}
-	else if (request.eventType == EventCallbackType.SystemRequestServerDetail) {
-		let functionRequest: FunctionRequestSystemRequestServerDetail = {
+	else if (request.eventType == EventCallbackType.SystemMatchmaking) {
+		let functionRequest: FunctionRequestSystemMatchmaking = {
 			request: request.request,
 			log(log: any) {
 				logs.push(JSON.stringify(log));
 			},
 		};
 
-		handleResponse = await ___handleMatchmakingFunction(request.eventName, functionRequest);
+		handleResponse = await ___handleSystemMatchmakingFunction(request.eventName, functionRequest);
 	}
 	else if (request.eventType == EventCallbackType.SystemAuthenticate) {
-		let originOperationRequest = request.operationRequest;
-		let operationRequest = new OperationRequest(originOperationRequest.operationCode);
-		if (originOperationRequest.parameters) {
-			operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
-		}
-
-		let originSecretInfo = request.secretInfo;
-		let secretInfo: SecretInfo = null as any;
-		if (originSecretInfo) {
-			secretInfo = SecretInfo.Builder()
-				.setSecretKey(originSecretInfo.secretKey)
-				.setDescription(originSecretInfo.description)
-				.setRole(originSecretInfo.role)
-				.setIsRemove(originSecretInfo.remove)
-				.setTsExpire(originSecretInfo.tsExpire)
-				.setPermission(originSecretInfo.permission)
-				.setGameId(originSecretInfo.gameId)
-				.setIsDefault(originSecretInfo.isDefault)
-				.setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
-				.build();
-		}
-
-		let originOperationResponse = request.operationResponse;
-		let operationResponse: OperationResponse = null as any;
-
-		if (originOperationResponse) {
-			operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId);
-			operationResponse.setReturnCode(originOperationResponse.returnCode);
-			operationResponse.setDebugMessage(originOperationResponse.debugMessage);
-
-			if (originOperationResponse.parameters) {
-				operationResponse.setParameters(GNHashtable.builder().addAll(originOperationResponse.parameters).build());
+		if (request.operationRequest != null) {
+			let originOperationRequest = request.operationRequest;
+			let operationRequest = new OperationRequest(originOperationRequest.operationCode);
+			if (originOperationRequest.parameters) {
+				operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
 			}
+
+			let originSecretInfo = request.secretInfo;
+			let secretInfo: SecretInfo = null as any;
+			if (originSecretInfo) {
+				secretInfo = SecretInfo.Builder()
+					.setSecretKey(originSecretInfo.secretKey)
+					.setDescription(originSecretInfo.description)
+					.setRole(originSecretInfo.role)
+					.setIsRemove(originSecretInfo.remove)
+					.setTsExpire(originSecretInfo.tsExpire)
+					.setPermission(originSecretInfo.permission)
+					.setGameId(originSecretInfo.gameId)
+					.setIsDefault(originSecretInfo.isDefault)
+					.setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
+					.build();
+			}
+
+			let originOperationResponse = request.operationResponse;
+			let operationResponse: OperationResponse = null as any;
+
+			if (originOperationResponse) {
+				operationResponse = new OperationResponse(originOperationRequest.operationCode, originOperationRequest.requestId);
+				operationResponse.setReturnCode(originOperationResponse.returnCode);
+				operationResponse.setDebugMessage(originOperationResponse.debugMessage);
+
+				if (originOperationResponse.parameters) {
+					operationResponse.setParameters(GNHashtable.builder().addAll(originOperationResponse.parameters).build());
+				}
+			}
+
+			let functionRequest: FunctionRequestSystemAuthenticate = {
+				operationRequest: operationRequest,
+				operationResponse: operationResponse,
+				secretInfo: secretInfo,
+				request: request.request,
+				log(log: any) {
+					logs.push(JSON.stringify(log));
+				},
+			};
+
+			handleResponse = await ___handleSystemAuthenticateFunction(request.eventName, functionRequest);
 		}
+		else {
+			let functionRequest: FunctionRequestSystemVerifyGenericService = {
+				request: {
+					serviceData: request.request.serviceData,
+					serviceName: request.request.serviceName,
+				},
+				log(log: any) {
+					logs.push(JSON.stringify(log));
+				},
+			};
 
-		let functionRequest: FunctionRequestSystemAuthenticate = {
-			operationRequest: operationRequest,
-			operationResponse: operationResponse,
-			secretInfo: secretInfo,
-			request: request.request,
-			log(log: any) {
-				logs.push(JSON.stringify(log));
-			},
-		};
-
-		handleResponse = await ___handleSystemAuthenticateFunction(request.eventName, functionRequest);
+			handleResponse = await ___handleSystemGenericServiceFunction(request.eventName, functionRequest);
+		}
 	}
-	else if (request.eventType == EventCallbackType.SystemVerifyGenericService) {
-		let functionRequest: FunctionRequestSystemVerifyGenericService = {
+	else if (request.eventType == EventCallbackType.Socket) {
+		let functionRequest: FunctionRequestSocket = {
 			request: request.request,
 			log(log: any) {
 				logs.push(JSON.stringify(log));
 			},
 		};
 
-		handleResponse = await ___handleGenericServiceFunction(request.eventName, functionRequest);
+		handleResponse = await ___handleSocketFunction(request.eventName, functionRequest);
 	}
 
 	let endTime = performance.now();
@@ -551,7 +571,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 		process.send(response);
 });
 
-async function ___handleMatchmakingFunction(name: string, request: FunctionRequestSystemRequestServerDetail): Promise<FunctionResponse> {
+async function ___handleSystemMatchmakingFunction(name: string, request: FunctionRequestSystemMatchmaking): Promise<FunctionResponse> {
 	let handler = systemMatchmakingHandlers[name];
 
 	if (handler == null) {
@@ -583,7 +603,7 @@ async function ___handleMatchmakingFunction(name: string, request: FunctionReque
 	return answer;
 }
 
-async function ___handleGenericServiceFunction(name: string, request: FunctionRequestSystemVerifyGenericService): Promise<FunctionResponse> {
+async function ___handleSystemGenericServiceFunction(name: string, request: FunctionRequestSystemVerifyGenericService): Promise<FunctionResponse> {
 	let handler = systemGenericServiceHandlers[name];
 
 	if (handler == null) {
@@ -607,6 +627,35 @@ async function ___handleGenericServiceFunction(name: string, request: FunctionRe
 
 		if (result != null)
 			answer.request = result;
+	} catch (err: any) {
+		answer.status = ExecuteResponseStatus.Exception;
+		answer.errorMessage = err.message;
+	}
+
+	return answer;
+}
+
+async function ___handleSocketFunction(name: string, request: FunctionRequestSocket): Promise<FunctionResponse> {
+	let handler = socketHandlers[name];
+
+	if (handler == null) {
+		return {
+			status: ExecuteResponseStatus.FunctionNameNotFound,
+			result: null,
+			request: null,
+			errorMessage: null,
+		};
+	}
+
+	let answer: FunctionResponse = {
+		status: ExecuteResponseStatus.Ok,
+		errorMessage: null,
+		result: null,
+		request: null,
+	};
+
+	try {
+		await handler(request.request.userId, request.request.socketId, request.log);
 	} catch (err: any) {
 		answer.status = ExecuteResponseStatus.Exception;
 		answer.errorMessage = err.message;
@@ -682,7 +731,7 @@ async function ___handleSystemFunction(name: string, request: FunctionRequestSys
 	return answer;
 }
 
-async function ___handleEventFunction(name: string, request: FunctionRequestSystemEvent): Promise<FunctionResponse> {
+async function ___handleEventFunction(name: string, request: FunctionRequestEvent): Promise<FunctionResponse> {
 	let handler = eventHandlers[name];
 
 	if (handler == null) {
@@ -834,5 +883,7 @@ const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTick
 const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
 
 const systemGenericServiceHandlers: Record<string, (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void) => Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>> = {};
+
+const socketHandlers: Record<string, (userId: string, socketId: string, log: (log: any) => void) => Promise<void>> = {};
 
 //$replaceScript

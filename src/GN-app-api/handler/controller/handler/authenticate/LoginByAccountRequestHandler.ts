@@ -121,7 +121,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByAccount",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,

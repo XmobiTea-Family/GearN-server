@@ -28,6 +28,7 @@ import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 import { GoogleService } from "./../GN-app-api/service/GoogleService";
 import { PushNotificationService } from "./../GN-app-api/service/PushNotificationService";
 import { CloudScriptService } from "./../GN-app-api/service/CloudScriptService";
+import { CloudScriptEventService } from "./../GN-app-api/service/CloudScriptEventService";
 import { GooglePlayGameService } from "./../GN-app-api/service/GooglePlayGameService";
 import { GameCenterService } from "./../GN-app-api/service/GameCenterService";
 import { CountryIPDetailService } from "./../GN-app-api/service/CountryIPDetailService";
@@ -352,6 +353,12 @@ export class ServerApplication extends BuilderBase {
 
 			eventCallbackCloudScriptService.init(gnServerSettingsOptions, dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
 			eventCallbackCloudScriptService.run();
+		}
+
+		{
+			let cloudScriptEventService = <CloudScriptEventService>this.gnServer.getCloudScriptEventService();
+
+			cloudScriptEventService.init(this.gnServer);
 		}
 
 		let postEventCallbackLogCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");

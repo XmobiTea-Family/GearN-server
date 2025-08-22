@@ -25,7 +25,7 @@ class DeleteInDatabaseOperationRequest extends OperationRequest {
 	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
 	public type: number;
 
-	@StringDataMember({ code: ParameterCode.Id, minLength: 2, maxLength: 15 })
+	@StringDataMember({ code: ParameterCode.Id, minLength: 2, maxLength: 32 })
 	public id: string;
 
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })

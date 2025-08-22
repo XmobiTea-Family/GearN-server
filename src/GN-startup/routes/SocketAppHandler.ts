@@ -14,6 +14,11 @@ import { xDatabase } from "./../../GN-library/xdatabase/lib/xDatabase";
 import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
 import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
+import { AuthInfo } from "../../GN-common/entity/AuthInfo";
+
+interface OnSocketAuthenticate {
+	(socket: Socket, authInfo: AuthInfo): void;
+}
 
 interface OnSocketDisconnect {
 	(socket: Socket, data: string): void;
@@ -27,6 +32,7 @@ export class SocketAppHandler {
 	private static readonly CONNECT_CMD = "connection";
 	private static readonly DISCONNECT_CMD = "disconnect";
 
+	private _onSocketAuthenticateCb: OnSocketAuthenticate;
 	private _onDisconnectCb: OnSocketDisconnect;
 	private _onRequestCb: OnSocketRequest;
 	private apiMiddleware: ApiMiddleware;
@@ -81,6 +87,10 @@ export class SocketAppHandler {
 		this._onDisconnectCb = _onDisconnectCb;
 	}
 
+	public setOnSocketAuthenticate(_onAuthenticateCb: OnSocketAuthenticate) {
+		this._onSocketAuthenticateCb = _onAuthenticateCb;
+	}
+
 	public run(): void {
 		this.server.on(SocketAppHandler.CONNECT_CMD, (socket) => {
 			// let masterClient = <any>socket;
@@ -93,26 +103,28 @@ export class SocketAppHandler {
 
 		this.initSocket(socket);
 
+		let thiz = this;
+
 		socket.on(Commands.RequestAuthTokenCmd, (...data) => {
 			this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, async () => {
-				await this.onSocketRequestAuthToken(socket, data);
+				await thiz.onSocketRequestAuthToken(socket, data);
 			});
 		});
 
 		if (this.enablePostViaMsgPack) {
 			socket.on(Commands.RequestCmd_MsgPack, (...data) => {
-				this.antiDdosMiddleware.checkRequestSizeBodyViaSocketMsgPack(socket, data, () => {
-					this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, () => {
-						this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaSocket(socket, data, () => {
-							this.antiDdosMiddleware.addPendingRequestViaSocket(socket, data, () => {
-								this.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
-									let operationResponse = await this.onSocketRequestMsgPack(socket, data, returnCode);
+				thiz.antiDdosMiddleware.checkRequestSizeBodyViaSocketMsgPack(socket, data, () => {
+					thiz.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, () => {
+						thiz.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaSocket(socket, data, () => {
+							thiz.antiDdosMiddleware.addPendingRequestViaSocket(socket, data, () => {
+								thiz.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
+									let operationResponse = await thiz.onSocketRequestMsgPack(socket, data, returnCode);
 
 									if (operationResponse != null) {
-										this.sendResponseForSocket(socket, operationResponse, true);
+										thiz.sendResponseForSocket(socket, operationResponse, true);
 									}
 
-									this.antiDdosMiddleware.removePendingRequestViaSocket(socket, data);
+									thiz.antiDdosMiddleware.removePendingRequestViaSocket(socket, data);
 								});
 							});
 						});
@@ -123,18 +135,18 @@ export class SocketAppHandler {
 
 		if (this.enablePostViaJson) {
 			socket.on(Commands.RequestCmd_Json, (...data) => {
-				this.antiDdosMiddleware.checkRequestSizeBodyViaSocketJson(socket, data, () => {
-					this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, () => {
-						this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaSocket(socket, data, () => {
-							this.antiDdosMiddleware.addPendingRequestViaSocket(socket, data, () => {
-								this.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
-									let operationResponse = await this.onSocketRequestJson(socket, data, returnCode);
+				thiz.antiDdosMiddleware.checkRequestSizeBodyViaSocketJson(socket, data, () => {
+					thiz.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaSocket(socket, data, () => {
+						thiz.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaSocket(socket, data, () => {
+							thiz.antiDdosMiddleware.addPendingRequestViaSocket(socket, data, () => {
+								thiz.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
+									let operationResponse = await thiz.onSocketRequestJson(socket, data, returnCode);
 
 									if (operationResponse != null) {
-										this.sendResponseForSocket(socket, operationResponse, false);
+										thiz.sendResponseForSocket(socket, operationResponse, false);
 									}
 
-									this.antiDdosMiddleware.removePendingRequestViaSocket(socket, data);
+									thiz.antiDdosMiddleware.removePendingRequestViaSocket(socket, data);
 								});
 							});
 						});
@@ -144,7 +156,7 @@ export class SocketAppHandler {
 		}
 
 		socket.on(SocketAppHandler.DISCONNECT_CMD, (data) => {
-			this.onSocketDisconnect(socket, data);
+			thiz.onSocketDisconnect(socket, data);
 		});
 	}
 
@@ -220,6 +232,8 @@ export class SocketAppHandler {
 
 					socket.join(authInfo.getUserId());
 					socket.join(await this.getRooms(authInfo.getUserId()));
+
+					this.onSocketAuthenticate(socket, authInfo);
 				}
 			}
 		}
@@ -241,21 +255,21 @@ export class SocketAppHandler {
 				socket.data.isSecreted = true;
 				socket.data.secretInfo = secretInfo;
 
-				if (socket.data.isAuthenticated === true) {
-					let gamePlayer = await this.xDatabase.loadGamePlayerAsync(socket.data.authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
+				// if (socket.data.isAuthenticated === true) {
+				// 	let gamePlayer = await this.xDatabase.loadGamePlayerAsync(socket.data.authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
 
-					if (gamePlayer != null && socket != null) {
-						let playerGroups = gamePlayer.getAllPlayerGroups();
+				// 	if (gamePlayer != null && socket != null) {
+				// 		let playerGroups = gamePlayer.getAllPlayerGroups();
 
-						for (let i = 0; i < playerGroups.length; i++) {
-							let playerGroup = playerGroups[i];
+				// 		for (let i = 0; i < playerGroups.length; i++) {
+				// 			let playerGroup = playerGroups[i];
 
-							if (playerGroup.status == 0) {	// 0 is member
-								socket.join(playerGroup.groupId);
-							}
-						}
-					}
-				}
+				// 			if (playerGroup.status == 0) {	// 0 is member
+				// 				socket.join(playerGroup.groupId);
+				// 			}
+				// 		}
+				// 	}
+				// }
 			}
 			else {
 				socket.data.isSecreted = false;
@@ -362,6 +376,11 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET] on socket disconnected " + socket.id);
 
 		if (this._onDisconnectCb != null) this._onDisconnectCb(socket, data);
+	}
+
+	private onSocketAuthenticate(socket: Socket, authInfo: AuthInfo) {
+
+		if (this._onSocketAuthenticateCb != null) this._onSocketAuthenticateCb(socket, authInfo);
 	}
 
 	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse, useMsgPack: boolean) {

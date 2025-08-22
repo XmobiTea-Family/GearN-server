@@ -137,7 +137,7 @@ export class LoginByWindowsDeviceIdRequestHandler extends LoginBaseRequestHandle
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByWindowsDeviceId",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,

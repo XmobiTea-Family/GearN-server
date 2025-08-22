@@ -649,5 +649,5 @@ export { ServerGameDataRequestParams };
 import { AnalyticsRequestParams } from "./GN-app-api/handler/controller/handler/dashboard/GetAnalyticsRequestHandler"
 export { AnalyticsRequestParams };
 
-import { MatchmakingTicketCanMatch } from "./GN-app-api/handler/controller/handler/multiplayer/MatchmakingHandler";
+import { MatchmakingTicketCanMatch } from "./GN-app-api/service/IMatchmakingService";
 export { MatchmakingTicketCanMatch };

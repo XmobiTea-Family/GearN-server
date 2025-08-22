@@ -156,7 +156,7 @@ export class LoginByFacebookRequestHandler extends LoginBaseRequestHandler {
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByFacebook",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,

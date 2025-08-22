@@ -89,7 +89,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 			return operationResponse;
 		}
 
-		let serviceResponse = await this.gnServer.getPostEventCallbackService().onVerifyGenericService(request.serviceName, request.serviceData);
+		let serviceResponse = await this.gnServer.getEventCallbackCloudScriptService().executeVerifyGenericService(request.serviceName, request.serviceData);
 
 		if (!serviceResponse.success) {
 			Debug.log("service name error " + serviceResponse.errorMessage);
@@ -171,7 +171,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByGenericService",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,

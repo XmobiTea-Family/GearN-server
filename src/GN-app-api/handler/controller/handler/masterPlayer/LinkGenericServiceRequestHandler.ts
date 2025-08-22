@@ -174,7 +174,7 @@ export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHan
 			return operationResponse;
 		}
 
-		let serviceResponse = await this.gnServer.getPostEventCallbackService().onVerifyGenericService(request.serviceName, request.serviceData);
+		let serviceResponse = await this.gnServer.getEventCallbackCloudScriptService().executeVerifyGenericService(request.serviceName, request.serviceData);
 
 		if (!serviceResponse.success) {
 			Debug.log("service name error " + serviceResponse.errorMessage);

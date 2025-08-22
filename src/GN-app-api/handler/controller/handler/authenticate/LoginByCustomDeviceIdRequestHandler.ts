@@ -138,7 +138,7 @@ export class LoginByCustomDeviceIdRequestHandler extends LoginBaseRequestHandler
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByCustomDeviceId",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,

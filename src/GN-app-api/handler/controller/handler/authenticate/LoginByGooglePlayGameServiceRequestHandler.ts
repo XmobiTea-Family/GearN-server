@@ -156,7 +156,7 @@ export class LoginByGooglePlayGameServiceRequestHandler extends LoginBaseRequest
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByGooglePlayGameService",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,

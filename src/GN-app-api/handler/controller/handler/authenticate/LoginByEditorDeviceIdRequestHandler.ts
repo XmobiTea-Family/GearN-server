@@ -137,7 +137,7 @@ export class LoginByEditorDeviceIdRequestHandler extends LoginBaseRequestHandler
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByEditorDeviceId",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,

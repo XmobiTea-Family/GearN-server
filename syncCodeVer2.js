@@ -5,67 +5,111 @@ let docs = [];
 
 let tsLastUpdate = 1736498427663;
 
-docs.push({
-	type: "system",
-	version: "FIRSTVER",
-	fullScript: "// first full script",
-	tsLastUpdate: tsLastUpdate,
-	childScripts: [
-		{
-			eventName: "system_OnEveryMinute",
-			script: "\nsystemHandlers.system_OnEveryMinute = async (log: (log: any) => void) => {\n\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "system_OnEveryHour",
-			script: "\nsystemHandlers.system_OnEveryHour = async (log: (log: any) => void) => {\n\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "system_OnEveryDay",
-			script: "\nsystemHandlers.system_OnEveryDay = async (log: (log: any) => void) => {\n\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "systemMatchmaking_RequestServerDetail",
-			script:
-				"\nsystemMatchmakingHandlers.system_RequestServerDetail = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void): Promise<{ success: boolean }> => {\n\t//call matchmaking.confirmServerDetail(gameId, matchmakingTicketCanMatch, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "systemAuthenticate_OnAuthenticateSuccess",
-			script:
-				"\nsystemAuthenticateHandlers.system_OnAuthenticateSuccess = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "systemGenericService_VerifyGenericService",
-			script:
-				"\nsystemGenericServiceHandlers.system_VerifyGenericService = async (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> => {\n\n\treturn { success: false, serviceId: null, };\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "systemEvent_SendEventTo",
-			script: "\neventHandlers.system_SendEventTo = async (request: { userId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "systemEvent_SendEventToRoom",
-			script: "\neventHandlers.system_SendEventToRoom = async (request: { roomId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "systemEvent_SendEventToMoreUser",
-			script: "\neventHandlers.system_SendEventToMoreUser = async (request: { userIds: string[] }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
-			hasEdit: false,
-		},
-		{
-			eventName: "systemEvent_SendEventToAllPlayer",
-			script: "\neventHandlers.system_SendEventToAllPlayer = async (request: {}, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
-			hasEdit: false,
-		},
-	],
-});
+docs.push(
+	{
+		type: "system",
+		version: "FIRSTVER",
+		fullScript: "// first full script",
+		tsLastUpdate: tsLastUpdate,
+		childScripts: [
+			{
+				eventName: "system_OnEveryMinute",
+				script: "\nsystemHandlers.system_OnEveryMinute = async (log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+			{
+				eventName: "system_OnEveryHour",
+				script: "\nsystemHandlers.system_OnEveryHour = async (log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+			{
+				eventName: "system_OnEveryDay",
+				script: "\nsystemHandlers.system_OnEveryDay = async (log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+		],
+	},
+	{
+		type: "systemMatchmaking",
+		version: "FIRSTVER",
+		fullScript: "// first full script",
+		tsLastUpdate: tsLastUpdate,
+		childScripts: [
+			{
+				eventName: "systemMatchmaking_RequestServerDetail",
+				script:
+					"\nsystemMatchmakingHandlers.systemMatchmaking_RequestServerDetail = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void): Promise<{ success: boolean }> => {\n\t//call matchmaking.confirmServerDetail(gameId, matchmakingTicketCanMatch, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
+				hasEdit: false,
+			},
+		],
+	},
+	{
+		type: "systemAuthenticate",
+		version: "FIRSTVER",
+		fullScript: "// first full script",
+		tsLastUpdate: tsLastUpdate,
+		childScripts: [
+			{
+				eventName: "systemAuthenticate_OnAuthenticateSuccess",
+				script:
+					"\nsystemAuthenticateHandlers.systemAuthenticate_OnAuthenticateSuccess = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+				hasEdit: false,
+			},
+			{
+				eventName: "systemAuthenticate_VerifyGenericService",
+				script:
+					"\nsystemGenericServiceHandlers.systemAuthenticate_VerifyGenericService = async (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> => {\n\n\treturn { success: false, serviceId: null, };\n}\n",
+				hasEdit: false,
+			},
+		],
+	},
+	{
+		type: "event",
+		version: "FIRSTVER",
+		fullScript: "// first full script",
+		tsLastUpdate: tsLastUpdate,
+		childScripts: [
+			{
+				eventName: "event_SendEventTo",
+				script: "\neventHandlers.event_SendEventTo = async (request: { userId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+			{
+				eventName: "event_SendEventToRoom",
+				script: "\neventHandlers.event_SendEventToRoom = async (request: { roomId: string }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+			{
+				eventName: "event_SendEventToMoreUser",
+				script: "\neventHandlers.event_SendEventToMoreUser = async (request: { userIds: string[] }, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+			{
+				eventName: "event_SendEventToAllPlayer",
+				script: "\neventHandlers.event_SendEventToAllPlayer = async (request: {}, operationEvent: OperationEvent, log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+		],
+	},
+	{
+		type: "socket",
+		version: "FIRSTVER",
+		fullScript: "// first full script",
+		tsLastUpdate: tsLastUpdate,
+		childScripts: [
+			{
+				eventName: "socket_OnSocketConnected",
+				script: "\nsocketHandlers.socket_OnSocketConnected = async (userId: string, socketId: string, log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+			{
+				eventName: "socket_OnSocketDisconnected",
+				script: "\nsocketHandlers.socket_OnSocketDisconnected = async (userId: string, socketId: string, log: (log: any) => void) => {\n\n}\n",
+				hasEdit: false,
+			},
+		],
+	}
+);
 
 docs.push(readAllTsFiles("authenticate"));
 docs.push(readAllTsFiles("characterPlayer"));

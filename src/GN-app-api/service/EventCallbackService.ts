@@ -15,17 +15,17 @@ import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { OperationEvent } from "./../../GN-common/entity/operationEvent/OperationEvent";
 import { ParameterCode } from "./../../GN-common/constant/parameterCode/ParameterCode";
 import { GNHashtable } from "./../../GN-common/common/GNData";
-import { MatchmakingTicketCanMatch } from "./../handler/controller/handler/multiplayer/MatchmakingHandler";
-import { ServerDetail } from "./../../GN-library/xdatabase/lib/entity/pro/ServerDetail";
+import { MatchmakingTicketCanMatch } from "./../service/IMatchmakingService";
+import { CloudScriptEvent } from "./CloudScriptEventService";
 
 enum EventCallbackType {
 	Pre = 0,
 	Post = 1,
 	System = 2,
-	SystemRequestServerDetail = 3,
-	SystemVerifyGenericService = 4,
+	SystemMatchmaking = 3,
 	SystemAuthenticate = 5,
-	SystemEvent = 6,
+	Event = 6,
+	Socket = 7,
 }
 
 interface CloudScriptRequestPre {
@@ -85,23 +85,13 @@ interface CloudScriptRequestSystem {
 	eventName: string;
 }
 
-interface CloudScriptRequestSystemRequestServerDetail {
+interface CloudScriptRequestSystemMatchmaking {
 	requestId: string;
-	eventType: EventCallbackType.SystemRequestServerDetail;
+	eventType: EventCallbackType.SystemMatchmaking;
 	eventName: string;
 	request: {
 		gameId: string;
 		matchmakingTicketCanMatch: MatchmakingTicketCanMatch;
-	};
-}
-
-interface CloudScriptRequestSystemVerifyGenericService {
-	requestId: string;
-	eventType: EventCallbackType.SystemVerifyGenericService;
-	eventName: string;
-	request: {
-		serviceName: string;
-		serviceData: { [k: string]: any; };
 	};
 }
 
@@ -110,17 +100,17 @@ interface CloudScriptRequestSystemAuthenticate {
 	eventType: EventCallbackType.SystemAuthenticate;
 	eventName: string;
 	request: { [k: string]: any };
-	operationRequest: {
+	operationRequest?: {
 		operationCode: string;
 		requestId: number;
 		parameters: {};
 	};
-	operationResponse: {
+	operationResponse?: {
 		returnCode: number;
 		debugMessage: string;
 		parameters: {};
 	};
-	secretInfo: {
+	secretInfo?: {
 		secretKey: string;
 		description: string;
 		role: number;
@@ -131,11 +121,11 @@ interface CloudScriptRequestSystemAuthenticate {
 		isDefault: boolean;
 		onlyMasterAdmin: boolean;
 	};
-}
+};
 
-interface CloudScriptRequestSystemEvent {
+interface CloudScriptRequestEvent {
 	requestId: string;
-	eventType: EventCallbackType.SystemEvent;
+	eventType: EventCallbackType.Event;
 	eventName: string;
 	request: { [k: string]: any };
 	operationEvent: {
@@ -144,7 +134,14 @@ interface CloudScriptRequestSystemEvent {
 	};
 }
 
-type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemRequestServerDetail | CloudScriptRequestSystemVerifyGenericService | CloudScriptRequestSystemAuthenticate | CloudScriptRequestSystemEvent;
+interface CloudScriptRequestSocket {
+	requestId: string;
+	eventType: EventCallbackType.Socket;
+	eventName: string;
+	request: { [k: string]: any };
+}
+
+type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket;
 
 interface CloudScriptResponse {
 	stats: {
@@ -167,136 +164,6 @@ interface CloudScriptResponse {
 	responseId: string;
 	logs: string[];
 }
-
-enum CloudScriptEventType {
-	SendEventToOne = 0,
-	SendEventToMore = 1,
-	SendEventToAll = 2,
-
-	ConfirmServerDetail = 10,
-
-	SendMailToOne = 20,
-	SendMailToMore = 21,
-
-	SendPushNotificationToOne = 30,
-	SendPushNotificationToMore = 31,
-	SendPushNotificationToTopic = 32,
-	SubscribeToTopic = 33,
-	UnsubscribeFromTopic = 34,
-
-}
-
-interface CloudScriptEventSendEventToOne {
-	eventType: CloudScriptEventType.SendEventToOne;
-	operationEvent: {
-		eventCode: string;
-		parameters: {};
-	};
-	userId: string;
-}
-
-interface CloudScriptEventSendEventToMore {
-	eventType: CloudScriptEventType.SendEventToMore;
-	operationEvent: {
-		eventCode: string;
-		parameters: {};
-	};
-	userIds: string[];
-}
-
-interface CloudScriptEventSendEventToAll {
-	eventType: CloudScriptEventType.SendEventToAll;
-	operationEvent: {
-		eventCode: string;
-		parameters: {};
-	};
-}
-
-interface CloudScriptEventConfirmServerDetail {
-	eventType: CloudScriptEventType.ConfirmServerDetail;
-	gameId: string;
-	matchmakingTicketCanMatch: MatchmakingTicketCanMatch;
-	serverDetail: ServerDetail;
-}
-
-interface CloudScriptEventSendMailToOne {
-	eventType: CloudScriptEventType.SendMailToOne;
-	mailData: {
-		subject: string;
-		contentHtml: string;
-	};
-	email: string;
-}
-
-interface CloudScriptEventSendMailToMore {
-	eventType: CloudScriptEventType.SendMailToMore;
-	mailData: {
-		subject: string;
-		contentHtml: string;
-	};
-	emails: string[];
-}
-
-interface CloudScriptEventSendPushNotificationToOne {
-	eventType: CloudScriptEventType.SendPushNotificationToOne;
-	pushData: {
-		title: string;
-		body: string;
-		badge?: number;
-		sound?: string;
-		icon?: string;
-		data?: { [k: string]: any };
-	};
-	token: string;
-}
-
-interface CloudScriptEventSendPushNotificationToMore {
-	eventType: CloudScriptEventType.SendPushNotificationToMore;
-	pushData: {
-		title: string;
-		body: string;
-		badge?: number;
-		sound?: string;
-		icon?: string;
-		data?: { [k: string]: any };
-	};
-	tokens: string[];
-}
-
-interface CloudScriptEventSendPushNotificationToTopic {
-	eventType: CloudScriptEventType.SendPushNotificationToTopic;
-	pushData: {
-		title: string;
-		body: string;
-		badge?: number;
-		sound?: string;
-		icon?: string;
-		data?: { [k: string]: any };
-	};
-	topic: string;
-}
-
-interface CloudScriptEventSubscribeToTopic {
-	eventType: CloudScriptEventType.SubscribeToTopic;
-	tokens: string[];
-	topic: string;
-}
-
-interface CloudScriptEventUnsubscribeFromTopic {
-	eventType: CloudScriptEventType.UnsubscribeFromTopic;
-	tokens: string[];
-	topic: string;
-}
-
-type CloudScriptEvent = CloudScriptEventSendEventToOne | CloudScriptEventSendEventToMore | CloudScriptEventSendEventToAll
-	| CloudScriptEventConfirmServerDetail
-	| CloudScriptEventSendMailToOne
-	| CloudScriptEventSendMailToMore
-	| CloudScriptEventSendPushNotificationToOne
-	| CloudScriptEventSendPushNotificationToMore
-	| CloudScriptEventSendPushNotificationToTopic
-	| CloudScriptEventSubscribeToTopic
-	| CloudScriptEventUnsubscribeFromTopic;
 
 interface DbConnection {
 	url: string,
@@ -329,8 +196,9 @@ export interface IEventCallbackCloudScriptService {
 	): Promise<void>;
 	executeEvent(eventName: string, request: { [k: string]: any }, operationEvent: OperationEvent): Promise<void>;
 	executePre(eventName: string, request: { [k: string]: any }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
-	executeAuthenticate(eventName: string, request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void>;
+	executeAuthenticate(request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void>;
 	executeVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>;
+	executeSocket(eventName: string, request: { [k: string]: any }): Promise<void>;
 
 	addCloudScriptFunction(eventName: string, script: string): Promise<{ success: boolean; errorMessage?: string; version?: string }>;
 	getAllCloudScriptFunction(): Promise<
@@ -541,12 +409,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	public async executeRequestServerDetailSystem(gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch): Promise<{ success: boolean }> {
-		let cloudFunction = this.cloudScriptFunctionDict.get("system");
+		let cloudFunction = this.cloudScriptFunctionDict.get("systemMatchmaking");
 		if (cloudFunction == null) {
-			Debug.logError("[GearN] [SystemEventCallback] system not found");
 			return { success: false };
 		}
-		let eventName = "system_RequestServerDetail";
+		let eventName = "systemMatchmaking_RequestServerDetail";
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -559,7 +426,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
-			eventType: EventCallbackType.SystemRequestServerDetail,
+			eventType: EventCallbackType.SystemMatchmaking,
 			request: {
 				gameId: gameId,
 				matchmakingTicketCanMatch: matchmakingTicketCanMatch,
@@ -614,9 +481,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	public async executeEvent(eventName: string, request: { [k: string]: any }, operationEvent: OperationEvent) {
-		let cloudFunction = this.cloudScriptFunctionDict.get("system");
+		let cloudFunction = this.cloudScriptFunctionDict.get("event");
 		if (cloudFunction == null) {
-			Debug.logError("[GearN] [SystemEventCallback] system not found");
 			return;
 		}
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
@@ -631,7 +497,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
-			eventType: EventCallbackType.SystemEvent,
+			eventType: EventCallbackType.Event,
 			operationEvent: {
 				eventCode: operationEvent.getEventCode(),
 				parameters: operationEvent.getParameters(),
@@ -660,7 +526,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 					stats: null,
 					logs: [],
 				});
-			}, EventCallbackCloudScriptService.SystemExecuteTimeoutInMs);
+			}, thiz.executeTimeoutInMs);
 
 			thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
 				if (isResolved) return;
@@ -811,12 +677,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	public async executeVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> {
-		let cloudFunction = this.cloudScriptFunctionDict.get("system");
+		let cloudFunction = this.cloudScriptFunctionDict.get("systemAuthenticate");
 		if (cloudFunction == null) {
-			Debug.logError("[GearN] [SystemEventCallback] system not found");
-			return { success: false, serviceId: null, };
+			return { success: false, serviceId: null, errorMessage: "systemAuthenticate does not implement" };
 		}
-		let eventName = "system_VerifyGenericService";
+		let eventName = "systemAuthenticate_VerifyGenericService";
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -829,7 +694,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
-			eventType: EventCallbackType.SystemVerifyGenericService,
+			eventType: EventCallbackType.SystemAuthenticate,
 			request: {
 				serviceName: serviceName,
 				serviceData: serviceData,
@@ -888,16 +753,17 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	public async executeAuthenticate(
-		eventName: string,
 		request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, },
 		secretInfo: SecretInfo,
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse
 	): Promise<void> {
-		let cloudFunction = this.cloudScriptFunctionDict.get("system");
+		let cloudFunction = this.cloudScriptFunctionDict.get("systemAuthenticate");
 		if (cloudFunction == null) {
 			return;
 		}
+
+		let eventName = "systemAuthenticate_OnAuthenticateSuccess";
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -1118,6 +984,64 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		}
 	}
 
+	public async executeSocket(eventName: string, request: { [k: string]: any }): Promise<void> {
+		let cloudFunction = this.cloudScriptFunctionDict.get("socket");
+		if (cloudFunction == null) {
+			return;
+		}
+		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+
+		if (cloudScriptWorker == null) {
+			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
+			return;
+		}
+
+		let requestId = StringUtility.generateRandomString(10, 0);
+
+		let cloudScriptRequest: CloudScriptRequest = {
+			requestId: requestId,
+			eventName: eventName,
+			eventType: EventCallbackType.Socket,
+			request: request,
+		};
+
+		cloudScriptWorker.send(cloudScriptRequest);
+
+		let thiz = this;
+
+		let isResolved = false;
+		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
+			let timeout = setTimeout(() => {
+				if (isResolved) return;
+				isResolved = true;
+
+				resolve({
+					responseId: requestId,
+					response: {
+						status: ExecuteResponseStatus.Timeout,
+						errorMessage: "function execute timeout",
+						result: null,
+						request: null,
+					},
+					stats: null,
+					logs: [],
+				});
+			}, thiz.executeTimeoutInMs);
+
+			thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
+				if (isResolved) return;
+				isResolved = true;
+
+				clearTimeout(timeout);
+				resolve(cloudScriptResponse);
+			});
+		});
+
+		this.cloudScriptWaitingResponseCallbackDict.delete(requestId);
+
+		if (cloudScriptResponse.logs.length != 0) Debug.log(JSON.stringify(cloudScriptResponse.logs));
+	}
+
 	private loadCloudScriptFunctionWorkerFromCache(type: string, eventName: string): ChildProcess {
 		let cloudFunction = this.cloudScriptFunctionDict.get(type);
 		if (cloudFunction == null) return null;
@@ -1140,23 +1064,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		let version = StringUtility.generateRandomString(7, 0);
 
 		let filePathTempTs = __dirname + "/./GN-startup/cloudScript/temp2.ts";
-
-		if (type == "system") {
-			let leftEventName = eventName.split("_")[1];
-
-			if (leftEventName == "SendEventTo" || leftEventName == "SendEventToRoom" || leftEventName == "SendEventToMoreUser" || leftEventName == "SendEventToAllPlayer") {
-				type = "systemEvent";
-			}
-			else if (leftEventName == "VerifyGenericService") {
-				type = "systemGenericService";
-			}
-			else if (leftEventName == "OnAuthenticateSuccess") {
-				type = "systemAuthenticate";
-			}
-			else if (leftEventName == "RequestServerDetail") {
-				type = "systemMatchmaking"
-			}
-		}
 
 		let cloudFunction = this.cloudScriptFunctionDict.get(type);
 		if (cloudFunction == null)
@@ -1333,55 +1240,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				}
 			} else {
 				let cloudScriptEvent: CloudScriptEvent = cloudScriptResponse as any;
-
-				if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToOne || cloudScriptEvent.eventType == CloudScriptEventType.SendEventToMore || cloudScriptEvent.eventType == CloudScriptEventType.SendEventToAll) {
-					let operationEvent = new OperationEvent(
-						cloudScriptEvent.operationEvent.eventCode,
-						cloudScriptEvent.operationEvent.parameters != null ? GNHashtable.builder().addAll(cloudScriptEvent.operationEvent.parameters).build() : null
-					);
-
-					if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToOne) {
-						thiz.gnServer.sendEventTo(cloudScriptEvent.userId, operationEvent);
-					} else if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToMore) {
-						thiz.gnServer.sendEventToMoreUser(cloudScriptEvent.userIds, operationEvent);
-					} else if (cloudScriptEvent.eventType == CloudScriptEventType.SendEventToAll) {
-						thiz.gnServer.sendEventToAllPlayer(operationEvent);
-					}
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.ConfirmServerDetail) {
-					thiz.gnServer.setMatchServerDetail(cloudScriptEvent.gameId, cloudScriptEvent.matchmakingTicketCanMatch.matchId, cloudScriptEvent.serverDetail, cloudScriptEvent.matchmakingTicketCanMatch.ticketIds);
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendMailToOne) {
-					let mailData = cloudScriptEvent.mailData;
-
-					thiz.gnServer.getEmailService().sendMail(cloudScriptEvent.email, mailData.subject, mailData.contentHtml);
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendMailToMore) {
-					let mailData = cloudScriptEvent.mailData;
-
-					thiz.gnServer.getEmailService().sendMailToMore(cloudScriptEvent.emails, mailData.subject, mailData.contentHtml);
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendPushNotificationToOne) {
-					let pushData = cloudScriptEvent.pushData;
-
-					thiz.gnServer.getPushNotificationService().sendNotification(cloudScriptEvent.token, pushData.title, pushData.body, pushData.badge, pushData.sound, pushData.icon, pushData.data);
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendPushNotificationToMore) {
-					let pushData = cloudScriptEvent.pushData;
-
-					thiz.gnServer.getPushNotificationService().sendNotificationToMore(cloudScriptEvent.tokens, pushData.title, pushData.body, pushData.badge, pushData.sound, pushData.icon, pushData.data);
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.SendPushNotificationToTopic) {
-					let pushData = cloudScriptEvent.pushData;
-
-					thiz.gnServer.getPushNotificationService().sendNotificationToTopic(cloudScriptEvent.topic, pushData.title, pushData.body, pushData.badge, pushData.sound, pushData.icon, pushData.data);
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.SubscribeToTopic) {
-					thiz.gnServer.getPushNotificationService().subscribeToTopic(cloudScriptEvent.tokens, cloudScriptEvent.topic);
-				}
-				else if (cloudScriptEvent.eventType == CloudScriptEventType.UnsubscribeFromTopic) {
-					thiz.gnServer.getPushNotificationService().unsubscribeFromTopic(cloudScriptEvent.tokens, cloudScriptEvent.topic);
-				}
+				thiz.gnServer.getCloudScriptEventService().handleEvent(cloudScriptEvent);
 			}
 		});
 
@@ -1475,26 +1334,6 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 				Debug.logException(err);
 			}
 		}
-	}
-
-	public async onAuthenticateEvent(eventName: string, request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void> {
-		if (this.cloudScriptService) {
-			await this.cloudScriptService.executeAuthenticate(eventName, request, secretInfo, operationRequest, operationResponse);
-		}
-	}
-
-	public async onVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> {
-		if (this.cloudScriptService) {
-			let response = await this.cloudScriptService.executeVerifyGenericService(serviceName, serviceData);
-
-			if (response) return response;
-		}
-
-		return {
-			success: false,
-			serviceId: null,
-			errorMessage: "Service not ready",
-		};
 	}
 
 }

@@ -137,7 +137,7 @@ export class LoginByiOSDeviceIdRequestHandler extends LoginBaseRequestHandler {
 
 		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		await this.gnServer.getPostEventCallbackService().onAuthenticateEvent("system_OnAuthenticateSuccess", {
+		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByiOSDeviceId",
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
