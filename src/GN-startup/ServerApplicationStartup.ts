@@ -57,6 +57,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"enableSendAndReceiveDebug": true,
 			"enablePostViaMsgPack": true,
 			"enablePostViaJson": true,
+			"trustProxy": true,
 		}
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(gnHttpAppSettings["enable"] ?? true)
@@ -67,6 +68,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setEnableSendAndReceiveDebug(gnHttpAppSettings["enableSendAndReceiveDebug"] ?? true)
 			.setEnablePostViaMsgPack(gnHttpAppSettings["enablePostViaMsgPack"] ?? true)
 			.setEnablePostViaJson(gnHttpAppSettings["enablePostViaJson"] ?? true)
+			.setTrustProxy(gnHttpAppSettings["trustProxy"] ?? true)
 			.build();
 
 		let gnSocketAppSettings = this.gnConfig["socketAppSettings"];

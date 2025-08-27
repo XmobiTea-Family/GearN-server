@@ -1,6 +1,7 @@
 .vscode/
 src/
 test/
+apiReferences/
 .editorconfig
 .gitignore
 tsconfig.json

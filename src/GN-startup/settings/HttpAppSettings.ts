@@ -11,6 +11,7 @@ abstract class BuilderBase {
 	protected enableSendAndReceiveDebug: boolean;
 	protected enablePostViaMsgPack: boolean;
 	protected enablePostViaJson: boolean;
+	protected trustProxy: boolean;
 
 	public getEnable(): boolean {
 		return this.enable;
@@ -42,6 +43,10 @@ abstract class BuilderBase {
 
 	public getEnablePostViaJson(): boolean {
 		return this.enablePostViaJson;
+	}
+
+	public getTrustProxy(): boolean {
+		return this.trustProxy;
 	}
 
 	constructor() { }
@@ -108,6 +113,11 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 		return this;
 	}
 
+	public setTrustProxy(trustProxy: boolean): Builder {
+		this.trustProxy = trustProxy;
+		return this;
+	}
+
 	public build() {
 		return new HttpAppSettings(this);
 	}
@@ -123,6 +133,7 @@ class Builder extends BuilderBase implements IBuilder<HttpAppSettings> {
 		this.enableSendAndReceiveDebug = false;
 		this.enablePostViaMsgPack = false;
 		this.enablePostViaJson = false;
+		this.trustProxy = false;
 	}
 
 }
@@ -139,6 +150,7 @@ export class HttpAppSettings extends BuilderBase {
 		this.enableSendAndReceiveDebug = builder.getEnableSendAndReceiveDebug();
 		this.enablePostViaMsgPack = builder.getEnablePostViaMsgPack();
 		this.enablePostViaJson = builder.getEnablePostViaJson();
+		this.trustProxy = builder.getTrustProxy();
 	}
 
 	public static Builder(): Builder {

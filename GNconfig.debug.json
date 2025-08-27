@@ -29,7 +29,8 @@
 			],
 			"enableSendAndReceiveDebug": false,
 			"enablePostViaMsgPack": true,
-			"enablePostViaJson": true
+			"enablePostViaJson": true,
+			"trustProxy": true
 		},
 		"socketAppSettings": {
 			"enable": true,

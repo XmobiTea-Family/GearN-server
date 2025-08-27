@@ -345,6 +345,10 @@ export class ApiMiddleware {
 		}
 
 		if (ip == null) {
+			ip = req.ip;
+		}
+
+		if (ip == null) {
 			ip = req.socket.remoteAddress;
 		}
 

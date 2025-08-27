@@ -37,6 +37,7 @@ export class DefaultApplicationStartup {
 			.setEnableSendAndReceiveDebug(true)
 			.setEnablePostViaJson(true)
 			.setEnablePostViaMsgPack(true)
+			.setTrustProxy(true)
 			.build();
 
 		let socketAppSettings = SocketAppSettings.Builder()

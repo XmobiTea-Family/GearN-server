@@ -101,6 +101,9 @@ export class HttpApp {
 	}
 
 	public run(): void {
+		if (this.appSettings.getTrustProxy())
+			this.app.enable("trust proxy");
+
 		this.app.use(express.urlencoded({ extended: false }));
 
 		this.app.get("/", (req: express.Request, res: express.Response): any => {

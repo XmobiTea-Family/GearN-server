@@ -839,18 +839,18 @@ function syncModelCodeCSharp(dirName, modelName) {
 }
 
 function mainTypescript() {
-	fixCodeTypescript("authenticate", ["LoginBaseRequestHandler.ts"], "Authenticate");
-	fixCodeTypescript("characterPlayer", ["CharacterPlayerBaseRequestHandler.ts"], "CharacterPlayer");
-	fixCodeTypescript("cloudScript", [], "CloudScript");
-	fixCodeTypescript("content", [], "Content");
+	// syncApiCodeTypescript("authenticate", ["LoginBaseRequestHandler.ts"], "Authenticate");
+	// syncApiCodeTypescript("characterPlayer", ["CharacterPlayerBaseRequestHandler.ts"], "CharacterPlayer");
+	// syncApiCodeTypescript("cloudScript", [], "CloudScript");
+	// syncApiCodeTypescript("content", [], "Content");
 
-	fixCodeTypescript("dashboard", [], "MasterAdmin");
-	fixCodeTypescript("gamePlayer", ["GamePlayerBaseRequestHandler.ts"], "GamePlayer");
-	fixCodeTypescript("group", ["GroupBaseRequestHandler.ts"], "Group");
-	fixCodeTypescript("inventory", ["ItemBaseRequestHandler.ts"], "Inventory");
-	fixCodeTypescript("masterPlayer", ["MasterPlayerBaseRequestHandler.ts"], "MasterPlayer");
-	fixCodeTypescript("multiplayer", ["MultiplayerBaseRequestHandler.ts", "MatchmakingHandler.ts"], "Multiplayer");
-	fixCodeTypescript("storeInventory", ["StoreItemBaseRequestHandler.ts"], "StoreInventory");
+	syncApiCodeTypescript("dashboard", [], "MasterAdmin");
+	// syncApiCodeTypescript("gamePlayer", ["GamePlayerBaseRequestHandler.ts"], "GamePlayer");
+	// syncApiCodeTypescript("group", ["GroupBaseRequestHandler.ts", "GroupMessageItem.ts"], "Group");
+	// syncApiCodeTypescript("inventory", ["ItemBaseRequestHandler.ts"], "Inventory");
+	// syncApiCodeTypescript("masterPlayer", ["MasterPlayerBaseRequestHandler.ts"], "MasterPlayer");
+	// syncApiCodeTypescript("multiplayer", ["MultiplayerBaseRequestHandler.ts"], "Multiplayer");
+	// syncApiCodeTypescript("storeInventory", ["StoreItemBaseRequestHandler.ts"], "StoreInventory");
 
 	// syncModelCodeTypescript("authenticate", "Authenticate");
 	// syncModelCodeTypescript("characterPlayer", "CharacterPlayer");
@@ -865,6 +865,8 @@ function mainTypescript() {
 
 function fixCodeTypescript(dirName, ignoreFileLst, modelName) {
 	let fileDir = __dirname + "/./src/GN-app-api/handler/controller/handler/" + dirName;
+	if (!fs.existsSync(fileDir)) return;
+
 	let allFilePaths = fs.readdirSync(fileDir);
 
 	for (let i = 0; i < allFilePaths.length; i++) {
@@ -884,14 +886,14 @@ function fixCodeTypescript(dirName, ignoreFileLst, modelName) {
 
 			if (lineJ.includes("@GNHashtable") || lineJ.includes("@String") || lineJ.includes("@Number") || lineJ.includes("@GNArray") || lineJ.includes("@Boolean") || lineJ.includes("@DataMember")) {
 				let isOptional = false;
+				let hasMustInt = false;
+				let parameterCode = "";
 
 				let lineK = lineJ;
 
 				let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
 				let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
 				let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
-
-				let fieldNameA = "";
 
 				for (let l = 0; l < lineK3Spls.length; l++) {
 					let lineK4Spls = lineK3Spls[l].split(":");
@@ -904,7 +906,7 @@ function fixCodeTypescript(dirName, ignoreFileLst, modelName) {
 					if (key == "mustInt" && value == "true") hasMustInt = true;
 					else if (key == "isOptional" && value == "true") isOptional = true;
 					else if (key == "code") {
-						fieldNameA = value.split(".")[1];
+						parameterCode = value.split(".")[1];
 					}
 				}
 
@@ -919,10 +921,8 @@ function fixCodeTypescript(dirName, ignoreFileLst, modelName) {
 					let type = lineKNextUseSpls[1];
 					let fieldName = lineKNextUseSpls[0].split("?")[0];
 
-					if (fieldName.startsWith("declare")) continue;
-
-					if (fieldName.split(" ")[fieldName.split(" ").length - 1].toLowerCase() != fieldNameA.toLowerCase()) {
-						console.log(fieldNameA + " " + filePath + " " + dirName);
+					if (fieldName.split(" ")[fieldName.split(" ").length - 1].toLowerCase() != parameterCode.toLowerCase()) {
+						console.log(parameterCode + " " + filePath + " " + dirName);
 					}
 
 					allLines[j] = fieldName + "?:" + type + ";";
@@ -934,8 +934,8 @@ function fixCodeTypescript(dirName, ignoreFileLst, modelName) {
 
 					let fieldName = lineKNextUseSpls[0].split("?")[0];
 
-					if (fieldName.split(" ")[fieldName.split(" ").length - 1].toLowerCase() != fieldNameA.toLowerCase()) {
-						console.log(fieldNameA + " " + filePath + " " + dirName);
+					if (fieldName.split(" ")[fieldName.split(" ").length - 1].toLowerCase() != parameterCode.toLowerCase()) {
+						console.log(parameterCode + " " + filePath + " " + dirName);
 					}
 				}
 			}
@@ -978,7 +978,7 @@ function syncModelCodeTypescript(dirName, modelName) {
 
 				if (lineJ.includes("@GNHashtable") || lineJ.includes("@String") || lineJ.includes("@Number") || lineJ.includes("@GNArray") || lineJ.includes("@Boolean") || lineJ.includes("@DataMember")) {
 					let isOptional = false;
-
+					let hasMustInt = false;
 					let lineK = lineJ;
 
 					let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
@@ -1031,4 +1031,364 @@ function syncModelCodeTypescript(dirName, modelName) {
 	// console.log(clientResponseModelFileStr);
 
 	// fs.readFileSync();
+}
+
+function syncApiCodeTypescript(dirName, ignoreFileLst, requestType) {
+	let finalModels = {
+		requestType: requestType,
+		operations: [],
+		models: [],
+	};
+
+	{
+		let fileDir = __dirname + "/./src/GN-app-api/handler/controller/handler/" + dirName;
+		let allFilePaths = fs.readdirSync(fileDir);
+
+		for (let i = 0; i < allFilePaths.length; i++) {
+			let filePath = allFilePaths[i];
+
+			if (!filePath.includes(".ts")) continue;
+
+			if (ignoreFileLst.indexOf(filePath) != -1) continue;
+
+			let allLines = fs
+				.readFileSync(fileDir + "/" + filePath)
+				.toString()
+				.split("\n");
+
+			let lineOperationCodeIndex = allLines.findIndex((x) => x.includes("public override getCode()")) + 1;
+			let operationCode = allLines[lineOperationCodeIndex].replace("\r", "").replace("\n", "").replace("\t", "").split(" ")[1].replace(";", "").split(".")[1].trim();
+			let thisOperation = finalModels.operations.find((x) => x.operationCode == operationCode);
+			if (thisOperation == null) {
+				thisOperation = {
+					operationCode: operationCode,
+					details: [],
+					responseData: [],
+					description: "",
+				};
+
+				finalModels.operations.push(thisOperation);
+			}
+
+			let isClient = true;
+			let isServer = false;
+			let isAdmin = false;
+
+			for (let j = 0; j < allLines.length - 1; j++) {
+				let lineJ = allLines[j];
+
+				if (lineJ.startsWith("class Server")) {
+					isClient = false;
+					isServer = true;
+					isAdmin = false;
+				} else if (lineJ.startsWith("class Admin")) {
+					isClient = false;
+					isServer = false;
+					isAdmin = true;
+				}
+
+				if (lineJ.includes("@GNHashtable") || lineJ.includes("@String") || lineJ.includes("@Number") || lineJ.includes("@GNArray") || lineJ.includes("@Boolean") || lineJ.includes("@DataMember")) {
+					let gnType = lineJ.includes("@GNHashtable")
+						? "GNHashtable"
+						: lineJ.includes("@String")
+						? "String"
+						: lineJ.includes("@Number")
+						? "Number"
+						: lineJ.includes("@GNArray")
+						? "GNArray"
+						: lineJ.includes("@Boolean")
+						? "Boolean"
+						: lineJ.includes("@DataMember")
+						? "DataMember"
+						: "Other";
+
+					let isOptional = false;
+					let hasMustInt = null;
+					let mustNonNull = null;
+					let minLength = null;
+					let maxLength = null;
+					let minValue = null;
+					let maxValue = null;
+					let elementCls = null;
+					let defaultValue = null;
+
+					let parameterCode = "";
+
+					let lineK = lineJ;
+
+					let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+					let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+					let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
+
+					for (let l = 0; l < lineK3Spls.length; l++) {
+						let lineK4Spls = lineK3Spls[l].split(":");
+
+						if (lineK4Spls.length <= 1) continue;
+
+						let key = lineK4Spls[0].trim();
+						let value = lineK4Spls[1].trim();
+
+						if (key == "mustInt" && value == "true") hasMustInt = true;
+						else if (key == "isOptional" && value == "true") isOptional = true;
+						else if (key == "code") {
+							parameterCode = value.split(".")[1];
+						} else if (key == "mustNonNull" && value == "true") mustNonNull = true;
+						else if (key == "minValue") minValue = parseInt(value);
+						else if (key == "maxValue") maxValue = parseInt(value);
+						else if (key == "minLength") minLength = parseInt(value);
+						else if (key == "maxLength") maxLength = parseInt(value);
+						else if (key == "elementCls") elementCls = value;
+						else if (key == "defaultValue") defaultValue = value;
+					}
+
+					j += 1;
+
+					let lineKNext = allLines[j];
+
+					let type = lineKNext.replace("declare ", "").replace("\r", "").replace("\t", "").replace("\n", "").replace(";", "").replace("declare", "").replace(":", "").split(" ")[2];
+
+					//Array<string>
+					if (lineJ.includes("@GNArray")) {
+						type = type.split("<")[1].replace(">", "");
+					}
+
+					let role = isClient ? "Client" : isServer ? "Server" : isAdmin ? "Admin" : "";
+					let thisDetail = thisOperation.details.find((x) => x.role == role);
+					if (thisDetail == null) {
+						thisDetail = {
+							role: role,
+							requestData: [],
+						};
+
+						thisOperation.details.push(thisDetail);
+					}
+
+					let thisRequestData = thisDetail.requestData.find((x) => x.code == parameterCode);
+
+					if (thisRequestData == null) {
+						thisRequestData = {
+							code: parameterCode,
+							description: "",
+						};
+
+						thisDetail.requestData.push(thisRequestData);
+					}
+
+					thisRequestData.optional = isOptional;
+					thisRequestData.type = type;
+					thisRequestData.gnType = gnType;
+					thisRequestData.defaultValue = defaultValue;
+					thisRequestData.conditions = {
+						mustNonNull: mustNonNull,
+						mustInt: hasMustInt,
+						minLength: minLength,
+						maxLength: maxLength,
+						minValue: minValue,
+						maxValue: maxValue,
+					};
+
+					if (thisRequestData.defaultValue == null) delete thisRequestData.defaultValue;
+					if (thisRequestData.conditions.mustNonNull == null) delete thisRequestData.conditions.mustNonNull;
+					if (thisRequestData.conditions.mustInt == null) delete thisRequestData.conditions.mustInt;
+					if (thisRequestData.conditions.minLength == null) delete thisRequestData.conditions.minLength;
+					if (thisRequestData.conditions.maxLength == null) delete thisRequestData.conditions.maxLength;
+					if (thisRequestData.conditions.minValue == null) delete thisRequestData.conditions.minValue;
+					if (thisRequestData.conditions.maxValue == null) delete thisRequestData.conditions.maxValue;
+				} else if (lineJ.includes("operationResponse.setParameter(")) {
+					let lineK = lineJ;
+
+					let parameterCode = lineK.replace("operationResponse.setParameter(", "").split(",")[0].split(".")[1].trim();
+
+					let thisResponseData = thisOperation.responseData.find((x) => x.code == parameterCode);
+					if (!thisResponseData) {
+						thisResponseData = {
+							code: parameterCode,
+						};
+
+						thisOperation.responseData.push(thisResponseData);
+					}
+
+					if (parameterCode == "ErrorCode") {
+						if (thisResponseData.value == null) thisResponseData.value = [];
+
+						//(ParameterCode.ErrorCode, ErrorCode.Ok);//
+						let errorCode = lineK.replace("operationResponse.setParameter", "").split(",")[1].split(")")[0].trim().split(".")[1];
+						if (!thisResponseData.value.includes(errorCode)) thisResponseData.value.push(errorCode);
+					}
+				}
+			}
+
+			thisOperation.responseData.sort((a, b) => (a.code == "ErrorCode" ? -1 : 1));
+
+			// let str = "";
+			// for (let j = 0; j < allLines.length; j++) {
+			// 	str += allLines[j];
+
+			// 	if (j < allLines.length - 1) str += "\n";
+			// }
+
+			// console.log(str);
+
+			// fs.writeFileSync(fileDir + "/" + filePath, str);
+		}
+	}
+
+	{
+		let fileDir = __dirname + "/./src/GN-app-api/handler/controller/handler/" + dirName + "/model";
+		if (fs.existsSync(fileDir)) {
+			let allFilePaths = fs.readdirSync(fileDir);
+
+			for (let i = 0; i < allFilePaths.length; i++) {
+				let filePath = allFilePaths[i];
+
+				if (!filePath.includes(".ts")) continue;
+
+				if (ignoreFileLst.indexOf(filePath) != -1) continue;
+
+				let allLines = fs
+					.readFileSync(fileDir + "/" + filePath)
+					.toString()
+					.split("\n");
+
+				for (let j = 0; j < allLines.length - 1; j++) {
+					let lineJ = allLines[j];
+
+					if (lineJ.includes("export class ") || lineJ.includes("class ")) {
+						let modelName = lineJ.includes("export class ") ? lineJ.replace("\r", "").replace("\n", "").replace("\t", "").split(" ")[2].trim() : lineJ.replace("\r", "").replace("\n", "").replace("\t", "").split(" ")[1].trim();
+						let thisModel = finalModels.models.find((x) => x.name == modelName);
+						if (thisModel == null) {
+							thisModel = {
+								name: modelName,
+								details: [],
+							};
+
+							finalModels.models.push(thisModel);
+						}
+
+						j += 1;
+						for (let k = j; k < allLines.length - 1; k++) {
+							lineJ = allLines[k];
+
+							if (lineJ.startsWith("}")) {
+								break;
+							}
+
+							if (lineJ.includes("@GNHashtable") || lineJ.includes("@String") || lineJ.includes("@Number") || lineJ.includes("@GNArray") || lineJ.includes("@Boolean") || lineJ.includes("@DataMember")) {
+								let gnType = lineJ.includes("@GNHashtable")
+									? "GNHashtable"
+									: lineJ.includes("@String")
+									? "String"
+									: lineJ.includes("@Number")
+									? "Number"
+									: lineJ.includes("@GNArray")
+									? "GNArray"
+									: lineJ.includes("@Boolean")
+									? "Boolean"
+									: lineJ.includes("@DataMember")
+									? "DataMember"
+									: "Other";
+
+								let isOptional = false;
+								let hasMustInt = null;
+								let mustNonNull = null;
+								let minLength = null;
+								let maxLength = null;
+								let minValue = null;
+								let maxValue = null;
+								let elementCls = null;
+								let defaultValue = null;
+
+								let parameterCode = "";
+
+								let lineK = lineJ;
+
+								let lineKSpls = lineK.split("@"); // [ StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+								let lineK2Spls = lineKSpls[1].split("("); // [ StringDataMember, { code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true }) ]
+								let lineK3Spls = lineK2Spls[1].split("{")[1].split("}")[0].split(","); // [ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true ]
+
+								for (let l = 0; l < lineK3Spls.length; l++) {
+									let lineK4Spls = lineK3Spls[l].split(":");
+
+									if (lineK4Spls.length <= 1) continue;
+
+									let key = lineK4Spls[0].trim();
+									let value = lineK4Spls[1].trim();
+
+									if (key == "mustInt" && value == "true") hasMustInt = true;
+									else if (key == "isOptional" && value == "true") isOptional = true;
+									else if (key == "code") {
+										parameterCode = value.split(".")[1];
+									} else if (key == "mustNonNull" && value == "true") mustNonNull = true;
+									else if (key == "minValue") minValue = parseInt(value);
+									else if (key == "maxValue") maxValue = parseInt(value);
+									else if (key == "minLength") minLength = parseInt(value);
+									else if (key == "maxLength") maxLength = parseInt(value);
+									else if (key == "elementCls") elementCls = value;
+									else if (key == "defaultValue") defaultValue = value;
+								}
+
+								j += 1;
+								k += 1;
+
+								let lineKNext = allLines[k];
+
+								let type = lineKNext.replace("\r", "").replace("\t", "").replace("\n", "").replace(";", "").replace("declare", "").replace(":", "").split(" ")[2];
+
+								if (lineJ.includes("@GNArray")) {
+									type = type.split("<")[1].replace(">", "");
+								}
+
+								let thisDetail = thisModel.details.find((x) => x.code == parameterCode);
+
+								if (thisDetail == null) {
+									thisDetail = {
+										code: parameterCode,
+										description: "",
+									};
+								}
+
+								thisDetail.optional = isOptional;
+								thisDetail.type = type;
+								thisDetail.gnType = gnType;
+								thisDetail.defaultValue = defaultValue;
+								thisDetail.conditions = {
+									mustNonNull: mustNonNull,
+									mustInt: hasMustInt,
+									minLength: minLength,
+									maxLength: maxLength,
+									minValue: minValue,
+									maxValue: maxValue,
+								};
+
+								if (thisDetail.defaultValue == null) delete thisDetail.defaultValue;
+								if (thisDetail.conditions.mustNonNull == null) delete thisDetail.conditions.mustNonNull;
+								if (thisDetail.conditions.mustInt == null) delete thisDetail.conditions.mustInt;
+								if (thisDetail.conditions.minLength == null) delete thisDetail.conditions.minLength;
+								if (thisDetail.conditions.maxLength == null) delete thisDetail.conditions.maxLength;
+								if (thisDetail.conditions.minValue == null) delete thisDetail.conditions.minValue;
+								if (thisDetail.conditions.maxValue == null) delete thisDetail.conditions.maxValue;
+
+								thisModel.details.push(thisDetail);
+							}
+
+							j += 1;
+						}
+					}
+				}
+
+				// let str = "";
+				// for (let j = 0; j < allLines.length; j++) {
+				// 	str += allLines[j];
+
+				// 	if (j < allLines.length - 1) str += "\n";
+				// }
+
+				// console.log(str);
+
+				// fs.writeFileSync(fileDir + "/" + filePath, str);
+			}
+		}
+	}
+
+	fs.writeFileSync("./apiReferences/" + requestType + ".json", JSON.stringify(finalModels, null, 2));
 }

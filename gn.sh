@@ -110,7 +110,8 @@ init_create_GNConfigDebugJson() {
 			"allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"],
 			"enableSendAndReceiveDebug": true,
 			"enablePostViaMsgPack": true,
-			"enablePostViaJson": true
+			"enablePostViaJson": true,
+            "trustProxy": true
 		},
 
 		"socketAppSettings": {
