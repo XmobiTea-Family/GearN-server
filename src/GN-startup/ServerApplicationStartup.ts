@@ -121,8 +121,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		let databaseSettings = DatabaseSettings.Builder()
 			.setConnectionString(gnDatabaseSettings["connectionString"] ?? "mongodb://127.0.0.1:27017/")
 			.setDatabaseName(gnDatabaseSettings["databaseName"] ?? "XmobiTea")
-			.setLogConnectionString(gnDatabaseSettings["logConnectionString"] ?? "mongodb://127.0.0.1:27017/")
-			.setDatabaseName(gnDatabaseSettings["databaseName"] ?? "XmobiTea")
+			.setLogConnectionString(gnDatabaseSettings["logConnectionString"] ?? "")
+			.setDatabaseName(gnDatabaseSettings["databaseName"] ?? "")
 			.setOptions(gnDatabaseSettings["options"] ?? {})
 			.build();
 

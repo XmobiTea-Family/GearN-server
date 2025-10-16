@@ -54,10 +54,10 @@
 			]
 		},
 		"databaseSettings": {
-			"connectionString": "mongodb://gearn_test:wLDxPACDrHB2mjnX@192.168.1.200:27017/gearn_test",
-			"databaseName": "gearn_test",
-			"logConnectionString": "mongodb://gearn_test_log:fKXTZ453a3MAz2az@192.168.1.200:27017/gearn_test_log",
-			"logDatabaseName": "gearn_test_log",
+			"connectionString": "mongodb://127.0.0.1:27017/gearn",
+			"databaseName": "gearn",
+			"logConnectionString": "mongodb://127.0.0.1:27017/gearn_log",
+			"logDatabaseName": "gearn_log",
 			"options": {}
 		},
 		"otherSettings": {

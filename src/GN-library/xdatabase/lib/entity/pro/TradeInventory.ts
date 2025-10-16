@@ -193,16 +193,31 @@ export class TradeInventory extends DataObjectBase {
 		return this.itemStatistics.get(key);
 	}
 
-	public changeItemStatistics(key: string, value: number, tsLastUpdate: number): void {
+	public changeItemStatistics(key: string, amount: number, tsLastUpdate: number): void {
+		const thisItemStatistics = this.itemStatistics.get(key);
 		this.itemStatistics.set(key, {
+			value: (thisItemStatistics != null) ? (thisItemStatistics.value + amount) : amount,
 			tsLastUpdate: tsLastUpdate,
-			value: value
 		});
 
-		this.removeSet(TradeInventory._itemStatistics);
-		this.set(TradeInventory._itemStatistics + DataObjectBase.DOT + key, {
+		const field = TradeInventory._itemStatistics + DataObjectBase.DOT + key;
+		this.removeSet(field);
+		this.inc(field + DataObjectBase.DOT + "value", amount);
+		this.set(field + DataObjectBase.DOT + "tsLastUpdate", tsLastUpdate);
+	}
+
+	public setItemStatistics(key: string, value: number, tsLastUpdate: number): void {
+		this.itemStatistics.set(key, {
+			value: value,
 			tsLastUpdate: tsLastUpdate,
-			value: value
+		});
+
+		const field = TradeInventory._itemStatistics + DataObjectBase.DOT + key;
+		this.removeInc(field + DataObjectBase.DOT + "value");
+		this.removeSet(field + DataObjectBase.DOT + "tsLastUpdate");
+		this.set(field, {
+			value: value,
+			tsLastUpdate: tsLastUpdate,
 		});
 	}
 
@@ -246,7 +261,6 @@ export class TradeInventory extends DataObjectBase {
 			value: value
 		});
 
-		this.removeSet(TradeInventory._prices);
 		this.set(TradeInventory._prices + DataObjectBase.DOT + key, {
 			value: value
 		});

@@ -331,10 +331,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 				let playerStatisticsSettings = new Array<xStatisticsSettings>();
 
 				let removeKeyAscLst = new Array<string>();
-				let removeKeyLst = new Array<string>();
+				let removeKeyLst = removeKeyAscLst;//new Array<string>();
 
 				let addKeyAscLst = new Array<string>();
-				let addKeyLst = new Array<string>();
+				let addKeyLst = addKeyAscLst;//new Array<string>();
 
 				for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
 					let playerStatisticsSetting = masterPlayerSettings.playerStatisticsSettings[i];
@@ -386,7 +386,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 						for (let i = 0; i < removeKeyLst.length; i++) {
 							let key = removeKeyLst[i];
 
-							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+							let indexName = "playerStatistics." + key + ".value_-1";
 							masterPlayerCollection.dropIndex(indexName);
 
 							Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
@@ -396,47 +396,8 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 							let key = addKeyLst[i];
 							let indexDoc = {} as any;
 							indexDoc["playerStatistics." + key + ".value"] = -1;
-							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-							masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-							Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);
-						}
-					}
-				}
-
-				{
-					for (let i = 0; i < addKeyAscLst.length; i++) {
-						let key = addKeyAscLst[i];
-
-						let removeIndexOf = removeKeyAscLst.indexOf(key);
-
-						if (removeIndexOf != -1) {
-							removeKeyAscLst.splice(removeIndexOf, 1);
-
-							addKeyAscLst.splice(i, 1);
-							i -= 1;
-						}
-					}
-
-					if (this.gnServer.isPrimary()) {
-						for (let i = 0; i < removeKeyAscLst.length; i++) {
-							let key = removeKeyAscLst[i];
-
-							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-							masterPlayerCollection.dropIndex(indexName);
-
-							Debug.log("[GearN] [Database] drop index " + indexName + " at " + masterPlayerCollection.collectionName);
-						}
-
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-							let indexDoc = {} as any;
-							indexDoc["playerStatistics." + key + ".value"] = 1;
-							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
-
-							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+							let indexName = "playerStatistics." + key + ".value_-1";
 							masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 							Debug.log("[GearN] [Database] create new index " + indexName + " at " + masterPlayerCollection.collectionName);

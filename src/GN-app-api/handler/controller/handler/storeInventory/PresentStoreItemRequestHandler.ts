@@ -282,14 +282,16 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 						value: storeCurrency.value,
 					});
 
+					let useSetPlayerCurrency = false;
 					if (!characterPlayer.hasPlayerCurrency(storeCurrency.key)) {
+						useSetPlayerCurrency = true;
 
 						let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find(x => x.key == storeCurrency.key);
 						if (playerCurrenciesSettingsItem != null) {
-							characterPlayer.changePlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
+							characterPlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
 						}
 						else {
-							characterPlayer.changePlayerCurrency(storeCurrency.key, 0);
+							characterPlayer.setPlayerCurrency(storeCurrency.key, 0);
 						}
 					}
 
@@ -302,7 +304,13 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					let oldValue = playerCurrency.value;
 					let serverValue = playerCurrency.value + storeCurrency.value;
-					characterPlayer.changePlayerCurrency(storeCurrency.key, serverValue);
+
+					if (useSetPlayerCurrency) {
+						characterPlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+					}
+					else {
+						characterPlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 
@@ -384,14 +392,16 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 						value: storeCurrency.value,
 					});
 
+					let useSetPlayerCurrency = false;
 					if (!gamePlayer.hasPlayerCurrency(storeCurrency.key)) {
+						useSetPlayerCurrency = true;
 
 						let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find(x => x.key == storeCurrency.key);
 						if (playerCurrenciesSettingsItem != null) {
-							gamePlayer.changePlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
+							gamePlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
 						}
 						else {
-							gamePlayer.changePlayerCurrency(storeCurrency.key, 0);
+							gamePlayer.setPlayerCurrency(storeCurrency.key, 0);
 						}
 					}
 
@@ -404,7 +414,13 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					let oldValue = playerCurrency.value;
 					let serverValue = playerCurrency.value + storeCurrency.value;
-					gamePlayer.changePlayerCurrency(storeCurrency.key, serverValue);
+
+					if (useSetPlayerCurrency) {
+						gamePlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+					}
+					else {
+						gamePlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 
@@ -486,14 +502,16 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 						value: storeCurrency.value,
 					});
 
+					let useSetGroupCurrency = false;
 					if (!group.hasGroupCurrency(storeCurrency.key)) {
+						useSetGroupCurrency = true;
 
 						let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == storeCurrency.key);
 						if (groupCurrenciesSettingsItem != null) {
-							group.changeGroupCurrency(storeCurrency.key, groupCurrenciesSettingsItem.initialValue);
+							group.setGroupCurrency(storeCurrency.key, groupCurrenciesSettingsItem.initialValue);
 						}
 						else {
-							group.changeGroupCurrency(storeCurrency.key, 0);
+							group.setGroupCurrency(storeCurrency.key, 0);
 						}
 					}
 
@@ -506,7 +524,13 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					let oldValue = groupCurrency.value;
 					let serverValue = groupCurrency.value + storeCurrency.value;
-					group.changeGroupCurrency(storeCurrency.key, serverValue);
+
+					if (useSetGroupCurrency) {
+						group.setGroupCurrency(storeCurrency.key, serverValue);
+					}
+					else {
+						group.changeGroupCurrency(storeCurrency.key, storeCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 

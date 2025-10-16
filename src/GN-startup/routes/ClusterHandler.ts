@@ -82,8 +82,8 @@ export class ClusterHandler {
 		this.router.use(
 			"/cluster",
 			wrap((req, res, next) => {
-				let pkt = req.header("privateKeyToken");
-				if (!pkt || pkt != this.privateKeyToken) {
+				let privateKeyToken = req.header("pkt");
+				if (!privateKeyToken || privateKeyToken != this.privateKeyToken) {
 					return res.sendStatus(401);
 				}
 
@@ -239,13 +239,14 @@ export class ClusterHandler {
 		for (let i = 0; i < currentPrimaryInstanceInfos.length; i++) {
 			let currentPrimaryInstanceInfo = currentPrimaryInstanceInfos[i];
 
-			if (currentPrimaryInstanceInfo.lostPing > 1) {
+			if (currentPrimaryInstanceInfo.lostPing < 1) {
 				okPrimaryInstanceInfos.push(currentPrimaryInstanceInfo);
 			}
 		}
 
 		if (okPrimaryInstanceInfos.length == 0) {
 			if (!this.instanceInfoStatus.isPrimary) {
+				this.isPrimary = true;
 				this.instanceInfoStatus.isPrimary = true;
 				this.instanceInfoStatus.tsPrimary = xDatetime.getCurrentMilliseconds();
 				this.instanceInfoStatus.currentInstanceIdPrimary = this.instanceId;
@@ -262,7 +263,7 @@ export class ClusterHandler {
 			}
 		}
 		else {
-			okPrimaryInstanceInfos.sort((a, b) => a.tsPrimary - b.tsPrimary);
+			okPrimaryInstanceInfos.sort((a, b) => a.tsPrimary < b.tsPrimary ? -1 : 1);
 
 			let primaryInstanceInfo = okPrimaryInstanceInfos[0];
 
@@ -284,6 +285,7 @@ export class ClusterHandler {
 			// neu dang la primary thi conflict va can phai thong nhat xem ai la primary
 			else {
 				if (this.instanceInfoStatus.tsPrimary > primaryInstanceInfo.tsPrimary) {
+					this.isPrimary = false;
 					this.instanceInfoStatus.isPrimary = false;
 					this.instanceInfoStatus.tsPrimary = 0;
 					this.instanceInfoStatus.currentInstanceIdPrimary = primaryInstanceInfo.instanceId;

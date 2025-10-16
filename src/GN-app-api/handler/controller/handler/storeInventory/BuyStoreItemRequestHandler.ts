@@ -248,18 +248,28 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 			let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 
+			let useSetPlayerCurrencyLst: string[] = [];
+
 			let enoughtCurrency = true;
 			for (let i = 0; i < allPriceCurrencies.length; i++) {
 				let priceCurrency = allPriceCurrencies[i];
 
 				if (!characterPlayer.hasPlayerCurrency(priceCurrency.key)) {
+					if (!useSetPlayerCurrencyLst.includes(priceCurrency.key))
+						useSetPlayerCurrencyLst.push(priceCurrency.key);
 
 					let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find(x => x.key == priceCurrency.key);
 					if (playerCurrenciesSettingsItem != null) {
-						characterPlayer.changePlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
+						characterPlayer.setPlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
 					}
 					else {
-						characterPlayer.changePlayerCurrency(priceCurrency.key, 0);
+						characterPlayer.setPlayerCurrency(priceCurrency.key, 0);
+					}
+				}
+				else {
+					if (allStoreCurrencies.find(x => x.key == priceCurrency.key) != null) {
+						if (!useSetPlayerCurrencyLst.includes(priceCurrency.key))
+							useSetPlayerCurrencyLst.push(priceCurrency.key);
 					}
 				}
 
@@ -298,7 +308,13 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					let oldValue = playerCurrency.value;
 					let serverValue = playerCurrency.value - priceCurrency.value;
-					characterPlayer.changePlayerCurrency(priceCurrency.key, serverValue);
+
+					if (useSetPlayerCurrencyLst.includes(priceCurrency.key)) {
+						characterPlayer.setPlayerCurrency(priceCurrency.key, serverValue);
+					}
+					else {
+						characterPlayer.changePlayerCurrency(priceCurrency.key, -priceCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 
@@ -356,13 +372,15 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 					});
 
 					if (!characterPlayer.hasPlayerCurrency(storeCurrency.key)) {
+						if (!useSetPlayerCurrencyLst.includes(storeCurrency.key))
+							useSetPlayerCurrencyLst.push(storeCurrency.key);
 
 						let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find(x => x.key == storeCurrency.key);
 						if (playerCurrenciesSettingsItem != null) {
-							characterPlayer.changePlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
+							characterPlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
 						}
 						else {
-							characterPlayer.changePlayerCurrency(storeCurrency.key, 0);
+							characterPlayer.setPlayerCurrency(storeCurrency.key, 0);
 						}
 					}
 
@@ -375,7 +393,13 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					let oldValue = playerCurrency.value;
 					let serverValue = playerCurrency.value + storeCurrency.value;
-					characterPlayer.changePlayerCurrency(storeCurrency.key, serverValue);
+
+					if (useSetPlayerCurrencyLst.includes(storeCurrency.key)) {
+						characterPlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+					}
+					else {
+						characterPlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 
@@ -413,18 +437,28 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 			let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
+			let useSetPlayerCurrencyLst: string[] = [];
+
 			let enoughtCurrency = true;
 			for (let i = 0; i < allPriceCurrencies.length; i++) {
 				let priceCurrency = allPriceCurrencies[i];
 
 				if (!gamePlayer.hasPlayerCurrency(priceCurrency.key)) {
+					if (!useSetPlayerCurrencyLst.includes(priceCurrency.key))
+						useSetPlayerCurrencyLst.push(priceCurrency.key);
 
 					let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find(x => x.key == priceCurrency.key);
 					if (playerCurrenciesSettingsItem != null) {
-						gamePlayer.changePlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
+						gamePlayer.setPlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
 					}
 					else {
-						gamePlayer.changePlayerCurrency(priceCurrency.key, 0);
+						gamePlayer.setPlayerCurrency(priceCurrency.key, 0);
+					}
+				}
+				else {
+					if (allStoreCurrencies.find(x => x.key == priceCurrency.key) != null) {
+						if (!useSetPlayerCurrencyLst.includes(priceCurrency.key))
+							useSetPlayerCurrencyLst.push(priceCurrency.key);
 					}
 				}
 
@@ -464,7 +498,13 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					let oldValue = playerCurrency.value;
 					let serverValue = playerCurrency.value - priceCurrency.value;
-					gamePlayer.changePlayerCurrency(priceCurrency.key, serverValue);
+
+					if (useSetPlayerCurrencyLst.includes(priceCurrency.key)) {
+						gamePlayer.setPlayerCurrency(priceCurrency.key, serverValue);
+					}
+					else {
+						gamePlayer.changePlayerCurrency(priceCurrency.key, -priceCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 
@@ -522,13 +562,15 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 					});
 
 					if (!gamePlayer.hasPlayerCurrency(storeCurrency.key)) {
+						if (!useSetPlayerCurrencyLst.includes(storeCurrency.key))
+							useSetPlayerCurrencyLst.push(storeCurrency.key);
 
 						let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find(x => x.key == storeCurrency.key);
 						if (playerCurrenciesSettingsItem != null) {
-							gamePlayer.changePlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
+							gamePlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
 						}
 						else {
-							gamePlayer.changePlayerCurrency(storeCurrency.key, 0);
+							gamePlayer.setPlayerCurrency(storeCurrency.key, 0);
 						}
 					}
 
@@ -541,7 +583,13 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					let oldValue = playerCurrency.value;
 					let serverValue = playerCurrency.value + storeCurrency.value;
-					gamePlayer.changePlayerCurrency(storeCurrency.key, serverValue);
+
+					if (useSetPlayerCurrencyLst.includes(storeCurrency.key)) {
+						gamePlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+					}
+					else {
+						gamePlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 
@@ -579,18 +627,28 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 			let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
+			let useSetGroupCurrencyLst: string[] = [];
+
 			let enoughtCurrency = true;
 			for (let i = 0; i < allPriceCurrencies.length; i++) {
 				let priceCurrency = allPriceCurrencies[i];
 
 				if (!group.hasGroupCurrency(priceCurrency.key)) {
+					if (!useSetGroupCurrencyLst.includes(priceCurrency.key))
+						useSetGroupCurrencyLst.push(priceCurrency.key);
 
 					let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == priceCurrency.key);
 					if (groupCurrenciesSettingsItem != null) {
-						group.changeGroupCurrency(priceCurrency.key, groupCurrenciesSettingsItem.initialValue);
+						group.setGroupCurrency(priceCurrency.key, groupCurrenciesSettingsItem.initialValue);
 					}
 					else {
-						group.changeGroupCurrency(priceCurrency.key, 0);
+						group.setGroupCurrency(priceCurrency.key, 0);
+					}
+				}
+				else {
+					if (allStoreCurrencies.find(x => x.key == priceCurrency.key) != null) {
+						if (!useSetGroupCurrencyLst.includes(priceCurrency.key))
+							useSetGroupCurrencyLst.push(priceCurrency.key);
 					}
 				}
 
@@ -629,7 +687,13 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					let oldValue = groupCurrency.value;
 					let serverValue = groupCurrency.value - priceCurrency.value;
-					group.changeGroupCurrency(priceCurrency.key, serverValue);
+
+					if (useSetGroupCurrencyLst.includes(priceCurrency.key)) {
+						group.setGroupCurrency(priceCurrency.key, serverValue);
+					}
+					else {
+						group.changeGroupCurrency(priceCurrency.key, -priceCurrency.value);
+					}
 
 					let gnGroupCurrency = new GNHashtable();
 
@@ -686,13 +750,16 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 					});
 
 					if (!group.hasGroupCurrency(storeCurrency.key)) {
+						if (!useSetGroupCurrencyLst.includes(storeCurrency.key)) {
+							useSetGroupCurrencyLst.push(storeCurrency.key);
+						}
 
 						let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == storeCurrency.key);
 						if (groupCurrenciesSettingsItem != null) {
-							group.changeGroupCurrency(storeCurrency.key, groupCurrenciesSettingsItem.initialValue);
+							group.setGroupCurrency(storeCurrency.key, groupCurrenciesSettingsItem.initialValue);
 						}
 						else {
-							group.changeGroupCurrency(storeCurrency.key, 0);
+							group.setGroupCurrency(storeCurrency.key, 0);
 						}
 					}
 
@@ -705,7 +772,13 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					let oldValue = groupCurrency.value;
 					let serverValue = groupCurrency.value + storeCurrency.value;
-					group.changeGroupCurrency(storeCurrency.key, serverValue);
+
+					if (useSetGroupCurrencyLst.includes(storeCurrency.key)) {
+						group.setGroupCurrency(storeCurrency.key, serverValue);
+					}
+					else {
+						group.changeGroupCurrency(storeCurrency.key, storeCurrency.value);
+					}
 
 					let gnPlayerCurrency = new GNHashtable();
 

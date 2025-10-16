@@ -159,8 +159,11 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			let gnItemStatistic = new GNHashtable();
 			gnItemStatistic.add(ParameterCode.Key, key);
 
-			if (!inventory.hasItemStatistics(key))
-				inventory.changeItemStatistics(key, itemStatisticsSettingsItem.initialValue, currentMilliseconds);
+			let useSetItemStatistics = false;
+			if (!inventory.hasItemStatistics(key)) {
+				useSetItemStatistics = true;
+				inventory.setItemStatistics(key, itemStatisticsSettingsItem.initialValue, currentMilliseconds);
+			}
 
 			let itemStatistics = inventory.getItemStatistics(key);
 			let oldValue = itemStatistics.value;
@@ -171,14 +174,26 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 				let newValue = value + itemStatistics.value;
 
 				if (itemStatisticsSettingsItem.maximumValue != null) {
-					if (value > itemStatisticsSettingsItem.maximumValue) value = itemStatisticsSettingsItem.maximumValue;
+					if (newValue > itemStatisticsSettingsItem.maximumValue) {
+						useSetItemStatistics = true;
+						newValue = itemStatisticsSettingsItem.maximumValue;
+					}
 				}
 
 				if (itemStatisticsSettingsItem.minimumValue != null) {
-					if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
+					if (newValue < itemStatisticsSettingsItem.minimumValue) {
+						useSetItemStatistics = true;
+						newValue = itemStatisticsSettingsItem.minimumValue;
+					}
 				}
 
-				inventory.changeItemStatistics(key, newValue, currentMilliseconds);
+				if (useSetItemStatistics) {
+					inventory.setItemStatistics(key, newValue, currentMilliseconds);
+				}
+				else {
+					inventory.changeItemStatistics(key, value, currentMilliseconds);
+				}
+
 				gnItemStatistic.add(ParameterCode.Value, newValue);
 
 				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, newValue, request.log);
@@ -194,7 +209,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 						if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
 					}
 
-					inventory.changeItemStatistics(key, value, currentMilliseconds);
+					inventory.setItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
@@ -203,14 +218,14 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					if (itemStatisticsSettingsItem.maximumValue != null) {
 						if (itemStatistics.value > itemStatisticsSettingsItem.maximumValue) {
 							itemStatistics.value = itemStatisticsSettingsItem.maximumValue;
-							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
+							inventory.setItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (itemStatisticsSettingsItem.minimumValue != null) {
 						if (itemStatistics.value < itemStatisticsSettingsItem.minimumValue) {
 							itemStatistics.value = itemStatisticsSettingsItem.minimumValue;
-							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
+							inventory.setItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -229,7 +244,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 						if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
 					}
 
-					inventory.changeItemStatistics(key, value, currentMilliseconds);
+					inventory.setItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
@@ -238,14 +253,14 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					if (itemStatisticsSettingsItem.maximumValue != null) {
 						if (itemStatistics.value > itemStatisticsSettingsItem.maximumValue) {
 							itemStatistics.value = itemStatisticsSettingsItem.maximumValue;
-							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
+							inventory.setItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (itemStatisticsSettingsItem.minimumValue != null) {
 						if (itemStatistics.value < itemStatisticsSettingsItem.minimumValue) {
 							itemStatistics.value = itemStatisticsSettingsItem.minimumValue;
-							inventory.changeItemStatistics(key, itemStatistics.value, currentMilliseconds);
+							inventory.setItemStatistics(key, itemStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -263,7 +278,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					if (value < itemStatisticsSettingsItem.minimumValue) value = itemStatisticsSettingsItem.minimumValue;
 				}
 
-				inventory.changeItemStatistics(key, value, currentMilliseconds);
+				inventory.setItemStatistics(key, value, currentMilliseconds);
 				gnItemStatistic.add(ParameterCode.Value, value);
 
 				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);

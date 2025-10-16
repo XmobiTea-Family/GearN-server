@@ -468,7 +468,7 @@ export class AnalyticsService implements IAnalyticsService {
 		//         },
 		//         {
 		//             $group: {
-		//                 _id: { eventName: "$eventName", E: "$operationResponse.parameters.E" },
+		//                 _id: { eventName: "$eventName", errorCode: "$operationResponse.parameters.errorCode" },
 		//                 count: { $sum: 1 } // Đếm số lần xuất hiện
 		//             }
 		//         },
@@ -477,7 +477,7 @@ export class AnalyticsService implements IAnalyticsService {
 		//                 _id: "$_id.eventName",
 		//                 results: {
 		//                     $push: {
-		//                         errorCode: "$_id.E",
+		//                         errorCode: "$_id.errorCode",
 		//                         count: "$count"
 		//                     }
 		//                 }
@@ -571,7 +571,7 @@ export class AnalyticsService implements IAnalyticsService {
 						this.currentRequestComplete.push(thisCurrentRequestComplete);
 					}
 
-					let errorCode = operationResponse?.parameters?.E;
+					let errorCode = operationResponse?.parameters?.errorCode;
 					if (errorCode) {
 						let thisCurrentRequestCompleteErrorCode = thisCurrentRequestComplete.results.find(x => x.errorCode == errorCode);
 						if (thisCurrentRequestCompleteErrorCode == null) {

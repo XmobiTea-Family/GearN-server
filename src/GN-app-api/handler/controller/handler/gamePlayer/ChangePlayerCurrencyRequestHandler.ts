@@ -170,7 +170,9 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 			let amount = playerCurrencyParam.amount;
 			let serverValue = 0;
 
+			let useSetPlayerCurrency = false;
 			if (!gamePlayer.hasPlayerCurrency(key)) {
+				useSetPlayerCurrency = true;
 				serverValue = initialValue;
 			}
 			else {
@@ -194,7 +196,12 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 
 			gnPlayerCurrencies.add(gnPlayerCurrency);
 
-			gamePlayer.changePlayerCurrency(key, serverValue);
+			if (useSetPlayerCurrency) {
+				gamePlayer.setPlayerCurrency(key, serverValue);
+			}
+			else {
+				gamePlayer.changePlayerCurrency(key, amount);
+			}
 		}
 
 		gamePlayer.saveAsync();

@@ -159,8 +159,11 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 			let gnGroupStatistic = new GNHashtable();
 			gnGroupStatistic.add(ParameterCode.Key, key);
 
-			if (!group.hasGroupStatistics(key))
-				group.changeGroupStatistics(key, groupStatisticsSettingsItem.initialValue, currentMilliseconds);
+			let useSetGroupStatistics = false;
+			if (!group.hasGroupStatistics(key)) {
+				useSetGroupStatistics = true;
+				group.setGroupStatistics(key, groupStatisticsSettingsItem.initialValue, currentMilliseconds);
+			}
 
 			let groupStatistics = group.getGroupStatistics(key);
 			let oldValue = groupStatistics.value;
@@ -171,14 +174,26 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 				let newValue = value + groupStatistics.value;
 
 				if (groupStatisticsSettingsItem.maximumValue != null) {
-					if (value > groupStatisticsSettingsItem.maximumValue) value = groupStatisticsSettingsItem.maximumValue;
+					if (newValue > groupStatisticsSettingsItem.maximumValue) {
+						useSetGroupStatistics = true;
+						newValue = groupStatisticsSettingsItem.maximumValue;
+					}
 				}
 
 				if (groupStatisticsSettingsItem.minimumValue != null) {
-					if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
+					if (newValue < groupStatisticsSettingsItem.minimumValue) {
+						useSetGroupStatistics = true;
+						newValue = groupStatisticsSettingsItem.minimumValue;
+					}
 				}
 
-				group.changeGroupStatistics(key, newValue, currentMilliseconds);
+				if (useSetGroupStatistics) {
+					group.setGroupStatistics(key, newValue, currentMilliseconds);
+				}
+				else {
+					group.changeGroupStatistics(key, value, currentMilliseconds);
+				}
+
 				gnGroupStatistic.add(ParameterCode.Value, newValue);
 
 				this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, newValue, request.log);
@@ -193,7 +208,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 						if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
 					}
 
-					group.changeGroupStatistics(key, value, currentMilliseconds);
+					group.setGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
@@ -202,14 +217,14 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 					if (groupStatisticsSettingsItem.maximumValue != null) {
 						if (groupStatistics.value > groupStatisticsSettingsItem.maximumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.maximumValue;
-							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (groupStatisticsSettingsItem.minimumValue != null) {
 						if (groupStatistics.value < groupStatisticsSettingsItem.minimumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.minimumValue;
-							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -228,7 +243,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 						if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
 					}
 
-					group.changeGroupStatistics(key, value, currentMilliseconds);
+					group.setGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
@@ -237,14 +252,14 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 					if (groupStatisticsSettingsItem.maximumValue != null) {
 						if (groupStatistics.value > groupStatisticsSettingsItem.maximumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.maximumValue;
-							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (groupStatisticsSettingsItem.minimumValue != null) {
 						if (groupStatistics.value < groupStatisticsSettingsItem.minimumValue) {
 							groupStatistics.value = groupStatisticsSettingsItem.minimumValue;
-							group.changeGroupStatistics(key, groupStatistics.value, currentMilliseconds);
+							group.setGroupStatistics(key, groupStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -262,7 +277,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 					if (value < groupStatisticsSettingsItem.minimumValue) value = groupStatisticsSettingsItem.minimumValue;
 				}
 
-				group.changeGroupStatistics(key, value, currentMilliseconds);
+				group.setGroupStatistics(key, value, currentMilliseconds);
 				gnGroupStatistic.add(ParameterCode.Value, value);
 
 				this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);

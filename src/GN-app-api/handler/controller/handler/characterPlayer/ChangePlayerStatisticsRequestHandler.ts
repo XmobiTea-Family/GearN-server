@@ -159,8 +159,11 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 			let gnPlayerStatistic = new GNHashtable();
 			gnPlayerStatistic.add(ParameterCode.Key, key);
 
-			if (!characterPlayer.hasPlayerStatistics(key))
-				characterPlayer.changePlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
+			let useSetPlayerStatistics = false;
+			if (!characterPlayer.hasPlayerStatistics(key)) {
+				useSetPlayerStatistics = true;
+				characterPlayer.setPlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
+			}
 
 			let playerStatistics = characterPlayer.getPlayerStatistics(key);
 			let oldValue = playerStatistics.value;
@@ -171,14 +174,26 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 				let newValue = value + playerStatistics.value;
 
 				if (playerStatisticsSettingsItem.maximumValue != null) {
-					if (value > playerStatisticsSettingsItem.maximumValue) value = playerStatisticsSettingsItem.maximumValue;
+					if (newValue > playerStatisticsSettingsItem.maximumValue) {
+						useSetPlayerStatistics = true;
+						newValue = playerStatisticsSettingsItem.maximumValue;
+					}
 				}
 
 				if (playerStatisticsSettingsItem.minimumValue != null) {
-					if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
+					if (newValue < playerStatisticsSettingsItem.minimumValue) {
+						useSetPlayerStatistics = true;
+						newValue = playerStatisticsSettingsItem.minimumValue;
+					}
 				}
 
-				characterPlayer.changePlayerStatistics(key, newValue, currentMilliseconds);
+				if (useSetPlayerStatistics) {
+					characterPlayer.setPlayerStatistics(key, newValue, currentMilliseconds);
+				}
+				else {
+					characterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+				}
+
 				gnPlayerStatistic.add(ParameterCode.Value, newValue);
 
 				this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, newValue, request.log);
@@ -193,7 +208,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 						if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 					}
 
-					characterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+					characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
@@ -202,14 +217,14 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 					if (playerStatisticsSettingsItem.maximumValue != null) {
 						if (playerStatistics.value > playerStatisticsSettingsItem.maximumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.maximumValue;
-							characterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							characterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (playerStatisticsSettingsItem.minimumValue != null) {
 						if (playerStatistics.value < playerStatisticsSettingsItem.minimumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.minimumValue;
-							characterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							characterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -228,7 +243,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 						if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 					}
 
-					characterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+					characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
@@ -237,14 +252,14 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 					if (playerStatisticsSettingsItem.maximumValue != null) {
 						if (playerStatistics.value > playerStatisticsSettingsItem.maximumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.maximumValue;
-							characterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							characterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (playerStatisticsSettingsItem.minimumValue != null) {
 						if (playerStatistics.value < playerStatisticsSettingsItem.minimumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.minimumValue;
-							characterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							characterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -262,7 +277,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 					if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 				}
 
-				characterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+				characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, value);
 
 				this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);

@@ -122,13 +122,25 @@ export class Group extends DataObjectBase {
 		return this.groupCurrencies.get(key);
 	}
 
-	public changeGroupCurrency(key: string, value: number): void {
+	public changeGroupCurrency(key: string, amount: number): void {
+		const thisGroupCurrency = this.groupCurrencies.get(key);
+		this.groupCurrencies.set(key, {
+			value: thisGroupCurrency != null ? (thisGroupCurrency.value + amount) : amount
+		});
+
+		const field = Group._groupCurrencies + DataObjectBase.DOT + key;
+		this.removeSet(field);
+		this.inc(field + DataObjectBase.DOT + "value", amount);
+	}
+
+	public setGroupCurrency(key: string, value: number): void {
 		this.groupCurrencies.set(key, {
 			value: value
 		});
 
-		this.removeSet(Group._groupCurrencies);
-		this.set(Group._groupCurrencies + DataObjectBase.DOT + key, {
+		const field = Group._groupCurrencies + DataObjectBase.DOT + key;
+		this.removeInc(field + DataObjectBase.DOT + "value");
+		this.set(field, {
 			value: value
 		});
 	}
@@ -198,16 +210,31 @@ export class Group extends DataObjectBase {
 		return this.groupStatistics.get(key);
 	}
 
-	public changeGroupStatistics(key: string, value: number, tsLastUpdate: number): void {
+	public changeGroupStatistics(key: string, amount: number, tsLastUpdate: number): void {
+		const thisGroupStatistics = this.groupStatistics.get(key);
 		this.groupStatistics.set(key, {
+			value: thisGroupStatistics != null ? (thisGroupStatistics.value + amount) : amount,
 			tsLastUpdate: tsLastUpdate,
-			value: value
 		});
 
-		this.removeSet(Group._groupStatistics);
-		this.set(Group._groupStatistics + DataObjectBase.DOT + key, {
+		const field = Group._groupStatistics + DataObjectBase.DOT + key;
+		this.removeSet(field);
+		this.inc(field + DataObjectBase.DOT + "value", amount);
+		this.set(field + DataObjectBase.DOT + "tsLastUpdate", tsLastUpdate);
+	}
+
+	public setGroupStatistics(key: string, value: number, tsLastUpdate: number): void {
+		this.groupStatistics.set(key, {
+			value: value,
 			tsLastUpdate: tsLastUpdate,
-			value: value
+		});
+
+		const field = Group._groupStatistics + DataObjectBase.DOT + key;
+		this.removeInc(field + DataObjectBase.DOT + "value");
+		this.removeSet(field + DataObjectBase.DOT + "tsLastUpdate");
+		this.set(field, {
+			value: value,
+			tsLastUpdate: tsLastUpdate,
 		});
 	}
 

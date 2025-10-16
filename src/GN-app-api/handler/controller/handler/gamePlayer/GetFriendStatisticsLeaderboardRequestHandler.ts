@@ -256,100 +256,136 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 	public static quickSort(key: string, gamePlayers: GamePlayer[], initialValue: number): GamePlayer[] {
 		if (gamePlayers.length < 2) return gamePlayers;
 
-		let pivotIndex = gamePlayers.length - 1;
-		let pivot = gamePlayers[pivotIndex];
+		// let pivotIndex = gamePlayers.length - 1;
+		// let pivot = gamePlayers[pivotIndex];
 
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		// let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		let pivotPlayerStatistic = pivot.getPlayerStatistics(key);
-		if (pivotPlayerStatistic == null) {
-			pivotPlayerStatistic = {
-				tsLastUpdate: currentMilliseconds,
-				value: initialValue
-			}
-		}
+		// let pivotPlayerStatistic = pivot.getPlayerStatistics(key);
+		// if (pivotPlayerStatistic == null) {
+		// 	pivotPlayerStatistic = {
+		// 		tsLastUpdate: currentMilliseconds,
+		// 		value: initialValue
+		// 	}
+		// }
 
-		let left = [];
-		let right = [];
+		// let left = [];
+		// let right = [];
 
-		let currentItem;
-		for (let i = 0; i < pivotIndex; i++) {
-			currentItem = gamePlayers[i];
+		// let currentItem;
+		// for (let i = 0; i < pivotIndex; i++) {
+		// 	currentItem = gamePlayers[i];
 
-			let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
-			if (currentPlayerStatistic == null) {
-				currentPlayerStatistic = {
-					tsLastUpdate: currentMilliseconds,
-					value: initialValue
-				}
-			}
+		// 	let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
+		// 	if (currentPlayerStatistic == null) {
+		// 		currentPlayerStatistic = {
+		// 			tsLastUpdate: currentMilliseconds,
+		// 			value: initialValue
+		// 		}
+		// 	}
 
-			if (currentPlayerStatistic.value < pivotPlayerStatistic.value) {
-				right.push(currentItem);
-			}
-			else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
-				if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
-					right.push(currentItem);
-				}
-				else {
-					left.push(currentItem);
-				}
-			}
-			else {
-				left.push(currentItem);
-			}
-		}
+		// 	if (currentPlayerStatistic.value < pivotPlayerStatistic.value) {
+		// 		right.push(currentItem);
+		// 	}
+		// 	else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
+		// 		if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
+		// 			right.push(currentItem);
+		// 		}
+		// 		else {
+		// 			left.push(currentItem);
+		// 		}
+		// 	}
+		// 	else {
+		// 		left.push(currentItem);
+		// 	}
+		// }
 
-		return [...this.quickSort(key, right, initialValue), pivot, ...this.quickSort(key, left, initialValue)];
+		// return [...this.quickSort(key, right, initialValue), pivot, ...this.quickSort(key, left, initialValue)];
+
+		const currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		return gamePlayers.sort((left, right) => {
+			let leftStat = left.getPlayerStatistics(key);
+			let rightStat = right.getPlayerStatistics(key);
+
+			if (leftStat == null) leftStat = { tsLastUpdate: currentMilliseconds, value: initialValue };
+			if (rightStat == null) rightStat = { tsLastUpdate: currentMilliseconds, value: initialValue };
+
+			if (leftStat.value > rightStat.value) return -1;
+			if (leftStat.value < rightStat.value) return 1;
+
+			// if (leftStat.tsLastUpdate > rightStat.tsLastUpdate) return -1;
+			// if (leftStat.tsLastUpdate < rightStat.tsLastUpdate) return 1;
+
+			return 0;
+		});
 	}
 
 	public static quickSortAsc(key: string, gamePlayers: GamePlayer[], initialValue: number): GamePlayer[] {
 		if (gamePlayers.length < 2) return gamePlayers;
 
-		let pivotIndex = gamePlayers.length - 1;
-		let pivot = gamePlayers[pivotIndex];
+		// let pivotIndex = gamePlayers.length - 1;
+		// let pivot = gamePlayers[pivotIndex];
 
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		// let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		let pivotPlayerStatistic = pivot.getPlayerStatistics(key);
-		if (pivotPlayerStatistic == null) {
-			pivotPlayerStatistic = {
-				tsLastUpdate: currentMilliseconds,
-				value: initialValue
-			}
-		}
+		// let pivotPlayerStatistic = pivot.getPlayerStatistics(key);
+		// if (pivotPlayerStatistic == null) {
+		// 	pivotPlayerStatistic = {
+		// 		tsLastUpdate: currentMilliseconds,
+		// 		value: initialValue
+		// 	}
+		// }
 
-		let left = [];
-		let right = [];
+		// let left = [];
+		// let right = [];
 
-		let currentItem;
-		for (let i = 0; i < pivotIndex; i++) {
-			currentItem = gamePlayers[i];
+		// let currentItem;
+		// for (let i = 0; i < pivotIndex; i++) {
+		// 	currentItem = gamePlayers[i];
 
-			let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
-			if (currentPlayerStatistic == null) {
-				currentPlayerStatistic = {
-					tsLastUpdate: currentMilliseconds,
-					value: initialValue
-				}
-			}
+		// 	let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
+		// 	if (currentPlayerStatistic == null) {
+		// 		currentPlayerStatistic = {
+		// 			tsLastUpdate: currentMilliseconds,
+		// 			value: initialValue
+		// 		}
+		// 	}
 
-			if (currentPlayerStatistic.value > pivotPlayerStatistic.value) {
-				right.push(currentItem);
-			}
-			else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
-				if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
-					right.push(currentItem);
-				}
-				else {
-					left.push(currentItem);
-				}
-			}
-			else {
-				left.push(currentItem);
-			}
-		}
+		// 	if (currentPlayerStatistic.value > pivotPlayerStatistic.value) {
+		// 		right.push(currentItem);
+		// 	}
+		// 	else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
+		// 		if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
+		// 			right.push(currentItem);
+		// 		}
+		// 		else {
+		// 			left.push(currentItem);
+		// 		}
+		// 	}
+		// 	else {
+		// 		left.push(currentItem);
+		// 	}
+		// }
 
-		return [...this.quickSort(key, right, initialValue), pivot, ...this.quickSort(key, left, initialValue)];
+		// return [...this.quickSort(key, right, initialValue), pivot, ...this.quickSort(key, left, initialValue)];
+
+		const currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		return gamePlayers.sort((left, right) => {
+			let leftStat = left.getPlayerStatistics(key);
+			let rightStat = right.getPlayerStatistics(key);
+
+			if (leftStat == null) leftStat = { tsLastUpdate: currentMilliseconds, value: initialValue };
+			if (rightStat == null) rightStat = { tsLastUpdate: currentMilliseconds, value: initialValue };
+
+			if (leftStat.value > rightStat.value) return 1;
+			if (leftStat.value < rightStat.value) return -1;
+
+			// if (leftStat.tsLastUpdate > rightStat.tsLastUpdate) return -1;
+			// if (leftStat.tsLastUpdate < rightStat.tsLastUpdate) return 1;
+
+			return 0;
+		});
 	}
 }

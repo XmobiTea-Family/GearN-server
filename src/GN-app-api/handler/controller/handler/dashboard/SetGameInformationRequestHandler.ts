@@ -528,10 +528,10 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 					let playerStatisticsSettings = new Array<xStatisticsSettings>();
 
 					let removeKeyAscLst = new Array<string>();
-					let removeKeyLst = new Array<string>();
+					let removeKeyLst = removeKeyAscLst;//new Array<string>();
 
 					let addKeyAscLst = new Array<string>();
-					let addKeyLst = new Array<string>();
+					let addKeyLst = addKeyAscLst;//new Array<string>();
 
 					for (let i = 0; i < currentCharacterPlayerSettings.playerStatisticsSettings.length; i++) {
 						let playerStatisticsSetting = currentCharacterPlayerSettings.playerStatisticsSettings[i];
@@ -584,14 +584,14 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 							let key = removeKeyLst[i];
 
 							{
-								let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "playerStatistics." + key + ".value_-1";
 								characterPlayerCollection.dropIndex(indexName);
 
 								Debug.log("[GearN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
 							}
 
 							{
-								let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_-1";
 								characterPlayerCollection.dropIndex(indexName);
 
 								Debug.log("[GearN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
@@ -604,9 +604,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 							{
 								let indexDoc = {} as any;
 								indexDoc["playerStatistics." + key + ".value"] = -1;
-								indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-								let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "playerStatistics." + key + ".value_-1";
 								characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 								Debug.log("[GearN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
@@ -616,69 +615,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 								let indexDoc = {} as any;
 								indexDoc["catalogId"] = 1;
 								indexDoc["playerStatistics." + key + ".value"] = -1;
-								indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-								let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-								characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-								Debug.log("[GearN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
-							}
-						}
-					}
-
-					{
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-
-							let removeIndexOf = removeKeyAscLst.indexOf(key);
-
-							if (removeIndexOf != -1) {
-								removeKeyAscLst.splice(removeIndexOf, 1);
-
-								addKeyAscLst.splice(i, 1);
-								i -= 1;
-							}
-						}
-
-						for (let i = 0; i < removeKeyAscLst.length; i++) {
-							let key = removeKeyAscLst[i];
-
-							{
-								let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-								characterPlayerCollection.dropIndex(indexName);
-
-								Debug.log("[GearN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
-							}
-
-							{
-								let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-								characterPlayerCollection.dropIndex(indexName);
-
-								Debug.log("[GearN] [Database] drop index " + indexName + " at " + characterPlayerCollection.collectionName);
-							}
-						}
-
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-
-							{
-								let indexDoc = {} as any;
-								indexDoc["playerStatistics." + key + ".value"] = 1;
-								indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
-
-								let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-								characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-								Debug.log("[GearN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
-							}
-
-							{
-								let indexDoc = {} as any;
-								indexDoc["catalogId"] = 1;
-								indexDoc["playerStatistics." + key + ".value"] = 1;
-								indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
-
-								let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "catalogId_1_" + "playerStatistics." + key + ".value_-1";
 								characterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 								Debug.log("[GearN] [Database] create new index " + indexName + " at " + characterPlayerCollection.collectionName);
@@ -905,10 +843,10 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 					let playerStatisticsSettings = new Array<xStatisticsSettings>();
 
 					let removeKeyAscLst = new Array<string>();
-					let removeKeyLst = new Array<string>();
+					let removeKeyLst = removeKeyAscLst;//new Array<string>();
 
 					let addKeyAscLst = new Array<string>();
-					let addKeyLst = new Array<string>();
+					let addKeyLst = addKeyAscLst;//new Array<string>();
 
 					for (let i = 0; i < currentGamePlayerSettings.playerStatisticsSettings.length; i++) {
 						let playerStatisticsSetting = currentGamePlayerSettings.playerStatisticsSettings[i];
@@ -960,7 +898,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 						for (let i = 0; i < removeKeyLst.length; i++) {
 							let key = removeKeyLst[i];
 
-							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
+							let indexName = "playerStatistics." + key + ".value_-1";
 							gamePlayerCollection.dropIndex(indexName);
 
 							Debug.log("[GearN] [Database] drop index " + indexName + " at " + gamePlayerCollection.collectionName);
@@ -970,45 +908,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 							let key = addKeyLst[i];
 							let indexDoc = {} as any;
 							indexDoc["playerStatistics." + key + ".value"] = -1;
-							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
-							let indexName = "playerStatistics." + key + ".value_-1_playerStatistics." + key + ".tsLastUpdate_1";
-							gamePlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-							Debug.log("[GearN] [Database] create new index " + indexName + " at " + gamePlayerCollection.collectionName);
-						}
-					}
-
-					{
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-
-							let removeIndexOf = removeKeyAscLst.indexOf(key);
-
-							if (removeIndexOf != -1) {
-								removeKeyAscLst.splice(removeIndexOf, 1);
-
-								addKeyAscLst.splice(i, 1);
-								i -= 1;
-							}
-						}
-
-						for (let i = 0; i < removeKeyAscLst.length; i++) {
-							let key = removeKeyAscLst[i];
-
-							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
-							gamePlayerCollection.dropIndex(indexName);
-
-							Debug.log("[GearN] [Database] drop index " + indexName + " at " + gamePlayerCollection.collectionName);
-						}
-
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-							let indexDoc = {} as any;
-							indexDoc["playerStatistics." + key + ".value"] = 1;
-							indexDoc["playerStatistics." + key + ".tsLastUpdate"] = 1;
-
-							let indexName = "playerStatistics." + key + ".value_1_playerStatistics." + key + ".tsLastUpdate_1";
+							let indexName = "playerStatistics." + key + ".value_-1";
 							gamePlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 							Debug.log("[GearN] [Database] create new index " + indexName + " at " + gamePlayerCollection.collectionName);
@@ -1273,10 +1174,10 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 					let groupStatisticsSettings = new Array<xStatisticsSettings>();
 
 					let removeKeyAscLst = new Array<string>();
-					let removeKeyLst = new Array<string>();
+					let removeKeyLst = removeKeyAscLst;//new Array<string>();
 
 					let addKeyAscLst = new Array<string>();
-					let addKeyLst = new Array<string>();
+					let addKeyLst = addKeyAscLst;//new Array<string>();
 
 					for (let i = 0; i < groupSettings.groupStatisticsSettings.length; i++) {
 						let groupStatisticsSetting = groupSettings.groupStatisticsSettings[i];
@@ -1329,14 +1230,14 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 							let key = removeKeyLst[i];
 
 							{
-								let indexName = "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "groupStatistics." + key + ".value_-1";
 								groupCollection.dropIndex(indexName);
 
 								Debug.log("[GearN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
 							}
 
 							{
-								let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_-1";
 								groupCollection.dropIndex(indexName);
 
 								Debug.log("[GearN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
@@ -1349,9 +1250,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 							{
 								let indexDoc = {} as any;
 								indexDoc["groupStatistics." + key + ".value"] = -1;
-								indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-								let indexName = "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "groupStatistics." + key + ".value_-1";
 								groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 								Debug.log("[GearN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
@@ -1361,69 +1261,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 								let indexDoc = {} as any;
 								indexDoc["catalogId"] = 1;
 								indexDoc["groupStatistics." + key + ".value"] = -1;
-								indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
-								let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_-1_groupStatistics." + key + ".tsLastUpdate_1";
-								groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-								Debug.log("[GearN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
-							}
-						}
-					}
-
-					{
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-
-							let removeIndexOf = removeKeyAscLst.indexOf(key);
-
-							if (removeIndexOf != -1) {
-								removeKeyAscLst.splice(removeIndexOf, 1);
-
-								addKeyAscLst.splice(i, 1);
-								i -= 1;
-							}
-						}
-
-						for (let i = 0; i < removeKeyAscLst.length; i++) {
-							let key = removeKeyAscLst[i];
-
-							{
-								let indexName = "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
-								groupCollection.dropIndex(indexName);
-
-								Debug.log("[GearN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
-							}
-
-							{
-								let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
-								groupCollection.dropIndex(indexName);
-
-								Debug.log("[GearN] [Database] drop index " + indexName + " at " + groupCollection.collectionName);
-							}
-						}
-
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-
-							{
-								let indexDoc = {} as any;
-								indexDoc["groupStatistics." + key + ".value"] = 1;
-								indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
-
-								let indexName = "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
-								groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-								Debug.log("[GearN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
-							}
-
-							{
-								let indexDoc = {} as any;
-								indexDoc["catalogId"] = 1;
-								indexDoc["groupStatistics." + key + ".value"] = 1;
-								indexDoc["groupStatistics." + key + ".tsLastUpdate"] = 1;
-
-								let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_1_groupStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "catalogId_1_" + "groupStatistics." + key + ".value_-1";
 								groupCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 								Debug.log("[GearN] [Database] create new index " + indexName + " at " + groupCollection.collectionName);
@@ -1555,10 +1394,10 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 					let itemStatisticsSettings = new Array<xStatisticsSettings>();
 
 					let removeKeyAscLst = new Array<string>();
-					let removeKeyLst = new Array<string>();
+					let removeKeyLst = removeKeyAscLst;//new Array<string>();
 
 					let addKeyAscLst = new Array<string>();
-					let addKeyLst = new Array<string>();
+					let addKeyLst = addKeyAscLst;//new Array<string>();
 
 					for (let i = 0; i < inventorySettings.itemStatisticsSettings.length; i++) {
 						let itemStatisticsSetting = inventorySettings.itemStatisticsSettings[i];
@@ -1611,14 +1450,14 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 							let key = removeKeyLst[i];
 
 							{
-								let indexName = "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "itemStatistics." + key + ".value_-1";
 								inventoryCollection.dropIndex(indexName);
 
 								Debug.log("[GearN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
 							}
 
 							{
-								let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_-1";
 								inventoryCollection.dropIndex(indexName);
 
 								Debug.log("[GearN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
@@ -1630,9 +1469,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 							{
 								let indexDoc = {} as any;
 								indexDoc["itemStatistics." + key + ".value"] = -1;
-								indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-								let indexName = "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "itemStatistics." + key + ".value_-1";
 								inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 								Debug.log("[GearN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
@@ -1642,69 +1480,8 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 								let indexDoc = {} as any;
 								indexDoc["catalogId"] = 1;
 								indexDoc["itemStatistics." + key + ".value"] = -1;
-								indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-								let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_-1_itemStatistics." + key + ".tsLastUpdate_1";
-								inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-								Debug.log("[GearN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
-							}
-						}
-					}
-
-					{
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-
-							let removeIndexOf = removeKeyAscLst.indexOf(key);
-
-							if (removeIndexOf != -1) {
-								removeKeyAscLst.splice(removeIndexOf, 1);
-
-								addKeyAscLst.splice(i, 1);
-								i -= 1;
-							}
-						}
-
-						for (let i = 0; i < removeKeyAscLst.length; i++) {
-							let key = removeKeyAscLst[i];
-
-							{
-								let indexName = "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
-								inventoryCollection.dropIndex(indexName);
-
-								Debug.log("[GearN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
-							}
-
-							{
-								let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
-								inventoryCollection.dropIndex(indexName);
-
-								Debug.log("[GearN] [Database] drop index " + indexName + " at " + inventoryCollection.collectionName);
-							}
-						}
-
-						for (let i = 0; i < addKeyAscLst.length; i++) {
-							let key = addKeyAscLst[i];
-
-							{
-								let indexDoc = {} as any;
-								indexDoc["itemStatistics." + key + ".value"] = 1;
-								indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
-
-								let indexName = "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
-								inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
-
-								Debug.log("[GearN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);
-							}
-
-							{
-								let indexDoc = {} as any;
-								indexDoc["catalogId"] = 1;
-								indexDoc["itemStatistics." + key + ".value"] = 1;
-								indexDoc["itemStatistics." + key + ".tsLastUpdate"] = 1;
-
-								let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_1_itemStatistics." + key + ".tsLastUpdate_1";
+								let indexName = "catalogId_1_" + "itemStatistics." + key + ".value_-1";
 								inventoryCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
 								Debug.log("[GearN] [Database] create new index " + indexName + " at " + inventoryCollection.collectionName);

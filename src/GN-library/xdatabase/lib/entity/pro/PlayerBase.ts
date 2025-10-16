@@ -118,13 +118,25 @@ export class PlayerBase extends DataObjectBase {
 		return this.playerCurrencies.get(key);
 	}
 
-	public changePlayerCurrency(key: string, value: number): void {
+	public changePlayerCurrency(key: string, amount: number): void {
+		const thisPlayerCurrency = this.playerCurrencies.get(key);
+		this.playerCurrencies.set(key, {
+			value: thisPlayerCurrency != null ? (thisPlayerCurrency.value + amount) : amount,
+		});
+
+		const field = PlayerBase._playerCurrencies + DataObjectBase.DOT + key;
+		this.removeSet(field);
+		this.inc(field + DataObjectBase.DOT + "value", amount);
+	}
+
+	public setPlayerCurrency(key: string, value: number): void {
 		this.playerCurrencies.set(key, {
 			value: value
 		});
 
-		this.removeSet(PlayerBase._playerCurrencies);
-		this.set(PlayerBase._playerCurrencies + DataObjectBase.DOT + key, {
+		const field = PlayerBase._playerCurrencies + DataObjectBase.DOT + key;
+		this.removeInc(field + DataObjectBase.DOT + "value");
+		this.set(field, {
 			value: value
 		});
 	}
@@ -151,14 +163,29 @@ export class PlayerBase extends DataObjectBase {
 		return this.playerStatistics.get(key);
 	}
 
-	public changePlayerStatistics(key: string, value: number, tsLastUpdate: number): void {
+	public changePlayerStatistics(key: string, amount: number, tsLastUpdate: number): void {
+		const thisPlayerStatistics = this.playerStatistics.get(key);
+		this.playerStatistics.set(key, {
+			value: thisPlayerStatistics != null ? (thisPlayerStatistics.value + amount) : amount,
+			tsLastUpdate: tsLastUpdate,
+		});
+
+		const field = PlayerBase._playerStatistics + DataObjectBase.DOT + key;
+		this.removeSet(field);
+		this.inc(field + DataObjectBase.DOT + "value", amount);
+		this.set(field + DataObjectBase.DOT + "tsLastUpdate", tsLastUpdate);
+	}
+
+	public setPlayerStatistics(key: string, value: number, tsLastUpdate: number): void {
 		this.playerStatistics.set(key, {
 			value: value,
 			tsLastUpdate: tsLastUpdate
 		});
 
-		this.removeSet(PlayerBase._playerStatistics);
-		this.set(PlayerBase._playerStatistics + DataObjectBase.DOT + key, {
+		const field = PlayerBase._playerStatistics + DataObjectBase.DOT + key;
+		this.removeInc(field + DataObjectBase.DOT + "value");
+		this.removeSet(field + DataObjectBase.DOT + "tsLastUpdate");
+		this.set(field, {
 			value: value,
 			tsLastUpdate: tsLastUpdate
 		});

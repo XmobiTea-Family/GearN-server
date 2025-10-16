@@ -147,13 +147,13 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == key);
 			if (groupCurrenciesSettingsItem == null) continue;
 
-			let initialValue = groupCurrenciesSettingsItem.initialValue;
-
 			let amount = groupCurrencyParam.amount;
 			let serverValue = 0;
 
+			let useSetGroupCurrency = false;
 			if (!group.hasGroupCurrency(key)) {
-				serverValue = initialValue;
+				useSetGroupCurrency = true;
+				serverValue = groupCurrenciesSettingsItem.initialValue;
 			}
 			else {
 				serverValue = group.getGroupCurrency(key).value;
@@ -172,7 +172,12 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 			gnGroupCurrencies.add(gnGroupCurrency);
 
-			group.changeGroupCurrency(key, serverValue);
+			if (useSetGroupCurrency) {
+				group.setGroupCurrency(key, serverValue);
+			}
+			else {
+				group.changeGroupCurrency(key, amount);
+			}
 		}
 
 		group.saveAsync();

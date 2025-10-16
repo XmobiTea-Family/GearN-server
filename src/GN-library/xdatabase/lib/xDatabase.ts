@@ -283,7 +283,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
-		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let results = await collection.find({}, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
@@ -299,7 +299,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
-		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let results = await collection.find($filter, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
@@ -366,24 +366,24 @@ export class xDatabase {
 		let $filter = {} as any;
 
 		if (direction == -1) {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["playerStatistics." + key + ".value"] = { $gt: score };
-			condition2["playerStatistics." + key + ".value"] = score;
-			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["playerStatistics." + key + ".value"] = { $gt: score };
+			// condition2["playerStatistics." + key + ".value"] = score;
+			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 		else {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["playerStatistics." + key + ".value"] = { $lt: score };
-			condition2["playerStatistics." + key + ".value"] = score;
-			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["playerStatistics." + key + ".value"] = { $lt: score };
+			// condition2["playerStatistics." + key + ".value"] = score;
+			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 
 		return await collection.countDocuments($filter);
@@ -732,7 +732,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
-		$sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
+		// $sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
 
 		let results = await collection.find({}, {
 			projection: this.getFindOptions(gamePlayerFindOptions)
@@ -748,7 +748,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
-		$sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
+		// $sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
 
 		let results = await collection.find($filter, {
 			projection: this.getFindOptions(gamePlayerFindOptions)
@@ -830,24 +830,24 @@ export class xDatabase {
 
 		let $filter = {} as any;
 		if (direction == -1) {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["playerStatistics." + key + ".value"] = { $gt: score };
-			condition2["playerStatistics." + key + ".value"] = score;
-			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["playerStatistics." + key + ".value"] = { $gt: score };
+			// condition2["playerStatistics." + key + ".value"] = score;
+			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 		else {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["playerStatistics." + key + ".value"] = { $lt: score };
-			condition2["playerStatistics." + key + ".value"] = score;
-			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["playerStatistics." + key + ".value"] = { $lt: score };
+			// condition2["playerStatistics." + key + ".value"] = score;
+			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 
 		return await collection.countDocuments($filter);
@@ -1059,7 +1059,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
-		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let $filter = {} as any;
 		if (catalogId) {
@@ -1081,7 +1081,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["playerStatistics." + key + ".value"] = direction;
-		$sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["playerStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let results = await collection.find($filter, {
 			projection: this.getFindOptions(characterPlayerFindOptions)
@@ -1157,24 +1157,24 @@ export class xDatabase {
 		}
 
 		if (direction == -1) {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["playerStatistics." + key + ".value"] = { $gt: score };
-			condition2["playerStatistics." + key + ".value"] = score;
-			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["playerStatistics." + key + ".value"] = { $gt: score };
+			// condition2["playerStatistics." + key + ".value"] = score;
+			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 		else {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["playerStatistics." + key + ".value"] = { $lt: score };
-			condition2["playerStatistics." + key + ".value"] = score;
-			condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["playerStatistics." + key + ".value"] = { $lt: score };
+			// condition2["playerStatistics." + key + ".value"] = score;
+			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 
 		return await collection.countDocuments($filter);
@@ -1395,7 +1395,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["groupStatistics." + key + ".value"] = direction;
-		$sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let $filter = {} as any;
 		if (catalogId) $filter["catalogId"] = catalogId;
@@ -1415,7 +1415,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["groupStatistics." + key + ".value"] = direction;
-		$sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["groupStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let results = await collection.find($filter, {
 			projection: this.getFindOptions(groupFindOptions)
@@ -1475,24 +1475,24 @@ export class xDatabase {
 		if (catalogId) $filter["catalogId"] = catalogId;
 
 		if (direction == -1) {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["groupStatistics." + key + ".value"] = { $gt: score };
-			condition2["groupStatistics." + key + ".value"] = score;
-			condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["groupStatistics." + key + ".value"] = { $gt: score };
+			// condition2["groupStatistics." + key + ".value"] = score;
+			// condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 		else {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["groupStatistics." + key + ".value"] = { $lt: score };
-			condition2["groupStatistics." + key + ".value"] = score;
-			condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["groupStatistics." + key + ".value"] = { $lt: score };
+			// condition2["groupStatistics." + key + ".value"] = score;
+			// condition2["groupStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 
 		return await collection.countDocuments($filter);
@@ -1613,7 +1613,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["itemStatistics." + key + ".value"] = direction;
-		$sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let $filter = {} as any;
 		$filter["catalogId"] = catalogId;
@@ -1633,7 +1633,7 @@ export class xDatabase {
 
 		let $sort = {} as any;
 		$sort["itemStatistics." + key + ".value"] = direction;
-		$sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
+		// $sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let results = await collection.find({}, {
 			projection: this.getFindOptions(inventoryFindOptions)
@@ -1678,24 +1678,24 @@ export class xDatabase {
 		if (catalogId) $filter["catalogId"] = catalogId;
 
 		if (direction == -1) {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["itemStatistics." + key + ".value"] = { $gt: score };
-			condition2["itemStatistics." + key + ".value"] = score;
-			condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["itemStatistics." + key + ".value"] = { $gt: score };
+			// condition2["itemStatistics." + key + ".value"] = score;
+			// condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 		else {
-			let condition1 = {} as any;
-			let condition2 = {} as any;
+			// let condition1 = {} as any;
+			// let condition2 = {} as any;
 
-			condition1["itemStatistics." + key + ".value"] = { $lt: score };
-			condition2["itemStatistics." + key + ".value"] = score;
-			condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
+			$filter["itemStatistics." + key + ".value"] = { $lt: score };
+			// condition2["itemStatistics." + key + ".value"] = score;
+			// condition2["itemStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
 
-			$filter.$or = [condition1, condition2];
+			// $filter.$or = [condition1, condition2];
 		}
 
 		return await collection.countDocuments($filter);

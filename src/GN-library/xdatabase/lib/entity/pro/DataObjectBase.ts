@@ -89,7 +89,6 @@ export class DataObjectBase extends MongoObject {
 	public setCustomData(key: string, value: DataValueType) {
 		this.customDatas.set(key, value);
 
-		this.removeSet(DataObjectBase._customDatas);
 		this.set(DataObjectBase._customDatas + DataObjectBase.DOT + key, value);
 	}
 
@@ -154,7 +153,6 @@ export class DataObjectBase extends MongoObject {
 	public setTag(key: string, value: string): void {
 		this.tags.set(key, value);
 
-		this.removeSet(DataObjectBase._tags);
 		this.set(DataObjectBase._tags + DataObjectBase.DOT + key, value);
 	}
 

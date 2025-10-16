@@ -174,8 +174,11 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 			let gnPlayerStatistic = new GNHashtable();
 			gnPlayerStatistic.add(ParameterCode.Key, key);
 
-			if (!masterPlayer.hasPlayerStatistics(key))
-				masterPlayer.changePlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
+			let useSetPlayerStatistics = false;
+			if (!masterPlayer.hasPlayerStatistics(key)) {
+				useSetPlayerStatistics = true;
+				masterPlayer.setPlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
+			}
 
 			let playerStatistics = masterPlayer.getPlayerStatistics(key);
 			let oldValue = playerStatistics.value;
@@ -186,14 +189,26 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 				let newValue = value + playerStatistics.value;
 
 				if (playerStatisticsSettingsItem.maximumValue != null) {
-					if (value > playerStatisticsSettingsItem.maximumValue) value = playerStatisticsSettingsItem.maximumValue;
+					if (newValue > playerStatisticsSettingsItem.maximumValue) {
+						useSetPlayerStatistics = true;
+						newValue = playerStatisticsSettingsItem.maximumValue;
+					}
 				}
 
 				if (playerStatisticsSettingsItem.minimumValue != null) {
-					if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
+					if (newValue < playerStatisticsSettingsItem.minimumValue) {
+						useSetPlayerStatistics = true;
+						newValue = playerStatisticsSettingsItem.minimumValue;
+					}
 				}
 
-				masterPlayer.changePlayerStatistics(key, newValue, currentMilliseconds);
+				if (useSetPlayerStatistics) {
+					masterPlayer.setPlayerStatistics(key, newValue, currentMilliseconds);
+				}
+				else {
+					masterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+				}
+
 				gnPlayerStatistic.add(ParameterCode.Value, newValue);
 
 				this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, newValue, request.log);
@@ -208,7 +223,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 						if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 					}
 
-					masterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+					masterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
@@ -217,14 +232,14 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 					if (playerStatisticsSettingsItem.maximumValue != null) {
 						if (playerStatistics.value > playerStatisticsSettingsItem.maximumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.maximumValue;
-							masterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							masterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (playerStatisticsSettingsItem.minimumValue != null) {
 						if (playerStatistics.value < playerStatisticsSettingsItem.minimumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.minimumValue;
-							masterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							masterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -243,7 +258,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 						if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 					}
 
-					masterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+					masterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
 					this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
@@ -252,14 +267,14 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 					if (playerStatisticsSettingsItem.maximumValue != null) {
 						if (playerStatistics.value > playerStatisticsSettingsItem.maximumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.maximumValue;
-							masterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							masterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
 					if (playerStatisticsSettingsItem.minimumValue != null) {
 						if (playerStatistics.value < playerStatisticsSettingsItem.minimumValue) {
 							playerStatistics.value = playerStatisticsSettingsItem.minimumValue;
-							masterPlayer.changePlayerStatistics(key, playerStatistics.value, currentMilliseconds);
+							masterPlayer.setPlayerStatistics(key, playerStatistics.value, currentMilliseconds);
 						}
 					}
 
@@ -277,7 +292,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 					if (value < playerStatisticsSettingsItem.minimumValue) value = playerStatisticsSettingsItem.minimumValue;
 				}
 
-				masterPlayer.changePlayerStatistics(key, value, currentMilliseconds);
+				masterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, value);
 
 				this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);

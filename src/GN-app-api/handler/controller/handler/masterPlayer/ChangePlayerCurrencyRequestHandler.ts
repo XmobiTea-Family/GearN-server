@@ -170,7 +170,9 @@ export class ChangePlayerCurrencyRequestHandler extends MasterPlayerBaseRequestH
 			let amount = playerCurrencyParam.amount;
 			let serverValue = 0;
 
+			let useSetPlayerCurrency = false;
 			if (!masterPlayer.hasPlayerCurrency(key)) {
+				useSetPlayerCurrency = true;
 				serverValue = initialValue;
 			}
 			else {
@@ -194,7 +196,12 @@ export class ChangePlayerCurrencyRequestHandler extends MasterPlayerBaseRequestH
 
 			gnPlayerCurrencies.add(gnPlayerCurrency);
 
-			masterPlayer.changePlayerCurrency(key, serverValue);
+			if (useSetPlayerCurrency) {
+				masterPlayer.setPlayerCurrency(key, serverValue);
+			}
+			else {
+				masterPlayer.changePlayerCurrency(key, amount);
+			}
 		}
 
 		masterPlayer.saveAsync();

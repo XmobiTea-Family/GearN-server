@@ -34,6 +34,13 @@ export class MongoObject {
 		this.updateFilter.$inc[field] = value;
 	}
 
+	protected removeInc(field: string) {
+		if (this.updateFilter != null && this.updateFilter.$inc != null) {
+			if (this.updateFilter.$inc[field])
+				delete this.updateFilter.$inc[field];
+		}
+	}
+
 	protected min(field: string, value: any) {
 		if (this.updateFilter == null) this.updateFilter = {};
 		if (this.updateFilter.$min == null) this.updateFilter.$min = {};
