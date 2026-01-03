@@ -126,6 +126,10 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: false,
+			subData: {
+				username: request.username,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByAccount", request, secretInfo, operationRequest, operationResponse);

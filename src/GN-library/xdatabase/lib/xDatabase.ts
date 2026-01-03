@@ -27,11 +27,11 @@ export class xDatabase {
 	private static readonly META: string = "Meta" + xDatabase.DOT;
 	private static readonly SYSTEM: string = "System" + xDatabase.DOT;
 
-	private client: mongoDB.MongoClient;
-	private db: mongoDB.Db;
+	protected client: mongoDB.MongoClient;
+	protected db: mongoDB.Db;
 
-	private logClient: mongoDB.MongoClient;
-	private logDb: mongoDB.Db;
+	protected logClient: mongoDB.MongoClient;
+	protected logDb: mongoDB.Db;
 
 	public getDb(): mongoDB.Db {
 		return this.db;
@@ -57,6 +57,10 @@ export class xDatabase {
 	}
 
 	public run(onMongoRunSuccess?: OnRunSuccess, onMongoRunError?: OnMongoRunError): void {
+		if (this.logClient != null && this.logClient != this.client) {
+			this.logClient.connect();
+		}
+
 		this.client.connect().then(result => {
 			if (onMongoRunSuccess != null) onMongoRunSuccess();
 		}).catch(err => {

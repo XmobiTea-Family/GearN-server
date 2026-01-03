@@ -336,6 +336,9 @@ export { TradeInventory };
 import { UploadFileInfo } from "./GN-library/xdatabase/lib/entity/pro/UploadFileInfo";
 export { UploadFileInfo };
 
+import { FileUploadInfoFindOptions } from "./GN-library/xdatabase/lib/entity/pro/findOptions/FileUploadInfoFindOptions";
+export { FileUploadInfoFindOptions };
+
 import { xDatabase } from "./GN-library/xdatabase/lib/xDatabase";
 export { xDatabase };
 

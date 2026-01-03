@@ -102,7 +102,7 @@ export class HttpAppHandler {
 
 			if (!authToken) {
 				return res.status(200).json({
-					error: "missing authToken in body"
+					error: "missing authToken"
 				});
 			}
 
@@ -138,7 +138,7 @@ export class HttpAppHandler {
 
 			if (!authToken) {
 				return res.status(200).json({
-					error: "missing authToken in body"
+					error: "missing authToken"
 				});
 			}
 

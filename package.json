@@ -1,6 +1,6 @@
 {
   "name": "@xmobitea/gn-server",
-  "version": "2.6.8",
+  "version": "2.6.12",
   "description": "GearN Server by XmobiTea (Pro)",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -9,6 +9,7 @@
     "debug": "node index.js",
     "build": "rm -rf ./dist && webpack --mode production --stats-modules && npm run copyCloudScriptTemplate",
     "build:withoutwebpack": "rm -rf ./dist && tsc",
+    "build:cloudScript": "tsc -p ./src/GN-startup/cloudScript/tsconfig.json",
     "copyCloudScriptTemplate": "node ./syncCodeVer2.js && cp -R ./src/GN-startup/cloudScript ./dist/GN-startup/cloudScript",
     "push": "npm run build && npm publish && git push"
   },
@@ -32,7 +33,7 @@
     "@msgpack/msgpack": "^2.8.0",
     "@socket.io/mongo-adapter": "^0.3.2",
     "@socket.io/mongo-emitter": "^0.2.0",
-    "@xmobitea/gn-typescript-client": "^2.6.9",
+    "@xmobitea/gn-typescript-client": "^2.6.10",
     "axios": "^1.10.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",

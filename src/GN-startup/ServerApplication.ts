@@ -834,7 +834,11 @@ export class ServerApplication extends BuilderBase {
 				},
 				emailSettings: {
 					sendFrom: "",
-					sendGridApiKey: "",
+					secure: false,
+					host: "",
+					port: 0,
+					username: "",
+					password: "",
 				}
 			} as any;
 
@@ -1834,7 +1838,7 @@ export class ServerApplication extends BuilderBase {
 
 					let cacheServiceController: ICacheServiceController;
 					if (isSingleNode) cacheServiceController = new MemoryCacheServiceController();
-					else cacheServiceController = new MongoDbCacheServiceController(this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId));
+					else cacheServiceController = new MongoDbCacheServiceController(this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId), this.gnServer.getDatabase());
 
 					let cacheService = new CacheService(cacheServiceController);
 					this.gnServer.setCacheService(gameId, cacheService);

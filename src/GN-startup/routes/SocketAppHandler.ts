@@ -165,7 +165,11 @@ export class SocketAppHandler {
 
 		let headerIP = this.apiMiddleware.getHeaderIP();
 		if (headerIP != null) {
-			ip = socket.handshake.headers[headerIP] as string;
+			ip = socket.handshake.headers[headerIP.toLowerCase()] as string;
+		}
+
+		if (ip == null) {
+			ip = (socket.handshake.headers["x-forwarded-for"] as string)?.split(',')[0].trim();
 		}
 
 		if (ip == null) {

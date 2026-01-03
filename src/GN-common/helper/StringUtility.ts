@@ -1,18 +1,32 @@
 import { xRandom } from "./../../GN-library/xrandom/lib/xRandom";
 
 export class StringUtility {
-	private static readonly RandomCharacter: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	private static readonly RandomCharacterWithNumber: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	private static readonly RandomCharacter: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+	// 0 all
+	// 1 all uppercase
+	// 2 all lowercase
+	// 3 string uppercase
+	// 4 string lowercase
 	public static generateRandomString(length: number, idTypeCase: number): string {
 		let nameReturn = "";
 
-		while (nameReturn.length < length) {
-			nameReturn += StringUtility.RandomCharacter[xRandom.randomInt(0, StringUtility.RandomCharacter.length)];
-		}
+		if (idTypeCase > 2) {
+			while (nameReturn.length < length) {
+				nameReturn += StringUtility.RandomCharacter[xRandom.randomInt(0, StringUtility.RandomCharacter.length)];
+			}
 
-		if (idTypeCase) {
+			if (idTypeCase == 3) nameReturn = nameReturn.toUpperCase();
+			else if (idTypeCase == 4) nameReturn = nameReturn.toLowerCase();
+		}
+		else {
+			while (nameReturn.length < length) {
+				nameReturn += StringUtility.RandomCharacterWithNumber[xRandom.randomInt(0, StringUtility.RandomCharacterWithNumber.length)];
+			}
+
 			if (idTypeCase == 1) nameReturn = nameReturn.toUpperCase();
-			else nameReturn = nameReturn.toLowerCase();
+			else if (idTypeCase == 2) nameReturn = nameReturn.toLowerCase();
 		}
 
 		return nameReturn;

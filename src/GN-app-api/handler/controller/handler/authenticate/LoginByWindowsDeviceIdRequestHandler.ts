@@ -142,6 +142,10 @@ export class LoginByWindowsDeviceIdRequestHandler extends LoginBaseRequestHandle
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
+			subData: {
+				windowsDeviceId: request.windowsDeviceId,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByWindowsDeviceId", request, secretInfo, operationRequest, operationResponse);

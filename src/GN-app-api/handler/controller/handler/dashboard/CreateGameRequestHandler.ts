@@ -408,7 +408,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 
 			let cacheServiceController: ICacheServiceController;
 			if (isSingleNode) cacheServiceController = new MemoryCacheServiceController();
-			else cacheServiceController = new MongoDbCacheServiceController(this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId));
+			else cacheServiceController = new MongoDbCacheServiceController(this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId), this.gnServer.getDatabase());
 
 			let cacheService = new CacheService(cacheServiceController);
 			this.gnServer.setCacheService(gameId, cacheService);

@@ -196,7 +196,7 @@ export interface IEventCallbackCloudScriptService {
 	): Promise<void>;
 	executeEvent(eventName: string, request: { [k: string]: any }, operationEvent: OperationEvent): Promise<void>;
 	executePre(eventName: string, request: { [k: string]: any }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
-	executeAuthenticate(request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void>;
+	executeAuthenticate(request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any } }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void>;
 	executeVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>;
 	executeSocket(eventName: string, request: { [k: string]: any }): Promise<void>;
 
@@ -753,7 +753,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	public async executeAuthenticate(
-		request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, },
+		request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any } },
 		secretInfo: SecretInfo,
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse

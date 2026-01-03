@@ -345,6 +345,10 @@ export class ApiMiddleware {
 		}
 
 		if (ip == null) {
+			ip = req.header("x-forwarded-for")?.split(',')[0].trim();
+		}
+
+		if (ip == null) {
 			ip = req.ip;
 		}
 

@@ -158,6 +158,10 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
+			subData: {
+				verifyResult: result,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByApple", request, secretInfo, operationRequest, operationResponse);

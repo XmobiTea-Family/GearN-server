@@ -142,6 +142,10 @@ export class LoginByiOSDeviceIdRequestHandler extends LoginBaseRequestHandler {
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
+			subData: {
+				iOSDeviceId: request.iOSDeviceId,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByiOSDeviceId", request, secretInfo, operationRequest, operationResponse);

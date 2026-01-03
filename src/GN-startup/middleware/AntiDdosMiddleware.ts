@@ -149,8 +149,8 @@ export class AntiDdosMiddleware {
 			|| url == "/dashboard/client/createSecretInfo"
 			|| url == "/dashboard/client/setGameInformation"
 			|| url == "/dashboard/client/setEventCallbackCloudScript"
-			|| url == "/content/admin/setContentData/admin"
-			|| url == "/cloudscript/admin/addFunction/admin"
+			|| url == "/content/admin/setContentData"
+			|| url == "/cloudscript/admin/addFunction"
 		) {
 			return ReturnCode.Ok;
 		}

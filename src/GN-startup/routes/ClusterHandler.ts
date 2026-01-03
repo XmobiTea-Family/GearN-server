@@ -108,11 +108,27 @@ export class ClusterHandler {
 		let otherNode = this.allNodes.find(x => x.instanceId != this.instanceId);
 		if (otherNode == null) this.isSingleNode = true;
 
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
 		if (this.isPrimary && otherNode == null) {
 			this.instanceInfoStatus.isPrimary = true;
-			this.instanceInfoStatus.tsPrimary = xDatetime.getCurrentMilliseconds();
+			this.instanceInfoStatus.tsPrimary = currentMilliseconds;
 			this.instanceInfoStatus.currentInstanceIdPrimary = this.instanceId;
 			this.instanceInfoStatus.currentTsPrimary = this.instanceInfoStatus.tsPrimary;
+		}
+
+		for (let i = 0; i < this.allNodes.length; i++) {
+			let thisNode = this.allNodes[i];
+			if (thisNode.instanceId != this.instanceId) {
+				this.instanceInfos.push({
+					instanceId: thisNode.instanceId,
+					currentInstanceIdPrimary: this.isPrimary ? this.instanceId : "",
+					currentTsPrimary: currentMilliseconds,
+					isPrimary: false,
+					lostPing: 0,
+					tsPrimary: currentMilliseconds
+				});
+			}
 		}
 
 		this.clusterRouter.post(

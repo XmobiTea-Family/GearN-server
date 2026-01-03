@@ -142,6 +142,10 @@ export class LoginByLinuxDeviceIdRequestHandler extends LoginBaseRequestHandler 
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
+			subData: {
+				linuxDeviceId: request.linuxDeviceId,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByLinuxDeviceId", request, secretInfo, operationRequest, operationResponse);

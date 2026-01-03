@@ -176,6 +176,12 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
+			subData: {
+				serviceName: request.serviceName,
+				serviceData: request.serviceData,
+				verifyResult: serviceResponse,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByGenericService", request, secretInfo, operationRequest, operationResponse);

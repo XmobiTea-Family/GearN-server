@@ -322,7 +322,7 @@ interface FunctionRequestSystemMatchmaking {
 }
 
 interface FunctionRequestSystemAuthenticate {
-	request: { [k: string]: any };
+	request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any } };
 	secretInfo: SecretInfo;
 	operationRequest: OperationRequest;
 	operationResponse: OperationResponse;
@@ -515,7 +515,13 @@ process?.on("message", async (request: CloudScriptRequest) => {
 				operationRequest: operationRequest,
 				operationResponse: operationResponse,
 				secretInfo: secretInfo,
-				request: request.request,
+				request: {
+					userId: request.request.userId,
+					ipAddress: request.request.ipAddress,
+					isNewUser: request.request.isNewUser,
+					authenticationType: request.request.authenticationType,
+					subData: request.request.subData
+				},
 				log(log: any) {
 					logs.push(JSON.stringify(log));
 				},
@@ -880,7 +886,7 @@ const eventHandlers: Record<string, (request: any, operationEvent: OperationEven
 
 const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void) => Promise<{ success: boolean }>> = {};
 
-const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
+const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
 
 const systemGenericServiceHandlers: Record<string, (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void) => Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>> = {};
 

@@ -142,6 +142,10 @@ export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandle
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: operationResponse.getParameters().getBoolean(ParameterCode.NewlyCreated, false),
+			subData: {
+				androidDeviceId: request.androidDeviceId,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByAndroidDeviceId", request, secretInfo, operationRequest, operationResponse);

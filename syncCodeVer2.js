@@ -52,7 +52,7 @@ docs.push(
 			{
 				eventName: "systemAuthenticate_OnAuthenticateSuccess",
 				script:
-					"\nsystemAuthenticateHandlers.systemAuthenticate_OnAuthenticateSuccess = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+					"\nsystemAuthenticateHandlers.systemAuthenticate_OnAuthenticateSuccess = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
 				hasEdit: false,
 			},
 			{

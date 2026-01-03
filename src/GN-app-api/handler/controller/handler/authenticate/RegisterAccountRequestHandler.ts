@@ -126,6 +126,10 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 			userId: masterPlayer.getUserId(),
 			ipAddress: request.ipAddress,
 			isNewUser: true,
+			subData: {
+				username: request.username,
+				customTags: operationRequest.getParameters().getGNHashtable(ParameterCode.CustomTags)?.toData(),
+			}
 		}, secretInfo, operationRequest, operationResponse);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RegisterAccount", request, secretInfo, operationRequest, operationResponse);

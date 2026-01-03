@@ -113,6 +113,17 @@ export class HttpApp {
 		this.app.post("/", (req: express.Request, res: express.Response): any => {
 			return res.sendStatus(403);
 		});
+		let allowedHeaders = this.appSettings.getAllowedHeaders();
+		allowedHeaders.push(this.sessionId);
+
+		this.app.use(
+			cors({
+				origin: this.appSettings.getOrigin(),
+				allowedHeaders: allowedHeaders,
+				credentials: this.appSettings.getCredentials(),
+				methods: this.appSettings.getMethods(),
+			})
+		);
 
 		this.app.post("/ping", (req: express.Request, res: express.Response): any => {
 			return res.sendStatus(200);
@@ -122,7 +133,7 @@ export class HttpApp {
 			return res.sendStatus(200);
 		});
 
-		this.app.get("/healthCheck", (req: express.Request, res: express.Response): any => {
+		this.app.get("/healthcheck", (req: express.Request, res: express.Response): any => {
 
 			let thisInstance = this.clusterHandler.getInstanceInfoStatus();
 			let otherInstances = this.clusterHandler.getInstanceInfos();
@@ -178,18 +189,6 @@ export class HttpApp {
 				}
 			});
 		});
-
-		let allowedHeaders = this.appSettings.getAllowedHeaders();
-		allowedHeaders.push(this.sessionId);
-
-		this.app.use(
-			cors({
-				origin: this.appSettings.getOrigin(),
-				allowedHeaders: allowedHeaders,
-				credentials: this.appSettings.getCredentials(),
-				methods: this.appSettings.getMethods(),
-			})
-		);
 
 		this.httpAppHandler = new HttpAppHandler();
 		this.httpAppHandler.setRouter(this.app);
