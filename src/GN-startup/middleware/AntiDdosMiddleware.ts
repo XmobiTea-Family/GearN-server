@@ -556,11 +556,11 @@ export class AntiDdosMiddleware {
 	}
 
 	public addPendingRequestViaSocket(socket: Socket, data: any, next: Function) {
-		if (this.currentHttpUploadRequestCount > this.socketMaxPendingRequest) {
+		if (this.currentSocketRequestCount > this.socketMaxPendingRequest) {
 			this.reportDdosCollection.insertOne({
 				returnCode: ReturnCode.MaxRequestReject,
-				currentHttpUploadRequestCount: this.currentHttpUploadRequestCount,
-				type: RequestType.HTTP,
+				currentSocketRequestCount: this.currentSocketRequestCount,
+				type: RequestType.SOCKET,
 				tsCreate: xDatetime.getCurrentMilliseconds()
 			});
 

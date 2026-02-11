@@ -227,6 +227,7 @@ export class ServerApplication extends BuilderBase {
 
 		this.gnServer = this.newGNServer();
 		this.gnServer.setApiMiddleware(this.apiMiddleware);
+		this.apiMiddleware.setGameIds(this.gnServer.getGameIds());
 
 		this.httpApp = this.newHttpApp();
 		this.httpApp.setApiMiddleware(this.apiMiddleware);
@@ -663,13 +664,13 @@ export class ServerApplication extends BuilderBase {
 					let result = {
 						type: "secretInfo",
 						secretKey: "game_" + StringUtility.generateRandomString(15, 0),
-						gameId: "main",
+						gameId: "live",
 						role: <number>SecretRole.Player,
 						permission: permission,
 						creatorId: userId,
 						remove: false,
 						tsExpire: -1,
-						description: "default recommend player secret info for gameId main",
+						description: "default recommend player secret info for gameId live",
 						tsCreate: currentMilliseconds,
 					} as any;
 
@@ -689,7 +690,7 @@ export class ServerApplication extends BuilderBase {
 
 					this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
-					Debug.log("create SecretInfo Permission for player gameId main success.");
+					Debug.log("create SecretInfo Permission for player gameId live success.");
 				}
 			}
 
@@ -925,11 +926,11 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
-			// create main game settings
+			// create live game settings
 			{
-				Debug.log("creating some indexes for gameId main...");
+				Debug.log("creating some indexes for gameId live...");
 
-				let gameId = "main";
+				let gameId = "live";
 				let gameSettingsResult = {
 					type: "gameSettings",
 					gameId: gameId,
@@ -1255,7 +1256,7 @@ export class ServerApplication extends BuilderBase {
 					Debug.log("create some indexes on System." + gameId + ".Cache success.");
 				}
 
-				Debug.log("create some indexes for gameId main success.");
+				Debug.log("create some indexes for gameId live success.");
 			}
 
 			// create dev game settings

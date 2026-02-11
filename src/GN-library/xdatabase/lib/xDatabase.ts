@@ -177,7 +177,7 @@ export class xDatabase {
 	public async loadMasterPlayersWithGoogleAsync(googleIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.google": { $in: { "googleId": googleIds } } }, {
+		let results = await collection.find({ "external.google.googleId": { $in: googleIds } }, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
 		return this.convertToMasterPlayers(results, collection);
@@ -186,7 +186,7 @@ export class xDatabase {
 	public async loadMasterPlayersWithGooglePlayGameServiceAsync(playerIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.googlePlayGameService": { $in: { "playerId": playerIds } } }, {
+		let results = await collection.find({ "external.googlePlayGameService.playerId": { $in: playerIds } }, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
 		return this.convertToMasterPlayers(results, collection);
@@ -195,7 +195,7 @@ export class xDatabase {
 	public async loadMasterPlayersWithGameCenterAsync(playerIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.gameCenter": { $in: { "playerId": playerIds } } }, {
+		let results = await collection.find({ "external.gameCenter.playerId": { $in: playerIds } }, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
 		return this.convertToMasterPlayers(results, collection);
@@ -204,7 +204,7 @@ export class xDatabase {
 	public async loadMasterPlayersWithFacebookAsync(facebookIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.facebook": { $in: { "facebookId": facebookIds } } }, {
+		let results = await collection.find({ "external.facebook.facebookId": { $in: facebookIds } }, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
 		return this.convertToMasterPlayers(results, collection);
@@ -213,7 +213,7 @@ export class xDatabase {
 	public async loadMasterPlayersWithAppleAsync(appleIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 
-		let results = await collection.find({ "external.apple": { $in: { "appleId": appleIds } } }, {
+		let results = await collection.find({ "external.apple.appleId": { $in: appleIds } }, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
 		});
 		return this.convertToMasterPlayers(results, collection);
@@ -222,7 +222,7 @@ export class xDatabase {
 	public async loadMasterPlayersWithGenericServiceAsync(genericService: string, genericIds: string[], masterPlayerFindOptions?: MasterPlayerFindOptions): Promise<Array<MasterPlayer>> {
 		let collection = this.systemCollection("MasterPlayer");
 		let $filter = {} as any;
-		$filter["external.genericService.genericServices." + genericService] = { $in: { "genericId": genericIds } };
+		$filter["external.genericService.genericServices." + genericService + ".genericId"] = { $in: genericIds };
 
 		let results = await collection.find($filter, {
 			projection: this.getFindOptions(masterPlayerFindOptions)
@@ -412,10 +412,8 @@ export class xDatabase {
 
 		let $filter = {} as any;
 
-		$filter["playerCurrencies." + key] = {
-			$gt: {
-				value: score,
-			}
+		$filter["playerCurrencies." + key + ".value"] = {
+			$gt: score,
 		}
 		return await collection.countDocuments($filter);
 	}
@@ -875,10 +873,8 @@ export class xDatabase {
 
 		let $filter = {} as any;
 
-		$filter["playerCurrencies." + key] = {
-			$gt: {
-				value: score,
-			}
+		$filter["playerCurrencies." + key + ".value"] = {
+			$gt: score,
 		}
 		return await collection.countDocuments($filter);
 	}
@@ -1205,10 +1201,8 @@ export class xDatabase {
 
 		let $filter = {} as any;
 
-		$filter["playerCurrencies." + key] = {
-			$gt: {
-				value: score,
-			}
+		$filter["playerCurrencies." + key + ".value"] = {
+			$gt: score,
 		}
 		return await collection.countDocuments($filter);
 	}
@@ -1588,7 +1582,7 @@ export class xDatabase {
 			projection: this.getFindOptions(inventoryFindOptions)
 		});
 
-		if (!result) null;
+		if (!result) return null;
 		return new Inventory(result, collection);
 	}
 
@@ -1599,7 +1593,7 @@ export class xDatabase {
 			projection: this.getFindOptions(inventoryFindOptions)
 		});
 
-		if (!result) null;
+		if (!result) return null;
 		return new Inventory(result, collection);
 	}
 
@@ -1773,7 +1767,7 @@ export class xDatabase {
 	public async insertStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string, ownerType: number) {
 		let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
 
-		collection.updateOne({ storeId: storeId }, {
+		await collection.updateOne({ storeId: storeId }, {
 			$push: {
 				useIds: {
 					id: ownerId,
@@ -1793,7 +1787,7 @@ export class xDatabase {
 			await collection.deleteOne({ storeId: storeId });
 		}
 		else {
-			collection.updateOne({ storeId: storeId }, {
+			await collection.updateOne({ storeId: storeId }, {
 				$pull: {
 					useIds: {
 						id: { $in: ownerIds },

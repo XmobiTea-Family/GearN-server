@@ -49,7 +49,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(operationRequest);
+			return this.newInvalidRequestParameters(request);
 		}
 
 		if (!secretInfo.getPermission().authenticate.loginByAccount.selfEnable) {
@@ -89,7 +89,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		else {
 			let lastIPDetail = masterPlayer.getLastIPDetail();
 			if (lastIPDetail.ipAddress != request.ipAddress) {
-				lastIPDetail.ipAddress = lastIPDetail.ipAddress;
+				lastIPDetail.ipAddress = request.ipAddress;
 
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {

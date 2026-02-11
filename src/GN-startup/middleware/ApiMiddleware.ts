@@ -36,6 +36,8 @@ export class ApiMiddleware {
 
 	private maxCCU: number;
 
+    private gameIds: string[];
+
 	public setSecretInfoCollection(secretInfoCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.secretInfoCollection = secretInfoCollection;
 	}
@@ -63,6 +65,10 @@ export class ApiMiddleware {
 	public getHeaderIP() {
 		return this.headerIP;
 	}
+
+    public setGameIds(gameIds: string[]) {
+        this.gameIds = gameIds;
+    }
 
 	public run() {
 		this.dauLast30Min = [];
@@ -163,7 +169,7 @@ export class ApiMiddleware {
 
 	public verifyAuthToken(authToken: string): jwt.JwtPayload {
 		try {
-			return jwt.verify(authToken, this.privateKeyToken) as jwt.JwtPayload;
+			return jwt.verify(authToken, this.privateKeyToken, { algorithms: ["HS512"] }) as jwt.JwtPayload;
 		}
 		catch (err) {
 			return null;
@@ -449,6 +455,9 @@ export class ApiMiddleware {
 			if (!secretInfo.getGameId()) {
 				let gameId: string = req.header(Commands.RequestGameIdCmd);
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
+                else {
+                    if (!this.gameIds.includes(gameId)) return ReturnCode.SecretInvalid;
+                }
 
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;
@@ -496,7 +505,7 @@ export class ApiMiddleware {
 				socket.data.isAuthenticated = false;
 				socket.data.authInfo = null;
 
-			} else if (authInfo.getTsExpire() < currentMilliseconds) {
+			} else if (authInfo.getTsExpire() != -1 && authInfo.getTsExpire() < currentMilliseconds) {
 				this.authInfoDict.delete(gnToken);
 
 				socket.rooms.forEach(room => socket.leave(room));
@@ -549,6 +558,9 @@ export class ApiMiddleware {
 			if (!secretInfo.getGameId()) {
 				let gameId = socket.data.gameId as string;
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
+                else {
+                    if (!this.gameIds.includes(gameId)) return next(ReturnCode.SecretInvalid);
+                }
 
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;

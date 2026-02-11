@@ -235,7 +235,7 @@ export class AnalyticsService implements IAnalyticsService {
 
 		{
 			this.currentAnalyticsPrice = await this.gnServer.getDatabase().systemCollection("StoreAnalytics").countDocuments({
-				tsLastLogin: {
+				tsCreate: {
 					$gt: millisecondsAt15MinutesAgo
 				}
 			});

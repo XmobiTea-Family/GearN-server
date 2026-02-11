@@ -43,7 +43,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(operationRequest);
+			return this.newInvalidRequestParameters(request);
 		}
 
 		if (!secretInfo.getPermission().masterAdmin.createGame.selfEnable) {
@@ -365,7 +365,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 		if (!gameIds.includes(gameId)) gameIds.push(gameId);
 
 		{
-			let oldCloudScriptService = this.gnServer.getCloudScriptService("main");
+			let oldCloudScriptService = this.gnServer.getCloudScriptService("live");
 			if (oldCloudScriptService != null) {
 				let cloudScriptService = new CloudScriptService();
 

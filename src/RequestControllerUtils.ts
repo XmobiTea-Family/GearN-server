@@ -711,7 +711,6 @@ export class RequestControllerUtils {
 
 			requestController.addHandler(requestTypeValue, new Dashboard_LoginByAdminAccountRequestHandler(gnServer), false);
 			requestController.addHandler(requestTypeValue, new Dashboard_SetMasterGameSettingsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_SetMasterGameSettingsRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new Dashboard_CreateAdminAccountRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new Dashboard_RemoveAdminAccountRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new Dashboard_SetPasswordAdminAccountRequestHandler(gnServer), true);

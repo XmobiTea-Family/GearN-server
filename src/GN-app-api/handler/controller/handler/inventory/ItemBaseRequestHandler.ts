@@ -124,11 +124,11 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().inventory.getAmount.selfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.amount = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getOwner.selfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.owner = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getRemoveStatus.selfEnable) {
@@ -184,11 +184,11 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().inventory.getAmount.otherSelfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.amount = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getOwner.otherSelfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.owner = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getRemoveStatus.otherSelfEnable) {
@@ -244,11 +244,11 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().inventory.getAmount.serverSelfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.amount = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getOwner.serverSelfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.owner = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getRemoveStatus.serverSelfEnable) {
@@ -304,11 +304,11 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().inventory.getAmount.adminSelfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.amount = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getOwner.adminSelfEnable) {
-			infoRequestParam.removeStatus = false;
+			infoRequestParam.owner = false;
 		}
 
 		if (!secretInfo.getPermission().inventory.getRemoveStatus.adminSelfEnable) {

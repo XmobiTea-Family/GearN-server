@@ -485,10 +485,10 @@ init_create_packageJson() {
     "author": "GN-Server-author",
     "license": "ISC",
     "devDependencies": {
-        "typescript": "^5.7.2"
     },
     "dependencies": {
-        "@xmobitea/gn-server": "*"
+        "@xmobitea/gn-server": "*",
+        "typescript": "^5.8.3"
     }
 }' > package.json
     echo 'create package.json file success'

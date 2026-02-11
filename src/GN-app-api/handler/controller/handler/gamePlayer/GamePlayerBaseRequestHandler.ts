@@ -130,7 +130,7 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerGroup.selfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerFriend.selfEnable) {
@@ -201,7 +201,7 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerGroup.otherSelfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerFriend.otherSelfEnable) {
@@ -272,7 +272,7 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerGroup.serverSelfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerFriend.serverSelfEnable) {
@@ -344,7 +344,7 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerGroup.adminSelfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerFriend.adminSelfEnable) {

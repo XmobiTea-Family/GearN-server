@@ -39,7 +39,7 @@ export class RemoveAdminAccountRequestHandler extends RequestHandler {
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(operationRequest);
+			return this.newInvalidRequestParameters(request);
 		}
 
 		if (!secretInfo.getPermission().masterAdmin.removeAdminAccount.selfEnable) {

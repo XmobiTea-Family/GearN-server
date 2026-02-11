@@ -270,6 +270,8 @@ export class HttpAppHandler {
 								return next(err);
 							}
 						});
+
+						return;
 					}
 
 					return next();
