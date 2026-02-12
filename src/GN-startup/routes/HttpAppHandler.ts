@@ -308,7 +308,7 @@ export class HttpAppHandler {
 
 					if (this.enableSendAndReceiveDebug) Debug.log("[HTTP SEND] %O", JSON.stringify(finalData));
 
-					let content = Buffer.from(encode(httpData));
+					let content = Buffer.from(encode(finalData));
 					res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 					res.setHeader(Commands.CONTENT_LENGTH, content.length);
 					return res.send(content);
