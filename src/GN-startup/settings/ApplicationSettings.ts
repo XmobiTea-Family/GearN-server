@@ -208,7 +208,7 @@ class Builder extends BuilderBase implements IBuilder<ApplicationSettings> {
 	 * @param restoreRootPassword Provides the restore root password value used by this operation.
 	 * @returns Returns the current builder instance.
 	 */
-	public setRestoreRootUsername(restoreRootPassword: string): Builder {
+	public setRestoreRootPassword(restoreRootPassword: string): Builder {
 		this.restoreRootPassword = restoreRootPassword;
 		return this;
 	}

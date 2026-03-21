@@ -31,7 +31,7 @@ export class DefaultApplicationStartup {
 			.setPrivateKeyToken("defaultApplicationStartup")
 			.setInitRootUsername("admin")
 			.setInitRootPassword("password")
-			.setRestoreRootUsername("")
+			.setRestoreRootPassword("")
 			.build();
 
 		// Stores the resolved HTTP app settings instance for the current execution flow.

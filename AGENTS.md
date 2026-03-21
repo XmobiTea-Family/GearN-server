@@ -12,6 +12,7 @@ Use this repository as the source of truth for the GearN Server runtime and expo
 - `src/RequestControllerUtils.ts`
 - `src/GN-app-api/handler/controller/RequestController.ts`
 - `src/index.ts`
+- `DOMAIN_RELATIONSHIP.md`
 
 ## Source Of Truth
 

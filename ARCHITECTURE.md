@@ -95,6 +95,8 @@ Each request family maps to one `RequestType`:
 - `CloudScript`
 - `Custom`
 
+The public Unity client SDK mirrors these request family names directly, including `StoreInventory`.
+
 This means a new feature is not active until it is registered in that file.
 
 ## Database Shape At Runtime

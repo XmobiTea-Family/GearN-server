@@ -47,15 +47,15 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 		// Stores the resolved application settings instance for the current execution flow.
 		let applicationSettings = ApplicationSettings.Builder()
 			.setUseSSL(gnApplicationSettings["useSsl"] ?? false)
-			.setCertFilePath(gnApplicationSettings["keyFilePath"] ?? "")
-			.setKeyFilePath(gnApplicationSettings["certFilePath"] ?? "")
+			.setCertFilePath(gnApplicationSettings["certFilePath"] ?? "")
+			.setKeyFilePath(gnApplicationSettings["keyFilePath"] ?? "")
 			.setPort(gnApplicationSettings["port"] ?? 2202)
 			.setSocketPort(gnApplicationSettings["socketPort"] ?? 2901)
 			.setExpiredToken(gnApplicationSettings["expiredTokenInMs"] ?? 172800000)
 			.setPrivateKeyToken(gnApplicationSettings["privateKeyToken"] ?? "privateKeyToken")
 			.setInitRootUsername(gnApplicationSettings["initRootUsername"] ?? "admin")
 			.setInitRootPassword(gnApplicationSettings["initRootPassword"] ?? "password")
-			.setRestoreRootUsername(gnApplicationSettings["restoreRootPassword"] ?? "")
+			.setRestoreRootPassword(gnApplicationSettings["restoreRootPassword"] ?? "")
 			.build();
 
 		// Stores the resolved GearN HTTP app settings instance for the current execution flow.
