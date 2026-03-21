@@ -382,7 +382,7 @@ export class ApiMiddleware {
 			if (tokenPayload == null) {
 				req.isAuthenticated = false;
 
-				return ReturnCode.OperationNotAuthorized;
+				// return ReturnCode.OperationNotAuthorized;
 			}
 			else {
 				let gnToken: string = tokenPayload.gnToken;
