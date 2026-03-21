@@ -17,9 +17,13 @@ import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class CancelMatchmakingTicketOperationRequest extends OperationRequest {
 
+	// Stores the ticket ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.TicketId, minLength: 10, maxLength: 10 })
 	public ticketId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -29,9 +33,13 @@ class CancelMatchmakingTicketOperationRequest extends OperationRequest {
 
 class ServerCancelMatchmakingTicketOperationRequest extends CancelMatchmakingTicketOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10 })
 	public userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -41,6 +49,9 @@ class ServerCancelMatchmakingTicketOperationRequest extends CancelMatchmakingTic
 
 class AdminCancelMatchmakingTicketOperationRequest extends ServerCancelMatchmakingTicketOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,15 +61,29 @@ class AdminCancelMatchmakingTicketOperationRequest extends ServerCancelMatchmaki
 
 export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.CancelMatchmakingTicket;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return CancelMatchmakingTicketOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -75,7 +100,14 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCancelMatchmakingTicketOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -92,7 +124,14 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCancelMatchmakingTicketOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -109,7 +148,15 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, ticketId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_CancelMatchmakingTicket", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -118,6 +165,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the matchmaking ticket collection value used in the current execution flow.
 		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
 		// find tat ca nhung cai ticket nay
@@ -133,6 +181,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			return operationResponse;
 		}
 
+		// Stores the matchmaking ticket value used in the current execution flow.
 		let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
 		if (matchmakingTicket.getStatus() != <number>MatchmakingTicketStatus.WaitingForMembers && matchmakingTicket.getStatus() != <number>MatchmakingTicketStatus.WaitingForMatch) {
@@ -140,6 +189,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			return operationResponse;
 		}
 
+		// Stores the member value used in the current execution flow.
 		let member = matchmakingTicket.getMember(request.userId);
 		if (member == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingPlayerHasNotJoinedTicket);

@@ -4,23 +4,39 @@ import { createHmac } from "crypto";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 export class FacebookService implements IFacebookService {
+	// Stores the graph FBAPI URL value used by this instance.
 	private static readonly graphFBAPIUrl: string = "https://graph.facebook.com";
+	// Stores the graph FBAPI content URL value used by this instance.
 	private static readonly graphFBAPIContentURL: string = "/me?fields=$scopes&access_token=$access_token";//id,name,email,friends
 	private static readonly graphFBAPIVerifyURL: string = "/debug_token?input_token=$input_token&access_token=$access_token";
 
+	// Stores the facebook app ID value used by this instance.
 	private facebookAppId: string;
+	// Stores the facebook app token value used by this instance.
 	private facebookAppToken: string;
+	// Stores the facebook inapp secret value used by this instance.
 	private facebookInappSecret: string;
 
+	/**
+	 * Executes the init workflow.
+	 * @param request Provides the request value used by this operation.
+	 */
 	public init(request: { facebookAppId: string, facebookAppToken: string, facebookInappSecret: string }): void {
 		this.facebookAppId = request.facebookAppId;
 		this.facebookAppToken = request.facebookAppToken;
 		this.facebookInappSecret = request.facebookInappSecret;
 	}
 
+	/**
+	 * Returns the basic info by access token.
+	 * @param accessToken Provides the access token value used by this operation.
+	 * @returns Returns the basic info by access token.
+	 */
 	public async getBasicInfoByAccessToken(accessToken: string): Promise<{ [k: string]: any }> {
+		// Stores the app info by access token result value used in the current execution flow.
 		let appInfoByAccessTokenResult = await this.getAppInfoByAccessToken(accessToken);
 
+		// Stores the answer value used in the current execution flow.
 		let answer: { [k: string]: any } = {};
 
 		if (appInfoByAccessTokenResult.error != null) {
@@ -28,8 +44,10 @@ export class FacebookService implements IFacebookService {
 		}
 		else {
 			try {
+				// Stores the scope str value used in the current execution flow.
 				let scopeStr = answer.scopes.join(",");
 
+				// Stores the result value used in the current execution flow.
 				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIContentURL.replace("$scopes", scopeStr).replace("$access_token", accessToken));
 				answer = result.data;
 			} catch (error) {
@@ -40,7 +58,13 @@ export class FacebookService implements IFacebookService {
 		return answer;
 	}
 
+	/**
+	 * Returns the app info by access token.
+	 * @param accessToken Provides the access token value used by this operation.
+	 * @returns Returns the app info by access token.
+	 */
 	private async getAppInfoByAccessToken(accessToken: string): Promise<{ [k: string]: any }> {
+		// Stores the answer value used in the current execution flow.
 		let answer: { [k: string]: any } = {};
 
 		if (!this.facebookAppToken) {
@@ -48,12 +72,14 @@ export class FacebookService implements IFacebookService {
 		}
 		else {
 			try {
+				// Stores the result value used in the current execution flow.
 				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIVerifyURL.replace("$access_token", this.facebookAppToken).replace("$input_token", accessToken));
 
 				if (result.data.data.error) {
 					answer["error"] = result.data.data.error.message;
 				}
 				else {
+					// Stores the data value used in the current execution flow.
 					let data = result.data.data;
 
 					if (data.expires_at * 1000 < xDatetime.getCurrentMilliseconds()) {
@@ -69,12 +95,22 @@ export class FacebookService implements IFacebookService {
 		return answer;
 	}
 
+	/**
+	 * Validates the receipt.
+	 * @param payload Provides the payload value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async validateReceipt(payload: string): Promise<{
+		// Indicates whether success.
 		success: boolean,
+		// Stores the product ID value used by this contract.
 		productId?: string,
 	}> {
+		// Stores the payload JSON value used in the current execution flow.
 		let payloadJson = JSON.parse(payload);
+		// Stores the signed request value used in the current execution flow.
 		let signedRequest = payloadJson["json"]["signedRequest"];
+		// Stores the app ID value used in the current execution flow.
 		let appId = payloadJson["json"]["appId"];
 		if (this.facebookValidationReceipt(signedRequest)) {
 			// let json = CryptoJS.enc.Base64.parse(signedRequest.split(".")[1]).toString(CryptoJS.enc.Utf8);
@@ -93,11 +129,15 @@ export class FacebookService implements IFacebookService {
 				.replace(/-/g, "+")
 				.replace(/_/g, "/");
 
+			// Stores the payload buffer value used in the current execution flow.
 			const payloadBuffer = Buffer.from(base64Payload, "base64");
+			// Stores the JSON str value used in the current execution flow.
 			const jsonStr = payloadBuffer.toString("utf8");
+			// Stores the gs JSON value used in the current execution flow.
 			const gsJson = JSON.parse(jsonStr);
 
 			if (appId === this.facebookAppId) {
+				// Stores the product ID value used in the current execution flow.
 				const product_id = gsJson["product_id"];
 				return {
 					success: true,
@@ -111,6 +151,11 @@ export class FacebookService implements IFacebookService {
 		};
 	}
 
+	/**
+	 * Executes the facebook validation receipt workflow.
+	 * @param signedRequest Provides the signed request value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	private facebookValidationReceipt(signedRequest: string): boolean {
 		// let [encodedSig, encodedPayload] = signedRequest.split(".");
 
@@ -123,16 +168,21 @@ export class FacebookService implements IFacebookService {
 
 		const [encodedSig, encodedPayload] = signedRequest.split(".");
 
+		// Stores the base 64 sig value used in the current execution flow.
 		const base64Sig = encodedSig
 			.replace(/-/g, "+")
 			.replace(/_/g, "/");
 
+		// Stores the signature buffer value used in the current execution flow.
 		const signatureBuffer = Buffer.from(base64Sig, "base64");
 
+		// Stores the hmac value used in the current execution flow.
 		const hmac = createHmac("sha256", this.facebookInappSecret);
 		hmac.update(encodedPayload);
+		// Stores the data hash buffer value used in the current execution flow.
 		const dataHashBuffer = hmac.digest();
 
+		// Tracks whether valid.
 		const isValid = signatureBuffer.equals(dataHashBuffer);
 		return isValid;
 	};

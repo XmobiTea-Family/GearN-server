@@ -16,12 +16,17 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 
 class GetPlayerInventoryOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	// Stores the item catalog IDs value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.ItemCatalogIds, isOptional: true, elementCls: String })
 	public itemCatalogIds?: Array<string>;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,6 +36,9 @@ class GetPlayerInventoryOperationRequest extends OperationRequest {
 
 class ServerGetPlayerInventoryOperationRequest extends GetPlayerInventoryOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -40,6 +48,9 @@ class ServerGetPlayerInventoryOperationRequest extends GetPlayerInventoryOperati
 
 class AdminGetPlayerInventoryOperationRequest extends ServerGetPlayerInventoryOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,21 +60,36 @@ class AdminGetPlayerInventoryOperationRequest extends ServerGetPlayerInventoryOp
 
 export class GetPlayerInventoryRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetPlayerInventory;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetPlayerInventoryOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.getPlayerInventory);
 
 		if (!allowMethod) {
@@ -76,7 +102,14 @@ export class GetPlayerInventoryRequestHandler extends CharacterPlayerBaseRequest
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerInventoryOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -93,7 +126,14 @@ export class GetPlayerInventoryRequestHandler extends CharacterPlayerBaseRequest
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerInventoryOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -110,7 +150,15 @@ export class GetPlayerInventoryRequestHandler extends CharacterPlayerBaseRequest
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string, itemCatalogIds: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetPlayerInventory", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -119,10 +167,12 @@ export class GetPlayerInventoryRequestHandler extends CharacterPlayerBaseRequest
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerInventories: true,
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
@@ -130,6 +180,7 @@ export class GetPlayerInventoryRequestHandler extends CharacterPlayerBaseRequest
 			return operationResponse;
 		}
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.PlayerInventories, this.generatePlayerInventories(characterPlayer, request.itemCatalogIds));
 

@@ -3,22 +3,37 @@ import jwksClient from "jwks-rsa";
 import { IPlayStationNetworkService } from "./IPlayStationNetworkService";
 
 export class PlayStationNetworkService implements IPlayStationNetworkService {
+	// Stores the MAIN iss value used by this instance.
 	private static readonly MAIN_iss: string = "https://auth.api.sonyentertainmentnetwork.com";
+	// Stores the MAIN iss auth keys value used by this instance.
 	private static readonly MAIN_iss_auth_keys: string = "https://auth.api.sonyentertainmentnetwork.com/2.0/jwks";
 
+	// Stores the client value used by this instance.
 	private client: jwksClient.JwksClient;
+	// Stores the apple client ID value used by this instance.
 	private appleClientId: string;
 
+	/**
+	 * Initializes a new play station network service instance.
+	 */
 	constructor() {
 		this.client = jwksClient({
 			jwksUri: PlayStationNetworkService.MAIN_iss_auth_keys,
 		});
 	}
 
+	/**
+	 * Executes the init workflow.
+	 */
 	public init(): void {
 
 	}
 
+	/**
+	 * Returns the signing key.
+	 * @param header Provides the header value used by this operation.
+	 * @returns Returns the signing key.
+	 */
 	private getSigningKey(header: JwtHeader): Promise<string> {
 		return new Promise((resolve, reject) => {
 			if (!header.kid) {
@@ -30,14 +45,21 @@ export class PlayStationNetworkService implements IPlayStationNetworkService {
 					return reject(err);
 				}
 
+				// Stores the signing key value used in the current execution flow.
 				const signingKey = key.getPublicKey(); // hoặc key.rsaPublicKey
 				resolve(signingKey);
 			});
 		});
 	}
 
+	/**
+	 * Executes the verify token workflow asynchronously.
+	 * @param token Provides the token value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async verifyToken(token: string): Promise<{ [k: string]: any }> {
 		try {
+			// Stores the signing key value used in the current execution flow.
 			const signingKey = await this.getSigningKey(jwt.decode(token, { complete: true })?.header as JwtHeader);
 
 			return new Promise((resolve, reject) =>
@@ -53,8 +75,14 @@ export class PlayStationNetworkService implements IPlayStationNetworkService {
 		}
 	}
 
+	/**
+	 * Executes the verify PSN token workflow asynchronously.
+	 * @param token Provides the token value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async verifyPSNToken(token: string): Promise<{ [k: string]: any }> {
 		try {
+			// Stores the answer value used in the current execution flow.
 			let answer = await this.verifyToken(token);
 
 			if (answer.iss !== PlayStationNetworkService.MAIN_iss) {
@@ -62,6 +90,7 @@ export class PlayStationNetworkService implements IPlayStationNetworkService {
 			} else if (answer.aud !== this.appleClientId) {
 				answer["error"] = "unexpected audience (aud claim): " + answer.aud;
 			} else {
+				// Stores the now value used in the current execution flow.
 				let now = Math.floor(Date.now() / 1000); // thời gian hiện tại (epoch seconds)
 
 				if (answer.exp && answer.exp < now) {

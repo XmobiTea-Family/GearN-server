@@ -34,18 +34,25 @@ import { EmailService } from "./../../../../service/EmailService";
 
 class SetMasterGameSettingsOperationRequest extends OperationRequest {
 
+	// Stores the thirt party settings value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.ThirtPartySettings, isOptional: true })
 	public thirtPartySettings?: ThirtPartyParam;
 
+	// Stores the master player settings value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.MasterPlayerSettings, isOptional: true })
 	public masterPlayerSettings?: MasterPlayerSettingsParam;
 
+	// Stores the email settings value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.EmailSettings, isOptional: true })
 	public emailSettings?: EmailSettingsParam;
 
+	// Stores the push notification settings value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.PushNotificationSettings, isOptional: true })
 	public pushNotificationSettings?: PushNotificationSettingsParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,15 +62,29 @@ class SetMasterGameSettingsOperationRequest extends OperationRequest {
 
 export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetMasterGameSettings;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetMasterGameSettingsOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -82,7 +103,15 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -101,15 +130,23 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		return operationResponse;
 	}
 
+	/**
+	 * Executes the apply settings workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 */
 	private async applySettings(request: { thirtPartySettings: ThirtPartyParam, masterPlayerSettings: MasterPlayerSettingsParam, emailSettings: EmailSettingsParam, pushNotificationSettings: PushNotificationSettingsParam }) {
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ type: "masterGameSettings" });
 
+		// Stores the resolved master game settings instance for the current execution flow.
 		let masterGameSettings = new MasterGameSettings(result, collection);
 
 		if (request.thirtPartySettings != null) {
+			// Stores the resolved thirt party settings instance for the current execution flow.
 			let thirtPartySettings = masterGameSettings.getThirtPartySettings();
 
 			if (request.thirtPartySettings.googleSettings != null) {
@@ -205,21 +242,28 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		}
 
 		if (request.masterPlayerSettings != null) {
+			// Stores the resolved master player settings instance for the current execution flow.
 			let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
+			// Stores the master player collection value used in the current execution flow.
 			let masterPlayerCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
 
 			if (request.masterPlayerSettings.genericServiceSettings != null) {
+				// Stores the resolved generic service settings instance for the current execution flow.
 				let genericServiceSettings = new Array<xGenericServiceSettings>();
 
+				// Stores the remove key lst value used in the current execution flow.
 				let removeKeyLst = new Array<string>();
+				// Stores the add key lst value used in the current execution flow.
 				let addKeyLst = new Array<string>();
 
 				for (let i = 0; i < masterPlayerSettings.genericServiceSettings.length; i++) {
+					// Stores the generic service setting value used in the current execution flow.
 					let genericServiceSetting = masterPlayerSettings.genericServiceSettings[i];
 					removeKeyLst.push(genericServiceSetting.serviceName);
 				}
 
 				for (let i = 0; i < request.masterPlayerSettings.genericServiceSettings.length; i++) {
+					// Stores the generic service setting value used in the current execution flow.
 					let genericServiceSetting = request.masterPlayerSettings.genericServiceSettings[i];
 
 					genericServiceSettings.push({
@@ -232,8 +276,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 				this.gnServer.getGNSettings().getMasterPlayerSettings().genericServiceSettings = genericServiceSettings;
 
 				for (let i = 0; i < addKeyLst.length; i++) {
+					// Stores the key value used in the current execution flow.
 					let key = addKeyLst[i];
 
+					// Stores the remove index of value used in the current execution flow.
 					let removeIndexOf = removeKeyLst.indexOf(key);
 
 					if (removeIndexOf != -1) {
@@ -246,12 +292,15 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
 				if (this.gnServer.isPrimary()) {
 					for (let i = 0; i < removeKeyLst.length; i++) {
+						// Stores the key value used in the current execution flow.
 						let key = removeKeyLst[i];
 						masterPlayerCollection.dropIndex("external.genericService.genericServices." + key + ".serviceId_1");
 					}
 
 					for (let i = 0; i < addKeyLst.length; i++) {
+						// Stores the key value used in the current execution flow.
 						let key = addKeyLst[i];
+						// Stores the index doc value used in the current execution flow.
 						let indexDoc = {} as any;
 						indexDoc["external.genericService.genericServices." + key + ".serviceId"] = 1;
 
@@ -263,17 +312,22 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.masterPlayerSettings.playerCurrenciesSettings != null) {
+				// Stores the resolved player currencies settings instance for the current execution flow.
 				let playerCurrenciesSettings = new Array<xCurrencySettings>();
 
+				// Stores the remove key lst value used in the current execution flow.
 				let removeKeyLst = new Array<string>();
+				// Stores the add key lst value used in the current execution flow.
 				let addKeyLst = new Array<string>();
 
 				for (let i = 0; i < masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+					// Stores the player currencies setting value used in the current execution flow.
 					let playerCurrenciesSetting = masterPlayerSettings.playerCurrenciesSettings[i];
 					removeKeyLst.push(playerCurrenciesSetting.key);
 				}
 
 				for (let i = 0; i < request.masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+					// Stores the player currencies setting value used in the current execution flow.
 					let playerCurrenciesSetting = request.masterPlayerSettings.playerCurrenciesSettings[i];
 
 					playerCurrenciesSettings.push({
@@ -290,8 +344,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 				this.gnServer.getGNSettings().getMasterPlayerSettings().playerCurrenciesSettings = playerCurrenciesSettings;
 
 				for (let i = 0; i < addKeyLst.length; i++) {
+					// Stores the key value used in the current execution flow.
 					let key = addKeyLst[i];
 
+					// Stores the remove index of value used in the current execution flow.
 					let removeIndexOf = removeKeyLst.indexOf(key);
 
 					if (removeIndexOf != -1) {
@@ -304,8 +360,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
 				if (this.gnServer.isPrimary()) {
 					for (let i = 0; i < removeKeyLst.length; i++) {
+						// Stores the key value used in the current execution flow.
 						let key = removeKeyLst[i];
 
+						// Stores the index name value used in the current execution flow.
 						let indexName = "playerCurrencies." + key + ".value_-1";
 						masterPlayerCollection.dropIndex(indexName);
 
@@ -313,10 +371,13 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					}
 
 					for (let i = 0; i < addKeyLst.length; i++) {
+						// Stores the key value used in the current execution flow.
 						let key = addKeyLst[i];
+						// Stores the index doc value used in the current execution flow.
 						let indexDoc = {} as any;
 						indexDoc["playerCurrencies." + key + ".value"] = -1;
 
+						// Stores the index name value used in the current execution flow.
 						let indexName = "playerCurrencies." + key + ".value_-1";
 						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
@@ -328,15 +389,20 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.masterPlayerSettings.playerStatisticsSettings != null) {
+				// Stores the resolved player statistics settings instance for the current execution flow.
 				let playerStatisticsSettings = new Array<xStatisticsSettings>();
 
+				// Stores the remove key asc lst value used in the current execution flow.
 				let removeKeyAscLst = new Array<string>();
+				// Stores the remove key lst value used in the current execution flow.
 				let removeKeyLst = removeKeyAscLst;//new Array<string>();
 
 				let addKeyAscLst = new Array<string>();
+				// Stores the add key lst value used in the current execution flow.
 				let addKeyLst = addKeyAscLst;//new Array<string>();
 
 				for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
+					// Stores the player statistics setting value used in the current execution flow.
 					let playerStatisticsSetting = masterPlayerSettings.playerStatisticsSettings[i];
 
 					if (playerStatisticsSetting.index) {
@@ -347,6 +413,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 				}
 
 				for (let i = 0; i < request.masterPlayerSettings.playerStatisticsSettings.length; i++) {
+					// Stores the player statistics setting value used in the current execution flow.
 					let playerStatisticsSetting = request.masterPlayerSettings.playerStatisticsSettings[i];
 
 					playerStatisticsSettings.push({
@@ -370,8 +437,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
 				{
 					for (let i = 0; i < addKeyLst.length; i++) {
+						// Stores the key value used in the current execution flow.
 						let key = addKeyLst[i];
 
+						// Stores the remove index of value used in the current execution flow.
 						let removeIndexOf = removeKeyLst.indexOf(key);
 
 						if (removeIndexOf != -1) {
@@ -384,8 +453,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
 					if (this.gnServer.isPrimary()) {
 						for (let i = 0; i < removeKeyLst.length; i++) {
+							// Stores the key value used in the current execution flow.
 							let key = removeKeyLst[i];
 
+							// Stores the index name value used in the current execution flow.
 							let indexName = "playerStatistics." + key + ".value_-1";
 							masterPlayerCollection.dropIndex(indexName);
 
@@ -393,10 +464,13 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 						}
 
 						for (let i = 0; i < addKeyLst.length; i++) {
+							// Stores the key value used in the current execution flow.
 							let key = addKeyLst[i];
+							// Stores the index doc value used in the current execution flow.
 							let indexDoc = {} as any;
 							indexDoc["playerStatistics." + key + ".value"] = -1;
 
+							// Stores the index name value used in the current execution flow.
 							let indexName = "playerStatistics." + key + ".value_-1";
 							masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
@@ -409,9 +483,11 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.masterPlayerSettings.playerDatasSettings != null) {
+				// Stores the resolved player datas settings instance for the current execution flow.
 				let playerDatasSettings = new Array<xDataSettings>();
 
 				for (let i = 0; i < request.masterPlayerSettings.playerDatasSettings.length; i++) {
+					// Stores the player datas setting value used in the current execution flow.
 					let playerDatasSetting = request.masterPlayerSettings.playerDatasSettings[i];
 
 					playerDatasSettings.push({
@@ -426,9 +502,11 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.masterPlayerSettings.customDatasSettings != null) {
+				// Stores the resolved player datas settings instance for the current execution flow.
 				let playerDatasSettings = new Array<xDataSettings>();
 
 				for (let i = 0; i < request.masterPlayerSettings.customDatasSettings.length; i++) {
+					// Stores the custom datas setting value used in the current execution flow.
 					let customDatasSetting = request.masterPlayerSettings.customDatasSettings[i];
 
 					playerDatasSettings.push({
@@ -443,17 +521,22 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.masterPlayerSettings.tagsSettings != null) {
+				// Stores the resolved tags settings instance for the current execution flow.
 				let tagsSettings = new Array<xTagSettings>();
 
+				// Stores the remove key lst value used in the current execution flow.
 				let removeKeyLst = new Array<string>();
+				// Stores the add key lst value used in the current execution flow.
 				let addKeyLst = new Array<string>();
 
 				for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
+					// Stores the tags setting value used in the current execution flow.
 					let tagsSetting = masterPlayerSettings.tagsSettings[i];
 					removeKeyLst.push(tagsSetting.key);
 				}
 
 				for (let i = 0; i < request.masterPlayerSettings.tagsSettings.length; i++) {
+					// Stores the tags setting value used in the current execution flow.
 					let tagsSetting = request.masterPlayerSettings.tagsSettings[i];
 
 					tagsSettings.push({
@@ -471,8 +554,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 				this.gnServer.getGNSettings().getMasterPlayerSettings().tagsSettings = tagsSettings;
 
 				for (let i = 0; i < addKeyLst.length; i++) {
+					// Stores the key value used in the current execution flow.
 					let key = addKeyLst[i];
 
+					// Stores the remove index of value used in the current execution flow.
 					let removeIndexOf = removeKeyLst.indexOf(key);
 
 					if (removeIndexOf != -1) {
@@ -485,8 +570,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
 				if (this.gnServer.isPrimary()) {
 					for (let i = 0; i < removeKeyLst.length; i++) {
+						// Stores the key value used in the current execution flow.
 						let key = removeKeyLst[i];
 
+						// Stores the index name value used in the current execution flow.
 						let indexName = "tags." + key + "_1";
 						masterPlayerCollection.dropIndex(indexName);
 
@@ -494,10 +581,13 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 					}
 
 					for (let i = 0; i < addKeyLst.length; i++) {
+						// Stores the key value used in the current execution flow.
 						let key = addKeyLst[i];
+						// Stores the index doc value used in the current execution flow.
 						let indexDoc = {} as any;
 						indexDoc["tags." + key] = 1;
 
+						// Stores the index name value used in the current execution flow.
 						let indexName = "tags." + key + "_1";
 						masterPlayerCollection.createIndex(indexDoc, { background: true, sparse: true, name: indexName });
 
@@ -512,6 +602,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		}
 
 		if (request.emailSettings != null) {
+			// Stores the resolved email settings instance for the current execution flow.
 			let emailSettings = masterGameSettings.getEmailSettings();
 
 			if (request.emailSettings.sendFrom) emailSettings.sendFrom = request.emailSettings.sendFrom;
@@ -528,6 +619,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		}
 
 		if (request.pushNotificationSettings != null) {
+			// Stores the resolved push notification settings instance for the current execution flow.
 			let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
 
 			if (request.pushNotificationSettings.projectId) pushNotificationSettings.projectId = request.pushNotificationSettings.projectId;
@@ -543,7 +635,11 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		masterGameSettings.saveAsync();
 	}
 
+	/**
+	 * Executes the init workflow.
+	 */
 	protected override init(): void {
+		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 		this.gnServer.getHttpApp().getClusterHandler().onEvent("dashboard_SetMasterGameSettings", data => {
 			thiz.applySettings(data);

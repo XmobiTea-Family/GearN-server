@@ -16,12 +16,17 @@ import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class GetPlayerCharacterOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the character catalog IDs value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.CharacterCatalogIds, isOptional: true, elementCls: String })
 	public characterCatalogIds?: Array<string>;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,9 +36,13 @@ class GetPlayerCharacterOperationRequest extends OperationRequest {
 
 class ServerGetPlayerCharacterOperationRequest extends GetPlayerCharacterOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +52,9 @@ class ServerGetPlayerCharacterOperationRequest extends GetPlayerCharacterOperati
 
 class AdminGetPlayerCharacterOperationRequest extends ServerGetPlayerCharacterOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,15 +64,29 @@ class AdminGetPlayerCharacterOperationRequest extends ServerGetPlayerCharacterOp
 
 export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetPlayerCharacter;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetPlayerCharacterOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -91,7 +117,14 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerCharacterOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -108,7 +141,14 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerCharacterOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -125,7 +165,15 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, characterCatalogIds: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayerCharacter", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -134,10 +182,12 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerCharacters: true,
 		}
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
@@ -145,6 +195,7 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 			return operationResponse;
 		}
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.PlayerCharacters, this.generatePlayerCharacters(gamePlayer, request.characterCatalogIds));
 

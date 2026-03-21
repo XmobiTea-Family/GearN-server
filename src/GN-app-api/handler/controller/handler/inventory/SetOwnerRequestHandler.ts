@@ -20,15 +20,21 @@ import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/enti
 
 class SetOwnerOperationRequest extends OperationRequest {
 
+	// Stores the item ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public itemId: string;
 
+	// Stores the new owner ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.NewOwnerId, minLength: 10, maxLength: 12, mustNonNull: true })
 	public newOwnerId: string;
 
+	// Stores the new owner type value used by this instance.
 	@NumberDataMember({ code: ParameterCode.NewOwnerType, mustInt: true })
 	public newOwnerType: number;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -38,6 +44,9 @@ class SetOwnerOperationRequest extends OperationRequest {
 
 class ServerSetOwnerOperationRequest extends SetOwnerOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -47,6 +56,9 @@ class ServerSetOwnerOperationRequest extends SetOwnerOperationRequest {
 
 class AdminSetOwnerOperationRequest extends ServerSetOwnerOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -56,21 +68,36 @@ class AdminSetOwnerOperationRequest extends ServerSetOwnerOperationRequest {
 
 export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetOwner;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetOwnerOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setOwner);
 
 		if (!allowMethod) {
@@ -84,7 +111,14 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetOwnerOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -102,7 +136,14 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetOwnerOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -120,7 +161,15 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { itemId: string, newOwnerId: string, newOwnerType: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetOwner", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -129,12 +178,14 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			owner: true,
 			catalogId: true,
 			classId: true,
 		}
 
+		// Stores the inventory value used in the current execution flow.
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
@@ -142,13 +193,16 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the owner value used in the current execution flow.
 		let owner = inventory.getOwner();
 		if (owner.id != request.newOwnerId) {
 			if (request.newOwnerType == OwnerType.Group) {
+				// Stores the group find options value used in the current execution flow.
 				let groupFindOptions: GroupFindOptions = {
 					groupInventories: true,
 				}
 
+				// Stores the new item owner player value used in the current execution flow.
 				let newItemOwnerPlayer = await this.gnServer.getDatabase().loadGroupAsync(request.newOwnerId, secretInfo.getGameId(), groupFindOptions);
 				if (newItemOwnerPlayer == null) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
@@ -159,10 +213,12 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 				newItemOwnerPlayer.saveAsync();
 			}
 			else if (request.newOwnerType == OwnerType.GamePlayer) {
+				// Stores the game player find options value used in the current execution flow.
 				let gamePlayerFindOptions: GamePlayerFindOptions = {
 					playerInventories: true,
 				}
 
+				// Stores the new item owner player value used in the current execution flow.
 				let newItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
 				if (newItemOwnerPlayer == null) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
@@ -173,10 +229,12 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 				newItemOwnerPlayer.saveAsync();
 			}
 			else if (request.newOwnerType == OwnerType.CharacterPlayer) {
+				// Stores the character player find options value used in the current execution flow.
 				let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 					playerInventories: true,
 				}
 
+				// Stores the new item owner player value used in the current execution flow.
 				let newItemOwnerPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.newOwnerId, secretInfo.getGameId(), characterPlayerFindOptions);
 				if (newItemOwnerPlayer == null) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
@@ -192,10 +250,12 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			}
 
 			if (owner.type == OwnerType.Group) {
+				// Stores the group find options value used in the current execution flow.
 				let groupFindOptions: GroupFindOptions = {
 					groupInventories: true,
 				}
 
+				// Stores the current item owner player value used in the current execution flow.
 				let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadGroupAsync(owner.id, secretInfo.getGameId(), groupFindOptions);
 				if (currentItemOwnerPlayer != null) {
 					if (currentItemOwnerPlayer.hasGroupInventory(request.itemId)) {
@@ -205,10 +265,12 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 				}
 			}
 			else if (owner.type == OwnerType.GamePlayer) {
+				// Stores the game player find options value used in the current execution flow.
 				let gamePlayerFindOptions: GamePlayerFindOptions = {
 					playerInventories: true,
 				}
 
+				// Stores the current item owner player value used in the current execution flow.
 				let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
 				if (currentItemOwnerPlayer != null) {
 					if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
@@ -218,10 +280,12 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 				}
 			}
 			else if (owner.type == OwnerType.CharacterPlayer) {
+				// Stores the character player find options value used in the current execution flow.
 				let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 					playerInventories: true,
 				}
 
+				// Stores the current item owner player value used in the current execution flow.
 				let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), characterPlayerFindOptions);
 				if (currentItemOwnerPlayer != null) {
 					if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {

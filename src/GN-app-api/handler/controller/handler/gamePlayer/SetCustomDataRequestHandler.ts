@@ -18,12 +18,17 @@ import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/
 
 class SetCustomDataOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the custom datas value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
 	public customDatas: Array<CustomDataParam>;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -33,9 +38,13 @@ class SetCustomDataOperationRequest extends OperationRequest {
 
 class ServerSetCustomDataOperationRequest extends SetCustomDataOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -45,6 +54,9 @@ class ServerSetCustomDataOperationRequest extends SetCustomDataOperationRequest 
 
 class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -54,15 +66,29 @@ class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationReq
 
 export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetCustomData;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetCustomDataOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -93,7 +119,14 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetCustomDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -111,7 +144,14 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetCustomDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -128,7 +168,15 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, customDatas: Array<CustomDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_SetCustomData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -137,10 +185,12 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			customDatas: true,
 		}
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
@@ -148,20 +198,27 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the resolved game player settings instance for the current execution flow.
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
+		// Stores the GearN custom datas value used in the current execution flow.
 		let gnCustomDatas = new GNArray();
 
 		for (let i = 0; i < request.customDatas.length; i++) {
 
+			// Stores the custom data parameter value used in the current execution flow.
 			let customDataParameter = request.customDatas[i];
 
+			// Stores the key value used in the current execution flow.
 			let key = customDataParameter.key;
 
+			// Stores the custom datas settings item value used in the current execution flow.
 			let customDatasSettingsItem = gamePlayerSettings.customDatasSettings.find(x => x.key == key);
 			if (customDatasSettingsItem == null) continue;
 
+			// Stores the value value used in the current execution flow.
 			let value = customDataParameter.value;
 
 			if (value == null) {
@@ -175,6 +232,7 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 				gamePlayer.setCustomData(key, value as DataValueType);
 			}
 
+			// Stores the GearN player data value used in the current execution flow.
 			let gnPlayerData = new GNHashtable();
 			gnPlayerData.add(ParameterCode.Key, key);
 			gnPlayerData.add(ParameterCode.Value, customDataParameter.value);

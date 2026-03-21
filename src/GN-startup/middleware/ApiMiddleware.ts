@@ -14,62 +14,110 @@ import jwt from "jsonwebtoken";
 import { TokenPayload } from "./../../GN-common/entity/TokenPayload";
 
 export class ApiMiddleware {
+	// Stores the FIVE MINUTE timestamp value used by this instance.
 	private static readonly FIVE_MINUTE_TS: number = 5 * 60 * 1000;
+	// Stores the timestamp REMOVE auth INFO dictionary value used by this instance.
 	private static readonly TS_REMOVE_AUTH_INFO_DIC: number = 1000 * 60 * 60 * 12;
+	// Stores the DEFAULT GAME ID value used by this instance.
 	private static readonly DEFAULT_GAME_ID: string = "dev";
 
+	// Stores the auth info dict collection used by this instance.
 	private authInfoDict: Map<string, AuthInfo>;
+	// Stores the auth info collection value used by this instance.
 	private authInfoCollection: mongoDB.Collection<mongoDB.Document>;
 
+	// Stores the secret info dict collection used by this instance.
 	private secretInfoDict: Map<string, SecretInfo>;
+	// Stores the secret info collection value used by this instance.
 	private secretInfoCollection: mongoDB.Collection<mongoDB.Document>;
 
+	// Stores the player game collection value used by this instance.
 	private playerGameCollection: mongoDB.Collection<mongoDB.Document>;
 
+	// Stores the expired token value used by this instance.
 	private expiredToken: number = 2 * 1000 * 60 * 60 * 24;
 
+	// Stores the private key token value used by this instance.
 	private privateKeyToken: string;
 
+	// Stores the header IP value used by this instance.
 	private headerIP: string;
 
+	// Stores the dau last 30 min value used by this instance.
 	private dauLast30Min: Array<string>;
 
+	// Stores the max CCU value used by this instance.
 	private maxCCU: number;
 
+    // Stores the game IDs list used by this instance.
     private gameIds: string[];
 
+	/**
+	 * Sets the secret info collection.
+	 * @param secretInfoCollection Provides the secret info collection used by this operation.
+	 */
 	public setSecretInfoCollection(secretInfoCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.secretInfoCollection = secretInfoCollection;
 	}
 
+	/**
+	 * Sets the auth info collection.
+	 * @param authInfoCollection Provides the auth info collection used by this operation.
+	 */
 	public setAuthInfoCollection(authInfoCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.authInfoCollection = authInfoCollection;
 	}
 
+	/**
+	 * Sets the player game collection.
+	 * @param playerGameCollection Provides the player game collection used by this operation.
+	 */
 	public setPlayerGameCollection(playerGameCollection: mongoDB.Collection<mongoDB.Document>) {
 		this.playerGameCollection = playerGameCollection;
 	}
 
+	/**
+	 * Sets the expired token.
+	 * @param expiredToken Provides the expired token value used by this operation.
+	 */
 	public setExpiredToken(expiredToken: number) {
 		this.expiredToken = expiredToken;
 	}
 
+	/**
+	 * Sets the private key token.
+	 * @param privateKeyToken Provides the private key token value used by this operation.
+	 */
 	public setPrivateKeyToken(privateKeyToken: string) {
 		this.privateKeyToken = privateKeyToken;
 	}
 
+	/**
+	 * Sets the header IP.
+	 * @param headerIP Provides the header IP value used by this operation.
+	 */
 	public setHeaderIP(headerIP: string) {
 		this.headerIP = headerIP;
 	}
 
+	/**
+	 * Returns the header IP.
+	 */
 	public getHeaderIP() {
 		return this.headerIP;
 	}
 
+    /**
+     * Sets the game IDs.
+     * @param gameIds Provides the game IDs value used by this operation.
+     */
     public setGameIds(gameIds: string[]) {
         this.gameIds = gameIds;
     }
 
+	/**
+	 * Runs the current workflow.
+	 */
 	public run() {
 		this.dauLast30Min = [];
 		this.maxCCU = -1;
@@ -80,12 +128,16 @@ export class ApiMiddleware {
 		}, ApiMiddleware.FIVE_MINUTE_TS);
 	}
 
+	/**
+	 * Returns the DAU last 30 min.
+	 */
 	private async getDAULast30Min() {
 		this.maxCCU = -1;
 
 		if (this.maxCCU != -1) {
 
 			try {
+				// Stores the player last 30 mins value used in the current execution flow.
 				let playerLast30Mins = await this.playerGameCollection.find({}, {
 					projection: {
 						userId: true
@@ -95,6 +147,7 @@ export class ApiMiddleware {
 				this.dauLast30Min.length = 0;
 
 				for (let i = 0; i < playerLast30Mins.length; i++) {
+					// Stores the player last 30 min value used in the current execution flow.
 					let playerLast30Min = playerLast30Mins[i];
 					this.dauLast30Min.push(playerLast30Min.userId);
 				}
@@ -105,17 +158,26 @@ export class ApiMiddleware {
 		}
 	}
 
+	/**
+	 * Executes the check and remove dict workflow asynchronously.
+	 */
 	private async checkAndRemoveDict(): Promise<void> {
 		try {
+			// Stores the remove count value used in the current execution flow.
 			let removeCount = 0;
 
+			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+			// Stores the timestamp remove value used in the current execution flow.
 			let tsRemove = currentMilliseconds - ApiMiddleware.TS_REMOVE_AUTH_INFO_DIC;
 
+			// Stores the start size value used in the current execution flow.
 			let startSize = this.authInfoDict.size;
 
+			// Stores the entries value used in the current execution flow.
 			let entries = this.authInfoDict.entries();
 
+			// Stores the keys to remove value used in the current execution flow.
 			let keysNeedRemove: string[] = [];
 
 			for (let [key, authInfo] of entries) {
@@ -137,18 +199,27 @@ export class ApiMiddleware {
 		}
 	}
 
+	/**
+	 * Executes the generate auth info workflow.
+	 * @param payload Provides the payload value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	public generateAuthInfo(payload: TokenPayload): AuthInfo {
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		payload.gnToken = payload.gnToken ?? "gn.a_" + StringUtility.generateRandomString(10, 0);
 
+		// Stores the timestamp expire value used in the current execution flow.
 		let tsExpire = this.expiredToken == -1 ? -1 : (currentMilliseconds + this.expiredToken);
 
+		// Stores the auth token value used in the current execution flow.
 		let authToken = jwt.sign(payload, this.privateKeyToken, {
 			expiresIn: this.expiredToken == -1 ? "1y" : this.expiredToken,
 			algorithm: "HS512"
 		});
 
+		// Stores the auth info value used in the current execution flow.
 		let authInfo = AuthInfo.Builder()
 			.setGNToken(payload.gnToken)
 			.setAuthToken(authToken)
@@ -167,6 +238,11 @@ export class ApiMiddleware {
 		return authInfo;
 	}
 
+	/**
+	 * Executes the verify auth token workflow.
+	 * @param authToken Provides the auth token value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	public verifyAuthToken(authToken: string): jwt.JwtPayload {
 		try {
 			return jwt.verify(authToken, this.privateKeyToken, { algorithms: ["HS512"] }) as jwt.JwtPayload;
@@ -176,9 +252,16 @@ export class ApiMiddleware {
 		}
 	}
 
+	/**
+	 * Returns the secret info by secret key in database.
+	 * @param secretKey Provides the secret key value used by this operation.
+	 * @returns Returns the secret info by secret key in database.
+	 */
 	public async getSecretInfoBySecretKeyInDatabase(secretKey: string): Promise<SecretInfo> {
+		// Stores the secret info value used in the current execution flow.
 		let secretInfo = this.secretInfoDict.get(secretKey);
 		if (secretInfo == null) {
+			// Stores the secret info result value used in the current execution flow.
 			let secretInfoResult = await this.secretInfoCollection.findOne({ secretKey: secretKey });
 
 			if (secretInfoResult != null) {
@@ -186,27 +269,37 @@ export class ApiMiddleware {
 
 				let defaultSecretPermissionItem = CreateSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false) as any;
 
+				// Stores the data secret permission item value used in the current execution flow.
 				let dataSecretPermissionItem = secretInfoResult.permission as any;
+				// Stores the key layer 0 s value used in the current execution flow.
 				let keyLayer0s = Object.keys(dataSecretPermissionItem);		// authenticate, masterPlayer, ...
 
 				for (let i = 0; i < keyLayer0s.length; i++) {
+					// Stores the key layer 0 value used in the current execution flow.
 					let keyLayer0 = keyLayer0s[i];		// authenticate
 					let thisLayer0Any = dataSecretPermissionItem[keyLayer0];	// { loginByAccount : { seft enable: false } }
 					let defaultThisLayer0Any = defaultSecretPermissionItem[keyLayer0];
 
+					// Stores the key layer 1 s value used in the current execution flow.
 					let keyLayer1s = Object.keys(thisLayer0Any);	// [ loginByAccount, registerAccount]
 
 					for (let j = 0; j < keyLayer1s.length; j++) {
+						// Stores the key layer 1 value used in the current execution flow.
 						let keyLayer1 = keyLayer1s[j];		// loginByAccount
 
 						let dataPermissionAnyForLayer1Any = thisLayer0Any[keyLayer1];
+						// Stores the default permission any for layer 1 any value used in the current execution flow.
 						let defaultPermissionAnyForLayer1Any = defaultThisLayer0Any[keyLayer1];
 
 						if (dataPermissionAnyForLayer1Any != null) {
 
+							// Stores the self enable value used in the current execution flow.
 							let selfEnable: boolean = dataPermissionAnyForLayer1Any.selfEnable;
+							// Stores the other self enable value used in the current execution flow.
 							let otherSelfEnable: boolean = dataPermissionAnyForLayer1Any.otherSelfEnable;
+							// Stores the admin self enable value used in the current execution flow.
 							let adminSelfEnable: boolean = dataPermissionAnyForLayer1Any.adminSelfEnable;
+							// Stores the server self enable value used in the current execution flow.
 							let serverSelfEnable: boolean = dataPermissionAnyForLayer1Any.serverSelfEnable;
 
 							defaultPermissionAnyForLayer1Any.selfEnable = selfEnable != null && selfEnable;
@@ -261,12 +354,20 @@ export class ApiMiddleware {
 		return secretInfo;
 	}
 
+	/**
+	 * Returns the auth info by GearN token in database.
+	 * @param gnToken Provides the GearN token value used by this operation.
+	 * @returns Returns the auth info by GearN token in database.
+	 */
 	public async getAuthInfoByGNTokenInDatabase(gnToken: string): Promise<AuthInfo> {
+		// Stores the auth info value used in the current execution flow.
 		let authInfo = this.authInfoDict.get(gnToken);
 		if (authInfo == null) {
+			// Stores the auth info temp value used in the current execution flow.
 			let authInfoTemp = await this.authInfoCollection.findOne({ gnToken: gnToken });
 
 			if (authInfoTemp != null) {
+				// Tracks whether r ID should be used.
 				let userId = authInfoTemp["userId"];
 				authInfo = AuthInfo.Builder()
 					.setGNToken(authInfoTemp["gnToken"])
@@ -286,7 +387,13 @@ export class ApiMiddleware {
 		return authInfo;
 	}
 
+	/**
+	 * Returns the auth infos by user ID in mem cache.
+	 * @param userId Indicates whether r ID should be used.
+	 * @returns Returns the auth infos by user ID in mem cache.
+	 */
 	public getAuthInfosByUserIdInMemCache(userId: string): AuthInfo[] {
+		// Stores the answer value used in the current execution flow.
 		let answer: AuthInfo[] = [];
 
 		for (const authInfo of this.authInfoDict.values()) {
@@ -298,21 +405,38 @@ export class ApiMiddleware {
 		return answer;
 	}
 
+	/**
+	 * Executes the update secret info workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 */
 	public async updateSecretInfo(secretInfo: SecretInfo): Promise<void> {
+		// Stores the secret key value used in the current execution flow.
 		let secretKey = secretInfo.getSecretKey();
 
 		this.secretInfoDict.set(secretKey, secretInfo);
 		await this.secretInfoCollection.updateOne({ secretKey: secretKey }, { $set: secretInfo.toDocumentData() }, { upsert: true });
 	}
 
+	/**
+	 * Executes the update auth info workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 */
 	public async updateAuthInfo(authInfo: AuthInfo): Promise<void> {
+		// Stores the GearN token value used in the current execution flow.
 		let gnToken = authInfo.getGNToken();
 
 		this.authInfoDict.set(gnToken, authInfo);
 		await this.authInfoCollection.updateOne({ gnToken: gnToken }, { $set: authInfo.toDocumentData() });
 	}
 
+	/**
+	 * Executes the authenticate token via JSON workflow asynchronously.
+	 * @param req Provides the req value used by this operation.
+	 * @param res Provides the res value used by this operation.
+	 * @param next Provides the next value used by this operation.
+	 */
 	public async authenticateTokenViaJson(req: express.Request, res: express.Response, next: Function) {
+		// Stores the return code value used in the current execution flow.
 		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
@@ -322,7 +446,14 @@ export class ApiMiddleware {
 		return next();
 	}
 
+	/**
+	 * Executes the authenticate upload token workflow asynchronously.
+	 * @param req Provides the req value used by this operation.
+	 * @param res Provides the res value used by this operation.
+	 * @param next Provides the next value used by this operation.
+	 */
 	public async authenticateUploadToken(req: express.Request, res: express.Response, next: Function) {
+		// Stores the return code value used in the current execution flow.
 		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
 			return res.sendStatus(401);
@@ -331,9 +462,17 @@ export class ApiMiddleware {
 		return next();
 	}
 
+	/**
+	 * Executes the authenticate token via msg pack workflow asynchronously.
+	 * @param req Provides the req value used by this operation.
+	 * @param res Provides the res value used by this operation.
+	 * @param next Provides the next value used by this operation.
+	 */
 	public async authenticateTokenViaMsgPack(req: express.Request, res: express.Response, next: Function) {
+		// Stores the return code value used in the current execution flow.
 		let returnCode = await this.getReturnCodeAuthenticate(req);
 		if (returnCode != ReturnCode.Ok) {
+			// Stores the content value used in the current execution flow.
 			let content = Buffer.from(encode({ returnCode: returnCode }));
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 			res.setHeader(Commands.CONTENT_LENGTH, content.length);
@@ -343,7 +482,14 @@ export class ApiMiddleware {
 		return next();
 	}
 
+	/**
+	 * Returns the IP.
+	 * @param req Provides the req value used by this operation.
+	 * @param res Provides the res value used by this operation.
+	 * @param next Provides the next value used by this operation.
+	 */
 	public async getIP(req: express.Request, res: express.Response, next: Function) {
+		// Stores the IP value used in the current execution flow.
 		let ip: string = null;
 
 		if (this.headerIP != null) {
@@ -369,14 +515,22 @@ export class ApiMiddleware {
 		return next();
 	}
 
+	/**
+	 * Returns the return code authenticate.
+	 * @param req Provides the req value used by this operation.
+	 * @returns Returns the return code authenticate.
+	 */
 	public async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
+		// Stores the auth token value used in the current execution flow.
 		let authToken: string = req.header(Commands.RequestAuthTokenCmd);
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		if (!authToken) {
 			req.isAuthenticated = false;
 		} else {
+			// Stores the token payload value used in the current execution flow.
 			let tokenPayload = this.verifyAuthToken(authToken);
 
 			if (tokenPayload == null) {
@@ -385,8 +539,10 @@ export class ApiMiddleware {
 				// return ReturnCode.OperationNotAuthorized;
 			}
 			else {
+				// Stores the GearN token value used in the current execution flow.
 				let gnToken: string = tokenPayload.gnToken;
 
+				// Stores the auth info value used in the current execution flow.
 				let authInfo = await this.getAuthInfoByGNTokenInDatabase(gnToken);
 
 				if (authInfo == null) {
@@ -413,6 +569,7 @@ export class ApiMiddleware {
 		}
 
 		if (this.maxCCU != -1) {
+			// Stores the dau last 30 min value used in the current execution flow.
 			let dauLast30Min = [...this.dauLast30Min];
 
 			if (dauLast30Min.length >= this.maxCCU) {
@@ -422,6 +579,7 @@ export class ApiMiddleware {
 			}
 		}
 
+		// Stores the secret key value used in the current execution flow.
 		let secretKey: string = req.header(Commands.RequestSecretCmd);
 
 		if (!secretKey) {
@@ -436,6 +594,7 @@ export class ApiMiddleware {
 		}
 
 		if (secretKey) {
+			// Stores the secret info value used in the current execution flow.
 			let secretInfo = await this.getSecretInfoBySecretKeyInDatabase(secretKey);
 
 			if (secretInfo != null && secretInfo.getIsOnlyMasterAdmin()) {
@@ -453,12 +612,14 @@ export class ApiMiddleware {
 			}
 
 			if (!secretInfo.getGameId()) {
+				// Stores the game ID value used in the current execution flow.
 				let gameId: string = req.header(Commands.RequestGameIdCmd);
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
                 else {
                     if (!this.gameIds.includes(gameId)) return ReturnCode.SecretInvalid;
                 }
 
+				// Stores the secret info any value used in the current execution flow.
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
@@ -490,11 +651,19 @@ export class ApiMiddleware {
 		return ReturnCode.Ok;
 	}
 
+	/**
+	 * Executes the socket authenticate token workflow asynchronously.
+	 * @param socket Provides the socket value used by this operation.
+	 * @param next Provides the next value used by this operation.
+	 */
 	public async socketAuthenticateToken(socket: Socket, next: (returnCode: number) => void): Promise<void> {
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		if (socket.data.isAuthenticated === true) {
+			// Stores the auth info value used in the current execution flow.
 			let authInfo = socket.data.authInfo as AuthInfo;
+			// Stores the GearN token value used in the current execution flow.
 			let gnToken = authInfo.getGNToken();
 
 			if (authInfo.isRemove()) {
@@ -519,6 +688,7 @@ export class ApiMiddleware {
 		}
 
 		if (this.maxCCU != -1) {
+			// Stores the dau last 30 min value used in the current execution flow.
 			let dauLast30Min = [...this.dauLast30Min];
 
 			if (dauLast30Min.length >= this.maxCCU) {
@@ -528,12 +698,14 @@ export class ApiMiddleware {
 			}
 		}
 
+		// Stores the secret info value used in the current execution flow.
 		let secretInfo: SecretInfo = null;
 
 		if (socket.data.isSecreted) {
 			secretInfo = socket.data.secretInfo;
 		}
 		else {
+			// Stores the secret key value used in the current execution flow.
 			let secretKey = socket.data.secretKey as string;
 			if (!secretKey) {
 				if (socket.data.isAuthenticated === false) {
@@ -556,12 +728,14 @@ export class ApiMiddleware {
 			}
 
 			if (!secretInfo.getGameId()) {
+				// Stores the game ID value used in the current execution flow.
 				let gameId = socket.data.gameId as string;
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
                 else {
                     if (!this.gameIds.includes(gameId)) return next(ReturnCode.SecretInvalid);
                 }
 
+				// Stores the secret info any value used in the current execution flow.
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
@@ -602,6 +776,11 @@ export class ApiMiddleware {
 		return next(ReturnCode.Ok);
 	}
 
+	/**
+	 * Creates the IP.
+	 * @param ip Provides the IP value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	public createIP(ip: string): string {
 		if (ip.substring(0, 7) == "::ffff:") {
 			ip = ip.substring(7);
@@ -610,6 +789,9 @@ export class ApiMiddleware {
 		return ip;
 	}
 
+	/**
+	 * Initializes a new API middleware instance.
+	 */
 	constructor() {
 		this.authInfoDict = new Map<string, AuthInfo>();
 		this.secretInfoDict = new Map<string, SecretInfo>();

@@ -17,15 +17,21 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 
 class GetBackupStatisticsLeaderboardVersionOperationRequest extends OperationRequest {
 
+	// Stores the game ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true })
 	public gameId: string;
 
+	// Stores the type value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Type, mustInt: true })
 	public type: number;
 
+	// Stores the key value used by this instance.
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32 })
 	public key: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -35,15 +41,29 @@ class GetBackupStatisticsLeaderboardVersionOperationRequest extends OperationReq
 
 export class GetBackupStatisticsLeaderboardVersionRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetBackupStatisticsLeaderboardVersion;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetBackupStatisticsLeaderboardVersionOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -61,7 +81,15 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { gameId: string, type: number, key: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetBackupStatisticsLeaderboardKey", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -70,13 +98,16 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the type value used in the current execution flow.
 		let type = request.type;
 
+		// Stores the backup statistics leaderboard collection value used in the current execution flow.
 		let backupStatisticsLeaderboardCollection: mongoDB.Collection<mongoDB.Document>;
 		if (type == OwnerType.MasterPlayer) {
 			backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
 		}
 		else {
+			// Stores the game ID value used in the current execution flow.
 			let gameId = request.gameId;
 
 			if (type == OwnerType.GamePlayer) {
@@ -97,8 +128,10 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 			}
 		}
 
+		// Stores the key value used in the current execution flow.
 		let key = request.key;
 
+		// Stores the results value used in the current execution flow.
 		let results = backupStatisticsLeaderboardCollection.find({ key: key }, {
 			projection: {
 				version: true,
@@ -107,11 +140,14 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 			}
 		}).sort({ _id: -1 });
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
 		while (await results.hasNext()) {
+			// Stores the result value used in the current execution flow.
 			let result = await results.next();
 
+			// Stores the GearN result value used in the current execution flow.
 			let gnResult = new GNHashtable();
 			gnResult.add(ParameterCode.Version, result["version"]);
 			gnResult.add(ParameterCode.Log, result["log"]);

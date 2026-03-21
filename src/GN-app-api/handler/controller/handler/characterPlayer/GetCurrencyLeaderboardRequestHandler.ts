@@ -18,24 +18,33 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
 
+	// Stores the key value used by this instance.
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	public key: string;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	// Stores the skip value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	public skip?: number;
 
+	// Stores the limit value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	public limit?: number;
 
+	// Indicates whether load from cache.
 	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	public loadFromCache?: boolean;
 
+	// Stores the catalog ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	public catalogId?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -45,6 +54,9 @@ class GetCurrencyLeaderboardOperationRequest extends OperationRequest {
 
 class ServerGetCurrencyLeaderboardOperationRequest extends GetCurrencyLeaderboardOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -54,6 +66,9 @@ class ServerGetCurrencyLeaderboardOperationRequest extends GetCurrencyLeaderboar
 
 class AdminGetCurrencyLeaderboardOperationRequest extends ServerGetCurrencyLeaderboardOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -63,15 +78,29 @@ class AdminGetCurrencyLeaderboardOperationRequest extends ServerGetCurrencyLeade
 
 export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetCurrencyLeaderboard;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetCurrencyLeaderboardOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -94,7 +123,14 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCurrencyLeaderboardOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -117,7 +153,14 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCurrencyLeaderboardOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -140,7 +183,15 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, catalogId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetCurrencyLeaderboard", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -149,7 +200,9 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved character player settings instance for the current execution flow.
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		// Stores the player currencies settings item value used in the current execution flow.
 		let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find(x => x.key == request.key);
 
 		if (playerCurrenciesSettingsItem == null) {
@@ -158,6 +211,7 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			return operationResponse;
 		}
 
+		// Stores the cache key value used in the current execution flow.
 		let cacheKey = "characterPlayerCurrencyLeaderboard_" + request.key;
 		if (request.catalogId) cacheKey += "_" + request.catalogId;
 
@@ -167,6 +221,7 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			}
 		}
 
+		// Stores the cache data value used in the current execution flow.
 		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
 		if (request.loadFromCache) {
@@ -175,8 +230,10 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			}
 		}
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the character players value used in the current execution flow.
 		let characterPlayers: CharacterPlayer[];
 
 		if (request.loadFromCache) {
@@ -185,8 +242,10 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
 				if (i >= characterPlayers.length) break;
 
+				// Stores the character player value used in the current execution flow.
 				let characterPlayer = characterPlayers[i];
 
+				// Stores the GearN result value used in the current execution flow.
 				let gnResult = new GNHashtable();
 
 				gnResult.add(ParameterCode.Position, i);
@@ -199,6 +258,7 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 			}
 		}
 		else {
+			// Stores the character player find options value used in the current execution flow.
 			let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
 
 			if (request.skip + request.limit <= 100) {
@@ -209,8 +269,10 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= characterPlayers.length) break;
 
+					// Stores the character player value used in the current execution flow.
 					let characterPlayer = characterPlayers[i];
 
+					// Stores the GearN result value used in the current execution flow.
 					let gnResult = new GNHashtable();
 
 					gnResult.add(ParameterCode.Position, i);
@@ -229,8 +291,10 @@ export class GetCurrencyLeaderboardRequestHandler extends CharacterPlayerBaseReq
 
 				for (let i = 0; i < characterPlayers.length; i++) {
 
+					// Stores the character player value used in the current execution flow.
 					let characterPlayer = characterPlayers[i];
 
+					// Stores the GearN result value used in the current execution flow.
 					let gnResult = new GNHashtable();
 
 					gnResult.add(ParameterCode.Position, i + request.skip);

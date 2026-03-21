@@ -16,12 +16,17 @@ import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/ent
 
 class SetSecretKeyAdminAccountOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public userId: string;
 
+	// Stores the secret key value used by this instance.
 	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
 	public secretKey: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,15 +36,29 @@ class SetSecretKeyAdminAccountOperationRequest extends OperationRequest {
 
 export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetSecretKeyAdminAccount;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetSecretKeyAdminAccountOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -56,7 +75,15 @@ export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, secretKey: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetSecretKeyAdminAccount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -65,8 +92,10 @@ export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ type: "account", userId: request.userId });
 
 		if (result == null) {
@@ -74,6 +103,7 @@ export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the master admin player value used in the current execution flow.
 		let masterAdminPlayer = new MasterAdminPlayer(result, collection);
 		masterAdminPlayer.setSecretKey(request.secretKey);
 		masterAdminPlayer.saveAsync();

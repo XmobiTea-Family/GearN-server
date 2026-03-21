@@ -18,18 +18,25 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 
 class LinkAccountOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Indicates whether rname should be used.
 	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	public username: string;
 
+	// Stores the password value used by this instance.
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	public password: string;
 
+	// Indicates whether force link.
 	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
 	public forceLink?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -39,9 +46,13 @@ class LinkAccountOperationRequest extends OperationRequest {
 
 class ServerLinkAccountOperationRequest extends LinkAccountOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,6 +62,9 @@ class ServerLinkAccountOperationRequest extends LinkAccountOperationRequest {
 
 class AdminLinkAccountOperationRequest extends ServerLinkAccountOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -60,15 +74,29 @@ class AdminLinkAccountOperationRequest extends ServerLinkAccountOperationRequest
 
 export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.LinkAccount;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return LinkAccountOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -101,7 +129,14 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLinkAccountOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -120,7 +155,14 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLinkAccountOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -139,7 +181,15 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, username: string, password: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkAccount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -148,10 +198,12 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			external: true,
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -159,12 +211,14 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the external value used in the current execution flow.
 		let external = masterPlayer.getExternal();
 		if (external.account != null && !request.forceLink) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherValue);
 			return operationResponse;
 		}
 
+		// Stores the other master player value used in the current execution flow.
 		let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
 		if (otherMasterPlayer != null && otherMasterPlayer.getUserId() != masterPlayer.getUserId()) {
 			if (!request.forceLink) {
@@ -172,6 +226,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 				return operationResponse;
 			}
 
+			// Stores the other external value used in the current execution flow.
 			let otherExternal = otherMasterPlayer.getExternal();
 			otherExternal.account = null;
 
@@ -179,6 +234,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			otherMasterPlayer.saveAsync();
 		}
 
+		// Stores the password hash value used in the current execution flow.
 		let passwordHash = await bcrypt.hash(request.password, 10);
 
 		external.account = {
@@ -188,6 +244,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 		masterPlayer.setExternal(external);
 		masterPlayer.saveAsync();
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);

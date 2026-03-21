@@ -19,15 +19,21 @@ import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class ChangePlayerStatisticsOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the player statistics value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.PlayerStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerStatisticsParam })
 	public playerStatistics: Array<PlayerStatisticsParam>;
 
+	// Stores the log value used by this instance.
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,9 +43,13 @@ class ChangePlayerStatisticsOperationRequest extends OperationRequest {
 
 class ServerChangePlayerStatisticsOperationRequest extends ChangePlayerStatisticsOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,6 +59,9 @@ class ServerChangePlayerStatisticsOperationRequest extends ChangePlayerStatistic
 
 class AdminChangePlayerStatisticsOperationRequest extends ServerChangePlayerStatisticsOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -58,15 +71,29 @@ class AdminChangePlayerStatisticsOperationRequest extends ServerChangePlayerStat
 
 export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.ChangePlayerStatistics;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return ChangePlayerStatisticsOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -98,7 +125,14 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangePlayerStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -116,7 +150,14 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangePlayerStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -134,7 +175,15 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, playerStatistics: Array<PlayerStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_ChangePlayerStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -143,10 +192,12 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerStatistics: true,
 		}
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
@@ -154,38 +205,52 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 			return operationResponse;
 		}
 
+		// Stores the resolved game player settings instance for the current execution flow.
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
+		// Stores the GearN player statistics value used in the current execution flow.
 		let gnPlayerStatistics = new GNArray();
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		for (let i = 0; i < request.playerStatistics.length; i++) {
+			// Stores the player statistics parameter value used in the current execution flow.
 			let playerStatisticsParam = request.playerStatistics[i];
 
+			// Stores the key value used in the current execution flow.
 			let key = playerStatisticsParam.key;
 
+			// Stores the player statistics settings item value used in the current execution flow.
 			let playerStatisticsSettingsItem = gamePlayerSettings.playerStatisticsSettings.find(x => x.key == key);
 			if (playerStatisticsSettingsItem == null) continue;
 
+			// Stores the value value used in the current execution flow.
 			let value = playerStatisticsParam.value;
 
+			// Stores the GearN player statistic value used in the current execution flow.
 			let gnPlayerStatistic = new GNHashtable();
 			gnPlayerStatistic.add(ParameterCode.Key, key);
 
+			// Tracks whether set player statistics should be used.
 			let useSetPlayerStatistics = false;
 			if (!gamePlayer.hasPlayerStatistics(key)) {
 				useSetPlayerStatistics = true;
 				gamePlayer.setPlayerStatistics(key, playerStatisticsSettingsItem.initialValue, currentMilliseconds);
 			}
 
+			// Stores the player statistics value used in the current execution flow.
 			let playerStatistics = gamePlayer.getPlayerStatistics(key);
+			// Stores the old value value used in the current execution flow.
 			let oldValue = playerStatistics.value;
 
+			// Stores the statistics aggregation method value used in the current execution flow.
 			let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
 
 			if (statisticsAggregationMethod == xStatisticsAggregationMethod.Sum) {
+				// Stores the new value value used in the current execution flow.
 				let newValue = value + playerStatistics.value;
 
 				if (playerStatisticsSettingsItem.maximumValue != null) {

@@ -17,9 +17,13 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class RequestDownloadFileUploadInfoOperationRequest extends OperationRequest {
 
+	// Stores the file ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
 	public fileId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -30,6 +34,9 @@ class RequestDownloadFileUploadInfoOperationRequest extends OperationRequest {
 
 class ServerRequestDownloadFileUploadInfoOperationRequest extends RequestDownloadFileUploadInfoOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -39,6 +46,9 @@ class ServerRequestDownloadFileUploadInfoOperationRequest extends RequestDownloa
 
 class AdminRequestDownloadFileUploadInfoOperationRequest extends ServerRequestDownloadFileUploadInfoOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,15 +58,29 @@ class AdminRequestDownloadFileUploadInfoOperationRequest extends ServerRequestDo
 
 export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.RequestDownloadFileUploadInfo;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return RequestDownloadFileUploadInfoOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -72,7 +96,14 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerRequestDownloadFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -88,7 +119,14 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminRequestDownloadFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -104,7 +142,15 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { fileId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_RequestDownloadFileUploadInfo", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -113,6 +159,7 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the upload file info value used in the current execution flow.
 		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId, {
 			removeStatus: true,
 			fileUpload: true,
@@ -128,6 +175,7 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 			return operationResponse;
 		}
 
+		// Stores the file upload value used in the current execution flow.
 		let fileUpload = uploadFileInfo.getFileUpload();
 
 		if (fileUpload == null) {
@@ -135,8 +183,10 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 			return operationResponse;
 		}
 
+		// Stores the download token value used in the current execution flow.
 		let downloadToken = Md5Generate.getMd5(StringUtility.generateRandomString(15, 0));
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("DownloadFileSession");
 		collection.insertOne({
 			fileId: request.fileId,

@@ -16,6 +16,9 @@ import { MasterGameSettings } from "./../../../../../GN-library/xdatabase/lib/en
 
 class GetMasterGameSettingsOperationRequest extends OperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -25,15 +28,29 @@ class GetMasterGameSettingsOperationRequest extends OperationRequest {
 
 export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetMasterGameSettings;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetMasterGameSettingsOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -47,7 +64,15 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 		return this.execute({}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetMasterGameSettings", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -56,18 +81,24 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ type: "masterGameSettings" });
 
+		// Stores the resolved master game settings instance for the current execution flow.
 		let masterGameSettings = new MasterGameSettings(result, collection);
 
 		{
+			// Stores the resolved thirt party settings instance for the current execution flow.
 			let thirtPartySettings = masterGameSettings.getThirtPartySettings();
 
+			// Stores the resolved GearN thirt party settings instance for the current execution flow.
 			let gnThirtPartySettings = new GNHashtable();
 
 			if (thirtPartySettings.googleSettings != null) {
+				// Stores the resolved GearN google settings instance for the current execution flow.
 				let gnGoogleSettings = new GNHashtable();
 
 				gnGoogleSettings.add(ParameterCode.GoogleClientId, thirtPartySettings.googleSettings.googleClientId);
@@ -78,6 +109,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (thirtPartySettings.facebookSettings != null) {
+				// Stores the resolved GearN facebook settings instance for the current execution flow.
 				let gnFacebookSettings = new GNHashtable();
 
 				gnFacebookSettings.add(ParameterCode.FacebookAppId, thirtPartySettings.facebookSettings.facebookAppId);
@@ -89,6 +121,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (thirtPartySettings.appleSettings != null) {
+				// Stores the resolved GearN apple settings instance for the current execution flow.
 				let gnAppleSettings = new GNHashtable();
 
 				gnAppleSettings.add(ParameterCode.AppleClientId, thirtPartySettings.appleSettings.appleClientId);
@@ -101,6 +134,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (thirtPartySettings.googlePlayGameSettings != null) {
+				// Stores the resolved GearN google play game settings instance for the current execution flow.
 				let gnGooglePlayGameSettings = new GNHashtable();
 
 				gnGooglePlayGameSettings.add(ParameterCode.ApplicationId, thirtPartySettings.googlePlayGameSettings.applicationId);
@@ -112,6 +146,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (thirtPartySettings.gameCenterSettings != null) {
+				// Stores the resolved GearN game center settings instance for the current execution flow.
 				let gnGameCenterSettings = new GNHashtable();
 
 				gnGameCenterSettings.add(ParameterCode.PackageId, thirtPartySettings.gameCenterSettings.packageId);
@@ -123,16 +158,21 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 		}
 
 		{
+			// Stores the resolved master player settings instance for the current execution flow.
 			let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
 
+			// Stores the resolved GearN master player settings instance for the current execution flow.
 			let gnMasterPlayerSettings = new GNHashtable();
 
 			{
+				// Stores the resolved GearN generic service settings instance for the current execution flow.
 				let gnGenericServiceSettings = new GNArray();
 
 				for (let i = 0; i < masterPlayerSettings.genericServiceSettings.length; i++) {
+					// Stores the generic service setting value used in the current execution flow.
 					let genericServiceSetting = masterPlayerSettings.genericServiceSettings[i];
 
+					// Stores the GearN generic service setting value used in the current execution flow.
 					let gnGenericServiceSetting = new GNHashtable();
 
 					gnGenericServiceSetting.add(ParameterCode.ServiceName, genericServiceSetting.serviceName);
@@ -144,11 +184,14 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			{
+				// Stores the resolved GearN player currencies settings instance for the current execution flow.
 				let gnPlayerCurrenciesSettings = new GNArray();
 
 				for (let i = 0; i < masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+					// Stores the player currencies setting value used in the current execution flow.
 					let playerCurrenciesSetting = masterPlayerSettings.playerCurrenciesSettings[i];
 
+					// Stores the GearN player currencies setting value used in the current execution flow.
 					let gnPlayerCurrenciesSetting = new GNHashtable();
 
 					gnPlayerCurrenciesSetting.add(ParameterCode.Key, playerCurrenciesSetting.key);
@@ -163,11 +206,14 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			{
+				// Stores the resolved GearN player statistics settings instance for the current execution flow.
 				let gnPlayerStatisticsSettings = new GNArray();
 
 				for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
+					// Stores the player statistics setting value used in the current execution flow.
 					let playerStatisticsSetting = masterPlayerSettings.playerStatisticsSettings[i];
 
+					// Stores the GearN player statistics setting value used in the current execution flow.
 					let gnPlayerStatisticsSetting = new GNHashtable();
 
 					gnPlayerStatisticsSetting.add(ParameterCode.Key, playerStatisticsSetting.key);
@@ -185,11 +231,14 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			{
+				// Stores the resolved GearN player datas settings instance for the current execution flow.
 				let gnPlayerDatasSettings = new GNArray();
 
 				for (let i = 0; i < masterPlayerSettings.playerDatasSettings.length; i++) {
+					// Stores the player datas setting value used in the current execution flow.
 					let playerDatasSetting = masterPlayerSettings.playerDatasSettings[i];
 
+					// Stores the GearN player datas setting value used in the current execution flow.
 					let gnPlayerDatasSetting = new GNHashtable();
 
 					gnPlayerDatasSetting.add(ParameterCode.Key, playerDatasSetting.key);
@@ -203,11 +252,14 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			{
+				// Stores the resolved GearN custom datas settings instance for the current execution flow.
 				let gnCustomDatasSettings = new GNArray();
 
 				for (let i = 0; i < masterPlayerSettings.customDatasSettings.length; i++) {
+					// Stores the custom datas setting value used in the current execution flow.
 					let customDatasSetting = masterPlayerSettings.customDatasSettings[i];
 
+					// Stores the GearN custom datas setting value used in the current execution flow.
 					let gnCustomDatasSetting = new GNHashtable();
 
 					gnCustomDatasSetting.add(ParameterCode.Key, customDatasSetting.key);
@@ -221,11 +273,14 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			{
+				// Stores the resolved GearN tags settings instance for the current execution flow.
 				let gnTagsSettings = new GNArray();
 
 				for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
+					// Stores the tags setting value used in the current execution flow.
 					let tagsSetting = masterPlayerSettings.tagsSettings[i];
 
+					// Stores the GearN tags setting value used in the current execution flow.
 					let gnTagsSetting = new GNHashtable();
 
 					gnTagsSetting.add(ParameterCode.Key, tagsSetting.key);
@@ -242,8 +297,10 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 		}
 
 		{
+			// Stores the resolved email settings instance for the current execution flow.
 			let emailSettings = masterGameSettings.getEmailSettings();
 
+			// Stores the resolved GearN email settings instance for the current execution flow.
 			let gnEmailSettings = new GNHashtable();
 			gnEmailSettings.add(ParameterCode.SendFrom, emailSettings.sendFrom);
 			gnEmailSettings.add(ParameterCode.Host, emailSettings.host);
@@ -256,8 +313,10 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 		}
 
 		{
+			// Stores the resolved push notification settings instance for the current execution flow.
 			let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
 
+			// Stores the resolved GearN push notification settings instance for the current execution flow.
 			let gnPushNotificationSettings = new GNHashtable();
 			gnPushNotificationSettings.add(ParameterCode.ProjectId, pushNotificationSettings.projectId);
 			gnPushNotificationSettings.add(ParameterCode.ClientEmail, pushNotificationSettings.clientEmail);

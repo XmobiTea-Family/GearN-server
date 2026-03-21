@@ -16,12 +16,17 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 
 class GetCustomDataOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the custom data keys value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.CustomDataKeys, isOptional: true, elementCls: String })
 	public customDataKeys?: Array<string>;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,9 +36,13 @@ class GetCustomDataOperationRequest extends OperationRequest {
 
 class ServerGetCustomDataOperationRequest extends GetCustomDataOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +52,9 @@ class ServerGetCustomDataOperationRequest extends GetCustomDataOperationRequest 
 
 class AdminGetCustomDataOperationRequest extends ServerGetCustomDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,15 +64,29 @@ class AdminGetCustomDataOperationRequest extends ServerGetCustomDataOperationReq
 
 export class GetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetCustomData;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetCustomDataOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -91,7 +117,14 @@ export class GetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCustomDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -108,7 +141,14 @@ export class GetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCustomDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -125,7 +165,15 @@ export class GetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, customDataKeys: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetCustomData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -134,10 +182,12 @@ export class GetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			customDatas: true,
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -145,6 +195,7 @@ export class GetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 			return operationResponse;
 		}
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.CustomDatas, this.generateCustomDatas(masterPlayer, request.customDataKeys));
 

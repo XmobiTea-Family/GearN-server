@@ -16,15 +16,21 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 
 class SetDisplayNameOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	// Stores the display name value used by this instance.
 	@StringDataMember({ code: ParameterCode.DisplayName, minLength: 5, maxLength: 32, mustNonNull: true })
 	public displayName: string;
 
+	// Indicates whether unique display name.
 	@BooleanDataMember({ code: ParameterCode.UniqueDisplayName, defaultValue: false, isOptional: true })
 	public uniqueDisplayName?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,6 +40,9 @@ class SetDisplayNameOperationRequest extends OperationRequest {
 
 class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +52,9 @@ class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationReques
 
 class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,21 +64,36 @@ class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationR
 
 export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetDisplayName;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetDisplayNameOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setDisplayName);
 
 		if (!allowMethod) {
@@ -80,7 +107,14 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -98,7 +132,14 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -116,7 +157,15 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string, displayName: string, uniqueDisplayName: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetDisplayName", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -125,11 +174,13 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			displayName: true,
 		}
 
 		if (request.uniqueDisplayName) {
+			// Stores the character player with this display name value used in the current execution flow.
 			let characterPlayerWithThisDisplayName = await this.gnServer.getDatabase().loadCharacterPlayerWithDisplayNameAsync(request.displayName, secretInfo.getGameId(), characterPlayerFindOptions);
 
 			if (characterPlayerWithThisDisplayName != null) {
@@ -138,6 +189,7 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 			}
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {

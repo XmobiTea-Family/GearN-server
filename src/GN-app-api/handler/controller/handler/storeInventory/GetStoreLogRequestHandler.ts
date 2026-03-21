@@ -22,21 +22,29 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 
 class GetStoreLogOperationRequest extends OperationRequest {
 
+	// Stores the store ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true, isOptional: true })
 	public storeId?: string;
 
+	// Stores the store receive types value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.StoreReceiveTypes, minLength: 1, maxLength: 10, mustNonNull: true, elementCls: Number, isOptional: true })
 	public storeReceiveTypes?: Array<number>;
 
+	// Stores the ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.Id, minLength: 10, maxLength: 11, mustNonNull: true, isOptional: true })
 	public id?: string;
 
+	// Stores the limit value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	public limit?: number;
 
+	// Stores the token value used by this instance.
 	@StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
 	public token?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +54,9 @@ class GetStoreLogOperationRequest extends OperationRequest {
 
 class ServerGetStoreLogOperationRequest extends GetStoreLogOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,6 +66,9 @@ class ServerGetStoreLogOperationRequest extends GetStoreLogOperationRequest {
 
 class AdminGetStoreLogOperationRequest extends ServerGetStoreLogOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -64,15 +78,29 @@ class AdminGetStoreLogOperationRequest extends ServerGetStoreLogOperationRequest
 
 export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetStoreLog;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetStoreLogOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -96,7 +124,14 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 		);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStoreLogOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -120,7 +155,14 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 		);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStoreLogOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -144,7 +186,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 		);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { storeId: string; storeReceiveTypes: Array<number>; id: string; limit: number; token: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_GetStoreLog", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -153,6 +203,7 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the filter value used in the current execution flow.
 		let $filter = {} as any;
 
 		if (request.storeId) {
@@ -174,15 +225,20 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			$filter["_id"] = { $lt: request.token };
 		}
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the results value used in the current execution flow.
 		let results = await this.gnServer.getDatabase().getStoreInventoryLogAsync($filter, secretInfo.getGameId(), request.limit);
 
+		// Stores the token value used in the current execution flow.
 		let token: string;
 
 		while (await results.hasNext()) {
+			// Stores the result value used in the current execution flow.
 			let result = await results.next();
 
+			// Stores the GearN result value used in the current execution flow.
 			let gnResult = new GNHashtable();
 
 			gnResult.add(ParameterCode.StoreId, result["storeId"]);
@@ -192,11 +248,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			gnResult.add(ParameterCode.StoreReceiveType, result["storeReceiveType"]);
 
 			{
+				// Stores the GearN arr value used in the current execution flow.
 				let gnArr = new GNArray();
+				// Stores the arr values value used in the current execution flow.
 				let arrValues = result["priceCurrencyStartValues"];
 				for (let i = 0; i < arrValues.length; i++) {
+					// Stores the arr value value used in the current execution flow.
 					let arrValue = arrValues[i];
 
+					// Stores the GearN data value used in the current execution flow.
 					let gnData = new GNHashtable();
 					gnData.add(ParameterCode.Key, arrValue["key"]);
 					gnData.add(ParameterCode.Value, arrValue["value"]);
@@ -207,11 +267,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			}
 
 			{
+				// Stores the GearN arr value used in the current execution flow.
 				let gnArr = new GNArray();
+				// Stores the arr values value used in the current execution flow.
 				let arrValues = result["priceCurrencyAmountValues"];
 				for (let i = 0; i < arrValues.length; i++) {
+					// Stores the arr value value used in the current execution flow.
 					let arrValue = arrValues[i];
 
+					// Stores the GearN data value used in the current execution flow.
 					let gnData = new GNHashtable();
 					gnData.add(ParameterCode.Key, arrValue["key"]);
 					gnData.add(ParameterCode.Value, arrValue["value"]);
@@ -222,11 +286,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			}
 
 			{
+				// Stores the GearN arr value used in the current execution flow.
 				let gnArr = new GNArray();
+				// Stores the arr values value used in the current execution flow.
 				let arrValues = result["priceCurrencyFinalValues"];
 				for (let i = 0; i < arrValues.length; i++) {
+					// Stores the arr value value used in the current execution flow.
 					let arrValue = arrValues[i];
 
+					// Stores the GearN data value used in the current execution flow.
 					let gnData = new GNHashtable();
 					gnData.add(ParameterCode.Key, arrValue["key"]);
 					gnData.add(ParameterCode.Value, arrValue["value"]);
@@ -237,11 +305,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			}
 
 			{
+				// Stores the GearN arr value used in the current execution flow.
 				let gnArr = new GNArray();
+				// Stores the arr values value used in the current execution flow.
 				let arrValues = result["storeCurrencyStartValues"];
 				for (let i = 0; i < arrValues.length; i++) {
+					// Stores the arr value value used in the current execution flow.
 					let arrValue = arrValues[i];
 
+					// Stores the GearN data value used in the current execution flow.
 					let gnData = new GNHashtable();
 					gnData.add(ParameterCode.Key, arrValue["key"]);
 					gnData.add(ParameterCode.Value, arrValue["value"]);
@@ -252,11 +324,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			}
 
 			{
+				// Stores the GearN arr value used in the current execution flow.
 				let gnArr = new GNArray();
+				// Stores the arr values value used in the current execution flow.
 				let arrValues = result["storeCurrencyAmountValues"];
 				for (let i = 0; i < arrValues.length; i++) {
+					// Stores the arr value value used in the current execution flow.
 					let arrValue = arrValues[i];
 
+					// Stores the GearN data value used in the current execution flow.
 					let gnData = new GNHashtable();
 					gnData.add(ParameterCode.Key, arrValue["key"]);
 					gnData.add(ParameterCode.Value, arrValue["value"]);
@@ -267,11 +343,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			}
 
 			{
+				// Stores the GearN arr value used in the current execution flow.
 				let gnArr = new GNArray();
+				// Stores the arr values value used in the current execution flow.
 				let arrValues = result["storeCurrencyFinalValues"];
 				for (let i = 0; i < arrValues.length; i++) {
+					// Stores the arr value value used in the current execution flow.
 					let arrValue = arrValues[i];
 
+					// Stores the GearN data value used in the current execution flow.
 					let gnData = new GNHashtable();
 					gnData.add(ParameterCode.Key, arrValue["key"]);
 					gnData.add(ParameterCode.Value, arrValue["value"]);
@@ -282,11 +362,15 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			}
 
 			{
+				// Stores the GearN arr value used in the current execution flow.
 				let gnArr = new GNArray();
+				// Stores the arr values value used in the current execution flow.
 				let arrValues = result["storeItemFinalValues"];
 				for (let i = 0; i < arrValues.length; i++) {
+					// Stores the arr value value used in the current execution flow.
 					let arrValue = arrValues[i];
 
+					// Stores the GearN data value used in the current execution flow.
 					let gnData = new GNHashtable();
 					gnData.add(ParameterCode.CatalogId, arrValue["catalogId"]);
 					gnData.add(ParameterCode.ClassId, arrValue["classId"]);

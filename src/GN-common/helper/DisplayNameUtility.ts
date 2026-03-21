@@ -1,11 +1,18 @@
 export class DisplayNameUtility {
+	/**
+	 * Executes the normalize string workflow.
+	 * @param input Provides the input value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	public static normalizeString(input: string): string {
 		if (!input) return "";
 
+		// Stores the input return value used in the current execution flow.
 		let inputReturn = "";
 		input = input.toLowerCase();
 
 		for (let i = 0; i < input.length; i++) {
+			// Stores the char value used in the current execution flow.
 			let char = input[i];
 
 			if (

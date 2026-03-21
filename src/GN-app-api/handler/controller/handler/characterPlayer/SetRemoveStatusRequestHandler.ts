@@ -17,12 +17,17 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	// Stores the reason value used by this instance.
 	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
 	public reason?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -32,6 +37,9 @@ class SetRemoveStatusOperationRequest extends OperationRequest {
 
 class ServerGetAvatarOperationRequest extends SetRemoveStatusOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -41,6 +49,9 @@ class ServerGetAvatarOperationRequest extends SetRemoveStatusOperationRequest {
 
 class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,21 +61,36 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 
 export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetRemoveStatus;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetRemoveStatusOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setRemoveStatus);
 
 		if (!allowMethod) {
@@ -77,7 +103,14 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -94,7 +127,14 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -111,7 +151,15 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetRemoveStatus", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -120,11 +168,13 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			removeStatus: true,
 			owner: true,
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
@@ -132,11 +182,14 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 			return operationResponse;
 		}
 
+		// Stores the remove status value used in the current execution flow.
 		let removeStatus = characterPlayer.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {
 			characterPlayer.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
 
+			// Stores the owner value used in the current execution flow.
 			let owner = characterPlayer.getOwner();
+			// Stores the game player value used in the current execution flow.
 			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
 			if (gamePlayer != null) {
 				if (gamePlayer.hasPlayerCharacter(request.characterId)) {

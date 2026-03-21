@@ -16,6 +16,11 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
+	/**
+	 * Checks whether get all.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	private isGetAll(infoRequestParam: InfoRequestParam): boolean {
 		return infoRequestParam.external
 			&& infoRequestParam.segments
@@ -35,9 +40,15 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 			&& infoRequestParam.pushNotifications;
 	}
 
+	/**
+	 * Converts the to master player find options.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected convertToMasterPlayerFindOptions(infoRequestParam: InfoRequestParam): MasterPlayerFindOptions {
 		if (this.isGetAll(infoRequestParam)) return null;
 
+		// Stores the answer value used in the current execution flow.
 		let answer: MasterPlayerFindOptions = {};
 		answer.userId = true;
 
@@ -61,6 +72,11 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate info request parameter for owner workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForOwner(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().masterPlayer.getSegment.selfEnable) {
@@ -129,6 +145,11 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 
 	}
 
+	/**
+	 * Executes the generate info request parameter for other workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForOther(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().masterPlayer.getSegment.otherSelfEnable) {
@@ -197,6 +218,11 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 
 	}
 
+	/**
+	 * Executes the generate info request parameter for server workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForServer(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().masterPlayer.getSegment.serverSelfEnable) {
@@ -265,6 +291,11 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 
 	}
 
+	/**
+	 * Executes the generate info request parameter for admin workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForAdmin(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().masterPlayer.getSegment.adminSelfEnable) {
@@ -333,7 +364,14 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 
 	}
 
+	/**
+	 * Executes the generate info response parameters workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateInfoResponseParameters(masterPlayer: MasterPlayer, infoRequestParam: InfoRequestParam): GNHashtable {
+		// Stores the answer value used in the current execution flow.
 		let answer = new GNHashtable();
 
 		if (infoRequestParam.external)
@@ -387,12 +425,20 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate external workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateExternal(masterPlayer: MasterPlayer): GNHashtable {
+		// Stores the GearN external value used in the current execution flow.
 		let gnExternal = new GNHashtable();
 
+		// Stores the external item value used in the current execution flow.
 		let externalItem = masterPlayer.getExternal();
 
 		if (externalItem.device != null) {
+			// Stores the GearN device value used in the current execution flow.
 			let gnDevice = new GNHashtable();
 
 			if (externalItem.device.customDeviceId != null) gnDevice.add(ParameterCode.CustomDeviceId, externalItem.device.customDeviceId);
@@ -408,6 +454,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.account != null) {
+			// Stores the GearN account value used in the current execution flow.
 			let gnAccount = new GNHashtable();
 
 			if (externalItem.account.username != null) gnAccount.add(ParameterCode.Username, externalItem.account.username);
@@ -416,6 +463,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.custom != null) {
+			// Stores the GearN custom value used in the current execution flow.
 			let gnCustom = new GNHashtable();
 
 			if (externalItem.custom.customId != null) gnCustom.add(ParameterCode.CustomId, externalItem.custom.customId);
@@ -424,6 +472,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.apple != null) {
+			// Stores the GearN apple value used in the current execution flow.
 			let gnApple = new GNHashtable();
 
 			gnApple.add(ParameterCode.AppleId, externalItem.apple.appleId);
@@ -433,6 +482,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.google != null) {
+			// Stores the GearN google value used in the current execution flow.
 			let gnGoogle = new GNHashtable();
 
 			gnGoogle.add(ParameterCode.GoogleId, externalItem.google.googleId);
@@ -443,6 +493,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.facebook != null) {
+			// Stores the GearN facebook value used in the current execution flow.
 			let gnFacebook = new GNHashtable();
 
 			gnFacebook.add(ParameterCode.FacebookId, externalItem.facebook.facebookId);
@@ -453,11 +504,13 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.genericService != null) {
+			// Stores the GearN generic services value used in the current execution flow.
 			let gnGenericServices = new GNArray();
 
 			if (externalItem.genericService.genericServices != null) {
 
 				externalItem.genericService.genericServices.forEach((value, key: string) => {
+					// Stores the GearN generic service value used in the current execution flow.
 					let gnGenericService = new GNHashtable();
 					gnGenericService.add(ParameterCode.ServiceName, key);
 					gnGenericService.add(ParameterCode.ServiceId, value.serviceId);
@@ -470,6 +523,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.googlePlayGameService != null) {
+			// Stores the GearN google play game service value used in the current execution flow.
 			let gnGooglePlayGameService = new GNHashtable();
 
 			gnGooglePlayGameService.add(ParameterCode.PlayerId, externalItem.googlePlayGameService.playerId);
@@ -480,6 +534,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (externalItem.gameCenter != null) {
+			// Stores the GearN game center value used in the current execution flow.
 			let gnGameCenter = new GNHashtable();
 
 			gnGameCenter.add(ParameterCode.PlayerId, externalItem.gameCenter.playerId);
@@ -492,22 +547,38 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnExternal;
 	}
 
+	/**
+	 * Executes the generate segments workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateSegments(masterPlayer: MasterPlayer): string[] {
 		return masterPlayer.getAllSegments();
 	}
 
+	/**
+	 * Executes the generate custom datas workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @param customDataKeys Provides the custom data keys value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateCustomDatas(masterPlayer: MasterPlayer, customDataKeys: Array<string>): GNArray {
+		// Stores the GearN custom datas value used in the current execution flow.
 		let gnCustomDatas = new GNArray();
 
+		// Stores the resolved master player settings instance for the current execution flow.
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 		for (let i = 0; i < masterPlayerSettings.customDatasSettings.length; i++) {
+			// Stores the custom datas settings item value used in the current execution flow.
 			let customDatasSettingsItem = masterPlayerSettings.customDatasSettings[i];
 
 			if (customDataKeys == null || customDataKeys.indexOf(customDatasSettingsItem.key) != -1) {
+				// Stores the value value used in the current execution flow.
 				let value = masterPlayer.getCustomData(customDatasSettingsItem.key);
 
 				if (value != null) {
+					// Stores the GearN custom data value used in the current execution flow.
 					let gnCustomData = new GNHashtable();
 
 					gnCustomData.add(ParameterCode.Key, customDatasSettingsItem.key);
@@ -521,13 +592,25 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnCustomDatas;
 	}
 
+	/**
+	 * Executes the generate display name workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateDisplayName(masterPlayer: MasterPlayer): string {
 		return masterPlayer.getDisplayName();
 	}
 
+	/**
+	 * Executes the generate avatar workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateAvatar(masterPlayer: MasterPlayer): GNHashtable {
+		// Stores the GearN avatar value used in the current execution flow.
 		let gnAvatar = new GNHashtable();
 
+		// Stores the avatar value used in the current execution flow.
 		let avatar = masterPlayer.getAvatar();
 
 		gnAvatar.add(ParameterCode.Type, avatar.type);
@@ -536,22 +619,38 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnAvatar;
 	}
 
+	/**
+	 * Executes the generate timestamp create workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTsCreate(masterPlayer: MasterPlayer): number {
 		return masterPlayer.getTsCreate();
 	}
 
+	/**
+	 * Executes the generate tags workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @param tagKeys Provides the tag keys value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTags(masterPlayer: MasterPlayer, tagKeys: Array<string>): GNArray {
+		// Stores the GearN tags value used in the current execution flow.
 		let gnTags = new GNArray();
 
+		// Stores the resolved master player settings instance for the current execution flow.
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 		for (let i = 0; i < masterPlayerSettings.tagsSettings.length; i++) {
+			// Stores the tags settings item value used in the current execution flow.
 			let tagsSettingsItem = masterPlayerSettings.tagsSettings[i];
 
 			if (tagKeys == null || tagKeys.indexOf(tagsSettingsItem.key) != -1) {
+				// Stores the value value used in the current execution flow.
 				let value = masterPlayer.getTag(tagsSettingsItem.key);
 
 				if (value != null) {
+					// Stores the GearN tag value used in the current execution flow.
 					let gnTag = new GNHashtable();
 
 					gnTag.add(ParameterCode.Key, tagsSettingsItem.key);
@@ -565,9 +664,16 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnTags;
 	}
 
+	/**
+	 * Executes the generate player ban workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerBan(masterPlayer: MasterPlayer): GNHashtable {
+		// Stores the GearN player ban value used in the current execution flow.
 		let gnPlayerBan = new GNHashtable();
 
+		// Stores the player ban value used in the current execution flow.
 		let playerBan = masterPlayer.getPlayerBan();
 
 		gnPlayerBan.add(ParameterCode.TsExpire, playerBan.tsExpire);
@@ -576,18 +682,29 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerBan;
 	}
 
+	/**
+	 * Executes the generate player datas workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @param playerDataKeys Provides the player data keys value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerDatas(masterPlayer: MasterPlayer, playerDataKeys: Array<string>): GNArray {
+		// Stores the GearN player datas value used in the current execution flow.
 		let gnPlayerDatas = new GNArray();
 
+		// Stores the resolved master player settings instance for the current execution flow.
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 		for (let i = 0; i < masterPlayerSettings.playerDatasSettings.length; i++) {
+			// Stores the player datas settings item value used in the current execution flow.
 			let playerDatasSettingsItem = masterPlayerSettings.playerDatasSettings[i];
 
 			if (playerDataKeys == null || playerDataKeys.indexOf(playerDatasSettingsItem.key) != -1) {
+				// Stores the player data value used in the current execution flow.
 				let playerData = masterPlayer.getPlayerData(playerDatasSettingsItem.key);
 
 				if (playerData != null) {
+					// Stores the GearN player data value used in the current execution flow.
 					let gnPlayerData = new GNHashtable();
 
 					gnPlayerData.add(ParameterCode.Key, playerData.key);
@@ -601,17 +718,28 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerDatas;
 	}
 
+	/**
+	 * Executes the generate player currencies workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @param playerCurrencyKeys Provides the player currency keys value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerCurrencies(masterPlayer: MasterPlayer, playerCurrencyKeys: Array<string>): GNArray {
+		// Stores the GearN player currencies value used in the current execution flow.
 		let gnPlayerCurrencies = new GNArray();
 
+		// Stores the resolved master player settings instance for the current execution flow.
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 		for (let i = 0; i < masterPlayerSettings.playerCurrenciesSettings.length; i++) {
+			// Stores the player currencies settings item value used in the current execution flow.
 			let playerCurrenciesSettingsItem = masterPlayerSettings.playerCurrenciesSettings[i];
 
 			if (playerCurrencyKeys == null || playerCurrencyKeys.indexOf(playerCurrenciesSettingsItem.key) != -1) {
+				// Stores the player currency value used in the current execution flow.
 				let playerCurrency = masterPlayer.getPlayerCurrency(playerCurrenciesSettingsItem.key);
 
+				// Stores the GearN player currency value used in the current execution flow.
 				let gnPlayerCurrency = new GNHashtable();
 				gnPlayerCurrency.add(ParameterCode.Key, playerCurrenciesSettingsItem.key);
 
@@ -625,17 +753,28 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerCurrencies;
 	}
 
+	/**
+	 * Executes the generate player statistics workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @param playerStatisticsKeys Provides the player statistics keys value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerStatistics(masterPlayer: MasterPlayer, playerStatisticsKeys: Array<string>): GNArray {
+		// Stores the GearN player statistics value used in the current execution flow.
 		let gnPlayerStatistics = new GNArray();
 
+		// Stores the resolved master player settings instance for the current execution flow.
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 		for (let i = 0; i < masterPlayerSettings.playerStatisticsSettings.length; i++) {
+			// Stores the player statistics settings item value used in the current execution flow.
 			let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings[i];
 
 			if (playerStatisticsKeys == null || playerStatisticsKeys.indexOf(playerStatisticsSettingsItem.key) != -1) {
+				// Stores the player statistics value used in the current execution flow.
 				let playerStatistics = masterPlayer.getPlayerStatistics(playerStatisticsSettingsItem.key);
 
+				// Stores the GearN player statistic value used in the current execution flow.
 				let gnPlayerStatistic = new GNHashtable();
 				gnPlayerStatistic.add(ParameterCode.Key, playerStatisticsSettingsItem.key);
 
@@ -649,30 +788,59 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerStatistics;
 	}
 
+	/**
+	 * Executes the generate timestamp last login workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTsLastLogin(masterPlayer: MasterPlayer): number {
 		return masterPlayer.getTsLastLogin();
 	}
 
+	/**
+	 * Executes the generate IP address create workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateIpAddressCreate(masterPlayer: MasterPlayer): string {
 		return masterPlayer.getIpAddressCreate();
 	}
 
+	/**
+	 * Executes the generate country code workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateCountryCode(masterPlayer: MasterPlayer): string {
 		return masterPlayer.getCountryCode();
 	}
 
+	/**
+	 * Executes the generate email workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateEmail(masterPlayer: MasterPlayer): string {
 		return masterPlayer.getEmail();
 	}
 
+	/**
+	 * Executes the generate push notifications workflow.
+	 * @param masterPlayer Provides the master player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePushNotifications(masterPlayer: MasterPlayer): GNArray {
+		// Stores the GearN push notifications value used in the current execution flow.
 		let gnPushNotifications = new GNArray();
 
+		// Stores the push notifications value used in the current execution flow.
 		let pushNotifications = masterPlayer.getAllPushNotifications();
 
 		for (let i = 0; i < pushNotifications.length; i++) {
+			// Stores the push notification value used in the current execution flow.
 			let pushNotification = pushNotifications[i];
 
+			// Stores the GearN push notification value used in the current execution flow.
 			let gnPushNotification = new GNHashtable();
 			gnPushNotification.add(ParameterCode.PushId, pushNotification.pushId);
 			gnPushNotification.add(ParameterCode.PlatformType, pushNotification.platformType);

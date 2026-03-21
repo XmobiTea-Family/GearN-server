@@ -16,12 +16,17 @@ import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler
 
 class UnlinkAppleOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the apple ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.AppleId, minLength: 6, maxLength: 64, mustNonNull: true })
 	public appleId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,9 +36,13 @@ class UnlinkAppleOperationRequest extends OperationRequest {
 
 class ServerUnlinkAppleOperationRequest extends UnlinkAppleOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +52,9 @@ class ServerUnlinkAppleOperationRequest extends UnlinkAppleOperationRequest {
 
 class AdminUnlinkAppleOperationRequest extends ServerUnlinkAppleOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,15 +64,29 @@ class AdminUnlinkAppleOperationRequest extends ServerUnlinkAppleOperationRequest
 
 export class UnlinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.UnlinkApple;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return UnlinkAppleOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -91,7 +117,14 @@ export class UnlinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerUnlinkAppleOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -108,7 +141,14 @@ export class UnlinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminUnlinkAppleOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -125,7 +165,15 @@ export class UnlinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, appleId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_UnlinkApple", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -134,10 +182,12 @@ export class UnlinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			external: true,
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -145,6 +195,7 @@ export class UnlinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the external value used in the current execution flow.
 		let external = masterPlayer.getExternal();
 		if (external.apple == null || external.apple.appleId != request.appleId) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalNotLinked);

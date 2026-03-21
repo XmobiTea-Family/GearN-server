@@ -1,7 +1,9 @@
 import { xRandom } from "./../../GN-library/xrandom/lib/xRandom";
 
 export class StringUtility {
+	// Stores the random character with number value used by this instance.
 	private static readonly RandomCharacterWithNumber: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	// Stores the random character value used by this instance.
 	private static readonly RandomCharacter: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 	// 0 all
@@ -10,6 +12,7 @@ export class StringUtility {
 	// 3 string uppercase
 	// 4 string lowercase
 	public static generateRandomString(length: number, idTypeCase: number): string {
+		// Stores the name return value used in the current execution flow.
 		let nameReturn = "";
 
 		if (idTypeCase > 2) {

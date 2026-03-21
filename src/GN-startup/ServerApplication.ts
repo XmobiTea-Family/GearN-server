@@ -49,129 +49,244 @@ import { EventCallbackCloudScriptService, PostEventCallbackService, PreEventCall
 import { GNServerSettingsOptions, LogType, MessageType } from "@xmobitea/gn-typescript-client";
 
 abstract class BuilderBase {
+	// Stores the application settings value used by this instance.
 	protected applicationSettings: ApplicationSettings;
+	// Stores the HTTP app settings value used by this instance.
 	protected httpAppSettings: HttpAppSettings;
+	// Stores the socket app settings value used by this instance.
 	protected socketAppSettings: SocketAppSettings;
+	// Stores the database settings value used by this instance.
 	protected databaseSettings: DatabaseSettings;
+	// Stores the other settings value used by this instance.
 	protected otherSettings: OtherSettings;
+	// Stores the log settings value used by this instance.
 	protected logSettings: LogSettings;
+	// Stores the upload file settings value used by this instance.
 	protected uploadFileSettings: UploadFileSettings;
+	// Stores the DDoS settings value used by this instance.
 	protected ddosSettings: DdosSettings;
+	// Stores the cluster settings value used by this instance.
 	protected clusterSettings: ClusterSettings;
 
+	/**
+	 * Returns the application settings.
+	 * @returns Returns the application settings.
+	 */
 	public getApplicationSettings(): ApplicationSettings {
 		return this.applicationSettings;
 	}
 
+	/**
+	 * Returns the HTTP app settings.
+	 * @returns Returns the HTTP app settings.
+	 */
 	public getHttpAppSettings(): HttpAppSettings {
 		return this.httpAppSettings;
 	}
 
+	/**
+	 * Returns the socket app settings.
+	 * @returns Returns the socket app settings.
+	 */
 	public getSocketAppSettings(): SocketAppSettings {
 		return this.socketAppSettings;
 	}
 
+	/**
+	 * Returns the database settings.
+	 * @returns Returns the database settings.
+	 */
 	public getDatabaseSettings(): DatabaseSettings {
 		return this.databaseSettings;
 	}
 
+	/**
+	 * Returns the other settings.
+	 * @returns Returns the other settings.
+	 */
 	public getOtherSettings(): OtherSettings {
 		return this.otherSettings;
 	}
 
+	/**
+	 * Returns the log settings.
+	 * @returns Returns the log settings.
+	 */
 	public getLogSettings(): LogSettings {
 		return this.logSettings;
 	}
 
+	/**
+	 * Returns the upload file settings.
+	 * @returns Returns the upload file settings.
+	 */
 	public getUploadFileSettings(): UploadFileSettings {
 		return this.uploadFileSettings;
 	}
 
+	/**
+	 * Returns the DDoS settings.
+	 * @returns Returns the DDoS settings.
+	 */
 	public getDdosSettings(): DdosSettings {
 		return this.ddosSettings;
 	}
 
+	/**
+	 * Returns the cluster settings.
+	 * @returns Returns the cluster settings.
+	 */
 	public getClusterSettings(): ClusterSettings {
 		return this.clusterSettings;
 	}
 
+	/**
+	 * Initializes a new builder base instance.
+	 */
 	constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
+	/**
+	 * Sets the application settings.
+	 * @param applicationSettings Provides the application settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setApplicationSettings(applicationSettings: ApplicationSettings): Builder {
 		this.applicationSettings = applicationSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the HTTP app settings.
+	 * @param httpAppSettings Provides the HTTP app settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setHttpAppSettings(httpAppSettings: HttpAppSettings): Builder {
 		this.httpAppSettings = httpAppSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the socket app settings.
+	 * @param socketAppSettings Provides the socket app settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setSocketAppSettings(socketAppSettings: SocketAppSettings): Builder {
 		this.socketAppSettings = socketAppSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the database settings.
+	 * @param databaseSettings Provides the database settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setDatabaseSettings(databaseSettings: DatabaseSettings): Builder {
 		this.databaseSettings = databaseSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the other settings.
+	 * @param otherSettings Provides the other settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setOtherSettings(otherSettings: OtherSettings): Builder {
 		this.otherSettings = otherSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the log settings.
+	 * @param logSettings Provides the log settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setLogSettings(logSettings: LogSettings): Builder {
 		this.logSettings = logSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the upload file settings.
+	 * @param uploadFileSettings Provides the upload file settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setUploadFileSettings(uploadFileSettings: UploadFileSettings): Builder {
 		this.uploadFileSettings = uploadFileSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the DDoS settings.
+	 * @param ddosSettings Provides the DDoS settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setDdosSettings(ddosSettings: DdosSettings): Builder {
 		this.ddosSettings = ddosSettings;
 		return this;
 	}
 
+	/**
+	 * Sets the cluster settings.
+	 * @param clusterSettings Provides the cluster settings value used by this operation.
+	 * @returns Returns the current builder instance.
+	 */
 	public setClusterSettings(clusterSettings: ClusterSettings): Builder {
 		this.clusterSettings = clusterSettings;
 		return this;
 	}
 
+	/**
+	 * Builds the configured instance.
+	 */
 	public build() {
 		return new ServerApplication(this);
 	}
 
+	/**
+	 * Initializes a new builder instance.
+	 */
 	constructor() {
 		super();
 	}
 }
 
 export class ServerApplication extends BuilderBase {
+	// Stores the HTTP app value used by this instance.
 	private httpApp: HttpApp;
+	// Stores the socket app value used by this instance.
 	private socketApp: SocketApp;
+	// Stores the GearN server value used by this instance.
 	private gnServer: GNServer;
+	// Stores the API middleware value used by this instance.
 	private apiMiddleware: ApiMiddleware;
+	// Stores the anti DDoS middleware value used by this instance.
 	private antiDdosMiddleware: AntiDdosMiddleware;
+	// Stores the upload file middleware value used by this instance.
 	private uploadFileMiddleware: UploadFileMiddleware;
 
+	// Stores the session ID value used by this instance.
 	private sessionId: string;
+	// Stores the secretkey value used by this instance.
 	private secretkey: string;
+	// Stores the secret ID value used by this instance.
 	private secretId: string;
 
+	/**
+	 * Runs the current workflow.
+	 * @param onRunSuccess Provides the callback executed after a successful startup.
+	 */
 	public async run(onRunSuccess?: OnRunSuccess): Promise<void> {
+		// Stores the salt value used in the current execution flow.
 		let salt = StringUtility.generateRandomString(10, 0);
 		this.sessionId = StringUtility.generateRandomString(15, 0);
 		this.secretkey = StringUtility.generateRandomString(20, 0);
 		this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
 
+		// Stores the configuration full log path value used in the current execution flow.
 		let configFullLogPath = this.getLogSettings().getLogPath();
+		// Stores the full log path value used in the current execution flow.
 		let fullLogPath = configFullLogPath;
 		if (fullLogPath) {
 			if (!fs.existsSync(fullLogPath)) {
@@ -190,16 +305,22 @@ export class ServerApplication extends BuilderBase {
 
 		Debug.log("[GearN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
 
+		// Stores the port value used in the current execution flow.
 		const port = this.getApplicationSettings().getPort();
 		Debug.log("[GearN] Try run server on the port " + port);
 
+		// Stores the socket port value used in the current execution flow.
 		const socketPort = this.getApplicationSettings().getSocketPort();
 		Debug.log("[GearN] Try run socket server on the port " + socketPort);
 
+		// Stores the app value used in the current execution flow.
 		const app = express();
+		// Stores the server value used in the current execution flow.
 		const server = this.getServer(app, this.getApplicationSettings());
 
+		// Tracks whether other socket server should be used.
 		const useOtherSocketServer = this.getApplicationSettings().getPort() != this.getApplicationSettings().getSocketPort() && this.getSocketAppSettings().getEnable();
+		// Stores the socket server value used in the current execution flow.
 		const socketServer = useOtherSocketServer ? http.createServer() : server;
 
 		this.uploadFileMiddleware = this.newUploadMiddleware();
@@ -264,12 +385,15 @@ export class ServerApplication extends BuilderBase {
 			}
 		);
 
+		// Stores the auth info collection value used in the current execution flow.
 		let authInfoCollection = this.gnServer.getDatabase().systemCollection("AuthInfo");
 		this.apiMiddleware.setAuthInfoCollection(authInfoCollection);
 
+		// Stores the player game collection value used in the current execution flow.
 		let playerGameCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
 
+		// Stores the secret info collection value used in the current execution flow.
 		let secretInfoCollection = this.gnServer.getDatabase().systemCollection("SecretInfo");
 		this.apiMiddleware.setSecretInfoCollection(secretInfoCollection);
 
@@ -279,16 +403,20 @@ export class ServerApplication extends BuilderBase {
 		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 		this.gnServer.setIdTypeCase(this.getOtherSettings().getIdTypeCase());
 		this.gnServer.setRestoreRootPassword(this.getApplicationSettings().getRestoreRootPassword());
+		// Stores the report DDoS collection value used in the current execution flow.
 		let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdos");
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
+		// Stores the ban DDoS collection value used in the current execution flow.
 		let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdos");
 		this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
 		await this.setupDatabase();
 
+		// Stores the game IDs value used in the current execution flow.
 		let gameIds = await this.applySettingsGame();
 
+		// Stores the adapter event collection value used in the current execution flow.
 		let adapterEventCollection = this.gnServer.getDatabase().systemCollection("AdapterEvent");
 		this.socketApp.setEmitter(adapterEventCollection);
 
@@ -299,6 +427,7 @@ export class ServerApplication extends BuilderBase {
 		// }
 
 		let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
+		// Stores the download file session collection value used in the current execution flow.
 		let downloadFileSessionCollection = this.gnServer.getDatabase().systemCollection("DownloadFileSession");
 		this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
 		this.httpApp.getUploadFileHandler().setDownloadFileSessionCollection(downloadFileSessionCollection);
@@ -309,10 +438,14 @@ export class ServerApplication extends BuilderBase {
 			Debug.log("[GearN] Game Application run success");
 		});
 
+		// Stores the secret info results value used in the current execution flow.
 		let secretInfoResults = await secretInfoCollection.find({ isDefault: true }).toArray();
+		// Stores the secret info value used in the current execution flow.
 		let secretInfo = secretInfoResults.at(0);
+		// Stores the secret key value used in the current execution flow.
 		let secretKey = secretInfo == null ? "" : secretInfo["secretKey"];
 
+		// Stores the GearN server settings options value used in the current execution flow.
 		let gnServerSettingsOptions: GNServerSettingsOptions = {
 			serverAddress: "127.0.0.1",
 			serverPort: this.applicationSettings.getPort(),
@@ -335,6 +468,7 @@ export class ServerApplication extends BuilderBase {
 			clientSecretKey: secretKey,
 		}
 
+		// Stores the database connection value used in the current execution flow.
 		let dbConnection = {
 			url: this.databaseSettings.getConnectionString(),
 			dbName: this.databaseSettings.getDatabaseName(),
@@ -344,11 +478,14 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
+			// Stores the event callback cloud script service value used in the current execution flow.
 			let eventCallbackCloudScriptService = (<EventCallbackCloudScriptService>this.gnServer.getEventCallbackCloudScriptService());
 
+			// Stores the backup cloud script function collection value used in the current execution flow.
 			let backupCloudScriptFunctionCollection = this.gnServer.getDatabase().systemCollection("EventCallback.CloudScriptBackup");
 			eventCallbackCloudScriptService.setBackupCloudScriptFunctionCollection(backupCloudScriptFunctionCollection);
 
+			// Stores the cloud script function collection value used in the current execution flow.
 			let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemCollection("EventCallback.CloudScript");
 			eventCallbackCloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
 
@@ -357,11 +494,13 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
+			// Stores the cloud script event service value used in the current execution flow.
 			let cloudScriptEventService = <CloudScriptEventService>this.gnServer.getCloudScriptEventService();
 
 			cloudScriptEventService.init(this.gnServer);
 		}
 
+		// Stores the post event callback log collection value used in the current execution flow.
 		let postEventCallbackLogCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
 		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setEventCallbackLogCollection(postEventCallbackLogCollection);
 
@@ -369,7 +508,9 @@ export class ServerApplication extends BuilderBase {
 		(<PreEventCallbackService>this.gnServer.getPreEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 
 		server.listen(port, "0.0.0.0", () => {
+			// Stores the banner path value used in the current execution flow.
 			let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
+			// Stores the banner txt value used in the current execution flow.
 			let bannerTxt = fs.readFileSync(bannerPath, "utf8");
 			console.log('\n\n' + bannerTxt + '\n\n');
 
@@ -389,15 +530,18 @@ export class ServerApplication extends BuilderBase {
 
 		{
 			for (let i = 0; i < gameIds.length; i++) {
+				// Stores the game ID value used in the current execution flow.
 				let gameId = gameIds[i];
 
 				{
+					// Stores the cloud script service value used in the current execution flow.
 					let cloudScriptService = <CloudScriptService>this.gnServer.getCloudScriptService(gameId);
 					cloudScriptService.init(gameId, gnServerSettingsOptions, dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
 					cloudScriptService.run();
 				}
 
 				{
+					// Stores the configuration service value used in the current execution flow.
 					let configService = this.gnServer.getConfigService(gameId);
 					(<ConfigService>configService).run();
 				}
@@ -405,7 +549,9 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
+			// Stores the country region collection value used in the current execution flow.
 			let countryRegionCollection = this.gnServer.getDatabase().systemCollection("CountryRegion");
+			// Tracks whether r IP address collection should be used.
 			let userIPAddressCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer.IPAddress");
 
 			(this.gnServer.getCountryIPDetailService() as CountryIPDetailService).init(this.getOtherSettings().getIPApiUrl(), countryRegionCollection, userIPAddressCollection);
@@ -413,11 +559,16 @@ export class ServerApplication extends BuilderBase {
 
 	}
 
+	/**
+	 * Sets the up database.
+	 */
 	private async setupDatabase(): Promise<void> {
 		Debug.log("setupDatabase");
 
+		// Stores the master admin collection value used in the current execution flow.
 		let masterAdminCollection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the version result value used in the current execution flow.
 		let versionResult = await masterAdminCollection.findOne({ type: "version" });
 
 		if (versionResult == null) {
@@ -428,6 +579,9 @@ export class ServerApplication extends BuilderBase {
 		}
 	}
 
+	/**
+	 * Sets the up new GearN database.
+	 */
 	private async setupNewGNDatabase() {
 		Debug.log("The GN Server is installing some new information on Database...");
 
@@ -447,14 +601,17 @@ export class ServerApplication extends BuilderBase {
 
 		Debug.log("create some indexes on System.MasterAdmin success.");
 
+		// Tracks whether r ID should be used.
 		let userId = StringUtility.generateRandomString(10, 0);
 		{
 
 
+			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 			// create secretInfo for admin account
 			{
+				// Stores the permission value used in the current execution flow.
 				let permission = CreateSecretInfoRequestHandler.generateRecommendAdminPermission();
 
 				{
@@ -585,6 +742,7 @@ export class ServerApplication extends BuilderBase {
 					};
 				}
 
+				// Stores the admin permission value used in the current execution flow.
 				let adminPermission = structuredClone(permission);
 				// adminPermission.masterAdmin.createAdminAccount.selfEnable = false;
 				// adminPermission.masterAdmin.removeAdminAccount.selfEnable = false;
@@ -607,8 +765,10 @@ export class ServerApplication extends BuilderBase {
 
 				await masterAdminCollection.insertOne(result);
 
+				// Stores the secret info item value used in the current execution flow.
 				let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
+				// Stores the new secret info value used in the current execution flow.
 				let newSecretInfo = SecretInfo.Builder()
 					.setGameId(secretInfoItem.getGameId())
 					.setIsRemove(secretInfoItem.getRemove())
@@ -625,9 +785,11 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
+				// Stores the permission value used in the current execution flow.
 				let permission = CreateSecretInfoRequestHandler.generateRecommendPlayerPermission();
 
 				{
+					// Stores the result value used in the current execution flow.
 					let result = {
 						type: "secretInfo",
 						secretKey: "game_" + StringUtility.generateRandomString(15, 0),
@@ -643,8 +805,10 @@ export class ServerApplication extends BuilderBase {
 
 					await masterAdminCollection.insertOne(result);
 
+					// Stores the secret info item value used in the current execution flow.
 					let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
+					// Stores the new secret info value used in the current execution flow.
 					let newSecretInfo = SecretInfo.Builder()
 						.setGameId(secretInfoItem.getGameId())
 						.setIsRemove(secretInfoItem.getRemove())
@@ -661,6 +825,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the result value used in the current execution flow.
 					let result = {
 						type: "secretInfo",
 						secretKey: "game_" + StringUtility.generateRandomString(15, 0),
@@ -676,8 +841,10 @@ export class ServerApplication extends BuilderBase {
 
 					await masterAdminCollection.insertOne(result);
 
+					// Stores the secret info item value used in the current execution flow.
 					let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
+					// Stores the new secret info value used in the current execution flow.
 					let newSecretInfo = SecretInfo.Builder()
 						.setGameId(secretInfoItem.getGameId())
 						.setIsRemove(secretInfoItem.getRemove())
@@ -694,14 +861,19 @@ export class ServerApplication extends BuilderBase {
 				}
 			}
 
+			// Stores the root username value used in the current execution flow.
 			let rootUsername = this.applicationSettings.getInitRootUsername() ?? "admin";
+			// Stores the root password value used in the current execution flow.
 			let rootPassword = this.applicationSettings.getInitRootPassword() ?? "password";
 
 			// create secretInfo for admin account
 			{
+				// Stores the permission value used in the current execution flow.
 				let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
+				// Stores the secret key value used in the current execution flow.
 				let secretKey = StringUtility.generateRandomString(20, 0);
 
+				// Stores the new secret info value used in the current execution flow.
 				let newSecretInfo = SecretInfo.Builder()
 					.setGameId("")
 					.setIsRemove(false)
@@ -732,6 +904,7 @@ export class ServerApplication extends BuilderBase {
 
 			Debug.log("creating some indexes on System.MasterPlayer...");
 
+			// Stores the master player collection value used in the current execution flow.
 			let masterPlayerCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
 
 			await masterPlayerCollection.createIndex({ userId: 1 }, { background: true, name: "userId_1" });
@@ -856,6 +1029,7 @@ export class ServerApplication extends BuilderBase {
 					max: 100000000
 				});
 
+				// Stores the currency log collection value used in the current execution flow.
 				let currencyLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.CurrencyLog");
 				await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 				await currencyLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
@@ -870,6 +1044,7 @@ export class ServerApplication extends BuilderBase {
 					max: 100000000
 				});
 
+				// Stores the statistics log collection value used in the current execution flow.
 				let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeCollection("MasterPlayer.StatisticsLog");
 				await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 				await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
@@ -878,6 +1053,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
+				// Tracks whether r IP address collection should be used.
 				let userIPAddressCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer.IPAddress");
 				await userIPAddressCollection.createIndex({ userId: 1 }, { background: true, name: "userId_1" });
 
@@ -885,6 +1061,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
+				// Stores the country region collection value used in the current execution flow.
 				let countryRegionCollection = this.gnServer.getDatabase().systemCollection("CountryRegion");
 				await countryRegionCollection.createIndex({ countryCode: 1 }, { background: true, name: "countryCode_1" });
 
@@ -892,6 +1069,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
+				// Stores the backup statistics leaderboard collection value used in the current execution flow.
 				let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
 				await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 
@@ -905,6 +1083,7 @@ export class ServerApplication extends BuilderBase {
 					max: 105120
 				});
 
+				// Stores the analytics collection value used in the current execution flow.
 				let analyticsCollection = this.gnServer.getDatabase().systemCollection("Analytics");
 				await analyticsCollection.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate_-1" });
 
@@ -918,6 +1097,7 @@ export class ServerApplication extends BuilderBase {
 					max: 100000
 				});
 
+				// Stores the store analytics value used in the current execution flow.
 				let storeAnalytics = this.gnServer.getDatabase().systemCollection("StoreAnalytics");
 				await storeAnalytics.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate_-1" });
 
@@ -930,7 +1110,9 @@ export class ServerApplication extends BuilderBase {
 			{
 				Debug.log("creating some indexes for gameId live...");
 
+				// Stores the game ID value used in the current execution flow.
 				let gameId = "live";
+				// Stores the game settings result value used in the current execution flow.
 				let gameSettingsResult = {
 					type: "gameSettings",
 					gameId: gameId,
@@ -982,6 +1164,7 @@ export class ServerApplication extends BuilderBase {
 				await masterAdminCollection.insertOne(gameSettingsResult);
 
 				{
+					// Stores the game player collection value used in the current execution flow.
 					let gamePlayerCollection = this.gnServer.getDatabase().systemGameCollection("GamePlayer", gameId);
 
 					await gamePlayerCollection.createIndex({ userId: 1 }, { background: true, name: "userId_1" });
@@ -999,6 +1182,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the currency log collection value used in the current execution flow.
 					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
@@ -1013,6 +1197,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
@@ -1021,6 +1206,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 
@@ -1028,6 +1214,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the character player collection value used in the current execution flow.
 					let characterPlayerCollection = this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", gameId);
 
 					await characterPlayerCollection.createIndex({ characterId: 1 }, { background: true, name: "characterId_1" });
@@ -1045,6 +1232,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the currency log collection value used in the current execution flow.
 					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
@@ -1059,6 +1247,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
@@ -1067,6 +1256,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 
@@ -1074,6 +1264,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the group collection value used in the current execution flow.
 					let groupCollection = this.gnServer.getDatabase().systemGameCollection("Group", gameId);
 
 					await groupCollection.createIndex({ groupId: 1 }, { background: true, name: "groupId_1" });
@@ -1090,6 +1281,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the currency log collection value used in the current execution flow.
 					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
@@ -1104,6 +1296,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
@@ -1112,6 +1305,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 
@@ -1125,6 +1319,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the group message collection value used in the current execution flow.
 					let groupMessageCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.Message", gameId);
 					await groupMessageCollection.createIndex({ groupId: 1, _id: -1 }, { background: true, name: "groupId_1_id_-1" });
 
@@ -1132,6 +1327,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the inventory collection value used in the current execution flow.
 					let inventoryCollection = this.gnServer.getDatabase().systemGameCollection("Inventory", gameId);
 
 					await inventoryCollection.createIndex({ itemId: 1 }, { background: true, name: "itemId_1" });
@@ -1148,6 +1344,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ itemId: 1, key: 1, _id: -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
@@ -1156,6 +1353,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 
@@ -1163,6 +1361,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the store inventory collection value used in the current execution flow.
 					let storeInventoryCollection = this.gnServer.getDatabase().systemGameCollection("StoreInventory", gameId);
 
 					await storeInventoryCollection.createIndex({ storeId: 1 }, { background: true, name: "storeId_1" });
@@ -1179,6 +1378,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the store inventory log collection value used in the current execution flow.
 					let storeInventoryLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
 					await storeInventoryLogCollection.createIndex({ storeId: 1, id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
 					await storeInventoryLogCollection.createIndex({ id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
@@ -1188,6 +1388,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the store inventory used collection value used in the current execution flow.
 					let storeInventoryUsedCollection = this.gnServer.getDatabase().systemGameCollection("StoreInventory.StoreUsed", gameId);
 					await storeInventoryUsedCollection.createIndex({ storeId: 1 }, { background: true, name: "storeId_1" });
 
@@ -1195,6 +1396,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the receipt IAP collection value used in the current execution flow.
 					let receiptIAPCollection = this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", gameId);
 					receiptIAPCollection.createIndex({ payloadMd5: 1 }, { background: true, name: "payloadMd5_1" });
 					receiptIAPCollection.createIndex({ transactionId: 1 }, { background: true, name: "transactionId_1" });
@@ -1209,6 +1411,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000
 					});
 
+					// Stores the matchmaking ticket collection value used in the current execution flow.
 					let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
 					await matchmakingTicketCollection.createIndex({ userIds: 1, "queueName": 1, "status": -1 }, { background: true, name: "userIds_1_queueName_1_status_-1" });
@@ -1226,6 +1429,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000
 					});
 
+					// Stores the cloud script function log collection value used in the current execution flow.
 					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 					await cloudScriptFunctionLogCollection.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate-1" });
 
@@ -1233,6 +1437,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the match collection value used in the current execution flow.
 					let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", gameId);
 
 					await matchCollection.createIndex({ matchId: 1 }, { background: true, name: "matchId_1" });
@@ -1243,6 +1448,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the configuration collection value used in the current execution flow.
 					let configCollection = this.gnServer.getDatabase().systemGameCollection("Config", gameId);
 					await configCollection.createIndex({ configName: 1, label: 1 }, { background: true, unique: true, name: "configName_1_label_1" });
 
@@ -1250,6 +1456,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the cache collection value used in the current execution flow.
 					let cacheCollection = this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId);
 					await cacheCollection.createIndex({ key: 1 }, { background: true, name: "key_1" });
 
@@ -1263,7 +1470,9 @@ export class ServerApplication extends BuilderBase {
 			{
 				Debug.log("creating some indexes for gameId dev...");
 
+				// Stores the game ID value used in the current execution flow.
 				let gameId = "dev";
+				// Stores the game settings result value used in the current execution flow.
 				let gameSettingsResult = {
 					type: "gameSettings",
 					gameId: gameId,
@@ -1315,6 +1524,7 @@ export class ServerApplication extends BuilderBase {
 				await masterAdminCollection.insertOne(gameSettingsResult);
 
 				{
+					// Stores the game player collection value used in the current execution flow.
 					let gamePlayerCollection = this.gnServer.getDatabase().systemGameCollection("GamePlayer", gameId);
 
 					await gamePlayerCollection.createIndex({ userId: 1 }, { background: true, name: "userId_1" });
@@ -1330,6 +1540,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the currency log collection value used in the current execution flow.
 					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
@@ -1342,12 +1553,14 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ userId: 1, key: 1, _id: -1 }, { background: true, name: "userId_1_key_1_id_-1" });
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("GamePlayer.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 				}
@@ -1355,6 +1568,7 @@ export class ServerApplication extends BuilderBase {
 				Debug.log("create some indexes on GamePlayer for gameId " + gameId + " success.");
 
 				{
+					// Stores the character player collection value used in the current execution flow.
 					let characterPlayerCollection = this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", gameId);
 
 					await characterPlayerCollection.createIndex({ characterId: 1 }, { background: true, name: "characterId_1" });
@@ -1370,6 +1584,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the currency log collection value used in the current execution flow.
 					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
@@ -1382,12 +1597,14 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ characterId: 1, key: 1, _id: -1 }, { background: true, name: "characterId_1_key_1_id_-1" });
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("CharacterPlayer.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 				}
@@ -1395,6 +1612,7 @@ export class ServerApplication extends BuilderBase {
 				Debug.log("create some indexes on CharacterPlayer for gameId " + gameId + " success.");
 
 				{
+					// Stores the group collection value used in the current execution flow.
 					let groupCollection = this.gnServer.getDatabase().systemGameCollection("Group", gameId);
 
 					await groupCollection.createIndex({ groupId: 1 }, { background: true, name: "groupId_1" });
@@ -1409,6 +1627,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the currency log collection value used in the current execution flow.
 					let currencyLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.CurrencyLog", gameId);
 					await currencyLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await currencyLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
@@ -1421,12 +1640,14 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Group.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ groupId: 1, key: 1, _id: -1 }, { background: true, name: "groupId_1_key_1_id_-1" });
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 				}
@@ -1438,6 +1659,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the group message collection value used in the current execution flow.
 					let groupMessageCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.Message", gameId);
 					await groupMessageCollection.createIndex({ groupId: 1, _id: -1 }, { background: true, name: "groupId_1_id_-1" });
 				}
@@ -1445,6 +1667,7 @@ export class ServerApplication extends BuilderBase {
 				Debug.log("create some indexes on Group for gameId " + gameId + " success.");
 
 				{
+					// Stores the inventory collection value used in the current execution flow.
 					let inventoryCollection = this.gnServer.getDatabase().systemGameCollection("Inventory", gameId);
 
 					await inventoryCollection.createIndex({ itemId: 1 }, { background: true, name: "itemId_1" });
@@ -1459,12 +1682,14 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the statistics log collection value used in the current execution flow.
 					let statisticsLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("Inventory.StatisticsLog", gameId);
 					await statisticsLogCollection.createIndex({ key: 1, _id: -1 }, { background: true, name: "key_1_id_-1" });
 					await statisticsLogCollection.createIndex({ itemId: 1, key: 1, _id: -1 }, { background: true, name: "itemId_1_key_1_id_-1" });
 				}
 
 				{
+					// Stores the backup statistics leaderboard collection value used in the current execution flow.
 					let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsBackup", gameId);
 					await backupStatisticsLeaderboardCollection.createIndex({ key: 1, version: 1 }, { background: true, name: "key_1_version_1" });
 				}
@@ -1472,6 +1697,7 @@ export class ServerApplication extends BuilderBase {
 				Debug.log("create some indexes on Inventory for gameId " + gameId + " success.");
 
 				{
+					// Stores the store inventory collection value used in the current execution flow.
 					let storeInventoryCollection = this.gnServer.getDatabase().systemGameCollection("StoreInventory", gameId);
 
 					await storeInventoryCollection.createIndex({ storeId: 1 }, { background: true, name: "storeId_1" });
@@ -1486,6 +1712,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000000
 					});
 
+					// Stores the store inventory log collection value used in the current execution flow.
 					let storeInventoryLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
 					await storeInventoryLogCollection.createIndex({ storeId: 1, id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "storeId_1_id_1_storeReceiveType_-1_id_-1" });
 					await storeInventoryLogCollection.createIndex({ id: 1, storeReceiveType: -1, _id: -1 }, { background: true, name: "id_1_storeReceiveType_-1_id_-1" });
@@ -1493,6 +1720,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the store inventory used collection value used in the current execution flow.
 					let storeInventoryUsedCollection = this.gnServer.getDatabase().systemGameCollection("StoreInventory.StoreUsed", gameId);
 					await storeInventoryUsedCollection.createIndex({ storeId: 1 }, { background: true, name: "storeId_1" });
 				}
@@ -1500,6 +1728,7 @@ export class ServerApplication extends BuilderBase {
 				Debug.log("create some indexes on StoreInventory for gameId " + gameId + " success.");
 
 				{
+					// Stores the receipt IAP collection value used in the current execution flow.
 					let receiptIAPCollection = this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", gameId);
 					receiptIAPCollection.createIndex({ payloadMd5: 1 }, { background: true, name: "payloadMd5_1" });
 					receiptIAPCollection.createIndex({ transactionId: 1 }, { background: true, name: "transactionId_1" });
@@ -1514,6 +1743,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000
 					});
 
+					// Stores the matchmaking ticket collection value used in the current execution flow.
 					let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
 					await matchmakingTicketCollection.createIndex({ userIds: 1, queueName: 1, status: -1 }, { background: true, name: "userIds_1_queueName_1_status_-1" });
@@ -1531,6 +1761,7 @@ export class ServerApplication extends BuilderBase {
 						max: 100000
 					});
 
+					// Stores the cloud script function log collection value used in the current execution flow.
 					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 					await cloudScriptFunctionLogCollection.createIndex({ tsCreate: -1 }, { background: true, name: "tsCreate-1" });
 
@@ -1538,6 +1769,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the match collection value used in the current execution flow.
 					let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", gameId);
 
 					await matchCollection.createIndex({ matchId: 1 }, { background: true, name: "matchId_1" });
@@ -1548,6 +1780,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the configuration collection value used in the current execution flow.
 					let configCollection = this.gnServer.getDatabase().systemGameCollection("Config", gameId);
 					await configCollection.createIndex({ configName: 1, label: 1 }, { background: true, unique: true, name: "configName_1_label_1" });
 
@@ -1555,6 +1788,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the cache collection value used in the current execution flow.
 					let cacheCollection = this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId);
 					await cacheCollection.createIndex({ key: 1 }, { background: true, name: "key_1" });
 
@@ -1572,6 +1806,7 @@ export class ServerApplication extends BuilderBase {
 				max: 100000000
 			});
 
+			// Stores the auth info collection value used in the current execution flow.
 			let authInfoCollection = this.gnServer.getDatabase().systemCollection("AuthInfo");
 			await authInfoCollection.createIndex({ gnToken: 1 }, { background: true, name: "gnToken_1" });
 
@@ -1579,6 +1814,7 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
+			// Stores the download file session collection value used in the current execution flow.
 			let downloadFileSessionCollection = this.gnServer.getDatabase().systemCollection("DownloadFileSession");
 
 			await downloadFileSessionCollection.createIndex({ downloadToken: 1 }, { background: true, name: "downloadToken_1" });
@@ -1588,6 +1824,7 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
+			// Stores the upload file info collection value used in the current execution flow.
 			let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
 
 			await uploadFileInfoCollection.createIndex({ fileId: 1 }, { background: true, name: "fileId_1" });
@@ -1631,8 +1868,10 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
+			// Stores the cloud script function collection value used in the current execution flow.
 			let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemCollection("EventCallback.CloudScript");
 
+			// Stores the path value used in the current execution flow.
 			let path = __dirname + "/./GN-startup/cloudScript/eventCallbackCloudScriptData.json";
 
 			await cloudScriptFunctionCollection.insertMany(JSON.parse(fs.readFileSync(path).toString()));
@@ -1642,21 +1881,34 @@ export class ServerApplication extends BuilderBase {
 
 	}
 
+	/**
+	 * Executes the re setup GearN database workflow asynchronously.
+	 * @param oldVersion Provides the old version value used by this operation.
+	 */
 	private async reSetupGNDatabase(oldVersion: string) {
 		Debug.log("re setup Database from version " + oldVersion);
 	}
 
+	/**
+	 * Executes the apply settings game workflow asynchronously.
+	 * @returns Resolves with the operation result.
+	 */
 	private async applySettingsGame(): Promise<string[]> {
+		// Stores the answer value used in the current execution flow.
 		let answer: string[] = [];
 
+		// Stores the master admin collection value used in the current execution flow.
 		let masterAdminCollection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
 		{
+			// Stores the master game settings result value used in the current execution flow.
 			let masterGameSettingsResult = await masterAdminCollection.findOne({ type: "masterGameSettings" });
 
+			// Stores the resolved master game settings instance for the current execution flow.
 			let masterGameSettings = new MasterGameSettings(masterGameSettingsResult, masterAdminCollection);
 
 			{
+				// Stores the resolved thirt party settings instance for the current execution flow.
 				let thirtPartySettings = masterGameSettings.getThirtPartySettings();
 
 				if (thirtPartySettings.appleSettings != null) {
@@ -1702,8 +1954,10 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
+				// Stores the resolved master player settings instance for the current execution flow.
 				let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
 
+				// Stores the resolved current master player settings instance for the current execution flow.
 				let currentMasterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 				currentMasterPlayerSettings.genericServiceSettings = masterPlayerSettings.genericServiceSettings;
@@ -1715,6 +1969,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
+				// Stores the resolved email settings instance for the current execution flow.
 				let emailSettings = masterGameSettings.getEmailSettings();
 
 				(<EmailService>this.gnServer.getEmailService()).init(emailSettings.host, emailSettings.port, emailSettings.secure, emailSettings.username, emailSettings.password, emailSettings.sendFrom);
@@ -1722,6 +1977,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
+				// Stores the resolved push notification settings instance for the current execution flow.
 				let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
 
 				(<PushNotificationService>this.gnServer.getPushNotificationService()).init(pushNotificationSettings.projectId, pushNotificationSettings.clientEmail, pushNotificationSettings.privateKey);
@@ -1730,25 +1986,34 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
+			// Stores the game settings results value used in the current execution flow.
 			let gameSettingsResults = await masterAdminCollection.find({ type: "gameSettings" });
 
 			while (await gameSettingsResults.hasNext()) {
+				// Stores the game settings result value used in the current execution flow.
 				let gameSettingsResult = await gameSettingsResults.next();
 
+				// Stores the game item value used in the current execution flow.
 				let gameItem = new GameItem(gameSettingsResult, masterAdminCollection);
 
+				// Stores the resolved game settings instance for the current execution flow.
 				let gameSettings = gameItem.getGameSettings();
+				// Stores the resolved matchmaking queue settings instance for the current execution flow.
 				let matchmakingQueueSettings = gameItem.getMatchmakingQueueSettings();
 
+				// Stores the game ID value used in the current execution flow.
 				let gameId = gameItem.getGameId();
 
+				// Stores the game IDs value used in the current execution flow.
 				let gameIds = this.gnServer.getGameIds();
 				if (!gameIds.includes(gameId)) gameIds.push(gameId);
 				answer.push(gameId);
 
 				{
+					// Stores the resolved game player settings instance for the current execution flow.
 					let gamePlayerSettings = gameSettings.gamePlayerSettings;
 
+					// Stores the resolved current game player settings instance for the current execution flow.
 					let currentGamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(gameId);
 
 					currentGamePlayerSettings.playerCurrenciesSettings = gamePlayerSettings.playerCurrenciesSettings;
@@ -1764,8 +2029,10 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the resolved character player settings instance for the current execution flow.
 					let characterPlayerSettings = gameSettings.characterPlayerSettings;
 
+					// Stores the resolved current character player settings instance for the current execution flow.
 					let currentCharacterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
 
 					currentCharacterPlayerSettings.playerCurrenciesSettings = characterPlayerSettings.playerCurrenciesSettings;
@@ -1780,8 +2047,10 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the resolved group settings instance for the current execution flow.
 					let groupSettings = gameSettings.groupSettings;
 
+					// Stores the resolved current group settings instance for the current execution flow.
 					let currentGroupSettings = this.gnServer.getGNSettings().getGroupSettings(gameId);
 
 					currentGroupSettings.groupCurrenciesSettings = groupSettings.groupCurrenciesSettings;
@@ -1793,8 +2062,10 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the resolved inventory settings instance for the current execution flow.
 					let inventorySettings = gameSettings.inventorySettings;
 
+					// Stores the resolved current inventory settings instance for the current execution flow.
 					let currentInventorySettings = this.gnServer.getGNSettings().getInventorySettings(gameId);
 
 					currentInventorySettings.itemStatisticsSettings = inventorySettings.itemStatisticsSettings;
@@ -1804,6 +2075,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the resolved current matchmaking queue settings instance for the current execution flow.
 					let currentMatchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
 
 					if (matchmakingQueueSettings != null) {
@@ -1814,9 +2086,12 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the cloud script service value used in the current execution flow.
 					let cloudScriptService = new CloudScriptService();
 
+					// Stores the cloud script function collection value used in the current execution flow.
 					let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemGameCollection("CloudScript.Function", gameId);
+					// Stores the cloud script function log collection value used in the current execution flow.
 					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 
 					cloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
@@ -1826,8 +2101,10 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Stores the configuration service value used in the current execution flow.
 					let configService = new ConfigService();
 
+					// Stores the configuration collection value used in the current execution flow.
 					let configCollection = this.gnServer.getDatabase().systemGameCollection("Config", gameId);
 					configService.setConfigCollection(gameId, configCollection);
 
@@ -1835,12 +2112,15 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
+					// Tracks whether single node.
 					let isSingleNode = this.gnServer.getHttpApp().getClusterHandler().getIsSingleNode();
 
+					// Stores the cache service controller value used in the current execution flow.
 					let cacheServiceController: ICacheServiceController;
 					if (isSingleNode) cacheServiceController = new MemoryCacheServiceController();
 					else cacheServiceController = new MongoDbCacheServiceController(this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId), this.gnServer.getDatabase());
 
+					// Stores the cache service value used in the current execution flow.
 					let cacheService = new CacheService(cacheServiceController);
 					this.gnServer.setCacheService(gameId, cacheService);
 				}
@@ -1853,16 +2133,26 @@ export class ServerApplication extends BuilderBase {
 		return answer;
 	}
 
+	/**
+	 * Executes the new GearN server workflow.
+	 * @returns Returns the operation result.
+	 */
 	private newGNServer(): GNServer {
+		// Stores the GearN server value used in the current execution flow.
 		let gnServer = new GNServer();
 
 		// settings database
 		{
+			// Stores the connection string value used in the current execution flow.
 			let connectionString = this.databaseSettings.getConnectionString();
+			// Stores the database name value used in the current execution flow.
 			let databaseName = this.databaseSettings.getDatabaseName();
+			// Stores the log connection string value used in the current execution flow.
 			let logConnectionString = this.databaseSettings.getLogConnectionString();
+			// Stores the log database name value used in the current execution flow.
 			let logDatabaseName = this.databaseSettings.getLogDatabaseName();
 
+			// Stores the options value used in the current execution flow.
 			let options = this.databaseSettings.getOptions();
 			gnServer.getDatabase().init(connectionString, databaseName, logConnectionString, logDatabaseName, options);
 		}
@@ -1870,35 +2160,69 @@ export class ServerApplication extends BuilderBase {
 		return gnServer;
 	}
 
+	/**
+	 * Executes the new API middleware workflow.
+	 * @returns Returns the operation result.
+	 */
 	private newApiMiddleware(): ApiMiddleware {
+		// Stores the API middleware value used in the current execution flow.
 		let apiMiddleware = new ApiMiddleware();
 		return apiMiddleware;
 	}
 
+	/**
+	 * Executes the new anti DDoS middleware workflow.
+	 * @returns Returns the operation result.
+	 */
 	private newAntiDdosMiddleware(): AntiDdosMiddleware {
+		// Stores the anti DDoS middleware value used in the current execution flow.
 		let antiDdosMiddleware = new AntiDdosMiddleware();
 		return antiDdosMiddleware;
 	}
 
+	/**
+	 * Executes the new upload middleware workflow.
+	 * @returns Returns the operation result.
+	 */
 	private newUploadMiddleware(): UploadFileMiddleware {
+		// Stores the upload file middleware value used in the current execution flow.
 		let uploadFileMiddleware = new UploadFileMiddleware();
 		return uploadFileMiddleware;
 	}
 
+	/**
+	 * Returns the GearN server.
+	 * @returns Returns the GearN server.
+	 */
 	public getGNServer(): GNServer {
 		return this.gnServer;
 	}
 
+	/**
+	 * Executes the new HTTP app workflow.
+	 * @returns Returns the operation result.
+	 */
 	private newHttpApp(): HttpApp {
 		return new HttpApp();
 	}
 
+	/**
+	 * Executes the new socket app workflow.
+	 * @returns Returns the operation result.
+	 */
 	private newSocketApp(): SocketApp {
 		return new SocketApp();
 	}
 
+	/**
+	 * Returns the server.
+	 * @param app Provides the app value used by this operation.
+	 * @param settings Provides the settings value used by this operation.
+	 * @returns Returns the server.
+	 */
 	private getServer(app: Express, settings: ApplicationSettings): http.Server {
 		if (settings.getUseSSL()) {
+			// Stores the options value used in the current execution flow.
 			const options = {
 				key: fs.readFileSync(__dirname + "/../" + settings.getKeyFilePath()),
 				cert: fs.readFileSync(__dirname + "/../" + settings.getCertFilePath()),
@@ -1910,6 +2234,10 @@ export class ServerApplication extends BuilderBase {
 		}
 	}
 
+	/**
+	 * Initializes a new server application instance.
+	 * @param builder Provides the builder state copied into this instance.
+	 */
 	constructor(builder: BuilderBase) {
 		super();
 
@@ -1924,6 +2252,10 @@ export class ServerApplication extends BuilderBase {
 		this.clusterSettings = builder.getClusterSettings();
 	}
 
+	/**
+	 * Creates a new builder instance.
+	 * @returns Returns a new builder instance.
+	 */
 	public static Builder(): Builder {
 		return new Builder();
 	}

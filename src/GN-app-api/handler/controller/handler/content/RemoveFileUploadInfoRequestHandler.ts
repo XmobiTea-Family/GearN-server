@@ -16,12 +16,17 @@ import { RequestHandler } from "./../base/RequestHandler";
 
 class RemoveFileUploadInfoOperationRequest extends OperationRequest {
 
+	// Stores the file ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
 	public fileId: string;
 
+	// Stores the reason value used by this instance.
 	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
 	public reason?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,6 +36,9 @@ class RemoveFileUploadInfoOperationRequest extends OperationRequest {
 
 class ServerGetAvatarOperationRequest extends RemoveFileUploadInfoOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -40,6 +48,9 @@ class ServerGetAvatarOperationRequest extends RemoveFileUploadInfoOperationReque
 
 class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,15 +60,29 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 
 export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.RemoveFileUploadInfo;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return RemoveFileUploadInfoOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -74,7 +99,14 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -91,7 +123,14 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -108,7 +147,15 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { fileId: string, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_RemoveFileUploadInfo", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -117,6 +164,7 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the upload file info value used in the current execution flow.
 		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId, {
 			fileUpload: true,
 			removeStatus: true,
@@ -127,10 +175,12 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the remove status value used in the current execution flow.
 		let removeStatus = uploadFileInfo.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {
 			uploadFileInfo.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
 
+			// Stores the file upload value used in the current execution flow.
 			let fileUpload = uploadFileInfo.getFileUpload();
 			if (fileUpload != null) {
 				this.gnServer.getHttpApp().getUploadFileHandler().removeFile(fileUpload.fullPath);

@@ -16,15 +16,21 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 
 class SetPlayerBanOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	// Stores the timestamp expire value used by this instance.
 	@NumberDataMember({ code: ParameterCode.TsExpire })
 	public tsExpire: number;
 
+	// Stores the reason value used by this instance.
 	@StringDataMember({ code: ParameterCode.Reason })
 	public reason: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,6 +40,9 @@ class SetPlayerBanOperationRequest extends OperationRequest {
 
 class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +52,9 @@ class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 
 class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,21 +64,36 @@ class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationReque
 
 export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetPlayerBan;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetPlayerBanOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setPlayerBan);
 
 		if (!allowMethod) {
@@ -80,7 +107,14 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -98,7 +132,14 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -116,7 +157,15 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string, tsExpire: number, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetPlayerBan", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -125,10 +174,12 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerBan: true,
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {

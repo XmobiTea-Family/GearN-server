@@ -15,12 +15,17 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 
 class GetContentDataOperationRequest extends OperationRequest {
 
+	// Stores the keys value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.Keys, elementCls: String, isOptional: true })
 	public keys?: Array<string>;
 
+	// Stores the label value used by this instance.
 	@StringDataMember({ code: ParameterCode.Label, minLength: 2, maxLength: 32, isOptional: true, defaultValue: "" })
 	public label?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -30,6 +35,9 @@ class GetContentDataOperationRequest extends OperationRequest {
 
 class ServerGetContentDataOperationRequest extends GetContentDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -39,6 +47,9 @@ class ServerGetContentDataOperationRequest extends GetContentDataOperationReques
 
 class AdminGetContentDataOperationRequest extends ServerGetContentDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,15 +59,29 @@ class AdminGetContentDataOperationRequest extends ServerGetContentDataOperationR
 
 export class GetContentDataRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetContentData;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetContentDataOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -73,7 +98,14 @@ export class GetContentDataRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetContentDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -90,7 +122,14 @@ export class GetContentDataRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetContentDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -107,7 +146,15 @@ export class GetContentDataRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { keys: Array<string>, label: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_GetContentData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -116,6 +163,7 @@ export class GetContentDataRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the configuration game value used in the current execution flow.
 		let configGame = this.gnServer.getConfigService(secretInfo.getGameId());
 		if (!configGame) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameNotFound);
@@ -124,12 +172,15 @@ export class GetContentDataRequestHandler extends RequestHandler {
 
 		if (!request.label) request.label = "origin";
 
+		// Stores the GearN configs value used in the current execution flow.
 		let gnConfigs = new GNArray();
 
+		// Stores the configuration dictionary value used in the current execution flow.
 		let configDic = configGame.getConfigDicViaLabel(request.label);
 
 		configDic.forEach((value, key) => {
 			if (request.keys == null || request.keys.indexOf(key) != -1) {
+				// Stores the GearN configuration value used in the current execution flow.
 				let gnConfig = new GNHashtable();
 
 				gnConfig.add(ParameterCode.Key, key);

@@ -16,9 +16,13 @@ import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class GetAvatarOperationRequest extends OperationRequest {
 
+	// Stores the item ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	public itemId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -28,6 +32,9 @@ class GetAvatarOperationRequest extends OperationRequest {
 
 class ServerGetAvatarOperationRequest extends GetAvatarOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,6 +44,9 @@ class ServerGetAvatarOperationRequest extends GetAvatarOperationRequest {
 
 class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,21 +56,36 @@ class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
 
 export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetAvatar;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetAvatarOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.getAvatar);
 
 		if (!allowMethod) {
@@ -73,7 +98,14 @@ export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -90,7 +122,14 @@ export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -107,7 +146,15 @@ export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { itemId: string, gameId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetAvatar", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -116,10 +163,12 @@ export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			avatar: true,
 		}
 
+		// Stores the inventory value used in the current execution flow.
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, request.gameId, inventoryFindOptions);
 
 		if (inventory == null) {
@@ -127,6 +176,7 @@ export class GetAvatarRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 
 		gnInfoResponseParameters.add(ParameterCode.Avatar, this.generateAvatar(inventory));

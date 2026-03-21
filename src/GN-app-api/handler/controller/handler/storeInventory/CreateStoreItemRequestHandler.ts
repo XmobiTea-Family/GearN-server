@@ -18,12 +18,17 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 class CreateStoreItemOperationRequest extends OperationRequest {
 
+	// Stores the store ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true, isOptional: true })
 	public storeId?: string;
 
+	// Stores the display name value used by this instance.
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
 	public displayName?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -33,6 +38,9 @@ class CreateStoreItemOperationRequest extends OperationRequest {
 
 class ServerCreateStoreItemOperationRequest extends CreateStoreItemOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -42,6 +50,9 @@ class ServerCreateStoreItemOperationRequest extends CreateStoreItemOperationRequ
 
 class AdminCreateStoreItemOperationRequest extends ServerCreateStoreItemOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -51,15 +62,29 @@ class AdminCreateStoreItemOperationRequest extends ServerCreateStoreItemOperatio
 
 export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.CreateStoreItem;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return CreateStoreItemOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -76,7 +101,14 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreateStoreItemOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -93,7 +125,14 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreateStoreItemOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -110,7 +149,15 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { storeId: string, displayName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_CreateStoreItem", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -119,8 +166,10 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the store ID value used in the current execution flow.
 		let storeId = request.storeId ?? StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
 
+		// Stores the old store inventory value used in the current execution flow.
 		let oldStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(storeId, secretInfo.getGameId(), {
 			storeId: true,
 		});
@@ -129,8 +178,10 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadExists);
 		}
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
+		// Stores the result value used in the current execution flow.
 		let result = {} as any;
 		result["storeId"] = storeId;
 		result["storeItems"] = [];

@@ -16,12 +16,17 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetStoreItemInformationOperationRequest extends OperationRequest {
 
+	// Stores the store ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
 	public storeId: string;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,6 +36,9 @@ class GetStoreItemInformationOperationRequest extends OperationRequest {
 
 class ServerGetStoreItemInformationOperationRequest extends GetStoreItemInformationOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -40,6 +48,9 @@ class ServerGetStoreItemInformationOperationRequest extends GetStoreItemInformat
 
 class AdminGetStoreItemInformationOperationRequest extends ServerGetStoreItemInformationOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,15 +60,29 @@ class AdminGetStoreItemInformationOperationRequest extends ServerGetStoreItemInf
 
 export class GetStoreItemInformationRequestHandler extends StoreItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetStoreItemInformation;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetStoreItemInformationOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -74,7 +99,14 @@ export class GetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStoreItemInformationOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -91,7 +123,14 @@ export class GetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStoreItemInformationOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -108,7 +147,15 @@ export class GetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { storeId: string, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_GetStoreItemInformation", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -117,8 +164,10 @@ export class GetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the store inventory find options value used in the current execution flow.
 		let storeInventoryFindOptions = this.convertToStoreInventoryFindOptions(request.infoRequestParam);
 
+		// Stores the store inventory value used in the current execution flow.
 		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), storeInventoryFindOptions);
 
 		if (storeInventory == null) {

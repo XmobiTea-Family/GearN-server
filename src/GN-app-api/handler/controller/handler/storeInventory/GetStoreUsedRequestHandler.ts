@@ -22,9 +22,13 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 
 class GetStoreUsedOperationRequest extends OperationRequest {
 
+	// Stores the store ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
 	public storeId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,6 +38,9 @@ class GetStoreUsedOperationRequest extends OperationRequest {
 
 class ServerGetStoreUsedOperationRequest extends GetStoreUsedOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +50,9 @@ class ServerGetStoreUsedOperationRequest extends GetStoreUsedOperationRequest {
 
 class AdminGetStoreUsedOperationRequest extends ServerGetStoreUsedOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,15 +62,29 @@ class AdminGetStoreUsedOperationRequest extends ServerGetStoreUsedOperationReque
 
 export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetStoreUsed;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetStoreUsedOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -80,7 +104,14 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStoreUsedOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -100,7 +131,14 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStoreUsedOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -120,7 +158,15 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { storeId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_GetStoreUsed", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -129,14 +175,18 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the result value used in the current execution flow.
 		let result = await this.gnServer.getDatabase().getStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId());
 
 		if (result != null) {
 			for (let i = 0; i < result.useIds.length; i++) {
+				// Tracks whether ID should be used.
 				let useId = result.useIds[i];
 
+				// Stores the GearN result value used in the current execution flow.
 				let gnResult = new GNHashtable();
 
 				gnResult.add(ParameterCode.OwnerId, useId.id);

@@ -16,9 +16,13 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 
 class GetCountryCodeOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -28,6 +32,9 @@ class GetCountryCodeOperationRequest extends OperationRequest {
 
 class ServerGetCountryCodeOperationRequest extends GetCountryCodeOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,6 +44,9 @@ class ServerGetCountryCodeOperationRequest extends GetCountryCodeOperationReques
 
 class AdminGetCountryCodeOperationRequest extends ServerGetCountryCodeOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,21 +56,36 @@ class AdminGetCountryCodeOperationRequest extends ServerGetCountryCodeOperationR
 
 export class GetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetCountryCode;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetCountryCodeOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.getCountryCode);
 
 		if (!allowMethod) {
@@ -72,7 +97,14 @@ export class GetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCountryCodeOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -88,7 +120,14 @@ export class GetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCountryCodeOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -104,7 +143,15 @@ export class GetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetCountryCode", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -113,10 +160,12 @@ export class GetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			countryCode: true,
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
@@ -124,6 +173,7 @@ export class GetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 			return operationResponse;
 		}
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.CountryCode, this.generateCountryCode(characterPlayer));
 

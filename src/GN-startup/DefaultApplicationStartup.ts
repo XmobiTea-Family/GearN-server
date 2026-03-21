@@ -12,9 +12,15 @@ import { DdosSettings } from "./settings/DDosSettings";
 import { ClusterSettings } from "./settings/ClusterSettings";
 
 export class DefaultApplicationStartup {
+	// Stores the server application value used by this instance.
 	protected serverApplication: ServerApplication;
 
+	/**
+	 * Runs the current workflow.
+	 * @param onRunSuccess Provides the callback executed after a successful startup.
+	 */
 	public run(onRunSuccess?: OnRunSuccess): void {
+		// Stores the resolved application settings instance for the current execution flow.
 		let applicationSettings = ApplicationSettings.Builder()
 			.setUseSSL(false)
 			.setCertFilePath("")
@@ -28,6 +34,7 @@ export class DefaultApplicationStartup {
 			.setRestoreRootUsername("")
 			.build();
 
+		// Stores the resolved HTTP app settings instance for the current execution flow.
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(true)
 			.setOrigins("*")
@@ -40,6 +47,7 @@ export class DefaultApplicationStartup {
 			.setTrustProxy(true)
 			.build();
 
+		// Stores the resolved socket app settings instance for the current execution flow.
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(true)
 			.setUseEmitter(false)
@@ -54,12 +62,14 @@ export class DefaultApplicationStartup {
 			.setPingTimeout(5000)
 			.build();
 
+		// Stores the resolved other settings instance for the current execution flow.
 		let otherSettings = OtherSettings.Builder()
 			.setHeaderIP("X-Real-IP")
 			.setIdTypeCase(0)
 			.setIPApiUrl("http://127.0.0.1:2555/json")
 			.build();
 
+		// Stores the resolved database settings instance for the current execution flow.
 		let databaseSettings = DatabaseSettings.Builder()
 			.setConnectionString("mongodb://rootuser:rootpass@127.0.10.21:27017,127.0.10.22:27017,127.0.10.23:27017/?retryWrites=false&replicaSet=rs0&readPreference=primaryPreferred&serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-256")
 			.setLogConnectionString(null)
@@ -70,12 +80,14 @@ export class DefaultApplicationStartup {
 			})
 			.build();
 
+		// Stores the resolved log settings instance for the current execution flow.
 		let logSettings = LogSettings.Builder()
 			.setLogToFileEnable(true)
 			.setLogToConsoleEnable(true)
 			.setLogPath("./log/Server.log")
 			.build();
 
+		// Stores the resolved upload file settings instance for the current execution flow.
 		let uploadFileSettings = UploadFileSettings.Builder()
 			.setEnable(true)
 			.setMaxSizeUpload(1024 * 1024 * 50)
@@ -83,6 +95,7 @@ export class DefaultApplicationStartup {
 			.setMimeTypeAccepts(["image/png"])
 			.build();
 
+		// Stores the resolved DDoS settings instance for the current execution flow.
 		let ddosSettings = DdosSettings.Builder()
 			.setSocketMaxRequestPerSecondPerIp(50)
 			.setSocketMaxRequestPerSecondPerPeer(20)
@@ -97,6 +110,7 @@ export class DefaultApplicationStartup {
 			.setIPWhiteList(["127.0.0.1"])
 			.build();
 
+		// Stores the resolved cluster settings instance for the current execution flow.
 		let clusterSettings = ClusterSettings.Builder()
 			.setInstanceId("node_0")
 			.setIsPrimary(true)
@@ -124,6 +138,18 @@ export class DefaultApplicationStartup {
 		});
 	}
 
+	/**
+	 * Executes the new server application workflow.
+	 * @param applicationSettings Provides the application settings value used by this operation.
+	 * @param httpAppSettings Provides the HTTP app settings value used by this operation.
+	 * @param socketAppSettings Provides the socket app settings value used by this operation.
+	 * @param otherSettings Provides the other settings value used by this operation.
+	 * @param databaseSettings Provides the database settings value used by this operation.
+	 * @param logSettings Provides the log settings value used by this operation.
+	 * @param uploadFileSettings Provides the upload file settings value used by this operation.
+	 * @param ddosSettings Provides the DDoS settings value used by this operation.
+	 * @param clusterSettings Provides the cluster settings value used by this operation.
+	 */
 	protected newServerApplication(
 		applicationSettings: ApplicationSettings,
 		httpAppSettings: HttpAppSettings,
@@ -148,6 +174,10 @@ export class DefaultApplicationStartup {
 			.build();
 	}
 
+	/**
+	 * Returns the GearN server.
+	 * @returns Returns the GearN server.
+	 */
 	public getGNServer(): GNServer {
 		return this.serverApplication.getGNServer();
 	}

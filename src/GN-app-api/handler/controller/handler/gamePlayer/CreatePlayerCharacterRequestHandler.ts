@@ -20,18 +20,25 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 
 class CreatePlayerCharacterOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the catalog ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
 	public catalogId: string;
 
+	// Stores the display name value used by this instance.
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true, mustNonNull: true })
 	public displayName?: string;
 
+	// Indicates whether unique display name.
 	@BooleanDataMember({ code: ParameterCode.UniqueDisplayName, defaultValue: false, isOptional: true })
 	public uniqueDisplayName?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -41,9 +48,13 @@ class CreatePlayerCharacterOperationRequest extends OperationRequest {
 
 class ServerCreatePlayerCharacterOperationRequest extends CreatePlayerCharacterOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -53,6 +64,9 @@ class ServerCreatePlayerCharacterOperationRequest extends CreatePlayerCharacterO
 
 class AdminCreatePlayerCharacterOperationRequest extends ServerCreatePlayerCharacterOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -62,15 +76,29 @@ class AdminCreatePlayerCharacterOperationRequest extends ServerCreatePlayerChara
 
 export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.CreatePlayerCharacter;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return CreatePlayerCharacterOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -104,7 +132,14 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreatePlayerCharacterOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -124,7 +159,14 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreatePlayerCharacterOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -144,7 +186,15 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, catalogId: string, displayName: string, uniqueDisplayName: boolean, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_CreatePlayerCharacter", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -153,11 +203,14 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerCharacters: true,
 		}
 
+		// Stores the resolved game player settings instance for the current execution flow.
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+		// Stores the player character catalog settings item value used in the current execution flow.
 		let playerCharacterCatalogSettingsItem = gamePlayerSettings.playerCharacterCatalogSettings.find(x => x.catalogId == request.catalogId);
 
 		if (playerCharacterCatalogSettingsItem == null) {
@@ -166,6 +219,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		}
 
 		if (request.uniqueDisplayName && request.displayName) {
+			// Stores the character player with this display name value used in the current execution flow.
 			let characterPlayerWithThisDisplayName = await this.gnServer.getDatabase().loadCharacterPlayerWithDisplayNameAsync(request.displayName, secretInfo.getGameId(), { displayName: true });
 
 			if (characterPlayerWithThisDisplayName != null) {
@@ -174,6 +228,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			}
 		}
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
@@ -181,9 +236,12 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			return operationResponse;
 		}
 
+		// Stores the character ID value used in the current execution flow.
 		let characterId = StringUtility.generateRandomString(11, this.gnServer.getIdTypeCase());
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		// Stores the result value used in the current execution flow.
 		let result = {} as any;
 
 		result["characterId"] = characterId;
@@ -209,6 +267,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
+		// Stores the IP detail response value used in the current execution flow.
 		let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 		if (ipDetailResponse.statusCode == "Ok") {
 			if (ipDetailResponse.detail.countryCode) {
@@ -216,13 +275,16 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			}
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().createCharacterPlayerAsync(result, secretInfo.getGameId());
 
 		gamePlayer.setPlayerCharacter(characterId, request.catalogId);
 		gamePlayer.saveAsync();
 
+		// Stores the GearN player characters value used in the current execution flow.
 		let gnPlayerCharacters = new GNArray();
 
+		// Stores the GearN player character value used in the current execution flow.
 		let gnPlayerCharacter = new GNHashtable();
 
 		gnPlayerCharacter.add(ParameterCode.CharacterId, characterPlayer.getCharacterId());
@@ -230,6 +292,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 
 		gnPlayerCharacters.add(gnPlayerCharacter);
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.PlayerCharacters, gnPlayerCharacters);
 

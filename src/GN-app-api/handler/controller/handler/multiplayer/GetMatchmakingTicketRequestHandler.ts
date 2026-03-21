@@ -17,12 +17,17 @@ import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetMatchmakingTicketOperationRequest extends OperationRequest {
 
+	// Stores the ticket ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.TicketId, minLength: 10, maxLength: 10 })
 	public ticketId: string;
 
+	// Indicates whether return member.
 	@BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
 	public returnMember?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -32,6 +37,9 @@ class GetMatchmakingTicketOperationRequest extends OperationRequest {
 
 class ServerGetMatchmakingTicketOperationRequest extends GetMatchmakingTicketOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -41,6 +49,9 @@ class ServerGetMatchmakingTicketOperationRequest extends GetMatchmakingTicketOpe
 
 class AdminGetMatchmakingTicketOperationRequest extends ServerGetMatchmakingTicketOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,15 +61,29 @@ class AdminGetMatchmakingTicketOperationRequest extends ServerGetMatchmakingTick
 
 export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetMatchmakingTicket;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetMatchmakingTicketOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -76,7 +101,14 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetMatchmakingTicketOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -94,7 +126,14 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetMatchmakingTicketOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -112,7 +151,15 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, ticketId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -121,6 +168,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the matchmaking ticket collection value used in the current execution flow.
 		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
 		// find tat ca nhung cai ticket nay
@@ -131,9 +179,11 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 			return operationResponse;
 		}
 
+		// Stores the matchmaking ticket value used in the current execution flow.
 		let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
 		if (secretInfo.getRole() == SecretRole.Player) {
+			// Stores the member value used in the current execution flow.
 			let member = matchmakingTicket.getMember(request.userId);
 			if (member == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketNotFound);
@@ -143,6 +193,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
+		// Stores the GearN matchmaking ticket value used in the current execution flow.
 		let gnMatchmakingTicket = new GNHashtable();
 
 		gnMatchmakingTicket.add(ParameterCode.TsCreate, matchmakingTicket.getTsCreate());
@@ -156,12 +207,16 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		}
 
 		if (request.returnMember) {
+			// Stores the GearN members value used in the current execution flow.
 			let gnMembers = new GNArray();
 
+			// Stores the members value used in the current execution flow.
 			let members = matchmakingTicket.getMembers();
 			for (let i = 0; i < members.length; i++) {
+				// Stores the member value used in the current execution flow.
 				let member = members[i];
 
+				// Stores the GearN member value used in the current execution flow.
 				let gnMember = new GNHashtable();
 
 				gnMember.add(ParameterCode.UserId, member.userId);

@@ -17,6 +17,9 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 
 class RefreshAuthTokenOperationRequest extends OperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -26,15 +29,29 @@ class RefreshAuthTokenOperationRequest extends OperationRequest {
 
 export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.RefreshAuthToken;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return RefreshAuthTokenOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -50,7 +67,15 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -59,10 +84,12 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			playerBan: true
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -71,10 +98,12 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		masterPlayer.setTsLastLogin(currentMilliseconds);
 		masterPlayer.saveAsync();
 
+		// Stores the player ban value used in the current execution flow.
 		let playerBan = masterPlayer.getPlayerBan();
 		if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 			operationResponse.setParameter(ParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
@@ -83,6 +112,7 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 		else {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
+			// Stores the new auth info value used in the current execution flow.
 			let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
 				gnToken: null,
 				secretKey: secretInfo.getSecretKey(),

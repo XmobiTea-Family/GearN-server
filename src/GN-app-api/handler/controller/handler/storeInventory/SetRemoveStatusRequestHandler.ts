@@ -17,12 +17,17 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
 
+	// Stores the store ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.StoreId, minLength: 10, maxLength: 32, mustNonNull: true })
 	public storeId: string;
 
+	// Stores the reason value used by this instance.
 	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
 	public reason?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -32,6 +37,9 @@ class SetRemoveStatusOperationRequest extends OperationRequest {
 
 class ServerSetRemoveStatusOperationRequest extends SetRemoveStatusOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -41,6 +49,9 @@ class ServerSetRemoveStatusOperationRequest extends SetRemoveStatusOperationRequ
 
 class AdminSetRemoveStatusOperationRequest extends ServerSetRemoveStatusOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,15 +61,29 @@ class AdminSetRemoveStatusOperationRequest extends ServerSetRemoveStatusOperatio
 
 export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetRemoveStatus;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetRemoveStatusOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -75,7 +100,14 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetRemoveStatusOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -92,7 +124,14 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetRemoveStatusOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -109,7 +148,15 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { storeId: string, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_SetRemoveStatus", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -118,10 +165,12 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the store inventory find options value used in the current execution flow.
 		let storeInventoryFindOptions: StoreInventoryFindOptions = {
 			removeStatus: true,
 		}
 
+		// Stores the store inventory value used in the current execution flow.
 		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), storeInventoryFindOptions);
 
 		if (storeInventory == null) {
@@ -129,6 +178,7 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the remove status value used in the current execution flow.
 		let removeStatus = storeInventory.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {
 			storeInventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);

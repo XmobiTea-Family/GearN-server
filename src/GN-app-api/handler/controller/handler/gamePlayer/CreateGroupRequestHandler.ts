@@ -22,18 +22,25 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 
 class CreateGroupOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the catalog ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
 	public catalogId: string;
 
+	// Stores the group members value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.GroupMembers, isOptional: true, elementCls: GroupMemberParam })
 	public groupMembers?: Array<GroupMemberParam>;
 
+	// Stores the display name value used by this instance.
 	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
 	public displayName?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,9 +50,13 @@ class CreateGroupOperationRequest extends OperationRequest {
 
 class ServerCreateGroupOperationRequest extends CreateGroupOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,6 +66,9 @@ class ServerCreateGroupOperationRequest extends CreateGroupOperationRequest {
 
 class AdminCreateGroupOperationRequest extends ServerCreateGroupOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -64,15 +78,29 @@ class AdminCreateGroupOperationRequest extends ServerCreateGroupOperationRequest
 
 export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.CreateGroup;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return CreateGroupOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -105,7 +133,14 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreateGroupOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -124,7 +159,14 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreateGroupOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -143,7 +185,15 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, catalogId: string, groupMembers: Array<GroupMemberParam>, displayName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_CreateGroup", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -152,11 +202,14 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerGroups: true,
 		}
 
+		// Stores the resolved game player settings instance for the current execution flow.
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+		// Stores the player group catalog settings item value used in the current execution flow.
 		let playerGroupCatalogSettingsItem = gamePlayerSettings.playerGroupCatalogSettings.find(x => x.catalogId == request.catalogId);
 
 		if (playerGroupCatalogSettingsItem == null) {
@@ -165,6 +218,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
@@ -172,9 +226,12 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+		// Stores the group ID value used in the current execution flow.
 		let groupId = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
 
+		// Stores the result value used in the current execution flow.
 		let result = {} as any;
 		result["groupId"] = groupId;
 		result["groupType"] = <number>OwnerType.GamePlayer;
@@ -193,14 +250,17 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
+		// Stores the group value used in the current execution flow.
 		let group = await this.gnServer.getDatabase().createGroupAsync(result, secretInfo.getGameId());
 
 		if (request.groupMembers != null) {
 			for (let i = 0; i < request.groupMembers.length; i++) {
+				// Stores the group member value used in the current execution flow.
 				let groupMember = request.groupMembers[i];
 
 				if (groupMember.userId == request.userId) continue;
 
+				// Stores the other game player value used in the current execution flow.
 				let otherGamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(groupMember.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 				if (otherGamePlayer != null) {
@@ -218,8 +278,10 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		gamePlayer.setPlayerGroup(groupId, request.catalogId, <number>GroupStatus.Member, currentMilliseconds);
 		gamePlayer.saveAsync();
 
+		// Stores the GearN player groups value used in the current execution flow.
 		let gnPlayerGroups = new GNArray();
 
+		// Stores the GearN player group value used in the current execution flow.
 		let gnPlayerGroup = new GNHashtable();
 
 		gnPlayerGroup.add(ParameterCode.GroupId, group.getGroupId());
@@ -229,6 +291,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 		gnPlayerGroups.add(gnPlayerGroup);
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.PlayerGroups, gnPlayerGroups);
 

@@ -17,12 +17,17 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetPlayerInformationOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -32,12 +37,17 @@ class GetPlayerInformationOperationRequest extends OperationRequest {
 
 class ServerGetPlayerInformationOperationRequest extends GetPlayerInformationOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	// Indicates whether create player if not exists.
 	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
 	public createPlayerIfNotExists?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -47,6 +57,9 @@ class ServerGetPlayerInformationOperationRequest extends GetPlayerInformationOpe
 
 class AdminGetPlayerInformationOperationRequest extends ServerGetPlayerInformationOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -56,23 +69,40 @@ class AdminGetPlayerInformationOperationRequest extends ServerGetPlayerInformati
 
 export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetPlayerInformation;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetPlayerInformationOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Stores the create player if not exists value used in the current execution flow.
 		let createPlayerIfNotExists = false;
+		// Stores the update timestamp last login value used in the current execution flow.
 		let updateTsLastLogin = false;
+		// Stores the IP address create value used in the current execution flow.
 		let ipAddressCreate: string = null;
 
 		if (!request.userId) {
@@ -116,7 +146,14 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerInformationOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -138,7 +175,14 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerInformationOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -160,7 +204,15 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, infoRequestParam: InfoRequestParam, createPlayerIfNotExists: boolean, ipAddress: string, updateTsLastLogin: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayerInformation", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -169,8 +221,10 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
@@ -179,6 +233,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 				return operationResponse;
 			}
 			else {
+				// Stores the master player value used in the current execution flow.
 				let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {});
 				if (!masterPlayer) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
@@ -186,7 +241,9 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 				}
 			}
 
+			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+			// Stores the result value used in the current execution flow.
 			let result = {} as any;
 
 			result["userId"] = request.userId;
@@ -210,6 +267,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 			result["ipAddressCreate"] = request.ipAddress;
 			result["countryCode"] = "";
 
+			// Stores the IP detail response value used in the current execution flow.
 			let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 			if (ipDetailResponse.statusCode == "Ok") {
 				if (ipDetailResponse.detail.countryCode) {

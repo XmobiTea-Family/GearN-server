@@ -18,6 +18,11 @@ import { Inventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 export abstract class StoreItemBaseRequestHandler extends RequestHandler {
+	/**
+	 * Checks whether get all.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	private isGetAll(infoRequestParam: InfoRequestParam): boolean {
 		return infoRequestParam.storeItems
 			&& infoRequestParam.storeItemType
@@ -34,9 +39,22 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 			&& infoRequestParam.storeDatas;
 	}
 
+	/**
+	 * Creates the item.
+	 * @param catalogId Provides the catalog ID value used by this operation.
+	 * @param classId Provides the class ID value used by this operation.
+	 * @param amount Provides the amount value used by this operation.
+	 * @param itemType Provides the item type value used by this operation.
+	 * @param id Provides the ID value used by this operation.
+	 * @param type Provides the type value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	protected async createItem(catalogId: string, classId: string, amount: number, itemType: number, id: string, type: number, gameId: string): Promise<Inventory> {
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
+		// Stores the store ID value used in the current execution flow.
 		let storeId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
 		// o day can tao 1 dong 
 		let result = {} as any;
@@ -57,13 +75,20 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
+		// Stores the inventory value used in the current execution flow.
 		let inventory = await this.gnServer.getDatabase().createInventoryAsync(result, gameId);
 		return inventory;
 	}
 
+	/**
+	 * Converts the to store inventory find options.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected convertToStoreInventoryFindOptions(infoRequestParam: InfoRequestParam): StoreInventoryFindOptions {
 		if (this.isGetAll(infoRequestParam)) return null;
 
+		// Stores the answer value used in the current execution flow.
 		let answer: StoreInventoryFindOptions = {};
 		answer.storeId = true;
 
@@ -84,7 +109,15 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate info response parameters workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateInfoResponseParameters(storeInventory: StoreInventory, infoRequestParam: InfoRequestParam, gameId: string): GNHashtable {
+		// Stores the answer value used in the current execution flow.
 		let answer = new GNHashtable();
 
 		if (infoRequestParam.storeItems)
@@ -123,14 +156,23 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate store items workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateStoreItems(storeInventory: StoreInventory): GNArray {
+		// Stores the GearN store items value used in the current execution flow.
 		let gnStoreItems = new GNArray();
 
+		// Stores the complete store items collection used in the current execution flow.
 		let allStoreItems = storeInventory.getAllStoreItems();
 
 		for (let i = 0; i < allStoreItems.length; i++) {
+			// Stores the store item value used in the current execution flow.
 			let storeItem = allStoreItems[i];
 
+			// Stores the GearN store item value used in the current execution flow.
 			let gnStoreItem = new GNHashtable();
 
 			gnStoreItem.add(ParameterCode.CatalogId, storeItem.catalogId);
@@ -143,18 +185,32 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return gnStoreItems;
 	}
 
+	/**
+	 * Executes the generate store item type workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateStoreItemType(storeInventory: StoreInventory): number {
 		return storeInventory.getStoreItemType();
 	}
 
+	/**
+	 * Executes the generate store currencies workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateStoreCurrencies(storeInventory: StoreInventory): GNArray {
+		// Stores the GearN store currenciess value used in the current execution flow.
 		let gnStoreCurrenciess = new GNArray();
 
+		// Stores the complete store currencies collection used in the current execution flow.
 		let allStoreCurrencies = storeInventory.getAllStoreCurrencies();
 
 		for (let i = 0; i < allStoreCurrencies.length; i++) {
+			// Stores the store currency value used in the current execution flow.
 			let storeCurrency = allStoreCurrencies[i];
 
+			// Stores the GearN store currency value used in the current execution flow.
 			let gnStoreCurrency = new GNHashtable();
 
 			gnStoreCurrency.add(ParameterCode.Key, storeCurrency.key);
@@ -166,14 +222,23 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return gnStoreCurrenciess;
 	}
 
+	/**
+	 * Executes the generate price currencies workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePriceCurrencies(storeInventory: StoreInventory): GNArray {
+		// Stores the GearN price currenciess value used in the current execution flow.
 		let gnPriceCurrenciess = new GNArray();
 
+		// Stores the complete price currencies collection used in the current execution flow.
 		let allPriceCurrencies = storeInventory.getAllPriceCurrencies();
 
 		for (let i = 0; i < allPriceCurrencies.length; i++) {
+			// Stores the price currency value used in the current execution flow.
 			let priceCurrency = allPriceCurrencies[i];
 
+			// Stores the GearN price currency value used in the current execution flow.
 			let gnPriceCurrency = new GNHashtable();
 
 			gnPriceCurrency.add(ParameterCode.Key, priceCurrency.key);
@@ -185,9 +250,16 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return gnPriceCurrenciess;
 	}
 
+	/**
+	 * Executes the generate in app purchase workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateInAppPurchase(storeInventory: StoreInventory): GNHashtable {
+		// Stores the GearN in app purchase value used in the current execution flow.
 		let gnInAppPurchase = new GNHashtable();
 
+		// Stores the in app purchase value used in the current execution flow.
 		let inAppPurchase = storeInventory.getInAppPurchase();
 
 		gnInAppPurchase.add(ParameterCode.FacebookStoreId, inAppPurchase.facebookStoreId);
@@ -198,9 +270,16 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return gnInAppPurchase;
 	}
 
+	/**
+	 * Executes the generate remove status workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateRemoveStatus(storeInventory: StoreInventory): GNHashtable {
+		// Stores the remove status value used in the current execution flow.
 		let removeStatus = storeInventory.getRemoveStatus();
 
+		// Stores the GearN remove status value used in the current execution flow.
 		let gnRemoveStatus = new GNHashtable();
 
 		gnRemoveStatus.add(ParameterCode.TsRemove, removeStatus.tsRemove);
@@ -209,13 +288,25 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return gnRemoveStatus;
 	}
 
+	/**
+	 * Executes the generate display name workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateDisplayName(storeInventory: StoreInventory): string {
 		return storeInventory.getDisplayName();
 	}
 
+	/**
+	 * Executes the generate avatar workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateAvatar(storeInventory: StoreInventory): GNHashtable {
+		// Stores the avatar value used in the current execution flow.
 		let avatar = storeInventory.getAvatar();
 
+		// Stores the GearN avatar value used in the current execution flow.
 		let gnAvatar = new GNHashtable();
 
 		gnAvatar.add(ParameterCode.Type, avatar.type);
@@ -224,16 +315,29 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return gnAvatar;
 	}
 
+	/**
+	 * Executes the generate timestamp create workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTsCreate(storeInventory: StoreInventory): number {
 		return storeInventory.getTsCreate();
 	}
 
+	/**
+	 * Executes the generate tags workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTags(storeInventory: StoreInventory): GNArray {
+		// Stores the GearN tags value used in the current execution flow.
 		let gnTags = new GNArray();
 
+		// Stores the complete tags collection used in the current execution flow.
 		let allTags = storeInventory.getAllTags();
 
 		allTags.forEach((value: string, key: string) => {
+			// Stores the GearN tag value used in the current execution flow.
 			let gnTag = new GNHashtable();
 
 			gnTag.add(ParameterCode.Key, key);
@@ -245,14 +349,23 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		return gnTags;
 	}
 
+	/**
+	 * Executes the generate store datas workflow.
+	 * @param storeInventory Provides the store inventory value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateStoreDatas(storeInventory: StoreInventory): GNArray {
+		// Stores the GearN store datas value used in the current execution flow.
 		let gnStoreDatas = new GNArray();
 
+		// Stores the complete store datas collection used in the current execution flow.
 		let allStoreDatas = storeInventory.getAllStoreDatas();
 
 		for (let i = 0; i < allStoreDatas.length; i++) {
+			// Stores the store data value used in the current execution flow.
 			let storeData = allStoreDatas[i];
 
+			// Stores the GearN store data value used in the current execution flow.
 			let gnStoreData = new GNHashtable();
 
 			gnStoreData.add(ParameterCode.Key, storeData.key);

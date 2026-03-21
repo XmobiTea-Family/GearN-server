@@ -17,12 +17,17 @@ import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/ent
 
 class ChangePasswordAdminAccountOperationRequest extends OperationRequest {
 
+	// Stores the current password value used by this instance.
 	@StringDataMember({ code: ParameterCode.CurrentPassword, minLength: 6, maxLength: 64, mustNonNull: true })
 	public currentPassword: string;
 
+	// Stores the password value used by this instance.
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	public password: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -32,15 +37,29 @@ class ChangePasswordAdminAccountOperationRequest extends OperationRequest {
 
 export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.ChangePasswordAdminAccount;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return ChangePasswordAdminAccountOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -58,7 +77,15 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, currentPassword: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_ChangePasswordAdminAccount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -67,8 +94,10 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ type: "account", userId: request.userId });
 
 		if (result == null) {
@@ -76,10 +105,13 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the master admin player value used in the current execution flow.
 		let masterAdminPlayer = new MasterAdminPlayer(result, collection);
 
+		// Stores the password value used in the current execution flow.
 		let password = masterAdminPlayer.getPassword();
 
+		// Tracks whether match.
 		let isMatch = await bcrypt.compare(request.currentPassword, password);
 
 		if (!isMatch) {

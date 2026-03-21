@@ -20,15 +20,21 @@ import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 
 class AddPlayerFriendOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	// Stores the friend ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.FriendId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public friendId: string;
 
+	// Stores the catalog ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
 	public catalogId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -38,6 +44,9 @@ class AddPlayerFriendOperationRequest extends OperationRequest {
 
 class ServerAddPlayerFriendOperationRequest extends AddPlayerFriendOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -47,6 +56,9 @@ class ServerAddPlayerFriendOperationRequest extends AddPlayerFriendOperationRequ
 
 class AdminAddPlayerFriendOperationRequest extends ServerAddPlayerFriendOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -56,21 +68,36 @@ class AdminAddPlayerFriendOperationRequest extends ServerAddPlayerFriendOperatio
 
 export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.AddPlayerFriend;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return AddPlayerFriendOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.addPlayerFriend);
 
 		if (!allowMethod) {
@@ -84,7 +111,14 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerAddPlayerFriendOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -102,7 +136,14 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminAddPlayerFriendOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -120,7 +161,15 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string, friendId: string, catalogId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_AddPlayerFriend", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -129,7 +178,9 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved game player settings instance for the current execution flow.
 		let gamePlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		// Stores the player friend catalog settings item value used in the current execution flow.
 		let playerFriendCatalogSettingsItem = gamePlayerSettings.playerFriendCatalogSettings.find(x => x.catalogId == request.catalogId);
 
 		if (playerFriendCatalogSettingsItem == null) {
@@ -139,12 +190,15 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		}
 
 		if (request.characterId != request.friendId) {
+			// Stores the game player find options value used in the current execution flow.
 			let gamePlayerFindOptions: CharacterPlayerFindOptions = {
 				playerFriends: true,
 				owner: true
 			}
 
+			// Stores the character player value used in the current execution flow.
 			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), gamePlayerFindOptions);
+			// Stores the friend player value used in the current execution flow.
 			let friendPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 			if (characterPlayer == null) {
@@ -157,6 +211,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 				return operationResponse;
 			}
 
+			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 			if (!characterPlayer.hasPlayerFriend(request.friendId)) {
@@ -168,8 +223,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					friendPlayer.saveAsync();
 
 					{
+						// Stores the GearN player friends value used in the current execution flow.
 						let gnPlayerFriends = new GNArray();
 
+						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -177,6 +234,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
+						// Stores the character player friend update operation event value used in the current execution flow.
 						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -186,8 +244,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					}
 
 					{
+						// Stores the GearN player friends value used in the current execution flow.
 						let gnPlayerFriends = new GNArray();
 
+						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -195,6 +255,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
+						// Stores the character player friend update operation event value used in the current execution flow.
 						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -211,8 +272,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					friendPlayer.saveAsync();
 
 					{
+						// Stores the GearN player friends value used in the current execution flow.
 						let gnPlayerFriends = new GNArray();
 
+						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -220,6 +283,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
+						// Stores the character player friend update operation event value used in the current execution flow.
 						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -229,8 +293,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					}
 
 					{
+						// Stores the GearN player friends value used in the current execution flow.
 						let gnPlayerFriends = new GNArray();
 
+						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -238,6 +304,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
+						// Stores the character player friend update operation event value used in the current execution flow.
 						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -248,6 +315,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 				}
 			}
 			else {
+				// Stores the friend item value used in the current execution flow.
 				let friendItem = characterPlayer.getPlayerFriend(request.friendId);
 
 				if (friendItem.status == <number>FriendStatus.WaitingAccept) {
@@ -258,8 +326,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					friendPlayer.saveAsync();
 
 					{
+						// Stores the GearN player friends value used in the current execution flow.
 						let gnPlayerFriends = new GNArray();
 
+						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -267,6 +337,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
+						// Stores the character player friend update operation event value used in the current execution flow.
 						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -276,8 +347,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					}
 
 					{
+						// Stores the GearN player friends value used in the current execution flow.
 						let gnPlayerFriends = new GNArray();
 
+						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -285,6 +358,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
+						// Stores the character player friend update operation event value used in the current execution flow.
 						let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 						characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -303,8 +377,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 							friendPlayer.saveAsync();
 
 							{
+								// Stores the GearN player friends value used in the current execution flow.
 								let gnPlayerFriends = new GNArray();
 
+								// Stores the GearN player friend value used in the current execution flow.
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -312,6 +388,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 
+								// Stores the character player friend update operation event value used in the current execution flow.
 								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -321,8 +398,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 							}
 
 							{
+								// Stores the GearN player friends value used in the current execution flow.
 								let gnPlayerFriends = new GNArray();
 
+								// Stores the GearN player friend value used in the current execution flow.
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -330,6 +409,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 
+								// Stores the character player friend update operation event value used in the current execution flow.
 								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -346,8 +426,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 							friendPlayer.saveAsync();
 
 							{
+								// Stores the GearN player friends value used in the current execution flow.
 								let gnPlayerFriends = new GNArray();
 
+								// Stores the GearN player friend value used in the current execution flow.
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -355,6 +437,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 
+								// Stores the character player friend update operation event value used in the current execution flow.
 								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -364,8 +447,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 							}
 
 							{
+								// Stores the GearN player friends value used in the current execution flow.
 								let gnPlayerFriends = new GNArray();
 
+								// Stores the GearN player friend value used in the current execution flow.
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
@@ -373,6 +458,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 
+								// Stores the character player friend update operation event value used in the current execution flow.
 								let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 								characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);

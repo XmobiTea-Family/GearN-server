@@ -16,18 +16,25 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetGroupsWithDisplayNameOperationRequest extends OperationRequest {
 
+    // Stores the keyword value used by this instance.
     @StringDataMember({ code: ParameterCode.Keyword, minLength: 2, maxLength: 32 })
     public keyword: string;
 
+    // Stores the info request parameter value used by this instance.
     @GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
     public infoRequestParam: InfoRequestParam;
 
+    // Stores the skip value used by this instance.
     @NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
     public skip?: number;
 
+    // Stores the limit value used by this instance.
     @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
     public limit?: number;
 
+    /**
+     * Checks whether valid request.
+     */
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
 
@@ -37,6 +44,9 @@ class GetGroupsWithDisplayNameOperationRequest extends OperationRequest {
 
 class ServerGetGroupsWithDisplayNameOperationRequest extends GetGroupsWithDisplayNameOperationRequest {
 
+    /**
+     * Checks whether valid request.
+     */
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
 
@@ -46,6 +56,9 @@ class ServerGetGroupsWithDisplayNameOperationRequest extends GetGroupsWithDispla
 
 class AdminGetGroupsWithDisplayNameOperationRequest extends ServerGetGroupsWithDisplayNameOperationRequest {
 
+    /**
+     * Checks whether valid request.
+     */
     public override isValidRequest() {
         if (!super.isValidRequest()) return false;
 
@@ -55,15 +68,29 @@ class AdminGetGroupsWithDisplayNameOperationRequest extends ServerGetGroupsWithD
 
 export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHandler {
 
+    /**
+     * Returns the code.
+     */
     public override getCode() {
         return OperationCode.GetGroupsWithDisplayName;
     }
 
+    /**
+     * Returns the common operation request.
+     */
     public override getCommonOperationRequest() {
         return GetGroupsWithDisplayNameOperationRequest;
     }
 
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
     public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
         let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
         if (!request.isValidRequest()) {
@@ -84,7 +111,14 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
         }, secretInfo, operationRequest);
     }
 
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
     public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
         let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetGroupsWithDisplayNameOperationRequest);
 
         if (!request.isValidRequest()) {
@@ -105,7 +139,14 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
         }, secretInfo, operationRequest);
     }
 
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
     public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
         let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetGroupsWithDisplayNameOperationRequest);
 
         if (!request.isValidRequest()) {
@@ -126,7 +167,15 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
         }, secretInfo, operationRequest);
     }
 
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
     private async execute(request: { keyword: string, infoRequestParam: InfoRequestParam, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetGroupsWithDisplayName", request, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
@@ -135,15 +184,20 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
+        // Stores the group find options value used in the current execution flow.
         let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
 
+        // Stores the GearN results value used in the current execution flow.
         let gnResults = new GNArray();
 
+        // Stores the groups value used in the current execution flow.
         let groups = await this.gnServer.getDatabase().loadGroupsWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
 
         for (let i = 0; i < groups.length; i++) {
+            // Stores the group value used in the current execution flow.
             let group = groups[i];
 
+            // Stores the GearN result value used in the current execution flow.
             let gnResult = new GNHashtable();
 
             gnResult.add(ParameterCode.GroupId, group.getGroupId());

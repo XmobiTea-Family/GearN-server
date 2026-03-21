@@ -359,10 +359,16 @@ import { GetFunctionRequestHandler as CloudScript_GetFunctionRequestHandler } fr
 import { GetFunctionsRequestHandler as CloudScript_GetFunctionsRequestHandler } from "./GN-app-api/handler/controller/handler/cloudScript/GetFunctionsRequestHandler";
 
 export class RequestControllerUtils {
+	/**
+	 * Adds the all handler.
+	 * @param gnServer Provides the GearN server value used by this operation.
+	 */
 	public static addAllHandler(gnServer: GNServer): void {
+		// Stores the request controller value used in the current execution flow.
 		let requestController = gnServer.getRequestController();
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.Authenticate;
 
 			requestController.addHandler(requestTypeValue, new Authenticate_LoginByAccountRequestHandler(gnServer), false);
@@ -386,6 +392,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.MasterPlayer;
 
 			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAccountRequestHandler(gnServer), true);
@@ -477,6 +484,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.CharacterPlayer;
 
 			requestController.addHandler(requestTypeValue, new CharacterPlayer_AddSegmentRequestHandler(gnServer), true);
@@ -535,6 +543,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.GamePlayer;
 
 			requestController.addHandler(requestTypeValue, new GamePlayer_AddSegmentRequestHandler(gnServer), true);
@@ -592,6 +601,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.Content;
 
 			requestController.addHandler(requestTypeValue, new Content_GetContentDataRequestHandler(gnServer), true);
@@ -605,6 +615,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.Group;
 
 			requestController.addHandler(requestTypeValue, new Group_AddSegmentRequestHandler(gnServer), true);
@@ -649,6 +660,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.Inventory;
 
 			requestController.addHandler(requestTypeValue, new Inventory_AddSegmentRequestHandler(gnServer), true);
@@ -688,6 +700,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.StoreInventory;
 
 			requestController.addHandler(requestTypeValue, new StoreInventory_BuyStoreItemRequestHandler(gnServer), true);
@@ -707,6 +720,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.Dashboard;
 
 			requestController.addHandler(requestTypeValue, new Dashboard_LoginByAdminAccountRequestHandler(gnServer), false);
@@ -738,6 +752,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.Multiplayer;
 
 			requestController.addHandler(requestTypeValue, new Multiplayer_CancelAllMatchmakingTicketRequestHandler(gnServer), true);
@@ -753,6 +768,7 @@ export class RequestControllerUtils {
 		}
 
 		{
+			// Stores the request type value value used in the current execution flow.
 			let requestTypeValue = RequestType.CloudScript;
 
 			requestController.addHandler(requestTypeValue, new CloudScript_AddFunctionRequestHandler(gnServer), true);

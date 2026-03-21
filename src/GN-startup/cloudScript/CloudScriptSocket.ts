@@ -2,6 +2,11 @@ import { OperationEvent } from "@xmobitea/gn-typescript-client";
 import { CloudScriptEventType, CloudScriptProcessBase } from "./CloudScriptEvent";
 
 export class CloudScriptSocket extends CloudScriptProcessBase {
+	/**
+	 * Sends the event to.
+	 * @param userId Indicates whether r ID should be used.
+	 * @param operationEvent Provides the operation event value used by this operation.
+	 */
 	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
 		return await this.sendEvent({
 			eventType: CloudScriptEventType.SendEventToOne,
@@ -13,6 +18,11 @@ export class CloudScriptSocket extends CloudScriptProcessBase {
 		});
 	}
 
+	/**
+	 * Sends the event to more user.
+	 * @param userIds Indicates whether r IDs should be used.
+	 * @param operationEvent Provides the operation event value used by this operation.
+	 */
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
 		return await this.sendEvent({
 			eventType: CloudScriptEventType.SendEventToMore,
@@ -24,6 +34,10 @@ export class CloudScriptSocket extends CloudScriptProcessBase {
 		});
 	}
 
+	/**
+	 * Sends the event to all player.
+	 * @param operationEvent Provides the operation event value used by this operation.
+	 */
 	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
 		return await this.sendEvent({
 			eventType: CloudScriptEventType.SendEventToAll,
@@ -34,6 +48,11 @@ export class CloudScriptSocket extends CloudScriptProcessBase {
 		});
 	}
 
+	/**
+	 * Executes the join room workflow asynchronously.
+	 * @param userId Indicates whether r ID should be used.
+	 * @param roomId Provides the room ID value used by this operation.
+	 */
 	public async joinRoom(userId: string, roomId: string): Promise<void> {
 		return await this.sendEvent({
 			eventType: CloudScriptEventType.JoinRoom,
@@ -42,6 +61,11 @@ export class CloudScriptSocket extends CloudScriptProcessBase {
 		});
 	}
 
+	/**
+	 * Executes the leave room workflow asynchronously.
+	 * @param userId Indicates whether r ID should be used.
+	 * @param roomId Provides the room ID value used by this operation.
+	 */
 	public async leaveRoom(userId: string, roomId: string): Promise<void> {
 		return await this.sendEvent({
 			eventType: CloudScriptEventType.LeaveRoom,
@@ -50,6 +74,11 @@ export class CloudScriptSocket extends CloudScriptProcessBase {
 		});
 	}
 
+	/**
+	 * Sends the event to room.
+	 * @param roomId Provides the room ID value used by this operation.
+	 * @param operationEvent Provides the operation event value used by this operation.
+	 */
 	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
 		return await this.sendEvent({
 			eventType: CloudScriptEventType.SendEventToRoom,

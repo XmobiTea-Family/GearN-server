@@ -3,6 +3,7 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 
 export class ThirtPartyGameCenterSettingsParam {
 
+	// Stores the package ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.PackageId })
 	public packageId: string;
 

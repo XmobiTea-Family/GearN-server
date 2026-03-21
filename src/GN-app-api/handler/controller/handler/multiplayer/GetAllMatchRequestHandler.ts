@@ -16,15 +16,21 @@ import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
 
 class GetAllMatchOperationRequest extends OperationRequest {
 
+	// Indicates whether return member.
 	@BooleanDataMember({ code: ParameterCode.ReturnMember, isOptional: true, defaultValue: false })
 	public returnMember?: boolean;
 
+	// Stores the skip value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	public skip?: number;
 
+	// Stores the limit value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	public limit?: number;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,6 +40,9 @@ class GetAllMatchOperationRequest extends OperationRequest {
 
 class ServerGetAllMatchOperationRequest extends GetAllMatchOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +52,9 @@ class ServerGetAllMatchOperationRequest extends GetAllMatchOperationRequest {
 
 class AdminGetAllMatchOperationRequest extends ServerGetAllMatchOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,15 +64,29 @@ class AdminGetAllMatchOperationRequest extends ServerGetAllMatchOperationRequest
 
 export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetAllMatch;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetAllMatchOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -78,7 +104,14 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAllMatchOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -96,7 +129,14 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAllMatchOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -114,7 +154,15 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { returnMember: boolean, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetAllMatch", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -123,8 +171,10 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the match collection value used in the current execution flow.
 		let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", secretInfo.getGameId());
 
+		// Stores the projection value used in the current execution flow.
 		let projection: any = null;
 		if (!request.returnMember) {
 			projection = {
@@ -139,13 +189,17 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 			})
 			.sort({ "_id": -1 }).skip(request.skip).limit(request.limit);
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
 		while (await results.hasNext()) {
+			// Stores the result value used in the current execution flow.
 			let result = await results.next();
 
+			// Stores the match value used in the current execution flow.
 			let match = new Match(result, matchCollection);
 
+			// Stores the GearN match value used in the current execution flow.
 			let gnMatch = new GNHashtable();
 
 			gnMatch.add(ParameterCode.MatchId, match.getMatchId());
@@ -154,12 +208,16 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 			gnMatch.add(ParameterCode.TimeToMatchInSeconds, match.getTimeToMatchInSeconds());
 
 			if (request.returnMember) {
+				// Stores the GearN members value used in the current execution flow.
 				let gnMembers = new GNArray();
 
+				// Stores the members value used in the current execution flow.
 				let members = match.getMembers();
 				for (let i = 0; i < members.length; i++) {
+					// Stores the member value used in the current execution flow.
 					let member = members[i];
 
+					// Stores the GearN member value used in the current execution flow.
 					let gnMember = new GNHashtable();
 
 					gnMember.add(ParameterCode.UserId, member.userId);
@@ -172,18 +230,24 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 				gnMatch.add(ParameterCode.Members, gnMembers);
 			}
 
+			// Stores the server detail value used in the current execution flow.
 			let serverDetail = match.getServerDetail();
 			if (serverDetail != null) {
+				// Stores the GearN server detail value used in the current execution flow.
 				let gnServerDetail = new GNHashtable();
 
 				gnServerDetail.add(ParameterCode.IpV4Address, serverDetail.ipV4Address);
 
+				// Stores the GearN ports value used in the current execution flow.
 				let gnPorts = new GNArray();
+				// Stores the ports value used in the current execution flow.
 				let ports = serverDetail.ports;
 
 				for (let i = 0; i < ports.length; i++) {
+					// Stores the port value used in the current execution flow.
 					let port = ports[i];
 
+					// Stores the GearN port value used in the current execution flow.
 					let gnPort = new GNHashtable();
 
 					gnPort.add(ParameterCode.Name, port.name);

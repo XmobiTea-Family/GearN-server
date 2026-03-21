@@ -19,12 +19,17 @@ import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class SetPlayerDataOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the player datas value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.PlayerDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: PlayerDataParam })
 	public playerDatas: Array<PlayerDataParam>;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,9 +39,13 @@ class SetPlayerDataOperationRequest extends OperationRequest {
 
 class ServerSetPlayerDataOperationRequest extends SetPlayerDataOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +55,9 @@ class ServerSetPlayerDataOperationRequest extends SetPlayerDataOperationRequest 
 
 class AdminSetPlayerDataOperationRequest extends ServerSetPlayerDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,15 +67,29 @@ class AdminSetPlayerDataOperationRequest extends ServerSetPlayerDataOperationReq
 
 export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetPlayerData;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetPlayerDataOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -94,7 +120,14 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -111,7 +144,14 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -128,7 +168,15 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, playerDatas: Array<PlayerDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_SetPlayerData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -137,10 +185,12 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerDatas: true,
 		}
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
@@ -148,19 +198,27 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the resolved game player settings instance for the current execution flow.
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
+		// Stores the GearN player datas value used in the current execution flow.
 		let gnPlayerDatas = new GNArray();
 
 		for (let i = 0; i < request.playerDatas.length; i++) {
+			// Stores the player data parameter value used in the current execution flow.
 			let playerDataParam = request.playerDatas[i];
 
+			// Stores the key value used in the current execution flow.
 			let key = playerDataParam.key;
+			// Stores the player datas settings item value used in the current execution flow.
 			let playerDatasSettingsItem = gamePlayerSettings.playerDatasSettings.find(x => x.key == key);
 			if (playerDatasSettingsItem == null) continue;
 
+			// Stores the value value used in the current execution flow.
 			let value = playerDataParam.value;
+			// Stores the permission value used in the current execution flow.
 			let permission = <PermissionDataItem>playerDatasSettingsItem.permission;
 
 			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
@@ -173,6 +231,7 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 
 				gamePlayer.setPlayerData(key, value as DataValueType);
 
+				// Stores the GearN player data value used in the current execution flow.
 				let gnPlayerData = new GNHashtable();
 				gnPlayerData.add(ParameterCode.Key, key);
 				gnPlayerData.add(ParameterCode.Value, playerDataParam.value);

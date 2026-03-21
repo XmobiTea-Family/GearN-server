@@ -19,27 +19,37 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetStatisticsLeaderboardAroundItemOperationRequest extends OperationRequest {
 
+	// Stores the item ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	public itemId: string;
 
+	// Stores the key value used by this instance.
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	public key: string;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	// Stores the skip value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	public skip?: number;
 
+	// Stores the limit value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	public limit?: number;
 
+	// Indicates whether load from cache.
 	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	public loadFromCache?: boolean;
 
+	// Stores the catalog ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	public catalogId?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,6 +59,9 @@ class GetStatisticsLeaderboardAroundItemOperationRequest extends OperationReques
 
 class ServerGetStatisticsLeaderboardAroundItemOperationRequest extends GetStatisticsLeaderboardAroundItemOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -58,6 +71,9 @@ class ServerGetStatisticsLeaderboardAroundItemOperationRequest extends GetStatis
 
 class AdminGetStatisticsLeaderboardAroundItemOperationRequest extends ServerGetStatisticsLeaderboardAroundItemOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -67,21 +83,36 @@ class AdminGetStatisticsLeaderboardAroundItemOperationRequest extends ServerGetS
 
 export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetStatisticsLeaderboardAroundItem;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetStatisticsLeaderboardAroundItemOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.getStatisticsLeaderboardAroundItem);
 
 		if (!allowMethod) {
@@ -101,7 +132,14 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStatisticsLeaderboardAroundItemOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -125,7 +163,14 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStatisticsLeaderboardAroundItemOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -149,7 +194,15 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { itemId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, catalogId: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetStatisticsLeaderboardAroundItem", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -158,7 +211,9 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved inventory settings instance for the current execution flow.
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
+		// Stores the item statistics settings item value used in the current execution flow.
 		let itemStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == request.key);
 
 		if (itemStatisticsSettingsItem == null) {
@@ -167,7 +222,9 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			return operationResponse;
 		}
 
+		// Stores the position cache key value used in the current execution flow.
 		let positionCacheKey = "inventoryStatisticsLeaderboardAroundPosition_" + request.itemId + "_" + request.key;
+		// Stores the cache key value used in the current execution flow.
 		let cacheKey = "inventoryStatisticsLeaderboardAround_" + request.itemId + "_" + request.key;
 		if (request.catalogId) {
 			cacheKey += "_" + request.catalogId;
@@ -180,6 +237,7 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			}
 		}
 
+		// Stores the cache data value used in the current execution flow.
 		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
 		if (request.loadFromCache) {
@@ -188,9 +246,12 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			}
 		}
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the this position value used in the current execution flow.
 		let thisPosition: number;
+		// Stores the inventories value used in the current execution flow.
 		let inventories: Inventory[];
 
 		if (request.loadFromCache) {
@@ -200,8 +261,10 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
 				if (i >= inventories.length) break;
 
+				// Stores the inventory value used in the current execution flow.
 				let inventory = inventories[i];
 
+				// Stores the GearN result value used in the current execution flow.
 				let gnResult = new GNHashtable();
 
 				gnResult.add(ParameterCode.Position, i + thisPosition);
@@ -214,7 +277,9 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			}
 		}
 		else {
+			// Stores the statistics aggregation method value used in the current execution flow.
 			let statisticsAggregationMethod = <xStatisticsAggregationMethod>itemStatisticsSettingsItem.statisticsAggregationMethod;
+			// Stores the direction value used in the current execution flow.
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
 			thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), itemStatisticsSettingsItem.initialValue, direction);
@@ -222,6 +287,7 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			if (thisPosition != -1) {
 				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 
+				// Stores the inventory find options value used in the current execution flow.
 				let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
 
 				if (request.skip + request.limit <= 100) {
@@ -232,8 +298,10 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= inventories.length) break;
 
+						// Stores the inventory value used in the current execution flow.
 						let inventory = inventories[i];
 
+						// Stores the GearN result value used in the current execution flow.
 						let gnResult = new GNHashtable();
 
 						gnResult.add(ParameterCode.Position, i + thisPosition);
@@ -252,8 +320,10 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 
 					for (let i = 0; i < inventories.length; i++) {
 
+						// Stores the inventory value used in the current execution flow.
 						let inventory = inventories[i];
 
+						// Stores the GearN result value used in the current execution flow.
 						let gnResult = new GNHashtable();
 
 						gnResult.add(ParameterCode.Position, i + thisPosition + request.skip);

@@ -19,12 +19,17 @@ import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType"
 
 class SetAmountOperationRequest extends OperationRequest {
 
+	// Stores the item ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	public itemId: string;
 
+	// Stores the amount value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Amount, mustInt: true })
 	public amount: number;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,6 +39,9 @@ class SetAmountOperationRequest extends OperationRequest {
 
 class ServerSetAmountOperationRequest extends SetAmountOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +51,9 @@ class ServerSetAmountOperationRequest extends SetAmountOperationRequest {
 
 class AdminSetAmountOperationRequest extends ServerSetAmountOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,21 +63,36 @@ class AdminSetAmountOperationRequest extends ServerSetAmountOperationRequest {
 
 export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetAmount;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetAmountOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setAmount);
 
 		if (!allowMethod) {
@@ -79,7 +105,14 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetAmountOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -96,7 +129,14 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetAmountOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -113,7 +153,15 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { itemId: string, amount: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetAmount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -122,12 +170,14 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			amount: true,
 			itemType: true,
 			owner: true,
 		}
 
+		// Stores the inventory value used in the current execution flow.
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
@@ -135,6 +185,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the item type value used in the current execution flow.
 		let itemType = <ItemType>inventory.getItemType();
 		if (itemType == ItemType.NonStackable) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotStackable);
@@ -144,13 +195,17 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 		inventory.setAmount(inventory.getAmount() + request.amount);
 
 		if (inventory.getAmount() <= 0) {
+			// Stores the remove status value used in the current execution flow.
 			let removeStatus = inventory.getRemoveStatus();
 			if (removeStatus.tsRemove == 0) {
 				inventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), "");
 
+				// Stores the owner value used in the current execution flow.
 				let owner = inventory.getOwner();
+				// Stores the owner type value used in the current execution flow.
 				let ownerType = <OwnerType>owner.type;
 				if (ownerType == OwnerType.Group) {
+					// Stores the group value used in the current execution flow.
 					let group = await this.gnServer.getDatabase().loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });
 					if (group != null) {
 						if (group.hasGroupInventory(request.itemId)) {
@@ -161,6 +216,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 					}
 				}
 				else if (ownerType == OwnerType.GamePlayer) {
+					// Stores the game player value used in the current execution flow.
 					let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
 					if (gamePlayer != null) {
 						if (gamePlayer.hasPlayerInventory(request.itemId)) {
@@ -171,6 +227,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 					}
 				}
 				else if (ownerType == OwnerType.CharacterPlayer) {
+					// Stores the character player value used in the current execution flow.
 					let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
 					if (characterPlayer != null) {
 						if (characterPlayer.hasPlayerInventory(request.itemId)) {
@@ -185,6 +242,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 
 		inventory.saveAsync();
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		gnInfoResponseParameters.add(ParameterCode.Amount, inventory.getAmount());
 

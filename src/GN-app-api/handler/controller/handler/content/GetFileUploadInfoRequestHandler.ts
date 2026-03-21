@@ -15,9 +15,13 @@ import { GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 class GetFileUploadInfoOperationRequest extends OperationRequest {
 
+	// Stores the file ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
 	public fileId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -28,6 +32,9 @@ class GetFileUploadInfoOperationRequest extends OperationRequest {
 
 class ServerGetFileUploadInfoOperationRequest extends GetFileUploadInfoOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,6 +44,9 @@ class ServerGetFileUploadInfoOperationRequest extends GetFileUploadInfoOperation
 
 class AdminGetFileUploadInfoOperationRequest extends ServerGetFileUploadInfoOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,15 +56,29 @@ class AdminGetFileUploadInfoOperationRequest extends ServerGetFileUploadInfoOper
 
 export class GetFileUploadInfoRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetFileUploadInfo;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetFileUploadInfoOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -70,7 +94,14 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -86,7 +117,14 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -102,7 +140,15 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { fileId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_GetFileUploadInfo", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -111,6 +157,7 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the upload file info value used in the current execution flow.
 		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId);
 
 		if (uploadFileInfo == null) {
@@ -122,15 +169,19 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 		operationResponse.setParameter(ParameterCode.FileName, uploadFileInfo.getFileName());
 		operationResponse.setParameter(ParameterCode.TsCreate, uploadFileInfo.getTsCreate());
 
+		// Stores the GearN remove status value used in the current execution flow.
 		let gnRemoveStatus = new GNHashtable();
+		// Stores the remove status value used in the current execution flow.
 		let removeStatus = uploadFileInfo.getRemoveStatus();
 		gnRemoveStatus.add(ParameterCode.TsRemove, removeStatus.tsRemove);
 		gnRemoveStatus.add(ParameterCode.Reason, removeStatus.reason);
 		operationResponse.setParameter(ParameterCode.RemoveStatus, gnRemoveStatus);
 
+		// Stores the file upload value used in the current execution flow.
 		let fileUpload = uploadFileInfo.getFileUpload();
 
 		if (fileUpload != null) {
+			// Stores the GearN file upload value used in the current execution flow.
 			let gnFileUpload = new GNHashtable();
 
 			gnFileUpload.add(ParameterCode.MimeType, fileUpload.mimeType);

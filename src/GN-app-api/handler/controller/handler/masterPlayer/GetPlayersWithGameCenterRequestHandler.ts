@@ -16,12 +16,17 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithGameCenterOperationRequest extends OperationRequest {
 
+	// Stores the player IDs value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.PlayerIds, mustNonNull: true, elementCls: String })
 	public playerIds: Array<string>;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -31,6 +36,9 @@ class GetPlayersWithGameCenterOperationRequest extends OperationRequest {
 
 class ServerGetPlayersWithGameCenterOperationRequest extends GetPlayersWithGameCenterOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -40,6 +48,9 @@ class ServerGetPlayersWithGameCenterOperationRequest extends GetPlayersWithGameC
 
 class AdminGetPlayersWithGameCenterOperationRequest extends ServerGetPlayersWithGameCenterOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -49,15 +60,29 @@ class AdminGetPlayersWithGameCenterOperationRequest extends ServerGetPlayersWith
 
 export class GetPlayersWithGameCenterRequestHandler extends MasterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetPlayersWithGameCenter;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetPlayersWithGameCenterOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -76,7 +101,14 @@ export class GetPlayersWithGameCenterRequestHandler extends MasterPlayerBaseRequ
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayersWithGameCenterOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -95,7 +127,14 @@ export class GetPlayersWithGameCenterRequestHandler extends MasterPlayerBaseRequ
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayersWithGameCenterOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -114,7 +153,15 @@ export class GetPlayersWithGameCenterRequestHandler extends MasterPlayerBaseRequ
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { playerIds: Array<string>, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetPlayersWithGameCenter", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -123,16 +170,21 @@ export class GetPlayersWithGameCenterRequestHandler extends MasterPlayerBaseRequ
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 		if (masterPlayerFindOptions != null) masterPlayerFindOptions.external = true;
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the master players value used in the current execution flow.
 		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersWithGameCenterAsync(request.playerIds, masterPlayerFindOptions);
 
 		for (let i = 0; i < masterPlayers.length; i++) {
+			// Stores the master player value used in the current execution flow.
 			let masterPlayer = masterPlayers[i];
 
+			// Stores the GearN result value used in the current execution flow.
 			let gnResult = new GNHashtable();
 
 			gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());

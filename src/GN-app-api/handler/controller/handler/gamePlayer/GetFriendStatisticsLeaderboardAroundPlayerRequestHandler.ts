@@ -21,24 +21,33 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetFriendStatisticsLeaderboardAroundPlayerOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the key value used by this instance.
 	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
 	public key: string;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	// Stores the skip value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	public skip?: number;
 
+	// Stores the limit value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	public limit?: number;
 
+	// Indicates whether load from cache.
 	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	public loadFromCache?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,9 +57,13 @@ class GetFriendStatisticsLeaderboardAroundPlayerOperationRequest extends Operati
 
 class ServerGetFriendStatisticsLeaderboardAroundPlayerOperationRequest extends GetFriendStatisticsLeaderboardAroundPlayerOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -60,6 +73,9 @@ class ServerGetFriendStatisticsLeaderboardAroundPlayerOperationRequest extends G
 
 class AdminGetFriendStatisticsLeaderboardAroundPlayerOperationRequest extends ServerGetFriendStatisticsLeaderboardAroundPlayerOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -69,15 +85,29 @@ class AdminGetFriendStatisticsLeaderboardAroundPlayerOperationRequest extends Se
 
 export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetFriendStatisticsLeaderboardAroundPlayer;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetFriendStatisticsLeaderboardAroundPlayerOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -114,7 +144,14 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetFriendStatisticsLeaderboardAroundPlayerOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -137,7 +174,14 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetFriendStatisticsLeaderboardAroundPlayerOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -160,7 +204,15 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetFriendStatisticsLeaderboardAroundPlayer", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -169,7 +221,9 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved game player settings instance for the current execution flow.
 		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+		// Stores the player statistics settings item value used in the current execution flow.
 		let playerStatisticsSettingsItem = gamePlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
 
 		if (playerStatisticsSettingsItem == null) {
@@ -178,8 +232,10 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 			return operationResponse;
 		}
 
+		// Stores the cache data value used in the current execution flow.
 		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
+		// Stores the cache key value used in the current execution flow.
 		let cacheKey = "gamePlayerStatisticsLeaderboardFriendAround_" + request.userId;
 
 		if (request.loadFromCache) {
@@ -188,14 +244,17 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 			}
 		}
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the game players value used in the current execution flow.
 		let gamePlayers: GamePlayer[];
 
 		if (request.loadFromCache) {
 			gamePlayers = await cacheData.getData(cacheKey);
 		}
 		else {
+			// Stores the game player value used in the current execution flow.
 			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), null);
 
 			if (gamePlayer == null) {
@@ -204,11 +263,14 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 				return operationResponse;
 			}
 
+			// Stores the friend IDs value used in the current execution flow.
 			let friendIds: string[] = [];
 
+			// Stores the complete player friends collection used in the current execution flow.
 			let allPlayerFriends = gamePlayer.getAllPlayerFriends();
 
 			for (let i = 0; i < allPlayerFriends.length; i++) {
+				// Stores the player friend item value used in the current execution flow.
 				let playerFriendItem = allPlayerFriends[i];
 
 				if (playerFriendItem.status == <number>FriendStatus.Friend) {
@@ -216,10 +278,12 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 				}
 			}
 
+			// Stores the complete game players collection used in the current execution flow.
 			let allGamePlayers = await this.gnServer.getDatabase().loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds, secretInfo.getGameId(), null);
 
 			allGamePlayers.push(gamePlayer);
 
+			// Stores the statistics aggregation method value used in the current execution flow.
 			let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
 
 			gamePlayers = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum
@@ -229,14 +293,18 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 			await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 		}
 
+		// Stores the game player value used in the current execution flow.
 		let gamePlayer = gamePlayers.find(x => x.getUserId() == request.userId);
+		// Stores the this position value used in the current execution flow.
 		let thisPosition = gamePlayers.indexOf(gamePlayer);
 
 		for (let i = request.skip + thisPosition; i < request.skip + thisPosition + request.limit; i++) {
 			if (i >= gamePlayers.length) break;
 
+			// Stores the game player value used in the current execution flow.
 			let gamePlayer = gamePlayers[i];
 
+			// Stores the GearN result value used in the current execution flow.
 			let gnResult = new GNHashtable();
 
 			gnResult.add(ParameterCode.Position, i);

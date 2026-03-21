@@ -19,18 +19,25 @@ import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class LoginByGenericServiceOperationRequest extends OperationRequest {
 
+	// Stores the service name value used by this instance.
 	@StringDataMember({ code: ParameterCode.ServiceName, minLength: 6, maxLength: 32, mustNonNull: true })
 	public serviceName: string;
 
+	// Stores the service data value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.ServiceData, mustNonNull: true })
 	public serviceData: GNHashtable;
 
+	// Indicates whether create player if not exists.
 	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
 	public createPlayerIfNotExists?: boolean;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -40,15 +47,29 @@ class LoginByGenericServiceOperationRequest extends OperationRequest {
 
 export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.LoginByGenericService;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return LoginByGenericServiceOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -70,7 +91,15 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { serviceName: string, serviceData: { [k: string]: any }, createPlayerIfNotExists: boolean, infoRequestParam: InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByGenericService", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -79,7 +108,9 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved master player settings instance for the current execution flow.
 		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
+		// Stores the generic service settings item value used in the current execution flow.
 		let genericServiceSettingsItem = masterPlayerSettings.genericServiceSettings.find(x => x.serviceName == request.serviceName);
 
 		if (genericServiceSettingsItem == null) {
@@ -89,6 +120,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 			return operationResponse;
 		}
 
+		// Stores the service response value used in the current execution flow.
 		let serviceResponse = await this.gnServer.getEventCallbackCloudScriptService().executeVerifyGenericService(request.serviceName, request.serviceData);
 
 		if (!serviceResponse.success) {
@@ -99,13 +131,16 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 			return operationResponse;
 		}
 
+		// Stores the service ID value used in the current execution flow.
 		let serviceId = serviceResponse.serviceId;
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 		if (masterPlayerFindOptions != null) {
 			masterPlayerFindOptions.lastIPDetail = true;
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGenericServiceAsync(request.serviceName, serviceId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -115,8 +150,10 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 				return operationResponse;
 			}
 			else {
+				// Stores the new master player result value used in the current execution flow.
 				let newMasterPlayerResult = this.generateNewMasterPlayerResult(request.ipAddress);
 
+				// Stores the g value used in the current execution flow.
 				let g = {} as any;
 				g[request.serviceName] = {
 					serviceId: serviceId,
@@ -127,12 +164,14 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 					"genericServices": g
 				};
 
+				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {
 					if (ipDetailResponse.detail.countryCode) {
 						newMasterPlayerResult["countryCode"] = ipDetailResponse.detail.countryCode;
 					}
 
+					// Stores the last IP detail value used in the current execution flow.
 					let lastIPDetail = newMasterPlayerResult["lastIPDetail"];
 					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
 					lastIPDetail.regionCode = ipDetailResponse.detail.regionCode ?? "Unknown";
@@ -145,10 +184,12 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 			}
 		}
 		else {
+			// Stores the last IP detail value used in the current execution flow.
 			let lastIPDetail = masterPlayer.getLastIPDetail();
 			if (lastIPDetail.ipAddress != request.ipAddress) {
 				lastIPDetail.ipAddress = lastIPDetail.ipAddress;
 
+				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {
 					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";

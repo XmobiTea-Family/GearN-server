@@ -16,9 +16,13 @@ import { MasterAdminPlayer } from "./../../../../../GN-library/xdatabase/lib/ent
 
 class GetUsernameAdminAccountOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -28,15 +32,29 @@ class GetUsernameAdminAccountOperationRequest extends OperationRequest {
 
 export class GetUsernameAdminAccountRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetUsernameAdminAccount;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetUsernameAdminAccountOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -52,7 +70,15 @@ export class GetUsernameAdminAccountRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetUsernameAdminAccount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -61,8 +87,10 @@ export class GetUsernameAdminAccountRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ type: "account", userId: request.userId });
 
 		if (result == null) {
@@ -70,6 +98,7 @@ export class GetUsernameAdminAccountRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the master admin player value used in the current execution flow.
 		let masterAdminPlayer = new MasterAdminPlayer(result, collection);
 
 		operationResponse.setParameter(ParameterCode.Username, masterAdminPlayer.getUsername());

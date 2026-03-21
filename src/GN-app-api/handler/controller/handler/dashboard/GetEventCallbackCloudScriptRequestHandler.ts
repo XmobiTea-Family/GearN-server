@@ -14,6 +14,9 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
 class GetEventCallbackCloudScriptOperationRequest extends OperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -23,15 +26,29 @@ class GetEventCallbackCloudScriptOperationRequest extends OperationRequest {
 
 export class GetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetEventCallbackCloudScript;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetEventCallbackCloudScriptOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -45,7 +62,15 @@ export class GetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 		return this.execute({}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetEventCallbackCloudScript", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -54,13 +79,17 @@ export class GetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the results value used in the current execution flow.
 		let results = await this.gnServer.getEventCallbackCloudScriptService().getAllCloudScriptFunction();
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
 		for (let i = 0; i < results.length; i++) {
+			// Stores the result value used in the current execution flow.
 			let result = results[i];
 
+			// Stores the GearN result value used in the current execution flow.
 			let gnResult = new GNHashtable();
 
 			gnResult.add(ParameterCode.Type, result.type);
@@ -69,10 +98,13 @@ export class GetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 			// gnResult.add(ParameterCode.FullScript, result.fullScript);
 
 			let gnChildScripts = new GNArray();
+			// Stores the child scripts value used in the current execution flow.
 			let childScripts = result.childScripts;
 			for (let j = 0; j < childScripts.length; j++) {
+				// Stores the child script value used in the current execution flow.
 				let childScript = childScripts[j];
 
+				// Stores the GearN child script value used in the current execution flow.
 				let gnChildScript = new GNHashtable();
 				gnChildScript.add(ParameterCode.EventName, childScript.eventName);
 				gnChildScript.add(ParameterCode.Script, childScript.script);

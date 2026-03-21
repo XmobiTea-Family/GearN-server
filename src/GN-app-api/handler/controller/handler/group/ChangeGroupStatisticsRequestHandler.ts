@@ -19,15 +19,21 @@ import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class ChangeGroupStatisticsOperationRequest extends OperationRequest {
 
+	// Stores the group ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public groupId: string;
 
+	// Stores the group statistics value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.GroupStatistics, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupStatisticsParam })
 	public groupStatistics: Array<GroupStatisticsParam>;
 
+	// Stores the log value used by this instance.
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,6 +43,9 @@ class ChangeGroupStatisticsOperationRequest extends OperationRequest {
 
 class ServerChangeGroupStatisticsOperationRequest extends ChangeGroupStatisticsOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +55,9 @@ class ServerChangeGroupStatisticsOperationRequest extends ChangeGroupStatisticsO
 
 class AdminChangeGroupStatisticsOperationRequest extends ServerChangeGroupStatisticsOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,21 +67,36 @@ class AdminChangeGroupStatisticsOperationRequest extends ServerChangeGroupStatis
 
 export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.ChangeGroupStatistics;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return ChangeGroupStatisticsOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.changeGroupStatistics);
 
 		if (!allowMethod) {
@@ -83,7 +110,14 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangeGroupStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -101,7 +135,14 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangeGroupStatisticsOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -119,7 +160,15 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { groupId: string, groupStatistics: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_ChangeGroupStatistics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -128,10 +177,12 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			groupStatistics: true,
 		}
 
+		// Stores the group value used in the current execution flow.
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
@@ -139,38 +190,52 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 			return operationResponse;
 		}
 
+		// Stores the resolved group settings instance for the current execution flow.
 		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
+		// Stores the GearN group statistics value used in the current execution flow.
 		let gnGroupStatistics = new GNArray();
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		for (let i = 0; i < request.groupStatistics.length; i++) {
+			// Stores the group statistics parameter value used in the current execution flow.
 			let groupStatisticsParam = request.groupStatistics[i];
 
+			// Stores the key value used in the current execution flow.
 			let key = groupStatisticsParam.key;
 
+			// Stores the group statistics settings item value used in the current execution flow.
 			let groupStatisticsSettingsItem = groupSettings.groupStatisticsSettings.find(x => x.key == key);
 			if (groupStatisticsSettingsItem == null) continue;
 
+			// Stores the value value used in the current execution flow.
 			let value = groupStatisticsParam.value;
 
+			// Stores the GearN group statistic value used in the current execution flow.
 			let gnGroupStatistic = new GNHashtable();
 			gnGroupStatistic.add(ParameterCode.Key, key);
 
+			// Tracks whether set group statistics should be used.
 			let useSetGroupStatistics = false;
 			if (!group.hasGroupStatistics(key)) {
 				useSetGroupStatistics = true;
 				group.setGroupStatistics(key, groupStatisticsSettingsItem.initialValue, currentMilliseconds);
 			}
 
+			// Stores the group statistics value used in the current execution flow.
 			let groupStatistics = group.getGroupStatistics(key);
+			// Stores the old value value used in the current execution flow.
 			let oldValue = groupStatistics.value;
 
+			// Stores the statistics aggregation method value used in the current execution flow.
 			let statisticsAggregationMethod = <xStatisticsAggregationMethod>groupStatisticsSettingsItem.statisticsAggregationMethod;
 
 			if (statisticsAggregationMethod == xStatisticsAggregationMethod.Sum) {
+				// Stores the new value value used in the current execution flow.
 				let newValue = value + groupStatistics.value;
 
 				if (groupStatisticsSettingsItem.maximumValue != null) {

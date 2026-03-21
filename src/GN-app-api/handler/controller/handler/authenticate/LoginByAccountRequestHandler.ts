@@ -19,15 +19,21 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByAccountOperationRequest extends OperationRequest {
 
+	// Indicates whether rname should be used.
 	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	public username: string;
 
+	// Stores the password value used by this instance.
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	public password: string;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,15 +43,29 @@ class LoginByAccountOperationRequest extends OperationRequest {
 
 export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.LoginByAccount;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return LoginByAccountOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -66,7 +86,15 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { username: string, password: string, infoRequestParam: InfoRequestParam, ipAddress: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByAccount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -75,11 +103,13 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 		if (masterPlayerFindOptions != null) {
 			masterPlayerFindOptions.lastIPDetail = true;
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -87,10 +117,12 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			return operationResponse;
 		}
 		else {
+			// Stores the last IP detail value used in the current execution flow.
 			let lastIPDetail = masterPlayer.getLastIPDetail();
 			if (lastIPDetail.ipAddress != request.ipAddress) {
 				lastIPDetail.ipAddress = request.ipAddress;
 
+				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {
 					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
@@ -106,6 +138,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			masterPlayer.saveAsync();
 		}
 
+		// Tracks whether match.
 		let isMatch = await bcrypt.compare(request.password, masterPlayer.getPassword());
 
 		if (!isMatch) {

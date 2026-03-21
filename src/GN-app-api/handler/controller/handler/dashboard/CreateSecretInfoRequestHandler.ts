@@ -17,18 +17,25 @@ import { PermissionParam } from "./model/PermissionParam";
 
 class CreateSecretInfoOperationRequest extends OperationRequest {
 
+	// Stores the secret key value used by this instance.
 	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true, isOptional: true })
 	public secretKey?: string;
 
+	// Stores the game ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	public gameId?: string;
 
+	// Stores the role value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Role, mustInt: true, minValue: 1, maxValue: 3 })
 	public role: number;
 
+	// Stores the permission parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.PermissionParam, isOptional: true })
 	public permissionParam?: PermissionParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -38,15 +45,29 @@ class CreateSecretInfoOperationRequest extends OperationRequest {
 
 export class CreateSecretInfoRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.CreateSecretInfo;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return CreateSecretInfoOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -66,9 +87,17 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { secretKey: string, gameId: string, role: number, creatorId: string, permissionParam: PermissionParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		if (!request.secretKey) request.secretKey = StringUtility.generateRandomString(20, 0);
 
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_CreateSecretInfo", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -77,8 +106,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ type: "secretInfo", secretKey: request.secretKey });
 
 		if (result != null) {
@@ -86,6 +117,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the permission value used in the current execution flow.
 		let permission = request.permissionParam ?? (request.role == SecretRole.Player ? CreateSecretInfoRequestHandler.generateRecommendPlayerPermission() : request.role == SecretRole.Server ? CreateSecretInfoRequestHandler.generateRecommendServerPermission() : request.role == SecretRole.Admin ? CreateSecretInfoRequestHandler.generateRecommendAdminPermission() : CreateSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false));
 
 		result = {
@@ -103,8 +135,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 
 		await collection.insertOne(result);
 
+		// Stores the secret info item value used in the current execution flow.
 		let secretInfoItem = new SecretInfoItem(result, collection);
 
+		// Stores the new secret info value used in the current execution flow.
 		let newSecretInfo = SecretInfo.Builder()
 			.setGameId(secretInfoItem.getGameId())
 			.setIsRemove(secretInfoItem.getRemove())
@@ -126,6 +160,14 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		return operationResponse;
 	}
 
+	/**
+	 * Executes the generate default permission workflow.
+	 * @param selfEnable Provides the self enable value used by this operation.
+	 * @param otherSelfEnable Provides the other self enable value used by this operation.
+	 * @param adminSelfEnable Provides the admin self enable value used by this operation.
+	 * @param serverSelfEnable Provides the server self enable value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	public static generateDefaultPermission(selfEnable: boolean, otherSelfEnable: boolean, adminSelfEnable: boolean, serverSelfEnable: boolean): SecretPermissionItem {
 		//let answer = {} as any;
 
@@ -579,7 +621,12 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate recommend server permission workflow.
+	 * @returns Returns the operation result.
+	 */
 	public static generateRecommendServerPermission(): SecretPermissionItem {
+		// Stores the answer value used in the current execution flow.
 		let answer: SecretPermissionItem = {
 			authenticate: {
 				loginByAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1066,7 +1113,12 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate recommend admin permission workflow.
+	 * @returns Returns the operation result.
+	 */
 	public static generateRecommendAdminPermission(): SecretPermissionItem {
+		// Stores the answer value used in the current execution flow.
 		let answer: SecretPermissionItem = {
 			authenticate: {
 				loginByAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1553,6 +1605,10 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate recommend player permission workflow.
+	 * @returns Returns the operation result.
+	 */
 	public static generateRecommendPlayerPermission(): SecretPermissionItem {
 		//let answer = {} as any;
 

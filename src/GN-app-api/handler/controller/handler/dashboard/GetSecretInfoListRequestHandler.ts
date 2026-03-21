@@ -15,6 +15,9 @@ import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity
 
 class GetSecretInfoListOperationRequest extends OperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -24,15 +27,29 @@ class GetSecretInfoListOperationRequest extends OperationRequest {
 
 export class GetSecretInfoListRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetSecretInfoList;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetSecretInfoListOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -46,7 +63,15 @@ export class GetSecretInfoListRequestHandler extends RequestHandler {
 		return this.execute({}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetSecretInfoList", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -55,20 +80,28 @@ export class GetSecretInfoListRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ type: "secretInfo" }, { secretKey: true, role: true } as any);
 
+		// Stores the GearN admin secret keys value used in the current execution flow.
 		let gnAdminSecretKeys = new GNArray();
+		// Stores the GearN server secret keys value used in the current execution flow.
 		let gnServerSecretKeys = new GNArray();
+		// Stores the GearN player secret keys value used in the current execution flow.
 		let gnPlayerSecretKeys = new GNArray();
 
 		while (await results.hasNext()) {
+			// Stores the secret info item value used in the current execution flow.
 			let secretInfoItem = new SecretInfoItem(await results.next(), collection);
 
+			// Stores the GearN secret info item value used in the current execution flow.
 			let gnSecretInfoItem = new GNHashtable();
 			gnSecretInfoItem.add(ParameterCode.SecretKey, secretInfoItem.getSecretKey());
 
+			// Stores the role value used in the current execution flow.
 			let role = <SecretRole>secretInfoItem.getRole();
 			if (role == SecretRole.Admin) gnAdminSecretKeys.add(gnSecretInfoItem);
 			else if (role == SecretRole.Server) gnServerSecretKeys.add(gnSecretInfoItem);

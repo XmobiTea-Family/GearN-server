@@ -17,12 +17,17 @@ import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib
 
 class SetOwnerOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	// Stores the new owner ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.NewOwnerId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public newOwnerId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -32,6 +37,9 @@ class SetOwnerOperationRequest extends OperationRequest {
 
 class ServerSetOwnerOperationRequest extends SetOwnerOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -41,6 +49,9 @@ class ServerSetOwnerOperationRequest extends SetOwnerOperationRequest {
 
 class AdminSetOwnerOperationRequest extends ServerSetOwnerOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,21 +61,36 @@ class AdminSetOwnerOperationRequest extends ServerSetOwnerOperationRequest {
 
 export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetOwner;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetOwnerOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setOwner);
 
 		if (!allowMethod) {
@@ -77,7 +103,14 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetOwnerOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -94,7 +127,14 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetOwnerOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -111,7 +151,15 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string, newOwnerId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetOwner", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -120,11 +168,13 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			owner: true,
 			catalogId: true,
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
@@ -132,18 +182,22 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the owner value used in the current execution flow.
 		let owner = characterPlayer.getOwner();
 		if (owner.id != request.newOwnerId) {
+			// Stores the game player find options value used in the current execution flow.
 			let gamePlayerFindOptions: GamePlayerFindOptions = {
 				playerCharacters: true,
 			}
 
+			// Stores the new character owner player value used in the current execution flow.
 			let newCharacterOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
 			if (newCharacterOwnerPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
 				return operationResponse;
 			}
 
+			// Stores the current character owner player value used in the current execution flow.
 			let currentCharacterOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
 			if (currentCharacterOwnerPlayer != null) {
 				if (currentCharacterOwnerPlayer.hasPlayerCharacter(request.characterId)) {

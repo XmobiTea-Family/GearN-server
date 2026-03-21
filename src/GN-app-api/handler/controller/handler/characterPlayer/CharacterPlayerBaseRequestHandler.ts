@@ -18,6 +18,11 @@ import { CharacterPlayerPermissionRules, SecretInfo } from "./../../../../../GN-
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
+	/**
+	 * Checks whether get all.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	private isGetAll(infoRequestParam: InfoRequestParam): boolean {
 		return infoRequestParam.catalogId
 			&& infoRequestParam.owner
@@ -42,9 +47,15 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 			&& infoRequestParam.countryCode;
 	}
 
+	/**
+	 * Converts the to character player find options.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected convertToCharacterPlayerFindOptions(infoRequestParam: InfoRequestParam): CharacterPlayerFindOptions {
 		if (this.isGetAll(infoRequestParam)) return null;
 
+		// Stores the answer value used in the current execution flow.
 		let answer: CharacterPlayerFindOptions = {};
 		answer.characterId = true;
 
@@ -74,7 +85,16 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Checks whether allow method.
+	 * @param userId Indicates whether r ID should be used.
+	 * @param characterId Provides the character ID value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @param permissionRules Provides the permission rules value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	protected async isAllowMethod(userId: string, characterId: string, gameId: string, permissionRules: CharacterPlayerPermissionRules): Promise<boolean> {
+		// Stores the answer value used in the current execution flow.
 		let answer = false;
 
 		if (permissionRules.otherSelfEnable) {
@@ -82,6 +102,7 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!answer && permissionRules.selfEnable) {
+			// Stores the game player value used in the current execution flow.
 			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, { playerCharacters: true });
 
 			if (gamePlayer != null) {
@@ -92,6 +113,11 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate info request parameter for owner workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForOwner(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().characterPlayer.getCatalogId.selfEnable) {
@@ -171,6 +197,11 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 	}
 
+	/**
+	 * Executes the generate info request parameter for other workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForOther(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().characterPlayer.getCatalogId.otherSelfEnable) {
@@ -250,6 +281,11 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 	}
 
+	/**
+	 * Executes the generate info request parameter for server workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForServer(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().characterPlayer.getCatalogId.serverSelfEnable) {
@@ -329,6 +365,11 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 	}
 
+	/**
+	 * Executes the generate info request parameter for admin workflow.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 */
 	protected generateInfoRequestParamForAdmin(secretInfo: SecretInfo, infoRequestParam: InfoRequestParam): void {
 
 		if (!secretInfo.getPermission().characterPlayer.getCatalogId.adminSelfEnable) {
@@ -408,7 +449,15 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 	}
 
+	/**
+	 * Executes the generate info response parameters workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param infoRequestParam Provides the info request parameter value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateInfoResponseParameters(characterPlayer: CharacterPlayer, infoRequestParam: InfoRequestParam, gameId: string): GNHashtable {
+		// Stores the answer value used in the current execution flow.
 		let answer = new GNHashtable();
 
 		if (infoRequestParam.catalogId)
@@ -471,13 +520,25 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return answer;
 	}
 
+	/**
+	 * Executes the generate catalog ID workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateCatalogId(characterPlayer: CharacterPlayer): string {
 		return characterPlayer.getCatalogId();
 	}
 
+	/**
+	 * Executes the generate owner workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateOwner(characterPlayer: CharacterPlayer): GNHashtable {
+		// Stores the owner value used in the current execution flow.
 		let owner = characterPlayer.getOwner();
 
+		// Stores the GearN owner value used in the current execution flow.
 		let gnOwner = new GNHashtable();
 
 		gnOwner.add(ParameterCode.Type, owner.type);
@@ -486,9 +547,16 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnOwner;
 	}
 
+	/**
+	 * Executes the generate remove status workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateRemoveStatus(characterPlayer: CharacterPlayer): GNHashtable {
+		// Stores the remove status value used in the current execution flow.
 		let removeStatus = characterPlayer.getRemoveStatus();
 
+		// Stores the GearN remove status value used in the current execution flow.
 		let gnRemoveStatus = new GNHashtable();
 
 		gnRemoveStatus.add(ParameterCode.TsRemove, removeStatus.tsRemove);
@@ -497,22 +565,39 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnRemoveStatus;
 	}
 
+	/**
+	 * Executes the generate segments workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateSegments(characterPlayer: CharacterPlayer): string[] {
 		return characterPlayer.getAllSegments();
 	}
 
+	/**
+	 * Executes the generate custom datas workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param customDataKeys Provides the custom data keys value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateCustomDatas(characterPlayer: CharacterPlayer, customDataKeys: string[], gameId: string): GNArray {
+		// Stores the GearN custom datas value used in the current execution flow.
 		let gnCustomDatas = new GNArray();
 
+		// Stores the resolved character player settings instance for the current execution flow.
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
 
 		for (let i = 0; i < characterPlayerSettings.customDatasSettings.length; i++) {
+			// Stores the custom datas settings item value used in the current execution flow.
 			let customDatasSettingsItem = characterPlayerSettings.customDatasSettings[i];
 
 			if (customDataKeys == null || customDataKeys.indexOf(customDatasSettingsItem.key) != -1) {
+				// Stores the value value used in the current execution flow.
 				let value = characterPlayer.getCustomData(customDatasSettingsItem.key);
 
 				if (value != null) {
+					// Stores the GearN custom data value used in the current execution flow.
 					let gnCustomData = new GNHashtable();
 
 					gnCustomData.add(ParameterCode.Key, customDatasSettingsItem.key);
@@ -526,13 +611,25 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnCustomDatas;
 	}
 
+	/**
+	 * Executes the generate display name workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateDisplayName(characterPlayer: CharacterPlayer): string {
 		return characterPlayer.getDisplayName();
 	}
 
+	/**
+	 * Executes the generate avatar workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateAvatar(characterPlayer: CharacterPlayer): GNHashtable {
+		// Stores the avatar value used in the current execution flow.
 		let avatar = characterPlayer.getAvatar();
 
+		// Stores the GearN avatar value used in the current execution flow.
 		let gnAvatar = new GNHashtable();
 
 		gnAvatar.add(ParameterCode.Type, avatar.type);
@@ -541,22 +638,39 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnAvatar;
 	}
 
+	/**
+	 * Executes the generate timestamp create workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTsCreate(characterPlayer: CharacterPlayer): number {
 		return characterPlayer.getTsCreate();
 	}
 
+	/**
+	 * Executes the generate tags workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param tagKeys Provides the tag keys value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTags(characterPlayer: CharacterPlayer, tagKeys: Array<string>, gameId: string): GNArray {
+		// Stores the GearN tags value used in the current execution flow.
 		let gnTags = new GNArray();
 
+		// Stores the resolved character player settings instance for the current execution flow.
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
 
 		for (let i = 0; i < characterPlayerSettings.tagsSettings.length; i++) {
+			// Stores the tags settings item value used in the current execution flow.
 			let tagsSettingsItem = characterPlayerSettings.tagsSettings[i];
 
 			if (tagKeys == null || tagKeys.indexOf(tagsSettingsItem.key) != -1) {
+				// Stores the value value used in the current execution flow.
 				let value = characterPlayer.getTag(tagsSettingsItem.key);
 
 				if (value != null) {
+					// Stores the GearN tag value used in the current execution flow.
 					let gnTag = new GNHashtable();
 
 					gnTag.add(ParameterCode.Key, tagsSettingsItem.key);
@@ -570,9 +684,16 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnTags;
 	}
 
+	/**
+	 * Executes the generate player ban workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerBan(characterPlayer: CharacterPlayer): GNHashtable {
+		// Stores the GearN player ban value used in the current execution flow.
 		let gnPlayerBan = new GNHashtable();
 
+		// Stores the player ban value used in the current execution flow.
 		let playerBan = characterPlayer.getPlayerBan();
 
 		gnPlayerBan.add(ParameterCode.TsExpire, playerBan.tsExpire);
@@ -581,18 +702,30 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerBan;
 	}
 
+	/**
+	 * Executes the generate player datas workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param playerDataKeys Provides the player data keys value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerDatas(characterPlayer: CharacterPlayer, playerDataKeys: Array<string>, gameId: string): GNArray {
+		// Stores the GearN player datas value used in the current execution flow.
 		let gnPlayerDatas = new GNArray();
 
+		// Stores the resolved character player settings instance for the current execution flow.
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
 
 		for (let i = 0; i < characterPlayerSettings.playerDatasSettings.length; i++) {
+			// Stores the player datas settings item value used in the current execution flow.
 			let playerDatasSettingsItem = characterPlayerSettings.playerDatasSettings[i];
 
 			if (playerDataKeys == null || playerDataKeys.indexOf(playerDatasSettingsItem.key) != -1) {
+				// Stores the player data value used in the current execution flow.
 				let playerData = characterPlayer.getPlayerData(playerDatasSettingsItem.key);
 
 				if (playerData != null) {
+					// Stores the GearN player data value used in the current execution flow.
 					let gnPlayerData = new GNHashtable();
 
 					gnPlayerData.add(ParameterCode.Key, playerData.key);
@@ -606,17 +739,29 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerDatas;
 	}
 
+	/**
+	 * Executes the generate player currencies workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param playerCurrencyKeys Provides the player currency keys value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerCurrencies(characterPlayer: CharacterPlayer, playerCurrencyKeys: Array<string>, gameId: string): GNArray {
+		// Stores the GearN player currencies value used in the current execution flow.
 		let gnPlayerCurrencies = new GNArray();
 
+		// Stores the resolved character player settings instance for the current execution flow.
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
 
 		for (let i = 0; i < characterPlayerSettings.playerCurrenciesSettings.length; i++) {
+			// Stores the player currencies settings item value used in the current execution flow.
 			let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings[i];
 
 			if (playerCurrencyKeys == null || playerCurrencyKeys.indexOf(playerCurrenciesSettingsItem.key) != -1) {
+				// Stores the player currency value used in the current execution flow.
 				let playerCurrency = characterPlayer.getPlayerCurrency(playerCurrenciesSettingsItem.key);
 
+				// Stores the GearN player currency value used in the current execution flow.
 				let gnPlayerCurrency = new GNHashtable();
 				gnPlayerCurrency.add(ParameterCode.Key, playerCurrenciesSettingsItem.key);
 
@@ -630,17 +775,29 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerCurrencies;
 	}
 
+	/**
+	 * Executes the generate player statistics workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param playerStatisticsKeys Provides the player statistics keys value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerStatistics(characterPlayer: CharacterPlayer, playerStatisticsKeys: Array<string>, gameId: string): GNArray {
+		// Stores the GearN player statistics value used in the current execution flow.
 		let gnPlayerStatistics = new GNArray();
 
+		// Stores the resolved character player settings instance for the current execution flow.
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
 
 		for (let i = 0; i < characterPlayerSettings.playerStatisticsSettings.length; i++) {
+			// Stores the player statistics settings item value used in the current execution flow.
 			let playerStatisticsSettingsItem = characterPlayerSettings.playerStatisticsSettings[i];
 
 			if (playerStatisticsKeys == null || playerStatisticsKeys.indexOf(playerStatisticsSettingsItem.key) != -1) {
+				// Stores the player statistics value used in the current execution flow.
 				let playerStatistics = characterPlayer.getPlayerStatistics(playerStatisticsSettingsItem.key);
 
+				// Stores the GearN player statistic value used in the current execution flow.
 				let gnPlayerStatistic = new GNHashtable();
 				gnPlayerStatistic.add(ParameterCode.Key, playerStatisticsSettingsItem.key);
 
@@ -654,15 +811,25 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerStatistics;
 	}
 
+	/**
+	 * Executes the generate player inventories workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param itemCatalogIds Provides the item catalog IDs value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerInventories(characterPlayer: CharacterPlayer, itemCatalogIds: Array<string>): GNArray {
+		// Stores the GearN player inventories value used in the current execution flow.
 		let gnPlayerInventories = new GNArray();
 
+		// Stores the player inventories value used in the current execution flow.
 		let playerInventories = characterPlayer.getAllPlayerInventories();
 
 		for (let i = 0; i < playerInventories.length; i++) {
+			// Stores the player inventory value used in the current execution flow.
 			let playerInventory = playerInventories[i];
 
 			if (itemCatalogIds == null || itemCatalogIds.indexOf(playerInventory.catalogId) != -1) {
+				// Stores the GearN player inventory value used in the current execution flow.
 				let gnPlayerInventory = new GNHashtable();
 
 				gnPlayerInventory.add(ParameterCode.ItemId, playerInventory.itemId);
@@ -676,15 +843,25 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerInventories;
 	}
 
+	/**
+	 * Executes the generate player groups workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param groupCatalogIds Provides the group catalog IDs value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerGroups(characterPlayer: CharacterPlayer, groupCatalogIds: Array<string>): GNArray {
+		// Stores the GearN player groups value used in the current execution flow.
 		let gnPlayerGroups = new GNArray();
 
+		// Stores the player groups value used in the current execution flow.
 		let playerGroups = characterPlayer.getAllPlayerGroups();
 
 		for (let i = 0; i < playerGroups.length; i++) {
+			// Stores the player group value used in the current execution flow.
 			let playerGroup = playerGroups[i];
 
 			if (groupCatalogIds == null || groupCatalogIds.indexOf(playerGroup.catalogId) != -1) {
+				// Stores the GearN player group value used in the current execution flow.
 				let gnPlayerGroup = new GNHashtable();
 
 				gnPlayerGroup.add(ParameterCode.GroupId, playerGroup.groupId);
@@ -699,15 +876,25 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerGroups;
 	}
 
+	/**
+	 * Executes the generate player friends workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @param friendCatalogIds Provides the friend catalog IDs value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generatePlayerFriends(characterPlayer: CharacterPlayer, friendCatalogIds: Array<string>): GNArray {
+		// Stores the GearN player friends value used in the current execution flow.
 		let gnPlayerFriends = new GNArray();
 
+		// Stores the player friends value used in the current execution flow.
 		let playerFriends = characterPlayer.getAllPlayerFriends();
 
 		for (let i = 0; i < playerFriends.length; i++) {
+			// Stores the player friend value used in the current execution flow.
 			let playerFriend = playerFriends[i];
 
 			if (friendCatalogIds == null || friendCatalogIds.indexOf(playerFriend.catalogId) != -1) {
+				// Stores the GearN player friend value used in the current execution flow.
 				let gnPlayerFriend = new GNHashtable();
 
 				gnPlayerFriend.add(ParameterCode.FriendId, playerFriend.friendId);
@@ -722,14 +909,29 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		return gnPlayerFriends;
 	}
 
+	/**
+	 * Executes the generate timestamp last login workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateTsLastLogin(characterPlayer: CharacterPlayer): number {
 		return characterPlayer.getTsLastLogin();
 	}
 
+	/**
+	 * Executes the generate IP address create workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateIpAddressCreate(characterPlayer: CharacterPlayer): string {
 		return characterPlayer.getIpAddressCreate();
 	}
 
+	/**
+	 * Executes the generate country code workflow.
+	 * @param characterPlayer Provides the character player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	protected generateCountryCode(characterPlayer: CharacterPlayer): string {
 		return characterPlayer.getCountryCode();
 	}

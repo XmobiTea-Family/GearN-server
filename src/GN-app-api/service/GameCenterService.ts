@@ -3,20 +3,36 @@ import axios from "axios";
 import { createVerify } from "crypto";
 
 export class GameCenterService implements IGameCenterService {
+	// Stores the public key cache collection used by this instance.
 	private publicKeyCache: Map<string, string>;
+	// Stores the bundle ID value used by this instance.
 	private bundleId: string;
 
+	/**
+	 * Initializes a new game center service instance.
+	 */
 	constructor() {
 		this.publicKeyCache = new Map();
 	}
 
+	/**
+	 * Executes the init workflow.
+	 * @param request Provides the request value used by this operation.
+	 */
 	public init(request: { bundleId: string }) {
 		this.bundleId = request.bundleId;
 	}
 
+	/**
+	 * Executes the verify token workflow asynchronously.
+	 * @param auth Provides the auth value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async verifyToken(auth: GameCenterAuth): Promise<{ [k: string]: any; }> {
+		// Stores the answer value used in the current execution flow.
 		let answer: { [k: string]: any } = {};
 		try {
+			// Stores the public key value used in the current execution flow.
 			let publicKey = await this.getCertificate(auth.publicKeyUrl);
 
 			if (!this.concatSignatureAndVerify(publicKey, auth)) {
@@ -36,7 +52,14 @@ export class GameCenterService implements IGameCenterService {
 		return answer;
 	}
 
+	/**
+	 * Executes the concat signature and verify workflow.
+	 * @param publicKey Provides the public key value used by this operation.
+	 * @param auth Provides the auth value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	private concatSignatureAndVerify(publicKey: string, auth: GameCenterAuth): boolean {
+		// Stores the verifier value used in the current execution flow.
 		let verifier = createVerify("sha256");
 
 		// ConcatSignature
@@ -48,11 +71,19 @@ export class GameCenterService implements IGameCenterService {
 		return verifier.verify(publicKey, auth.signature, "base64");
 	}
 
+	/**
+	 * Executes the to big endian workflow.
+	 * @param value Provides the value value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	private toBigEndian(value: number): Buffer {
+		// Stores the buffer value used in the current execution flow.
 		let buffer = Buffer.alloc(8);
 		buffer.fill(0);
 
+		// Stores the high value used in the current execution flow.
 		let high = ~~(value / 0xffffffff);
+		// Stores the low value used in the current execution flow.
 		let low = value % (0xffffffff + 0x1);
 
 		buffer.writeUInt32BE(parseInt(high as any, 10), 0);
@@ -61,6 +92,11 @@ export class GameCenterService implements IGameCenterService {
 		return buffer;
 	}
 
+	/**
+	 * Returns the certificate.
+	 * @param publicKeyUrl Provides the public key URL value used by this operation.
+	 * @returns Returns the certificate.
+	 */
 	private async getCertificate(publicKeyUrl: string): Promise<string> {
 		// validate for safe security
 		this.validatePublicKeyUrl(publicKeyUrl);
@@ -73,7 +109,12 @@ export class GameCenterService implements IGameCenterService {
 		return publicKey;
 	}
 
+	/**
+	 * Validates the public key URL.
+	 * @param publicKeyUrl Provides the public key URL value used by this operation.
+	 */
 	private validatePublicKeyUrl(publicKeyUrl: string): void {
+		// Stores the URL value used in the current execution flow.
 		let url = new URL(publicKeyUrl);
 		if (!url.host.endsWith(".apple.com")) {
 			throw new Error("publicKeyUrl host must be apple.com");
@@ -84,6 +125,11 @@ export class GameCenterService implements IGameCenterService {
 		}
 	}
 
+	/**
+	 * Returns the public key from cache.
+	 * @param publicKeyUrl Provides the public key URL value used by this operation.
+	 * @returns Returns the public key from cache.
+	 */
 	private getPublicKeyFromCache(publicKeyUrl: string): string | null | undefined {
 		if (this.publicKeyCache.has(publicKeyUrl)) {
 			return this.publicKeyCache.get(publicKeyUrl);
@@ -92,15 +138,29 @@ export class GameCenterService implements IGameCenterService {
 		return null;
 	}
 
+	/**
+	 * Converts the x 509 cert to PEM.
+	 * @param base64 Provides the base 64 value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	private convertX509CertToPEM(base64: string): string {
+		// Stores the pem pre fix value used in the current execution flow.
 		let pemPreFix = "-----BEGIN CERTIFICATE-----\n";
+		// Stores the pem post fix value used in the current execution flow.
 		let pemPostFix = "-----END CERTIFICATE-----";
 
+		// Stores the cert body value used in the current execution flow.
 		let certBody = base64.match(/.{0,64}/g)?.join("\n");
 		return pemPreFix + certBody + pemPostFix;
 	}
 
+	/**
+	 * Executes the download public key workflow asynchronously.
+	 * @param publicKeyUrl Provides the public key URL value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async downloadPublicKey(publicKeyUrl: string): Promise<string> {
+		// Stores the response value used in the current execution flow.
 		let response = await axios.get(publicKeyUrl, {
 			responseType: "arraybuffer",
 		});
@@ -108,17 +168,21 @@ export class GameCenterService implements IGameCenterService {
 		if (response.status !== 200)
 			throw new Error(`fetchPemFromUrl failed: statusCode: ${response.status}, statusText: ${response.statusText}`)
 
+		// Stores the buffer value used in the current execution flow.
 		let buffer: Buffer = response.data;
 
+		// Stores the public key value used in the current execution flow.
 		let publicKey = this.convertX509CertToPEM(buffer.toString("base64"));
 
 		// check reponse has cache header to save cache timer 
 		let cacheHeader = response.headers["cache-control"];
 		if (cacheHeader) {
+			// Stores the max age sec value used in the current execution flow.
 			const maxAgeSec = cacheHeader.match(/max-age=([0-9]+)/);
 
 			// default cache timer is 5000
 			let marginMs = 5000;
+			// Stores the parsed value used in the current execution flow.
 			let parsed = (typeof maxAgeSec?.[1] === "string") ? parseInt(maxAgeSec[1], 10) * 1000 - marginMs : 0;
 			if (parsed > 0) {
 				this.publicKeyCache.set(publicKeyUrl, publicKey);

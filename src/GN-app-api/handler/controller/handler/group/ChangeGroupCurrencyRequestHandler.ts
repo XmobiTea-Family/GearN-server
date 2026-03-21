@@ -17,15 +17,21 @@ import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class ChangeGroupCurrencyOperationRequest extends OperationRequest {
 
+	// Stores the group ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public groupId: string;
 
+	// Stores the group currencies value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.GroupCurrencies, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupCurrencyParam })
 	public groupCurrencies: Array<GroupCurrencyParam>;
 
+	// Stores the log value used by this instance.
 	@StringDataMember({ code: ParameterCode.Log, minLength: 1, maxLength: 256, mustNonNull: true, isOptional: true })
 	public log?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -35,6 +41,9 @@ class ChangeGroupCurrencyOperationRequest extends OperationRequest {
 
 class ServerChangeGroupCurrencyOperationRequest extends ChangeGroupCurrencyOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -44,6 +53,9 @@ class ServerChangeGroupCurrencyOperationRequest extends ChangeGroupCurrencyOpera
 
 class AdminChangeGroupCurrencyOperationRequest extends ServerChangeGroupCurrencyOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -53,21 +65,36 @@ class AdminChangeGroupCurrencyOperationRequest extends ServerChangeGroupCurrency
 
 export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.ChangeGroupCurrency;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return ChangeGroupCurrencyOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.changeGroupCurrency);
 
 		if (!allowMethod) {
@@ -80,7 +107,14 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangeGroupCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -97,7 +131,14 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangeGroupCurrencyOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -114,7 +155,15 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_ChangeGroupCurrency", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -123,10 +172,12 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			groupCurrencies: true,
 		}
 
+		// Stores the group value used in the current execution flow.
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
@@ -134,22 +185,31 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the resolved group settings instance for the current execution flow.
 		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
+		// Stores the GearN group currencies value used in the current execution flow.
 		let gnGroupCurrencies = new GNArray();
 
 		for (let i = 0; i < request.groupCurrencies.length; i++) {
+			// Stores the group currency parameter value used in the current execution flow.
 			let groupCurrencyParam = request.groupCurrencies[i];
 
+			// Stores the key value used in the current execution flow.
 			let key = groupCurrencyParam.key;
 
+			// Stores the group currencies settings item value used in the current execution flow.
 			let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == key);
 			if (groupCurrenciesSettingsItem == null) continue;
 
+			// Stores the amount value used in the current execution flow.
 			let amount = groupCurrencyParam.amount;
+			// Stores the server value value used in the current execution flow.
 			let serverValue = 0;
 
+			// Tracks whether set group currency should be used.
 			let useSetGroupCurrency = false;
 			if (!group.hasGroupCurrency(key)) {
 				useSetGroupCurrency = true;
@@ -165,6 +225,7 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 				return operationResponse;
 			}
 
+			// Stores the GearN group currency value used in the current execution flow.
 			let gnGroupCurrency = new GNHashtable();
 
 			gnGroupCurrency.add(ParameterCode.Key, key);

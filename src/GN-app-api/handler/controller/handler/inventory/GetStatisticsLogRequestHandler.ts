@@ -15,18 +15,25 @@ import { RequestHandler } from "./../base/RequestHandler";
 
 class GetStatisticsLogOperationRequest extends OperationRequest {
 
+	// Stores the keys value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.Keys, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: String, isOptional: true })
 	public keys?: Array<string>;
 
+	// Stores the item ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true, isOptional: true })
 	public itemId?: string;
 
+	// Stores the limit value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	public limit?: number;
 
+	// Stores the token value used by this instance.
 	@StringDataMember({ code: ParameterCode.Token, minLength: 24, maxLength: 24, mustNonNull: true, isOptional: true })
 	public token?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -36,6 +43,9 @@ class GetStatisticsLogOperationRequest extends OperationRequest {
 
 class ServerGetStatisticsLogOperationRequest extends GetStatisticsLogOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -45,6 +55,9 @@ class ServerGetStatisticsLogOperationRequest extends GetStatisticsLogOperationRe
 
 class AdminGetStatisticsLogOperationRequest extends ServerGetStatisticsLogOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -54,15 +67,29 @@ class AdminGetStatisticsLogOperationRequest extends ServerGetStatisticsLogOperat
 
 export class GetStatisticsLogRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetStatisticsLog;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetStatisticsLogOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -81,7 +108,14 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStatisticsLogOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -100,7 +134,14 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStatisticsLogOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -119,7 +160,15 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { keys: Array<string>, token: string, limit: number, itemId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetStatisticsLog", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -128,11 +177,14 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved inventory settings instance for the current execution flow.
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
 
+		// Stores the keys value used in the current execution flow.
 		let keys: string[] = [];
 		if (request.keys) {
 			for (let i = 0; i < request.keys.length; i++) {
+				// Stores the player statistics settings item value used in the current execution flow.
 				let playerStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == request.keys[i]);
 
 				if (playerStatisticsSettingsItem != null) {
@@ -141,6 +193,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 			}
 		}
 
+		// Stores the filter value used in the current execution flow.
 		let $filter = {} as any;
 
 		if (request.itemId) {
@@ -156,15 +209,20 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 			$filter["_id"] = { $lt: request.token };
 		}
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the results value used in the current execution flow.
 		let results = await this.gnServer.getDatabase().loadInventoryStatisticsLogAsync($filter, secretInfo.getGameId(), request.limit);
 
+		// Stores the token value used in the current execution flow.
 		let token: string;
 
 		while (await results.hasNext()) {
+			// Stores the result value used in the current execution flow.
 			let result = await results.next();
 
+			// Stores the GearN result value used in the current execution flow.
 			let gnResult = new GNHashtable();
 
 			gnResult.add(ParameterCode.ItemId, result["itemId"]);

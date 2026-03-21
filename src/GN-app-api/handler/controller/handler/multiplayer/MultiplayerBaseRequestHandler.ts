@@ -16,15 +16,32 @@ import { GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
+	/**
+	 * Returns the matchmaking queue settings.
+	 * @param queueName Provides the queue name value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @returns Returns the matchmaking queue settings.
+	 */
 	protected getMatchmakingQueueSettings(queueName: string, gameId: string): xMatchmakingQueueSettings {
+		// Stores the resolved matchmaking queue settings instance for the current execution flow.
 		let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
 		return matchmakingQueueSettings.find(x => x.queueName == queueName);
 	}
 
+	/**
+	 * Returns the attribute for queue.
+	 * @param userId Indicates whether r ID should be used.
+	 * @param gameId Provides the game ID value used by this operation.
+	 * @param attribute Provides the attribute value used by this operation.
+	 * @param matchmakingQueueSettings Provides the matchmaking queue settings value used by this operation.
+	 * @returns Returns the attribute for queue.
+	 */
 	protected async getAttributeForQueue(userId: string, gameId: string, attribute: GNHashtable, matchmakingQueueSettings: xMatchmakingQueueSettings): Promise<{ [k: string]: DataValueType }> {
+		// Stores the answer value used in the current execution flow.
 		let answer: { [k: string]: DataValueType } = {};
 
 		if (attribute != null && matchmakingQueueSettings.rules != null) {
+			// Stores the game player value used in the current execution flow.
 			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, {
 				playerDatas: true,
 
@@ -32,17 +49,21 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 
 			if (gamePlayer != null) {
 				for (let i = 0; i < matchmakingQueueSettings.rules.length; i++) {
+					// Stores the matchmaking rules value used in the current execution flow.
 					let matchmakingRules = matchmakingQueueSettings.rules[i];
 
 					if (matchmakingRules.type == RuleType.String) {
+						// Stores the string rule value used in the current execution flow.
 						let stringRule = <StringRule>matchmakingRules;
 
+						// Stores the value value used in the current execution flow.
 						let value: string = null;
 
 						if (stringRule.attributeSource == RuleAttributeSource.UserInput) {
 							value = attribute.getString(stringRule.attributePath, null);
 						}
 						else if (stringRule.attributeSource == RuleAttributeSource.PlayerData) {
+							// Stores the temp value value used in the current execution flow.
 							let tempValue = gamePlayer.getPlayerData(stringRule.attributePath);
 
 							if (typeof (tempValue) == "string") {
@@ -57,14 +78,17 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 						answer[matchmakingRules.name] = value;
 					}
 					else if (matchmakingRules.type == RuleType.Difference) {
+						// Stores the difference rule value used in the current execution flow.
 						let differenceRule = <DifferenceRule>matchmakingRules;
 
+						// Stores the value value used in the current execution flow.
 						let value: number = 0;
 
 						if (differenceRule.attributeSource == RuleAttributeSource.UserInput) {
 							value = attribute.getNumber(differenceRule.attributePath, 0);
 						}
 						else if (differenceRule.attributeSource == RuleAttributeSource.PlayerData) {
+							// Stores the temp value value used in the current execution flow.
 							let tempValue = gamePlayer.getPlayerData(differenceRule.attributePath);
 
 							if (typeof (tempValue) == "number") {
@@ -79,11 +103,14 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 						answer[matchmakingRules.name] = value;
 					}
 					else if (matchmakingRules.type == RuleType.SetIntersection) {
+						// Stores the set intersection rule value used in the current execution flow.
 						let setIntersectionRule = <SetIntersectionRule>matchmakingRules;
 
+						// Stores the value value used in the current execution flow.
 						let value: string[] = [];
 
 						if (setIntersectionRule.attributeSource == RuleAttributeSource.UserInput) {
+							// Stores the temp value value used in the current execution flow.
 							let tempValue = attribute.getGNArray(setIntersectionRule.attributePath, null);
 
 							if (tempValue != null) {
@@ -91,6 +118,7 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 							}
 						}
 						else if (setIntersectionRule.attributeSource == RuleAttributeSource.PlayerData) {
+							// Stores the temp value value used in the current execution flow.
 							let tempValue = gamePlayer.getPlayerData(setIntersectionRule.attributePath);
 
 							if (typeof (tempValue) == "object") {
@@ -111,14 +139,17 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 						answer[matchmakingRules.name] = value;
 					}
 					else if (matchmakingRules.type == RuleType.MatchTotal) {
+						// Stores the match total rule value used in the current execution flow.
 						let matchTotalRule = <MatchTotalRule>matchmakingRules;
 
+						// Stores the value value used in the current execution flow.
 						let value: number = 0;
 
 						if (matchTotalRule.attributeSource == RuleAttributeSource.UserInput) {
 							value = attribute.getNumber(matchTotalRule.attributePath, 0);
 						}
 						else if (matchTotalRule.attributeSource == RuleAttributeSource.PlayerData) {
+							// Stores the temp value value used in the current execution flow.
 							let tempValue = gamePlayer.getPlayerData(matchTotalRule.attributePath);
 
 							if (typeof (tempValue) == "number") {
@@ -129,13 +160,16 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 						answer[matchmakingRules.name] = value;
 					}
 					else if (matchmakingRules.type == RuleType.RegionSelection) {
+						// Stores the region selection rule value used in the current execution flow.
 						let regionSelectionRule = <RegionSelectionRule>matchmakingRules;
 
+						// Stores the value value used in the current execution flow.
 						let value = {
 							region: "",
 							ping: 0
 						};
 
+						// Stores the temp value value used in the current execution flow.
 						let tempValue = attribute.getGNHashtable(regionSelectionRule.attributePath, null);
 
 						if (tempValue != null) {
@@ -151,14 +185,17 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 					//     answer[matchmakingRules.name] = value as any;
 					// }
 					else if (matchmakingRules.type == RuleType.TeamDifference) {
+						// Stores the team difference rule value used in the current execution flow.
 						let teamDifferenceRule = <TeamDifferenceRule>matchmakingRules;
 
+						// Stores the value value used in the current execution flow.
 						let value: number = 0;
 
 						if (teamDifferenceRule.attributeSource == RuleAttributeSource.UserInput) {
 							value = attribute.getNumber(teamDifferenceRule.attributePath, 0);
 						}
 						else if (teamDifferenceRule.attributeSource == RuleAttributeSource.PlayerData) {
+							// Stores the temp value value used in the current execution flow.
 							let tempValue = gamePlayer.getPlayerData(teamDifferenceRule.attributePath);
 
 							if (typeof (tempValue) == "number") {

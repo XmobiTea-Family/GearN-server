@@ -19,12 +19,17 @@ import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class SetGroupDataOperationRequest extends OperationRequest {
 
+	// Stores the group ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public groupId: string;
 
+	// Stores the group datas value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.GroupDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: GroupDataParam })
 	public groupDatas: Array<GroupDataParam>;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,6 +39,9 @@ class SetGroupDataOperationRequest extends OperationRequest {
 
 class ServerSetGroupDataOperationRequest extends SetGroupDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +51,9 @@ class ServerSetGroupDataOperationRequest extends SetGroupDataOperationRequest {
 
 class AdminSetGroupDataOperationRequest extends ServerSetGroupDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,21 +63,36 @@ class AdminSetGroupDataOperationRequest extends ServerSetGroupDataOperationReque
 
 export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetGroupData;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetGroupDataOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.setGroupData);
 
 		if (!allowMethod) {
@@ -79,7 +105,14 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetGroupDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -96,7 +129,14 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetGroupDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -113,7 +153,15 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { groupId: string, groupDatas: Array<GroupDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SetGroupData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -122,10 +170,12 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			groupDatas: true,
 		}
 
+		// Stores the group value used in the current execution flow.
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
@@ -133,19 +183,27 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the resolved group settings instance for the current execution flow.
 		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
+		// Stores the GearN group datas value used in the current execution flow.
 		let gnGroupDatas = new GNArray();
 
 		for (let i = 0; i < request.groupDatas.length; i++) {
+			// Stores the group data parameter value used in the current execution flow.
 			let groupDataParam = request.groupDatas[i];
 
+			// Stores the key value used in the current execution flow.
 			let key = groupDataParam.key;
+			// Stores the group datas settings item value used in the current execution flow.
 			let groupDatasSettingsItem = groupSettings.groupDatasSettings.find(x => x.key == key);
 			if (groupDatasSettingsItem == null) continue;
 
+			// Stores the value value used in the current execution flow.
 			let value = groupDataParam.value;
+			// Stores the permission value used in the current execution flow.
 			let permission = <PermissionDataItem>groupDatasSettingsItem.permission;
 
 			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
@@ -158,6 +216,7 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 
 				group.setGroupData(key, value as DataValueType);
 
+				// Stores the GearN group data value used in the current execution flow.
 				let gnGroupData = new GNHashtable();
 				gnGroupData.add(ParameterCode.Key, key);
 				gnGroupData.add(ParameterCode.Value, groupDataParam.value);

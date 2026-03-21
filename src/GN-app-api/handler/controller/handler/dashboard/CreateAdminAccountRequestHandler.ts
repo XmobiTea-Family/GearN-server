@@ -17,15 +17,21 @@ import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
 class CreateAdminAccountOperationRequest extends OperationRequest {
 
+	// Indicates whether rname should be used.
 	@StringDataMember({ code: ParameterCode.Username, minLength: 6, maxLength: 32, mustNonNull: true })
 	public username: string;
 
+	// Stores the password value used by this instance.
 	@StringDataMember({ code: ParameterCode.Password, minLength: 6, maxLength: 64, mustNonNull: true })
 	public password: string;
 
+	// Stores the secret key value used by this instance.
 	@StringDataMember({ code: ParameterCode.SecretKey, minLength: 6, maxLength: 64, mustNonNull: true })
 	public secretKey: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -35,15 +41,29 @@ class CreateAdminAccountOperationRequest extends OperationRequest {
 
 export class CreateAdminAccountRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.CreateAdminAccount;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return CreateAdminAccountOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -61,7 +81,15 @@ export class CreateAdminAccountRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { username: string, password: string, secretKey: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_CreateAdminAccount", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -70,8 +98,10 @@ export class CreateAdminAccountRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
+		// Stores the this user value used in the current execution flow.
 		let thisUser = await collection.findOne({ type: "account", username: request.username });
 
 		if (thisUser != null) {
@@ -79,6 +109,7 @@ export class CreateAdminAccountRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the result value used in the current execution flow.
 		let result = {
 			type: "account",
 			userId: StringUtility.generateRandomString(10, 0),
@@ -89,6 +120,7 @@ export class CreateAdminAccountRequestHandler extends RequestHandler {
 
 		await collection.insertOne(result);
 
+		// Stores the master admin player value used in the current execution flow.
 		let masterAdminPlayer = new MasterAdminPlayer(result, collection);
 
 		operationResponse.setParameter(ParameterCode.UserId, masterAdminPlayer.getUserId());

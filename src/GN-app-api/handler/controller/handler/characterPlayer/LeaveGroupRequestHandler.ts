@@ -22,12 +22,17 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 
 class LeaveGroupOperationRequest extends OperationRequest {
 
+	// Stores the character ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public characterId: string;
 
+	// Stores the group ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public groupId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -37,6 +42,9 @@ class LeaveGroupOperationRequest extends OperationRequest {
 
 class ServerLeaveGroupOperationRequest extends LeaveGroupOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -46,6 +54,9 @@ class ServerLeaveGroupOperationRequest extends LeaveGroupOperationRequest {
 
 class AdminLeaveGroupOperationRequest extends ServerLeaveGroupOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -55,21 +66,36 @@ class AdminLeaveGroupOperationRequest extends ServerLeaveGroupOperationRequest {
 
 export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.LeaveGroup;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return LeaveGroupOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.leaveGroup);
 
 		if (!allowMethod) {
@@ -82,7 +108,14 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLeaveGroupOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -99,7 +132,14 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLeaveGroupOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -116,7 +156,15 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { characterId: string, groupId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_LeaveGroup", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -125,43 +173,52 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			members: true,
 			groupType: true,
 			catalogId: true,
 		}
 
+		// Stores the group value used in the current execution flow.
 		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
+		// Stores the group type value used in the current execution flow.
 		let groupType = <OwnerType>group.getGroupType();
 		if (groupType != OwnerType.CharacterPlayer) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
+		// Stores the remove status value used in the current execution flow.
 		let removeStatus = group.getRemoveStatus();
 		if (removeStatus.tsRemove != 0) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
+		// Stores the catalog ID value used in the current execution flow.
 		let catalogId = group.getCatalogId();
+		// Stores the resolved character player settings instance for the current execution flow.
 		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		// Stores the player group catalog settings item value used in the current execution flow.
 		let playerGroupCatalogSettingsItem = characterPlayerSettings.playerGroupCatalogSettings.find(x => x.catalogId == catalogId);
 		if (playerGroupCatalogSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerGroups: true,
 			owner: true,
 		}
 
+		// Stores the character player value used in the current execution flow.
 		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
@@ -169,6 +226,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 			return operationResponse;
 		}
 
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		if (characterPlayer.hasPlayerGroup(request.groupId)) {
@@ -176,8 +234,10 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 			characterPlayer.saveAsync();
 
 			{
+				// Stores the GearN player groups value used in the current execution flow.
 				let gnPlayerGroups = new GNArray();
 
+				// Stores the GearN player group value used in the current execution flow.
 				let gnPlayerGroup = new GNHashtable();
 				gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 				gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
@@ -185,6 +245,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 				gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 				gnPlayerGroups.add(gnPlayerGroup);
 
+				// Stores the character player group update operation event value used in the current execution flow.
 				let characterPlayerGroupUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerGroupUpdate, null);
 
 				characterPlayerGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
@@ -199,8 +260,10 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 			group.saveAsync();
 
 			{
+				// Stores the GearN members value used in the current execution flow.
 				let gnMembers = new GNArray();
 
+				// Stores the GearN member value used in the current execution flow.
 				let gnMember = new GNHashtable();
 
 				gnMember.add(ParameterCode.CharacterId, request.characterId);
@@ -208,6 +271,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 
 				gnMembers.add(gnMember);
 
+				// Stores the group member update operation event value used in the current execution flow.
 				let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 				groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);

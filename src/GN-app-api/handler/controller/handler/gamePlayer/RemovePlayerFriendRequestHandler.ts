@@ -20,12 +20,17 @@ import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent
 
 class RemovePlayerFriendOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the friend ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.FriendId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public friendId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -35,9 +40,13 @@ class RemovePlayerFriendOperationRequest extends OperationRequest {
 
 class ServerRemovePlayerFriendOperationRequest extends RemovePlayerFriendOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -47,6 +56,9 @@ class ServerRemovePlayerFriendOperationRequest extends RemovePlayerFriendOperati
 
 class AdminRemovePlayerFriendOperationRequest extends ServerRemovePlayerFriendOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -56,15 +68,29 @@ class AdminRemovePlayerFriendOperationRequest extends ServerRemovePlayerFriendOp
 
 export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.RemovePlayerFriend;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return RemovePlayerFriendOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -95,7 +121,14 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerRemovePlayerFriendOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -112,7 +145,14 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminRemovePlayerFriendOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -129,7 +169,15 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, friendId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_RemovePlayerFriend", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -139,11 +187,14 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		if (request.userId != request.friendId) {
+			// Stores the game player find options value used in the current execution flow.
 			let gamePlayerFindOptions: GamePlayerFindOptions = {
 				playerFriends: true
 			}
 
+			// Stores the game player value used in the current execution flow.
 			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+			// Stores the friend player value used in the current execution flow.
 			let friendPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 			if (gamePlayer == null) {
@@ -156,17 +207,21 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 				return operationResponse;
 			}
 
+			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 			if (gamePlayer.hasPlayerFriend(request.friendId)) {
+				// Stores the player friend item value used in the current execution flow.
 				let playerFriendItem = gamePlayer.getPlayerFriend(request.friendId);
 
 				gamePlayer.removePlayerFriend(request.friendId);
 				gamePlayer.saveAsync();
 
 				{
+					// Stores the GearN player friends value used in the current execution flow.
 					let gnPlayerFriends = new GNArray();
 
+					// Stores the GearN player friend value used in the current execution flow.
 					let gnPlayerFriend = new GNHashtable();
 					gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 					gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
@@ -174,6 +229,7 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 					gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 					gnPlayerFriends.add(gnPlayerFriend);
 
+					// Stores the game player friend update operation event value used in the current execution flow.
 					let gamePlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
 
 					gamePlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
@@ -183,14 +239,17 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 			}
 
 			if (friendPlayer.hasPlayerFriend(request.userId)) {
+				// Stores the player friend item value used in the current execution flow.
 				let playerFriendItem = friendPlayer.getPlayerFriend(request.userId);
 
 				friendPlayer.removePlayerFriend(request.userId);
 				friendPlayer.saveAsync();
 
 				{
+					// Stores the GearN player friends value used in the current execution flow.
 					let gnPlayerFriends = new GNArray();
 
+					// Stores the GearN player friend value used in the current execution flow.
 					let gnPlayerFriend = new GNHashtable();
 					gnPlayerFriend.add(ParameterCode.FriendId, request.userId);
 					gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
@@ -198,6 +257,7 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 					gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 					gnPlayerFriends.add(gnPlayerFriend);
 
+					// Stores the game player friend update operation event value used in the current execution flow.
 					let gamePlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
 
 					gamePlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);

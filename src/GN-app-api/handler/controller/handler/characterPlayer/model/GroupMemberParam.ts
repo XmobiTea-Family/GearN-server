@@ -3,6 +3,7 @@ import { BooleanDataMember, DataMember, GNArrayDataMember, NumberDataMember, Str
 
 export class GroupMemberParam {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 11, maxLength: 11, mustNonNull: true })
 	public userId: string;
 

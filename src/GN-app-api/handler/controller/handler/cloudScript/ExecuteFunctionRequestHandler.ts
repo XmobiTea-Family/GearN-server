@@ -16,18 +16,25 @@ import { GNData } from "./../../../../../GN-common/common/GNData";
 
 class ExecuteFunctionOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the function name value used by this instance.
 	@StringDataMember({ code: ParameterCode.FunctionName, minLength: 3, maxLength: 30, mustNonNull: true })
 	public functionName: string;
 
+	// Stores the function parameters value used by this instance.
 	@DataMember({ code: ParameterCode.FunctionParameters, isOptional: true })
 	public functionParameters?: any;
 
+	// Stores the version value used by this instance.
 	@StringDataMember({ code: ParameterCode.Version, minLength: 7, maxLength: 7, isOptional: true })
 	public version?: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -36,9 +43,13 @@ class ExecuteFunctionOperationRequest extends OperationRequest {
 }
 
 class ServerExecuteFunctionOperationRequest extends ExecuteFunctionOperationRequest {
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +59,9 @@ class ServerExecuteFunctionOperationRequest extends ExecuteFunctionOperationRequ
 
 class AdminExecuteFunctionOperationRequest extends ServerExecuteFunctionOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -57,15 +71,29 @@ class AdminExecuteFunctionOperationRequest extends ServerExecuteFunctionOperatio
 
 export class ExecuteFunctionRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.ExecuteFunction;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return ExecuteFunctionOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -98,7 +126,14 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerExecuteFunctionOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -117,7 +152,14 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminExecuteFunctionOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -136,7 +178,15 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, functionName: string, functionParameters: any, version: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_ExecuteFunction", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -145,15 +195,19 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the custom tags value used in the current execution flow.
 		let customTags = operationRequest.getParameters().getGNHashtable("customTags");
+		// Stores the custom tags data value used in the current execution flow.
 		let customTagsData = customTags == null ? null : customTags.toData();
 
+		// Stores the cloud script service value used in the current execution flow.
 		let cloudScriptService = this.gnServer.getCloudScriptService(secretInfo.getGameId());
 		if (!cloudScriptService) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameNotFound);
 			return operationResponse;
 		}
 
+		// Stores the function parameters value used in the current execution flow.
 		let functionParameters = request.functionParameters;
 		if (functionParameters != null) {
 			if (functionParameters instanceof GNData) {
@@ -161,6 +215,7 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 			}
 		}
 
+		// Stores the response value used in the current execution flow.
 		let response = await cloudScriptService.executeCloudScriptFunction(request.userId, request.functionName, functionParameters, request.version, customTagsData);
 
 		operationResponse.setParameter(ParameterCode.FunctionLogs, response.logs);

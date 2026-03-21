@@ -18,15 +18,21 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByAppleOperationRequest extends OperationRequest {
 
+	// Stores the token value used by this instance.
 	@StringDataMember({ code: ParameterCode.Token, minLength: 32, maxLength: 2048, mustNonNull: true })
 	public token: string;
 
+	// Indicates whether create player if not exists.
 	@BooleanDataMember({ code: ParameterCode.CreatePlayerIfNotExists, isOptional: true, defaultValue: false })
 	public createPlayerIfNotExists?: boolean;
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -36,15 +42,29 @@ class LoginByAppleOperationRequest extends OperationRequest {
 
 export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.LoginByApple;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return LoginByAppleOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -65,7 +85,15 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { token: string, createPlayerIfNotExists: boolean, infoRequestParam: InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByApple", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -74,6 +102,7 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the result value used in the current execution flow.
 		let result = await this.gnServer.getAppleService().verifyAppleToken(request.token);
 
 		if (result["error"] != null) {
@@ -81,15 +110,19 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the apple user ID value used in the current execution flow.
 		let appleUserId = result["sub"];
+		// Stores the email value used in the current execution flow.
 		let email = result["email"] ?? "";
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 		if (masterPlayerFindOptions != null) {
 			masterPlayerFindOptions.lastIPDetail = true;
 			masterPlayerFindOptions.external = true;
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAppleAsync(appleUserId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -99,18 +132,21 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 				return operationResponse;
 			}
 			else {
+				// Stores the new master player result value used in the current execution flow.
 				let newMasterPlayerResult = this.generateNewMasterPlayerResult(request.ipAddress);
 				newMasterPlayerResult["external"]["apple"] = {
 					"appleId": appleUserId,
 					"email": email,
 				}
 
+				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {
 					if (ipDetailResponse.detail.countryCode) {
 						newMasterPlayerResult["countryCode"] = ipDetailResponse.detail.countryCode;
 					}
 
+					// Stores the last IP detail value used in the current execution flow.
 					let lastIPDetail = newMasterPlayerResult["lastIPDetail"];
 					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
 					lastIPDetail.regionCode = ipDetailResponse.detail.regionCode ?? "Unknown";
@@ -123,10 +159,12 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 			}
 		}
 		else {
+			// Stores the last IP detail value used in the current execution flow.
 			let lastIPDetail = masterPlayer.getLastIPDetail();
 			if (lastIPDetail.ipAddress != request.ipAddress) {
 				lastIPDetail.ipAddress = lastIPDetail.ipAddress;
 
+				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {
 					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
@@ -138,6 +176,7 @@ export class LoginByAppleRequestHandler extends LoginBaseRequestHandler {
 				masterPlayer.setLastIPDetail(lastIPDetail);
 			}
 
+			// Stores the external value used in the current execution flow.
 			let external = masterPlayer.getExternal();
 			external.apple.email = email;
 			masterPlayer.setExternal(external);

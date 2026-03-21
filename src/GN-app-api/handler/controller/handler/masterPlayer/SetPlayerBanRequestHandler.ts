@@ -17,15 +17,21 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SetPlayerBanOperationRequest extends OperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
 	public userId?: string;
 
+	// Stores the timestamp expire value used by this instance.
 	@NumberDataMember({ code: ParameterCode.TsExpire })
 	public tsExpire: number;
 
+	// Stores the reason value used by this instance.
 	@StringDataMember({ code: ParameterCode.Reason })
 	public reason: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -35,9 +41,13 @@ class SetPlayerBanOperationRequest extends OperationRequest {
 
 class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 
+	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
 	public declare userId: string;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -47,6 +57,9 @@ class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 
 class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -56,15 +69,29 @@ class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationReque
 
 export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetPlayerBan;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetPlayerBanOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -96,7 +123,14 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -114,7 +148,14 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -132,7 +173,15 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { userId: string, tsExpire: number, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SetPlayerBan", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -141,10 +190,12 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			playerBan: true,
 		}
 
+		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
@@ -164,10 +215,16 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 		return operationResponse;
 	}
 
+	/**
+	 * Sets the player ban.
+	 * @param data Provides the data value used by this operation.
+	 */
 	private setPlayerBan(data: { userId: string, tsExpire: number, reason: string, }) {
+		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		if (data.tsExpire == -1 || data.tsExpire > currentMilliseconds) {
+			// Stores the auth infos value used in the current execution flow.
 			let authInfos = this.gnServer.getApiMiddleware().getAuthInfosByUserIdInMemCache(data.userId);
 
 			for (const authInfo of authInfos) {
@@ -180,7 +237,11 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 		}
 	}
 
+	/**
+	 * Executes the init workflow.
+	 */
 	protected override init(): void {
+		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 		this.gnServer.getHttpApp().getClusterHandler().onEvent("masterPlayer_SetPlayerBan", data => {
 			thiz.setPlayerBan(data);

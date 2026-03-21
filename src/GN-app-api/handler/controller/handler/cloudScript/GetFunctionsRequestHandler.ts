@@ -15,6 +15,9 @@ import { GNArray, GNHashtableBuilder } from "./../../../../../GN-common/common/G
 
 class GetFunctionsOperationRequest extends OperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -24,6 +27,9 @@ class GetFunctionsOperationRequest extends OperationRequest {
 
 class ServerGetFunctionsOperationRequest extends GetFunctionsOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -33,6 +39,9 @@ class ServerGetFunctionsOperationRequest extends GetFunctionsOperationRequest {
 
 class AdminGetFunctionsOperationRequest extends ServerGetFunctionsOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -42,15 +51,29 @@ class AdminGetFunctionsOperationRequest extends ServerGetFunctionsOperationReque
 
 export class GetFunctionsRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetFunctions;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetFunctionsOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -64,7 +87,14 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 		return this.execute({}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetFunctionsOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -78,7 +108,14 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 		return this.execute({}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetFunctionsOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -92,7 +129,15 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 		return this.execute({}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_GetFunctions", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -101,16 +146,20 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the cloud script service value used in the current execution flow.
 		let cloudScriptService = this.gnServer.getCloudScriptService(secretInfo.getGameId());
 		if (!cloudScriptService) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameNotFound);
 			return operationResponse;
 		}
 
+		// Stores the response value used in the current execution flow.
 		let response = cloudScriptService.getCloudScriptFunctions();
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 		for (let i = 0; i < response.length; i++) {
+			// Stores the function 1 value used in the current execution flow.
 			let function1 = response[i];
 
 			gnResults.add(new GNHashtableBuilder()

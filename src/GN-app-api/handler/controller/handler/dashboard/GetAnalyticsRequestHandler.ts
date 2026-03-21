@@ -15,33 +15,45 @@ import { BooleanDataMember, NumberDataMember } from "./../../../../../GN-common/
 
 class GetAnalyticsOperationRequest extends OperationRequest {
 
+	// Stores the timestamp value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Timestamp, minValue: 0, isOptional: true })
 	public timestamp?: number;
 
+	// Indicates whether analytics item.
 	@BooleanDataMember({ code: ParameterCode.AnalyticsItem, isOptional: true })
 	public analyticsItem?: boolean;
 
+	// Indicates whether country.
 	@BooleanDataMember({ code: ParameterCode.Country, isOptional: true })
 	public country?: boolean;
 
+	// Indicates whether request complete.
 	@BooleanDataMember({ code: ParameterCode.RequestComplete, isOptional: true })
 	public requestComplete?: boolean;
 
+	// Indicates whether operation system.
 	@BooleanDataMember({ code: ParameterCode.OperationSystem, isOptional: true })
 	public operationSystem?: boolean;
 
+	// Indicates whether database system.
 	@BooleanDataMember({ code: ParameterCode.DatabaseSystem, isOptional: true })
 	public databaseSystem?: boolean;
 
+	// Indicates whether log database system.
 	@BooleanDataMember({ code: ParameterCode.LogDatabaseSystem, isOptional: true })
 	public logDatabaseSystem?: boolean;
 
+	// Indicates whether cost.
 	@BooleanDataMember({ code: ParameterCode.Cost, isOptional: true })
 	public cost?: boolean;
 
+	// Indicates whether monthly cost.
 	@BooleanDataMember({ code: ParameterCode.MonthlyCost, isOptional: true })
 	public monthlyCost?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -50,27 +62,49 @@ class GetAnalyticsOperationRequest extends OperationRequest {
 }
 
 export interface AnalyticsRequestParams {
+	// Indicates whether analytics item.
 	analyticsItem: boolean;
+	// Indicates whether country.
 	country: boolean;
+	// Indicates whether request complete.
 	requestComplete: boolean;
+	// Indicates whether operation system.
 	operationSystem: boolean;
+	// Indicates whether database system.
 	databaseSystem: boolean;
+	// Indicates whether log database system.
 	logDatabaseSystem: boolean;
+	// Indicates whether cost.
 	cost: boolean;
+	// Indicates whether monthly cost.
 	monthlyCost: boolean;
 }
 
 export class GetAnalyticsRequestHandler extends RequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetAnalytics;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetAnalyticsOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -100,7 +134,15 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { timestamp: number, requestParams: AnalyticsRequestParams }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetAnalytics", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -109,7 +151,9 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the analytics service value used in the current execution flow.
 		let analyticsService = this.gnServer.getAnalyticsService();
+		// Stores the big analytics item value used in the current execution flow.
 		let bigAnalyticsItem = await analyticsService.getBigAnalyticsItem(request.timestamp);
 
 		if (bigAnalyticsItem == null) {
@@ -118,6 +162,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.analyticsItem) {
+			// Stores the GearN analytics item value used in the current execution flow.
 			let gnAnalyticsItem = new GNHashtable();
 
 			gnAnalyticsItem.add(ParameterCode.CCU, bigAnalyticsItem.CCU);
@@ -139,21 +184,27 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.country) {
+			// Stores the GearN countrys value used in the current execution flow.
 			let gnCountrys = new GNArray();
 
 			if (bigAnalyticsItem.country) {
 				for (let i = 0; i < bigAnalyticsItem.country.length; i++) {
+					// Stores the country value used in the current execution flow.
 					let country = bigAnalyticsItem.country[i];
 
+					// Stores the GearN country value used in the current execution flow.
 					let gnCountry = new GNHashtable();
 
 					gnCountry.add(ParameterCode.CountryCode, country.countryCode);
 
+					// Stores the GearN regions value used in the current execution flow.
 					let gnRegions = new GNArray();
 
 					for (let j = 0; j < country.regions.length; j++) {
+						// Stores the region value used in the current execution flow.
 						let region = country.regions[j];
 
+						// Stores the GearN region value used in the current execution flow.
 						let gnRegion = new GNHashtable();
 
 						if (!region) continue;
@@ -176,11 +227,13 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.operationSystem) {
+			// Stores the GearN operation system value used in the current execution flow.
 			let gnOperationSystem = new GNHashtable();
 
 			if (bigAnalyticsItem.operationSystem) {
 				gnOperationSystem.add(ParameterCode.CpuUsage, bigAnalyticsItem.operationSystem.cpuUsage);
 
+				// Stores the GearN memory usage value used in the current execution flow.
 				let gnMemoryUsage = new GNHashtable();
 				if (bigAnalyticsItem.operationSystem.memoryUsage) {
 					gnMemoryUsage.add(ParameterCode.FreeMemoryInBytes, bigAnalyticsItem.operationSystem.memoryUsage.freeMemoryInBytes);
@@ -188,11 +241,14 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 				}
 				gnOperationSystem.add(ParameterCode.MemoryUsage, gnMemoryUsage);
 
+				// Stores the GearN storage usages value used in the current execution flow.
 				let gnStorageUsages = new GNArray();
 				if (bigAnalyticsItem.operationSystem.storageUsage) {
 					for (let i = 0; i < bigAnalyticsItem.operationSystem.storageUsage.length; i++) {
+						// Stores the storage usage value used in the current execution flow.
 						let storageUsage = bigAnalyticsItem.operationSystem.storageUsage[i];
 
+						// Stores the GearN storage usage value used in the current execution flow.
 						let gnStorageUsage = new GNHashtable();
 
 						gnStorageUsage.add(ParameterCode.Name, storageUsage.name);
@@ -209,6 +265,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.databaseSystem) {
+			// Stores the GearN database system value used in the current execution flow.
 			let gnDatabaseSystem = new GNHashtable();
 
 			if (bigAnalyticsItem.operationSystem) {
@@ -224,6 +281,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.logDatabaseSystem) {
+			// Stores the GearN database system value used in the current execution flow.
 			let gnDatabaseSystem = new GNHashtable();
 
 			if (bigAnalyticsItem.operationSystem) {
@@ -239,21 +297,27 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.requestComplete) {
+			// Stores the GearN request complete value used in the current execution flow.
 			let gnRequestComplete = new GNArray();
 
 			if (bigAnalyticsItem.requestComplete) {
 				for (let i = 0; i < bigAnalyticsItem.requestComplete.length; i++) {
+					// Stores the request complete value used in the current execution flow.
 					let requestComplete = bigAnalyticsItem.requestComplete[i];
 
+					// Stores the this GearN request complete value used in the current execution flow.
 					let thisGnRequestComplete = new GNHashtable();
 
 					thisGnRequestComplete.add(ParameterCode.EventName, requestComplete.eventName);
 
+					// Stores the GearN results value used in the current execution flow.
 					let gnResults = new GNArray();
 
 					for (let j = 0; j < requestComplete.results.length; j++) {
+						// Stores the result value used in the current execution flow.
 						let result = requestComplete.results[j];
 
+						// Stores the GearN result value used in the current execution flow.
 						let gnResult = new GNHashtable();
 
 						gnResult.add(ParameterCode.ErrorCode, result.errorCode);
@@ -272,6 +336,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.cost) {
+			// Stores the GearN cost value used in the current execution flow.
 			let gnCost = new GNHashtable();
 
 			if (bigAnalyticsItem.cost) {
@@ -286,6 +351,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 		}
 
 		if (request.requestParams.monthlyCost) {
+			// Stores the GearN cost value used in the current execution flow.
 			let gnCost = new GNHashtable();
 
 			if (bigAnalyticsItem.monthlyCost) {

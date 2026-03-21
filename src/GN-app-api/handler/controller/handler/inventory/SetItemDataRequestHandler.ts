@@ -19,12 +19,17 @@ import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class SetItemDataOperationRequest extends OperationRequest {
 
+	// Stores the item ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	public itemId: string;
 
+	// Stores the item datas value used by this instance.
 	@GNArrayDataMember({ code: ParameterCode.ItemDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: ItemDataParam })
 	public itemDatas: Array<ItemDataParam>;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -34,6 +39,9 @@ class SetItemDataOperationRequest extends OperationRequest {
 
 class ServerSetItemDataOperationRequest extends SetItemDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -43,6 +51,9 @@ class ServerSetItemDataOperationRequest extends SetItemDataOperationRequest {
 
 class AdminSetItemDataOperationRequest extends ServerSetItemDataOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -52,21 +63,36 @@ class AdminSetItemDataOperationRequest extends ServerSetItemDataOperationRequest
 
 export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.SetItemData;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return SetItemDataOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		// Tracks whether method is allowed.
 		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setItemData);
 
 		if (!allowMethod) {
@@ -79,7 +105,14 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetItemDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -96,7 +129,14 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetItemDataOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -113,7 +153,15 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { itemId: string, itemDatas: Array<ItemDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetItemData", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -122,10 +170,12 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			itemDatas: true,
 		}
 
+		// Stores the inventory value used in the current execution flow.
 		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
@@ -133,19 +183,27 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+		// Stores the resolved inventory settings instance for the current execution flow.
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
 
+		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
+		// Stores the GearN item datas value used in the current execution flow.
 		let gnItemDatas = new GNArray();
 
 		for (let i = 0; i < request.itemDatas.length; i++) {
+			// Stores the item data parameter value used in the current execution flow.
 			let itemDataParam = request.itemDatas[i];
 
+			// Stores the key value used in the current execution flow.
 			let key = itemDataParam.key;
+			// Stores the item datas settings item value used in the current execution flow.
 			let itemDatasSettingsItem = inventorySettings.itemDatasSettings.find(x => x.key == key);
 			if (itemDatasSettingsItem == null) continue;
 
+			// Stores the value value used in the current execution flow.
 			let value = itemDataParam.value;
+			// Stores the permission value used in the current execution flow.
 			let permission = <PermissionDataItem>itemDatasSettingsItem.permission;
 
 			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
@@ -158,6 +216,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 				inventory.setItemData(key, value as DataValueType);
 
+				// Stores the GearN item data value used in the current execution flow.
 				let gnItemData = new GNHashtable();
 				gnItemData.add(ParameterCode.Key, key);
 				gnItemData.add(ParameterCode.Value, itemDataParam.value);

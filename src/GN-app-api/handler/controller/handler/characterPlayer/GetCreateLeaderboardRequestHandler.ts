@@ -18,18 +18,25 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class GetCreateLeaderboardOperationRequest extends OperationRequest {
 
+	// Stores the info request parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
 	public infoRequestParam: InfoRequestParam;
 
+	// Stores the skip value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
 	public skip?: number;
 
+	// Stores the limit value used by this instance.
 	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
 	public limit?: number;
 
+	// Indicates whether load from cache.
 	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
 	public loadFromCache?: boolean;
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -39,6 +46,9 @@ class GetCreateLeaderboardOperationRequest extends OperationRequest {
 
 class ServerGetCreateLeaderboardOperationRequest extends GetCreateLeaderboardOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -48,6 +58,9 @@ class ServerGetCreateLeaderboardOperationRequest extends GetCreateLeaderboardOpe
 
 class AdminGetCreateLeaderboardOperationRequest extends ServerGetCreateLeaderboardOperationRequest {
 
+	/**
+	 * Checks whether valid request.
+	 */
 	public override isValidRequest() {
 		if (!super.isValidRequest()) return false;
 
@@ -57,15 +70,29 @@ class AdminGetCreateLeaderboardOperationRequest extends ServerGetCreateLeaderboa
 
 export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseRequestHandler {
 
+	/**
+	 * Returns the code.
+	 */
 	public override getCode() {
 		return OperationCode.GetCreateLeaderboard;
 	}
 
+	/**
+	 * Returns the common operation request.
+	 */
 	public override getCommonOperationRequest() {
 		return GetCreateLeaderboardOperationRequest;
 	}
 
+	/**
+	 * Executes the handle workflow asynchronously.
+	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
 		if (!request.isValidRequest()) {
@@ -86,7 +113,14 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the server handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCreateLeaderboardOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -107,7 +141,14 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the admin handle workflow asynchronously.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the request value used in the current execution flow.
 		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCreateLeaderboardOperationRequest);
 
 		if (!request.isValidRequest()) {
@@ -128,7 +169,15 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 		}, secretInfo, operationRequest);
 	}
 
+	/**
+	 * Executes the execute workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @returns Resolves with the operation result.
+	 */
 	private async execute(request: { skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetCreateLeaderboard", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
@@ -137,8 +186,10 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions = this.convertToCharacterPlayerFindOptions(request.infoRequestParam);
 
+		// Stores the cache key value used in the current execution flow.
 		let cacheKey = "characterPlayerCreateLeaderboard";
 
 		if (request.loadFromCache) {
@@ -147,6 +198,7 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 			}
 		}
 
+		// Stores the cache data value used in the current execution flow.
 		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
 		if (request.loadFromCache) {
@@ -155,8 +207,10 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 			}
 		}
 
+		// Stores the GearN results value used in the current execution flow.
 		let gnResults = new GNArray();
 
+		// Stores the character players value used in the current execution flow.
 		let characterPlayers: CharacterPlayer[];
 
 		if (request.loadFromCache) {
@@ -165,8 +219,10 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 			for (let i = request.skip; i < request.skip + request.limit; i++) {
 				if (i >= characterPlayers.length) break;
 
+				// Stores the character player value used in the current execution flow.
 				let characterPlayer = characterPlayers[i];
 
+				// Stores the GearN result value used in the current execution flow.
 				let gnResult = new GNHashtable();
 
 				gnResult.add(ParameterCode.Position, i);
@@ -187,8 +243,10 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= characterPlayers.length) break;
 
+					// Stores the character player value used in the current execution flow.
 					let characterPlayer = characterPlayers[i];
 
+					// Stores the GearN result value used in the current execution flow.
 					let gnResult = new GNHashtable();
 
 					gnResult.add(ParameterCode.Position, i);
@@ -207,8 +265,10 @@ export class GetCreateLeaderboardRequestHandler extends CharacterPlayerBaseReque
 
 				for (let i = 0; i < characterPlayers.length; i++) {
 
+					// Stores the character player value used in the current execution flow.
 					let characterPlayer = characterPlayers[i];
 
+					// Stores the GearN result value used in the current execution flow.
 					let gnResult = new GNHashtable();
 
 					gnResult.add(ParameterCode.Position, i + request.skip);

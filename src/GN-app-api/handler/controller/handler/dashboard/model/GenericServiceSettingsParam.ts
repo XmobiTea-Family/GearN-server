@@ -3,6 +3,7 @@ import { BooleanDataMember, GNHashtableDataMember, StringDataMember, GNArrayData
 
 export class GenericServiceSettingsParam {
 
+	// Stores the service name value used by this instance.
 	@StringDataMember({ code: ParameterCode.ServiceName, minLength: 2, maxLength: 32 })
 	public serviceName: string;
 
