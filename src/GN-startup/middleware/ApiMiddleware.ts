@@ -13,43 +13,46 @@ import { CreateSecretInfoRequestHandler } from "./../../GN-app-api/handler/contr
 import jwt from "jsonwebtoken";
 import { TokenPayload } from "./../../GN-common/entity/TokenPayload";
 
+/**
+ * Central auth/secret middleware shared by HTTP and socket transports.
+ */
 export class ApiMiddleware {
-	// Stores the FIVE MINUTE timestamp value used by this instance.
+	// Interval used to refresh lightweight auth caches and housekeeping tasks.
 	private static readonly FIVE_MINUTE_TS: number = 5 * 60 * 1000;
-	// Stores the timestamp REMOVE auth INFO dictionary value used by this instance.
+	// In-memory auth entries older than this threshold are evicted from the local cache.
 	private static readonly TS_REMOVE_AUTH_INFO_DIC: number = 1000 * 60 * 60 * 12;
-	// Stores the DEFAULT GAME ID value used by this instance.
+	// Fallback game id when a secret is global and the caller does not specify one.
 	private static readonly DEFAULT_GAME_ID: string = "dev";
 
-	// Stores the auth info dict collection used by this instance.
+	// Hot auth-token cache keyed by `gnToken`.
 	private authInfoDict: Map<string, AuthInfo>;
-	// Stores the auth info collection value used by this instance.
+	// Persistent auth-token storage in MongoDB.
 	private authInfoCollection: mongoDB.Collection<mongoDB.Document>;
 
-	// Stores the secret info dict collection used by this instance.
+	// Hot secret cache keyed by secret key.
 	private secretInfoDict: Map<string, SecretInfo>;
-	// Stores the secret info collection value used by this instance.
+	// Persistent secret storage in MongoDB.
 	private secretInfoCollection: mongoDB.Collection<mongoDB.Document>;
 
-	// Stores the player game collection value used by this instance.
+	// Backing collection for global player/account lookups used by analytics-oriented auth gates.
 	private playerGameCollection: mongoDB.Collection<mongoDB.Document>;
 
-	// Stores the expired token value used by this instance.
+	// Token lifetime in milliseconds. `-1` means "effectively never expire".
 	private expiredToken: number = 2 * 1000 * 60 * 60 * 24;
 
-	// Stores the private key token value used by this instance.
+	// HMAC secret used to sign and verify JWT auth tokens.
 	private privateKeyToken: string;
 
-	// Stores the header IP value used by this instance.
+	// Preferred proxy header used to resolve the caller IP.
 	private headerIP: string;
 
-	// Stores the dau last 30 min value used by this instance.
+	// Sliding window of recent user ids used when enforcing max-CCU style rejections.
 	private dauLast30Min: Array<string>;
 
-	// Stores the max CCU value used by this instance.
+	// Optional global CCU ceiling. `-1` disables the gate.
 	private maxCCU: number;
 
-    // Stores the game IDs list used by this instance.
+    // Known game ids loaded at startup. Used to validate global secrets against explicit game ids.
     private gameIds: string[];
 
 	/**
@@ -116,7 +119,7 @@ export class ApiMiddleware {
     }
 
 	/**
-	 * Runs the current workflow.
+	 * Starts periodic maintenance for the auth cache and DAU/CCU helper state.
 	 */
 	public run() {
 		this.dauLast30Min = [];
@@ -129,7 +132,7 @@ export class ApiMiddleware {
 	}
 
 	/**
-	 * Returns the DAU last 30 min.
+	 * Refreshes the recent-user cache consulted by the optional CCU gate.
 	 */
 	private async getDAULast30Min() {
 		this.maxCCU = -1;
@@ -137,7 +140,7 @@ export class ApiMiddleware {
 		if (this.maxCCU != -1) {
 
 			try {
-				// Stores the player last 30 mins value used in the current execution flow.
+				// Pull only the newest users because the CCU gate only needs a small rolling window.
 				let playerLast30Mins = await this.playerGameCollection.find({}, {
 					projection: {
 						userId: true
@@ -147,7 +150,6 @@ export class ApiMiddleware {
 				this.dauLast30Min.length = 0;
 
 				for (let i = 0; i < playerLast30Mins.length; i++) {
-					// Stores the player last 30 min value used in the current execution flow.
 					let playerLast30Min = playerLast30Mins[i];
 					this.dauLast30Min.push(playerLast30Min.userId);
 				}
@@ -159,25 +161,19 @@ export class ApiMiddleware {
 	}
 
 	/**
-	 * Executes the check and remove dict workflow asynchronously.
+	 * Evicts stale auth entries from the in-memory cache without touching MongoDB.
 	 */
 	private async checkAndRemoveDict(): Promise<void> {
 		try {
-			// Stores the remove count value used in the current execution flow.
 			let removeCount = 0;
 
-			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-			// Stores the timestamp remove value used in the current execution flow.
 			let tsRemove = currentMilliseconds - ApiMiddleware.TS_REMOVE_AUTH_INFO_DIC;
 
-			// Stores the start size value used in the current execution flow.
 			let startSize = this.authInfoDict.size;
 
-			// Stores the entries value used in the current execution flow.
 			let entries = this.authInfoDict.entries();
 
-			// Stores the keys to remove value used in the current execution flow.
 			let keysNeedRemove: string[] = [];
 
 			for (let [key, authInfo] of entries) {
@@ -200,26 +196,22 @@ export class ApiMiddleware {
 	}
 
 	/**
-	 * Executes the generate auth info workflow.
+	 * Mints a signed auth token, mirrors it to MongoDB, and caches the resolved `AuthInfo`.
 	 * @param payload Provides the payload value used by this operation.
 	 * @returns Returns the operation result.
 	 */
 	public generateAuthInfo(payload: TokenPayload): AuthInfo {
-		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		payload.gnToken = payload.gnToken ?? "gn.a_" + StringUtility.generateRandomString(10, 0);
 
-		// Stores the timestamp expire value used in the current execution flow.
 		let tsExpire = this.expiredToken == -1 ? -1 : (currentMilliseconds + this.expiredToken);
 
-		// Stores the auth token value used in the current execution flow.
 		let authToken = jwt.sign(payload, this.privateKeyToken, {
 			expiresIn: this.expiredToken == -1 ? "1y" : this.expiredToken,
 			algorithm: "HS512"
 		});
 
-		// Stores the auth info value used in the current execution flow.
 		let authInfo = AuthInfo.Builder()
 			.setGNToken(payload.gnToken)
 			.setAuthToken(authToken)
@@ -516,21 +508,18 @@ export class ApiMiddleware {
 	}
 
 	/**
-	 * Returns the return code authenticate.
+	 * Resolves request auth state for HTTP, validates the active secret, and returns the final gate result.
 	 * @param req Provides the req value used by this operation.
 	 * @returns Returns the return code authenticate.
 	 */
 	public async getReturnCodeAuthenticate(req: express.Request): Promise<number> {
-		// Stores the auth token value used in the current execution flow.
 		let authToken: string = req.header(Commands.RequestAuthTokenCmd);
 
-		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		if (!authToken) {
 			req.isAuthenticated = false;
 		} else {
-			// Stores the token payload value used in the current execution flow.
 			let tokenPayload = this.verifyAuthToken(authToken);
 
 			if (tokenPayload == null) {
@@ -539,10 +528,8 @@ export class ApiMiddleware {
 				// return ReturnCode.OperationNotAuthorized;
 			}
 			else {
-				// Stores the GearN token value used in the current execution flow.
 				let gnToken: string = tokenPayload.gnToken;
 
-				// Stores the auth info value used in the current execution flow.
 				let authInfo = await this.getAuthInfoByGNTokenInDatabase(gnToken);
 
 				if (authInfo == null) {
@@ -569,7 +556,6 @@ export class ApiMiddleware {
 		}
 
 		if (this.maxCCU != -1) {
-			// Stores the dau last 30 min value used in the current execution flow.
 			let dauLast30Min = [...this.dauLast30Min];
 
 			if (dauLast30Min.length >= this.maxCCU) {
@@ -579,7 +565,7 @@ export class ApiMiddleware {
 			}
 		}
 
-		// Stores the secret key value used in the current execution flow.
+		// A client secret can come from the header or fall back to the authenticated account secret.
 		let secretKey: string = req.header(Commands.RequestSecretCmd);
 
 		if (!secretKey) {
@@ -594,7 +580,6 @@ export class ApiMiddleware {
 		}
 
 		if (secretKey) {
-			// Stores the secret info value used in the current execution flow.
 			let secretInfo = await this.getSecretInfoBySecretKeyInDatabase(secretKey);
 
 			if (secretInfo != null && secretInfo.getIsOnlyMasterAdmin()) {
@@ -612,14 +597,13 @@ export class ApiMiddleware {
 			}
 
 			if (!secretInfo.getGameId()) {
-				// Stores the game ID value used in the current execution flow.
+				// Global secrets are cloned per-request so a concrete game id can be injected safely.
 				let gameId: string = req.header(Commands.RequestGameIdCmd);
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
                 else {
                     if (!this.gameIds.includes(gameId)) return ReturnCode.SecretInvalid;
                 }
 
-				// Stores the secret info any value used in the current execution flow.
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
@@ -652,18 +636,15 @@ export class ApiMiddleware {
 	}
 
 	/**
-	 * Executes the socket authenticate token workflow asynchronously.
+	 * Performs the same auth/secret resolution for sockets, but keeps the result on `socket.data`.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param next Provides the next value used by this operation.
 	 */
 	public async socketAuthenticateToken(socket: Socket, next: (returnCode: number) => void): Promise<void> {
-		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		if (socket.data.isAuthenticated === true) {
-			// Stores the auth info value used in the current execution flow.
 			let authInfo = socket.data.authInfo as AuthInfo;
-			// Stores the GearN token value used in the current execution flow.
 			let gnToken = authInfo.getGNToken();
 
 			if (authInfo.isRemove()) {
@@ -688,7 +669,6 @@ export class ApiMiddleware {
 		}
 
 		if (this.maxCCU != -1) {
-			// Stores the dau last 30 min value used in the current execution flow.
 			let dauLast30Min = [...this.dauLast30Min];
 
 			if (dauLast30Min.length >= this.maxCCU) {
@@ -698,14 +678,12 @@ export class ApiMiddleware {
 			}
 		}
 
-		// Stores the secret info value used in the current execution flow.
 		let secretInfo: SecretInfo = null;
 
 		if (socket.data.isSecreted) {
 			secretInfo = socket.data.secretInfo;
 		}
 		else {
-			// Stores the secret key value used in the current execution flow.
 			let secretKey = socket.data.secretKey as string;
 			if (!secretKey) {
 				if (socket.data.isAuthenticated === false) {
@@ -728,14 +706,13 @@ export class ApiMiddleware {
 			}
 
 			if (!secretInfo.getGameId()) {
-				// Stores the game ID value used in the current execution flow.
+				// Global secrets are cloned per-socket so the resolved game id does not mutate the cached secret.
 				let gameId = socket.data.gameId as string;
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
                 else {
                     if (!this.gameIds.includes(gameId)) return next(ReturnCode.SecretInvalid);
                 }
 
-				// Stores the secret info any value used in the current execution flow.
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
@@ -777,7 +754,7 @@ export class ApiMiddleware {
 	}
 
 	/**
-	 * Creates the IP.
+	 * Normalizes IPv6-mapped IPv4 addresses to the plain IPv4 string used across the codebase.
 	 * @param ip Provides the IP value used by this operation.
 	 * @returns Returns the operation result.
 	 */

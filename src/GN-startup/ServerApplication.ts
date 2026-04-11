@@ -252,6 +252,9 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
 	}
 }
 
+/**
+ * Owns the full startup pipeline after settings have been materialized by `ServerApplicationStartup`.
+ */
 export class ServerApplication extends BuilderBase {
 	// Stores the HTTP app value used by this instance.
 	private httpApp: HttpApp;
@@ -274,19 +277,18 @@ export class ServerApplication extends BuilderBase {
 	private secretId: string;
 
 	/**
-	 * Runs the current workflow.
+	 * Wires middleware, transports, database bootstrap, and runtime services, then starts listening.
 	 * @param onRunSuccess Provides the callback executed after a successful startup.
 	 */
 	public async run(onRunSuccess?: OnRunSuccess): Promise<void> {
-		// Stores the salt value used in the current execution flow.
+		// Generate per-process identifiers used by the transport layer and default secret bootstrap.
 		let salt = StringUtility.generateRandomString(10, 0);
 		this.sessionId = StringUtility.generateRandomString(15, 0);
 		this.secretkey = StringUtility.generateRandomString(20, 0);
 		this.secretId = Md5Generate.getMd5(this.secretkey + salt + this.secretkey + salt + this.sessionId);
 
-		// Stores the configuration full log path value used in the current execution flow.
+		// Accept either an absolute log path or a path relative to the current working directory.
 		let configFullLogPath = this.getLogSettings().getLogPath();
-		// Stores the full log path value used in the current execution flow.
 		let fullLogPath = configFullLogPath;
 		if (fullLogPath) {
 			if (!fs.existsSync(fullLogPath)) {
@@ -305,24 +307,20 @@ export class ServerApplication extends BuilderBase {
 
 		Debug.log("[GearN XmobiTea] -->>==>>>--<<<==<<-- [GN XmobiTea]");
 
-		// Stores the port value used in the current execution flow.
 		const port = this.getApplicationSettings().getPort();
 		Debug.log("[GearN] Try run server on the port " + port);
 
-		// Stores the socket port value used in the current execution flow.
 		const socketPort = this.getApplicationSettings().getSocketPort();
 		Debug.log("[GearN] Try run socket server on the port " + socketPort);
 
-		// Stores the app value used in the current execution flow.
 		const app = express();
-		// Stores the server value used in the current execution flow.
 		const server = this.getServer(app, this.getApplicationSettings());
 
-		// Tracks whether other socket server should be used.
+		// Reuse the HTTP server when both transports share a port; otherwise spin up a dedicated socket server.
 		const useOtherSocketServer = this.getApplicationSettings().getPort() != this.getApplicationSettings().getSocketPort() && this.getSocketAppSettings().getEnable();
-		// Stores the socket server value used in the current execution flow.
 		const socketServer = useOtherSocketServer ? http.createServer() : server;
 
+		// Initialize shared middleware first so HTTP and socket transports read the same runtime rules.
 		this.uploadFileMiddleware = this.newUploadMiddleware();
 		this.uploadFileMiddleware.setMaxSizeUpload(this.getUploadFileSettings().getMaxSizeUpload());
 		this.uploadFileMiddleware.setMimeTypeAccepts(this.getUploadFileSettings().getMimeTypeAccepts());
@@ -385,15 +383,14 @@ export class ServerApplication extends BuilderBase {
 			}
 		);
 
-		// Stores the auth info collection value used in the current execution flow.
+		// Core middleware depends on a few system collections before any request is dispatched.
 		let authInfoCollection = this.gnServer.getDatabase().systemCollection("AuthInfo");
 		this.apiMiddleware.setAuthInfoCollection(authInfoCollection);
 
-		// Stores the player game collection value used in the current execution flow.
+		// Despite the old variable name, authentication resolves against the global `MasterPlayer` account collection.
 		let playerGameCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
 		this.apiMiddleware.setPlayerGameCollection(playerGameCollection);
 
-		// Stores the secret info collection value used in the current execution flow.
 		let secretInfoCollection = this.gnServer.getDatabase().systemCollection("SecretInfo");
 		this.apiMiddleware.setSecretInfoCollection(secretInfoCollection);
 
@@ -411,12 +408,12 @@ export class ServerApplication extends BuilderBase {
 		let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdos");
 		this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
+		// Ensure schema/index bootstrap is complete before loading per-game settings into memory.
 		await this.setupDatabase();
 
-		// Stores the game IDs value used in the current execution flow.
 		let gameIds = await this.applySettingsGame();
 
-		// Stores the adapter event collection value used in the current execution flow.
+		// Clustered socket emission is backed by the capped `AdapterEvent` system collection.
 		let adapterEventCollection = this.gnServer.getDatabase().systemCollection("AdapterEvent");
 		this.socketApp.setEmitter(adapterEventCollection);
 
@@ -433,19 +430,17 @@ export class ServerApplication extends BuilderBase {
 		this.httpApp.getUploadFileHandler().setDownloadFileSessionCollection(downloadFileSessionCollection);
 		this.uploadFileMiddleware.setUploadFileInfoCollection(uploadFileInfoCollection);
 
+		// Register built-in handlers only after storage, secrets, and game settings have been prepared.
 		this.gnServer.init();
 		this.gnServer.run(() => {
 			Debug.log("[GearN] Game Application run success");
 		});
 
-		// Stores the secret info results value used in the current execution flow.
+		// CloudScript workers reuse the default admin secret so internal callbacks can call back into the server.
 		let secretInfoResults = await secretInfoCollection.find({ isDefault: true }).toArray();
-		// Stores the secret info value used in the current execution flow.
 		let secretInfo = secretInfoResults.at(0);
-		// Stores the secret key value used in the current execution flow.
 		let secretKey = secretInfo == null ? "" : secretInfo["secretKey"];
 
-		// Stores the GearN server settings options value used in the current execution flow.
 		let gnServerSettingsOptions: GNServerSettingsOptions = {
 			serverAddress: "127.0.0.1",
 			serverPort: this.applicationSettings.getPort(),
@@ -468,7 +463,7 @@ export class ServerApplication extends BuilderBase {
 			clientSecretKey: secretKey,
 		}
 
-		// Stores the database connection value used in the current execution flow.
+		// Worker processes receive the same DB connection metadata instead of opening a separate config source.
 		let dbConnection = {
 			url: this.databaseSettings.getConnectionString(),
 			dbName: this.databaseSettings.getDatabaseName(),
@@ -478,14 +473,12 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
-			// Stores the event callback cloud script service value used in the current execution flow.
+			// Event callback scripts are global and run before/after several request families.
 			let eventCallbackCloudScriptService = (<EventCallbackCloudScriptService>this.gnServer.getEventCallbackCloudScriptService());
 
-			// Stores the backup cloud script function collection value used in the current execution flow.
 			let backupCloudScriptFunctionCollection = this.gnServer.getDatabase().systemCollection("EventCallback.CloudScriptBackup");
 			eventCallbackCloudScriptService.setBackupCloudScriptFunctionCollection(backupCloudScriptFunctionCollection);
 
-			// Stores the cloud script function collection value used in the current execution flow.
 			let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemCollection("EventCallback.CloudScript");
 			eventCallbackCloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
 
@@ -494,23 +487,22 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
-			// Stores the cloud script event service value used in the current execution flow.
+			// CloudScript event helpers need the fully wired `GNServer` instance but do not spawn their own worker.
 			let cloudScriptEventService = <CloudScriptEventService>this.gnServer.getCloudScriptEventService();
 
 			cloudScriptEventService.init(this.gnServer);
 		}
 
-		// Stores the post event callback log collection value used in the current execution flow.
+		// Pre/post callback services share the same worker service and post-log collection.
 		let postEventCallbackLogCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
 		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setEventCallbackLogCollection(postEventCallbackLogCollection);
 
 		(<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 		(<PreEventCallbackService>this.gnServer.getPreEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 
+		// Start listening only after every runtime dependency has been initialized and the bootstrap data is ready.
 		server.listen(port, "0.0.0.0", () => {
-			// Stores the banner path value used in the current execution flow.
 			let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
-			// Stores the banner txt value used in the current execution flow.
 			let bannerTxt = fs.readFileSync(bannerPath, "utf8");
 			console.log('\n\n' + bannerTxt + '\n\n');
 
@@ -530,18 +522,17 @@ export class ServerApplication extends BuilderBase {
 
 		{
 			for (let i = 0; i < gameIds.length; i++) {
-				// Stores the game ID value used in the current execution flow.
 				let gameId = gameIds[i];
 
 				{
-					// Stores the cloud script service value used in the current execution flow.
+					// Every loaded game gets its own CloudScript worker bound to game-specific collections.
 					let cloudScriptService = <CloudScriptService>this.gnServer.getCloudScriptService(gameId);
 					cloudScriptService.init(gameId, gnServerSettingsOptions, dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
 					cloudScriptService.run();
 				}
 
 				{
-					// Stores the configuration service value used in the current execution flow.
+					// Config data is loaded after the game context exists because it depends on `gameId`.
 					let configService = this.gnServer.getConfigService(gameId);
 					(<ConfigService>configService).run();
 				}
@@ -549,9 +540,8 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
-			// Stores the country region collection value used in the current execution flow.
+			// Country/IP enrichment reads shared system collections plus the optional external IP lookup endpoint.
 			let countryRegionCollection = this.gnServer.getDatabase().systemCollection("CountryRegion");
-			// Tracks whether r IP address collection should be used.
 			let userIPAddressCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer.IPAddress");
 
 			(this.gnServer.getCountryIPDetailService() as CountryIPDetailService).init(this.getOtherSettings().getIPApiUrl(), countryRegionCollection, userIPAddressCollection);
@@ -560,15 +550,14 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	/**
-	 * Sets the up database.
+	 * Ensures required system collections exist and seeds a fresh installation when no version document is found.
 	 */
 	private async setupDatabase(): Promise<void> {
 		Debug.log("setupDatabase");
 
-		// Stores the master admin collection value used in the current execution flow.
 		let masterAdminCollection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
-		// Stores the version result value used in the current execution flow.
+		// `System.MasterAdmin.type=version` is the bootstrap marker that distinguishes fresh installs from upgrades.
 		let versionResult = await masterAdminCollection.findOne({ type: "version" });
 
 		if (versionResult == null) {
@@ -580,38 +569,32 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	/**
-	 * Sets the up new GearN database.
+	 * Creates indexes, default secrets, root admin, and baseline game documents for a brand-new installation.
 	 */
 	private async setupNewGNDatabase() {
 		Debug.log("The GN Server is installing some new information on Database...");
 
-		//let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-
 		let masterAdminCollection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
 		{
-			// create index
+			// `type` is the primary discriminator for documents stored in `System.MasterAdmin`.
 			await masterAdminCollection.createIndex({ type: 1 }, { background: true, name: "type_1" });
 		}
 
 		{
-			// create version 
+			// Persist the installed server version so later startups can decide whether migrations are required.
 			await masterAdminCollection.insertOne({ type: "version", gnVersion: GNServer.getServerVersion() });
 		}
 
 		Debug.log("create some indexes on System.MasterAdmin success.");
 
-		// Tracks whether r ID should be used.
+		// Seeded records use one generated creator id because no authenticated admin exists yet.
 		let userId = StringUtility.generateRandomString(10, 0);
 		{
-
-
-			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-			// create secretInfo for admin account
+			// Seed a recommended sub-admin template, then explicitly remove root-only capabilities.
 			{
-				// Stores the permission value used in the current execution flow.
 				let permission = CreateSecretInfoRequestHandler.generateRecommendAdminPermission();
 
 				{
@@ -742,7 +725,6 @@ export class ServerApplication extends BuilderBase {
 					};
 				}
 
-				// Stores the admin permission value used in the current execution flow.
 				let adminPermission = structuredClone(permission);
 				// adminPermission.masterAdmin.createAdminAccount.selfEnable = false;
 				// adminPermission.masterAdmin.removeAdminAccount.selfEnable = false;
@@ -765,10 +747,8 @@ export class ServerApplication extends BuilderBase {
 
 				await masterAdminCollection.insertOne(result);
 
-				// Stores the secret info item value used in the current execution flow.
 				let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-				// Stores the new secret info value used in the current execution flow.
 				let newSecretInfo = SecretInfo.Builder()
 					.setGameId(secretInfoItem.getGameId())
 					.setIsRemove(secretInfoItem.getRemove())
@@ -785,11 +765,10 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
-				// Stores the permission value used in the current execution flow.
+				// Seed player-level secret keys for the built-in `dev` and `live` game ids used by the repo.
 				let permission = CreateSecretInfoRequestHandler.generateRecommendPlayerPermission();
 
 				{
-					// Stores the result value used in the current execution flow.
 					let result = {
 						type: "secretInfo",
 						secretKey: "game_" + StringUtility.generateRandomString(15, 0),
@@ -805,10 +784,8 @@ export class ServerApplication extends BuilderBase {
 
 					await masterAdminCollection.insertOne(result);
 
-					// Stores the secret info item value used in the current execution flow.
 					let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-					// Stores the new secret info value used in the current execution flow.
 					let newSecretInfo = SecretInfo.Builder()
 						.setGameId(secretInfoItem.getGameId())
 						.setIsRemove(secretInfoItem.getRemove())
@@ -825,7 +802,6 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					// Stores the result value used in the current execution flow.
 					let result = {
 						type: "secretInfo",
 						secretKey: "game_" + StringUtility.generateRandomString(15, 0),
@@ -841,10 +817,8 @@ export class ServerApplication extends BuilderBase {
 
 					await masterAdminCollection.insertOne(result);
 
-					// Stores the secret info item value used in the current execution flow.
 					let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-					// Stores the new secret info value used in the current execution flow.
 					let newSecretInfo = SecretInfo.Builder()
 						.setGameId(secretInfoItem.getGameId())
 						.setIsRemove(secretInfoItem.getRemove())
@@ -861,19 +835,15 @@ export class ServerApplication extends BuilderBase {
 				}
 			}
 
-			// Stores the root username value used in the current execution flow.
+			// Bootstrap root credentials come from application settings because no DB state exists yet.
 			let rootUsername = this.applicationSettings.getInitRootUsername() ?? "admin";
-			// Stores the root password value used in the current execution flow.
 			let rootPassword = this.applicationSettings.getInitRootPassword() ?? "password";
 
-			// create secretInfo for admin account
+			// Create the only master-admin secret separately so the first root account can log in immediately.
 			{
-				// Stores the permission value used in the current execution flow.
 				let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
-				// Stores the secret key value used in the current execution flow.
 				let secretKey = StringUtility.generateRandomString(20, 0);
 
-				// Stores the new secret info value used in the current execution flow.
 				let newSecretInfo = SecretInfo.Builder()
 					.setGameId("")
 					.setIsRemove(false)
@@ -888,7 +858,7 @@ export class ServerApplication extends BuilderBase {
 
 				await this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
-				// create admin account
+				// Store the bootstrap root admin account linked to the default master-admin secret key.
 				let result = {
 					type: "account",
 					userId: userId,
@@ -1882,7 +1852,7 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	/**
-	 * Executes the re setup GearN database workflow asynchronously.
+	 * Placeholder for future schema migrations when the persisted database version lags the server version.
 	 * @param oldVersion Provides the old version value used by this operation.
 	 */
 	private async reSetupGNDatabase(oldVersion: string) {
@@ -1890,25 +1860,23 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	/**
-	 * Executes the apply settings game workflow asynchronously.
+	 * Loads master settings plus every game definition from MongoDB into the in-memory runtime graph.
 	 * @returns Resolves with the operation result.
 	 */
 	private async applySettingsGame(): Promise<string[]> {
-		// Stores the answer value used in the current execution flow.
+		// Collect the game ids that were successfully materialized into runtime services.
 		let answer: string[] = [];
 
-		// Stores the master admin collection value used in the current execution flow.
 		let masterAdminCollection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
 		{
-			// Stores the master game settings result value used in the current execution flow.
+			// Shared cross-game settings are loaded once before any per-game services are initialized.
 			let masterGameSettingsResult = await masterAdminCollection.findOne({ type: "masterGameSettings" });
 
-			// Stores the resolved master game settings instance for the current execution flow.
 			let masterGameSettings = new MasterGameSettings(masterGameSettingsResult, masterAdminCollection);
 
 			{
-				// Stores the resolved thirt party settings instance for the current execution flow.
+				// Third-party identity and payment integrations are configured from master settings.
 				let thirtPartySettings = masterGameSettings.getThirtPartySettings();
 
 				if (thirtPartySettings.appleSettings != null) {
@@ -1954,10 +1922,9 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
-				// Stores the resolved master player settings instance for the current execution flow.
+				// Copy master-player schema settings into the runtime cache read by handlers and services.
 				let masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
 
-				// Stores the resolved current master player settings instance for the current execution flow.
 				let currentMasterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
 				currentMasterPlayerSettings.genericServiceSettings = masterPlayerSettings.genericServiceSettings;
@@ -1969,7 +1936,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
-				// Stores the resolved email settings instance for the current execution flow.
+				// EmailService is global because account recovery and operational mail are not game-scoped.
 				let emailSettings = masterGameSettings.getEmailSettings();
 
 				(<EmailService>this.gnServer.getEmailService()).init(emailSettings.host, emailSettings.port, emailSettings.secure, emailSettings.username, emailSettings.password, emailSettings.sendFrom);
@@ -1977,7 +1944,7 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			{
-				// Stores the resolved push notification settings instance for the current execution flow.
+				// Push credentials are also shared globally and loaded once from master settings.
 				let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
 
 				(<PushNotificationService>this.gnServer.getPushNotificationService()).init(pushNotificationSettings.projectId, pushNotificationSettings.clientEmail, pushNotificationSettings.privateKey);
@@ -1986,25 +1953,20 @@ export class ServerApplication extends BuilderBase {
 		}
 
 		{
-			// Stores the game settings results value used in the current execution flow.
+			// Each `gameSettings` document becomes one runtime context keyed by `gameId`.
 			let gameSettingsResults = await masterAdminCollection.find({ type: "gameSettings" });
 
 			while (await gameSettingsResults.hasNext()) {
-				// Stores the game settings result value used in the current execution flow.
 				let gameSettingsResult = await gameSettingsResults.next();
 
-				// Stores the game item value used in the current execution flow.
 				let gameItem = new GameItem(gameSettingsResult, masterAdminCollection);
 
-				// Stores the resolved game settings instance for the current execution flow.
 				let gameSettings = gameItem.getGameSettings();
-				// Stores the resolved matchmaking queue settings instance for the current execution flow.
 				let matchmakingQueueSettings = gameItem.getMatchmakingQueueSettings();
 
-				// Stores the game ID value used in the current execution flow.
 				let gameId = gameItem.getGameId();
 
-				// Stores the game IDs value used in the current execution flow.
+				// Register the game once so schedulers and runtime services can iterate over active game ids.
 				let gameIds = this.gnServer.getGameIds();
 				if (!gameIds.includes(gameId)) gameIds.push(gameId);
 				answer.push(gameId);
@@ -2075,7 +2037,7 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					// Stores the resolved current matchmaking queue settings instance for the current execution flow.
+					// Queue settings are additive: append every configured queue for the current game.
 					let currentMatchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
 
 					if (matchmakingQueueSettings != null) {
@@ -2086,12 +2048,10 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					// Stores the cloud script service value used in the current execution flow.
+					// Each game gets its own CloudScript storage pair for functions and execution logs.
 					let cloudScriptService = new CloudScriptService();
 
-					// Stores the cloud script function collection value used in the current execution flow.
 					let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemGameCollection("CloudScript.Function", gameId);
-					// Stores the cloud script function log collection value used in the current execution flow.
 					let cloudScriptFunctionLogCollection = this.gnServer.getDatabase().logRuntimeGameCollection("CloudScript.Log", gameId);
 
 					cloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
@@ -2101,10 +2061,9 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					// Stores the configuration service value used in the current execution flow.
+					// ConfigService exposes per-game config documents through the runtime API surface.
 					let configService = new ConfigService();
 
-					// Stores the configuration collection value used in the current execution flow.
 					let configCollection = this.gnServer.getDatabase().systemGameCollection("Config", gameId);
 					configService.setConfigCollection(gameId, configCollection);
 
@@ -2112,15 +2071,13 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				{
-					// Tracks whether single node.
+					// Single-node deployments can keep cache in memory; clustered nodes need a shared Mongo-backed cache.
 					let isSingleNode = this.gnServer.getHttpApp().getClusterHandler().getIsSingleNode();
 
-					// Stores the cache service controller value used in the current execution flow.
 					let cacheServiceController: ICacheServiceController;
 					if (isSingleNode) cacheServiceController = new MemoryCacheServiceController();
 					else cacheServiceController = new MongoDbCacheServiceController(this.gnServer.getDatabase().runtimeGameCollection("Cache", gameId), this.gnServer.getDatabase());
 
-					// Stores the cache service value used in the current execution flow.
 					let cacheService = new CacheService(cacheServiceController);
 					this.gnServer.setCacheService(gameId, cacheService);
 				}
@@ -2134,25 +2091,19 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	/**
-	 * Executes the new GearN server workflow.
+	 * Creates the runtime coordinator and primes its database connections before transports start listening.
 	 * @returns Returns the operation result.
 	 */
 	private newGNServer(): GNServer {
-		// Stores the GearN server value used in the current execution flow.
 		let gnServer = new GNServer();
 
-		// settings database
+		// Database handles are configured here so every later startup step uses the same connection source.
 		{
-			// Stores the connection string value used in the current execution flow.
 			let connectionString = this.databaseSettings.getConnectionString();
-			// Stores the database name value used in the current execution flow.
 			let databaseName = this.databaseSettings.getDatabaseName();
-			// Stores the log connection string value used in the current execution flow.
 			let logConnectionString = this.databaseSettings.getLogConnectionString();
-			// Stores the log database name value used in the current execution flow.
 			let logDatabaseName = this.databaseSettings.getLogDatabaseName();
 
-			// Stores the options value used in the current execution flow.
 			let options = this.databaseSettings.getOptions();
 			gnServer.getDatabase().init(connectionString, databaseName, logConnectionString, logDatabaseName, options);
 		}
@@ -2161,31 +2112,28 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	/**
-	 * Executes the new API middleware workflow.
+	 * Factory method kept overridable for custom startup implementations.
 	 * @returns Returns the operation result.
 	 */
 	private newApiMiddleware(): ApiMiddleware {
-		// Stores the API middleware value used in the current execution flow.
 		let apiMiddleware = new ApiMiddleware();
 		return apiMiddleware;
 	}
 
 	/**
-	 * Executes the new anti DDoS middleware workflow.
+	 * Factory method kept overridable for custom startup implementations.
 	 * @returns Returns the operation result.
 	 */
 	private newAntiDdosMiddleware(): AntiDdosMiddleware {
-		// Stores the anti DDoS middleware value used in the current execution flow.
 		let antiDdosMiddleware = new AntiDdosMiddleware();
 		return antiDdosMiddleware;
 	}
 
 	/**
-	 * Executes the new upload middleware workflow.
+	 * Factory method kept overridable for custom startup implementations.
 	 * @returns Returns the operation result.
 	 */
 	private newUploadMiddleware(): UploadFileMiddleware {
-		// Stores the upload file middleware value used in the current execution flow.
 		let uploadFileMiddleware = new UploadFileMiddleware();
 		return uploadFileMiddleware;
 	}
@@ -2215,14 +2163,13 @@ export class ServerApplication extends BuilderBase {
 	}
 
 	/**
-	 * Returns the server.
+	 * Creates the underlying HTTP/HTTPS server used by Express and, when ports match, by Socket.IO as well.
 	 * @param app Provides the app value used by this operation.
 	 * @param settings Provides the settings value used by this operation.
 	 * @returns Returns the server.
 	 */
 	private getServer(app: Express, settings: ApplicationSettings): http.Server {
 		if (settings.getUseSSL()) {
-			// Stores the options value used in the current execution flow.
 			const options = {
 				key: fs.readFileSync(__dirname + "/../" + settings.getKeyFilePath()),
 				cert: fs.readFileSync(__dirname + "/../" + settings.getCertFilePath()),

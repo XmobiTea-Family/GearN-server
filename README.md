@@ -55,6 +55,7 @@ This repository is both:
 - `ARCHITECTURE.md`: startup flow, module boundaries, data flow, and extension points
 - `DEVELOPMENT.md`: build commands, config sections, workflow, and current caveats
 - `DOMAIN_RELATIONSHIP.md`: domain map and relationships between authenticate, player, group, inventory, store inventory, content, dashboard, matchmaking, and cloud script
+- `CLOUDSCRIPT_USAGE.md`: CloudScript overview, runtime rules, helper selection, and links to split helper docs
 
 ## Third-Party Dependencies
 

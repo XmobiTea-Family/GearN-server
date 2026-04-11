@@ -1,4 +1,4 @@
-// Stores the GearN VERSION value used by this module.
+// Persisted server version used during bootstrap and future database compatibility checks.
 const GN_VERSION = "2.6";
 
 import { RequestController } from "./GN-app-api/handler/controller/RequestController";
@@ -59,14 +59,17 @@ import { RequestControllerUtils } from "./RequestControllerUtils";
 import { AuthInfo } from "./GN-common/entity/AuthInfo";
 
 interface CreateIndexesOptions {
-	// Indicates whether unique.
+	// Create the index as unique.
 	unique?: boolean;
-	// Indicates whether sparse.
+	// Skip documents that do not contain the indexed field.
 	sparse?: boolean;
-	// Stores the expire after seconds value used by this contract.
+	// Turn the index into a TTL index when provided.
 	expireAfterSeconds?: number;
 }
 
+/**
+ * Runtime coordinator that connects transports, request dispatch, cross-cutting services, and scheduled jobs.
+ */
 export class GNServer {
 	/**
 	 * Returns the server version.
@@ -186,17 +189,15 @@ export class GNServer {
 
 		CodeHelper.init();
 
-		// Stores the thiz value used in the current execution flow.
+		// Poll global maintenance tasks because they span every loaded game id.
 		let thiz = this;
 		this.timerService.subscriberEverySecond(() => {
-			// Stores the current date value used in the current execution flow.
 			let currentDate = xDatetime.getCurrentDate();
 			if (currentDate.getSeconds() % 10 == 0)
 				thiz.handleMatchmaking();
 		});
 
 		this.timerService.subscriberEveryMinute(() => {
-			// Stores the current date value used in the current execution flow.
 			let currentDate = xDatetime.getCurrentDate();
 			if (currentDate.getMinutes() % 10 == 0)
 				thiz.handleRemoveCacheInvalidData();
@@ -204,18 +205,18 @@ export class GNServer {
 	}
 
 	/**
-	 * Executes the init workflow.
+	 * Registers the built-in handler graph into the request controller.
 	 */
 	public init(): void {
 		RequestControllerUtils.addAllHandler(this);
 	}
 
 	/**
-	 * Runs the current workflow.
+	 * Binds HTTP/socket callbacks, analytics, and cluster event forwarding after transports are injected.
 	 * @param onRunSuccess Provides the callback executed after a successful startup.
 	 */
 	public run(onRunSuccess?: OnRunSuccess) {
-		// Stores the thiz value used in the current execution flow.
+		// Capture the instance once because the transport APIs below are callback-driven.
 		let thiz = this;
 
 		this.httpApp.getHttpAppHandler().setOnHttpRequest((request: Request) => {
@@ -234,7 +235,7 @@ export class GNServer {
 			return thiz.handleOnRequest(request);
 		});
 
-		// Stores the temp analytics service value used in the current execution flow.
+		// AnalyticsService depends on the fully wired runtime before it can start consuming events.
 		let tempAnalyticsService = new AnalyticsService();
 		tempAnalyticsService.setGNServer(this);
 		tempAnalyticsService.run();
@@ -242,6 +243,7 @@ export class GNServer {
 
 		this.postEventCallbackCollection = this.xDatabase.logRuntimeCollection("EventCallback.PostLog");
 
+		// Cluster messages re-enter the local socket transport through these handlers.
 		this.getHttpApp().getClusterHandler().onEvent("sendEventTo", data => {
 			thiz.executeSendEventTo(data);
 		});
@@ -584,14 +586,14 @@ export class GNServer {
 	}
 
 	/**
-	 * Sends the event to.
+	 * Broadcasts an event to one user, logs the callback payload, then fans it out through the cluster handler.
 	 * @param userId Indicates whether r ID should be used.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 */
 	public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
 		await this.eventCallbackCloudScriptService.executeEvent("event_SendEventTo", { userId: userId }, operationEvent);
 
-		// Stores the operation event to data value used in the current execution flow.
+		// Serialize once so the exact same payload is logged and replayed across nodes.
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
 			parameters: operationEvent.getParameters()?.toData()
@@ -615,37 +617,36 @@ export class GNServer {
 	}
 
 	/**
-	 * Executes the send event to.
+	 * Replays a cluster message locally on the socket layer.
 	 * @param data Provides the data value used by this operation.
 	 */
 	private executeSendEventTo(data: {
-		// Indicates whether r ID should be used.
+		// Target user that should receive the event.
 		userId: string,
-		// Stores the operation event value used by this contract.
+		// Serialized event payload coming from the cluster bus.
 		operationEvent: {
-			// Stores the event code value used by this contract.
+			// Event code understood by socket clients.
 			eventCode: string,
-			// Stores the parameters value used by this contract.
+			// Event parameters already converted to plain data.
 			parameters: {}
 		},
-		// Indicates whether msg pack should be used.
+		// Preserve the original transport encoding across nodes.
 		useMsgPack: boolean
 	}) {
-		// Stores the operation event value used in the current execution flow.
 		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventTo(data.userId, operationEvent, data.useMsgPack);
 	}
 
 	/**
-	 * Sends the event to room.
+	 * Broadcasts an event to one room, logs the callback payload, then fans it out through the cluster handler.
 	 * @param roomId Provides the room ID value used by this operation.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 */
 	public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
 		await this.eventCallbackCloudScriptService.executeEvent("event_SendEventToRoom", { roomId: roomId }, operationEvent);
 
-		// Stores the operation event to data value used in the current execution flow.
+		// Serialize once so the exact same payload is logged and replayed across nodes.
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
 			parameters: operationEvent.getParameters()?.toData()
@@ -669,37 +670,36 @@ export class GNServer {
 	}
 
 	/**
-	 * Executes the send event to room.
+	 * Replays a room broadcast received from the cluster bus on the local node.
 	 * @param data Provides the data value used by this operation.
 	 */
 	private executeSendEventToRoom(data: {
-		// Stores the room ID value used by this contract.
+		// Target room that should receive the event.
 		roomId: string,
-		// Stores the operation event value used by this contract.
+		// Serialized event payload coming from the cluster bus.
 		operationEvent: {
-			// Stores the event code value used by this contract.
+			// Event code understood by socket clients.
 			eventCode: string,
-			// Stores the parameters value used by this contract.
+			// Event parameters already converted to plain data.
 			parameters: {}
 		},
-		// Indicates whether msg pack should be used.
+		// Preserve the original transport encoding across nodes.
 		useMsgPack: boolean
 	}) {
-		// Stores the operation event value used in the current execution flow.
 		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventToRoom(data.roomId, operationEvent, data.useMsgPack);
 	}
 
 	/**
-	 * Sends the event to more user.
+	 * Broadcasts an event to multiple users, logs the callback payload, then fans it out through the cluster handler.
 	 * @param userIds Indicates whether r IDs should be used.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 */
 	public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
 		await this.eventCallbackCloudScriptService.executeEvent("event_SendEventToMoreUser", { userIds: userIds }, operationEvent);
 
-		// Stores the operation event to data value used in the current execution flow.
+		// Serialize once so the exact same payload is logged and replayed across nodes.
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
 			parameters: operationEvent.getParameters()?.toData()
@@ -723,36 +723,35 @@ export class GNServer {
 	}
 
 	/**
-	 * Executes the send event to more user.
+	 * Replays a multi-user broadcast received from the cluster bus on the local node.
 	 * @param data Provides the data value used by this operation.
 	 */
 	private executeSendEventToMoreUser(data: {
-		// Indicates whether r IDs should be used.
+		// Target users that should receive the event.
 		userIds: string[],
-		// Stores the operation event value used by this contract.
+		// Serialized event payload coming from the cluster bus.
 		operationEvent: {
-			// Stores the event code value used by this contract.
+			// Event code understood by socket clients.
 			eventCode: string,
-			// Stores the parameters value used by this contract.
+			// Event parameters already converted to plain data.
 			parameters: {}
 		},
-		// Indicates whether msg pack should be used.
+		// Preserve the original transport encoding across nodes.
 		useMsgPack: boolean,
 	}) {
-		// Stores the operation event value used in the current execution flow.
 		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventToMoreUser(data.userIds, operationEvent, data.useMsgPack);
 	}
 
 	/**
-	 * Sends the event to all player.
+	 * Broadcasts an event to every connected player, logs the callback payload, then fans it out through the cluster handler.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 */
 	public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
 		await this.eventCallbackCloudScriptService.executeEvent("event_SendEventToAllPlayer", {}, operationEvent);
 
-		// Stores the operation event to data value used in the current execution flow.
+		// Serialize once so the exact same payload is logged and replayed across nodes.
 		let operationEventToData = {
 			eventCode: operationEvent.getEventCode(),
 			parameters: operationEvent.getParameters()?.toData()
@@ -773,21 +772,20 @@ export class GNServer {
 	}
 
 	/**
-	 * Executes the send event to all player.
+	 * Replays a global broadcast received from the cluster bus on the local node.
 	 * @param data Provides the data value used by this operation.
 	 */
 	private executeSendEventToAllPlayer(data: {
-		// Stores the operation event value used by this contract.
+		// Serialized event payload coming from the cluster bus.
 		operationEvent: {
-			// Stores the event code value used by this contract.
+			// Event code understood by socket clients.
 			eventCode: string,
-			// Stores the parameters value used by this contract.
+			// Event parameters already converted to plain data.
 			parameters: {}
 		},
-		// Indicates whether msg pack should be used.
+		// Preserve the original transport encoding across nodes.
 		useMsgPack: boolean,
 	}) {
-		// Stores the operation event value used in the current execution flow.
 		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent, data.useMsgPack);
@@ -797,12 +795,15 @@ export class GNServer {
 	// 	return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
 	// }
 
+	/**
+	 * Proxies room membership changes to the socket transport.
+	 */
 	public joinRoom(userId: string, roomId: string): void {
 		return this.socketApp.getSocketAppHandler().joinRoom(userId, roomId);
 	}
 
 	/**
-	 * Executes the leave room workflow.
+	 * Removes a user from a socket room on the local node.
 	 * @param userId Indicates whether r ID should be used.
 	 * @param roomId Provides the room ID value used by this operation.
 	 */
@@ -811,7 +812,7 @@ export class GNServer {
 	}
 
 	/**
-	 * Returns the rooms.
+	 * Returns the socket rooms the given user currently belongs to on this node.
 	 * @param userId Indicates whether r ID should be used.
 	 * @returns Returns the rooms.
 	 */
@@ -820,7 +821,7 @@ export class GNServer {
 	}
 
 	/**
-	 * Handles the socket disconnect.
+	 * Clears runtime socket auth state and emits disconnect callbacks for authenticated sockets.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param data Provides the data value used by this operation.
 	 */
@@ -828,7 +829,6 @@ export class GNServer {
 		if (socket.data.isAuthenticated) {
 			socket.data.isAuthenticated = false;
 
-			// Stores the auth info value used in the current execution flow.
 			let authInfo = socket.data.authInfo as AuthInfo;
 			// authInfo.removeOtherData("SocketId");
 
@@ -846,7 +846,7 @@ export class GNServer {
 	}
 
 	/**
-	 * Handles the socket authenticate.
+	 * Emits the post-auth socket callback once middleware marks the connection as authenticated.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param authInfo Provides the auth info value used by this operation.
 	 */
@@ -860,7 +860,7 @@ export class GNServer {
 	}
 
 	/**
-	 * Handles the on request.
+	 * Single dispatch point shared by both HTTP and socket transports.
 	 * @param request Provides the request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
@@ -869,22 +869,20 @@ export class GNServer {
 	}
 
 	/**
-	 * Handles the matchmaking.
+	 * Polls matchmaking queues for every loaded game.
 	 */
 	private handleMatchmaking() {
 		for (let i = 0; i < this.gameIds.length; i++) {
-			// Stores the game ID value used in the current execution flow.
 			let gameId = this.gameIds[i];
 			this.handleMatchmakingForGame(gameId);
 		}
 	}
 
 	/**
-	 * Handles the remove cache invalid data.
+	 * Periodically evicts expired cache entries for every loaded game.
 	 */
 	private handleRemoveCacheInvalidData() {
 		for (let i = 0; i < this.gameIds.length; i++) {
-			// Stores the game ID value used in the current execution flow.
 			let gameId = this.gameIds[i];
 			this.getCacheService(gameId).removeInvalidData();
 		}
@@ -895,22 +893,19 @@ export class GNServer {
 	 * @param gameId Provides the game ID value used by this operation.
 	 */
 	private async handleMatchmakingForGame(gameId: string) {
-		// Stores the matchmaking ticket can matchs value used in the current execution flow.
+		// The matchmaking service returns tickets that are ready to transition to the next state.
 		let matchmakingTicketCanMatchs = await this.matchmakingService.handle(gameId);
 
 		if (matchmakingTicketCanMatchs != null) {
-			// o day can lam gi do
 			for (let i = 0; i < matchmakingTicketCanMatchs.length; i++) {
-				// Stores the matchmaking ticket can match value used in the current execution flow.
 				let matchmakingTicketCanMatch = matchmakingTicketCanMatchs[i];
 
 				if (matchmakingTicketCanMatch.status == <number>MatchmakingTicketStatus.WaitingForServer) {
+					// Server allocation is delegated to callback/cloud-script infrastructure.
 					this.requestMatchServerDetail(gameId, matchmakingTicketCanMatch);
-					// this.eventCallbackCloudScriptService.executeSystem
-					// Goi ham de tao server o day
 				}
 				else {
-					// Da ok san roi khong can lam gi nua
+					// Already resolved tickets do not need additional work in this polling cycle.
 				}
 			}
 		}
@@ -922,20 +917,18 @@ export class GNServer {
 	 * @param matchmakingTicketCanMatch Provides the matchmaking ticket can match value used by this operation.
 	 */
 	private async requestMatchServerDetail(gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch): Promise<void> {
-		// Stores the match ID value used in the current execution flow.
 		let matchId = matchmakingTicketCanMatch.matchId;
 		Debug.logInfo("[GearN] [Matchmaking] request match server detail for " + matchId + " to set serverDetail on gameId " + gameId);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
-		// Stores the timeout value used in the current execution flow.
+		// Protect the queue from hanging forever when external server allocation never answers back.
 		let timeout = setTimeout(async () => {
 			thiz.setMatchServerDetailFailed(gameId, matchId, matchmakingTicketCanMatch.ticketIds, "Timeout");
 		}, 15 * 60 * 1000);
 
 		this.waitingServerDetailDict.set(matchId, timeout);
 
-		// Stores the response value used in the current execution flow.
+		// The callback/cloud-script layer is expected to allocate a server and call back into this runtime.
 		let response = await this.eventCallbackCloudScriptService.executeRequestServerDetailSystem(gameId, matchmakingTicketCanMatch);
 		if (!response.success) {
 			this.setMatchServerDetailFailed(gameId, matchId, matchmakingTicketCanMatch.ticketIds, "SystemMatchmakingCallback not have return success ok.");
@@ -943,38 +936,34 @@ export class GNServer {
 	}
 
 	/**
-	 * Sets the match server detail.
+	 * Stores the allocated runtime server detail and marks every related ticket as matched.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param matchId Provides the match ID value used by this operation.
 	 * @param serverDetail Provides the server detail value used by this operation.
 	 * @param ticketIds Provides the ticket IDs value used by this operation.
 	 */
 	public setMatchServerDetail(gameId: string, matchId: string, serverDetail: ServerDetail, ticketIds: string[]) {
-		// Stores the timeout value used in the current execution flow.
 		let timeout = this.waitingServerDetailDict.get(matchId);
 		if (timeout) {
 			clearTimeout(timeout);
 			this.waitingServerDetailDict.delete(matchId);
 		}
 
-		// Stores the match collection value used in the current execution flow.
 		let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
 		matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail } });
 
-		// Stores the matchmaking ticket collection value used in the current execution flow.
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: <number>MatchmakingTicketStatus.Matched } });
 	}
 
 	/**
-	 * Sets the match server detail failed.
+	 * Cancels waiting tickets when runtime server allocation fails or times out.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param matchId Provides the match ID value used by this operation.
 	 * @param ticketIds Provides the ticket IDs value used by this operation.
 	 * @param reason Provides the reason value used by this operation.
 	 */
 	public setMatchServerDetailFailed(gameId: string, matchId: string, ticketIds: string[], reason: string) {
-		// Stores the timeout value used in the current execution flow.
 		let timeout = this.waitingServerDetailDict.get(matchId);
 		if (timeout) {
 			clearTimeout(timeout);
@@ -983,11 +972,9 @@ export class GNServer {
 
 		Debug.logInfo("[GearN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
 
-		// Stores the match collection value used in the current execution flow.
 		let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
 		matchCollection.updateOne({ matchId: matchId }, { $set: {} });
 
-		// Stores the matchmaking ticket collection value used in the current execution flow.
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: <number>MatchmakingTicketStatus.Canceled } });
 	}
@@ -1001,7 +988,7 @@ export class GNServer {
 	}
 
 	/**
-	 * Checks whether primary.
+	 * Returns whether the current runtime is the primary cluster node.
 	 * @returns Returns the operation result.
 	 */
 	public isPrimary(): boolean {

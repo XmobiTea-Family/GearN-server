@@ -12,7 +12,7 @@ import { DdosSettings } from "./settings/DDosSettings";
 import { ClusterSettings } from "./settings/ClusterSettings";
 
 export class ServerApplicationStartup extends DefaultApplicationStartup {
-	// Stores the GearN configuration collection used by this instance.
+	// Raw bootstrap config loaded from JSON before it is normalized into typed settings objects.
 	private gnConfig: { [k: string]: any };
 
 	/**
@@ -24,12 +24,12 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 	}
 
 	/**
-	 * Runs the current workflow.
+	 * Normalizes bootstrap config, applies local defaults, and starts the runtime application.
 	 * @param onRunSuccess Provides the callback executed after a successful startup.
 	 */
 	public run(onRunSuccess?: OnRunSuccess): void {
-
-		// Stores the resolved GearN application settings instance for the current execution flow.
+		// Each block below tolerates missing config keys so `index.js` can boot from a minimal debug file.
+		// These defaults keep local startup working; production should override them explicitly.
 		let gnApplicationSettings = this.gnConfig["applicationSettings"];
 		if (gnApplicationSettings == null) gnApplicationSettings = {
 			"port": 2202,
@@ -44,7 +44,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"restoreRootPassword": "",
 		}
 
-		// Stores the resolved application settings instance for the current execution flow.
+		// Convert raw config into the strongly typed settings object consumed by the runtime.
 		let applicationSettings = ApplicationSettings.Builder()
 			.setUseSSL(gnApplicationSettings["useSsl"] ?? false)
 			.setCertFilePath(gnApplicationSettings["certFilePath"] ?? "")
@@ -58,7 +58,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setRestoreRootPassword(gnApplicationSettings["restoreRootPassword"] ?? "")
 			.build();
 
-		// Stores the resolved GearN HTTP app settings instance for the current execution flow.
+		// Resolve HTTP transport settings with safe debug defaults.
 		let gnHttpAppSettings = this.gnConfig["httpAppSettings"];
 		if (gnHttpAppSettings == null) gnHttpAppSettings = {
 			"enable": true,
@@ -71,7 +71,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"enablePostViaJson": true,
 			"trustProxy": true,
 		}
-		// Stores the resolved HTTP app settings instance for the current execution flow.
 		let httpAppSettings = HttpAppSettings.Builder()
 			.setEnable(gnHttpAppSettings["enable"] ?? true)
 			.setOrigins(gnHttpAppSettings["allowOrigin"] ?? "*")
@@ -84,7 +83,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setTrustProxy(gnHttpAppSettings["trustProxy"] ?? true)
 			.build();
 
-		// Stores the resolved GearN socket app settings instance for the current execution flow.
+		// Resolve socket transport settings independently because HTTP and socket can run on different ports.
 		let gnSocketAppSettings = this.gnConfig["socketAppSettings"];
 		if (gnSocketAppSettings == null) gnSocketAppSettings = {
 			"enable": true,
@@ -98,7 +97,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"pingInterval": 50000,
 			"pingTimeout": 5000,
 		}
-		// Stores the resolved socket app settings instance for the current execution flow.
 		let socketAppSettings = SocketAppSettings.Builder()
 			.setEnable(gnSocketAppSettings["enable"] ?? true)
 			.setUseEmitter(gnSocketAppSettings["useEmitter"] ?? false)
@@ -113,19 +111,18 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setEnableSendAndReceiveDebug(gnSocketAppSettings["enableSendAndReceiveDebug"] ?? true)
 			.build();
 
-		// Stores the resolved GearN other settings instance for the current execution flow.
+		// Resolve transport-adjacent settings that do not belong to a specific subsystem builder.
 		let gnOtherSettings = this.gnConfig["otherSettings"];
 		if (gnOtherSettings == null) gnOtherSettings = {
 			"headerIP": "X-Real-IP",
 		}
-		// Stores the resolved other settings instance for the current execution flow.
 		let otherSettings = OtherSettings.Builder()
 			.setHeaderIP(gnOtherSettings["headerIP"] ?? "X-Real-IP")
 			.setIdTypeCase(gnOtherSettings["idTypeCase"] ?? 0)
 			.setIPApiUrl(gnOtherSettings["ipApiUrl"])
 			.build();
 
-		// Stores the resolved GearN database settings instance for the current execution flow.
+		// Resolve database connection settings for both main and log databases.
 		let gnDatabaseSettings = this.gnConfig["databaseSettings"];
 		if (gnDatabaseSettings == null) gnDatabaseSettings = {
 			"connectionString": "mongodb://127.0.0.1:27017/",
@@ -136,7 +133,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			},
 		}
 
-		// Stores the resolved database settings instance for the current execution flow.
 		let databaseSettings = DatabaseSettings.Builder()
 			.setConnectionString(gnDatabaseSettings["connectionString"] ?? "mongodb://127.0.0.1:27017/")
 			.setDatabaseName(gnDatabaseSettings["databaseName"] ?? "XmobiTea")
@@ -145,21 +141,20 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setOptions(gnDatabaseSettings["options"] ?? {})
 			.build();
 
-		// Stores the resolved GearN log settings instance for the current execution flow.
+		// Resolve logging output settings before the runtime starts writing logs.
 		let gnLogSettings = this.gnConfig["logSettings"];
 		if (gnLogSettings == null) gnLogSettings = {
 			"logToConsoleEnable": true,
 			"logToFileEnable": true,
 			"logPath": "./log/debug/Server.log",
 		}
-		// Stores the resolved log settings instance for the current execution flow.
 		let logSettings = LogSettings.Builder()
 			.setLogToFileEnable(gnLogSettings["logToFileEnable"] ?? true)
 			.setLogToConsoleEnable(gnLogSettings["logToConsoleEnable"] ?? true)
 			.setLogPath(gnLogSettings["logPath"] ?? "./log/debug/Server.log")
 			.build();
 
-		// Stores the resolved GearN upload file settings instance for the current execution flow.
+		// Resolve upload constraints before the HTTP upload middleware is initialized.
 		let gnUploadFileSettings = this.gnConfig["uploadFileSettings"];
 		if (gnUploadFileSettings == null) gnUploadFileSettings = {
 			"enable": true,
@@ -167,7 +162,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"maxSizeUpload": 52428800,
 			"mimeTypeAccepts": ["image/png"],
 		}
-		// Stores the resolved upload file settings instance for the current execution flow.
 		let uploadFileSettings = UploadFileSettings.Builder()
 			.setEnable(gnUploadFileSettings["enable"] ?? true)
 			.setUploadPath(gnUploadFileSettings["uploadPath"] ?? "./file-upload")
@@ -175,7 +169,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setMimeTypeAccepts(gnUploadFileSettings["mimeTypeAccepts"] ?? ["image/png"])
 			.build();
 
-		// Stores the resolved GearN DDoS settings instance for the current execution flow.
+		// Resolve request-throttling limits shared by both HTTP and socket transports.
 		let gnDdosSettings = this.gnConfig["ddosSettings"];
 		if (gnDdosSettings == null) gnDdosSettings = {
 			"socketMaxRequestPerSecondPerIp": 50,
@@ -189,7 +183,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			"maxUploadPendingRequest": 200,
 			"maxDownloadPendingRequest": 200,
 		}
-		// Stores the resolved DDoS settings instance for the current execution flow.
 		let ddosSettings = DdosSettings.Builder()
 			.setSocketMaxRequestPerSecondPerIp(gnDdosSettings["socketMaxRequestPerSecondPerIp"] ?? 50)
 			.setSocketMaxRequestPerSecondPerPeer(gnDdosSettings["socketMaxRequestPerSecondPerPeer"] ?? 20)
@@ -204,7 +197,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setIPWhiteList(gnDdosSettings["ipWhiteList"] ?? [])
 			.build();
 
-		// Stores the resolved GearN cluster settings instance for the current execution flow.
+		// Default cluster config represents a single primary node so local startup does not require clustering.
 		let gnClusterSettings = this.gnConfig["clusterSettings"];
 		if (gnClusterSettings == null) gnClusterSettings = {
 			"instanceId": "node_0",
@@ -217,13 +210,13 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 				}
 			]
 		}
-		// Stores the resolved cluster settings instance for the current execution flow.
 		let clusterSettings = ClusterSettings.Builder()
 			.setInstanceId(gnClusterSettings["instanceId"] ?? "node_0")
 			.setIsPrimary(gnClusterSettings["isPrimary"] ?? true)
 			.setPrivateKeyToken(gnClusterSettings["privateKeyToken"] ?? "privateKeyDefault")
 			.setAllNodes(gnClusterSettings["allNodes"] ?? [{ instanceId: "node_0", fullUrl: "http://127.0.0.1:2202" }])
 
+		// Hand off to the concrete runtime once every settings object has been materialized.
 		this.serverApplication = this.newServerApplication(
 			applicationSettings,
 			httpAppSettings,
