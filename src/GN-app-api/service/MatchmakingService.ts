@@ -31,39 +31,36 @@ export class MatchmakingService implements IMatchmakingService {
         try {
             let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
-            // Only tickets still waiting for a match are considered in this evaluation pass.
-            let results = await matchmakingTicketCollection.find({ status: <number>MatchmakingTicketStatus.WaitingForMatch }, {
-                projection: {
-                    status: true,
-                    members: true,
-                }
-            });
+            // Load active tickets so expiration is applied even when no valid match candidate exists.
+            let results = await matchmakingTicketCollection.find({ status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] } });
 
-            let matchmakingTickets: MatchmakingTicket[] = [];
+            let pendingMatchmakingTickets: MatchmakingTicket[] = [];
 
             while (await results.hasNext()) {
                 let result = await results.next();
 
-                matchmakingTickets.push(new MatchmakingTicket(result, matchmakingTicketCollection));
+                pendingMatchmakingTickets.push(new MatchmakingTicket(result, matchmakingTicketCollection));
             }
 
+            let waitingForMatchTickets = pendingMatchmakingTickets.filter(x => x.getStatus() == <number>MatchmakingTicketStatus.WaitingForMatch);
+
             // Candidate matches are built entirely in memory before any ticket state is persisted.
-            let matchmakingTicketCanMatchs = this.getMatchmakingTicketCanMatchs(gameId, matchmakingTickets);
+            let matchmakingTicketCanMatchs = this.getMatchmakingTicketCanMatchs(gameId, waitingForMatchTickets);
 
             if (matchmakingTicketCanMatchs.length != 0) {
                 this.removeMatchmakingTicketNotCorrect(matchmakingTicketCanMatchs);
 
-                this.createMatch(gameId, matchmakingTicketCanMatchs, matchmakingTickets);
-
-                this.removeGiveUpTickets(matchmakingTickets);
+                await this.createMatch(gameId, matchmakingTicketCanMatchs, waitingForMatchTickets);
 
                 Debug.log("Matchmaking handler " + matchmakingTicketCanMatchs.length + " matched success!");
             }
 
+            await this.removeGiveUpTickets(pendingMatchmakingTickets);
+
             return matchmakingTicketCanMatchs;
         }
         catch (err) {
-            console.error(err);
+            Debug.logException(err);
         }
 
         return null;
@@ -167,7 +164,7 @@ export class MatchmakingService implements IMatchmakingService {
                                 matchmakingTicketCanMatch.memberIds.push(member.userId);
                             });
 
-                            matchmakingTicketCanMatch.ticketIds.push(matchmakingTicket.getTicketId());
+                            matchmakingTicketCanMatch.ticketIds.push(nextMatchmakingTicket.getTicketId());
                             teamMatchmakingTicketCanMatch.tickets.push({
                                 ticketId: nextMatchmakingTicket.getTicketId(),
                                 memberCount: nextMatchmakingTicket.getMembers().length
@@ -230,7 +227,7 @@ export class MatchmakingService implements IMatchmakingService {
                                 matchmakingTicketCanMatch.tempMemberIds.push(member.userId);
                             });
 
-                            matchmakingTicketCanMatch.tempTicketIds.push(matchmakingTicket.getTicketId());
+                            matchmakingTicketCanMatch.tempTicketIds.push(nextMatchmakingTicket.getTicketId());
                             teamMatchmakingTicketCanMatch.tempTickets.push({
                                 ticketId: nextMatchmakingTicket.getTicketId(),
                                 memberCount: nextMatchmakingTicket.getMembers().length
@@ -312,7 +309,7 @@ export class MatchmakingService implements IMatchmakingService {
                 matchmakingTicketCanMatchs.push(matchmakingTicketCanMatch);
             }
             catch (err) {
-                console.error(err);
+                Debug.logException(err);
             }
         }
 
@@ -757,7 +754,7 @@ export class MatchmakingService implements IMatchmakingService {
                     }
                 }
 
-                if (valueToCompair.ping > maximumLatency) return false;
+                if (valueToCompair.ping > maximumLatency || nextValueToCompair.ping > maximumLatency) return false;
             }
         }
 
@@ -905,7 +902,7 @@ export class MatchmakingService implements IMatchmakingService {
      * @param matchmakingTicketCanMatchs Provides the matchmaking ticket can matchs value used by this operation.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      */
-    private createMatch(gameId: string, matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[], matchmakingTickets: MatchmakingTicket[]): void {
+    private async createMatch(gameId: string, matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[], matchmakingTickets: MatchmakingTicket[]): Promise<void> {
         let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", gameId);
 
         let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
@@ -934,7 +931,7 @@ export class MatchmakingService implements IMatchmakingService {
                 //         protocol: 1,
                 //     }]
                 // },
-                tsCreate: xDatetime.getCurrentDate(),
+                tsCreate: xDatetime.getCurrentMilliseconds(),
                 timeToMatchInSeconds: -1,
                 ticketIds: [] as any,
             };
@@ -983,7 +980,7 @@ export class MatchmakingService implements IMatchmakingService {
 
                     matchmakingTicket.setStatus(matchmakingTicketCanMatch.status);
 
-                    matchmakingTicket.saveAsync();
+                    await matchmakingTicket.saveAsync();
 
                     let members = matchmakingTicket.getMembers();
 
@@ -998,14 +995,16 @@ export class MatchmakingService implements IMatchmakingService {
                     }
 
                     totalMatchSuccess += 1;
-                    totalMatchSuccessTimeInSeconds += currentMilliseconds - matchmakingTicket.getTsCreate();
+                    totalMatchSuccessTimeInSeconds += (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
                 }
             }
 
             if (totalMatchSuccess != 0)
                 matchResult.timeToMatchInSeconds = totalMatchSuccessTimeInSeconds / totalMatchSuccess;
 
-            matchCollection.insertOne(matchResult);
+            matchResult.ticketIds = matchmakingTicketCanMatch.ticketIds;
+
+            await matchCollection.insertOne(matchResult);
         }
     }
 
@@ -1013,17 +1012,17 @@ export class MatchmakingService implements IMatchmakingService {
      * Cancels tickets that have waited longer than their configured give-up timeout.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      */
-    private removeGiveUpTickets(matchmakingTickets: MatchmakingTicket[]): void {
+    private async removeGiveUpTickets(matchmakingTickets: MatchmakingTicket[]): Promise<void> {
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
         for (let i = 0; i < matchmakingTickets.length; i++) {
             let matchmakingTicket = matchmakingTickets[i];
 
-            if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.WaitingForMatch) {
+            if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.WaitingForMatch || matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.WaitingForMembers) {
                 if (matchmakingTicket.getTsCreate() + matchmakingTicket.getGiveUpAfterSeconds() * 1000 < currentMilliseconds) {
                     matchmakingTicket.setStatus(<number>MatchmakingTicketStatus.Canceled);
 
-                    matchmakingTicket.saveAsync();
+                    await matchmakingTicket.saveAsync();
                 }
             }
         }

@@ -179,6 +179,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 		// find tat ca nhung cai ticket nay
 		let result = await matchmakingTicketCollection.findOne({ ticketId: request.ticketId }, {
 			projection: {
+				queueName: true,
 				status: true,
 				members: true,
 			}
@@ -219,6 +220,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 		// Stores the results value used in the current execution flow.
 		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: matchmakingTicket.getQueueName(), status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] } }, {
 			projection: {
+				ticketId: true,
 				members: true,
 			}
 		});
@@ -227,10 +229,11 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 		let isJoinOtherTicket = false;
 		while (await results.hasNext()) {
 			// Stores the matchmaking ticket value used in the current execution flow.
-			let matchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
+			let thisMatchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
+			if (thisMatchmakingTicket.getTicketId() == request.ticketId) continue;
 
 			// Stores the member value used in the current execution flow.
-			let member = matchmakingTicket.getMember(request.userId);
+			let member = thisMatchmakingTicket.getMember(request.userId);
 
 			if (member.status == MatchmakingMemberStatus.Joined) {
 				isJoinOtherTicket = true;

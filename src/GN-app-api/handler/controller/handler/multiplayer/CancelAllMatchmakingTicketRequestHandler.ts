@@ -196,7 +196,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 
 			if (member.status == MatchmakingMemberStatus.Joined) {
 				matchmakingTicket.setMemberStatus(request.userId, <number>MatchmakingMemberStatus.Canceled);
-				matchmakingTicket.setStatus(<number>MatchmakingMemberStatus.Canceled);
+				matchmakingTicket.setStatus(<number>MatchmakingTicketStatus.Canceled);
 				matchmakingTicket.saveAsync();
 
 				ticketIds.push(matchmakingTicket.getTicketId());
