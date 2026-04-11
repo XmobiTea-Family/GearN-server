@@ -2,6 +2,7 @@ import { SecretRole } from "./../entity/SecretInfo";
 import { RequestRole } from "./../constant/enumType/RequestRole";
 import { RequestType } from "./../constant/enumType/RequestType";
 import { ReturnCode } from "./../constant/ReturnCode";
+import { InvalidMemberType } from "./../constant/enumType/InvalidMemberType";
 
 class CodeHelperBase {
 	// Stores the unknown code value used by this instance.
@@ -37,6 +38,7 @@ export class CodeHelper {
 	private static requestRoleHelper: CodeHelperBase;
 	// Stores the secret role helper value used by this instance.
 	private static secretRoleHelper: CodeHelperBase;
+	private static invalidMemberHelper: CodeHelperBase;
 
 	/**
 	 * Returns the return code name.
@@ -74,6 +76,10 @@ export class CodeHelper {
 		return CodeHelper.secretRoleHelper.getCodeName(secretRole);
 	}
 
+    public static getInvalidMemberName(invalidMember: number): string {
+        return CodeHelper.invalidMemberHelper.getCodeName(invalidMember);
+    }
+
 	/**
 	 * Executes the init workflow.
 	 */
@@ -82,6 +88,7 @@ export class CodeHelper {
 		this.setRequestTypeDic();
 		this.setRequestRoleDic();
 		this.setSecretRoleDic();
+        this.setInvalidMemberDic();
 	}
 
 	/**
@@ -183,6 +190,25 @@ export class CodeHelper {
 			// Stores the key value used in the current execution flow.
 			let key = keys[i];
 			this.secretRoleHelper.codeDict.set(values[i], key[0].toLowerCase() + key.slice(1));
+		}
+	}
+
+    private static setInvalidMemberDic(): void {
+        this.invalidMemberHelper = new CodeHelperBase(new Map());
+
+        this.addInvalidMemberDic(InvalidMemberType);
+    }
+
+    public static addInvalidMemberDic(invalidMember: any): void {
+		// Stores the keys value used in the current execution flow.
+		let keys = Object.keys(invalidMember) as Array<string>;
+		// Stores the values value used in the current execution flow.
+		let values = Object.values(invalidMember) as Array<number>;
+
+		for (let i = 0; i < keys.length; i++) {
+			// Stores the key value used in the current execution flow.
+			let key = keys[i];
+			this.invalidMemberHelper.codeDict.set(values[i], key[0].toLowerCase() + key.slice(1));
 		}
 	}
 

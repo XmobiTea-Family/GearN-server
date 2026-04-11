@@ -15,6 +15,7 @@ import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
 import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
 import { AuthInfo } from "../../GN-common/entity/AuthInfo";
+import { DebugSupport } from "./utils/DebugSupport";
 
 interface OnSocketAuthenticate {
 	(socket: Socket, authInfo: AuthInfo): void;
@@ -469,8 +470,7 @@ export class SocketAppHandler {
 		if (isSecreted === true) request.setSecretInfo(socket.data.secretInfo);
 
 		if (this.enableSendAndReceiveDebug) {
-			Debug.log("[SOCKET RECV] %O", request);
-			Debug.log("[Parameters] " + JSON.stringify(params));
+			Debug.log("[SOCKET RECV] %O", JSON.stringify(DebugSupport.flatAndSecurityRequest(request)));
 		}
 
 		// Stores the operation response value used in the current execution flow.
@@ -545,7 +545,7 @@ export class SocketAppHandler {
 			finalData.debugMessage = socketData.debugMessage;
 		}
 
-		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(finalData));
+		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(DebugSupport.flatAndSecurityFinalData(finalData)));
 
 		if (useMsgPack) {
 			// Stores the socket data msg pack value used in the current execution flow.
