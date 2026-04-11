@@ -211,7 +211,7 @@ export class RemovePlayerFriendRequestHandler extends CharacterPlayerBaseRequest
 					let gnPlayerFriend = new GNHashtable();
 					gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 					gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
-					gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.NotFriend);
+					gnPlayerFriend.add(ParameterCode.Status, FriendStatus.NotFriend);
 					gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 					gnPlayerFriends.add(gnPlayerFriend);
 
@@ -240,7 +240,7 @@ export class RemovePlayerFriendRequestHandler extends CharacterPlayerBaseRequest
 					let gnPlayerFriend = new GNHashtable();
 					gnPlayerFriend.add(ParameterCode.FriendId, request.characterId);
 					gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
-					gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.NotFriend);
+					gnPlayerFriend.add(ParameterCode.Status, FriendStatus.NotFriend);
 					gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 					gnPlayerFriends.add(gnPlayerFriend);
 

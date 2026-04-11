@@ -226,7 +226,7 @@ export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 		// Stores the amount value used in the current execution flow.
 		let amount = request.amount;
 
-		if (playerItemCatalogSettingsItem.itemType == <number>ItemType.NonStackable) {
+		if (playerItemCatalogSettingsItem.itemType == ItemType.NonStackable) {
 			amount = 1;
 		}
 
@@ -242,7 +242,7 @@ export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 		result["classId"] = request.classId;
 		result["amount"] = amount;
 		result["itemType"] = playerItemCatalogSettingsItem.itemType;
-		result["owner"] = { "id": request.characterId, "type": <number>OwnerType.CharacterPlayer };
+		result["owner"] = { "id": request.characterId, "type": OwnerType.CharacterPlayer };
 		result["itemDatas"] = [];
 		result["itemStatistics"] = {};
 		result["removeStatus"] = { "tsRemove": 0, "reason": "" };

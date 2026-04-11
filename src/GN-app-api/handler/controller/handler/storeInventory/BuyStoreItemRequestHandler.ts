@@ -108,7 +108,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 			allowMethod = true;
 		}
 		else if (secretInfo.getPermission().storeInventory.buyStoreItem.selfEnable) {
-			if (request.type == <number>OwnerType.CharacterPlayer) {
+			if (request.type == OwnerType.CharacterPlayer) {
 				// Stores the game player value used in the current execution flow.
 				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
@@ -118,12 +118,12 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 					}
 				}
 			}
-			else if (request.type == <number>OwnerType.GamePlayer) {
+			else if (request.type == OwnerType.GamePlayer) {
 				if (request.id == authInfo.getUserId()) {
 					allowMethod = true;
 				}
 			}
-			else if (request.type == <number>OwnerType.Group) {
+			else if (request.type == OwnerType.Group) {
 				// Stores the game player value used in the current execution flow.
 				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
 
@@ -131,7 +131,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 					// Stores the group item value used in the current execution flow.
 					let groupItem = gamePlayer.getPlayerGroup(request.id);
 
-					if (groupItem != null && groupItem.status == <number>GroupStatus.Member) {
+					if (groupItem != null && groupItem.status == GroupStatus.Member) {
 						allowMethod = true;
 					}
 				}
@@ -314,7 +314,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		// Stores the complete store items collection used in the current execution flow.
 		let allStoreItems = storeInventory.getAllStoreItems();
 
-		if (request.type == <number>OwnerType.CharacterPlayer) {
+		if (request.type == OwnerType.CharacterPlayer) {
 			// Stores the character player value used in the current execution flow.
 			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
 				playerCurrencies: true,
@@ -529,7 +529,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		}
-		else if (request.type == <number>OwnerType.GamePlayer) {
+		else if (request.type == OwnerType.GamePlayer) {
 			// Stores the game player value used in the current execution flow.
 			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
 				playerCurrencies: true,
@@ -745,7 +745,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		}
-		else if (request.type == <number>OwnerType.Group) {
+		else if (request.type == OwnerType.Group) {
 			// Stores the group value used in the current execution flow.
 			let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, secretInfo.getGameId(), {
 				groupCurrencies: true,
@@ -960,7 +960,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		}
 
-		this.gnServer.getDatabase().insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, <number>StoreReceiveType.Buy, request.log);
+		this.gnServer.getDatabase().insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, StoreReceiveType.Buy, request.log);
 
 		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
 

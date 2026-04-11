@@ -234,9 +234,9 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		// Stores the result value used in the current execution flow.
 		let result = {} as any;
 		result["groupId"] = groupId;
-		result["groupType"] = <number>OwnerType.GamePlayer;
+		result["groupType"] = OwnerType.GamePlayer;
 		result["catalogId"] = request.catalogId;
-		result["members"] = [{ "memberId": request.userId, "status": <number>GroupStatus.Member }];
+		result["members"] = [{ "memberId": request.userId, "status": GroupStatus.Member }];
 		result["groupDatas"] = [];
 		result["groupCurrencies"] = {};
 		result["groupStatistics"] = {};
@@ -265,17 +265,17 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 				if (otherGamePlayer != null) {
 
-					otherGamePlayer.setPlayerGroup(groupId, request.catalogId, <number>GroupStatus.WaitingAccept, currentMilliseconds);
+					otherGamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
 					otherGamePlayer.saveAsync();
 
-					group.setMember(request.userId, <number>GroupStatus.WaitingAccept);
+					group.setMember(request.userId, GroupStatus.WaitingAccept);
 				}
 			}
 
 			group.saveAsync();
 		}
 
-		gamePlayer.setPlayerGroup(groupId, request.catalogId, <number>GroupStatus.Member, currentMilliseconds);
+		gamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
 		gamePlayer.saveAsync();
 
 		// Stores the GearN player groups value used in the current execution flow.
@@ -286,7 +286,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 		gnPlayerGroup.add(ParameterCode.GroupId, group.getGroupId());
 		gnPlayerGroup.add(ParameterCode.CatalogId, group.getCatalogId());
-		gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.Member);
+		gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 		gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 
 		gnPlayerGroups.add(gnPlayerGroup);

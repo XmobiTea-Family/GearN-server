@@ -208,7 +208,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 		let catalogId = group.getCatalogId();
 
 		// Stores the sender type value used in the current execution flow.
-		let senderType: number = <number>groupType;
+		let senderType: number = groupType;
 
 		if (groupType == OwnerType.GamePlayer) {
 			// Stores the resolved group settings instance for the current execution flow.

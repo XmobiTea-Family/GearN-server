@@ -170,7 +170,7 @@ export class ListMatchmakingTicketsForPlayerRequestHandler extends MultiplayerBa
 		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
 		// find tat ca nhung cai ticket nay
-		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: <number>MatchmakingTicketStatus.WaitingForMembers }, {
+		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: MatchmakingTicketStatus.WaitingForMembers }, {
 			projection: {
 				ticketId: true,
 				members: true,

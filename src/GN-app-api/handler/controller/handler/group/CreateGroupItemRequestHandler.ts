@@ -226,7 +226,7 @@ export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
 		// Stores the amount value used in the current execution flow.
 		let amount = request.amount;
 
-		if (groupItemCatalogSettingsItem.itemType == <number>ItemType.NonStackable) {
+		if (groupItemCatalogSettingsItem.itemType == ItemType.NonStackable) {
 			amount = 1;
 		}
 
@@ -242,7 +242,7 @@ export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
 		result["classId"] = request.classId;
 		result["amount"] = amount;
 		result["itemType"] = groupItemCatalogSettingsItem.itemType;
-		result["owner"] = { "id": request.groupId, "type": <number>OwnerType.Group };
+		result["owner"] = { "id": request.groupId, "type": OwnerType.Group };
 		result["itemDatas"] = [];
 		result["itemStatistics"] = {};
 		result["removeStatus"] = { "tsRemove": 0, "reason": "" };

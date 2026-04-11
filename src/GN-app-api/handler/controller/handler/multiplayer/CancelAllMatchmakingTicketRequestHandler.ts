@@ -177,7 +177,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
 		// find tat ca nhung cai ticket nay
-		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] } }, {
+		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: { $in: [MatchmakingTicketStatus.WaitingForMatch, MatchmakingTicketStatus.WaitingForMembers] } }, {
 			projection: {
 				ticketId: true,
 				members: true,
@@ -195,8 +195,8 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 			let member = matchmakingTicket.getMember(request.userId);
 
 			if (member.status == MatchmakingMemberStatus.Joined) {
-				matchmakingTicket.setMemberStatus(request.userId, <number>MatchmakingMemberStatus.Canceled);
-				matchmakingTicket.setStatus(<number>MatchmakingTicketStatus.Canceled);
+				matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Canceled);
+				matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
 				matchmakingTicket.saveAsync();
 
 				ticketIds.push(matchmakingTicket.getTicketId());

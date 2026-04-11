@@ -854,23 +854,23 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 						let gnRule = new GNHashtable();
 
 						gnRule.add(ParameterCode.Name, rule.name);
-						gnRule.add(ParameterCode.Type, <number>rule.type);
+						gnRule.add(ParameterCode.Type, rule.type);
 
 						if (rule.type == RuleType.String) {
 							// Stores the string rule value used in the current execution flow.
 							let stringRule = <StringRule>rule;
 
-							gnRule.add(ParameterCode.AttributeSource, <number>stringRule.attributeSource);
+							gnRule.add(ParameterCode.AttributeSource, stringRule.attributeSource);
 							gnRule.add(ParameterCode.AttributePath, stringRule.attributePath);
 							gnRule.add(ParameterCode.DefaultValue, stringRule.defaultValue);
-							gnRule.add(ParameterCode.CompairType, <number>stringRule.compairType);
+							gnRule.add(ParameterCode.CompairType, stringRule.compairType);
 
 							if (stringRule.advancedSettings != null) {
 								// Stores the resolved GearN advanced settings instance for the current execution flow.
 								let gnAdvancedSettings = new GNHashtable();
 
 								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, stringRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>stringRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, stringRule.advancedSettings.expansionType);
 
 								if (stringRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									// Stores the GearN custom expansions value used in the current execution flow.
@@ -889,7 +889,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 							// Stores the difference rule value used in the current execution flow.
 							let differenceRule = <DifferenceRule>rule;
 
-							gnRule.add(ParameterCode.AttributeSource, <number>differenceRule.attributeSource);
+							gnRule.add(ParameterCode.AttributeSource, differenceRule.attributeSource);
 							gnRule.add(ParameterCode.AttributePath, differenceRule.attributePath);
 							gnRule.add(ParameterCode.DefaultValue, differenceRule.defaultValue);
 							gnRule.add(ParameterCode.AllowedDifference, differenceRule.allowedDifference);
@@ -899,7 +899,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 								let gnAdvancedSettings = new GNHashtable();
 
 								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, differenceRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>differenceRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, differenceRule.advancedSettings.expansionType);
 
 								if (differenceRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									// Stores the GearN linear expansions value used in the current execution flow.
@@ -928,7 +928,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 							// Stores the set intersection rule value used in the current execution flow.
 							let setIntersectionRule = <SetIntersectionRule>rule;
 
-							gnRule.add(ParameterCode.AttributeSource, <number>setIntersectionRule.attributeSource);
+							gnRule.add(ParameterCode.AttributeSource, setIntersectionRule.attributeSource);
 							gnRule.add(ParameterCode.AttributePath, setIntersectionRule.attributePath);
 							gnRule.add(ParameterCode.DefaultValue, setIntersectionRule.defaultValue);
 							gnRule.add(ParameterCode.Min, setIntersectionRule.min);
@@ -938,7 +938,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 								let gnAdvancedSettings = new GNHashtable();
 
 								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, setIntersectionRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>setIntersectionRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, setIntersectionRule.advancedSettings.expansionType);
 
 								if (setIntersectionRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									// Stores the GearN linear expansions value used in the current execution flow.
@@ -966,7 +966,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 							// Stores the match total rule value used in the current execution flow.
 							let matchTotalRule = <MatchTotalRule>rule;
 
-							gnRule.add(ParameterCode.AttributeSource, <number>matchTotalRule.attributeSource);
+							gnRule.add(ParameterCode.AttributeSource, matchTotalRule.attributeSource);
 							gnRule.add(ParameterCode.AttributePath, matchTotalRule.attributePath);
 							gnRule.add(ParameterCode.Max, matchTotalRule.max);
 							gnRule.add(ParameterCode.Min, matchTotalRule.min);
@@ -976,7 +976,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 								let gnAdvancedSettings = new GNHashtable();
 
 								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, matchTotalRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>matchTotalRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, matchTotalRule.advancedSettings.expansionType);
 
 								if (matchTotalRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
 									// Stores the GearN custom expansions value used in the current execution flow.
@@ -1004,7 +1004,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 								let gnAdvancedSettings = new GNHashtable();
 
 								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, regionSelectionRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>regionSelectionRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, regionSelectionRule.advancedSettings.expansionType);
 
 								if (regionSelectionRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									// Stores the GearN linear expansions value used in the current execution flow.
@@ -1040,7 +1040,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 								let gnAdvancedSettings = new GNHashtable();
 
 								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, teamSizeBalanceRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>teamSizeBalanceRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, teamSizeBalanceRule.advancedSettings.expansionType);
 
 								if (teamSizeBalanceRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									// Stores the GearN linear expansions value used in the current execution flow.
@@ -1069,7 +1069,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 							// Stores the team difference rule value used in the current execution flow.
 							let teamDifferenceRule = <TeamDifferenceRule>rule;
 
-							gnRule.add(ParameterCode.AttributeSource, <number>teamDifferenceRule.attributeSource);
+							gnRule.add(ParameterCode.AttributeSource, teamDifferenceRule.attributeSource);
 							gnRule.add(ParameterCode.AttributePath, teamDifferenceRule.attributePath);
 							gnRule.add(ParameterCode.DefaultValue, teamDifferenceRule.defaultValue);
 							gnRule.add(ParameterCode.AllowedDifference, teamDifferenceRule.allowedDifference);
@@ -1079,7 +1079,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 								let gnAdvancedSettings = new GNHashtable();
 
 								gnAdvancedSettings.add(ParameterCode.SecondsUntilOptional, teamDifferenceRule.advancedSettings.secondsUntilOptional);
-								gnAdvancedSettings.add(ParameterCode.ExpansionType, <number>teamDifferenceRule.advancedSettings.expansionType);
+								gnAdvancedSettings.add(ParameterCode.ExpansionType, teamDifferenceRule.advancedSettings.expansionType);
 
 								if (teamDifferenceRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
 									// Stores the GearN linear expansions value used in the current execution flow.

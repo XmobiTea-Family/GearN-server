@@ -900,7 +900,7 @@ export class GNServer {
 			for (let i = 0; i < matchmakingTicketCanMatchs.length; i++) {
 				let matchmakingTicketCanMatch = matchmakingTicketCanMatchs[i];
 
-				if (matchmakingTicketCanMatch.status == <number>MatchmakingTicketStatus.WaitingForServer) {
+				if (matchmakingTicketCanMatch.status == MatchmakingTicketStatus.WaitingForServer) {
 					// Server allocation is delegated to callback/cloud-script infrastructure.
 					this.requestMatchServerDetail(gameId, matchmakingTicketCanMatch);
 				}
@@ -953,7 +953,7 @@ export class GNServer {
 		matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail } });
 
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
-		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: <number>MatchmakingTicketStatus.Matched } });
+		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Matched } });
 	}
 
 	/**
@@ -976,7 +976,7 @@ export class GNServer {
 		matchCollection.updateOne({ matchId: matchId }, { $set: {} });
 
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
-		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: <number>MatchmakingTicketStatus.Canceled } });
+		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Canceled } });
 	}
 
 	/**

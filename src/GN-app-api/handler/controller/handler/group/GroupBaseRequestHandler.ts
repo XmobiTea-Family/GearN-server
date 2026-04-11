@@ -106,16 +106,16 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 			if (group != null) {
 				// Stores the group type value used in the current execution flow.
 				let groupType = group.getGroupType();
-				if (groupType == <number>OwnerType.GamePlayer) {
+				if (groupType == OwnerType.GamePlayer) {
 					// Stores the member item value used in the current execution flow.
 					let memberItem = group.getMember(userId);
 					if (memberItem != null) {
-						if (memberItem.status == <number>GroupStatus.Member) {
+						if (memberItem.status == GroupStatus.Member) {
 							answer = true;
 						}
 					}
 				}
-				else if (groupType == <number>OwnerType.CharacterPlayer) {
+				else if (groupType == OwnerType.CharacterPlayer) {
 					// Stores the game player value used in the current execution flow.
 					let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, { playerCharacters: true });
 
@@ -131,7 +131,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 								// Stores the member item value used in the current execution flow.
 								let memberItem = group.getMember(characterPlayer.characterId);
 								if (memberItem != null) {
-									if (memberItem.status == <number>GroupStatus.Member) {
+									if (memberItem.status == GroupStatus.Member) {
 										answer = true;
 
 										break;
@@ -150,7 +150,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 				// Stores the player group value used in the current execution flow.
 				let playerGroup = gamePlayer.getPlayerGroup(groupId);
 
-				if (playerGroup != null && playerGroup.status == <number>GroupStatus.Member) answer = true;
+				if (playerGroup != null && playerGroup.status == GroupStatus.Member) answer = true;
 			}
 		}
 

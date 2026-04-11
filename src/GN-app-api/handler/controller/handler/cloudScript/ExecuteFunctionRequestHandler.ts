@@ -222,7 +222,7 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 
 		if (response.response.status == ExecuteResponseStatus.Ok) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-			operationResponse.setParameter(ParameterCode.Status, <number>response.response.status);
+			operationResponse.setParameter(ParameterCode.Status, response.response.status);
 
 			operationResponse.setParameter(ParameterCode.ExecutionTimeInMs, response.stats.executeTimeInMs);
 			operationResponse.setParameter(ParameterCode.MemoryUsedInBytes, response.stats.memoryUsedInBytes);
@@ -230,7 +230,7 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 		}
 		else {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExecuteError);
-			operationResponse.setParameter(ParameterCode.Status, <number>response.response.status);
+			operationResponse.setParameter(ParameterCode.Status, response.response.status);
 
 			operationResponse.setParameter(ParameterCode.ErrorMessage, response.response.errorMessage);
 		}

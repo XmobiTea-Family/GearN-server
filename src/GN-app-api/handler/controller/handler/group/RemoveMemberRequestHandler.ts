@@ -239,7 +239,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 					let gnMember = new GNHashtable();
 
 					gnMember.add(ParameterCode.UserId, request.userId);
-					gnMember.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+					gnMember.add(ParameterCode.Status, GroupStatus.NotMember);
 
 					gnMembers.add(gnMember);
 
@@ -266,7 +266,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 					let gnPlayerGroup = new GNHashtable();
 					gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 					gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-					gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+					gnPlayerGroup.add(ParameterCode.Status, GroupStatus.NotMember);
 					gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 					gnPlayerGroups.add(gnPlayerGroup);
 
@@ -318,7 +318,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 					let gnMember = new GNHashtable();
 
 					gnMember.add(ParameterCode.UserId, request.userId);
-					gnMember.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+					gnMember.add(ParameterCode.Status, GroupStatus.NotMember);
 
 					gnMembers.add(gnMember);
 
@@ -343,7 +343,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 					let gnPlayerGroup = new GNHashtable();
 					gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 					gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-					gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+					gnPlayerGroup.add(ParameterCode.Status, GroupStatus.NotMember);
 					gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 					gnPlayerGroups.add(gnPlayerGroup);
 

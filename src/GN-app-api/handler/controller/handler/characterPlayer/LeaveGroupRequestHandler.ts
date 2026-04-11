@@ -241,7 +241,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 				let gnPlayerGroup = new GNHashtable();
 				gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 				gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-				gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+				gnPlayerGroup.add(ParameterCode.Status, GroupStatus.NotMember);
 				gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 				gnPlayerGroups.add(gnPlayerGroup);
 
@@ -267,7 +267,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 				let gnMember = new GNHashtable();
 
 				gnMember.add(ParameterCode.CharacterId, request.characterId);
-				gnMember.add(ParameterCode.Status, <number>GroupStatus.NotMember);
+				gnMember.add(ParameterCode.Status, GroupStatus.NotMember);
 
 				gnMembers.add(gnMember);
 

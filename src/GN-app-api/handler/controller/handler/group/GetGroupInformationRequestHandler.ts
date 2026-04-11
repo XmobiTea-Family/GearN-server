@@ -114,17 +114,17 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 			if (group != null) {
 				// Stores the group type value used in the current execution flow.
 				let groupType = group.getGroupType();
-				if (groupType == <number>OwnerType.GamePlayer) {
+				if (groupType == OwnerType.GamePlayer) {
 					// Stores the member item value used in the current execution flow.
 					let memberItem = group.getMember(authInfo.getUserId());
 					if (memberItem != null) {
-						if (memberItem.status == <number>GroupStatus.Member) {
+						if (memberItem.status == GroupStatus.Member) {
 							allowMethod = true;
 							owned = true;
 						}
 					}
 				}
-				else if (groupType == <number>OwnerType.CharacterPlayer) {
+				else if (groupType == OwnerType.CharacterPlayer) {
 					// Stores the game player value used in the current execution flow.
 					let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
@@ -140,7 +140,7 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 								// Stores the member item value used in the current execution flow.
 								let memberItem = group.getMember(characterPlayer.characterId);
 								if (memberItem != null) {
-									if (memberItem.status == <number>GroupStatus.Member) {
+									if (memberItem.status == GroupStatus.Member) {
 										allowMethod = true;
 										owned = true;
 

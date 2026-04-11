@@ -246,7 +246,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 
 		result["characterId"] = characterId;
 		result["catalogId"] = request.catalogId;
-		result["owner"] = { "id": request.userId, "type": <number>OwnerType.GamePlayer };
+		result["owner"] = { "id": request.userId, "type": OwnerType.GamePlayer };
 		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
 		result["playerCharacters"] = [];
 		result["playerInventories"] = [];

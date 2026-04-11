@@ -111,13 +111,13 @@ export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
 				// Stores the owner value used in the current execution flow.
 				let owner = inventory.getOwner();
 				if (owner != null) {
-					if (owner.type == <number>OwnerType.GamePlayer) {
+					if (owner.type == OwnerType.GamePlayer) {
 						if (owner.id == authInfo.getUserId()) {
 							allowMethod = true;
 							owned = true;
 						}
 					}
-					else if (owner.type == <number>OwnerType.CharacterPlayer) {
+					else if (owner.type == OwnerType.CharacterPlayer) {
 						// Stores the game player value used in the current execution flow.
 						let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
@@ -128,14 +128,14 @@ export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
 							}
 						}
 					}
-					else if (owner.type == <number>OwnerType.Group) {
+					else if (owner.type == OwnerType.Group) {
 						// Stores the game player value used in the current execution flow.
 						let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
 
 						if (gamePlayer != null) {
 							// Stores the player group value used in the current execution flow.
 							let playerGroup = gamePlayer.getPlayerGroup(owner.id);
-							if (playerGroup != null && playerGroup.status == <number>GroupStatus.Member) {
+							if (playerGroup != null && playerGroup.status == GroupStatus.Member) {
 								allowMethod = true;
 								owned = true;
 							}

@@ -184,7 +184,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		// Stores the matchmaking ticket value used in the current execution flow.
 		let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
-		if (matchmakingTicket.getStatus() != <number>MatchmakingTicketStatus.WaitingForMembers && matchmakingTicket.getStatus() != <number>MatchmakingTicketStatus.WaitingForMatch) {
+		if (matchmakingTicket.getStatus() != MatchmakingTicketStatus.WaitingForMembers && matchmakingTicket.getStatus() != MatchmakingTicketStatus.WaitingForMatch) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketAlreadyCompleted);
 			return operationResponse;
 		}
@@ -196,9 +196,9 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			return operationResponse;
 		}
 
-		if (member.status == <number>MatchmakingMemberStatus.Joined) {
-			matchmakingTicket.setMemberStatus(request.userId, <number>MatchmakingMemberStatus.Canceled);
-			matchmakingTicket.setStatus(<number>MatchmakingTicketStatus.Canceled);
+		if (member.status == MatchmakingMemberStatus.Joined) {
+			matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Canceled);
+			matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
 
 			matchmakingTicket.saveAsync();
 		}

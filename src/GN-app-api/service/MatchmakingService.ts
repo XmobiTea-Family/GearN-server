@@ -32,7 +32,7 @@ export class MatchmakingService implements IMatchmakingService {
             let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
             // Load active tickets so expiration is applied even when no valid match candidate exists.
-            let results = await matchmakingTicketCollection.find({ status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] } });
+            let results = await matchmakingTicketCollection.find({ status: { $in: [MatchmakingTicketStatus.WaitingForMatch, MatchmakingTicketStatus.WaitingForMembers] } });
 
             let pendingMatchmakingTickets: MatchmakingTicket[] = [];
 
@@ -42,7 +42,7 @@ export class MatchmakingService implements IMatchmakingService {
                 pendingMatchmakingTickets.push(new MatchmakingTicket(result, matchmakingTicketCollection));
             }
 
-            let waitingForMatchTickets = pendingMatchmakingTickets.filter(x => x.getStatus() == <number>MatchmakingTicketStatus.WaitingForMatch);
+            let waitingForMatchTickets = pendingMatchmakingTickets.filter(x => x.getStatus() == MatchmakingTicketStatus.WaitingForMatch);
 
             // Candidate matches are built entirely in memory before any ticket state is persisted.
             let matchmakingTicketCanMatchs = this.getMatchmakingTicketCanMatchs(gameId, waitingForMatchTickets);
@@ -97,7 +97,7 @@ export class MatchmakingService implements IMatchmakingService {
                     tempTicketIds: [],
                     tsCreate: matchmakingTicket.getTsCreate(),
                     matchSize: matchmakingQueueSetting.matchSize,
-                    status: <number>MatchmakingTicketStatus.Matched,
+                    status: MatchmakingTicketStatus.Matched,
                 };
 
                 if (matchmakingQueueSetting.teams == null || matchmakingQueueSetting.teams.length == 0) {
@@ -940,7 +940,7 @@ export class MatchmakingService implements IMatchmakingService {
             if (matchmakingQueueSetting == null) continue;
 
             if (matchmakingQueueSetting.serverAllocation.enable) {
-                matchmakingTicketCanMatch.status = <number>MatchmakingTicketStatus.WaitingForServer;
+                matchmakingTicketCanMatch.status = MatchmakingTicketStatus.WaitingForServer;
             }
 
             // if (matchmakingQueueSetting.serverAllocation.enable) {
@@ -1018,9 +1018,9 @@ export class MatchmakingService implements IMatchmakingService {
         for (let i = 0; i < matchmakingTickets.length; i++) {
             let matchmakingTicket = matchmakingTickets[i];
 
-            if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.WaitingForMatch || matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.WaitingForMembers) {
+            if (matchmakingTicket.getStatus() == MatchmakingTicketStatus.WaitingForMatch || matchmakingTicket.getStatus() == MatchmakingTicketStatus.WaitingForMembers) {
                 if (matchmakingTicket.getTsCreate() + matchmakingTicket.getGiveUpAfterSeconds() * 1000 < currentMilliseconds) {
-                    matchmakingTicket.setStatus(<number>MatchmakingTicketStatus.Canceled);
+                    matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
 
                     await matchmakingTicket.saveAsync();
                 }

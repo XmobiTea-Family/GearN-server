@@ -204,7 +204,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 			return operationResponse;
 		}
 
-		if (member.status != <number>MatchmakingMemberStatus.Pending) {
+		if (member.status != MatchmakingMemberStatus.Pending) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingTicketAlreadyCompleted);
 			return operationResponse;
 		}
@@ -218,7 +218,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 		}
 
 		// Stores the results value used in the current execution flow.
-		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: matchmakingTicket.getQueueName(), status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] } }, {
+		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: matchmakingTicket.getQueueName(), status: { $in: [MatchmakingTicketStatus.WaitingForMatch, MatchmakingTicketStatus.WaitingForMembers] } }, {
 			projection: {
 				ticketId: true,
 				members: true,
@@ -247,12 +247,12 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 		}
 
 		matchmakingTicket.setMemberAttribute(request.userId, request.attribute != null ? request.attribute.toData() : null, await this.getAttributeForQueue(request.userId, secretInfo.getGameId(), request.attribute, matchmakingQueueSettings));
-		matchmakingTicket.setMemberStatus(request.userId, <number>MatchmakingMemberStatus.Joined);
+		matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Joined);
 
 		// Stores the complete is ready collection used in the current execution flow.
-		let allIsReady = matchmakingTicket.getMembers().find(x => x.status == <number>MatchmakingMemberStatus.Pending) == null;
+		let allIsReady = matchmakingTicket.getMembers().find(x => x.status == MatchmakingMemberStatus.Pending) == null;
 		if (allIsReady) {
-			matchmakingTicket.setStatus(<number>MatchmakingTicketStatus.WaitingForMatch);
+			matchmakingTicket.setStatus(MatchmakingTicketStatus.WaitingForMatch);
 		}
 
 		matchmakingTicket.saveAsync();

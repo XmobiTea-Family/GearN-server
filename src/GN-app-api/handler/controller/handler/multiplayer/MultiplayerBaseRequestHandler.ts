@@ -89,8 +89,8 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 						// Stores the temp value value used in the current execution flow.
 						let tempValue = gamePlayer.getPlayerData(differenceRule.attributePath);
 
-						if (typeof (tempValue) == "number") {
-							value = <number>tempValue;
+						if (typeof tempValue == "number") {
+							value = tempValue;
 						}
 					}
 
@@ -151,8 +151,8 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 						// Stores the temp value value used in the current execution flow.
 						let tempValue = gamePlayer.getPlayerData(matchTotalRule.attributePath);
 
-						if (typeof (tempValue) == "number") {
-							value = <number>tempValue;
+						if (typeof tempValue == "number") {
+							value = tempValue;
 						}
 					}
 
@@ -201,8 +201,8 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 						// Stores the temp value value used in the current execution flow.
 						let tempValue = gamePlayer.getPlayerData(teamDifferenceRule.attributePath);
 
-						if (typeof (tempValue) == "number") {
-							value = <number>tempValue;
+						if (typeof tempValue == "number") {
+							value = tempValue;
 						}
 					}
 

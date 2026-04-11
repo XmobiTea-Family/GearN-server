@@ -216,10 +216,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 
 			if (!characterPlayer.hasPlayerFriend(request.friendId)) {
 				if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
-					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 					characterPlayer.saveAsync();
 
-					friendPlayer.setPlayerFriend(request.characterId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+					friendPlayer.setPlayerFriend(request.characterId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 					friendPlayer.saveAsync();
 
 					{
@@ -230,7 +230,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
@@ -251,7 +251,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
@@ -265,10 +265,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					}
 				}
 				else {
-					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
 					characterPlayer.saveAsync();
 
-					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.WaitingAccept, currentMilliseconds);
+					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
 					friendPlayer.saveAsync();
 
 					{
@@ -279,7 +279,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.SentRequestAndWaitingAccept);
+						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.SentRequestAndWaitingAccept);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
@@ -300,7 +300,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.WaitingAccept);
+						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.WaitingAccept);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
@@ -318,11 +318,11 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 				// Stores the friend item value used in the current execution flow.
 				let friendItem = characterPlayer.getPlayerFriend(request.friendId);
 
-				if (friendItem.status == <number>FriendStatus.WaitingAccept) {
-					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+				if (friendItem.status == FriendStatus.WaitingAccept) {
+					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 					characterPlayer.saveAsync();
 
-					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 					friendPlayer.saveAsync();
 
 					{
@@ -333,7 +333,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
@@ -354,7 +354,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 						let gnPlayerFriend = new GNHashtable();
 						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-						gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerFriends.add(gnPlayerFriend);
 
@@ -370,10 +370,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 				else {
 					if (friendItem.catalogId != request.catalogId) {
 						if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
-							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 							characterPlayer.saveAsync();
 
-							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.Friend, currentMilliseconds);
+							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 							friendPlayer.saveAsync();
 
 							{
@@ -384,7 +384,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+								gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 
@@ -405,7 +405,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.Friend);
+								gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 
@@ -419,10 +419,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 							}
 						}
 						else {
-							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
 							characterPlayer.saveAsync();
 
-							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, <number>FriendStatus.WaitingAccept, currentMilliseconds);
+							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
 							friendPlayer.saveAsync();
 
 							{
@@ -433,7 +433,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.SentRequestAndWaitingAccept);
+								gnPlayerFriend.add(ParameterCode.Status, FriendStatus.SentRequestAndWaitingAccept);
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 
@@ -454,7 +454,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 								let gnPlayerFriend = new GNHashtable();
 								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
-								gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.WaitingAccept);
+								gnPlayerFriend.add(ParameterCode.Status, FriendStatus.WaitingAccept);
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 								gnPlayerFriends.add(gnPlayerFriend);
 

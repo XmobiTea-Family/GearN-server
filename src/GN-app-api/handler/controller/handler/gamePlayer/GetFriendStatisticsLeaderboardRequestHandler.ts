@@ -272,7 +272,7 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends GamePlayerBase
 				// Stores the player friend item value used in the current execution flow.
 				let playerFriendItem = allPlayerFriends[i];
 
-				if (playerFriendItem.status == <number>FriendStatus.Friend) {
+				if (playerFriendItem.status == FriendStatus.Friend) {
 					friendIds.push(playerFriendItem.friendId);
 				}
 			}

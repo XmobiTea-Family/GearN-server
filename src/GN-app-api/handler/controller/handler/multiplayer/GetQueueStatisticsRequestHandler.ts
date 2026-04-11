@@ -178,7 +178,7 @@ export class GetQueueStatisticsRequestHandler extends MultiplayerBaseRequestHand
 		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
 		// Stores the results value used in the current execution flow.
-		let results = await matchmakingTicketCollection.find({ queueName: request.queueName, status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] }, tsCreate: { $gt: currentMilliseconds - request.timeInSeconds * 1000 } }, {
+		let results = await matchmakingTicketCollection.find({ queueName: request.queueName, status: { $in: [MatchmakingTicketStatus.WaitingForMatch, MatchmakingTicketStatus.WaitingForMembers] }, tsCreate: { $gt: currentMilliseconds - request.timeInSeconds * 1000 } }, {
 			projection: {
 				members: true,
 			}

@@ -202,7 +202,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", secretInfo.getGameId());
 
 		// Stores the results value used in the current execution flow.
-		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: { $in: [<number>MatchmakingTicketStatus.WaitingForMatch, <number>MatchmakingTicketStatus.WaitingForMembers] } }, {
+		let results = await matchmakingTicketCollection.find({ userIds: request.userId, queueName: request.queueName, status: { $in: [MatchmakingTicketStatus.WaitingForMatch, MatchmakingTicketStatus.WaitingForMembers] } }, {
 			projection: {
 				members: true,
 			}
@@ -236,7 +236,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		let members: MatchmakingTicketMember[] = [];
 		members.push({
 			userId: request.userId,
-			status: <number>MatchmakingMemberStatus.Joined,
+			status: MatchmakingMemberStatus.Joined,
 			attribute: request.attribute == null ? null : request.attribute.toData(),
 			attributeForQueue: await this.getAttributeForQueue(request.userId, secretInfo.getGameId(), request.attribute, matchmakingQueueSettings)
 		});
@@ -254,7 +254,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 
 					members.push({
 						userId: member,
-						status: <number>MatchmakingMemberStatus.Pending,
+						status: MatchmakingMemberStatus.Pending,
 						attribute: null,
 						attributeForQueue: null,
 					});
@@ -279,7 +279,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			giveUpAfterSeconds: request.giveUpAfterSeconds,
 			userIds: userIds,
 			members: members,
-			status: <number>matchmakingTicketStatus,
+			status: MatchmakingTicketStatus,
 			tsCreate: xDatetime.getCurrentMilliseconds(),
 		}
 

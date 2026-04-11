@@ -229,10 +229,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 			if (!group.hasMember(request.userId)) {
 				if (playerGroupCatalogSettingsItem.forceAcceptMember) {
-					group.setMember(request.userId, <number>GroupStatus.Member);
+					group.setMember(request.userId, GroupStatus.Member);
 					group.saveAsync();
 
-					gamePlayer.setPlayerGroup(request.groupId, catalogId, <number>GroupStatus.Member, currentMilliseconds);
+					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
 					gamePlayer.saveAsync();
 
 					{
@@ -243,7 +243,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnPlayerGroup = new GNHashtable();
 						gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 						gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-						gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 						gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerGroups.add(gnPlayerGroup);
 
@@ -263,7 +263,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnMember = new GNHashtable();
 
 						gnMember.add(ParameterCode.UserId, request.userId);
-						gnMember.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
 
@@ -278,10 +278,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 					this.gnServer.joinRoom(request.userId, request.groupId);
 				}
 				else {
-					group.setMember(request.userId, <number>GroupStatus.SentRequestAndWaitingAccept);
+					group.setMember(request.userId, GroupStatus.SentRequestAndWaitingAccept);
 					group.saveAsync();
 
-					gamePlayer.setPlayerGroup(request.groupId, catalogId, <number>GroupStatus.WaitingAccept, currentMilliseconds);
+					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
 					gamePlayer.saveAsync();
 
 					{
@@ -292,7 +292,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnPlayerGroup = new GNHashtable();
 						gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 						gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-						gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.WaitingAccept);
+						gnPlayerGroup.add(ParameterCode.Status, GroupStatus.WaitingAccept);
 						gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerGroups.add(gnPlayerGroup);
 
@@ -312,7 +312,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnMember = new GNHashtable();
 
 						gnMember.add(ParameterCode.UserId, request.userId);
-						gnMember.add(ParameterCode.Status, <number>GroupStatus.SentRequestAndWaitingAccept);
+						gnMember.add(ParameterCode.Status, GroupStatus.SentRequestAndWaitingAccept);
 
 						gnMembers.add(gnMember);
 
@@ -329,11 +329,11 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 				// Stores the member item value used in the current execution flow.
 				let memberItem = group.getMember(request.userId);
 
-				if (memberItem.status == <number>GroupStatus.WaitingAccept) {
-					group.setMember(request.userId, <number>GroupStatus.Member);
+				if (memberItem.status == GroupStatus.WaitingAccept) {
+					group.setMember(request.userId, GroupStatus.Member);
 					group.saveAsync();
 
-					gamePlayer.setPlayerGroup(request.groupId, catalogId, <number>GroupStatus.Member, currentMilliseconds);
+					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
 					gamePlayer.saveAsync();
 
 					{
@@ -344,7 +344,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnPlayerGroup = new GNHashtable();
 						gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 						gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-						gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 						gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerGroups.add(gnPlayerGroup);
 
@@ -364,7 +364,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnMember = new GNHashtable();
 
 						gnMember.add(ParameterCode.UserId, request.userId);
-						gnMember.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
 
@@ -409,10 +409,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 			if (!group.hasMember(request.userId)) {
 				if (playerGroupCatalogSettingsItem.forceAcceptMember) {
-					group.setMember(request.userId, <number>GroupStatus.Member);
+					group.setMember(request.userId, GroupStatus.Member);
 					group.saveAsync();
 
-					characterPlayer.setPlayerGroup(request.groupId, catalogId, <number>GroupStatus.Member, currentMilliseconds);
+					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
 					characterPlayer.saveAsync();
 
 					{
@@ -423,7 +423,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnPlayerGroup = new GNHashtable();
 						gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 						gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-						gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 						gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerGroups.add(gnPlayerGroup);
 
@@ -444,7 +444,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnMember = new GNHashtable();
 
 						gnMember.add(ParameterCode.UserId, request.userId);
-						gnMember.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
 
@@ -457,10 +457,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 					}
 				}
 				else {
-					group.setMember(request.userId, <number>GroupStatus.SentRequestAndWaitingAccept);
+					group.setMember(request.userId, GroupStatus.SentRequestAndWaitingAccept);
 					group.saveAsync();
 
-					characterPlayer.setPlayerGroup(request.groupId, catalogId, <number>GroupStatus.WaitingAccept, currentMilliseconds);
+					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
 					characterPlayer.saveAsync();
 
 					{
@@ -471,7 +471,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnPlayerGroup = new GNHashtable();
 						gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 						gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-						gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.WaitingAccept);
+						gnPlayerGroup.add(ParameterCode.Status, GroupStatus.WaitingAccept);
 						gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerGroups.add(gnPlayerGroup);
 
@@ -492,7 +492,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnMember = new GNHashtable();
 
 						gnMember.add(ParameterCode.UserId, request.userId);
-						gnMember.add(ParameterCode.Status, <number>GroupStatus.SentRequestAndWaitingAccept);
+						gnMember.add(ParameterCode.Status, GroupStatus.SentRequestAndWaitingAccept);
 
 						gnMembers.add(gnMember);
 
@@ -509,11 +509,11 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 				// Stores the member item value used in the current execution flow.
 				let memberItem = group.getMember(request.userId);
 
-				if (memberItem.status == <number>GroupStatus.WaitingAccept) {
-					group.setMember(request.userId, <number>GroupStatus.Member);
+				if (memberItem.status == GroupStatus.WaitingAccept) {
+					group.setMember(request.userId, GroupStatus.Member);
 					group.saveAsync();
 
-					characterPlayer.setPlayerGroup(request.groupId, catalogId, <number>GroupStatus.Member, currentMilliseconds);
+					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
 					characterPlayer.saveAsync();
 
 					{
@@ -524,7 +524,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnPlayerGroup = new GNHashtable();
 						gnPlayerGroup.add(ParameterCode.GroupId, request.groupId);
 						gnPlayerGroup.add(ParameterCode.CatalogId, catalogId);
-						gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 						gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 						gnPlayerGroups.add(gnPlayerGroup);
 
@@ -545,7 +545,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let gnMember = new GNHashtable();
 
 						gnMember.add(ParameterCode.UserId, request.userId);
-						gnMember.add(ParameterCode.Status, <number>GroupStatus.Member);
+						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
 

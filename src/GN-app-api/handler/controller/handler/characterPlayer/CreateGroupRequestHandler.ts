@@ -218,9 +218,9 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		// Stores the result value used in the current execution flow.
 		let result = {} as any;
 		result["groupId"] = groupId;
-		result["groupType"] = <number>OwnerType.CharacterPlayer;
+		result["groupType"] = OwnerType.CharacterPlayer;
 		result["catalogId"] = request.catalogId;
-		result["members"] = [{ "memberId": request.characterId, "status": <number>GroupStatus.Member }];
+		result["members"] = [{ "memberId": request.characterId, "status": GroupStatus.Member }];
 		result["groupDatas"] = [];
 		result["groupCurrencies"] = {};
 		result["groupStatistics"] = {};
@@ -249,17 +249,17 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 
 				if (otherCharacterPlayer != null) {
 
-					otherCharacterPlayer.setPlayerGroup(groupId, request.catalogId, <number>GroupStatus.WaitingAccept, currentMilliseconds);
+					otherCharacterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
 					otherCharacterPlayer.saveAsync();
 
-					group.setMember(request.characterId, <number>GroupStatus.WaitingAccept);
+					group.setMember(request.characterId, GroupStatus.WaitingAccept);
 				}
 			}
 
 			group.saveAsync();
 		}
 
-		characterPlayer.setPlayerGroup(groupId, request.catalogId, <number>GroupStatus.Member, currentMilliseconds);
+		characterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
 		characterPlayer.saveAsync();
 
 		// Stores the GearN player groups value used in the current execution flow.
@@ -270,7 +270,7 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 
 		gnPlayerGroup.add(ParameterCode.GroupId, group.getGroupId());
 		gnPlayerGroup.add(ParameterCode.CatalogId, group.getCatalogId());
-		gnPlayerGroup.add(ParameterCode.Status, <number>GroupStatus.Member);
+		gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 		gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 
 		gnPlayerGroups.add(gnPlayerGroup);

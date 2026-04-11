@@ -241,7 +241,7 @@ export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		// Stores the amount value used in the current execution flow.
 		let amount = request.amount;
 
-		if (playerItemCatalogSettingsItem.itemType == <number>ItemType.NonStackable) {
+		if (playerItemCatalogSettingsItem.itemType == ItemType.NonStackable) {
 			amount = 1;
 		}
 
@@ -257,7 +257,7 @@ export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		result["classId"] = request.classId;
 		result["amount"] = amount;
 		result["itemType"] = playerItemCatalogSettingsItem.itemType;
-		result["owner"] = { "id": request.userId, "type": <number>OwnerType.GamePlayer };
+		result["owner"] = { "id": request.userId, "type": OwnerType.GamePlayer };
 		result["itemDatas"] = [];
 		result["itemStatistics"] = {};
 		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
