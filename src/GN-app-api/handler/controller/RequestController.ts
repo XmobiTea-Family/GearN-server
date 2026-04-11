@@ -6,17 +6,17 @@ import { OperationHelper } from "./../../../GN-common/entity/operationHelper/Ope
 import { RequestRole } from "./../../../GN-common/constant/enumType/RequestRole";
 
 export class RequestController {
-	// Stores the handlers value used by this instance.
+	// Handlers are indexed by request type, then by operation code.
 	private handlers: {
 		[k: number]: {
 			[k: string]: IRequestHandler;
 		}
 	};
 
-	// Stores the request unauthenticated codes list used by this instance.
+	// Operation codes that are allowed to bypass client authentication checks.
 	private requestUnAuthenticatedCodes: string[];
 
-	// Stores the request converter service value used by this instance.
+	// Converts the raw transport request into the typed operation request expected by handlers.
 	private requestConverterService: IRequestConverterService;
 
 	/**
@@ -112,32 +112,26 @@ export class RequestController {
 	}
 
 	/**
-	 * Handles the request.
+	 * Applies authentication rules, converts the request payload, then dispatches to the correct role entrypoint.
 	 * @param request Provides the request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
 	public async handleRequest(request: Request): Promise<OperationResponse> {
-		// Stores the operation code value used in the current execution flow.
 		let operationCode = request.getOperationCode();
-		// Stores the role value used in the current execution flow.
 		let role = <RequestRole>request.getRole();
 
-		// Tracks whether authenticated.
+		// Admin and server roles are authenticated upstream through secrets, not client auth tokens.
 		let isAuthenticated = request.isAuthenticated();
 		if (!isAuthenticated && role != RequestRole.Admin && role != RequestRole.Server) {
-			// if the user not authentication
-			// and this request not in unAthenticated
 			if (this.requestUnAuthenticatedCodes.indexOf(operationCode) == -1) {
 				return OperationHelper.newOperationResponseNotAuthorized(operationCode, request.getRequestId());
 			}
 		}
 
-		// Stores the request type value used in the current execution flow.
 		let requestType = request.getRequestType();
-		// Stores the handler value used in the current execution flow.
 		let handler = this.getHandler(requestType, operationCode);
 		if (handler != null) {
-			// Stores the operation request value used in the current execution flow.
+			// Convert only after a handler is found to avoid unnecessary request-model allocation.
 			let operationRequest = this.requestConverterService.newOperationRequest(request);
 
 			if (role == RequestRole.Admin) {

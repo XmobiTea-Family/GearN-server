@@ -4,42 +4,30 @@ import { BigAnalyticsItem, IAnalyticsService } from "./IAnalyticsService";
 import si from "systeminformation";
 import * as mongoDB from "mongodb";
 
+/**
+ * Periodically aggregates dashboard metrics from player activity, runtime logs, and host/database telemetry.
+ */
 export class AnalyticsService implements IAnalyticsService {
-	// Stores the GearN server value used by this instance.
+	// Runtime entry point used to access timer, database, and cluster state.
 	private gnServer: GNServer;
 
-	// Stores the current CCU value used by this instance.
+	// Rolling player activity metrics exposed to the dashboard.
 	private currentCCU: number;
-
-	// Stores the current DAU value used by this instance.
 	private currentDAU: number;
-	// Stores the current DAU since 0 h value used by this instance.
 	private currentDAUSince0h: number;
-	// Stores the current DNU value used by this instance.
 	private currentDNU: number;
-	// Stores the current DNU since 0 h value used by this instance.
 	private currentDNUSince0h: number;
-	// Stores the current DRT value used by this instance.
 	private currentDRT: number;
-	// Stores the current DRT since 0 h value used by this instance.
 	private currentDRTSince0h: number;
-
-	// Stores the current MAU value used by this instance.
 	private currentMAU: number;
-	// Stores the current MAU since 0 h 1 value used by this instance.
 	private currentMAUSince0h1: number;
-	// Stores the current MNU value used by this instance.
 	private currentMNU: number;
-	// Stores the current MNU since 0 h 1 value used by this instance.
 	private currentMNUSince0h1: number;
-	// Stores the current MRT value used by this instance.
 	private currentMRT: number;
-	// Stores the current MRT since 0 h 1 value used by this instance.
 	private currentMRTSince0h1: number;
-	// Stores the current analytics price value used by this instance.
 	private currentAnalyticsPrice: number;
 
-	// Stores the current country list used by this instance.
+	// Geo, machine, and storage snapshots returned by dashboard analytics.
 	private currentCountry: {
 		// Stores the country code value used by this contract.
 		countryCode: string,
@@ -58,7 +46,6 @@ export class AnalyticsService implements IAnalyticsService {
 		}[]
 	}[];
 
-	// Stores the current operation system value used by this instance.
 	private currentOperationSystem: {
 		// Stores the cpu usage value used by this contract.
 		cpuUsage: number;
@@ -80,7 +67,7 @@ export class AnalyticsService implements IAnalyticsService {
 		}[];
 	};
 
-	// Stores the current database system value used by this instance.
+	// Live MongoDB capacity snapshots for primary and log databases.
 	private currentDatabaseSystem: {
 		// Stores the fs total size in bytes value used by this contract.
 		fsTotalSizeInBytes: number;
@@ -96,7 +83,6 @@ export class AnalyticsService implements IAnalyticsService {
 		indexes: number;
 	};
 
-	// Stores the current log database system value used by this instance.
 	private currentLogDatabaseSystem: {
 		// Stores the fs total size in bytes value used by this contract.
 		fsTotalSizeInBytes: number;
@@ -112,7 +98,7 @@ export class AnalyticsService implements IAnalyticsService {
 		indexes: number;
 	};
 
-	// Stores the current request complete list used by this instance.
+	// Rolling request/error aggregates used by the dashboard summary.
 	private currentRequestComplete: {
 		// Stores the event name value used by this contract.
 		eventName: string;
@@ -125,7 +111,7 @@ export class AnalyticsService implements IAnalyticsService {
 		}[]
 	}[];
 
-	// Stores the current cost value used by this instance.
+	// Estimated infra cost for the last 15-minute window and month-to-date window.
 	private currentCost: {
 		// Stores the request count value used by this contract.
 		requestCount: number;
@@ -139,7 +125,6 @@ export class AnalyticsService implements IAnalyticsService {
 		dataTransferSizeInBytes: number;
 	}
 
-	// Stores the current monthly cost value used by this instance.
 	private currentMonthlyCost: {
 		// Stores the request count value used by this contract.
 		requestCount: number;
@@ -154,20 +139,19 @@ export class AnalyticsService implements IAnalyticsService {
 	}
 
 	/**
-	 * Sets the GearN server.
-	 * @param gnServer Provides the GearN server value used by this operation.
+	 * Injects the runtime coordinator used to query databases and schedule refresh jobs.
+	 * @param gnServer Runtime server instance.
 	 */
 	public setGNServer(gnServer: GNServer): void {
 		this.gnServer = gnServer;
 	}
 
 	/**
-	 * Returns the big analytics item.
-	 * @param tsDate Provides the timestamp date value used by this operation.
-	 * @returns Returns the big analytics item.
+	 * Returns the in-memory analytics snapshot or a persisted 15-minute snapshot when `tsDate` is provided.
+	 * @param tsDate Snapshot timestamp persisted in the `Analytics` collection.
+	 * @returns Dashboard-ready analytics payload.
 	 */
 	public async getBigAnalyticsItem(tsDate?: number): Promise<BigAnalyticsItem> {
-		// Stores the answer value used in the current execution flow.
 		let answer: BigAnalyticsItem;
 
 		if (!tsDate) {
@@ -201,10 +185,8 @@ export class AnalyticsService implements IAnalyticsService {
 			};
 		}
 		else {
-			// Stores the analytics collection value used in the current execution flow.
 			let analyticsCollection = this.gnServer.getDatabase().systemCollection("Analytics");
 
-			// Stores the result value used in the current execution flow.
 			let result = await analyticsCollection.findOne({ tsCreate: tsDate });
 
 			if (result == null) {
@@ -271,15 +253,14 @@ export class AnalyticsService implements IAnalyticsService {
 	}
 
 	/**
-	 * Runs the current workflow.
+	 * Starts the analytics refresh loop.
+	 * The service refreshes volatile metrics every 5 minutes and persists a snapshot every 15 minutes.
 	 */
 	public run(): void {
 		this.getAnalytics();
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 		this.gnServer.getTimerService().subscriberEveryMinute(() => {
-			// Stores the current date value used in the current execution flow.
 			let currentDate = xDatetime.getCurrentDate();
 			if (currentDate.getMinutes() % 15 == 0)
 				thiz.analytics();
@@ -290,7 +271,7 @@ export class AnalyticsService implements IAnalyticsService {
 	}
 
 	/**
-	 * Executes the analytics workflow asynchronously.
+	 * Refreshes the in-memory snapshot and persists it when running on the primary node.
 	 */
 	private async analytics(): Promise<void> {
 		await this.getAnalytics();
@@ -301,17 +282,14 @@ export class AnalyticsService implements IAnalyticsService {
 	}
 
 	/**
-	 * Returns the analytics.
+	 * Recomputes every dashboard metric from the latest player, geo, system, and runtime log data.
 	 */
 	private async getAnalytics(): Promise<void> {
-		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		// Stores the milliseconds since 0 h value used in the current execution flow.
 		let millisecondsSince0h = xDatetime.getToday0hMilliseconds();
-		// Stores the player collection value used in the current execution flow.
 		let playerCollection = this.gnServer.getDatabase().systemCollection("MasterPlayer");
 
-		// Stores the milliseconds at 15 minutes ago value used in the current execution flow.
+		// The near-real-time dashboard uses a 15-minute activity window for CCU and recent pricing counters.
 		let millisecondsAt15MinutesAgo = currentMilliseconds - 15 * xDatetime.ONE_MINUTE_MILLISECOND;
 
 		// CCU
@@ -333,7 +311,6 @@ export class AnalyticsService implements IAnalyticsService {
 
 		// DAU
 		{
-			// Stores the milliseconds at 1 day ago value used in the current execution flow.
 			let millisecondsAt1DayAgo = currentMilliseconds - xDatetime.ONE_DAY_MILLISECOND;
 			this.currentDAU = await playerCollection.countDocuments({
 				tsLastLogin: {
@@ -353,7 +330,6 @@ export class AnalyticsService implements IAnalyticsService {
 
 		// DNU
 		{
-			// Stores the milliseconds at 1 day ago value used in the current execution flow.
 			let millisecondsAt1DayAgo = currentMilliseconds - xDatetime.ONE_DAY_MILLISECOND;
 			this.currentDNU = await playerCollection.countDocuments({
 				tsCreate: {
@@ -373,7 +349,6 @@ export class AnalyticsService implements IAnalyticsService {
 
 		// MAU
 		{
-			// Stores the milliseconds at 1 month ago value used in the current execution flow.
 			let millisecondsAt1MonthAgo = currentMilliseconds - xDatetime.ONE_MONTH_MILLISECOND;
 
 			this.currentMAU = await playerCollection.countDocuments({
@@ -385,7 +360,7 @@ export class AnalyticsService implements IAnalyticsService {
 
 		// MAUSince0h1
 		{
-			// Stores the current date value used in the current execution flow.
+			// Month-based metrics are anchored to the first day of the current month at midnight.
 			let currentDate = xDatetime.getCurrentDate();
 			currentDate.setHours(0);
 			currentDate.setMinutes(0);
@@ -394,7 +369,6 @@ export class AnalyticsService implements IAnalyticsService {
 
 			currentDate.setDate(1);
 
-			// Stores the milliseconds since 0 h 1 value used in the current execution flow.
 			let millisecondsSince0h1 = currentDate.getTime();
 
 			this.currentMAUSince0h1 = await playerCollection.countDocuments({
@@ -406,7 +380,6 @@ export class AnalyticsService implements IAnalyticsService {
 
 		// MNU
 		{
-			// Stores the milliseconds at 1 day ago value used in the current execution flow.
 			let millisecondsAt1DayAgo = currentMilliseconds - xDatetime.ONE_MONTH_MILLISECOND;
 
 			this.currentMNU = await playerCollection.countDocuments({
@@ -418,7 +391,6 @@ export class AnalyticsService implements IAnalyticsService {
 
 		// MNUSince0h1
 		{
-			// Stores the current date value used in the current execution flow.
 			let currentDate = xDatetime.getCurrentDate();
 			currentDate.setHours(0);
 			currentDate.setMinutes(0);
@@ -427,7 +399,6 @@ export class AnalyticsService implements IAnalyticsService {
 
 			currentDate.setDate(1);
 
-			// Stores the milliseconds since 0 h 1 value used in the current execution flow.
 			let millisecondsSince0h1 = currentDate.getTime();
 
 			this.currentMNUSince0h1 = await playerCollection.countDocuments({
@@ -444,7 +415,7 @@ export class AnalyticsService implements IAnalyticsService {
 		this.currentMRTSince0h1 = this.currentMAUSince0h1 - this.currentMNUSince0h1;
 
 		{
-			// Stores the GearN countrys value used in the current execution flow.
+			// `CountryRegion` stores IP lookup buckets; this block compresses them into dashboard-friendly regions.
 			let gnCountrys: {
 				// Stores the country code value used by this contract.
 				countryCode: string,
@@ -463,26 +434,19 @@ export class AnalyticsService implements IAnalyticsService {
 				}[]
 			}[] = [];
 
-			// Stores the country region collection value used in the current execution flow.
 			let countryRegionCollection = this.gnServer.getDatabase().systemCollection("CountryRegion");
 
-			// Stores the results value used in the current execution flow.
 			let results = await countryRegionCollection.find({});
 
 			while (await results.hasNext()) {
-				// Stores the result value used in the current execution flow.
 				let result = await results.next();
 
-				// Stores the regions value used in the current execution flow.
 				let regions = result["regions"];
-				// Stores the name regions value used in the current execution flow.
 				let nameRegions = result["nameRegions"];
-				// Stores the IP address regions value used in the current execution flow.
 				let ipAddressRegions = result["ipAddressRegions"];
 
 				if (!regions || !nameRegions || !ipAddressRegions) continue;
 
-				// Stores the GearN country value used in the current execution flow.
 				let gnCountry: {
 					// Stores the country code value used by this contract.
 					countryCode: string,
@@ -504,21 +468,16 @@ export class AnalyticsService implements IAnalyticsService {
 					regions: [],
 				};
 
-				// Stores the region keys value used in the current execution flow.
 				let regionKeys = Object.keys(regions);
 
 				for (let i = 0; i < regionKeys.length; i++) {
-					// Stores the key value used in the current execution flow.
 					let key = regionKeys[i];
-					// Stores the IP address region value used in the current execution flow.
 					let ipAddressRegion = ipAddressRegions[key];
 					if (!ipAddressRegion) continue;
 
-					// Stores the region value used in the current execution flow.
 					let region = regions[key];
 					if (!region) continue;
 
-					// Stores the GearN region value used in the current execution flow.
 					let gnRegion: {
 						// Stores the region code value used by this contract.
 						regionCode: string,
@@ -538,12 +497,9 @@ export class AnalyticsService implements IAnalyticsService {
 						longitude: 0,
 					};
 
-					// Stores the IP address region IP keys value used in the current execution flow.
 					let ipAddressRegionIPKeys = Object.keys(ipAddressRegion);
-					// Stores the IP address region IP key value used in the current execution flow.
 					let ipAddressRegionIPKey = ipAddressRegionIPKeys[0];
 					if (ipAddressRegionIPKey) {
-						// Stores the IP address region IP value used in the current execution flow.
 						let ipAddressRegionIP = ipAddressRegion[ipAddressRegionIPKey];
 
 						gnRegion.latidute = ipAddressRegionIP["latitude"];
@@ -560,14 +516,11 @@ export class AnalyticsService implements IAnalyticsService {
 		}
 
 		{
-			// Stores the cpu value used in the current execution flow.
+			// Host resource usage reflects the current machine, not an aggregate across every cluster node.
 			const cpu = await si.currentLoad();
-			// Stores the memory value used in the current execution flow.
 			const memory = await si.mem();
-			// Stores the fs size value used in the current execution flow.
 			const fsSize = await si.fsSize();
 
-			// Stores the storage usage value used in the current execution flow.
 			let storageUsage: {
 				// Stores the name value used by this contract.
 				name: string;
@@ -578,7 +531,6 @@ export class AnalyticsService implements IAnalyticsService {
 			}[] = [];
 
 			for (let i = 0; i < fsSize.length; i++) {
-				// Stores the storage value used in the current execution flow.
 				let storage = fsSize[i];
 
 				storageUsage.push({
@@ -610,7 +562,7 @@ export class AnalyticsService implements IAnalyticsService {
 		//         {
 		//             $group: {
 		//                 _id: { eventName: "$eventName", errorCode: "$operationResponse.parameters.errorCode" },
-		//                 count: { $sum: 1 } // Đếm số lần xuất hiện
+		//                 count: { $sum: 1 } // Äáº¿m sá»‘ láº§n xuáº¥t hiá»‡n
 		//             }
 		//         },
 		//         {
@@ -639,7 +591,6 @@ export class AnalyticsService implements IAnalyticsService {
 		// }
 
 		{
-			// Stores the stats value used in the current execution flow.
 			let stats = await this.gnServer.getDatabase().getDb().stats();
 
 			if (stats.ok == 1) {
@@ -655,7 +606,6 @@ export class AnalyticsService implements IAnalyticsService {
 		}
 
 		{
-			// Stores the stats value used in the current execution flow.
 			let stats = await this.gnServer.getDatabase().getLogDb().stats();
 
 			if (stats.ok == 1) {
@@ -671,17 +621,14 @@ export class AnalyticsService implements IAnalyticsService {
 		}
 
 		{
-			// Stores the event callback post collection value used in the current execution flow.
 			let eventCallbackPostCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
 
-			// Stores the now value used in the current execution flow.
 			let now = xDatetime.getCurrentDate();
-			// Stores the month 0 h value used in the current execution flow.
 			let month0h = new Date(now.getFullYear(), now.getMonth(), 1);
 
-			// Stores the results value used in the current execution flow.
 			let results = await eventCallbackPostCollection.find({ _id: { $gt: mongoDB.ObjectId.createFromTime(month0h.getTime() / 1000 - 1) } })
 
+			// Build both the rolling 15-minute cost view and the month-to-date cost view from the same log stream.
 			this.currentCost = {
 				requestCount: 0,
 				matchmakingRequestCount: 0,
@@ -701,18 +648,13 @@ export class AnalyticsService implements IAnalyticsService {
 			this.currentRequestComplete = [];
 
 			while (await results.hasNext()) {
-				// Stores the result value used in the current execution flow.
 				let result = await results.next();
 
-				// Stores the timestamp create value used in the current execution flow.
 				let tsCreate = result["tsCreate"];
-				// Stores the event name value used in the current execution flow.
 				let eventName = result["eventName"];
-				// Stores the operation response value used in the current execution flow.
 				let operationResponse = result["operationResponse"];
 
 				if (tsCreate > millisecondsAt15MinutesAgo) {
-					// Stores the this current request complete value used in the current execution flow.
 					let thisCurrentRequestComplete = this.currentRequestComplete.find(x => x.eventName == eventName);
 					if (thisCurrentRequestComplete == null) {
 						thisCurrentRequestComplete = {
@@ -723,10 +665,8 @@ export class AnalyticsService implements IAnalyticsService {
 						this.currentRequestComplete.push(thisCurrentRequestComplete);
 					}
 
-					// Stores the error code value used in the current execution flow.
 					let errorCode = operationResponse?.parameters?.errorCode;
 					if (errorCode) {
-						// Stores the this current request complete error code value used in the current execution flow.
 						let thisCurrentRequestCompleteErrorCode = thisCurrentRequestComplete.results.find(x => x.errorCode == errorCode);
 						if (thisCurrentRequestCompleteErrorCode == null) {
 							thisCurrentRequestCompleteErrorCode = {
@@ -751,16 +691,12 @@ export class AnalyticsService implements IAnalyticsService {
 
 							}
 							else if (eventName.startsWith("cloudScript_")) {
-								// Stores the parameters value used in the current execution flow.
 								let parameters = operationResponse?.parameters;
 								if (parameters) {
-									// Stores the execution time in milliseconds value used in the current execution flow.
 									let executionTimeInMs = parameters.executionTimeInMs;
-									// Stores the memory used in bytes value used in the current execution flow.
 									let memoryUsedInBytes = parameters.memoryUsedInBytes;
 
 									if (executionTimeInMs != null && memoryUsedInBytes != null) {
-										// Stores the cloud script g bs value used in the current execution flow.
 										let cloudScriptGBs = (executionTimeInMs / 1000) * (memoryUsedInBytes / 1024 / 1024 / 1024);
 
 										this.currentCost.cloudScriptGBs += cloudScriptGBs;
@@ -783,16 +719,12 @@ export class AnalyticsService implements IAnalyticsService {
 								this.currentMonthlyCost.matchmakingRequestCount += 1;
 							}
 							else if (eventName.startsWith("cloudScript_")) {
-								// Stores the parameters value used in the current execution flow.
 								let parameters = operationResponse?.parameters;
 								if (parameters) {
-									// Stores the execution time in milliseconds value used in the current execution flow.
 									let executionTimeInMs = parameters.executionTimeInMs;
-									// Stores the memory used in bytes value used in the current execution flow.
 									let memoryUsedInBytes = parameters.memoryUsedInBytes;
 
 									if (executionTimeInMs != null && memoryUsedInBytes != null) {
-										// Stores the cloud script g bs value used in the current execution flow.
 										let cloudScriptGBs = (executionTimeInMs / 1000) * (memoryUsedInBytes / 1024 / 1024 / 1024);
 
 										this.currentMonthlyCost.cloudScriptGBs += cloudScriptGBs;
@@ -809,13 +741,11 @@ export class AnalyticsService implements IAnalyticsService {
 	}
 
 	/**
-	 * Saves the analytics.
+	 * Persists the current snapshot into the `Analytics` collection using a 15-minute bucket timestamp.
 	 */
 	private async saveAnalytics(): Promise<void> {
-		// Stores the analytics collection value used in the current execution flow.
 		let analyticsCollection = this.gnServer.getDatabase().systemCollection("Analytics");
 
-		// Stores the current date value used in the current execution flow.
 		let currentDate = xDatetime.getCurrentDate();
 		currentDate.setMinutes(Math.floor(currentDate.getMinutes() / 15) * 15);
 		currentDate.setSeconds(0);

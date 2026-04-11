@@ -1,40 +1,95 @@
+/**
+ * Centralizes HTTP header names, content-type values, socket frame commands,
+ * and multipart field names used by the SDK transport layer.
+ */
 export class Commands {
-	// Indicates whether USER AGENT.
+	/**
+	 * HTTP header used to identify the SDK client variant and version.
+	 */
 	public static readonly USER_AGENT: string = "User-Agent";
 
-	// Stores the CONTENT TYPE value used by this instance.
+	/**
+	 * HTTP header that declares the request body content type.
+	 */
 	public static readonly CONTENT_TYPE: string = "Content-Type";
-	// Stores the CONTENT LENGTH value used by this instance.
+
+	/**
+	 * HTTP header that declares which response content types the client accepts.
+	 */
+	public static readonly ACCEPT: string = "Accept";
+
+	/**
+	 * HTTP header that carries the serialized request body size in bytes when required.
+	 */
 	public static readonly CONTENT_LENGTH: string = "Content-Length";
-	// Stores the APPLICATION JSON value used by this instance.
+
+	/**
+	 * MIME type used for JSON request and response payloads.
+	 */
 	public static readonly APPLICATION_JSON: string = "application/json";
-	// Stores the APPLICATION MsgPack value used by this instance.
+
+	/**
+	 * MIME type used for MessagePack request and response payloads.
+	 */
 	public static readonly APPLICATION_MSGPACK: string = "application/msgpack";
 
-	// Stores the request auth token cmd value used by this instance.
+	/**
+	 * Transport header used to send the current auth token with HTTP requests.
+	 */
 	public static readonly RequestAuthTokenCmd: string = "Auth-Token";
-	// Stores the request secret cmd value used by this instance.
+
+	/**
+	 * Transport header used to send the selected route secret key with HTTP requests.
+	 */
 	public static readonly RequestSecretCmd: string = "Secret-Key";
-	// Stores the request game ID cmd value used by this instance.
+
+	/**
+	 * Transport header used to send the current game id when the backend requires it.
+	 */
 	public static readonly RequestGameIdCmd: string = "Game-Id";
 
-	// Stores the request cmd msg pack value used by this instance.
+	/**
+	 * Socket command name for MessagePack operation requests.
+	 */
 	public static readonly RequestCmd_MsgPack: string = "rMsgPack";
-	// Stores the response cmd msg pack value used by this instance.
+
+	/**
+	 * Socket command name for MessagePack operation responses.
+	 */
 	public static readonly ResponseCmd_MsgPack: string = "rMsgPack";
-	// Stores the event cmd msg pack value used by this instance.
+
+	/**
+	 * Socket command name for MessagePack pushed events.
+	 */
 	public static readonly EventCmd_MsgPack: string = "eMsgPack";
 
-	// Stores the request cmd JSON value used by this instance.
+	/**
+	 * Socket command name for JSON operation requests.
+	 */
 	public static readonly RequestCmd_Json: string = "rJson";
-	// Stores the response cmd JSON value used by this instance.
+
+	/**
+	 * Socket command name for JSON operation responses.
+	 */
 	public static readonly ResponseCmd_Json: string = "rJson";
-	// Stores the event cmd JSON value used by this instance.
+
+	/**
+	 * Socket command name for JSON pushed events.
+	 */
 	public static readonly EventCmd_Json: string = "eJson";
 
-	// Stores the data value used by this instance.
+	/**
+	 * Multipart field name used for non-file payload data.
+	 */
 	public static readonly Data: string = "data";
-	// Stores the file value used by this instance.
+
+	/**
+	 * Multipart field name used for uploaded file content.
+	 */
 	public static readonly File: string = "file";
 
+	/**
+	 * Reverse-proxy helper header that carries the original base URL when needed.
+	 */
+	public static readonly BaseUrl: string = "X-BaseUrl";
 }

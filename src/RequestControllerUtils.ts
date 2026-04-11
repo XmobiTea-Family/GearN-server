@@ -360,15 +360,14 @@ import { GetFunctionsRequestHandler as CloudScript_GetFunctionsRequestHandler } 
 
 export class RequestControllerUtils {
 	/**
-	 * Adds the all handler.
+	 * Registers every built-in request handler family into the server request controller.
 	 * @param gnServer Provides the GearN server value used by this operation.
 	 */
 	public static addAllHandler(gnServer: GNServer): void {
-		// Stores the request controller value used in the current execution flow.
 		let requestController = gnServer.getRequestController();
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Authentication endpoints: login/register are public, token refresh requires an authenticated session.
 			let requestTypeValue = RequestType.Authenticate;
 
 			requestController.addHandler(requestTypeValue, new Authenticate_LoginByAccountRequestHandler(gnServer), false);
@@ -392,7 +391,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Master-player endpoints operate on the global account plane shared across games.
 			let requestTypeValue = RequestType.MasterPlayer;
 
 			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAccountRequestHandler(gnServer), true);
@@ -484,7 +483,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Character-player endpoints manage character-scoped gameplay state inside a game.
 			let requestTypeValue = RequestType.CharacterPlayer;
 
 			requestController.addHandler(requestTypeValue, new CharacterPlayer_AddSegmentRequestHandler(gnServer), true);
@@ -543,7 +542,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Game-player endpoints manage the main per-game player profile and related relationships.
 			let requestTypeValue = RequestType.GamePlayer;
 
 			requestController.addHandler(requestTypeValue, new GamePlayer_AddSegmentRequestHandler(gnServer), true);
@@ -601,7 +600,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Content endpoints expose content data plus file upload/download metadata.
 			let requestTypeValue = RequestType.Content;
 
 			requestController.addHandler(requestTypeValue, new Content_GetContentDataRequestHandler(gnServer), true);
@@ -615,7 +614,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Group endpoints manage shared entities, members, and group chat state.
 			let requestTypeValue = RequestType.Group;
 
 			requestController.addHandler(requestTypeValue, new Group_AddSegmentRequestHandler(gnServer), true);
@@ -660,7 +659,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Inventory endpoints manage concrete item records regardless of who owns them.
 			let requestTypeValue = RequestType.Inventory;
 
 			requestController.addHandler(requestTypeValue, new Inventory_AddSegmentRequestHandler(gnServer), true);
@@ -700,7 +699,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Store endpoints cover offers, purchase flows, and receipt validation.
 			let requestTypeValue = RequestType.StoreInventory;
 
 			requestController.addHandler(requestTypeValue, new StoreInventory_BuyStoreItemRequestHandler(gnServer), true);
@@ -720,7 +719,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Dashboard endpoints are the control plane for admin, secrets, settings, and maintenance.
 			let requestTypeValue = RequestType.Dashboard;
 
 			requestController.addHandler(requestTypeValue, new Dashboard_LoginByAdminAccountRequestHandler(gnServer), false);
@@ -752,7 +751,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// Multiplayer endpoints cover matchmaking tickets, queue stats, and match retrieval.
 			let requestTypeValue = RequestType.Multiplayer;
 
 			requestController.addHandler(requestTypeValue, new Multiplayer_CancelAllMatchmakingTicketRequestHandler(gnServer), true);
@@ -768,7 +767,7 @@ export class RequestControllerUtils {
 		}
 
 		{
-			// Stores the request type value value used in the current execution flow.
+			// CloudScript endpoints manage stored functions and runtime execution.
 			let requestTypeValue = RequestType.CloudScript;
 
 			requestController.addHandler(requestTypeValue, new CloudScript_AddFunctionRequestHandler(gnServer), true);

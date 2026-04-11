@@ -390,41 +390,37 @@ export interface IEventCallbackCloudScriptService {
 	>;
 }
 
+/**
+ * Loads cloud-script bundles, keeps worker processes warm, and bridges GearN events to those workers.
+ */
 export class EventCallbackCloudScriptService implements IEventCallbackCloudScriptService {
 
-	// Stores the system execute timeout in milliseconds value used by this instance.
+	// Fixed timeout for built-in system jobs that should never hang forever.
 	private static readonly SystemExecuteTimeoutInMs = 12000000;
-	// Stores the on every minute value used by this instance.
+	// Reserved system event names triggered by the timer service.
 	private static readonly OnEveryMinute = "system_OnEveryMinute";
-	// Stores the on every hour value used by this instance.
 	private static readonly OnEveryHour = "system_OnEveryHour";
-	// Stores the on every day value used by this instance.
 	private static readonly OnEveryDay = "system_OnEveryDay";
 
-	// Stores the cloud script worker dict collection used by this instance.
+	// Warm workers and pending response resolvers keyed by script identity or request id.
 	private cloudScriptWorkerDict: Map<string, ChildProcess>;
-	// Stores the cloud script waiting response callback dict collection used by this instance.
 	private cloudScriptWaitingResponseCallbackDict: Map<string, (cloudScriptResponse: CloudScriptResponse) => void>;
 
-	// Stores the cloud script function collection value used by this instance.
+	// Primary and backup collections that persist cloud-script source and versions.
 	private cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>;
-	// Stores the backup cloud script function collection value used by this instance.
 	private backupCloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>;
 
-	// Stores the GearN server value used by this instance.
+	// Runtime dependencies required to spawn workers and execute cloud scripts.
 	private gnServer: GNServer;
-	// Stores the GearN server settings options value used by this instance.
 	private gnServerSettingsOptions: GNServerSettingsOptions;
-	// Stores the database connection value used by this instance.
 	private dbConnection: DbConnection;
-	// Stores the execute timeout in milliseconds value used by this instance.
 	private executeTimeoutInMs: number;
 
-	// Stores the cloud script function dict value used by this instance.
+	// In-memory function registry keyed by script type such as `pre`, `post`, or `system`.
 	private cloudScriptFunctionDict = new Map<string, EventCallbackCloudScriptFunction>();
 
 	/**
-	 * Initializes a new event callback cloud script service instance.
+	 * Initializes the in-memory registries used by the cloud-script runtime.
 	 */
 	constructor() {
 		this.cloudScriptFunctionDict = new Map();
@@ -434,8 +430,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Returns all cloud script function.
-	 * @returns Returns all cloud script function.
+	 * Returns the cloud-script bundles currently loaded in memory.
+	 * @returns Loaded cloud-script definitions, including child overrides per event.
 	 */
 	public async getAllCloudScriptFunction(): Promise<
 		{
@@ -458,7 +454,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			}[];
 		}[]
 	> {
-		// Stores the answer value used in the current execution flow.
 		let answer: {
 			// Stores the type value used by this contract.
 			type: string;
@@ -479,11 +474,9 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			}[];
 		}[] = [];
 
-		// Stores the values value used in the current execution flow.
 		let values = Array.from(this.cloudScriptFunctionDict.values());
 
 		for (let i = 0; i < values.length; i++) {
-			// Stores the cloud function value used in the current execution flow.
 			let cloudFunction = values[i];
 
 			answer.push(cloudFunction);
@@ -493,11 +486,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the init workflow.
-	 * @param gnServerSettingsOptions Provides the GearN server settings options value used by this operation.
-	 * @param dbConnection Provides the database connection value used by this operation.
-	 * @param gnServer Provides the GearN server value used by this operation.
-	 * @param executeTimeoutInMs Provides the execute timeout in milliseconds value used by this operation.
+	 * Injects runtime dependencies and subscribes the built-in system callbacks to the timer service.
+	 * Only the primary node executes timed system cloud scripts.
+	 * @param gnServerSettingsOptions Server settings passed down to spawned workers.
+	 * @param dbConnection Database connection info mirrored into worker processes.
+	 * @param gnServer Runtime server instance.
+	 * @param executeTimeoutInMs Default timeout for non-system script execution.
 	 */
 	public init(gnServerSettingsOptions: GNServerSettingsOptions, dbConnection: DbConnection, gnServer: GNServer, executeTimeoutInMs: number): void {
 		this.gnServerSettingsOptions = gnServerSettingsOptions;
@@ -505,7 +499,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		this.gnServer = gnServer;
 		this.executeTimeoutInMs = executeTimeoutInMs;
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
 		this.gnServer.getTimerService().subscriberEveryMinute(() => {
@@ -525,47 +518,44 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Sets the cloud script function collection.
-	 * @param cloudScriptFunctionCollection Provides the cloud script function collection used by this operation.
+	 * Registers the primary collection that stores cloud-script versions and source code.
+	 * @param cloudScriptFunctionCollection Mongo collection for active cloud-script bundles.
 	 */
 	public setCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>): void {
 		this.cloudScriptFunctionCollection = cloudScriptFunctionCollection;
 	}
 
 	/**
-	 * Sets the backup cloud script function collection.
-	 * @param cloudScriptFunctionCollection Provides the cloud script function collection used by this operation.
+	 * Registers the backup collection used when rotating or restoring cloud-script bundles.
+	 * @param cloudScriptFunctionCollection Mongo collection for backup cloud-script bundles.
 	 */
 	public setBackupCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>): void {
 		this.backupCloudScriptFunctionCollection = cloudScriptFunctionCollection;
 	}
 
 	/**
-	 * Runs the current workflow.
+	 * Loads persisted cloud-script versions and listens for cluster-wide reload events.
 	 */
 	public run(): void {
 		this.loadVersion();
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
+		// Cloud-script updates are propagated from the primary node through the cluster handler.
 		this.gnServer.getHttpApp().getClusterHandler().onEvent("addEventCloudScriptFunction", data => {
 			thiz.remoteAddCloudScriptFunction(data);
 		});
 	}
 
 	/**
-	 * Loads the version.
+	 * Restores every persisted cloud-script bundle into memory and spawns a worker for each script type.
 	 */
 	private async loadVersion(): Promise<void> {
-		// Stores the cloud script function results value used in the current execution flow.
 		let cloudScriptFunctionResults = await this.cloudScriptFunctionCollection.find();
 
 		while (await cloudScriptFunctionResults.hasNext()) {
-			// Stores the cloud script function result value used in the current execution flow.
 			let cloudScriptFunctionResult = await cloudScriptFunctionResults.next();
 
-			// Stores the cloud script function value used in the current execution flow.
 			let cloudScriptFunction: EventCallbackCloudScriptFunction = {
 				type: cloudScriptFunctionResult["type"],
 				version: cloudScriptFunctionResult["version"],
@@ -582,17 +572,15 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the system.
-	 * @param eventName Provides the event name value used by this operation.
+	 * Executes a reserved system event inside the `system` cloud-script worker.
+	 * @param eventName Reserved system event name triggered by the timer service.
 	 */
 	private async executeSystem(eventName: string) {
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get("system");
 		if (cloudFunction == null) {
 			Debug.logError("[GearN] [SystemEventCallback] system not found");
 			return;
 		}
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -602,10 +590,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		Debug.log("[GearN] [SystemEventCallback] auto call " + eventName);
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -614,14 +600,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
-
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
+
+		// Resolve exactly one response per worker request, or synthesize a timeout payload.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -660,20 +643,17 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the request server detail system.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param matchmakingTicketCanMatch Provides the matchmaking ticket can match value used by this operation.
+	 * Executes the matchmaking system script that asks game code to allocate server details for a match.
+	 * @param gameId Game identifier associated with the match request.
+	 * @param matchmakingTicketCanMatch Match candidate produced by the matchmaking service.
 	 * @returns Resolves with the operation result.
 	 */
 	public async executeRequestServerDetailSystem(gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch): Promise<{ success: boolean }> {
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get("systemMatchmaking");
 		if (cloudFunction == null) {
 			return { success: false };
 		}
-		// Stores the event name value used in the current execution flow.
 		let eventName = "systemMatchmaking_RequestServerDetail";
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -681,10 +661,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			return { success: false };
 		}
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -697,14 +675,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
-
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
+
+		// Matchmaking waits for the cloud script to either enrich the match or fail fast on timeout.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -747,18 +722,16 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the event.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param request Provides the request value used by this operation.
-	 * @param operationEvent Provides the operation event value used by this operation.
+	 * Executes an event callback script and lets the script mutate the outgoing event payload.
+	 * @param eventName Event callback name resolved from the emitted event.
+	 * @param request Mutable event context shared with the script.
+	 * @param operationEvent Event payload that can be rewritten by the script.
 	 */
 	public async executeEvent(eventName: string, request: { [k: string]: any }, operationEvent: OperationEvent) {
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get("event");
 		if (cloudFunction == null) {
 			return;
 		}
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -766,10 +739,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			return;
 		}
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -783,14 +754,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -823,6 +790,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		if (cloudScriptResponse.response.status == ExecuteResponseStatus.Ok) {
 			operationEvent.setParameters(cloudScriptResponse.response.result.parameters ? GNHashtable.builder().addAll(cloudScriptResponse.response.result.parameters).build() : null);
+			// The worker can also replace the emitted event code, not only its parameters.
 			(operationEvent as any).eventCode = (cloudScriptResponse.response.result as {
 				// Stores the event code value used by this contract.
 				eventCode: string;
@@ -837,11 +805,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the pre.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
+	 * Executes the pre-handler cloud script before the normal handler runs.
+	 * The script can mutate the request context or short-circuit execution by returning an `OperationResponse`.
+	 * @param eventName Request event name.
+	 * @param request Mutable request context.
+	 * @param secretInfo Authenticated secret context forwarded to the script.
+	 * @param operationRequest Typed operation request sent to the handler pipeline.
 	 * @returns Resolves with the operation result.
 	 */
 	public async executePre(
@@ -850,17 +819,15 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		secretInfo: SecretInfo,
 		operationRequest: OperationRequest
 	): Promise<OperationResponse> {
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(eventName.split("_")[0], eventName);
 
 		if (cloudScriptWorker == null) {
 			return null;
 		}
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the final secret info value used in the current execution flow.
+		// Serialize `SecretInfo` into a plain object because it will cross a worker-process boundary.
 		let finalSecretInfo: {
 			// Stores the secret key value used by this contract.
 			secretKey: string;
@@ -896,7 +863,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -912,14 +878,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -952,13 +914,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		if (cloudScriptResponse.response.status == ExecuteResponseStatus.Ok) {
 			if (cloudScriptResponse.response.request) {
-				// Stores the response request value used in the current execution flow.
 				let responseRequest = cloudScriptResponse.response.request;
-				// Stores the keys value used in the current execution flow.
 				let keys = Object.keys(responseRequest);
 
 				for (let i = 0; i < keys.length; i++) {
-					// Stores the key value used in the current execution flow.
 					let key = keys[i];
 
 					request[key] = responseRequest[key];
@@ -966,7 +925,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			}
 
 			if (cloudScriptResponse.response.result) {
-				// Stores the response operation response value used in the current execution flow.
 				let responseOperationResponse = cloudScriptResponse.response.result as {
 					// Stores the return code value used by this contract.
 					returnCode: number;
@@ -976,7 +934,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 					parameters?: {};
 				};
 
-				// Stores the operation response value used in the current execution flow.
 				let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 
 				operationResponse.setReturnCode(responseOperationResponse.returnCode);
@@ -992,20 +949,17 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the verify generic service.
-	 * @param serviceName Provides the service name value used by this operation.
-	 * @param serviceData Provides the service data value used by this operation.
+	 * Executes the system-authenticate script used to verify third-party services generically.
+	 * @param serviceName External service identifier.
+	 * @param serviceData Service-specific payload forwarded to the worker.
 	 * @returns Resolves with the operation result.
 	 */
 	public async executeVerifyGenericService(serviceName: string, serviceData: { [k: string]: any; }): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> {
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get("systemAuthenticate");
 		if (cloudFunction == null) {
 			return { success: false, serviceId: null, errorMessage: "systemAuthenticate does not implement" };
 		}
-		// Stores the event name value used in the current execution flow.
 		let eventName = "systemAuthenticate_VerifyGenericService";
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -1013,10 +967,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			return { success: false, serviceId: null, };
 		}
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -1029,14 +981,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -1083,11 +1031,11 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the authenticate.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @param operationResponse Provides the operation response value used by this operation.
+	 * Executes the post-authentication system script after a player login succeeds.
+	 * @param request Authentication context built by the middleware.
+	 * @param secretInfo Secret used for the authentication flow.
+	 * @param operationRequest Request that triggered authentication.
+	 * @param operationResponse Mutable response that the script can enrich.
 	 */
 	public async executeAuthenticate(
 		request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any } },
@@ -1095,15 +1043,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse
 	): Promise<void> {
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get("systemAuthenticate");
 		if (cloudFunction == null) {
 			return;
 		}
 
-		// Stores the event name value used in the current execution flow.
 		let eventName = "systemAuthenticate_OnAuthenticateSuccess";
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -1111,10 +1056,9 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			return;
 		}
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the final secret info value used in the current execution flow.
+		// Serialize `SecretInfo` into a plain object because workers cannot receive class instances directly.
 		let finalSecretInfo: {
 			// Stores the secret key value used by this contract.
 			secretKey: string;
@@ -1149,7 +1093,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -1170,14 +1113,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -1210,7 +1149,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		if (cloudScriptResponse.response.status == ExecuteResponseStatus.Ok) {
 			if (cloudScriptResponse.response.result) {
-				// Stores the response operation response value used in the current execution flow.
 				let responseOperationResponse = cloudScriptResponse.response.result as {
 					// Stores the return code value used by this contract.
 					returnCode: number;
@@ -1232,12 +1170,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the post.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @param operationResponse Provides the operation response value used by this operation.
+	 * Executes the post-handler cloud script after the normal handler produced a response.
+	 * @param eventName Request event name.
+	 * @param request Mutable request context.
+	 * @param secretInfo Authenticated secret context forwarded to the script.
+	 * @param operationRequest Typed operation request sent to the handler pipeline.
+	 * @param operationResponse Mutable response that the script can rewrite.
 	 */
 	public async executePost(
 		eventName: string,
@@ -1246,17 +1184,15 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse
 	): Promise<void> {
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(eventName.split("_")[0], eventName);
 
 		if (cloudScriptWorker == null) {
 			return;
 		}
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the final secret info value used in the current execution flow.
+		// Serialize `SecretInfo` into a plain object because workers cannot receive class instances directly.
 		let finalSecretInfo: {
 			// Stores the secret key value used by this contract.
 			secretKey: string;
@@ -1291,7 +1227,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -1312,14 +1247,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -1352,7 +1283,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		if (cloudScriptResponse.response.status == ExecuteResponseStatus.Ok) {
 			if (cloudScriptResponse.response.result) {
-				// Stores the response operation response value used in the current execution flow.
 				let responseOperationResponse = cloudScriptResponse.response.result as {
 					// Stores the return code value used by this contract.
 					returnCode: number;
@@ -1374,17 +1304,15 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the socket.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param request Provides the request value used by this operation.
+	 * Executes socket-specific cloud script hooks for non-request socket events.
+	 * @param eventName Socket event name.
+	 * @param request Mutable socket event context.
 	 */
 	public async executeSocket(eventName: string, request: { [k: string]: any }): Promise<void> {
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get("socket");
 		if (cloudFunction == null) {
 			return;
 		}
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
@@ -1392,10 +1320,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			return;
 		}
 
-		// Stores the request ID value used in the current execution flow.
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Stores the cloud script request value used in the current execution flow.
 		let cloudScriptRequest: CloudScriptRequest = {
 			requestId: requestId,
 			eventName: eventName,
@@ -1405,14 +1331,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		cloudScriptWorker.send(cloudScriptRequest);
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 
-		// Tracks whether resolved.
 		let isResolved = false;
-		// Stores the cloud script response value used in the current execution flow.
 		let cloudScriptResponse: CloudScriptResponse = await new Promise((resolve) => {
-			// Stores the timeout value used in the current execution flow.
 			let timeout = setTimeout(() => {
 				if (isResolved) return;
 				isResolved = true;
@@ -1445,24 +1367,21 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Loads the cloud script function worker from cache.
-	 * @param type Provides the type value used by this operation.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @returns Returns the operation result.
+	 * Returns the cached worker for an edited child script, or recreates it if the worker was evicted.
+	 * Only child scripts marked with `hasEdit` get their own worker version.
+	 * @param type Script family such as `pre`, `post`, or `system`.
+	 * @param eventName Concrete event name inside that script family.
+	 * @returns Child-process worker able to execute the requested event.
 	 */
 	private loadCloudScriptFunctionWorkerFromCache(type: string, eventName: string): ChildProcess {
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get(type);
 		if (cloudFunction == null) return null;
 
-		// Stores the child script value used in the current execution flow.
 		let childScript = cloudFunction.childScripts.find((x) => x.eventName == eventName);
 		if (childScript == null || !childScript.hasEdit) return null;
 
-		// Stores the final version value used in the current execution flow.
 		let finalVersion = cloudFunction.type + "_" + cloudFunction.version;
 
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = this.cloudScriptWorkerDict.get(finalVersion);
 		if (cloudScriptWorker == null) {
 			return this.loadCloudScriptFunctionWorker(cloudFunction.type, cloudFunction.version, cloudFunction.fullScript);
@@ -1472,21 +1391,17 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Adds the cloud script function.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param script Provides the script value used by this operation.
+	 * Compiles and hot-swaps a child cloud script for a specific event, then broadcasts the update to the cluster.
+	 * @param eventName Event whose child script is being edited.
+	 * @param script Replacement source code for the child script.
 	 * @returns Resolves with the operation result.
 	 */
 	public async addCloudScriptFunction(eventName: string, script: string): Promise<{ success: boolean; errorMessage?: string; version?: string }> {
-		// Stores the type value used in the current execution flow.
 		let type = eventName.split("_")[0];
-		// Stores the version value used in the current execution flow.
 		let version = StringUtility.generateRandomString(7, 0);
 
-		// Stores the file path temp timestamp value used in the current execution flow.
 		let filePathTempTs = __dirname + "/./GN-startup/cloudScript/temp2.ts";
 
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get(type);
 		if (cloudFunction == null)
 			return {
@@ -1494,7 +1409,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				errorMessage: "eventName invalid",
 			};
 
-		// Stores the child script value used in the current execution flow.
 		let childScript = cloudFunction.childScripts.find((x) => x.eventName == eventName);
 		if (childScript == null) {
 			return {
@@ -1503,11 +1417,10 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		// Stores the final script value used in the current execution flow.
+		// Rebuild the template by stitching together the edited child script set for this script family.
 		let finalScript: string = "";
 
 		for (let i = 0; i < cloudFunction.childScripts.length; i++) {
-			// Stores the this child script value used in the current execution flow.
 			let thisChildScript = cloudFunction.childScripts[i];
 
 			if (thisChildScript.eventName == eventName) {
@@ -1519,30 +1432,24 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			}
 		}
 
-		// Stores the full script js value used in the current execution flow.
 		let fullScriptJs: string;
 
 		try {
-			// Stores the template full script path timestamp value used in the current execution flow.
 			let templateFullScriptPathTs = __dirname + "/./GN-startup/cloudScript/templateEventCallback.ts";
-			// Stores the full script timestamp value used in the current execution flow.
 			let fullScriptTs = fs.readFileSync(templateFullScriptPathTs).toString().replace("//$replaceScript", finalScript);
 
 			fs.writeFileSync(filePathTempTs, fullScriptTs);
 
-			// Stores the file path temp value used in the current execution flow.
 			let filePathTemp = __dirname + "/./GN-startup/cloudScript";
 
 			await execSync("npx tsc " + filePathTempTs + " --allowJs --skipLibCheck --esModuleInterop --outDir " + filePathTemp);
 
-			// Stores the file path temp js value used in the current execution flow.
 			let filePathTempJs = __dirname + "/./GN-startup/cloudScript/temp2.js";
 			fullScriptJs = fs.readFileSync(filePathTempJs).toString();
 
 		} catch (err) {
 			if (fs.existsSync(filePathTempTs)) fs.rmSync(filePathTempTs);
 
-			// Stores the error message value used in the current execution flow.
 			let errorMessage = "Unknown error occurred";
 
 			if (err instanceof Error) {
@@ -1561,10 +1468,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		this.gnServer.getHttpApp().getClusterHandler().sendEvent("addEventCloudScriptFunction", { type: type, eventName: eventName, version: version, fullScriptJs: fullScriptJs, script: script, }, false);
 
-		// Stores the final version value used in the current execution flow.
 		let finalVersion = cloudFunction.type + "_" + cloudFunction.version;
 		setTimeout(() => {
-			// Stores the cloud script worker value used in the current execution flow.
 			let cloudScriptWorker = this.cloudScriptWorkerDict.get(finalVersion);
 			if (cloudScriptWorker != null) {
 				cloudScriptWorker.kill("SIGKILL");
@@ -1609,36 +1514,27 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Executes the remote add cloud script function workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
+	 * Applies a hot-reload broadcast received from another cluster node.
+	 * @param request Cluster payload describing the new child-script version.
 	 */
 	private async remoteAddCloudScriptFunction(request: { type: string, eventName: string, version: string, fullScriptJs: string, script: string, }) {
-		// Stores the type value used in the current execution flow.
 		let type = request.type;
-		// Stores the event name value used in the current execution flow.
 		let eventName = request.eventName;
-		// Stores the version value used in the current execution flow.
 		let version = request.version;
-		// Stores the full script js value used in the current execution flow.
 		let fullScriptJs = request.fullScriptJs;
-		// Stores the script value used in the current execution flow.
 		let script = request.script;
 
-		// Stores the cloud function value used in the current execution flow.
 		let cloudFunction = this.cloudScriptFunctionDict.get(type);
 		if (cloudFunction == null)
 			return;
 
-		// Stores the child script value used in the current execution flow.
 		let childScript = cloudFunction.childScripts.find((x) => x.eventName == eventName);
 		if (childScript == null) {
 			return;
 		}
 
-		// Stores the final version value used in the current execution flow.
 		let finalVersion = cloudFunction.type + "_" + cloudFunction.version;
 		setTimeout(() => {
-			// Stores the cloud script worker value used in the current execution flow.
 			let cloudScriptWorker = this.cloudScriptWorkerDict.get(finalVersion);
 			if (cloudScriptWorker != null) {
 				cloudScriptWorker.kill("SIGKILL");
@@ -1656,17 +1552,15 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Loads the cloud script function worker.
-	 * @param type Provides the type value used by this operation.
-	 * @param version Provides the version value used by this operation.
-	 * @param fullScript Provides the full script value used by this operation.
-	 * @returns Returns the operation result.
+	 * Persists a compiled script version to disk and starts a worker for it.
+	 * @param type Script family such as `pre`, `post`, or `system`.
+	 * @param version Version identifier appended to the worker filename.
+	 * @param fullScript Compiled JavaScript source that the worker executes.
+	 * @returns Spawned worker process.
 	 */
 	private loadCloudScriptFunctionWorker(type: string, version: string, fullScript: string): ChildProcess {
-		// Stores the final version value used in the current execution flow.
 		let finalVersion = type + "_" + version;
 
-		// Stores the file path value used in the current execution flow.
 		let filePath = __dirname + "/./GN-startup/cloudScript/" + finalVersion + ".js";
 		fs.writeFileSync(filePath, fullScript);
 
@@ -1674,20 +1568,17 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	}
 
 	/**
-	 * Loads the cloud script worker.
-	 * @param type Provides the type value used by this operation.
-	 * @param version Provides the version value used by this operation.
-	 * @returns Returns the operation result.
+	 * Forks a cloud-script worker process and wires response/event messages back into the main runtime.
+	 * @param type Script family such as `pre`, `post`, or `system`.
+	 * @param version Version identifier appended to the worker filename.
+	 * @returns Spawned worker process.
 	 */
 	private loadCloudScriptWorker(type: string, version: string): ChildProcess {
-		// Stores the final version value used in the current execution flow.
 		let finalVersion = type + "_" + version;
-		// Stores the file path value used in the current execution flow.
 		let filePath = __dirname + "/./GN-startup/cloudScript/" + finalVersion + ".js";
 
 		Debug.log("[GearN] [EventCallback] run cloudScript " + finalVersion);
 
-		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = fork(filePath, {
 			env: {
 				gnServerSettingsOptions: JSON.stringify(this.gnServerSettingsOptions),
@@ -1695,17 +1586,14 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			},
 		});
 
-		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 		cloudScriptWorker.on("message", (cloudScriptResponse: CloudScriptResponse) => {
 			if (cloudScriptResponse.responseId) {
-				// Stores the callback value used in the current execution flow.
 				let callback = thiz.cloudScriptWaitingResponseCallbackDict.get(cloudScriptResponse.responseId);
 				if (callback != null) {
 					callback(cloudScriptResponse);
 				}
 			} else {
-				// Stores the cloud script event value used in the current execution flow.
 				let cloudScriptEvent: CloudScriptEvent = cloudScriptResponse as any;
 				thiz.gnServer.getCloudScriptEventService().handleEvent(cloudScriptEvent);
 			}
@@ -1724,7 +1612,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 }
 
 export class PostEventCallbackService implements IPostEventCallbackService {
-	// Stores the event lst dict collection used by this instance.
+	// Post-handler subscribers grouped by event name.
 	private eventLstDict: Map<string, Array<OnPostCallbackFunction>>;
 
 	/**
@@ -1734,40 +1622,36 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 		this.eventLstDict = new Map();
 	}
 
-	// Stores the event callback log collection value used by this instance.
+	// Runtime log collection and optional cloud-script bridge invoked after handlers finish.
 	private eventCallbackLogCollection: mongoDB.Collection<mongoDB.Document>;
-	// Stores the cloud script service value used by this instance.
 	private cloudScriptService: IEventCallbackCloudScriptService;
 
 	/**
-	 * Executes the subscriber event workflow.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param callbackFunction Provides the callback function value used by this operation.
+	 * Registers an in-process post callback for a specific event.
+	 * @param eventName Request event name.
+	 * @param callbackFunction Callback invoked after the handler and cloud script complete.
 	 */
 	public subscriberEvent(eventName: string, callbackFunction: OnPostCallbackFunction) {
 		if (!this.eventLstDict.has(eventName)) {
 			this.eventLstDict.set(eventName, []);
 		}
 
-		// Stores the event lst value used in the current execution flow.
 		let eventLst = this.eventLstDict.get(eventName);
 		eventLst.push(callbackFunction);
 	}
 
 	/**
-	 * Executes the un subscriber event workflow.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param callbackFunction Provides the callback function value used by this operation.
+	 * Removes a previously registered in-process post callback.
+	 * @param eventName Request event name.
+	 * @param callbackFunction Callback instance to remove.
 	 */
 	public unSubscriberEvent(eventName: string, callbackFunction: OnPostCallbackFunction) {
 		if (!this.eventLstDict.has(eventName)) {
 			this.eventLstDict.set(eventName, []);
 		}
 
-		// Stores the event lst value used in the current execution flow.
 		let eventLst = this.eventLstDict.get(eventName);
 
-		// Stores the index of value used in the current execution flow.
 		let indexOf = eventLst.indexOf(callbackFunction);
 
 		if (indexOf != -1) {
@@ -1776,28 +1660,28 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 	}
 
 	/**
-	 * Sets the event callback log collection.
-	 * @param eventCallbackLogCollection Provides the event callback log collection used by this operation.
+	 * Injects the runtime collection used to persist post-event logs.
+	 * @param eventCallbackLogCollection Mongo collection used for post-event log documents.
 	 */
 	public setEventCallbackLogCollection(eventCallbackLogCollection: mongoDB.Collection<mongoDB.Document>): void {
 		this.eventCallbackLogCollection = eventCallbackLogCollection;
 	}
 
 	/**
-	 * Sets the cloud script service.
-	 * @param cloudScriptService Provides the cloud script service used by this operation.
+	 * Injects the cloud-script bridge used by post callbacks.
+	 * @param cloudScriptService Cloud-script callback runtime.
 	 */
 	public setCloudScriptService(cloudScriptService: IEventCallbackCloudScriptService): void {
 		this.cloudScriptService = cloudScriptService;
 	}
 
 	/**
-	 * Executes the on event workflow asynchronously.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @param operationResponse Provides the operation response value used by this operation.
+	 * Persists the post-event log, runs the post cloud script, then executes local post subscribers.
+	 * @param eventName Request event name.
+	 * @param request Mutable request context.
+	 * @param secretInfo Authenticated secret context.
+	 * @param operationRequest Request that produced the response.
+	 * @param operationResponse Final response produced by the handler pipeline.
 	 */
 	public async onEvent(
 		eventName: string,
@@ -1806,7 +1690,6 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse
 	): Promise<void> {
-		// Stores the operation response to data value used in the current execution flow.
 		let operationResponseToData = OperationHelper.toDataOperationResponse(operationResponse)
 
 		this.eventCallbackLogCollection.insertOne({
@@ -1828,7 +1711,6 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 			return;
 		}
 
-		// Stores the event lst value used in the current execution flow.
 		let eventLst = this.eventLstDict.get(eventName);
 
 		for (let i = 0; i < eventLst.length; i++) {
@@ -1843,54 +1725,54 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 }
 
 export class PreEventCallbackService implements IPreEventCallbackService {
-	// Stores the event dict collection used by this instance.
+	// One pre-handler callback per event name.
 	private eventDict: Map<string, OnPreCallbackFunction>;
-	// Stores the cloud script service value used by this instance.
+	// Optional cloud-script bridge executed before in-process pre callbacks.
 	private cloudScriptService: IEventCallbackCloudScriptService;
 
 	/**
-	 * Initializes a new pre event callback service instance.
+	 * Initializes the pre-callback registry.
 	 */
 	constructor() {
 		this.eventDict = new Map();
 	}
 
 	/**
-	 * Executes the subscriber event workflow.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param callbackFunction Provides the callback function value used by this operation.
+	 * Registers an in-process pre callback for a specific event.
+	 * @param eventName Request event name.
+	 * @param callbackFunction Callback invoked before the normal handler runs.
 	 */
 	public subscriberEvent(eventName: string, callbackFunction: OnPreCallbackFunction) {
 		this.eventDict.set(eventName, callbackFunction);
 	}
 
 	/**
-	 * Executes the un subscriber event workflow.
-	 * @param eventName Provides the event name value used by this operation.
+	 * Removes the in-process pre callback for a specific event.
+	 * @param eventName Request event name.
 	 */
 	public unSubscriberEvent(eventName: string) {
 		this.eventDict.delete(eventName);
 	}
 
 	/**
-	 * Sets the cloud script service.
-	 * @param cloudScriptService Provides the cloud script service used by this operation.
+	 * Injects the cloud-script bridge used by pre callbacks.
+	 * @param cloudScriptService Cloud-script callback runtime.
 	 */
 	public setCloudScriptService(cloudScriptService: IEventCallbackCloudScriptService): void {
 		this.cloudScriptService = cloudScriptService;
 	}
 
 	/**
-	 * Executes the on event workflow asynchronously.
-	 * @param eventName Provides the event name value used by this operation.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
+	 * Runs the cloud-script pre hook first, then falls back to the in-process pre callback if needed.
+	 * Returning a non-null `OperationResponse` short-circuits the normal request handler.
+	 * @param eventName Request event name.
+	 * @param request Mutable request context.
+	 * @param secretInfo Authenticated secret context.
+	 * @param operationRequest Request entering the handler pipeline.
 	 * @returns Resolves with the operation result.
 	 */
 	public async onEvent(eventName: string, request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		if (this.cloudScriptService) {
-			// Stores the operation response value used in the current execution flow.
 			let operationResponse = await this.cloudScriptService.executePre(eventName, request, secretInfo, operationRequest);
 
 			if (operationResponse) return operationResponse;

@@ -13,6 +13,7 @@ Use this repository as the source of truth for the GearN Server runtime and expo
 - `src/GN-app-api/handler/controller/RequestController.ts`
 - `src/index.ts`
 - `DOMAIN_RELATIONSHIP.md`
+- `CLOUDSCRIPT_USAGE.md` when the task touches CloudScript
 
 ## Source Of Truth
 

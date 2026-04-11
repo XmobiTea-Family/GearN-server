@@ -10,11 +10,11 @@ import { Commands } from "./../../GN-common/constant/Commands";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
 
 interface MaxRequestItem {
-	// Stores the ID value used by this contract.
+	// Cache key used to track one peer bucket.
 	id: string;
-	// Stores the count value used by this contract.
+	// Number of requests seen inside the current rolling window.
 	count: number;
-	// Stores the timestamp last update value used by this contract.
+	// Last time this bucket was updated.
 	tsLastUpdate: number;
 }
 
@@ -28,66 +28,53 @@ enum BanType {
 	BLACK_LIST = 1,
 }
 
+/**
+ * Transport-agnostic throttling middleware for HTTP, socket, uploads, downloads, and blacklist/whitelist rules.
+ */
 export class AntiDdosMiddleware {
-	// Stores the FIVE MINUTE timestamp value used by this instance.
+	// Interval used to refresh remote ban lists and clean short-lived request counters.
 	private static readonly FIVE_MINUTE_TS: number = 5 * 60 * 1000;
-	// Stores the k MULTIPLE ADMIN value used by this instance.
+	// Admin requests receive a larger budget multiplier than normal clients.
 	private static readonly K_MULTIPLE_ADMIN: number = 500;
-	// Stores the k MULTIPLE WHITE LIST value used by this instance.
+	// Whitelisted IPs receive a large request budget multiplier.
 	private static readonly K_MULTIPLE_WHITE_LIST: number = 100;
-	// Stores the k MULTIPLE BLACK LIST value used by this instance.
+	// Blacklisted IPs are heavily penalized instead of being fully bypassed.
 	private static readonly K_MULTIPLE_BLACK_LIST: number = 5;
 
-	// Stores the socket request per IP dictionary collection used by this instance.
+	// Rolling request counters keyed by transport and identity dimension.
 	private socketRequestPerIPDic: { [k: string]: MaxRequestItem };
-	// Stores the socket request per peer dictionary collection used by this instance.
 	private socketRequestPerPeerDic: { [k: string]: MaxRequestItem };
-	// Stores the HTTP request per IP dictionary collection used by this instance.
 	private httpRequestPerIPDic: { [k: string]: MaxRequestItem };
-	// Stores the HTTP request per peer dictionary collection used by this instance.
 	private httpRequestPerPeerDic: { [k: string]: MaxRequestItem };
-	// Stores the current HTTP request count value used by this instance.
+	// Pending-request counters used to limit concurrent pressure.
 	private currentHttpRequestCount: number;
-	// Stores the current socket request count value used by this instance.
 	private currentSocketRequestCount: number;
-	// Stores the current HTTP upload request count value used by this instance.
 	private currentHttpUploadRequestCount: number;
-	// Stores the current HTTP download request count value used by this instance.
 	private currentHttpDownloadRequestCount: number;
 
-	// Stores the report DDoS collection value used by this instance.
+	// Collections used to persist DDoS reports and ban rules.
 	private reportDdosCollection: mongoDB.Collection<mongoDB.Document>;
-	// Stores the ban DDoS collection value used by this instance.
 	private banDdosCollection: mongoDB.Collection<mongoDB.Document>;
 
-	// Stores the socket max request per second per IP value used by this instance.
+	// Socket request-rate and payload-size limits.
 	private socketMaxRequestPerSecondPerIp: number;
-	// Stores the socket max request per second per peer value used by this instance.
 	private socketMaxRequestPerSecondPerPeer: number;
-	// Stores the socket max pending request value used by this instance.
 	private socketMaxPendingRequest: number;
-	// Stores the socket max request size value used by this instance.
 	private socketMaxRequestSize: number;
 
-	// Stores the HTTP max request per second per IP value used by this instance.
+	// HTTP request-rate and payload-size limits.
 	private httpMaxRequestPerSecondPerIp: number;
-	// Stores the HTTP max request per second per peer value used by this instance.
 	private httpMaxRequestPerSecondPerPeer: number;
-	// Stores the HTTP max pending request value used by this instance.
 	private httpMaxPendingRequest: number;
-	// Stores the HTTP max request size value used by this instance.
 	private httpMaxRequestSize: number;
 
-	// Stores the max upload pending request value used by this instance.
+	// Dedicated pending-request limits for upload and download endpoints.
 	private maxUploadPendingRequest: number;
-	// Stores the max download pending request value used by this instance.
 	private maxDownloadPendingRequest: number;
 
-	// Stores the default IP white lst list used by this instance.
+	// Static allow-list from config plus dynamic lists fetched from MongoDB.
 	private defaultIPWhiteLst: string[];
-	// Stores the IP white lst list used by this instance.
 	private ipWhiteLst: string[];
-	// Stores the IP black lst list used by this instance.
 	private ipBlackLst: string[];
 
 	/**
@@ -187,14 +174,13 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Sets the IP white list.
+	 * Seeds the in-memory allow-list with statically configured IPs.
 	 * @param ipWhiteList Provides the IP white list value used by this operation.
 	 */
 	public setIPWhiteList(ipWhiteList: string[]): void {
 		this.defaultIPWhiteLst = ipWhiteList;
 		if (this.defaultIPWhiteLst) {
 			for (let j = 0; j < this.defaultIPWhiteLst.length; j++) {
-				// Stores the default IP value used in the current execution flow.
 				let defaultIP = this.defaultIPWhiteLst[j];
 				if (!this.ipWhiteLst.includes(defaultIP)) this.ipWhiteLst.push(defaultIP);
 			}
@@ -202,13 +188,12 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Executes the check request size body via JSON workflow asynchronously.
+	 * Rejects oversized JSON HTTP payloads before they reach the request parser.
 	 * @param req Provides the req value used by this operation.
 	 * @param res Provides the res value used by this operation.
 	 * @param next Provides the next value used by this operation.
 	 */
 	public async checkRequestSizeBodyViaJson(req: express.Request, res: express.Response, next: Function) {
-		// Stores the return code value used in the current execution flow.
 		let returnCode = this.getReturnCodeForRequestSizeHttp(req);
 		if (returnCode != ReturnCode.Ok) {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
@@ -221,16 +206,14 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Executes the check request size body via msg pack workflow asynchronously.
+	 * Rejects oversized MsgPack HTTP payloads before they reach the request parser.
 	 * @param req Provides the req value used by this operation.
 	 * @param res Provides the res value used by this operation.
 	 * @param next Provides the next value used by this operation.
 	 */
 	public async checkRequestSizeBodyViaMsgPack(req: express.Request, res: express.Response, next: Function) {
-		// Stores the return code value used in the current execution flow.
 		let returnCode = this.getReturnCodeForRequestSizeHttp(req);
 		if (returnCode != ReturnCode.Ok) {
-			// Stores the content value used in the current execution flow.
 			let content = Buffer.from(encode({ returnCode: returnCode }));
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_MSGPACK);
 			res.setHeader(Commands.CONTENT_LENGTH, content.length);
@@ -241,12 +224,11 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Returns the return code for request size HTTP.
+	 * Calculates the HTTP payload-size result code, with overrides for a few intentionally large admin routes.
 	 * @param req Provides the req value used by this operation.
 	 * @returns Returns the return code for request size HTTP.
 	 */
 	private getReturnCodeForRequestSizeHttp(req: express.Request): number {
-		// Stores the URL value used in the current execution flow.
 		let url = req.url;
 		if (url == "/dashboard/client/setSecretInfoInformation"
 			|| url == "/dashboard/client/setMasterGameSettings"
@@ -887,10 +869,12 @@ export class AntiDdosMiddleware {
 	 * Runs the current workflow.
 	 */
 	public run() {
+		// Delay the first remote ban-list fetch slightly so startup can finish wiring MongoDB first.
 		setTimeout(() => {
 			this.getBanDdos();
 		}, 5000);
 
+		// Keep ban lists fresh and prune expired in-memory request buckets.
 		setInterval(() => {
 			this.getBanDdos();
 			this.clearHttpRequestPerIPDic();
@@ -901,17 +885,15 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Returns the ban DDoS.
+	 * Reloads blacklist/whitelist rules from MongoDB and merges them with static allow-list entries.
 	 */
 	private async getBanDdos() {
-		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		this.ipBlackLst.length = 0;
 		this.ipWhiteLst.length = 0;
 
 		try {
-			// Stores the ban DDoS results value used in the current execution flow.
 			let banDdosResults = await this.banDdosCollection.find({}, {
 				projection: {
 					ip: true,
@@ -920,9 +902,7 @@ export class AntiDdosMiddleware {
 			}).limit(500).toArray();
 
 			for (let i = 0; i < banDdosResults.length; i++) {
-				// Stores the ban DDoS result value used in the current execution flow.
 				let banDdosResult = banDdosResults[i];
-				// Stores the IP value used in the current execution flow.
 				let ip = banDdosResult.ip;
 
 				if (banDdosResult.tsExpire == -1 || banDdosResult.tsExpire > currentMilliseconds) {
@@ -934,7 +914,6 @@ export class AntiDdosMiddleware {
 
 						if (this.defaultIPWhiteLst) {
 							for (let j = 0; j < this.defaultIPWhiteLst.length; j++) {
-								// Stores the default IP value used in the current execution flow.
 								let defaultIP = this.defaultIPWhiteLst[j];
 								if (!this.ipWhiteLst.includes(defaultIP)) this.ipWhiteLst.push(defaultIP);
 							}
@@ -949,7 +928,7 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Executes the clear HTTP request per IP dictionary workflow.
+	 * Drops expired HTTP-per-IP counters once they are older than one rolling window.
 	 */
 	private clearHttpRequestPerIPDic(): void {
 		try {
@@ -982,7 +961,7 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Executes the clear HTTP request per peer dictionary workflow.
+	 * Drops expired HTTP-per-peer counters once they are older than one rolling window.
 	 */
 	private clearHttpRequestPerPeerDic(): void {
 		try {
@@ -1015,7 +994,7 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Executes the clear socket request per IP dictionary workflow.
+	 * Drops expired socket-per-IP counters once they are older than one rolling window.
 	 */
 	private clearSocketRequestPerIPDic(): void {
 		try {
@@ -1048,7 +1027,7 @@ export class AntiDdosMiddleware {
 	}
 
 	/**
-	 * Executes the clear socket request per peer dictionary workflow.
+	 * Drops expired socket-per-peer counters once they are older than one rolling window.
 	 */
 	private clearSocketRequestPerPeerDic(): void {
 		try {

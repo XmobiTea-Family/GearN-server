@@ -1,107 +1,258 @@
+/**
+ * Enumerates domain-level error codes returned inside successful GearN responses.
+ *
+ * These codes are business errors carried inside the response payload after
+ * `returnCode === ReturnCode.Ok`. They do not replace low-level return codes.
+ */
 export class ErrorCode {
-	// Stores the ok value used by this instance.
+	/**
+	 * The business operation completed successfully.
+	 */
 	public static readonly Ok: number = 1;
 
-	// Stores the account not found value used by this instance.
+	/**
+	 * The requested username/account does not exist.
+	 */
 	public static readonly AccountNotFound: number = 2;
-	// Stores the account password wrong value used by this instance.
+
+	/**
+	 * The provided account password is incorrect.
+	 */
 	public static readonly AccountPasswordWrong: number = 3;
-	// Stores the account username exists value used by this instance.
+
+	/**
+	 * The requested username already exists and cannot be created again.
+	 */
 	public static readonly AccountUsernameExists: number = 4;
-	// Stores the verify token error value used by this instance.
+
+	/**
+	 * The provided token could not be verified or decoded.
+	 */
 	public static readonly VerifyTokenError: number = 5;
-	// Stores the verify failed value used by this instance.
+
+	/**
+	 * An external/provider verification step failed.
+	 */
 	public static readonly VerifyFailed: number = 6;
-	// Stores the character player not found value used by this instance.
+
+	/**
+	 * The target character player does not exist.
+	 */
 	public static readonly CharacterPlayerNotFound: number = 7;
-	// Stores the not enough currency value used by this instance.
+
+	/**
+	 * The target wallet or owner does not have enough currency to complete the operation.
+	 */
 	public static readonly NotEnoughCurrency: number = 8;
-	// Stores the key not found value used by this instance.
+
+	/**
+	 * The requested key does not exist in the target data set.
+	 */
 	public static readonly KeyNotFound: number = 9;
-	// Stores the item not found value used by this instance.
+
+	/**
+	 * The target inventory item does not exist.
+	 */
 	public static readonly ItemNotFound: number = 10;
-	// Stores the catalog ID not found value used by this instance.
+
+	/**
+	 * The referenced catalog id does not exist.
+	 */
 	public static readonly CatalogIdNotFound: number = 11;
-	// Stores the group not found value used by this instance.
+
+	/**
+	 * The target group does not exist.
+	 */
 	public static readonly GroupNotFound: number = 12;
-	// Stores the owner not found value used by this instance.
+
+	/**
+	 * The resolved owner entity does not exist.
+	 */
 	public static readonly OwnerNotFound: number = 13;
-	// Stores the class ID not found value used by this instance.
+
+	/**
+	 * The referenced class id does not exist.
+	 */
 	public static readonly ClassIdNotFound: number = 14;
-	// Stores the member not found value used by this instance.
+
+	/**
+	 * The target group member or relationship member does not exist.
+	 */
 	public static readonly MemberNotFound: number = 15;
-	// Stores the player not member value used by this instance.
+
+	/**
+	 * The player is not currently a member of the target group.
+	 */
 	public static readonly PlayerNotMember: number = 16;
-	// Stores the game player not found value used by this instance.
+
+	/**
+	 * The target game player does not exist.
+	 */
 	public static readonly GamePlayerNotFound: number = 17;
-	// Stores the file not found value used by this instance.
+
+	/**
+	 * The requested file metadata or physical file does not exist.
+	 */
 	public static readonly FileNotFound: number = 18;
-	// Stores the file not upload value used by this instance.
+
+	/**
+	 * The file metadata exists but the file content has not been uploaded yet.
+	 */
 	public static readonly FileNotUpload: number = 19;
-	// Stores the owner type not support value used by this instance.
+
+	/**
+	 * The requested owner type is not supported by the target operation.
+	 */
 	public static readonly OwnerTypeNotSupport: number = 20;
-	// Stores the item not stackable value used by this instance.
+
+	/**
+	 * The item cannot be stacked, so amount-based operations are invalid.
+	 */
 	public static readonly ItemNotStackable: number = 21;
-	// Stores the game not found value used by this instance.
+
+	/**
+	 * The target game does not exist.
+	 */
 	public static readonly GameNotFound: number = 22;
-	// Stores the game is exists value used by this instance.
+
+	/**
+	 * The game already exists and cannot be created again with the same identity.
+	 */
 	public static readonly GameIsExists: number = 23;
-	// Stores the secret info not found value used by this instance.
+
+	/**
+	 * The requested secret-info record does not exist.
+	 */
 	public static readonly SecretInfoNotFound: number = 24;
-	// Stores the secret info is exists value used by this instance.
+
+	/**
+	 * The secret-info record already exists.
+	 */
 	public static readonly SecretInfoIsExists: number = 25;
-	// Stores the external not linked value used by this instance.
+
+	/**
+	 * The requested external identity is not linked to the current account.
+	 */
 	public static readonly ExternalNotLinked: number = 26;
-	// Stores the external linked other account value used by this instance.
+
+	/**
+	 * The external identity is already linked to a different account.
+	 */
 	public static readonly ExternalLinkedOtherAccount: number = 27;
-	// Stores the external linked other value value used by this instance.
+
+	/**
+	 * The external provider/value pair conflicts with an existing linked value.
+	 */
 	public static readonly ExternalLinkedOtherValue: number = 28;
-	// Stores the master player not found value used by this instance.
+
+	/**
+	 * The target master player does not exist.
+	 */
 	public static readonly MasterPlayerNotFound: number = 29;
-	// Stores the store item not found value used by this instance.
+
+	/**
+	 * The target store item does not exist.
+	 */
 	public static readonly StoreItemNotFound: number = 30;
-	// Stores the buyer not found value used by this instance.
+
+	/**
+	 * The buyer entity does not exist.
+	 */
 	public static readonly BuyerNotFound: number = 31;
-	// Indicates whether not buy this store item can be performed.
+
+	/**
+	 * The requested store item cannot be purchased in the current state or by the current buyer.
+	 */
 	public static readonly CanNotBuyThisStoreItem: number = 32;
-	// Stores the exception when validate receipt value used by this instance.
+
+	/**
+	 * An exception occurred while validating a platform receipt.
+	 */
 	public static readonly ExceptionWhenValidateReceipt: number = 33;
-	// Stores the store invalid value used by this instance.
+
+	/**
+	 * The target store/provider configuration is invalid.
+	 */
 	public static readonly StoreInvalid: number = 34;
-	// Stores the receipt invalid value used by this instance.
+
+	/**
+	 * The provided purchase receipt is invalid.
+	 */
 	public static readonly ReceiptInvalid: number = 35;
-	// Stores the store item had been remove value used by this instance.
+
+	/**
+	 * The target store item was removed and can no longer be used for purchase flows.
+	 */
 	public static readonly StoreItemHadBeenRemove: number = 36;
-	// Stores the display name has use value used by this instance.
+
+	/**
+	 * The requested display name is already in use.
+	 */
 	public static readonly DisplayNameHasUse: number = 37;
-	// Stores the player ban value used by this instance.
+
+	/**
+	 * The target player is currently banned.
+	 */
 	public static readonly PlayerBan: number = 38;
 
-	// Stores the matchmaking ticket not found value used by this instance.
+	/**
+	 * The target matchmaking ticket does not exist.
+	 */
 	public static readonly MatchmakingTicketNotFound: number = 39;
-	// Stores the matchmaking ticket already completed value used by this instance.
+
+	/**
+	 * The matchmaking ticket already completed and cannot be joined or modified further.
+	 */
 	public static readonly MatchmakingTicketAlreadyCompleted: number = 40;
-	// Stores the matchmaking player has not joined ticket value used by this instance.
+
+	/**
+	 * The player is not a member of the referenced matchmaking ticket.
+	 */
 	public static readonly MatchmakingPlayerHasNotJoinedTicket: number = 41;
-	// Stores the match not found value used by this instance.
+
+	/**
+	 * The requested match does not exist.
+	 */
 	public static readonly MatchNotFound: number = 42;
-	// Stores the matchmaking player has joined other ticket value used by this instance.
+
+	/**
+	 * The player already joined a different matchmaking ticket that conflicts with this request.
+	 */
 	public static readonly MatchmakingPlayerHasJoinedOtherTicket: number = 43;
-	// Stores the matchmaking queue not found value used by this instance.
+
+	/**
+	 * The referenced matchmaking queue does not exist.
+	 */
 	public static readonly MatchmakingQueueNotFound: number = 44;
-	// Stores the ticket size error value used by this instance.
+
+	/**
+	 * The requested ticket size violates queue configuration.
+	 */
 	public static readonly TicketSizeError: number = 45;
 
-	// Stores the execute error value used by this instance.
+	/**
+	 * CloudScript execution failed inside the target function.
+	 */
 	public static readonly ExecuteError: number = 46;
-	// Stores the version invalid value used by this instance.
+
+	/**
+	 * The requested CloudScript version is invalid or unavailable.
+	 */
 	public static readonly VersionInvalid: number = 47;
-	// Stores the email invalid value used by this instance.
+
+	/**
+	 * The provided email address is syntactically or semantically invalid.
+	 */
 	public static readonly EmailInvalid: number = 48;
 
-	// Stores the store item had purchase and non consumable value used by this instance.
+	/**
+	 * The buyer already owns this non-consumable store item.
+	 */
 	public static readonly StoreItemHadPurchaseAndNonConsumable: number = 49;
-	// Stores the store item had exists value used by this instance.
+
+	/**
+	 * The store item already exists and cannot be created again with the same identity.
+	 */
 	public static readonly StoreItemHadExists: number = 50;
 
 }

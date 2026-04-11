@@ -1,5 +1,6 @@
 const fs = require("fs");
 
+// Local bootstrap entry used when running the built package with `GNconfig.debug.json`.
 const optionsPath = __dirname + "/./GNconfig.debug.json";
 let optionStr = fs.readFileSync(optionsPath).toString();
 let fullOptions = JSON.parse(optionStr);
@@ -11,8 +12,10 @@ let applicationStartup = new ServerApplicationStartup();
 applicationStartup.config(options);
 applicationStartup.run();
 
+// Keep a direct handle to the runtime while debugging startup from this file.
 let gnServer = applicationStartup.getGNServer();
 
+// Mirror fatal process-level failures to GearN logging so local bootstrap issues are visible.
 process.on("uncaughtException", (uncaughtException) => {
 	Debug.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
 });

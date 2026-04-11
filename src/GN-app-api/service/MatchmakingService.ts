@@ -7,8 +7,11 @@ import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleExpansionType,
 import { GNServer } from "./../../GNServer";
 import { IMatchmakingService, MatchmakingTicketCanMatch } from "./IMatchmakingService";
 
+/**
+ * Evaluates waiting matchmaking tickets against queue rules and materializes match documents.
+ */
 export class MatchmakingService implements IMatchmakingService {
-    // Stores the GearN server value used by this instance.
+    // Runtime access to queue settings, collections, and other shared services.
     private gnServer: GNServer;
 
     /**
@@ -20,16 +23,15 @@ export class MatchmakingService implements IMatchmakingService {
     }
 
     /**
-     * Executes the handle workflow asynchronously.
+     * Loads waiting tickets for one game, tries to build valid matches, and persists successful results.
      * @param gameId Provides the game ID value used by this operation.
      * @returns Resolves with the operation result.
      */
     public async handle(gameId: string): Promise<MatchmakingTicketCanMatch[]> {
         try {
-            // Stores the matchmaking ticket collection value used in the current execution flow.
             let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
-            // find tat ca nhung cai ticket nay
+            // Only tickets still waiting for a match are considered in this evaluation pass.
             let results = await matchmakingTicketCollection.find({ status: <number>MatchmakingTicketStatus.WaitingForMatch }, {
                 projection: {
                     status: true,
@@ -37,17 +39,15 @@ export class MatchmakingService implements IMatchmakingService {
                 }
             });
 
-            // Stores the matchmaking tickets value used in the current execution flow.
             let matchmakingTickets: MatchmakingTicket[] = [];
 
             while (await results.hasNext()) {
-                // Stores the result value used in the current execution flow.
                 let result = await results.next();
 
                 matchmakingTickets.push(new MatchmakingTicket(result, matchmakingTicketCollection));
             }
 
-            // Stores the matchmaking ticket can matchs value used in the current execution flow.
+            // Candidate matches are built entirely in memory before any ticket state is persisted.
             let matchmakingTicketCanMatchs = this.getMatchmakingTicketCanMatchs(gameId, matchmakingTickets);
 
             if (matchmakingTicketCanMatchs.length != 0) {
@@ -70,30 +70,26 @@ export class MatchmakingService implements IMatchmakingService {
     }
 
     /**
-     * Returns the matchmaking ticket can matchs.
+     * Tries to assemble candidate matches from the waiting tickets of one game.
      * @param gameId Provides the game ID value used by this operation.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      * @returns Returns the matchmaking ticket can matchs.
      */
     private getMatchmakingTicketCanMatchs(gameId: string, matchmakingTickets: MatchmakingTicket[]): MatchmakingTicketCanMatch[] {
-        // Stores the resolved matchmaking queue settings instance for the current execution flow.
         let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
 
-        // Stores the matchmaking ticket can matchs value used in the current execution flow.
         let matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[] = [];
 
-        // match cac ticket lai voi nhau
+        // Build one candidate around each ticket, then let later filters remove overlapping or invalid results.
         for (let i = 0; i < matchmakingTickets.length; i++) {
             try {
-                // Stores the matchmaking ticket value used in the current execution flow.
                 let matchmakingTicket = matchmakingTickets[i];
 
-                // Stores the matchmaking queue setting value used in the current execution flow.
-                let matchmakingQueueSetting = matchmakingQueueSettings.find(x => x.queueName == matchmakingTicketCanMatch.queueName);
+                // Queue settings decide match size, team layout, and advanced matchmaking rules.
+                let matchmakingQueueSetting = matchmakingQueueSettings.find(x => x.queueName == matchmakingTicket.getQueueName());
 
                 if (matchmakingQueueSetting == null) continue;
 
-                // Stores the matchmaking ticket can match value used in the current execution flow.
                 let matchmakingTicketCanMatch: MatchmakingTicketCanMatch = {
                     matchId: StringUtility.generateRandomString(15, 0),
                     queueName: matchmakingTicket.getQueueName(),
@@ -119,7 +115,6 @@ export class MatchmakingService implements IMatchmakingService {
                 }
                 else {
                     for (let j = 0; j < matchmakingQueueSetting.teams.length; j++) {
-                        // Stores the team value used in the current execution flow.
                         let team = matchmakingQueueSetting.teams[j];
                         matchmakingTicketCanMatch.matchmakingTicketTeams.push({
                             teamId: team.teamId,
@@ -132,7 +127,7 @@ export class MatchmakingService implements IMatchmakingService {
                     }
                 }
 
-                // Stores the my team matchmaking ticket can match value used in the current execution flow.
+                // Seed the first team with the current ticket, then try to fill the remaining capacity.
                 let myTeamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.find(x => x.teamSize.max >= matchmakingTicket.getMembers().length);
                 if (myTeamMatchmakingTicketCanMatch == null) continue;
 
@@ -153,14 +148,13 @@ export class MatchmakingService implements IMatchmakingService {
                     });
 
                     for (let j = 0; j < matchmakingTickets.length; j++) {
-                        // Stores the next matchmaking ticket value used in the current execution flow.
                         let nextMatchmakingTicket = matchmakingTickets[j];
 
                         if (nextMatchmakingTicket.getQueueName() != matchmakingTicket.getQueueName()) continue;
 
                         if (matchmakingTicketCanMatch.ticketIds.includes(nextMatchmakingTicket.getTicketId())) continue;
 
-                        // Stores the team matchmaking ticket can match value used in the current execution flow.
+                        // When there are no explicit rules, greedily fill the smallest team first.
                         let teamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.members.length - b.members.length)[0];
 
                         if (matchmakingTicketCanMatch.memberIds.length + nextMatchmakingTicket.getMembers().length <= matchmakingQueueSetting.matchSize.max && teamMatchmakingTicketCanMatch.members.length + nextMatchmakingTicket.getMembers().length <= teamMatchmakingTicketCanMatch.teamSize.max) {
@@ -182,7 +176,7 @@ export class MatchmakingService implements IMatchmakingService {
                     }
                 }
                 else {
-                    // Stores the last member count value used in the current execution flow.
+                    // Track the last ticket size to support similarity rules when teams are filled progressively.
                     let lastMemberCount = matchmakingTicket.getMembers().length;
 
                     matchmakingTicketCanMatch.tempTicketIds.push(matchmakingTicket.getTicketId());
@@ -201,7 +195,6 @@ export class MatchmakingService implements IMatchmakingService {
                     });
 
                     for (let j = 0; j < matchmakingTickets.length; j++) {
-                        // Stores the next matchmaking ticket value used in the current execution flow.
                         let nextMatchmakingTicket = matchmakingTickets[j];
 
                         if (nextMatchmakingTicket.getQueueName() != matchmakingTicket.getQueueName()) continue;
@@ -217,7 +210,7 @@ export class MatchmakingService implements IMatchmakingService {
 
                         if (!this.isSetIntersectionValid(matchmakingTicket, nextMatchmakingTicket, matchmakingQueueSetting)) continue;
 
-                        // Stores the team matchmaking ticket can match value used in the current execution flow.
+                        // Rule-based queues still prefer filling the smallest temporary team first.
                         let teamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.tempMembers.length - b.tempMembers.length)[0];
 
                         if (matchmakingTicketCanMatch.tempMemberIds.length + nextMatchmakingTicket.getMembers().length <= matchmakingQueueSetting.matchSize.max && teamMatchmakingTicketCanMatch.tempMembers.length + nextMatchmakingTicket.getMembers().length <= teamMatchmakingTicketCanMatch.teamSize.max) {
@@ -243,7 +236,7 @@ export class MatchmakingService implements IMatchmakingService {
                                 memberCount: nextMatchmakingTicket.getMembers().length
                             });
 
-                            // Tracks whether add to main can be performed.
+                            // Promote temporary teams into the final candidate only when the rule set still holds.
                             let canAddToMain = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.tempMembers.length - b.tempMembers.length)[0] == myTeamMatchmakingTicketCanMatch;
                             if (canAddToMain) {
                                 for (let l = 0; l < matchmakingTicketCanMatch.matchmakingTicketTeams.length; l++) {
@@ -327,27 +320,19 @@ export class MatchmakingService implements IMatchmakingService {
     }
 
     /**
-     * Checks whether match size valid.
-     * @param matchmakingTicketCanMatch Provides the matchmaking ticket can match value used by this operation.
-     * @param matchmakingQueueSetting Provides the matchmaking queue setting value used by this operation.
-     * @returns Returns the operation result.
+     * Verifies the total member count against the queue match-size bounds.
      */
     private isMatchSizeValid(matchmakingTicketCanMatch: MatchmakingTicketCanMatch, matchmakingQueueSetting: xMatchmakingQueueSettings): boolean {
         return matchmakingTicketCanMatch.memberIds.length >= matchmakingQueueSetting.matchSize.min && matchmakingTicketCanMatch.memberIds.length <= matchmakingQueueSetting.matchSize.max;
     }
 
     /**
-     * Checks whether team size valid.
-     * @param matchmakingTicketCanMatch Provides the matchmaking ticket can match value used by this operation.
-     * @param matchmakingQueueSetting Provides the matchmaking queue setting value used by this operation.
-     * @returns Returns the operation result.
+     * Verifies each team against the configured team-size bounds when the queue is team-based.
      */
     private isTeamSizeValid(matchmakingTicketCanMatch: MatchmakingTicketCanMatch, matchmakingQueueSetting: xMatchmakingQueueSettings): boolean {
         if (matchmakingQueueSetting.teams != null && matchmakingQueueSetting.teams.length != 0) {
             for (let k = 0; k < matchmakingTicketCanMatch.matchmakingTicketTeams.length; k++) {
-                // Stores the matchmaking ticket team value used in the current execution flow.
                 let matchmakingTicketTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[k];
-                // Stores the matchmaking queue setting team value used in the current execution flow.
                 let matchmakingQueueSettingTeam = matchmakingQueueSetting.teams.find(x => x.teamId == matchmakingTicketTeam.teamId);
 
                 if (matchmakingTicketTeam.members.length < matchmakingQueueSettingTeam.teamSize.min
@@ -361,31 +346,23 @@ export class MatchmakingService implements IMatchmakingService {
     }
 
     /**
-     * Checks whether team ticket size balance valid.
-     * @param matchmakingTicketCanMatch Provides the matchmaking ticket can match value used by this operation.
-     * @param matchmakingQueueSetting Provides the matchmaking queue setting value used by this operation.
-     * @returns Returns the operation result.
+     * Verifies balance between team sizes, including optional rule expansion over time.
      */
     private isTeamTicketSizeBalanceValid(matchmakingTicketCanMatch: MatchmakingTicketCanMatch, matchmakingQueueSetting: xMatchmakingQueueSettings): boolean {
         if (matchmakingQueueSetting.rules != null) {
-            // Stores the team size balance rules value used in the current execution flow.
             let teamSizeBalanceRules = matchmakingQueueSetting.rules.find(x => x.type == RuleType.TeamSizeBalance) as TeamSizeBalanceRule;
             if (teamSizeBalanceRules != null) {
-                // Stores the score to compare value used in the current execution flow.
                 let scoreToCompare = matchmakingTicketCanMatch.matchmakingTicketTeams[0].members.length;
-                // Stores the delta value used in the current execution flow.
                 let delta = teamSizeBalanceRules.allowedDifference;
 
                 if (teamSizeBalanceRules.advancedSettings != null) {
-                    // Stores the current milliseconds value used in the current execution flow.
                     let currentMilliseconds = xDatetime.getCurrentMilliseconds();
                     if (teamSizeBalanceRules.advancedSettings.secondsUntilOptional * 1000 + matchmakingTicketCanMatch.tsCreate < currentMilliseconds) return true;
 
                     if (teamSizeBalanceRules.advancedSettings.expansionType == RuleExpansionType.Linear) {
-                        // Moi bao nhieu giay se tang
+                        // Linear expansion gradually relaxes the rule the longer a candidate has been waiting.
                         let secondsFromStart = (currentMilliseconds - matchmakingTicketCanMatch.tsCreate) / 1000;
 
-                        // Stores the count value used in the current execution flow.
                         let count = Math.floor(secondsFromStart / teamSizeBalanceRules.advancedSettings.linearExpansions.secondsBetweenExpansions);
 
                         delta += count * teamSizeBalanceRules.advancedSettings.linearExpansions.delta;
@@ -393,10 +370,8 @@ export class MatchmakingService implements IMatchmakingService {
                         if (delta > teamSizeBalanceRules.advancedSettings.linearExpansions.limit) delta = teamSizeBalanceRules.advancedSettings.linearExpansions.limit;
                     }
                     else if (teamSizeBalanceRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
-                        // Stores the seconds from start value used in the current execution flow.
                         let secondsFromStart = (currentMilliseconds - matchmakingTicketCanMatch.tsCreate) / 1000;
 
-                        // Stores the count value used in the current execution flow.
                         let count = Math.floor(secondsFromStart / teamSizeBalanceRules.advancedSettings.customExpansions.secondsBetweenExpansions);
 
                         if (count < teamSizeBalanceRules.advancedSettings.customExpansions.overrideValue.length) {
@@ -409,7 +384,6 @@ export class MatchmakingService implements IMatchmakingService {
                 }
 
                 for (let i = 1; i < matchmakingTicketCanMatch.matchmakingTicketTeams.length; i++) {
-                    // Stores the next score to compare value used in the current execution flow.
                     let nextScoreToCompare = matchmakingTicketCanMatch.matchmakingTicketTeams[i].members.length;
                     if (Math.abs(nextScoreToCompare - scoreToCompare) > delta) return false;
                 }
@@ -420,10 +394,7 @@ export class MatchmakingService implements IMatchmakingService {
     }
 
     /**
-     * Checks whether team difference valid.
-     * @param matchmakingTicketCanMatch Provides the matchmaking ticket can match value used by this operation.
-     * @param matchmakingQueueSetting Provides the matchmaking queue setting value used by this operation.
-     * @returns Returns the operation result.
+     * Verifies aggregate per-team numeric-difference rules.
      */
     private isTeamDifferenceValid(matchmakingTicketCanMatch: MatchmakingTicketCanMatch, matchmakingQueueSetting: xMatchmakingQueueSettings): boolean {
         if (matchmakingQueueSetting.rules != null) {
@@ -897,16 +868,16 @@ export class MatchmakingService implements IMatchmakingService {
      * Removes the matchmaking ticket not correct.
      * @param matchmakingTicketCanMatchs Provides the matchmaking ticket can matchs value used by this operation.
      */
+    /**
+     * Removes overlapping match candidates so the same ticket is not consumed by multiple matches.
+     */
     private removeMatchmakingTicketNotCorrect(matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[]) {
         for (let i = 0; i < matchmakingTicketCanMatchs.length; i++) {
-            // Stores the matchmaking ticket can match value used in the current execution flow.
             let matchmakingTicketCanMatch = matchmakingTicketCanMatchs[i];
 
             for (let j = i + 1; j < matchmakingTicketCanMatchs.length; j++) {
-                // Stores the next matchmaking ticket can match value used in the current execution flow.
                 let nextMatchmakingTicketCanMatch = matchmakingTicketCanMatchs[j];
 
-                // Stores the need remove this match value used in the current execution flow.
                 let needRemoveThisMatch = false;
 
                 for (let k = 0; k < nextMatchmakingTicketCanMatch.ticketIds.length; k++) {
@@ -929,24 +900,21 @@ export class MatchmakingService implements IMatchmakingService {
     }
 
     /**
-     * Creates the match.
+     * Persists successful matches and updates the participating tickets to their new status.
      * @param gameId Provides the game ID value used by this operation.
      * @param matchmakingTicketCanMatchs Provides the matchmaking ticket can matchs value used by this operation.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      */
     private createMatch(gameId: string, matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[], matchmakingTickets: MatchmakingTicket[]): void {
-        // Stores the match collection value used in the current execution flow.
         let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", gameId);
 
-        // Stores the resolved matchmaking queue settings instance for the current execution flow.
         let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
         if (matchmakingQueueSettings == null) return;
 
         for (let i = 0; i < matchmakingTicketCanMatchs.length; i++) {
-            // Stores the matchmaking ticket can match value used in the current execution flow.
             let matchmakingTicketCanMatch = matchmakingTicketCanMatchs[i];
 
-            // Stores the match result value used in the current execution flow.
+            // `serverDetail` starts empty and may be filled later by server-allocation callbacks.
             let matchResult = {
                 matchId: matchmakingTicketCanMatch.matchId,
                 queueName: matchmakingTicketCanMatch.queueName,
@@ -971,7 +939,6 @@ export class MatchmakingService implements IMatchmakingService {
                 ticketIds: [] as any,
             };
 
-            // Stores the matchmaking queue setting value used in the current execution flow.
             let matchmakingQueueSetting = matchmakingQueueSettings.find(x => x.queueName == matchmakingTicketCanMatch.queueName);
             if (matchmakingQueueSetting == null) continue;
 
@@ -999,19 +966,14 @@ export class MatchmakingService implements IMatchmakingService {
 
             let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-            // Stores the total match success value used in the current execution flow.
             let totalMatchSuccess = 0;
-            // Stores the total match success time in seconds value used in the current execution flow.
             let totalMatchSuccessTimeInSeconds = 0;
 
             for (let j = 0; j < matchmakingTicketCanMatch.matchmakingTicketTeams.length; j++) {
-                // Stores the matchmaking ticket team value used in the current execution flow.
                 let matchmakingTicketTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[j];
 
                 for (let k = 0; k < matchmakingTicketTeam.tickets.length; k++) {
-                    // Stores the ticket ID value used in the current execution flow.
                     let ticketId = matchmakingTicketTeam.tickets[k].ticketId;
-                    // Stores the matchmaking ticket value used in the current execution flow.
                     let matchmakingTicket = matchmakingTickets.find(x => x.getTicketId() == ticketId);
 
                     if (!matchmakingTicketCanMatch.ticketIds.includes(ticketId))
@@ -1023,11 +985,9 @@ export class MatchmakingService implements IMatchmakingService {
 
                     matchmakingTicket.saveAsync();
 
-                    // Stores the members value used in the current execution flow.
                     let members = matchmakingTicket.getMembers();
 
                     for (let u = 0; u < members.length; u++) {
-                        // Stores the member value used in the current execution flow.
                         let member = members[u];
 
                         matchResult.members.push({
@@ -1050,15 +1010,13 @@ export class MatchmakingService implements IMatchmakingService {
     }
 
     /**
-     * Removes the give up tickets.
+     * Cancels tickets that have waited longer than their configured give-up timeout.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      */
     private removeGiveUpTickets(matchmakingTickets: MatchmakingTicket[]): void {
-        // Stores the current milliseconds value used in the current execution flow.
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
         for (let i = 0; i < matchmakingTickets.length; i++) {
-            // Stores the matchmaking ticket value used in the current execution flow.
             let matchmakingTicket = matchmakingTickets[i];
 
             if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.WaitingForMatch) {

@@ -29,36 +29,32 @@ interface OnSocketRequest {
 	(request: Request): Promise<OperationResponse>;
 }
 
+/**
+ * Owns the Socket.IO request pipeline, authentication handshake, and event fan-out helpers.
+ */
 export class SocketAppHandler {
-	// Stores the CONNECT CMD value used by this instance.
+	// Socket.IO lifecycle event names used by this handler.
 	private static readonly CONNECT_CMD = "connection";
-	// Stores the DISCONNECT CMD value used by this instance.
 	private static readonly DISCONNECT_CMD = "disconnect";
 
-	// Stores the on socket authenticate cb value used by this instance.
+	// Runtime callbacks injected by `GNServer`.
 	private _onSocketAuthenticateCb: OnSocketAuthenticate;
-	// Stores the on disconnect cb value used by this instance.
 	private _onDisconnectCb: OnSocketDisconnect;
-	// Stores the on request cb value used by this instance.
 	private _onRequestCb: OnSocketRequest;
-	// Stores the API middleware value used by this instance.
+	// Shared middleware dependencies used for auth and throttling.
 	private apiMiddleware: ApiMiddleware;
-	// Stores the anti DDoS middleware value used by this instance.
 	private antiDdosMiddleware: AntiDdosMiddleware;
 
-	// Indicates whether send and receive debug is enabled.
+	// Transport feature flags.
 	private enableSendAndReceiveDebug: boolean;
-	// Indicates whether post via msg pack is enabled.
 	private enablePostViaMsgPack: boolean;
-	// Indicates whether post via JSON is enabled.
 	private enablePostViaJson: boolean;
 
-	// Stores the server value used by this instance.
+	// Local Socket.IO server plus optional Mongo emitter for clustered fan-out.
 	private server: Server;
-	// Stores the emitter value used by this instance.
 	private emitter: Emitter;
 
-	// Stores the x database value used by this instance.
+	// Database access is only needed by a few legacy flows.
 	private xDatabase: xDatabase;
 
 	/**
@@ -150,7 +146,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Runs the current workflow.
+	 * Attaches the root socket connection listener.
 	 */
 	public run(): void {
 		this.server.on(SocketAppHandler.CONNECT_CMD, (socket) => {
@@ -160,7 +156,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the socket connect workflow.
+	 * Wires all request/auth/disconnect listeners for a newly connected socket.
 	 * @param socket Provides the socket value used by this operation.
 	 */
 	private socketConnect(socket: Socket) {
@@ -168,7 +164,7 @@ export class SocketAppHandler {
 
 		this.initSocket(socket);
 
-		// Stores the thiz value used in the current execution flow.
+		// Keep a stable self-reference inside deeply nested middleware callbacks.
 		let thiz = this;
 
 		socket.on(Commands.RequestAuthTokenCmd, (...data) => {
@@ -184,7 +180,7 @@ export class SocketAppHandler {
 						thiz.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaSocket(socket, data, () => {
 							thiz.antiDdosMiddleware.addPendingRequestViaSocket(socket, data, () => {
 								thiz.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
-									// Stores the operation response value used in the current execution flow.
+									// Build the response only after auth and throttling have both completed.
 									let operationResponse = await thiz.onSocketRequestMsgPack(socket, data, returnCode);
 
 									if (operationResponse != null) {
@@ -207,7 +203,7 @@ export class SocketAppHandler {
 						thiz.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaSocket(socket, data, () => {
 							thiz.antiDdosMiddleware.addPendingRequestViaSocket(socket, data, () => {
 								thiz.apiMiddleware.socketAuthenticateToken(socket, async (returnCode: number) => {
-									// Stores the operation response value used in the current execution flow.
+									// Build the response only after auth and throttling have both completed.
 									let operationResponse = await thiz.onSocketRequestJson(socket, data, returnCode);
 
 									if (operationResponse != null) {
@@ -229,14 +225,13 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the init socket workflow.
+	 * Resolves and normalizes the caller IP once per socket connection.
 	 * @param socket Provides the socket value used by this operation.
 	 */
 	private initSocket(socket: Socket) {
-		// Stores the IP value used in the current execution flow.
 		let ip: string = null;
 
-		// Stores the header IP value used in the current execution flow.
+		// Respect the configured proxy header first, then fall back to common Socket.IO sources.
 		let headerIP = this.apiMiddleware.getHeaderIP();
 		if (headerIP != null) {
 			ip = socket.handshake.headers[headerIP.toLowerCase()] as string;
@@ -257,7 +252,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the on socket request auth token workflow asynchronously.
+	 * Processes the lightweight socket auth handshake that stores auth/secret state on `socket.data`.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param data Provides the data value used by this operation.
 	 */
@@ -278,11 +273,9 @@ export class SocketAppHandler {
 			return;
 		}
 
-		// Stores the secret key value used in the current execution flow.
 		let secretKey = data[1] as string;
 		socket.data.secretKey = secretKey;
 
-		// Stores the auth token value used in the current execution flow.
 		let authToken = data[0] as string;
 		if (!authToken) {
 			if (socket.data.isAuthenticated === true) {
@@ -293,7 +286,6 @@ export class SocketAppHandler {
 			}
 		}
 		else {
-			// Stores the token payload value used in the current execution flow.
 			let tokenPayload = this.apiMiddleware.verifyAuthToken(authToken);
 			if (tokenPayload == null) {
 				if (socket.data.isAuthenticated === true) {
@@ -304,10 +296,8 @@ export class SocketAppHandler {
 				}
 			}
 			else {
-				// Stores the GearN token value used in the current execution flow.
 				let gnToken: string = tokenPayload.gnToken;
 
-				// Stores the auth info value used in the current execution flow.
 				let authInfo = await this.apiMiddleware.getAuthInfoByGNTokenInDatabase(gnToken);
 
 				if (authInfo != null) {
@@ -331,7 +321,6 @@ export class SocketAppHandler {
 			socket.data.secretInfo = null;
 		}
 		else {
-			// Stores the secret info value used in the current execution flow.
 			let secretInfo = await this.apiMiddleware.getSecretInfoBySecretKeyInDatabase(secretKey);
 
 			if (secretInfo != null && secretInfo.getIsOnlyMasterAdmin()) {
@@ -368,17 +357,15 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the on socket request msg pack workflow asynchronously.
+	 * Decodes a MsgPack socket request and forwards it to the common request pipeline.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param data Provides the data value used by this operation.
 	 * @param returnCode Provides the return code value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
 	private async onSocketRequestMsgPack(socket: Socket, data: any, returnCode: number): Promise<OperationResponse> {
-		// Stores the request data value used in the current execution flow.
 		let requestData: any;
 
-		// Stores the buffer value used in the current execution flow.
 		let buffer = data[0] as Buffer;
 		if (buffer[0] == 4) {
 			buffer = buffer.slice(1);
@@ -399,17 +386,15 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the on socket request JSON workflow asynchronously.
+	 * Normalizes a JSON socket request and forwards it to the common request pipeline.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param data Provides the data value used by this operation.
 	 * @param returnCode Provides the return code value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
 	private async onSocketRequestJson(socket: Socket, data: any, returnCode: number): Promise<OperationResponse> {
-		// Stores the request data value used in the current execution flow.
 		let requestData: any;
 
-		// Stores the buffer value used in the current execution flow.
 		let buffer = data[0];
 
 		try {
@@ -427,45 +412,35 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the on socket response workflow asynchronously.
+	 * Converts raw socket payload data into a `Request`, runs the injected request handler, and returns a response.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param requestData Provides the request data value used by this operation.
 	 * @param returnCode Provides the return code value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
 	private async onSocketResponse(socket: Socket, requestData: any, returnCode: number): Promise<OperationResponse> {
-		// Stores the request type str value used in the current execution flow.
 		let requestTypeStr = requestData[0] as string;
-		// Stores the role str value used in the current execution flow.
 		let roleStr = requestData[1] as string;
-		// Stores the operation code str value used in the current execution flow.
 		let operationCodeStr = requestData[2] as string;
 
 		if (!operationCodeStr || !requestTypeStr || !roleStr) return null;
 
-		// Stores the request type value used in the current execution flow.
 		let requestType = EnumUtility.parse(RequestType, requestTypeStr, true);
-		// Stores the role value used in the current execution flow.
 		let role = EnumUtility.parse(RequestRole, roleStr, true);
 
 		if (requestType == null || role == null) return null;
 
-		// Stores the parameters value used in the current execution flow.
 		let params = requestData.length > 3 ? (requestData[3] as {}) : {};
-		// Stores the request ID value used in the current execution flow.
 		let requestId = requestData.length > 4 ? (requestData[4] as number) : -1;
 
-		// Stores the request value used in the current execution flow.
 		let request = new Request(operationCodeStr, requestType, role);
 		request.setIP(socket.data.IPAddress);
 		request.setParameters(params);
 		request.setRequestId(requestId);
 
-		// Tracks whether authenticated.
 		let isAuthenticated = socket.data.isAuthenticated;
 		if (isAuthenticated === true) request.setAuthenticate(socket.data.authInfo);
 
-		// Tracks whether secreted.
 		let isSecreted = socket.data.isSecreted;
 		if (isSecreted === true) request.setSecretInfo(socket.data.secretInfo);
 
@@ -473,7 +448,6 @@ export class SocketAppHandler {
 			Debug.log("[SOCKET RECV] %O", JSON.stringify(DebugSupport.flatAndSecurityRequest(request)));
 		}
 
-		// Stores the operation response value used in the current execution flow.
 		let operationResponse: OperationResponse;
 
 		if (returnCode == ReturnCode.Ok) {
@@ -497,7 +471,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the on socket disconnect workflow.
+	 * Emits the injected disconnect callback after local debug logging.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param data Provides the data value used by this operation.
 	 */
@@ -508,7 +482,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the on socket authenticate workflow.
+	 * Emits the injected post-auth callback after the handshake succeeds.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param authInfo Provides the auth info value used by this operation.
 	 */
@@ -518,16 +492,14 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Sends the response for socket.
+	 * Serializes an `OperationResponse` back to the client in JSON or MsgPack form.
 	 * @param socket Provides the socket value used by this operation.
 	 * @param operationResponse Provides the operation response value used by this operation.
 	 * @param useMsgPack Indicates whether msg pack should be used.
 	 */
 	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse, useMsgPack: boolean) {
-		// Stores the socket data value used in the current execution flow.
 		let socketData = OperationHelper.toResponseSocketData(operationResponse);
 
-		// Stores the final data value used in the current execution flow.
 		let finalData = {
 			returnCode: socketData.returnCode,
 			responseId: socketData.responseId,
@@ -548,7 +520,6 @@ export class SocketAppHandler {
 		if (this.enableSendAndReceiveDebug) Debug.log("[SOCKET SEND] %O", JSON.stringify(DebugSupport.flatAndSecurityFinalData(finalData)));
 
 		if (useMsgPack) {
-			// Stores the socket data msg pack value used in the current execution flow.
 			let socketDataMsgPack = encode(finalData);
 
 			socket.emit(Commands.ResponseCmd_MsgPack, socketDataMsgPack);
@@ -574,13 +545,14 @@ export class SocketAppHandler {
 	// 	}
 	// }
 
+	/**
+	 * Emits an event to every socket currently joined to the user-id room.
+	 */
 	public sendEventTo(userId: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
-		// Stores the socket data value used in the current execution flow.
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO] " + userId + " %O", JSON.stringify(socketData));
 
 		if (useMsgPack) {
-			// Stores the socket data msg pack value used in the current execution flow.
 			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
@@ -593,18 +565,16 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Sends the event to room.
+	 * Emits an event to every socket joined to a room.
 	 * @param roomId Provides the room ID value used by this operation.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 * @param useMsgPack Indicates whether msg pack should be used.
 	 */
 	public sendEventToRoom(roomId: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
-		// Stores the socket data value used in the current execution flow.
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ROOM] " + roomId + " %O", JSON.stringify(socketData));
 
 		if (useMsgPack) {
-			// Stores the socket data msg pack value used in the current execution flow.
 			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
@@ -617,18 +587,16 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Sends the event to more user.
+	 * Emits an event to multiple user-id rooms at once.
 	 * @param userIds Indicates whether r IDs should be used.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 * @param useMsgPack Indicates whether msg pack should be used.
 	 */
 	public sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent, useMsgPack: boolean = true): void {
-		// Stores the socket data value used in the current execution flow.
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO MORE USER] %O", JSON.stringify(socketData));
 
 		if (useMsgPack) {
-			// Stores the socket data msg pack value used in the current execution flow.
 			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
@@ -641,17 +609,15 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Sends the event to all player.
+	 * Broadcasts an event to every connected socket.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 * @param useMsgPack Indicates whether msg pack should be used.
 	 */
 	public sendEventToAllPlayer(operationEvent: OperationEvent, useMsgPack: boolean = true): void {
-		// Stores the socket data value used in the current execution flow.
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO ALL PLAYER] %O", JSON.stringify(socketData));
 
 		if (useMsgPack) {
-			// Stores the socket data msg pack value used in the current execution flow.
 			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
@@ -664,18 +630,16 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Sends the event to namespace.
+	 * Broadcasts an event to every socket inside a Socket.IO namespace.
 	 * @param namespace Provides the namespace value used by this operation.
 	 * @param operationEvent Provides the operation event value used by this operation.
 	 * @param useMsgPack Indicates whether msg pack should be used.
 	 */
 	public sendEventToNamespace(namespace: string, operationEvent: OperationEvent, useMsgPack: boolean = true): void {
-		// Stores the socket data value used in the current execution flow.
 		let socketData = OperationHelper.toEventSocketData(operationEvent);
 		if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND EVENT TO NAME SPACE] %O", JSON.stringify(socketData));
 
 		if (useMsgPack) {
-			// Stores the socket data msg pack value used in the current execution flow.
 			let socketDataMsgPack = encode(socketData);
 
 			if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
@@ -688,7 +652,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Returns the socket via socket ID.
+	 * Returns one live socket by id from the root namespace.
 	 * @param socketId Provides the socket ID value used by this operation.
 	 * @returns Returns the socket via socket ID.
 	 */
@@ -697,7 +661,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Returns the sockets.
+	 * Returns the room operator for a user-id room.
 	 * @param userId Indicates whether r ID should be used.
 	 */
 	public getSockets(userId: string) {
@@ -705,7 +669,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the join room workflow.
+	 * Joins every active socket of a user to the given room.
 	 * @param userId Indicates whether r ID should be used.
 	 * @param roomId Provides the room ID value used by this operation.
 	 */
@@ -714,7 +678,7 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Executes the leave room workflow.
+	 * Removes every active socket of a user from the given room.
 	 * @param userId Indicates whether r ID should be used.
 	 * @param roomId Provides the room ID value used by this operation.
 	 */
@@ -723,19 +687,16 @@ export class SocketAppHandler {
 	}
 
 	/**
-	 * Returns the rooms.
+	 * Aggregates every room joined by every active socket of the given user.
 	 * @param userId Indicates whether r ID should be used.
 	 * @returns Returns the rooms.
 	 */
 	public async getRooms(userId: string): Promise<string[]> {
-		// Stores the answer value used in the current execution flow.
 		let answer: string[] = [];
 
-		// Stores the sockets value used in the current execution flow.
 		let sockets = await this.getSockets(userId).fetchSockets();
 
 		for (let i = 0; i < sockets.length; i++) {
-			// Stores the socket value used in the current execution flow.
 			let socket = sockets[i];
 
 			socket.rooms.forEach(room => {

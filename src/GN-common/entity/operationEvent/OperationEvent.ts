@@ -1,16 +1,15 @@
 import { GNHashtable } from "./../../common/GNData";
 
+/**
+ * Represents a low-level event pushed by the GearN backend.
+ */
 export class OperationEvent {
 
-	// Stores the event code value used by this instance.
 	private eventCode: string;
-	// Stores the parameters value used by this instance.
 	private parameters: GNHashtable;
 
 	/**
-	 * Initializes a new operation event instance.
-	 * @param eventCode Provides the event code value used by this operation.
-	 * @param parameters Provides the parameters value used by this operation.
+	 * Creates a new OperationEvent instance.
 	 */
 	constructor(eventCode: string, parameters: GNHashtable = null) {
 		this.eventCode = eventCode;
@@ -18,38 +17,29 @@ export class OperationEvent {
 	}
 
 	/**
-	 * Returns the event code.
-	 * @returns Returns the event code.
+	 * Returns the event code pushed by the backend.
 	 */
 	public getEventCode(): string {
 		return this.eventCode;
 	}
 
 	/**
-	 * Returns the parameters.
-	 * @returns Returns the parameters.
+	 * Returns the parameter bag attached to the event.
 	 */
 	public getParameters(): GNHashtable {
 		return this.parameters;
 	}
 
 	/**
-	 * Sets the parameter.
-	 * @param k Provides the k value used by this operation.
-	 * @param value Provides the value value used by this operation.
-	 * @returns Returns the current operation event instance.
+	 * Adds or replaces a single parameter on the existing event parameter bag.
 	 */
 	public setParameter(k: string, value: any): OperationEvent {
-		if (this.parameters == null) this.parameters = new GNHashtable();
-
 		this.parameters.add(k, value);
 		return this;
 	}
 
 	/**
-	 * Sets the parameters.
-	 * @param parameters Provides the parameters value used by this operation.
-	 * @returns Returns the current operation event instance.
+	 * Replaces the whole event parameter bag.
 	 */
 	public setParameters(parameters: GNHashtable): OperationEvent {
 		this.parameters = parameters;
@@ -57,8 +47,7 @@ export class OperationEvent {
 	}
 
 	/**
-	 * Executes the to string workflow.
-	 * @returns Returns the operation result.
+	 * Returns a debug-friendly string representation of this instance.
 	 */
 	public toString(): string {
 		return "EventCode: " + this.eventCode + ", parameters " + JSON.stringify(this.parameters?.toData());
