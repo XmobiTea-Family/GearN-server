@@ -128,6 +128,7 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 		if (masterPlayerFindOptions != null) {
 			masterPlayerFindOptions.lastIPDetail = true;
 			masterPlayerFindOptions.external = true;
+			masterPlayerFindOptions.playerBan = true;
 		}
 
 		// Stores the master player value used in the current execution flow.

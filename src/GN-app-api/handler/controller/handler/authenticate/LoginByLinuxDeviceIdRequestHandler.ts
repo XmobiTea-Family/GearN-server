@@ -106,6 +106,7 @@ export class LoginByLinuxDeviceIdRequestHandler extends LoginBaseRequestHandler 
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 		if (masterPlayerFindOptions != null) {
 			masterPlayerFindOptions.lastIPDetail = true;
+			masterPlayerFindOptions.playerBan = true;
 		}
 
 		// Stores the master player value used in the current execution flow.
