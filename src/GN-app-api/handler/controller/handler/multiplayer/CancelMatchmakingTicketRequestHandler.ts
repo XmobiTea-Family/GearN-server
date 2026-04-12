@@ -196,7 +196,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			return operationResponse;
 		}
 
-		if (member.status == MatchmakingMemberStatus.Joined) {
+		if (member.status == MatchmakingMemberStatus.Joined || member.status == MatchmakingMemberStatus.Pending) {
 			matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Canceled);
 			matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
 

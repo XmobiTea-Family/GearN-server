@@ -279,7 +279,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			giveUpAfterSeconds: request.giveUpAfterSeconds,
 			userIds: userIds,
 			members: members,
-			status: MatchmakingTicketStatus,
+			status: matchmakingTicketStatus,
 			tsCreate: xDatetime.getCurrentMilliseconds(),
 		}
 

@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "npm run build && npm run debug",
     "debug": "node index.js",
+    "test": "node -e \"require('fs').rmSync('.test-dist',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test .test-dist/test",
     "build": "rm -rf ./dist && webpack --mode production --stats-modules && npm run copy:cloudScriptTemplate",
     "build:tsc": "rm -rf ./dist && tsc",
     "build:cloudScript": "tsc -p ./src/GN-startup/cloudScript/tsconfig.json",

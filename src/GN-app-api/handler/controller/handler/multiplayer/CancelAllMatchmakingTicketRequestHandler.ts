@@ -194,7 +194,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 			// Stores the member value used in the current execution flow.
 			let member = matchmakingTicket.getMember(request.userId);
 
-			if (member.status == MatchmakingMemberStatus.Joined) {
+			if (member.status == MatchmakingMemberStatus.Joined || member.status == MatchmakingMemberStatus.Pending) {
 				matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Canceled);
 				matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
 				matchmakingTicket.saveAsync();
