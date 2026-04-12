@@ -22,13 +22,13 @@ export class TimerService implements ITimerService {
 			// Stores the now value used in the current execution flow.
 			let now = xDatetime.getCurrentDate();
 
-			if (now.getSeconds() == 0) {
+			if (now.getUTCSeconds() == 0) {
 				this.onEveryMinute();
 
-				if (now.getMinutes() == 0) {
+				if (now.getUTCMinutes() == 0) {
 					this.onEveryHour();
 
-					if (now.getHours() == 0) {
+					if (now.getUTCHours() == 0) {
 						this.onEveryDay();
 					}
 				}

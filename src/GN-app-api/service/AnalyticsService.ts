@@ -262,9 +262,9 @@ export class AnalyticsService implements IAnalyticsService {
 		let thiz = this;
 		this.gnServer.getTimerService().subscriberEveryMinute(() => {
 			let currentDate = xDatetime.getCurrentDate();
-			if (currentDate.getMinutes() % 15 == 0)
+			if (currentDate.getUTCMinutes() % 15 == 0)
 				thiz.analytics();
-			else if (currentDate.getMinutes() % 5 == 0) {
+			else if (currentDate.getUTCMinutes() % 5 == 0) {
 				thiz.getAnalytics();
 			}
 		});
@@ -624,7 +624,7 @@ export class AnalyticsService implements IAnalyticsService {
 			let eventCallbackPostCollection = this.gnServer.getDatabase().logRuntimeCollection("EventCallback.PostLog");
 
 			let now = xDatetime.getCurrentDate();
-			let month0h = new Date(now.getFullYear(), now.getMonth(), 1);
+			let month0h = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
 
 			let results = await eventCallbackPostCollection.find({ _id: { $gt: mongoDB.ObjectId.createFromTime(month0h.getTime() / 1000 - 1) } })
 
@@ -747,7 +747,7 @@ export class AnalyticsService implements IAnalyticsService {
 		let analyticsCollection = this.gnServer.getDatabase().systemCollection("Analytics");
 
 		let currentDate = xDatetime.getCurrentDate();
-		currentDate.setMinutes(Math.floor(currentDate.getMinutes() / 15) * 15);
+		currentDate.setMinutes(Math.floor(currentDate.getUTCMinutes() / 15) * 15);
 		currentDate.setSeconds(0);
 		currentDate.setMilliseconds(0);
 

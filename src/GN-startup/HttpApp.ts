@@ -244,9 +244,9 @@ export class HttpApp {
 				isPrimary: thisInstance.isPrimary,
 				currentInstanceIdPrimary: thisInstance.currentInstanceIdPrimary,
 				currentTsPrimary: thisInstance.currentTsPrimary,
-				currentTsPrimaryToDate: new Date(thisInstance.currentTsPrimary).toLocaleString(),
+				currentTsPrimaryToDate: new Date(thisInstance.currentTsPrimary).toISOString(),
 				tsPrimary: thisInstance.tsPrimary,
-				tsPrimaryToDate: new Date(thisInstance.tsPrimary).toLocaleString(),
+				tsPrimaryToDate: new Date(thisInstance.tsPrimary).toISOString(),
 			};
 
 			// Stores the other instances response data value used in the current execution flow.
@@ -278,9 +278,9 @@ export class HttpApp {
 					isPrimary: otherInstance.isPrimary,
 					currentInstanceIdPrimary: otherInstance.currentInstanceIdPrimary,
 					currentTsPrimary: otherInstance.currentTsPrimary,
-					currentTsPrimaryToDate: new Date(otherInstance.currentTsPrimary).toLocaleString(),
+					currentTsPrimaryToDate: new Date(otherInstance.currentTsPrimary).toISOString(),
 					tsPrimary: otherInstance.tsPrimary,
-					tsPrimaryToDate: new Date(otherInstance.tsPrimary).toLocaleString(),
+					tsPrimaryToDate: new Date(otherInstance.tsPrimary).toISOString(),
 					lostPing: otherInstance.lostPing,
 				});
 			}
