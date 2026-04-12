@@ -193,13 +193,13 @@ export class GNServer {
 		let thiz = this;
 		this.timerService.subscriberEverySecond(() => {
 			let currentDate = xDatetime.getCurrentDate();
-			if (currentDate.getSeconds() % 10 == 0)
+			if (currentDate.getUTCSeconds() % 10 == 0)
 				thiz.handleMatchmaking();
 		});
 
 		this.timerService.subscriberEveryMinute(() => {
 			let currentDate = xDatetime.getCurrentDate();
-			if (currentDate.getMinutes() % 10 == 0)
+			if (currentDate.getUTCMinutes() % 10 == 0)
 				thiz.handleRemoveCacheInvalidData();
 		});
 	}
