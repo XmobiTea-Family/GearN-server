@@ -328,7 +328,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 			// Stores the game ID value used in the current execution flow.
 			let gameId = secretInfo.getGameId();
 			// Stores the backup statistics leaderboard collection value used in the current execution flow.
-			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Group.StatisticsBackup", gameId);
+			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeGameCollection("Inventory.StatisticsBackup", gameId);
 
 			// Stores the key value used in the current execution flow.
 			let key = request.key;
@@ -364,8 +364,8 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 				results: {
 					// Stores the position value used by this contract.
 					position: number,
-					// Stores the group ID value used by this contract.
-					groupId: string,
+					// Stores the item ID value used by this contract.
+					itemId: string,
 					// Stores the value value used by this contract.
 					value: number,
 					// Stores the timestamp last update value used by this contract.
@@ -392,11 +392,11 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 				gnResult.add(ParameterCode.Position, result.position);
 				gnResult.add(ParameterCode.BackupValue, result.value);
 
-				gnResult.add(ParameterCode.GroupId, result.groupId);
+				gnResult.add(ParameterCode.ItemId, result.itemId);
 
 				// Stores the inventory value used in the current execution flow.
 				let inventory = inventoryFindOptions == null ? null
-					: await this.gnServer.getDatabase().loadInventoryAsync(result.groupId, gameId, inventoryFindOptions);
+					: await this.gnServer.getDatabase().loadInventoryAsync(result.itemId, gameId, inventoryFindOptions);
 
 				if (inventory == null) gnResult.add(ParameterCode.InfoResponseParameters, new GNHashtable());
 				else gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, gameId));

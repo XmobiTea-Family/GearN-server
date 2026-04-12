@@ -2801,7 +2801,9 @@ export class xDatabase {
 		// $sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
 		let $filter = {} as any;
-		$filter["catalogId"] = catalogId;
+		if (catalogId) {
+			$filter["catalogId"] = catalogId;
+		}
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
