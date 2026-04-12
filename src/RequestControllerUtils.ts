@@ -263,6 +263,7 @@ import { GetGroupsWithDisplayNameRequestHandler as Group_GetGroupsWithDisplayNam
 import { GetCreateLeaderboardRequestHandler as Group_GetCreateLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetCreateLeaderboardRequestHandler";
 import { GetStatisticsLogRequestHandler as Group_GetStatisticsLogRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetStatisticsLogRequestHandler";
 import { GetCurrencyLogRequestHandler as Group_GetCurrencyLogRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetCurrencyLogRequestHandler";
+import { GetCurrencyLeaderboardRequestHandler as Group_GetCurrencyLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetCurrencyLeaderboardRequestHandler";
 
 import { AddSegmentRequestHandler as Inventory_AddSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/AddSegmentRequestHandler";
 import { RemoveSegmentRequestHandler as Inventory_RemoveSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/RemoveSegmentRequestHandler";
@@ -656,6 +657,7 @@ export class RequestControllerUtils {
 			requestController.addHandler(requestTypeValue, new Group_GetCreateLeaderboardRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new Group_GetStatisticsLogRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new Group_GetCurrencyLogRequestHandler(gnServer), true);
+			requestController.addHandler(requestTypeValue, new Group_GetCurrencyLeaderboardRequestHandler(gnServer), true);
 		}
 
 		{
