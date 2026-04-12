@@ -103,7 +103,8 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupCurrencies: request.groupCurrencies
+			groupCurrencies: request.groupCurrencies,
+			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
@@ -127,7 +128,8 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupCurrencies: request.groupCurrencies
+			groupCurrencies: request.groupCurrencies,
+			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
@@ -151,7 +153,8 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			groupCurrencies: request.groupCurrencies
+			groupCurrencies: request.groupCurrencies,
+			log: request.log,
 		}, secretInfo, operationRequest);
 	}
 
@@ -162,7 +165,7 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_ChangeGroupCurrency", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
@@ -219,11 +222,16 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 				serverValue = group.getGroupCurrency(key).value;
 			}
 
+			// Stores the start value value used in the current execution flow.
+			let startValue = serverValue;
+
 			serverValue += amount;
-			if (serverValue <= 0) {
+			if (serverValue < 0) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
 				return operationResponse;
 			}
+
+			this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.groupId, secretInfo.getGameId(), key, amount, startValue, serverValue, request.log);
 
 			// Stores the GearN group currency value used in the current execution flow.
 			let gnGroupCurrency = new GNHashtable();
