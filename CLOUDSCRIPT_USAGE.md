@@ -36,7 +36,10 @@ Kết luận: script hợp lệ không phải file TypeScript hoàn chỉnh. Nó
 - Nếu không truyền `version`, runtime hiện tại sẽ dùng version đang `isLive`.
 - `args` là `functionParameters` từ request execute.
 - `context` có `userId` và `customTags`.
-- `log(any)` sẽ được đẩy về `functionLogs`.
+- `log` là tham số thứ 3 của handler, không phải global logger và không phải `console.log`.
+- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
+- Gọi `log(value)` chỉ để append debug log cho lần execute hiện tại. Runtime sẽ lưu `JSON.stringify(value)` vào `logs` và trả về client qua `functionLogs`.
+- Nếu `value` không stringify được, ví dụ object vòng tham chiếu, function sẽ lỗi. Chỉ log dữ liệu JSON-safe.
 - `return` chỉ nên là dữ liệu serialize an toàn: `null`, `boolean`, `number`, `string`, JSON object, JSON array, `GNHashtable`, `GNArray`.
 - Nếu cần fail rõ ràng, dùng `throw new Error("message")`.
 
@@ -106,18 +109,38 @@ Rule chọn nhanh:
 handlers["pingCloudScript"] = async (args: any, context, log) => {
     const message = typeof args?.message === "string" && args.message.length > 0 ? args.message : "pong";
 
-    log({
-        action: "pingCloudScript",
-        userId: context.userId,
-        message: message
-    });
-
     return {
         gameId: gameId,
         userId: context.userId,
         message: message
     };
 };
+```
+
+Nếu cần debug luồng đi hoặc số liệu runtime, có thể gọi `log(value)`:
+
+```ts
+handlers["pingCloudScriptDebug"] = async (args: any, context, log) => {
+    const message = typeof args?.message === "string" && args.message.length > 0 ? args.message : "pong";
+
+    // Use this only for temporary debug data or execution tracing.
+    log("pingCloudScriptDebug", {
+        userId: context.userId,
+        message: message
+    });
+
+    return {
+        message: message
+    };
+};
+```
+
+Khi có gọi `log`, `functionLogs` nhận về sẽ là mảng string, ví dụ:
+
+```ts
+[
+    "{\"action\":\"pingCloudScriptDebug\",\"userId\":\"0123456789\",\"message\":\"hello\"}"
+]
 ```
 
 Nếu bạn cần ví dụ thật theo từng helper, xem file chi tiết trong `docs/`.
@@ -208,6 +231,9 @@ Case này sẽ chạy vào version đang `isLive`, không phải version mới n
 - Hard-code `secretKey` vào script.
 - Tưởng rằng bỏ `version` sẽ chạy vào version mới add gần nhất. Runtime hiện tại chạy vào version đang `isLive`.
 - Dùng class instance phức tạp làm `return`, dẫn đến serialize lỗi hoặc mất field.
+- Tưởng function nào cũng phải gọi `log`. Không cần. Chỉ dùng `log` cho debug số liệu hoặc trace luồng.
+- Tưởng `console.log` hoặc global `log` sẽ đi vào `functionLogs`. Runtime chỉ capture tham số `log` được truyền vào handler.
+- Truyền object vòng tham chiếu vào `log(value)`, làm `JSON.stringify(value)` lỗi.
 - Dùng `database` để làm việc mà `admin` đã có official API sẵn.
 - Tưởng `socket`, `mail`, `pushNotification` sẽ trả ACK delivery chi tiết. Không có.
 

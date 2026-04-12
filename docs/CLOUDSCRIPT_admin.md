@@ -73,7 +73,16 @@ Rule thực tế:
 - Luôn check `response.hasReturnCodeError()` trước khi tin `response.responseData`.
 - Không hard-code `secretKey` trong script. Nếu cần secret, truyền từ caller qua `functionParameters` hoặc inject từ nguồn an toàn hơn.
 
-## 5. Rule request model rất quan trọng
+## 5. Rule log trong ví dụ
+
+- `log` là tham số thứ 3 của handler: `async (args, context, log) => { ... }`.
+- Đây không phải global logger và không phải `console.log`.
+- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
+- Runtime chỉ capture khi gọi đúng tham số này: `log(value)`.
+- Giá trị log được lưu bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
+- Chỉ log dữ liệu JSON-safe. Object vòng tham chiếu sẽ làm function lỗi.
+
+## 6. Rule request model rất quan trọng
 
 Từ SDK runtime và model:
 
@@ -91,7 +100,7 @@ Kết luận:
 - Khi AI thấy một method `admin.<domain>.*Async(...)`, đừng copy payload từ ví dụ `client` một cách máy móc.
 - Luôn kiểm tra request model tương ứng nếu method có vẻ “self route” ở client nhưng “explicit target” ở admin.
 
-## 6. `dashboard` là case đặc biệt
+## 7. `dashboard` là case đặc biệt
 
 Đây là điểm dễ gây hiểu nhầm nhất.
 
@@ -112,7 +121,7 @@ Khi dùng `admin.dashboard`, ưu tiên:
 - đọc lại [README.MD của SDK](../../GearN-typescript-client-sdk/README.MD)
 - đọc lại [DASHBOARD_API_README.md của SDK](../../GearN-typescript-client-sdk/docs/DASHBOARD_API_README.md)
 
-## 7. `admin` hiện có những domain nào
+## 8. `admin` hiện có những domain nào
 
 - `admin.characterPlayer`: social/gameplay theo character, thường cần `characterId` rõ ràng
 - `admin.content`: content config, upload metadata, file info
@@ -137,7 +146,7 @@ Nếu cần hiểu semantics sâu hơn từng domain, đọc doc tương ứng t
 - [CLOUDSCRIPT_API_README.md](../../GearN-typescript-client-sdk/docs/CLOUDSCRIPT_API_README.md)
 - [DASHBOARD_API_README.md](../../GearN-typescript-client-sdk/docs/DASHBOARD_API_README.md)
 
-## 8. Ví dụ cơ bản: `admin.dashboard`
+## 9. Ví dụ cơ bản: `admin.dashboard`
 
 ```ts
 const requireString = (value: unknown, fieldName: string): string => {
@@ -161,12 +170,6 @@ handlers["adminGetGameInfo"] = async (args: any, context, log) => {
         throw new Error(response.toString());
     }
 
-    log({
-        action: "adminGetGameInfo",
-        requestedByUserId: context.userId,
-        errorCode: response.errorCode
-    });
-
     return {
         errorCode: response.errorCode,
         responseData: response.responseData
@@ -180,7 +183,7 @@ handlers["adminGetGameInfo"] = async (args: any, context, log) => {
 - Không hard-code secret vào script.
 - Luôn check `hasReturnCodeError()`.
 
-## 9. Ví dụ domain thường dùng: `admin.gamePlayer`
+## 10. Ví dụ domain thường dùng: `admin.gamePlayer`
 
 ```ts
 const requireString = (value: unknown, fieldName: string): string => {
@@ -202,13 +205,6 @@ handlers["adminGetPlayerDisplayName"] = async (args: any, context, log) => {
         throw new Error(response.toString());
     }
 
-    log({
-        action: "adminGetPlayerDisplayName",
-        requestedByUserId: context.userId,
-        targetUserId: targetUserId,
-        errorCode: response.errorCode
-    });
-
     return {
         errorCode: response.errorCode,
         responseData: response.responseData
@@ -221,7 +217,7 @@ handlers["adminGetPlayerDisplayName"] = async (args: any, context, log) => {
 - Đây là route `admin`, nên `userId` được truyền rõ ràng.
 - Không copy thói quen của route `client` là bỏ `userId`.
 
-## 10. Khi nào dùng `admin.sendAsync(...)`
+## 11. Khi nào dùng `admin.sendAsync(...)`
 
 Chỉ dùng `admin.sendAsync(...)` khi:
 

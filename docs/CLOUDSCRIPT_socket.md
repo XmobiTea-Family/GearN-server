@@ -45,6 +45,10 @@ Wrapper `socket` đang expose:
 - `await` ở đây chỉ chờ event bridge phía server, không phải client ACK.
 - Payload event nên giữ gọn.
 - Dữ liệu event nên là JSON plain hoặc `GNHashtable`.
+- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
+- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
+- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
+- Chỉ log dữ liệu JSON-safe. Không dùng `functionLogs` để xác nhận client đã nhận event.
 
 ## 6. Ví dụ cơ bản
 
@@ -73,11 +77,6 @@ handlers["socketNotifyUser"] = async (args: any, context, log) => {
     const operationEvent = createDemoOperationEvent("Hello from cloud script", context.userId);
 
     await socket.sendEventTo(targetUserId, operationEvent);
-
-    log({
-        action: "socketNotifyUser",
-        targetUserId: targetUserId
-    });
 
     return {
         sent: true,
@@ -116,11 +115,6 @@ handlers["socketNotifyManyUsers"] = async (args: any, context, log) => {
 
     await socket.sendEventToMoreUser(args.userIds, operationEvent);
 
-    log({
-        action: "socketNotifyManyUsers",
-        count: args.userIds.length
-    });
-
     return {
         sent: true,
         count: args.userIds.length
@@ -135,10 +129,6 @@ handlers["socketBroadcastAll"] = async (args: any, context, log) => {
     });
 
     await socket.sendEventToAllPlayer(operationEvent);
-
-    log({
-        action: "socketBroadcastAll"
-    });
 
     return {
         broadcasted: true
@@ -169,12 +159,6 @@ handlers["socketRoomWorkflow"] = async (args: any, context, log) => {
     });
 
     await socket.sendEventToRoom(roomId, operationEvent);
-
-    log({
-        action: "socketRoomWorkflow",
-        userId: userId,
-        roomId: roomId
-    });
 
     return {
         joined: true,

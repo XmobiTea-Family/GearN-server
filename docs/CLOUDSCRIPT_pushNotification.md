@@ -44,6 +44,10 @@ Wrapper `pushNotification` đang expose:
 - Không nên return toàn bộ token ra ngoài nếu không cần.
 - Dữ liệu `data` nên là object JSON gọn.
 - Nếu cần trace business, tự ghi log vào DB.
+- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
+- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
+- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
+- Chỉ log dữ liệu JSON-safe. Không đưa token đầy đủ hoặc payload nhạy cảm vào `functionLogs`.
 
 ## 6. Ví dụ cơ bản
 
@@ -74,11 +78,6 @@ handlers["pushSendDemo"] = async (args: any, context, log) => {
             userId: context.userId
         }
     );
-
-    log({
-        action: "pushSendDemo",
-        tokenLength: token.length
-    });
 
     return {
         queued: true,
@@ -119,11 +118,6 @@ handlers["pushSendManyDemo"] = async (args: any, context, log) => {
         }
     );
 
-    log({
-        action: "pushSendManyDemo",
-        count: args.tokens.length
-    });
-
     return {
         queued: true,
         count: args.tokens.length
@@ -148,11 +142,6 @@ handlers["pushTopicSendDemo"] = async (args: any, context, log) => {
         }
     );
 
-    log({
-        action: "pushTopicSendDemo",
-        topic: topic
-    });
-
     return {
         queued: true,
         topic: topic
@@ -166,12 +155,6 @@ handlers["pushTopicSubscribeDemo"] = async (args: any, context, log) => {
     }
 
     await pushNotification.subscribeToTopic(args.tokens, topic);
-
-    log({
-        action: "pushTopicSubscribeDemo",
-        topic: topic,
-        count: args.tokens.length
-    });
 
     return {
         subscribed: true,
@@ -187,12 +170,6 @@ handlers["pushTopicUnsubscribeDemo"] = async (args: any, context, log) => {
     }
 
     await pushNotification.unsubscribeFromTopic(args.tokens, topic);
-
-    log({
-        action: "pushTopicUnsubscribeDemo",
-        topic: topic,
-        count: args.tokens.length
-    });
 
     return {
         unsubscribed: true,

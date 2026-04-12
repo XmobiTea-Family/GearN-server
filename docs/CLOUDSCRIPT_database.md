@@ -82,6 +82,16 @@ Dùng khi bạn muốn ghi hoặc đọc log từ log database.
 
 Dùng khi bạn cần tạo collection hoặc tạo index.
 
+### CloudScript execute log
+
+- `log` là tham số thứ 3 của handler: `async (args, context, log) => { ... }`.
+- Đây không phải global logger, không phải `console.log`, và không ghi trực tiếp vào log database.
+- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
+- Runtime chỉ capture khi gọi đúng tham số này: `log(value)`.
+- Giá trị log được lưu bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
+- Chỉ log dữ liệu JSON-safe. Object vòng tham chiếu sẽ làm function lỗi.
+- Nếu cần audit/business log bền vững, dùng `database.insert...LogAsync(...)` hoặc collection log phù hợp, không dựa vào `functionLogs`.
+
 ### Entity wrapper
 
 Một số method không trả raw document mà trả object wrapper:
@@ -157,12 +167,6 @@ handlers["dbSaveSample"] = async (args: any, context, log) => {
         { key: key },
         { projection: { _id: 0 } }
     );
-
-    log({
-        action: "dbSaveSample",
-        key: key,
-        updatedByUserId: context.userId
-    });
 
     return {
         gameId: gameId,
@@ -252,13 +256,6 @@ handlers["dbNamespaceOverview"] = async (args: any, context, log) => {
         { upsert: true }
     );
 
-    log({
-        action: "dbNamespaceOverview",
-        runtimeCollectionName: runtimeCollectionName,
-        metaCollectionName: metaCollectionName,
-        systemCollectionName: systemCollectionName
-    });
-
     return {
         runtimeCollectionName: runtimeCollectionName,
         metaCollectionName: metaCollectionName,
@@ -286,12 +283,6 @@ handlers["dbCreateCollectionAndIndex"] = async (args: any, context, log) => {
     database.createIndex(collectionName, { key: 1 }, { unique: true });
     database.createIndex(collectionName, { tsExpire: 1 }, { expireAfterSeconds: 60 });
     database.logCreateIndex(logCollectionName, { tsCreate: -1 });
-
-    log({
-        action: "dbCreateCollectionAndIndex",
-        collectionName: collectionName,
-        logCollectionName: logCollectionName
-    });
 
     return {
         collectionName: collectionName,
@@ -321,12 +312,6 @@ handlers["dbLoadAndMutateGamePlayer"] = async (args: any, context, log) => {
 
     await gamePlayer.saveAsync();
 
-    log({
-        action: "dbLoadAndMutateGamePlayer",
-        userId: gamePlayer.getUserId(),
-        displayName: gamePlayer.getDisplayName()
-    });
-
     return {
         userId: gamePlayer.getUserId(),
         displayName: gamePlayer.getDisplayName(),
@@ -351,11 +336,6 @@ handlers["dbFindGamePlayersByTag"] = async (args: any, context, log) => {
             tsCreate: gamePlayer.getTsCreate(),
             tagValue: gamePlayer.getTag(tagKey)
         };
-    });
-
-    log({
-        action: "dbFindGamePlayersByTag",
-        count: results.length
     });
 
     return {
@@ -383,12 +363,6 @@ handlers["dbGamePlayerLeaderboard"] = async (args: any, context, log) => {
         };
     });
 
-    log({
-        action: "dbGamePlayerLeaderboard",
-        statisticKey: statisticKey,
-        count: results.length
-    });
-
     return {
         statisticKey: statisticKey,
         results: results
@@ -411,12 +385,6 @@ handlers["dbInsertGamePlayerLog"] = async (args: any, context, log) => {
     const statisticLogs = await statisticLogCursor.toArray();
     const currencyLogs = await currencyLogCursor.toArray();
 
-    log({
-        action: "dbInsertGamePlayerLog",
-        userId: userId,
-        key: key
-    });
-
     return {
         userId: userId,
         key: key,
@@ -436,12 +404,6 @@ handlers["dbGroupMessageDemo"] = async (args: any, context, log) => {
     const cursor = await database.loadGroupMessagesAsync(groupId, gameId, 0, 10);
     const messages = await cursor.toArray();
 
-    log({
-        action: "dbGroupMessageDemo",
-        groupId: groupId,
-        count: messages.length
-    });
-
     return {
         groupId: groupId,
         messages: messages
@@ -458,13 +420,6 @@ handlers["dbStoreInventoryUsageDemo"] = async (args: any, context, log) => {
     const count = await database.getCountStoreInventoryUsedAsync(storeId, gameId, ownerId);
     const used = await database.getStoreInventoryUsedAsync(storeId, gameId);
 
-    log({
-        action: "dbStoreInventoryUsageDemo",
-        storeId: storeId,
-        ownerId: ownerId,
-        count: count
-    });
-
     return {
         count: count,
         used: used
@@ -478,11 +433,6 @@ handlers["dbUploadFileInfoDemo"] = async (args: any, context, log) => {
     if (uploadFileInfo == null) {
         throw new Error("uploadFileInfo not found");
     }
-
-    log({
-        action: "dbUploadFileInfoDemo",
-        fileId: uploadFileInfo.getFileId()
-    });
 
     return {
         fileId: uploadFileInfo.getFileId(),

@@ -40,6 +40,10 @@ Wrapper `mail` đang expose:
 - Đây là server-side bridge, không phải SMTP client trực tiếp trong cloud script.
 - Không nên hard-code danh sách email nhạy cảm trong script.
 - Nếu cần audit, bạn nên tự ghi log business vào DB.
+- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
+- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
+- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
+- Chỉ log dữ liệu JSON-safe. Không đưa nội dung email nhạy cảm vào `functionLogs`.
 
 ## 6. Ví dụ cơ bản
 
@@ -61,11 +65,6 @@ handlers["mailSendDemo"] = async (args: any, context, log) => {
         subject,
         "<h1>CloudScript Demo</h1><p>UserId: " + context.userId + "</p><p>GameId: " + gameId + "</p>"
     );
-
-    log({
-        action: "mailSendDemo",
-        email: email
-    });
 
     return {
         queued: true,
@@ -97,11 +96,6 @@ handlers["mailSendBatch"] = async (args: any, context, log) => {
 
     await mail.sendToMore(args.emails, subject, contentHtml);
 
-    log({
-        action: "mailSendBatch",
-        count: args.emails.length
-    });
-
     return {
         queued: true,
         count: args.emails.length
@@ -126,12 +120,6 @@ handlers["mailSendReport"] = async (args: any, context, log) => {
         "</table>";
 
     await mail.send(email, title, contentHtml);
-
-    log({
-        action: "mailSendReport",
-        email: email,
-        rowCount: rows.length
-    });
 
     return {
         queued: true,

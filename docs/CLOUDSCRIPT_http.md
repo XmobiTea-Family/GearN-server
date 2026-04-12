@@ -52,6 +52,10 @@ Thực chất nó bọc Axios, nên:
 - Thường chỉ nên `return` các field cần thiết như `status`, `data`, `header`.
 - Nên set `timeout` rõ ràng.
 - Nếu request có auth, truyền token qua header, không hard-code bí mật vào script.
+- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
+- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
+- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
+- Chỉ log dữ liệu JSON-safe. Không log nguyên Axios response/error object vì có thể lớn hoặc không stringify an toàn.
 
 ## 6. Ví dụ cơ bản
 
@@ -72,11 +76,6 @@ handlers["httpGetTodo"] = async (args: any, context, log) => {
         headers: {
             "x-cloud-script-user-id": context.userId
         }
-    });
-
-    log({
-        action: "httpGetTodo",
-        status: response.status
     });
 
     return {
@@ -115,12 +114,6 @@ handlers["httpPostWebhook"] = async (args: any, context, log) => {
         }
     });
 
-    log({
-        action: "httpPostWebhook",
-        status: response.status,
-        url: url
-    });
-
     return {
         status: response.status,
         data: response.data
@@ -139,11 +132,6 @@ handlers["httpPatchExternalProfile"] = async (args: any, context, log) => {
         }
     });
 
-    log({
-        action: "httpPatchExternalProfile",
-        status: response.status
-    });
-
     return {
         status: response.status,
         data: response.data
@@ -158,11 +146,6 @@ handlers["httpDeleteResource"] = async (args: any, context, log) => {
         headers: {
             "x-cloud-script-user-id": context.userId
         }
-    });
-
-    log({
-        action: "httpDeleteResource",
-        status: response.status
     });
 
     return {
@@ -185,11 +168,6 @@ handlers["httpSafeRequest"] = async (args: any, context, log) => {
             data: response.data
         };
     } catch (error: any) {
-        log({
-            action: "httpSafeRequest",
-            message: error?.message ?? "unknown error"
-        });
-
         return {
             success: false,
             errorMessage: error?.message ?? "unknown error",
