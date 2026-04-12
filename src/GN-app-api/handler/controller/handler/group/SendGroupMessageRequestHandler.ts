@@ -211,6 +211,15 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 		let senderType: number = groupType;
 
 		if (groupType == OwnerType.GamePlayer) {
+			if (request.userId) {
+				if (request.userId != request.senderId) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerNotMember);
+					operationResponse.setDebugMessage("GamePlayer use other senderId");
+
+					return operationResponse;
+				}
+			}
+
 			// Stores the resolved group settings instance for the current execution flow.
 			let groupSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 			// Stores the player group catalog settings item value used in the current execution flow.
@@ -221,6 +230,22 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			}
 		}
 		else if (groupType == OwnerType.CharacterPlayer) {
+			if (request.userId) {
+				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), {
+					playerCharacters: true,
+				});
+
+				if (request.userId != request.senderId) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
+					return operationResponse;
+				}
+
+				if (!gamePlayer.hasPlayerCharacter(request.senderId)) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerNotMember);
+					operationResponse.setDebugMessage("GamePlayer not owned of the CharacterPlayer with senderId");
+				}
+			}
+
 			// Stores the resolved group settings instance for the current execution flow.
 			let groupSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 			// Stores the player group catalog settings item value used in the current execution flow.
