@@ -173,6 +173,7 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 		let groupFindOptions: GroupFindOptions = {
 			removeStatus: true,
 			members: true,
+			groupType: true,
 		}
 
 		// Stores the group value used in the current execution flow.

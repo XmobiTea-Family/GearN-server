@@ -179,6 +179,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			members: true,
 			groupType: true,
 			catalogId: true,
+			removeStatus: true,
 		}
 
 		// Stores the group value used in the current execution flow.
