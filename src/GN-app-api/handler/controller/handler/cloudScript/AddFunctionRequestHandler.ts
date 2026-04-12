@@ -91,7 +91,7 @@ export class AddFunctionRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().cloudScript.addFunction.selfEnable) {
+		if (!secretInfo.getPermission().cloudScript.addFunction.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

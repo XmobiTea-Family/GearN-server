@@ -83,7 +83,7 @@ export class GetFunctionRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().cloudScript.getFunction.selfEnable) {
+		if (!secretInfo.getPermission().cloudScript.getFunction.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
