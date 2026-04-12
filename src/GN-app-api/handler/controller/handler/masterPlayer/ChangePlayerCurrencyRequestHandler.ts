@@ -244,7 +244,7 @@ export class ChangePlayerCurrencyRequestHandler extends MasterPlayerBaseRequestH
 			let startValue = serverValue;
 
 			serverValue += amount;
-			if (serverValue <= 0) {
+			if (serverValue < 0) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
 				return operationResponse;
 			}

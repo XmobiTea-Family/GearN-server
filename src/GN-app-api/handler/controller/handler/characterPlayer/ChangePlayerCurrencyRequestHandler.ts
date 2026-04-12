@@ -226,7 +226,7 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 			let startValue = serverValue;
 
 			serverValue += amount;
-			if (serverValue <= 0) {
+			if (serverValue < 0) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
 				return operationResponse;
 			}
