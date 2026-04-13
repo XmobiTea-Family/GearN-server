@@ -192,6 +192,7 @@ export class LinkCustomDeviceIdRequestHandler extends MasterPlayerBaseRequestHan
 		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			external: true,
+			userId: true,
 		}
 
 		// Stores the master player value used in the current execution flow.

@@ -200,6 +200,7 @@ export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHan
 		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			external: true,
+			userId: true,
 		}
 
 		// Stores the resolved master player settings instance for the current execution flow.
