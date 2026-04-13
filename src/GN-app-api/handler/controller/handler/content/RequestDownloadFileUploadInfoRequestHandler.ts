@@ -87,7 +87,7 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().content.requestDownloadFileUploadInfo.selfEnable) {
+		if (!secretInfo.getPermission().content.requestDownloadFileUploadInfo.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -188,7 +188,7 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 
 		// Stores the collection value used in the current execution flow.
 		let collection = this.gnServer.getDatabase().systemCollection("DownloadFileSession");
-		collection.insertOne({
+		await collection.insertOne({
 			fileId: request.fileId,
 			createdAt: xDatetime.getCurrentDate(),
 			downloadToken: downloadToken,
