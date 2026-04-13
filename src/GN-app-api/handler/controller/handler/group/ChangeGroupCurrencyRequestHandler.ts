@@ -212,6 +212,10 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		// Stores the GearN group currencies value used in the current execution flow.
 		let gnGroupCurrencies = new GNArray();
 
+		let logs: {
+			key: string, amount: number, startValue: number, finalValue: number
+		}[] = [];
+
 		for (let i = 0; i < request.groupCurrencies.length; i++) {
 			// Stores the group currency parameter value used in the current execution flow.
 			let groupCurrencyParam = request.groupCurrencies[i];
@@ -247,7 +251,14 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 				return operationResponse;
 			}
 
-			this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.groupId, secretInfo.getGameId(), key, amount, startValue, serverValue, request.log);
+			logs.push({
+				key: key,
+				amount: amount,
+				startValue: startValue,
+				finalValue: serverValue,
+			});
+
+
 
 			// Stores the GearN group currency value used in the current execution flow.
 			let gnGroupCurrency = new GNHashtable();
@@ -263,6 +274,10 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			else {
 				group.changeGroupCurrency(key, amount);
 			}
+		}
+
+		for (const log of logs) {
+			this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.groupId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
 		}
 
 		group.saveAsync();

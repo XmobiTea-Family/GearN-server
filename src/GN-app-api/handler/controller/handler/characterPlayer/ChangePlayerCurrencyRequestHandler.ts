@@ -212,6 +212,10 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 		// Stores the GearN player currencies value used in the current execution flow.
 		let gnPlayerCurrencies = new GNArray();
 
+		let logs: {
+			key: string, amount: number, startValue: number, finalValue: number
+		}[] = [];
+
 		for (let i = 0; i < request.playerCurrencies.length; i++) {
 			// Stores the player currency parameter value used in the current execution flow.
 			let playerCurrencyParam = request.playerCurrencies[i];
@@ -247,7 +251,12 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 				return operationResponse;
 			}
 
-			this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.characterId, secretInfo.getGameId(), key, amount, startValue, serverValue, request.log);
+			logs.push({
+				key: key,
+				amount: amount,
+				startValue: startValue,
+				finalValue: serverValue,
+			});
 
 			// Stores the GearN player currency value used in the current execution flow.
 			let gnPlayerCurrency = new GNHashtable();
@@ -263,6 +272,10 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 			else {
 				characterPlayer.changePlayerCurrency(key, amount);
 			}
+		}
+
+		for (const log of logs) {
+			this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.characterId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
 		}
 
 		characterPlayer.saveAsync();
