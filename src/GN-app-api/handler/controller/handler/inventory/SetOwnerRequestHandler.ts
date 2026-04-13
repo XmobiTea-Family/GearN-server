@@ -21,7 +21,7 @@ import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/enti
 class SetOwnerOperationRequest extends OperationRequest {
 
 	// Stores the item ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.ItemId, minLength: 11, maxLength: 11, mustNonNull: true })
+	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
 	public itemId: string;
 
 	// Stores the new owner ID value used by this instance.

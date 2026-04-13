@@ -293,7 +293,8 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 				if (request.skip + request.limit <= 100) {
 					inventoryFindOptions = null;
 
-					inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+					// Cache the first 100 leaderboard items from this position so later slices reuse the same window safely.
+					inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= inventories.length) break;

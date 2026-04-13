@@ -395,11 +395,8 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 				gnResult.add(ParameterCode.ItemId, result.itemId);
 
 				// Stores the inventory value used in the current execution flow.
-				let inventory = inventoryFindOptions == null ? null
-					: await this.gnServer.getDatabase().loadInventoryAsync(result.itemId, gameId, inventoryFindOptions);
-
-				if (inventory == null) gnResult.add(ParameterCode.InfoResponseParameters, new GNHashtable());
-				else gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, gameId));
+				let inventory = await this.gnServer.getDatabase().loadInventoryAsync(result.itemId, gameId, inventoryFindOptions);
+				if (inventory != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, gameId));
 
 				gnResults.add(gnResult);
 			}
