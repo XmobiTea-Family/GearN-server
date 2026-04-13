@@ -21,7 +21,7 @@ class GetPlayersWithGenericServiceOperationRequest extends OperationRequest {
 	public serviceName: string;
 
 	// Stores the generic IDs value used by this instance.
-	@GNArrayDataMember({ code: ParameterCode.GenericIds, mustNonNull: true, elementCls: String })
+	@GNArrayDataMember({ code: ParameterCode.GenericIds, mustNonNull: true, elementCls: String, minLength: 1, maxLength: 20 })
 	public genericIds: Array<string>;
 
 	// Stores the info request parameter value used by this instance.

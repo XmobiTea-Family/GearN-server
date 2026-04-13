@@ -17,7 +17,7 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 class GetPlayersWithGoogleOperationRequest extends OperationRequest {
 
 	// Stores the google IDs value used by this instance.
-	@GNArrayDataMember({ code: ParameterCode.GoogleIds, mustNonNull: true, elementCls: String })
+	@GNArrayDataMember({ code: ParameterCode.GoogleIds, mustNonNull: true, elementCls: String, minLength: 1, maxLength: 20 })
 	public googleIds: Array<string>;
 
 	// Stores the info request parameter value used by this instance.

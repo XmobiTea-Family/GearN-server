@@ -17,7 +17,7 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 class GetPlayersWithFacebookOperationRequest extends OperationRequest {
 
 	// Stores the facebook IDs value used by this instance.
-	@GNArrayDataMember({ code: ParameterCode.FacebookIds, mustNonNull: true, elementCls: String })
+	@GNArrayDataMember({ code: ParameterCode.FacebookIds, mustNonNull: true, elementCls: String, minLength: 1, maxLength: 20 })
 	public facebookIds: Array<string>;
 
 	// Stores the info request parameter value used by this instance.

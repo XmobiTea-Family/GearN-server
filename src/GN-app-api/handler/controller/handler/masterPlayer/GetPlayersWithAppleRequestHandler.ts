@@ -17,7 +17,7 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 class GetPlayersWithAppleOperationRequest extends OperationRequest {
 
 	// Stores the apple IDs value used by this instance.
-	@GNArrayDataMember({ code: ParameterCode.AppleIds, mustNonNull: true, elementCls: String })
+	@GNArrayDataMember({ code: ParameterCode.AppleIds, mustNonNull: true, elementCls: String, minLength: 1, maxLength: 20 })
 	public appleIds: Array<string>;
 
 	// Stores the info request parameter value used by this instance.
