@@ -204,7 +204,7 @@ export class LinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseReq
 
 		// Stores the external value used in the current execution flow.
 		let external = masterPlayer.getExternal();
-		if (external.google != null && external.google.googleId != null && !request.forceLink) {
+		if (external.googlePlayGameService != null && external.googlePlayGameService.playerId != null && !request.forceLink) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherValue);
 			return operationResponse;
 		}
