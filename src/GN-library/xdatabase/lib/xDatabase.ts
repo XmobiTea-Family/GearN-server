@@ -409,7 +409,7 @@ export class xDatabase {
 		let collection = this.systemCollection("MasterPlayer");
 		// Stores the filter value used in the current execution flow.
 		let $filter = {} as any;
-		$filter["external.genericService.genericServices." + genericService + ".genericId"] = { $in: genericIds };
+		$filter["external.genericService.genericServices." + genericService + ".serviceId"] = { $in: genericIds };
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
