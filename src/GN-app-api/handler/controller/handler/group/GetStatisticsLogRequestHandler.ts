@@ -13,6 +13,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import * as mongoDB from "mongodb";
+import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 
 class GetStatisticsLogOperationRequest extends OperationRequest {
 
@@ -66,7 +67,7 @@ class AdminGetStatisticsLogOperationRequest extends ServerGetStatisticsLogOperat
 	}
 }
 
-export class GetStatisticsLogRequestHandler extends RequestHandler {
+export class GetStatisticsLogRequestHandler extends GroupBaseRequestHandler {
 
 	/**
 	 * Returns the code.
@@ -97,7 +98,10 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().group.getStatisticsLog.otherSelfEnable) {
+		// Tracks whether method is allowed.
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.getStatisticsLog);
+
+		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
 		}
 

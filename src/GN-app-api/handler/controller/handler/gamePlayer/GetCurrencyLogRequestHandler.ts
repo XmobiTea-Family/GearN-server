@@ -97,8 +97,22 @@ export class GetCurrencyLogRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().gamePlayer.getCurrencyLog.otherSelfEnable) {
-			return this.newOperationNotAllowError(request);
+		if (!request.userId) {
+			if (!secretInfo.getPermission().gamePlayer.getCurrencyLog.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+
+			request.userId = authInfo.getUserId();
+		}
+		else if (request.userId != authInfo.getUserId()) {
+			if (!secretInfo.getPermission().gamePlayer.getCurrencyLog.otherSelfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
+		}
+		else {
+			if (!secretInfo.getPermission().gamePlayer.getCurrencyLog.selfEnable) {
+				return this.newOperationNotAllowError(request);
+			}
 		}
 
 		return this.execute({

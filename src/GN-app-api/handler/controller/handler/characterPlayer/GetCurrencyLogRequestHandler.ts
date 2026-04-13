@@ -13,6 +13,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import * as mongoDB from "mongodb";
+import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 
 class GetCurrencyLogOperationRequest extends OperationRequest {
 
@@ -97,7 +98,10 @@ export class GetCurrencyLogRequestHandler extends CharacterPlayerBaseRequestHand
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().characterPlayer.getCurrencyLog.otherSelfEnable) {
+		// Tracks whether method is allowed.
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.getCurrencyLog);
+
+		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
 		}
 
