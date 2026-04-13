@@ -119,7 +119,27 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends Characte
 			return this.newOperationNotAllowError(request);
 		}
 
-		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+		// Stores the owned value used in the current execution flow.
+		let owned = false;
+
+		if (secretInfo.getPermission().characterPlayer.getStatisticsLeaderboardAroundPlayer.selfEnable) {
+			// Stores the game player value used in the current execution flow.
+			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
+
+			if (gamePlayer != null) {
+				if (gamePlayer.hasPlayerCharacter(request.characterId)) {
+					allowMethod = true;
+					owned = true;
+				}
+			}
+		}
+
+		if (owned) {
+			this.generateInfoRequestParamForOwner(secretInfo, request.infoRequestParam);
+		}
+		else {
+			this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+		}
 
 		return this.execute({
 			characterId: request.characterId,

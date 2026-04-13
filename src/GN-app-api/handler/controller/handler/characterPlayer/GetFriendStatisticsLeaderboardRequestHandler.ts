@@ -217,7 +217,7 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends CharacterPlaye
 		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
 		// Stores the cache key value used in the current execution flow.
-		let cacheKey = "characterPlayerStatisticsLeaderboardFriend_" + request.characterId;
+		let cacheKey = "characterPlayerStatisticsLeaderboardFriend_" + request.characterId + "_" + request.key;
 
 		if (request.loadFromCache) {
 			if (!(await cacheData.isValid(cacheKey))) {

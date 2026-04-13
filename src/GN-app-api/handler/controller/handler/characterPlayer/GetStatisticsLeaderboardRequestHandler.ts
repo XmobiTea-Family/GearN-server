@@ -394,11 +394,9 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 				gnResult.add(ParameterCode.CharacterId, result.characterId);
 
 				// Stores the character player value used in the current execution flow.
-				let characterPlayer = characterPlayerFindOptions == null ? null
-					: await this.gnServer.getDatabase().loadCharacterPlayerAsync(result.characterId, gameId, characterPlayerFindOptions);
+				let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(result.characterId, gameId, characterPlayerFindOptions);
 
-				if (characterPlayer == null) gnResult.add(ParameterCode.InfoResponseParameters, new GNHashtable());
-				else gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, gameId));
+				if (characterPlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, gameId));
 
 				gnResults.add(gnResult);
 			}

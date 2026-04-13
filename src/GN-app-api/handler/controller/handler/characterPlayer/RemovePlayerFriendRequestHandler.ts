@@ -216,7 +216,7 @@ export class RemovePlayerFriendRequestHandler extends CharacterPlayerBaseRequest
 					gnPlayerFriends.add(gnPlayerFriend);
 
 					// Stores the character player friend update operation event value used in the current execution flow.
-					let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
+					let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 					characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
 					characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.characterId);
@@ -245,7 +245,7 @@ export class RemovePlayerFriendRequestHandler extends CharacterPlayerBaseRequest
 					gnPlayerFriends.add(gnPlayerFriend);
 
 					// Stores the character player friend update operation event value used in the current execution flow.
-					let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
+					let characterPlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerFriendUpdate, null);
 
 					characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
 					characterPlayerFriendUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.friendId);

@@ -189,7 +189,7 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerGroup.selfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerFriend.selfEnable) {
@@ -273,7 +273,7 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerGroup.otherSelfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerFriend.otherSelfEnable) {
@@ -357,7 +357,7 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerGroup.serverSelfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerFriend.serverSelfEnable) {
@@ -441,7 +441,7 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerGroup.adminSelfEnable) {
-			infoRequestParam.playerInventories = false;
+			infoRequestParam.playerGroups = false;
 		}
 
 		if (!secretInfo.getPermission().characterPlayer.getPlayerFriend.adminSelfEnable) {

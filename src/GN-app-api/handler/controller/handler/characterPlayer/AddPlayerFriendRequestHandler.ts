@@ -249,7 +249,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 
 						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
-						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.FriendId, request.characterId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
 						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
@@ -268,7 +268,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
 					characterPlayer.saveAsync();
 
-					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
+					friendPlayer.setPlayerFriend(request.characterId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
 					friendPlayer.saveAsync();
 
 					{
@@ -298,7 +298,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 
 						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
-						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.FriendId, request.characterId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
 						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.WaitingAccept);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
@@ -322,7 +322,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 					characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 					characterPlayer.saveAsync();
 
-					friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+					friendPlayer.setPlayerFriend(request.characterId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 					friendPlayer.saveAsync();
 
 					{
@@ -352,7 +352,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 
 						// Stores the GearN player friend value used in the current execution flow.
 						let gnPlayerFriend = new GNHashtable();
-						gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+						gnPlayerFriend.add(ParameterCode.FriendId, request.characterId);
 						gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
 						gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 						gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
@@ -373,7 +373,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 							characterPlayer.saveAsync();
 
-							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+							friendPlayer.setPlayerFriend(request.characterId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
 							friendPlayer.saveAsync();
 
 							{
@@ -403,7 +403,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 
 								// Stores the GearN player friend value used in the current execution flow.
 								let gnPlayerFriend = new GNHashtable();
-								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+								gnPlayerFriend.add(ParameterCode.FriendId, request.characterId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
 								gnPlayerFriend.add(ParameterCode.Status, FriendStatus.Friend);
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
@@ -422,7 +422,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 							characterPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
 							characterPlayer.saveAsync();
 
-							friendPlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
+							friendPlayer.setPlayerFriend(request.characterId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
 							friendPlayer.saveAsync();
 
 							{
@@ -452,7 +452,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 
 								// Stores the GearN player friend value used in the current execution flow.
 								let gnPlayerFriend = new GNHashtable();
-								gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+								gnPlayerFriend.add(ParameterCode.FriendId, request.characterId);
 								gnPlayerFriend.add(ParameterCode.CatalogId, request.catalogId);
 								gnPlayerFriend.add(ParameterCode.Status, FriendStatus.WaitingAccept);
 								gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);

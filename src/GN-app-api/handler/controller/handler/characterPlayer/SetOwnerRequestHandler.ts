@@ -14,6 +14,7 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
+import { GroupStatus } from "../../../../../GN-common/constant/enumType/GroupStatus";
 
 class SetOwnerOperationRequest extends OperationRequest {
 
@@ -172,6 +173,7 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			owner: true,
 			catalogId: true,
+			playerGroups: true,
 		}
 
 		// Stores the character player value used in the current execution flow.
@@ -184,6 +186,14 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 
 		// Stores the owner value used in the current execution flow.
 		let owner = characterPlayer.getOwner();
+
+		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
+
+		if (gamePlayer == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
+			return operationResponse;
+		}
+
 		if (owner.id != request.newOwnerId) {
 			// Stores the game player find options value used in the current execution flow.
 			let gamePlayerFindOptions: GamePlayerFindOptions = {
@@ -211,6 +221,28 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 
 			characterPlayer.setOwner(request.newOwnerId, owner.type);
 			characterPlayer.saveAsync();
+
+			let playerCharacters = gamePlayer.getAllPlayerCharacters();
+
+			for (let groupItem of characterPlayer.getAllPlayerGroups()) {
+				if (groupItem.status == GroupStatus.Member) {
+					this.gnServer.joinRoom(characterPlayer.getOwner().id, groupItem.groupId);
+
+					const group = await this.gnServer.getDatabase().loadGroupAsync(groupItem.groupId, secretInfo.getGameId());
+					if (group != null) {
+						let hasCharacter = false;
+						for (let playerCharacter of playerCharacters) {
+							if (group.hasMember(playerCharacter.characterId)) {
+								hasCharacter = true;
+								break;
+							}
+						}
+						if (!hasCharacter) this.gnServer.leaveRoom(characterPlayer.getOwner().id, groupItem.groupId);
+					}
+
+					this.gnServer.leaveRoom(owner.id, groupItem.groupId);
+				}
+			}
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

@@ -260,6 +260,20 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 			group.removeMember(request.characterId);
 			group.saveAsync();
 
+			let hasCharacter = false;
+			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(characterPlayer.getOwner().id, secretInfo.getGameId(), { playerCharacters: true });
+			if (gamePlayer != null) {
+				let playerCharacters = gamePlayer.getAllPlayerCharacters();
+
+				for (let playerCharacter of playerCharacters) {
+					if (group.hasMember(playerCharacter.characterId)) {
+						hasCharacter = true;
+						break;
+					}
+				}
+			}
+			if (!hasCharacter) this.gnServer.leaveRoom(characterPlayer.getOwner().id, request.groupId);
+
 			{
 				// Stores the GearN members value used in the current execution flow.
 				let gnMembers = new GNArray();
@@ -267,7 +281,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 				// Stores the GearN member value used in the current execution flow.
 				let gnMember = new GNHashtable();
 
-				gnMember.add(ParameterCode.CharacterId, request.characterId);
+				gnMember.add(ParameterCode.MemberId, request.characterId);
 				gnMember.add(ParameterCode.Status, GroupStatus.NotMember);
 
 				gnMembers.add(gnMember);
@@ -276,6 +290,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 				let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 				groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+				groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 				this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 			}
