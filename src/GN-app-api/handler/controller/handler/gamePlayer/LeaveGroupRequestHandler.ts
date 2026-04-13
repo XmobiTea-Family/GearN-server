@@ -280,7 +280,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
 				// Stores the GearN member value used in the current execution flow.
 				let gnMember = new GNHashtable();
 
-				gnMember.add(ParameterCode.UserId, request.userId);
+				gnMember.add(ParameterCode.MemberId, request.userId);
 				gnMember.add(ParameterCode.Status, GroupStatus.NotMember);
 
 				gnMembers.add(gnMember);
@@ -289,6 +289,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
 				let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 				groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+				groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 				this.gnServer.leaveRoom(request.userId, request.groupId);
 

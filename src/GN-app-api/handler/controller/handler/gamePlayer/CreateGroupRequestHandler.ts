@@ -268,7 +268,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 					otherGamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
 					otherGamePlayer.saveAsync();
 
-					group.setMember(request.userId, GroupStatus.WaitingAccept);
+					group.setMember(groupMember.userId, GroupStatus.WaitingAccept);
 				}
 			}
 

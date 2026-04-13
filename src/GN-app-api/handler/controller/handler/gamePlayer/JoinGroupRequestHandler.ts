@@ -279,7 +279,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 					// Stores the GearN member value used in the current execution flow.
 					let gnMember = new GNHashtable();
 
-					gnMember.add(ParameterCode.UserId, request.userId);
+					gnMember.add(ParameterCode.MemberId, request.userId);
 					gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 					gnMembers.add(gnMember);
@@ -288,6 +288,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 					let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 					groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+					groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 					this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 				}
@@ -328,7 +329,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 					// Stores the GearN member value used in the current execution flow.
 					let gnMember = new GNHashtable();
 
-					gnMember.add(ParameterCode.UserId, request.userId);
+					gnMember.add(ParameterCode.MemberId, request.userId);
 					gnMember.add(ParameterCode.Status, GroupStatus.WaitingAccept);
 
 					gnMembers.add(gnMember);
@@ -337,6 +338,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 					let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 					groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+					groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 					this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 				}
@@ -380,7 +382,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 					// Stores the GearN member value used in the current execution flow.
 					let gnMember = new GNHashtable();
 
-					gnMember.add(ParameterCode.UserId, request.userId);
+					gnMember.add(ParameterCode.MemberId, request.userId);
 					gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 					gnMembers.add(gnMember);
@@ -389,6 +391,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 					let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 					groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+					groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 					this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 				}

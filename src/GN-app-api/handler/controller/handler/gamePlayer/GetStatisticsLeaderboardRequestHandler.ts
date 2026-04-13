@@ -386,11 +386,9 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 				gnResult.add(ParameterCode.UserId, result.userId);
 
 				// Stores the game player value used in the current execution flow.
-				let gamePlayer = gamePlayerFindOptions == null ? null
-					: await this.gnServer.getDatabase().loadGamePlayerAsync(result.userId, gameId, gamePlayerFindOptions);
+				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(result.userId, gameId, gamePlayerFindOptions);
 
-				if (gamePlayer == null) gnResult.add(ParameterCode.InfoResponseParameters, new GNHashtable());
-				else gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, gameId));
+				if (gamePlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, gameId));
 
 				gnResults.add(gnResult);
 			}

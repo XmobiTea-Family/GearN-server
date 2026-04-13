@@ -229,7 +229,7 @@ export class GetPlayersWithTagRequestHandler extends GamePlayerBaseRequestHandle
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayersWithTagRequestHandler", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayersWithTag", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
