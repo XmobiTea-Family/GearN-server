@@ -143,15 +143,15 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 				}
 			}
 
-			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, { playerGroups: true });
+			// // Stores the game player value used in the current execution flow.
+			// let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, { playerGroups: true });
 
-			if (gamePlayer != null) {
-				// Stores the player group value used in the current execution flow.
-				let playerGroup = gamePlayer.getPlayerGroup(groupId);
+			// if (gamePlayer != null) {
+			// 	// Stores the player group value used in the current execution flow.
+			// 	let playerGroup = gamePlayer.getPlayerGroup(groupId);
 
-				if (playerGroup != null && playerGroup.status == GroupStatus.Member) answer = true;
-			}
+			// 	if (playerGroup != null && playerGroup.status == GroupStatus.Member) answer = true;
+			// }
 		}
 
 		return answer;
