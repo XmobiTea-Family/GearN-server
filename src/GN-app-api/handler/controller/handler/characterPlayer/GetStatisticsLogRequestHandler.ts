@@ -12,6 +12,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
+import * as mongoDB from "mongodb";
 
 class GetStatisticsLogOperationRequest extends OperationRequest {
 
@@ -65,7 +66,7 @@ class AdminGetStatisticsLogOperationRequest extends ServerGetStatisticsLogOperat
 	}
 }
 
-export class GetStatisticsLogRequestHandler extends RequestHandler {
+export class GetStatisticsLogRequestHandler extends CharacterPlayerBaseRequestHandler {
 
 	/**
 	 * Returns the code.
@@ -205,8 +206,8 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 			else $filter["key"] = { $in: keys };
 		}
 
-		if (request.token) {
-			$filter["_id"] = { $lt: request.token };
+		if (request.token && mongoDB.ObjectId.isValid(request.token)) {
+			$filter["_id"] = { $lt: new mongoDB.ObjectId(request.token) };
 		}
 
 		// Stores the GearN results value used in the current execution flow.
