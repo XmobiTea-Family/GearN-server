@@ -177,6 +177,25 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved inventory settings instance for the current execution flow.
+		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
+
+		for (let i = 0; i < request.itemStatistics.length; i++) {
+			// Stores the item statistics parameter value used in the current execution flow.
+			let itemStatisticsParam = request.itemStatistics[i];
+
+			// Stores the key value used in the current execution flow.
+			let key = itemStatisticsParam.key;
+
+			// Stores the item statistics settings item value used in the current execution flow.
+			let itemStatisticsSettingsItem = inventorySettings.itemStatisticsSettings.find(x => x.key == key);
+			if (itemStatisticsSettingsItem == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("StatisticsKey not found " + key);
+				return operationResponse;
+			}
+		}
+
 		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			itemStatistics: true,
@@ -189,9 +208,6 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
 		}
-
-		// Stores the resolved inventory settings instance for the current execution flow.
-		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

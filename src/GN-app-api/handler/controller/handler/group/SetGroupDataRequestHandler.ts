@@ -170,6 +170,25 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved group settings instance for the current execution flow.
+		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+
+		// Stores the resolved inventory settings instance for the current execution flow.
+		for (let i = 0; i < request.groupDatas.length; i++) {
+			// Stores the group data parameter value used in the current execution flow.
+			let groupDataParam = request.groupDatas[i];
+
+			// Stores the key value used in the current execution flow.
+			let key = groupDataParam.key;
+			// Stores the group datas settings item value used in the current execution flow.
+			let groupDatasSettingsItem = groupSettings.groupDatasSettings.find(x => x.key == key);
+			if (groupDatasSettingsItem == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("DataKey not found " + key);
+				return operationResponse;
+			}
+		}
+
 		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			groupDatas: true,
@@ -182,9 +201,6 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
-
-		// Stores the resolved group settings instance for the current execution flow.
-		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

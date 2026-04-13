@@ -192,6 +192,25 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved game player settings instance for the current execution flow.
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+
+		for (let i = 0; i < request.playerStatistics.length; i++) {
+			// Stores the player statistics parameter value used in the current execution flow.
+			let playerStatisticsParam = request.playerStatistics[i];
+
+			// Stores the key value used in the current execution flow.
+			let key = playerStatisticsParam.key;
+
+			// Stores the player statistics settings item value used in the current execution flow.
+			let playerStatisticsSettingsItem = gamePlayerSettings.playerStatisticsSettings.find(x => x.key == key);
+			if (playerStatisticsSettingsItem == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("StatisticsKey not found " + key);
+				return operationResponse;
+			}
+		}
+
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerStatistics: true,
@@ -204,9 +223,6 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
 		}
-
-		// Stores the resolved game player settings instance for the current execution flow.
-		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

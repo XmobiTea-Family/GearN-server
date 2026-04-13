@@ -175,6 +175,25 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved group settings instance for the current execution flow.
+		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+
+		for (let i = 0; i < request.groupCurrencies.length; i++) {
+			// Stores the group currency parameter value used in the current execution flow.
+			let groupCurrencyParam = request.groupCurrencies[i];
+
+			// Stores the key value used in the current execution flow.
+			let key = groupCurrencyParam.key;
+
+			// Stores the group currencies settings item value used in the current execution flow.
+			let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find(x => x.key == key);
+			if (groupCurrenciesSettingsItem == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("CurrencyKey not found " + key);
+				return operationResponse;
+			}
+		}
+
 		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			groupCurrencies: true,
@@ -187,9 +206,6 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
-
-		// Stores the resolved group settings instance for the current execution flow.
-		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

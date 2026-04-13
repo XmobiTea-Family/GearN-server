@@ -169,6 +169,26 @@ export class SetCustomDataRequestHandler extends GroupBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved group settings instance for the current execution flow.
+		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+
+		for (let i = 0; i < request.customDatas.length; i++) {
+
+			// Stores the custom data parameter value used in the current execution flow.
+			let customDataParameter = request.customDatas[i];
+
+			// Stores the key value used in the current execution flow.
+			let key = customDataParameter.key;
+
+			// Stores the custom datas settings item value used in the current execution flow.
+			let customDatasSettingsItem = groupSettings.customDatasSettings.find(x => x.key == key);
+			if (customDatasSettingsItem == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("CustomKey not found " + key);
+				return operationResponse;
+			}
+		}
+
 		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			customDatas: true,
@@ -181,9 +201,6 @@ export class SetCustomDataRequestHandler extends GroupBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
-
-		// Stores the resolved group settings instance for the current execution flow.
-		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

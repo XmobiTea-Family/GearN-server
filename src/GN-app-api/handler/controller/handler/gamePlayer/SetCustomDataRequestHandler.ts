@@ -185,6 +185,26 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved game player settings instance for the current execution flow.
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+
+		for (let i = 0; i < request.customDatas.length; i++) {
+
+			// Stores the custom data parameter value used in the current execution flow.
+			let customDataParameter = request.customDatas[i];
+
+			// Stores the key value used in the current execution flow.
+			let key = customDataParameter.key;
+
+			// Stores the custom datas settings item value used in the current execution flow.
+			let customDatasSettingsItem = gamePlayerSettings.customDatasSettings.find(x => x.key == key);
+			if (customDatasSettingsItem == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("CustomKey not found " + key);
+				return operationResponse;
+			}
+		}
+
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			customDatas: true,
@@ -197,9 +217,6 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
 		}
-
-		// Stores the resolved game player settings instance for the current execution flow.
-		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

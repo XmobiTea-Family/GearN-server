@@ -190,6 +190,25 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved game player settings instance for the current execution flow.
+		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+
+		for (let i = 0; i < request.playerCurrencies.length; i++) {
+			// Stores the player currency parameter value used in the current execution flow.
+			let playerCurrencyParam = request.playerCurrencies[i];
+
+			// Stores the key value used in the current execution flow.
+			let key = playerCurrencyParam.key;
+
+			// Stores the player currencies settings item value used in the current execution flow.
+			let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find(x => x.key == key);
+			if (playerCurrenciesSettingsItem == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("CurrencyKey not found " + key);
+				return operationResponse;
+			}
+		}
+
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerCurrencies: true,
@@ -202,9 +221,6 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
 		}
-
-		// Stores the resolved game player settings instance for the current execution flow.
-		let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
