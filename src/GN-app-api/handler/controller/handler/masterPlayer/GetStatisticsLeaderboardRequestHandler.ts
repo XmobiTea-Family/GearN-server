@@ -384,11 +384,9 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 				gnResult.add(ParameterCode.UserId, result.userId);
 
 				// Stores the master player value used in the current execution flow.
-				let masterPlayer = masterPlayerFindOptions == null ? null
-					: await this.gnServer.getDatabase().loadMasterPlayerAsync(result.userId, masterPlayerFindOptions);
+				let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(result.userId, masterPlayerFindOptions);
 
-				if (masterPlayer == null) gnResult.add(ParameterCode.InfoResponseParameters, new GNHashtable());
-				else gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+				if (masterPlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
 				gnResults.add(gnResult);
 			}

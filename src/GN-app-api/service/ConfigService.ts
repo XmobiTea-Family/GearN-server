@@ -11,6 +11,8 @@ export class ConfigService implements IConfigService {
 	// Stores the configuration collection value used by this instance.
 	private configCollection: mongoDB.Collection<mongoDB.Document>;
 
+	private intervalId: NodeJS.Timeout;
+
 	/**
 	 * Sets the configuration collection.
 	 * @param gameId Provides the game ID value used by this operation.
@@ -25,13 +27,29 @@ export class ConfigService implements IConfigService {
 	 * Runs the current workflow.
 	 */
 	public run(): void {
-		this.syncAllConfigAsync();
+		this.syncAllConfigAsync(true);
+
+		this.intervalId = setInterval(() => {
+			try {
+				this.syncAllConfigAsync(false);
+			}
+			catch (error) {
+				Debug.logError("Sync all config error on " + this.gameId + " with error " + error);
+			}
+			finally {
+
+			}
+		}, 120000);
+	}
+
+	public stop(): void {
+		if (this.intervalId) clearInterval(this.intervalId);
 	}
 
 	/**
 	 * Executes the sync all configuration async workflow asynchronously.
 	 */
-	private async syncAllConfigAsync(): Promise<void> {
+	private async syncAllConfigAsync(withDebug: boolean): Promise<void> {
 		// Stores the results value used in the current execution flow.
 		let results = await this.configCollection.find({});
 
@@ -57,7 +75,7 @@ export class ConfigService implements IConfigService {
 			let configDic2 = this.configDic.get(label);
 			configDic2.set(configName, configItem);
 
-			Debug.log("Update success local config " + configName + " with label " + label + " on " + this.gameId);
+			if (withDebug) Debug.log("Update success local config " + configName + " with label " + label + " on " + this.gameId);
 		}
 	}
 

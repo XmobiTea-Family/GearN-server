@@ -57,6 +57,8 @@ import * as mongoDB from "mongodb";
 import { GNHashtable } from "./GN-common/common/GNData";
 import { RequestControllerUtils } from "./RequestControllerUtils";
 import { AuthInfo } from "./GN-common/entity/AuthInfo";
+import { SecretInfo } from "./GN-common/entity/SecretInfo";
+import { GroupStatus } from "./GN-common/constant/enumType/GroupStatus";
 
 interface CreateIndexesOptions {
 	// Create the index as unique.
@@ -852,10 +854,47 @@ export class GNServer {
 	 */
 	private handleSocketAuthenticate(socket: Socket, authInfo: AuthInfo) {
 		if (socket.data.isAuthenticated) {
+			const userId = authInfo.getUserId();
+
 			this.eventCallbackCloudScriptService.executeSocket("socket_OnSocketConnected", {
 				socketId: socket.id,
-				userId: authInfo.getUserId(),
+				userId: userId,
 			});
+
+			let secretInfo: SecretInfo = socket.data.secretInfo;
+			if (secretInfo) {
+				this.getDatabase().loadGamePlayerAsync(userId, secretInfo.getGameId(), {
+					playerGroups: true,
+					playerCharacters: true,
+				}).then(async gamePlayer => {
+					if (socket != null && socket.connected && gamePlayer) {
+						for (const playerGroup of gamePlayer.getAllPlayerGroups()) {
+							if (playerGroup.status == GroupStatus.Member) {
+								this.joinRoom(userId, playerGroup.groupId);
+							}
+						}
+
+						for (const playerCharacter of gamePlayer.getAllPlayerCharacters()) {
+							const characterPlayer = await this.getDatabase().loadCharacterPlayerAsync(playerCharacter.characterId, secretInfo.getGameId(), {
+								playerGroups: true,
+							});
+
+							if (socket != null && socket.connected) {
+								if (characterPlayer) {
+									for (const playerGroup of characterPlayer.getAllPlayerGroups()) {
+										if (playerGroup.status == GroupStatus.Member) {
+											this.joinRoom(userId, playerGroup.groupId);
+										}
+									}
+								}
+							}
+							else {
+								break;
+							}
+						}
+					}
+				});
+			}
 		}
 	}
 

@@ -432,7 +432,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ segments: segment }, {
-			projection: this.getFindOptions(masterPlayerFindOptions)
+			projection: this.getFindOptions(masterPlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
@@ -456,7 +459,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
-			projection: this.getFindOptions(masterPlayerFindOptions)
+			projection: this.getFindOptions(masterPlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
@@ -513,7 +519,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
-			projection: this.getFindOptions(masterPlayerFindOptions)
+			projection: this.getFindOptions(masterPlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToMasterPlayers(results, collection);
 	}
@@ -1159,7 +1168,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ segments: segment }, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
+			projection: this.getFindOptions(gamePlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToGamePlayers(results, collection);
 	}
@@ -1184,7 +1196,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
+			projection: this.getFindOptions(gamePlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToGamePlayers(results, collection);
 	}
@@ -1242,7 +1257,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
+			projection: this.getFindOptions(gamePlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToGamePlayers(results, collection);
 	}
@@ -1734,7 +1752,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ segments: segment }, {
-			projection: this.getFindOptions(characterPlayerFindOptions)
+			projection: this.getFindOptions(characterPlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
@@ -1759,7 +1780,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
-			projection: this.getFindOptions(characterPlayerFindOptions)
+			projection: this.getFindOptions(characterPlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
@@ -1819,7 +1843,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
-			projection: this.getFindOptions(characterPlayerFindOptions)
+			projection: this.getFindOptions(characterPlayerFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToCharacterPlayers(results, collection);
 	}
@@ -2315,7 +2342,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ segments: segment }, {
-			projection: this.getFindOptions(groupFindOptions)
+			projection: this.getFindOptions(groupFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
@@ -2340,7 +2370,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
-			projection: this.getFindOptions(groupFindOptions)
+			projection: this.getFindOptions(groupFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
@@ -2400,7 +2433,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
-			projection: this.getFindOptions(groupFindOptions)
+			projection: this.getFindOptions(groupFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToGroups(results, collection);
 	}
@@ -2690,7 +2726,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ segments: segment }, {
-			projection: this.getFindOptions(inventoryFindOptions)
+			projection: this.getFindOptions(inventoryFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToInventories(results, collection);
 	}
@@ -2715,7 +2754,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
-			projection: this.getFindOptions(inventoryFindOptions)
+			projection: this.getFindOptions(inventoryFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToInventories(results, collection);
 	}
@@ -2775,7 +2817,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
-			projection: this.getFindOptions(inventoryFindOptions)
+			projection: this.getFindOptions(inventoryFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToInventories(results, collection);
 	}
@@ -3229,7 +3274,10 @@ export class xDatabase {
 
 		// Stores the results value used in the current execution flow.
 		let results = await collection.find($filter, {
-			projection: this.getFindOptions(storeInventoryFindOptions)
+			projection: this.getFindOptions(storeInventoryFindOptions),
+			sort: {
+				_id: -1
+			}
 		}).skip(skip).limit(limit);
 		return this.convertToStoreInventories(results, collection);
 	}
