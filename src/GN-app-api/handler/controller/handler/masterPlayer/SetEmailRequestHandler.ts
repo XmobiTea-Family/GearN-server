@@ -182,6 +182,12 @@ export class SetEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
+		if (!regex.test(request.email)) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.EmailInvalid);
+			return operationResponse;
+		}
+
 		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			email: true,
