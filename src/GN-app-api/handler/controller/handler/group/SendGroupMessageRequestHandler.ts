@@ -235,11 +235,6 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 					playerCharacters: true,
 				});
 
-				if (request.userId != request.senderId) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
-					return operationResponse;
-				}
-
 				if (!gamePlayer.hasPlayerCharacter(request.senderId)) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerNotMember);
 					operationResponse.setDebugMessage("GamePlayer not owned of the CharacterPlayer with senderId");

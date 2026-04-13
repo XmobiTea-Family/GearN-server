@@ -395,11 +395,9 @@ export class GetStatisticsLeaderboardRequestHandler extends GroupBaseRequestHand
 				gnResult.add(ParameterCode.GroupId, result.groupId);
 
 				// Stores the group value used in the current execution flow.
-				let group = groupFindOptions == null ? null
-					: await this.gnServer.getDatabase().loadGroupAsync(result.groupId, gameId, groupFindOptions);
+				let group = await this.gnServer.getDatabase().loadGroupAsync(result.groupId, gameId, groupFindOptions);
 
-				if (group == null) gnResult.add(ParameterCode.InfoResponseParameters, new GNHashtable());
-				else gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, gameId));
+				if (group != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, gameId));
 
 				gnResults.add(gnResult);
 			}

@@ -24,8 +24,8 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 class AddMemberOperationRequest extends OperationRequest {
 
 	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 11, mustNonNull: true })
-	public userId: string;
+	@StringDataMember({ code: ParameterCode.MemberId, minLength: 10, maxLength: 11, mustNonNull: true })
+	public memberId: string;
 
 	// Stores the group ID value used by this instance.
 	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
@@ -105,7 +105,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			userId: request.userId,
+			memberId: request.memberId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -129,7 +129,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			userId: request.userId,
+			memberId: request.memberId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -153,7 +153,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-			userId: request.userId,
+			memberId: request.memberId,
 		}, secretInfo, operationRequest);
 	}
 
@@ -164,7 +164,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { groupId: string, userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, memberId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_AddMember", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
@@ -218,7 +218,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			}
 
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.memberId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 			if (gamePlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MemberNotFound);
@@ -228,9 +228,9 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-			if (!group.hasMember(request.userId)) {
+			if (!group.hasMember(request.memberId)) {
 				if (playerGroupCatalogSettingsItem.forceAcceptMember) {
-					group.setMember(request.userId, GroupStatus.Member);
+					group.setMember(request.memberId, GroupStatus.Member);
 					group.saveAsync();
 
 					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
@@ -253,7 +253,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 						groupGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
 
-						this.gnServer.sendEventTo(request.userId, groupGroupUpdateOperationEvent);
+						this.gnServer.sendEventTo(request.memberId, groupGroupUpdateOperationEvent);
 					}
 
 					{
@@ -263,7 +263,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						// Stores the GearN member value used in the current execution flow.
 						let gnMember = new GNHashtable();
 
-						gnMember.add(ParameterCode.UserId, request.userId);
+						gnMember.add(ParameterCode.MemberId, request.memberId);
 						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
@@ -272,14 +272,15 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 						groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+						groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
 
-					this.gnServer.joinRoom(request.userId, request.groupId);
+					this.gnServer.joinRoom(request.memberId, request.groupId);
 				}
 				else {
-					group.setMember(request.userId, GroupStatus.SentRequestAndWaitingAccept);
+					group.setMember(request.memberId, GroupStatus.SentRequestAndWaitingAccept);
 					group.saveAsync();
 
 					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
@@ -302,7 +303,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 						groupGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
 
-						this.gnServer.sendEventTo(request.userId, groupGroupUpdateOperationEvent);
+						this.gnServer.sendEventTo(request.memberId, groupGroupUpdateOperationEvent);
 					}
 
 					{
@@ -312,7 +313,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						// Stores the GearN member value used in the current execution flow.
 						let gnMember = new GNHashtable();
 
-						gnMember.add(ParameterCode.UserId, request.userId);
+						gnMember.add(ParameterCode.MemberId, request.memberId);
 						gnMember.add(ParameterCode.Status, GroupStatus.SentRequestAndWaitingAccept);
 
 						gnMembers.add(gnMember);
@@ -321,6 +322,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 						groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+						groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
@@ -328,10 +330,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			}
 			else {
 				// Stores the member item value used in the current execution flow.
-				let memberItem = group.getMember(request.userId);
+				let memberItem = group.getMember(request.memberId);
 
 				if (memberItem.status == GroupStatus.WaitingAccept) {
-					group.setMember(request.userId, GroupStatus.Member);
+					group.setMember(request.memberId, GroupStatus.Member);
 					group.saveAsync();
 
 					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
@@ -354,7 +356,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 						groupGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
 
-						this.gnServer.sendEventTo(request.userId, groupGroupUpdateOperationEvent);
+						this.gnServer.sendEventTo(request.memberId, groupGroupUpdateOperationEvent);
 					}
 
 					{
@@ -364,7 +366,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						// Stores the GearN member value used in the current execution flow.
 						let gnMember = new GNHashtable();
 
-						gnMember.add(ParameterCode.UserId, request.userId);
+						gnMember.add(ParameterCode.MemberId, request.memberId);
 						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
@@ -373,11 +375,12 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 						groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+						groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
 
-					this.gnServer.joinRoom(request.userId, request.groupId);
+					this.gnServer.joinRoom(request.memberId, request.groupId);
 				}
 			}
 		}
@@ -398,7 +401,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			}
 
 			// Stores the character player value used in the current execution flow.
-			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.userId, secretInfo.getGameId(), characterPlayerFindOptions);
+			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.memberId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 			if (characterPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MemberNotFound);
@@ -408,9 +411,9 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-			if (!group.hasMember(request.userId)) {
+			if (!group.hasMember(request.memberId)) {
 				if (playerGroupCatalogSettingsItem.forceAcceptMember) {
-					group.setMember(request.userId, GroupStatus.Member);
+					group.setMember(request.memberId, GroupStatus.Member);
 					group.saveAsync();
 
 					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
@@ -429,10 +432,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						gnPlayerGroups.add(gnPlayerGroup);
 
 						// Stores the group group update operation event value used in the current execution flow.
-						let groupGroupUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerGroupUpdate, null);
+						let groupGroupUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerGroupUpdate, null);
 
 						groupGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
-						groupGroupUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.userId);
+						groupGroupUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.memberId);
 
 						this.gnServer.sendEventTo(characterPlayer.getOwner().id, groupGroupUpdateOperationEvent);
 					}
@@ -444,7 +447,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						// Stores the GearN member value used in the current execution flow.
 						let gnMember = new GNHashtable();
 
-						gnMember.add(ParameterCode.UserId, request.userId);
+						gnMember.add(ParameterCode.MemberId, request.memberId);
 						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
@@ -453,12 +456,13 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 						groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+						groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
 				}
 				else {
-					group.setMember(request.userId, GroupStatus.SentRequestAndWaitingAccept);
+					group.setMember(request.memberId, GroupStatus.SentRequestAndWaitingAccept);
 					group.saveAsync();
 
 					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
@@ -477,10 +481,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						gnPlayerGroups.add(gnPlayerGroup);
 
 						// Stores the group group update operation event value used in the current execution flow.
-						let groupGroupUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerGroupUpdate, null);
+						let groupGroupUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerGroupUpdate, null);
 
 						groupGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
-						groupGroupUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.userId);
+						groupGroupUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.memberId);
 
 						this.gnServer.sendEventTo(characterPlayer.getOwner().id, groupGroupUpdateOperationEvent);
 					}
@@ -492,7 +496,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						// Stores the GearN member value used in the current execution flow.
 						let gnMember = new GNHashtable();
 
-						gnMember.add(ParameterCode.UserId, request.userId);
+						gnMember.add(ParameterCode.MemberId, request.memberId);
 						gnMember.add(ParameterCode.Status, GroupStatus.SentRequestAndWaitingAccept);
 
 						gnMembers.add(gnMember);
@@ -501,6 +505,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 						groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+						groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
@@ -508,10 +513,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			}
 			else {
 				// Stores the member item value used in the current execution flow.
-				let memberItem = group.getMember(request.userId);
+				let memberItem = group.getMember(request.memberId);
 
 				if (memberItem.status == GroupStatus.WaitingAccept) {
-					group.setMember(request.userId, GroupStatus.Member);
+					group.setMember(request.memberId, GroupStatus.Member);
 					group.saveAsync();
 
 					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
@@ -530,10 +535,10 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						gnPlayerGroups.add(gnPlayerGroup);
 
 						// Stores the group group update operation event value used in the current execution flow.
-						let groupGroupUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerGroupUpdate, null);
+						let groupGroupUpdateOperationEvent = new OperationEvent(EventCode.OnCharacterPlayerGroupUpdate, null);
 
 						groupGroupUpdateOperationEvent.setParameter(ParameterCode.PlayerGroups, gnPlayerGroups);
-						groupGroupUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.userId);
+						groupGroupUpdateOperationEvent.setParameter(ParameterCode.CharacterId, request.memberId);
 
 						this.gnServer.sendEventTo(characterPlayer.getOwner().id, groupGroupUpdateOperationEvent);
 					}
@@ -545,7 +550,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						// Stores the GearN member value used in the current execution flow.
 						let gnMember = new GNHashtable();
 
-						gnMember.add(ParameterCode.UserId, request.userId);
+						gnMember.add(ParameterCode.MemberId, request.memberId);
 						gnMember.add(ParameterCode.Status, GroupStatus.Member);
 
 						gnMembers.add(gnMember);
@@ -554,6 +559,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 						let groupMemberUpdateOperationEvent = new OperationEvent(EventCode.OnGroupMemberUpdate, null);
 
 						groupMemberUpdateOperationEvent.setParameter(ParameterCode.Members, gnMembers);
+						groupMemberUpdateOperationEvent.setParameter(ParameterCode.GroupId, request.groupId);
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
