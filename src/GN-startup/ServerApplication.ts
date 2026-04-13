@@ -924,6 +924,9 @@ export class ServerApplication extends BuilderBase {
 			await masterPlayerCollection.createIndex({ "external.apple.appleId": 1 }, { background: true, sparse: true, name: "external.apple.appleId_1" });
 			await masterPlayerCollection.createIndex({ "external.google.googleId": 1 }, { background: true, sparse: true, name: "external.google.googleId_1" });
 			await masterPlayerCollection.createIndex({ "external.facebook.facebookId": 1 }, { background: true, sparse: true, name: "external.facebook.facebookId_1" });
+			
+			await masterPlayerCollection.createIndex({ "external.googlePlayGameService.playerId": 1 }, { background: true, sparse: true, name: "external.googlePlayGameService.playerId_1" });
+			await masterPlayerCollection.createIndex({ "external.gameCenter.playerId": 1 }, { background: true, sparse: true, name: "external.gameCenter.playerId_1" });
 
 			Debug.log("create some indexes on System.MasterPlayer success.");
 			Debug.log("[Security] Please login dashboard via account with username '" + rootUsername + "' and password is '" + rootPassword + "' and change new password");
