@@ -204,7 +204,7 @@ export class UnlinkGenericServiceRequestHandler extends MasterPlayerBaseRequestH
 
 		// Stores the external value used in the current execution flow.
 		let external = masterPlayer.getExternal();
-		if (external.genericService == null || (external.genericService.genericServices.has(request.serviceName) && external.genericService.genericServices.get(request.serviceName).serviceId != request.serviceId)) {
+		if (external.genericService == null || !external.genericService.genericServices.has(request.serviceName) || external.genericService.genericServices.get(request.serviceName).serviceId != request.serviceId) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalNotLinked);
 			return operationResponse;
 		}
