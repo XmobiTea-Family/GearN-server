@@ -3,8 +3,12 @@ import * as mongoDB from "mongodb";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import express from "express";
 import fs from "fs";
+import path from "path";
 
 export class UploadFileMiddleware {
+	// Windows reserved device names cannot be used as file names on disk.
+	private static readonly ReservedFileNames = new Set(["CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"]);
+
 	// Stores the upload file info collection value used by this instance.
 	private uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>;
 	// Stores the upload path value used by this instance.
@@ -52,6 +56,41 @@ export class UploadFileMiddleware {
 	public run() { }
 
 	/**
+	 * Collapses a client-supplied file name into a safe leaf name before it is written to disk.
+	 * @param originalFileName Provides the client-supplied file name value used by this operation.
+	 * @returns Returns the safe file name.
+	 */
+	private sanitizeUploadFileName(originalFileName: string): string {
+		let answer = (originalFileName ?? "").replace(/\\/g, "/");
+		answer = path.posix.basename(answer).normalize("NFKC");
+		answer = answer.replace(/[\u0000-\u001f\u007f]+/g, "");
+		answer = answer.replace(/[^A-Za-z0-9._-]+/g, "_");
+		answer = answer.replace(/_+/g, "_");
+		answer = answer.replace(/^[._-]+|[._-]+$/g, "");
+
+		if (!answer) {
+			return "file";
+		}
+
+		const extension = path.extname(answer);
+		const baseName = path.basename(answer, extension);
+		const normalizedBaseName = baseName.toUpperCase();
+		if (UploadFileMiddleware.ReservedFileNames.has(normalizedBaseName)) {
+			answer = "file_" + answer;
+		}
+
+		const maxSafeFileNameLength = 100;
+		if (answer.length > maxSafeFileNameLength) {
+			const currentExtension = path.extname(answer);
+			const currentBaseName = path.basename(answer, currentExtension);
+			const maxBaseNameLength = Math.max(1, maxSafeFileNameLength - currentExtension.length);
+			answer = currentBaseName.slice(0, maxBaseNameLength) + currentExtension;
+		}
+
+		return answer;
+	}
+
+	/**
 	 * Executes the storage workflow.
 	 * @returns Returns the operation result.
 	 */
@@ -73,7 +112,9 @@ export class UploadFileMiddleware {
 			filename: (req, file, cb) => {
 				// Stores the file ID value used in the current execution flow.
 				let fileId = req.params.fileId;
-				return cb(null, xDatetime.getCurrentMilliseconds() + "_" + fileId + "_" + file.originalname);
+				// Never trust multipart filenames because separators and device names can escape the upload directory.
+				let safeFileName = this.sanitizeUploadFileName(file.originalname);
+				return cb(null, xDatetime.getCurrentMilliseconds() + "_" + fileId + "_" + safeFileName);
 			},
 		});
 	}
