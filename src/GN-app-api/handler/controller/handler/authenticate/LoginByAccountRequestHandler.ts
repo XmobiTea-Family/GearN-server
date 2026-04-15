@@ -73,7 +73,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		}
 
 		if (!secretInfo.getPermission().authenticate.loginByAccount.selfEnable) {
-			return this.newOperationNotAllowError(operationRequest);
+			return this.newOperationNotAllowError(request);
 		}
 
 		this.generateInfoRequestParamForOwner(secretInfo, request.infoRequestParam);
@@ -108,6 +108,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		if (masterPlayerFindOptions != null) {
 			masterPlayerFindOptions.lastIPDetail = true;
 			masterPlayerFindOptions.playerBan = true;
+			masterPlayerFindOptions.external = true;
 		}
 
 		// Stores the master player value used in the current execution flow.
@@ -117,7 +118,17 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 			return operationResponse;
 		}
-		else {
+
+		// Tracks whether match.
+		let isMatch = await bcrypt.compare(request.password, masterPlayer.getPassword());
+
+		if (!isMatch) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountPasswordWrong);
+
+			return operationResponse;
+		}
+
+		{
 			// Stores the last IP detail value used in the current execution flow.
 			let lastIPDetail = masterPlayer.getLastIPDetail();
 			if (lastIPDetail.ipAddress != request.ipAddress) {
@@ -136,24 +147,15 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			}
 
 			masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-			masterPlayer.saveAsync();
+			await masterPlayer.saveAsync();
 		}
 
-		// Tracks whether match.
-		let isMatch = await bcrypt.compare(request.password, masterPlayer.getPassword());
+		await this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		if (!isMatch) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountPasswordWrong);
-
-			return operationResponse;
+		if (operationResponse.getParameters().getNumber(ParameterCode.ErrorCode) != ErrorCode.PlayerBan) {
+			operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 		}
-
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-		operationResponse.setParameter(ParameterCode.UserId, masterPlayer.getUserId());
-		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
-
-		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
 		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByAccount",

@@ -198,7 +198,7 @@ export class LoginByGameCenterRequestHandler extends LoginBaseRequestHandler {
 			// Stores the last IP detail value used in the current execution flow.
 			let lastIPDetail = masterPlayer.getLastIPDetail();
 			if (lastIPDetail.ipAddress != request.ipAddress) {
-				lastIPDetail.ipAddress = lastIPDetail.ipAddress;
+				lastIPDetail.ipAddress = request.ipAddress;
 
 				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
@@ -219,15 +219,15 @@ export class LoginByGameCenterRequestHandler extends LoginBaseRequestHandler {
 			masterPlayer.setExternal(external);
 
 			masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-			masterPlayer.saveAsync();
+			await masterPlayer.saveAsync();
 		}
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		await this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		operationResponse.setParameter(ParameterCode.UserId, masterPlayer.getUserId());
-		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
-
-		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
+		if (operationResponse.getParameters().getNumber(ParameterCode.ErrorCode) != ErrorCode.PlayerBan) {
+			operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		}
 
 		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "loginByGameCenter",

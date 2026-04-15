@@ -143,17 +143,17 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 
 		masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-		operationResponse.setParameter(ParameterCode.UserId, masterPlayer.getUserId());
-		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
-
 		operationResponse.setParameter(ParameterCode.NewlyCreated, true);
 
 		masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
-		this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
+		await this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
+
+		if (operationResponse.getParameters().getNumber(ParameterCode.ErrorCode) != ErrorCode.PlayerBan) {
+			operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		}
 
 		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "registerAccount",

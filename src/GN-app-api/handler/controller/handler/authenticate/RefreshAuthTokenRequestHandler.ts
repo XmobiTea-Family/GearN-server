@@ -100,12 +100,11 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		masterPlayer.setTsLastLogin(currentMilliseconds);
-		masterPlayer.saveAsync();
 
 		// Stores the player ban value used in the current execution flow.
 		let playerBan = masterPlayer.getPlayerBan();
-		if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+
+		if (playerBan.tsExpire != 0 && (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds)) {
 			operationResponse.setParameter(ParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 		}
@@ -113,7 +112,7 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 			// Stores the new auth info value used in the current execution flow.
-			let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
+			let newAuthInfo = await this.gnServer.getApiMiddleware().generateAuthInfo({
 				gnToken: null,
 				secretKey: secretInfo.getSecretKey(),
 				userId: request.userId,
@@ -121,6 +120,9 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
 			operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
 		}
+
+		masterPlayer.setTsLastLogin(currentMilliseconds);
+		await masterPlayer.saveAsync();
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, secretInfo, operationRequest, operationResponse);
 

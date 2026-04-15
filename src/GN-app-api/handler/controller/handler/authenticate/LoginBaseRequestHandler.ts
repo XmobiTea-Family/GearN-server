@@ -87,8 +87,6 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 		if (infoRequestParam.email) answer.email = infoRequestParam.email;
 		if (infoRequestParam.pushNotifications) answer.pushNotifications = infoRequestParam.pushNotifications;
 
-		answer.playerBan = true;
-
 		return answer;
 	}
 
@@ -659,7 +657,7 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 	 * @param masterPlayer Provides the master player value used by this operation.
 	 * @param secretInfo Provides the secret info value used by this operation.
 	 */
-	protected setupAuthInfo(operationResponse: OperationResponse, masterPlayer: MasterPlayer, secretInfo: SecretInfo) {
+	protected async setupAuthInfo(operationResponse: OperationResponse, masterPlayer: MasterPlayer, secretInfo: SecretInfo) {
 		// Tracks whether r ID should be used.
 		let userId = masterPlayer.getUserId();
 		operationResponse.setParameter(ParameterCode.UserId, userId);
@@ -681,7 +679,7 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 		}
 
 		// Stores the new auth info value used in the current execution flow.
-		let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
+		let newAuthInfo = await this.gnServer.getApiMiddleware().generateAuthInfo({
 			userId: userId,
 			secretKey: secretInfo.getSecretKey(),
 			gnToken: null
