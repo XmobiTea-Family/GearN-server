@@ -103,6 +103,10 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (request.type != OwnerType.CharacterPlayer && request.type != OwnerType.GamePlayer && request.type != OwnerType.Group) {
+			return this.newInvalidRequestParameters(request, "can not found the type parameter " + request.type);
+		}
+
 		// Tracks whether method is allowed.
 		let allowMethod = false;
 
@@ -166,6 +170,10 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (request.type != OwnerType.CharacterPlayer && request.type != OwnerType.GamePlayer && request.type != OwnerType.Group) {
+			return this.newInvalidRequestParameters(request, "can not found the type parameter " + request.type);
+		}
+
 		if (!secretInfo.getPermission().storeInventory.validateGooglePlayStoreReceipt.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
@@ -190,6 +198,10 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (request.type != OwnerType.CharacterPlayer && request.type != OwnerType.GamePlayer && request.type != OwnerType.Group) {
+			return this.newInvalidRequestParameters(request, "can not found the type parameter " + request.type);
 		}
 
 		if (!secretInfo.getPermission().storeInventory.validateGooglePlayStoreReceipt.adminSelfEnable) {
@@ -253,6 +265,16 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 
 			transactionId = receiptJson["TransactionID"];
 
+			// Stores the transaction result value used in the current execution flow.
+			let transactionResult = await this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).findOne({
+				transactionId: transactionId
+			});
+
+			if (transactionResult != null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ReceiptInvalid);
+				return operationResponse;
+			}
+
 			// Stores the receipt status value used in the current execution flow.
 			let receiptStatus = await this.gnServer.getGoogleService().validateReceipt(payload);
 			if (!receiptStatus.success) {
@@ -291,19 +313,6 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 				return operationResponse;
 			}
 		}
-
-		this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).insertOne({
-			payloadMd5: Md5Generate.getMd5(payload),
-			transactionId: transactionId,
-			payload: payload,
-			buyer: {
-				id: request.id,
-				type: request.type
-			},
-			tsCreate: xDatetime.getCurrentMilliseconds(),
-			productId: productId,
-			store: "GooglePlayStore",
-		});
 
 		// Stores the price currency start values value used in the current execution flow.
 		let priceCurrencyStartValues: {
@@ -748,6 +757,19 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 
 			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		}
+
+		this.gnServer.getDatabase().systemGameCollection("ReceiptIAP", secretInfo.getGameId()).insertOne({
+			payloadMd5: Md5Generate.getMd5(payload),
+			transactionId: transactionId,
+			payload: payload,
+			buyer: {
+				id: request.id,
+				type: request.type
+			},
+			tsCreate: xDatetime.getCurrentMilliseconds(),
+			productId: productId,
+			store: "GooglePlayStore",
+		});
 
 		this.gnServer.getDatabase().insertStoreInventoryLogAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, transactionId, StoreReceiveType.GooglePlayStore, request.log);
 
