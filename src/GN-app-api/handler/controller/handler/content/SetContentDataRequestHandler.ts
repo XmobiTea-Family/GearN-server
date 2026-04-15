@@ -187,7 +187,7 @@ export class SetContentDataRequestHandler extends RequestHandler {
 			});
 		}
 
-		this.gnServer.getHttpApp().getClusterHandler().sendEvent("content_SetContentData", {
+		await this.gnServer.getHttpApp().getClusterHandler().sendEvent("content_SetContentData", {
 			configs: configs,
 			label: request.label,
 			gameId: secretInfo.getGameId(),
