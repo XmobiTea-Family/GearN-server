@@ -15,6 +15,7 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
+import { StoreItemType } from "../../../../../GN-common/constant/enumType/StoreItemType";
 
 class CreateStoreItemOperationRequest extends OperationRequest {
 
@@ -176,6 +177,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 		if (oldStoreInventory != null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadExists);
+			return operationResponse;
 		}
 
 		// Stores the current milliseconds value used in the current execution flow.
@@ -185,9 +187,9 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		let result = {} as any;
 		result["storeId"] = storeId;
 		result["storeItems"] = [];
+		result["storeItemType"] = StoreItemType.Consumable;
 		result["storeCurrencies"] = [];
 		result["priceCurrencies"] = [];
-		result["packageId"] = null;
 		result["storeDatas"] = [];
 		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
 		result["segments"] = [];
@@ -199,7 +201,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
-		this.gnServer.getDatabase().createStoreInventoryAsync(result, secretInfo.getGameId());
+		await this.gnServer.getDatabase().createStoreInventoryAsync(result, secretInfo.getGameId());
 
 		operationResponse.setParameter(ParameterCode.StoreId, storeId);
 

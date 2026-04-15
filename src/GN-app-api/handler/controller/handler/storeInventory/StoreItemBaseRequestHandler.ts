@@ -54,11 +54,11 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		// Stores the store ID value used in the current execution flow.
-		let storeId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
+		// Stores the item ID value used in the current execution flow.
+		let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
 		// o day can tao 1 dong 
 		let result = {} as any;
-		result["storeId"] = storeId;
+		result["itemId"] = itemId;
 		result["catalogId"] = catalogId;
 		result["classId"] = classId;
 		result["amount"] = amount;
