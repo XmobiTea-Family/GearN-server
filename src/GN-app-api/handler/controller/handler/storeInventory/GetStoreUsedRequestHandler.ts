@@ -183,7 +183,7 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 
 		if (result != null) {
 			for (let i = 0; i < result.useIds.length; i++) {
-				// Tracks whether ID should be used.
+				// Stores the use ID should be used.
 				let useId = result.useIds[i];
 
 				// Stores the GearN result value used in the current execution flow.
