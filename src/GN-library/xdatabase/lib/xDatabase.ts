@@ -3494,8 +3494,7 @@ export class xDatabase {
 
 		// Stores the answer value used in the current execution flow.
 		let answer: { [k: string]: boolean } = {};
-
-		// Stores the keys value used in the current execution flow.
+		
 		let keys = Object.keys(findOptions);
 		keys.forEach((key: string) => {
 			if (findOptions[key] == true) answer[key] = true;
