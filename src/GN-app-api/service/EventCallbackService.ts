@@ -7,8 +7,10 @@ import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { IPostEventCallbackService, IPreEventCallbackService, OnPostCallbackFunction, OnPreCallbackFunction } from "./IEventCallbackService";
 import * as mongoDB from "mongodb";
 import fs from "fs";
+import path from "path";
+import { promisify } from "util";
 import { ExecuteResponseStatus } from "./ICloudScriptService";
-import { ChildProcess, fork, execSync } from "child_process";
+import { ChildProcess, execFile, fork } from "child_process";
 import { GNServer } from "./../../GNServer";
 import { GNServerSettingsOptions } from "@xmobitea/gn-typescript-client";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
@@ -17,6 +19,8 @@ import { ParameterCode } from "./../../GN-common/constant/parameterCode/Paramete
 import { GNHashtable } from "./../../GN-common/common/GNData";
 import { MatchmakingTicketCanMatch } from "./../service/IMatchmakingService";
 import { CloudScriptEvent } from "./CloudScriptEventService";
+
+const execFileAsync = promisify(execFile);
 
 enum EventCallbackType {
 	Pre = 0,
@@ -1400,8 +1404,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		let type = eventName.split("_")[0];
 		let version = StringUtility.generateRandomString(7, 0);
 
-		let filePathTempTs = __dirname + "/./GN-startup/cloudScript/temp2.ts";
-
 		let cloudFunction = this.cloudScriptFunctionDict.get(type);
 		if (cloudFunction == null)
 			return {
@@ -1435,34 +1437,18 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		let fullScriptJs: string;
 
 		try {
-			let templateFullScriptPathTs = __dirname + "/./GN-startup/cloudScript/templateEventCallback.ts";
-			let fullScriptTs = fs.readFileSync(templateFullScriptPathTs).toString().replace("//$replaceScript", finalScript);
-
-			fs.writeFileSync(filePathTempTs, fullScriptTs);
-
-			let filePathTemp = __dirname + "/./GN-startup/cloudScript";
-
-			await execSync("npx tsc " + filePathTempTs + " --allowJs --skipLibCheck --esModuleInterop --outDir " + filePathTemp);
-
-			let filePathTempJs = __dirname + "/./GN-startup/cloudScript/temp2.js";
-			fullScriptJs = fs.readFileSync(filePathTempJs).toString();
-
+			fullScriptJs = await this.compileCloudScript(script, version);
 		} catch (err) {
-			if (fs.existsSync(filePathTempTs)) fs.rmSync(filePathTempTs);
-
-			let errorMessage = "Unknown error occurred";
-
-			if (err instanceof Error) {
-				errorMessage = err.message;
-			} else if (typeof err === "string") {
-				errorMessage = err;
-			} else if (typeof err === "object" && err !== null) {
-				errorMessage = JSON.stringify(err);
-			}
-
 			return {
 				success: false,
-				errorMessage: errorMessage,
+				errorMessage: this.getErrorMessage(err),
+			}
+		}
+
+		if (!fullScriptJs) {
+			return {
+				success: false,
+				errorMessage: "compile error",
 			};
 		}
 
@@ -1511,6 +1497,80 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			success: true,
 			version: version,
 		};
+	}
+
+	/**
+	 * Compiles the submitted cloud script into executable JavaScript using isolated temp files.
+	 * @param script Provides the script value used by this operation.
+	 * @param version Provides the version value used by this operation.
+	 * @returns Resolves with the compiled JavaScript output.
+	 */
+	private async compileCloudScript(script: string, version: string): Promise<string> {
+		// Use a unique temp file per request to avoid concurrent add-function races.
+		let cloudScriptDirectoryPath = path.join(__dirname, "./GN-startup/cloudScript");
+		let templateCloudScriptPath = path.join(cloudScriptDirectoryPath, "templateEventCallback.ts");
+		let compileId = version + "_" + StringUtility.generateRandomString(11, 0);
+		let tempTsFilePath = path.join(cloudScriptDirectoryPath, compileId + ".ts");
+		let tempJsFilePath = path.join(cloudScriptDirectoryPath, compileId + ".js");
+
+		try {
+			let templateCloudScript = await fs.promises.readFile(templateCloudScriptPath, "utf8");
+			let fullScriptTs = templateCloudScript.replace("//$replaceScript", script);
+
+			await fs.promises.writeFile(tempTsFilePath, fullScriptTs, "utf8");
+			await execFileAsync("npx", ["tsc", tempTsFilePath, "--allowJs", "--skipLibCheck", "--outDir", cloudScriptDirectoryPath], { windowsHide: true, shell: process.platform === "win32" });
+
+			// await execFileAsync("npx tsc " + tempTsFilePath + " --allowJs --skipLibCheck --outDir " + tempJsFilePath);
+			return await fs.promises.readFile(tempJsFilePath, "utf8");
+		}
+		catch {
+			return null;
+		}
+		finally {
+			try {
+				await fs.promises.rm(tempTsFilePath, { force: true });
+			}
+			catch {
+			}
+			try {
+				await fs.promises.rm(tempJsFilePath, { force: true });
+			}
+			catch {
+			}
+		}
+	}
+
+	/**
+	 * Normalizes unknown error values into a readable message.
+	 * @param err Provides the error value used by this operation.
+	 * @returns Returns the error message.
+	 */
+	private getErrorMessage(err: unknown): string {
+		if (err instanceof Error) {
+			let execError = err as Error & { stderr?: string | Buffer, stdout?: string | Buffer };
+
+			let stderr = execError.stderr == null ? "" : execError.stderr.toString().trim();
+			if (stderr.length > 0) {
+				return stderr;
+			}
+
+			let stdout = execError.stdout == null ? "" : execError.stdout.toString().trim();
+			if (stdout.length > 0) {
+				return stdout;
+			}
+
+			return execError.message;
+		}
+
+		if (typeof err === "string") {
+			return err;
+		}
+
+		if (typeof err === "object" && err !== null) {
+			return JSON.stringify(err);
+		}
+
+		return "Unknown error occurred";
 	}
 
 	/**
