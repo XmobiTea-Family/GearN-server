@@ -217,7 +217,7 @@ export class UploadFileHandler {
 				// Stores the file ID value used in the current execution flow.
 				let fileId = req.params.fileId;
 
-				this.uploadFileInfoCollection.updateOne(
+				await this.uploadFileInfoCollection.updateOne(
 					{ fileId: fileId },
 					{
 						$set: {

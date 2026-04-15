@@ -163,10 +163,17 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId, {
 			removeStatus: true,
 			fileUpload: true,
+			gameId: true,
 		});
 
 		if (uploadFileInfo == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+			return operationResponse;
+		}
+
+		if (uploadFileInfo.getGameId() != secretInfo.getGameId()) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+			operationResponse.setDebugMessage("gameId not correct to get file");
 			return operationResponse;
 		}
 

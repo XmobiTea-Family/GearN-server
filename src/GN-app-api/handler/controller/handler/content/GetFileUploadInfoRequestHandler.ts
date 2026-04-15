@@ -165,6 +165,12 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		if (uploadFileInfo.getGameId() != secretInfo.getGameId()) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+			operationResponse.setDebugMessage("gameId not correct to get file");
+			return operationResponse;
+		}
+
 		operationResponse.setParameter(ParameterCode.FileId, uploadFileInfo.getFileId());
 		operationResponse.setParameter(ParameterCode.FileName, uploadFileInfo.getFileName());
 		operationResponse.setParameter(ParameterCode.TsCreate, uploadFileInfo.getTsCreate());

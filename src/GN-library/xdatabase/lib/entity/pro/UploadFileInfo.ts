@@ -33,6 +33,8 @@ export class UploadFileInfo extends MongoObject {
 	private static readonly _removeStatus: string = "removeStatus";
 	// Defines the internal field key for file upload.
 	private static readonly _fileUpload: string = "fileUpload";
+	// Defines the internal field key for gameId.
+	private static readonly _gameId: string = "gameId";
 
 	// Stores the file ID value used by this instance.
 	private readonly fileId: string;
@@ -50,6 +52,9 @@ export class UploadFileInfo extends MongoObject {
 	private removeStatus: RemoveStatusItem;
 	// Stores the file upload value used by this instance.
 	private fileUpload: FileUpload;
+
+	// Stores the game Id value used by this instance.
+	private gameId: string;
 
 	/**
 	 * Initializes a new upload file info instance.
@@ -75,6 +80,7 @@ export class UploadFileInfo extends MongoObject {
 		this.tsCreate = result[UploadFileInfo._tsCreate];
 		this.removeStatus = result[UploadFileInfo._removeStatus];
 		this.fileUpload = result[UploadFileInfo._fileUpload];
+		this.gameId = result[UploadFileInfo._gameId];
 	}
 
 	/**
@@ -83,6 +89,14 @@ export class UploadFileInfo extends MongoObject {
 	 */
 	public getFileId(): string {
 		return this.fileId;
+	}
+
+	/**
+	 * Returns the game ID.
+	 * @returns Returns the game ID.
+	 */
+	public getGameId(): string {
+		return this.gameId;
 	}
 
 	/**
