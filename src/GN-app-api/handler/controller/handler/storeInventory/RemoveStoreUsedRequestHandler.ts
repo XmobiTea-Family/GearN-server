@@ -29,6 +29,14 @@ class RemoveStoreUsedOperationRequest extends OperationRequest {
 	@GNArrayDataMember({ code: ParameterCode.OwnerIds, elementCls: String, isOptional: true })
 	public ownerIds?: Array<string>;
 
+	/**
+	 * Checks whether valid request.
+	 */
+	public override isValidRequest() {
+		if (!super.isValidRequest()) return false;
+
+		return true;
+	}
 }
 
 class ServerRemoveStoreUsedOperationRequest extends RemoveStoreUsedOperationRequest {
