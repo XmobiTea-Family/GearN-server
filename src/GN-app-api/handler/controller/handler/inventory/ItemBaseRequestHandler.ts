@@ -121,8 +121,9 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 
 						if (gamePlayer != null) {
 							// Stores the player group value used in the current execution flow.
-							let playerGroup = gamePlayer.getPlayerGroup(owner.id);
-							if (playerGroup != null && playerGroup.status == GroupStatus.Member) {
+							let groupItem = gamePlayer.getPlayerGroup(owner.id);
+
+							if (groupItem != null && groupItem.status == GroupStatus.Member) {
 								answer = true;
 							}
 						}

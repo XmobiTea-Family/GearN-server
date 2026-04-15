@@ -222,11 +222,11 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 			characterPlayer.setOwner(request.newOwnerId, owner.type);
 			characterPlayer.saveAsync();
 
-			let playerCharacters = gamePlayer.getAllPlayerCharacters();
+			let playerCharacters = gamePlayer.getAllPlayerCharacters().filter(x => x.characterId != request.characterId);
 
 			for (let groupItem of characterPlayer.getAllPlayerGroups()) {
 				if (groupItem.status == GroupStatus.Member) {
-					this.gnServer.joinRoom(characterPlayer.getOwner().id, groupItem.groupId);
+					this.gnServer.joinRoom(request.newOwnerId, groupItem.groupId);
 
 					const group = await this.gnServer.getDatabase().loadGroupAsync(groupItem.groupId, secretInfo.getGameId());
 					if (group != null) {
@@ -237,10 +237,8 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 								break;
 							}
 						}
-						if (!hasCharacter) this.gnServer.leaveRoom(characterPlayer.getOwner().id, groupItem.groupId);
+						if (!hasCharacter) this.gnServer.leaveRoom(owner.id, groupItem.groupId);
 					}
-
-					this.gnServer.leaveRoom(owner.id, groupItem.groupId);
 				}
 			}
 		}

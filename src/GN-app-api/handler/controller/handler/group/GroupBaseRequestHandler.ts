@@ -109,10 +109,8 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 				if (groupType == OwnerType.GamePlayer) {
 					// Stores the member item value used in the current execution flow.
 					let memberItem = group.getMember(userId);
-					if (memberItem != null) {
-						if (memberItem.status == GroupStatus.Member) {
-							answer = true;
-						}
+					if (memberItem != null && memberItem.status == GroupStatus.Member) {
+						answer = true;
 					}
 				}
 				else if (groupType == OwnerType.CharacterPlayer) {
@@ -130,12 +128,10 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 								// Stores the member item value used in the current execution flow.
 								let memberItem = group.getMember(characterPlayer.characterId);
-								if (memberItem != null) {
-									if (memberItem.status == GroupStatus.Member) {
-										answer = true;
+								if (memberItem != null && memberItem.status == GroupStatus.Member) {
+									answer = true;
 
-										break;
-									}
+									break;
 								}
 							}
 						}
@@ -787,10 +783,8 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 			// Stores the member item value used in the current execution flow.
 			let memberItem = group.getMember(userId);
-			// Stores the status value used in the current execution flow.
-			let status = <GroupStatus>memberItem.status;
 
-			if (status == GroupStatus.Member) {
+			if (memberItem.status == GroupStatus.Member) {
 				return true;
 			}
 		}
@@ -821,10 +815,8 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 				// Stores the member item value used in the current execution flow.
 				let memberItem = group.getMember(playerCharacter.characterId);
-				// Stores the status value used in the current execution flow.
-				let status = <GroupStatus>memberItem.status;
 
-				if (status != GroupStatus.Member) {
+				if (memberItem.status != GroupStatus.Member) {
 					continue;
 				}
 
