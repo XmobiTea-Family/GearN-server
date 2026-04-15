@@ -157,13 +157,18 @@ export class GetFunctionRequestHandler extends RequestHandler {
 		}
 
 		// Stores the response value used in the current execution flow.
-		let response = await cloudScriptService.getCloudScriptFunction(request.version);
+		let cloudScriptFunction = await cloudScriptService.getCloudScriptFunction(request.version);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-		operationResponse.setParameter(ParameterCode.Script, response.script);
-		operationResponse.setParameter(ParameterCode.CanExecute, response.canExecute);
-		operationResponse.setParameter(ParameterCode.IsLive, response.isLive);
-		operationResponse.setParameter(ParameterCode.TsCreate, response.tsCreate);
+		if (!cloudScriptFunction) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VersionInvalid);
+		}
+		else {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+			operationResponse.setParameter(ParameterCode.Script, cloudScriptFunction.script);
+			operationResponse.setParameter(ParameterCode.CanExecute, cloudScriptFunction.canExecute);
+			operationResponse.setParameter(ParameterCode.IsLive, cloudScriptFunction.isLive);
+			operationResponse.setParameter(ParameterCode.TsCreate, cloudScriptFunction.tsCreate);
+		}
 
 		await this.gnServer.getPostEventCallbackService().onEvent("cloudScript_GetFunction", request, secretInfo, operationRequest, operationResponse);
 
