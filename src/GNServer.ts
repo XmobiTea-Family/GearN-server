@@ -93,6 +93,8 @@ export class GNServer {
 
 	// Stores the ID type case value used by this instance.
 	private idTypeCase: number;
+	// Stores the root username value used by this instance.
+	private initRootUsername: string;
 	// Stores the restore root password value used by this instance.
 	private restoreRootPassword: string;
 	// Stores the x GearN settings value used by this instance.
@@ -413,6 +415,21 @@ export class GNServer {
 	 */
 	public getRestoreRootPassword() {
 		return this.restoreRootPassword;
+	}
+
+	/**
+	 * Sets the root username.
+	 * @param initRootUsername Provides the root username value used by this operation.
+	 */
+	public setInitRootUsername(initRootUsername: string) {
+		this.initRootUsername = initRootUsername;
+	}
+
+	/**
+	 * Returns the root username.
+	 */
+	public getInitRootUsername() {
+		return this.initRootUsername;
 	}
 
 	/**

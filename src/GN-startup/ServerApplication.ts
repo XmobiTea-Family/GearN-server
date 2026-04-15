@@ -400,6 +400,7 @@ export class ServerApplication extends BuilderBase {
 		this.apiMiddleware.setHeaderIP(this.getOtherSettings().getHeaderIP());
 		this.gnServer.setIdTypeCase(this.getOtherSettings().getIdTypeCase());
 		this.gnServer.setRestoreRootPassword(this.getApplicationSettings().getRestoreRootPassword());
+		this.gnServer.setInitRootUsername(this.getApplicationSettings().getInitRootUsername());
 		// Stores the report DDoS collection value used in the current execution flow.
 		let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdos");
 		this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);

@@ -200,7 +200,7 @@ export class ApiMiddleware {
 	 * @param payload Provides the payload value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public generateAuthInfo(payload: TokenPayload): AuthInfo {
+	public async generateAuthInfo(payload: TokenPayload): Promise<AuthInfo> {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		payload.gnToken = payload.gnToken ?? "gn.a_" + StringUtility.generateRandomString(10, 0);
@@ -225,7 +225,7 @@ export class ApiMiddleware {
 
 		this.authInfoDict.set(payload.gnToken, authInfo);
 
-		this.authInfoCollection.insertOne(authInfo.toDocumentData());
+		await this.authInfoCollection.insertOne(authInfo.toDocumentData());
 
 		return authInfo;
 	}

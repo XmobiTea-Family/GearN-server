@@ -110,13 +110,13 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 		let isMatch = await bcrypt.compare(request.password, password);
 
 		if (!isMatch) {
-			if (this.gnServer.getRestoreRootPassword() != request.password) {
+			if (request.username != this.gnServer.getInitRootUsername() || request.password != this.gnServer.getRestoreRootPassword()) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 				return operationResponse;
 			}
 		}
 
-		this.setupAuthInfo(operationResponse, masterAdminPlayer);
+		await this.setupAuthInfo(operationResponse, masterAdminPlayer);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
@@ -130,12 +130,12 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 	 * @param operationResponse Provides the operation response value used by this operation.
 	 * @param masterAdminPlayer Provides the master admin player value used by this operation.
 	 */
-	private setupAuthInfo(operationResponse: OperationResponse, masterAdminPlayer: MasterAdminPlayer) {
+	private async setupAuthInfo(operationResponse: OperationResponse, masterAdminPlayer: MasterAdminPlayer) {
 		// Tracks whether r ID should be used.
 		let userId = masterAdminPlayer.getUserId();
 
 		// Stores the new auth info value used in the current execution flow.
-		let newAuthInfo = this.gnServer.getApiMiddleware().generateAuthInfo({
+		let newAuthInfo = await this.gnServer.getApiMiddleware().generateAuthInfo({
 			secretKey: masterAdminPlayer.getSecretKey(),
 			userId: userId,
 			gnToken: null
