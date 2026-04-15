@@ -193,7 +193,7 @@ export class RequestConverterService implements IRequestConverterService {
                             let lastValue: number = value as number;
 
                             if (field.activeConditionValid) {
-                                if (field.mustInt == true) {
+                                if (field.mustInt === true) {
                                     if (!this.isInteger(lastValue)) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
@@ -1005,7 +1005,7 @@ export class RequestConverterService implements IRequestConverterService {
                             let lastValue: number = value as number;
 
                             if (field.activeConditionValid) {
-                                if (field.mustInt == true) {
+                                if (field.mustInt === true) {
                                     if (!this.isInteger(lastValue)) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
