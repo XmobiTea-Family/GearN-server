@@ -67,9 +67,10 @@ export abstract class RequestHandler implements IRequestHandler {
 	/**
 	 * Executes the new invalid request parameters workflow.
 	 * @param operationRequest Provides the operation request value used by this operation.
+	 * @param debugMessage Provides the debug message value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	protected newInvalidRequestParameters(operationRequest: OperationRequest): OperationResponse {
+	protected newInvalidRequestParameters(operationRequest: OperationRequest, debugMessage?: string): OperationResponse {
 		return OperationHelper.newOperationResponseInvalidRequestParameters(operationRequest.getOperationCode(), operationRequest.getRequestId(), (operationRequest as any).invalidMembers);
 	}
 
