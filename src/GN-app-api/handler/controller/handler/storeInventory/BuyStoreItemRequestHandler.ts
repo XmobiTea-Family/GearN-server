@@ -101,6 +101,10 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (request.type != OwnerType.CharacterPlayer && request.type != OwnerType.GamePlayer && request.type != OwnerType.Group) {
+			return this.newInvalidRequestParameters(request, "can not found the type parameter " + request.type);
+		}
+
 		// Tracks whether method is allowed.
 		let allowMethod = false;
 
@@ -164,6 +168,10 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
+		if (request.type != OwnerType.CharacterPlayer && request.type != OwnerType.GamePlayer && request.type != OwnerType.Group) {
+			return this.newInvalidRequestParameters(request, "can not found the type parameter " + request.type);
+		}
+
 		if (!secretInfo.getPermission().storeInventory.buyStoreItem.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
@@ -188,6 +196,10 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (request.type != OwnerType.CharacterPlayer && request.type != OwnerType.GamePlayer && request.type != OwnerType.Group) {
+			return this.newInvalidRequestParameters(request, "can not found the type parameter " + request.type);
 		}
 
 		if (!secretInfo.getPermission().storeInventory.buyStoreItem.adminSelfEnable) {
