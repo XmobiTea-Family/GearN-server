@@ -432,7 +432,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 
@@ -559,7 +559,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 
@@ -685,7 +685,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 					});
 
 					gnCurrencies.add(gnPlayerCurrency);
-					this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 
