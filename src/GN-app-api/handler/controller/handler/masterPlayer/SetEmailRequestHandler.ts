@@ -64,6 +64,8 @@ class AdminGetEmailOperationRequest extends ServerGetEmailOperationRequest {
 
 export class SetEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 
+	private static readonly emailRegex: RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
+
 	/**
 	 * Returns the code.
 	 */
@@ -182,8 +184,7 @@ export class SetEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
-		if (!regex.test(request.email)) {
+		if (!SetEmailRequestHandler.emailRegex.test(request.email)) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.EmailInvalid);
 			return operationResponse;
 		}
