@@ -33,7 +33,7 @@ class SetDisplayNameOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationRequest {
+class ServerSetDisplayNameOperationRequest extends SetDisplayNameOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -45,7 +45,7 @@ class ServerGetDisplayNameOperationRequest extends SetDisplayNameOperationReques
 	}
 }
 
-class AdminGetDisplayNameOperationRequest extends ServerGetDisplayNameOperationRequest {
+class AdminSetDisplayNameOperationRequest extends ServerSetDisplayNameOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -109,7 +109,7 @@ export class SetDisplayNameRequestHandler extends ItemBaseRequestHandler {
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetDisplayNameOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -133,7 +133,7 @@ export class SetDisplayNameRequestHandler extends ItemBaseRequestHandler {
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetDisplayNameOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetDisplayNameOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
