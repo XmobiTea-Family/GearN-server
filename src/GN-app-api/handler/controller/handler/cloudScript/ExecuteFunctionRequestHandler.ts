@@ -119,7 +119,7 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 		}
 
 		return this.execute({
-			userId: authInfo.getUserId(),
+			userId: request.userId,
 			functionName: request.functionName,
 			functionParameters: request.functionParameters,
 			version: request.version,
