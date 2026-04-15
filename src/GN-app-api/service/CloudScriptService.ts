@@ -173,7 +173,9 @@ export class CloudScriptService implements ICloudScriptService {
 
 			if (cloudScriptFunctionResult.isLive) {
 				this.liveLatestVersion = cloudScriptFunctionResult["version"];
-				this.loadCloudScriptFunctionWorker(this.liveLatestVersion, cloudScriptFunctionResult["fullScript"]);
+
+				if (cloudScriptFunctionResult.canExecute)
+					this.loadCloudScriptFunctionWorker(this.liveLatestVersion, cloudScriptFunctionResult["fullScript"]);
 			}
 		}
 	}
