@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ISteamService } from "./ISteamService";
 
+// I dont use this in current gearn server version.
 export class SteamService implements ISteamService {
     // Stores the steam API key value used by this instance.
     private steamApiKey: string;
