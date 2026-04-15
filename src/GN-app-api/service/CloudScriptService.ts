@@ -43,8 +43,12 @@ interface DbConnection {
 }
 
 export class CloudScriptService implements ICloudScriptService {
+	private static readonly MaxFailedToTerminalCloudScript: number = 3;
+
 	// Stores the cloud script worker dict collection used by this instance.
 	private cloudScriptWorkerDict: Map<string, ChildProcess>;
+	// Stores the cloud script worker failed dict collection used by this instance.
+	private cloudScriptWorkerFailedDict: Map<string, number>;
 	// Stores the cloud script waiting response callback dict collection used by this instance.
 	private cloudScriptWaitingResponseCallbackDict: Map<string, (cloudScriptResponse: CloudScriptResponse) => void>;
 
@@ -85,6 +89,7 @@ export class CloudScriptService implements ICloudScriptService {
 	constructor() {
 		this.cloudScriptFunctions = [];
 		this.cloudScriptWorkerDict = new Map();
+		this.cloudScriptWorkerFailedDict = new Map();
 		this.cloudScriptWaitingResponseCallbackDict = new Map();
 	}
 
@@ -230,6 +235,14 @@ export class CloudScriptService implements ICloudScriptService {
 				if (isResolved) return;
 				isResolved = true;
 
+				let nextFailedCount = (thiz.cloudScriptWorkerFailedDict.get(version) ?? 0) + 1;
+				thiz.cloudScriptWorkerFailedDict.set(version, nextFailedCount);
+
+				if (nextFailedCount >= CloudScriptService.MaxFailedToTerminalCloudScript) {
+					// Drop the poisoned worker so the next execute can spawn a fresh child process.
+					thiz.recycleCloudScriptWorker(version, cloudScriptWorker);
+				}
+
 				resolve({
 					responseId: requestId,
 					response: {
@@ -245,6 +258,8 @@ export class CloudScriptService implements ICloudScriptService {
 			thiz.cloudScriptWaitingResponseCallbackDict.set(requestId, (cloudScriptResponse: CloudScriptResponse) => {
 				if (isResolved) return;
 				isResolved = true;
+
+				thiz.cloudScriptWorkerFailedDict.set(version, 0);
 
 				clearTimeout(timeout);
 				resolve(cloudScriptResponse);
@@ -427,6 +442,7 @@ export class CloudScriptService implements ICloudScriptService {
 			let cloudScriptWorker = this.cloudScriptWorkerDict.get(version);
 			if (cloudScriptWorker) {
 				this.cloudScriptWorkerDict.delete(version);
+				this.cloudScriptWorkerFailedDict.delete(version);
 
 				setTimeout(() => {
 					if (!this.cloudScriptWorkerDict.has(version) && cloudScriptWorker) {
@@ -494,6 +510,7 @@ export class CloudScriptService implements ICloudScriptService {
 			if (cloudScriptWorker) {
 				// doi 1 lat cho khong con ai thuc thi nua thi thuc hien terminate
 				this.cloudScriptWorkerDict.delete(version);
+				this.cloudScriptWorkerFailedDict.delete(version);
 
 				setTimeout(() => {
 					if (!this.cloudScriptWorkerDict.has(version) && cloudScriptWorker) {
@@ -652,11 +669,40 @@ export class CloudScriptService implements ICloudScriptService {
 		cloudScriptWorker.on("exit", (code) => {
 			Debug.log("[GearN] [CloudScript] terminal cloudScript " + version + " with code " + code);
 
-			thiz.cloudScriptWorkerDict.delete(version);
+			if (thiz.cloudScriptWorkerDict.get(version) === cloudScriptWorker) {
+				thiz.cloudScriptWorkerDict.delete(version);
+				thiz.cloudScriptWorkerFailedDict.delete(version);
+			}
 		});
 
 		this.cloudScriptWorkerDict.set(version, cloudScriptWorker);
+		this.cloudScriptWorkerFailedDict.set(version, 0);
 
 		return cloudScriptWorker;
+	}
+
+	/**
+	 * Removes the timed-out worker from cache and terminates it.
+	 * @param version Provides the version value used by this operation.
+	 * @param cloudScriptWorker Provides the worker value used by this operation.
+	 */
+	private recycleCloudScriptWorker(version: string, cloudScriptWorker: ChildProcess): void {
+		if (!cloudScriptWorker) {
+			return;
+		}
+
+		if (this.cloudScriptWorkerDict.get(version) === cloudScriptWorker) {
+			this.cloudScriptWorkerDict.delete(version);
+
+			this.cloudScriptWorkerFailedDict.delete(version);
+		}
+
+		if (!cloudScriptWorker.killed) {
+			try {
+				cloudScriptWorker.kill("SIGKILL");
+			}
+			catch {
+			}
+		}
 	}
 }
