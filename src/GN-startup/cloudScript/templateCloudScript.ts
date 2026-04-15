@@ -146,45 +146,51 @@ interface FunctionResponse {
  * @param result Provides the result value used by this operation.
  */
 const ConvertObject = (result: any) => {
-	if (result) {
-		if (result instanceof GNHashtable) {
-			result = (<GNHashtable>result).toData();
+	if (result === undefined) {
+		return undefined;
+	}
+
+	if (result === null) {
+		return null;
+	}
+
+	if (result instanceof GNHashtable) {
+		return (<GNHashtable>result).toData();
+	}
+
+	if (result instanceof GNArray) {
+		return (<GNArray>result).toData();
+	}
+
+	// Stores the typeof object value used in the current execution flow.
+	let typeofObject = typeof (result);
+	if (typeofObject == "object") {
+		if (Array.isArray(result)) {
+			return ConvertArray(result as any[]);
 		}
-		else if (result instanceof GNArray) {
-			result = (<GNArray>result).toData();
-		}
-		else {
-			// Stores the typeof object value used in the current execution flow.
-			let typeofObject = typeof (result);
-			if (typeofObject == "object") {
-				if (Array.isArray(result)) {
-					result = ConvertArray(result as any[]);
-				}
-				else {
-					// Stores the answer value used in the current execution flow.
-					let answer = {} as any;
 
-					// Stores the keys value used in the current execution flow.
-					let keys = Object.keys(result);
+		// Preserve falsy JSON values such as false, 0, empty string, and null.
+		let answer = {} as any;
 
-					for (let i = 0; i < keys.length; i++) {
-						// Stores the key value used in the current execution flow.
-						let key = keys[i];
-						// Stores the value value used in the current execution flow.
-						let value = ConvertObject(result[key]);
+		// Stores the keys value used in the current execution flow.
+		let keys = Object.keys(result);
 
-						if (value) {
-							answer[key] = value;
-						}
-					}
+		for (let i = 0; i < keys.length; i++) {
+			// Stores the key value used in the current execution flow.
+			let key = keys[i];
+			// Stores the value value used in the current execution flow.
+			let value = ConvertObject(result[key]);
 
-					result = answer;
-				}
+			if (value !== undefined) {
+				answer[key] = value;
 			}
-			else if (typeofObject == "function") {
-				result = null;
-			}
 		}
+
+		return answer;
+	}
+
+	if (typeofObject == "function") {
+		return undefined;
 	}
 
 	return result;
