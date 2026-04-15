@@ -201,7 +201,7 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 	 */
 	protected generateStoreCurrencies(storeInventory: StoreInventory): GNArray {
 		// Stores the GearN store currenciess value used in the current execution flow.
-		let gnStoreCurrenciess = new GNArray();
+		let gnStoreCurrencies = new GNArray();
 
 		// Stores the complete store currencies collection used in the current execution flow.
 		let allStoreCurrencies = storeInventory.getAllStoreCurrencies();
@@ -216,10 +216,10 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 			gnStoreCurrency.add(ParameterCode.Key, storeCurrency.key);
 			gnStoreCurrency.add(ParameterCode.Value, storeCurrency.value);
 
-			gnStoreCurrenciess.add(gnStoreCurrency);
+			gnStoreCurrencies.add(gnStoreCurrency);
 		}
 
-		return gnStoreCurrenciess;
+		return gnStoreCurrencies;
 	}
 
 	/**
@@ -229,7 +229,7 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 	 */
 	protected generatePriceCurrencies(storeInventory: StoreInventory): GNArray {
 		// Stores the GearN price currenciess value used in the current execution flow.
-		let gnPriceCurrenciess = new GNArray();
+		let gnPriceCurrencies = new GNArray();
 
 		// Stores the complete price currencies collection used in the current execution flow.
 		let allPriceCurrencies = storeInventory.getAllPriceCurrencies();
@@ -244,10 +244,10 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 			gnPriceCurrency.add(ParameterCode.Key, priceCurrency.key);
 			gnPriceCurrency.add(ParameterCode.Value, priceCurrency.value);
 
-			gnPriceCurrenciess.add(gnPriceCurrency);
+			gnPriceCurrencies.add(gnPriceCurrency);
 		}
 
-		return gnPriceCurrenciess;
+		return gnPriceCurrencies;
 	}
 
 	/**

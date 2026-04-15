@@ -282,11 +282,48 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			// Stores the in app purchase value used in the current execution flow.
 			let inAppPurchase = storeInventory.getInAppPurchase();
 
+			let appleAppStoreId = request.inAppPurchase.appleAppStoreId;
+			let facebookStoreId = request.inAppPurchase.facebookStoreId;
+			let googlePlayStoreId = request.inAppPurchase.googlePlayStoreId;
+
+			if (appleAppStoreId) {
+				const storeStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryByAppleAppStoreAsync(appleAppStoreId, secretInfo.getGameId(), { storeId: true });
+
+				if (storeStoreInventory != null && storeStoreInventory.getStoreId() != request.storeId) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreInvalid);
+					operationResponse.setDebugMessage("Apple productId had use " + appleAppStoreId);
+
+					return operationResponse;
+				}
+			}
+
+			if (facebookStoreId) {
+				const storeStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryByFacebookStoreAsync(facebookStoreId, secretInfo.getGameId(), { storeId: true });
+
+				if (storeStoreInventory != null && storeStoreInventory.getStoreId() != request.storeId) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreInvalid);
+					operationResponse.setDebugMessage("Facebook productId had use " + facebookStoreId);
+
+					return operationResponse;
+				}
+			}
+
+			if (googlePlayStoreId) {
+				const storeStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryByGooglePlayStoreAsync(googlePlayStoreId, secretInfo.getGameId(), { storeId: true });
+
+				if (storeStoreInventory != null && storeStoreInventory.getStoreId() != request.storeId) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreInvalid);
+					operationResponse.setDebugMessage("Google productId had use " + googlePlayStoreId);
+
+					return operationResponse;
+				}
+			}
+
 			storeInventory.setInAppPurchase({
-				appleAppStoreId: request.inAppPurchase.appleAppStoreId ?? inAppPurchase.appleAppStoreId,
-				facebookStoreId: request.inAppPurchase.facebookStoreId ?? inAppPurchase.facebookStoreId,
-				googlePlayStoreId: request.inAppPurchase.googlePlayStoreId ?? inAppPurchase.googlePlayStoreId,
-				analyticsPrice: request.inAppPurchase.analyticsPrice ?? inAppPurchase.analyticsPrice,
+				appleAppStoreId: appleAppStoreId,
+				facebookStoreId: facebookStoreId,
+				googlePlayStoreId: googlePlayStoreId,
+				analyticsPrice: request.inAppPurchase.analyticsPrice,
 			});
 		}
 
