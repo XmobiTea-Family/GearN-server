@@ -150,14 +150,9 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			let thirtPartySettings = masterGameSettings.getThirtPartySettings();
 
 			if (request.thirtPartySettings.googleSettings != null) {
-				if (request.thirtPartySettings.googleSettings.googleClientId != null)
-					thirtPartySettings.googleSettings.googleClientId = request.thirtPartySettings.googleSettings.googleClientId;
-
-				if (request.thirtPartySettings.googleSettings.packageId != null)
-					thirtPartySettings.googleSettings.packageId = request.thirtPartySettings.googleSettings.packageId;
-
-				if (request.thirtPartySettings.googleSettings.publicRSAKey != null)
-					thirtPartySettings.googleSettings.publicRSAKey = request.thirtPartySettings.googleSettings.publicRSAKey;
+				thirtPartySettings.googleSettings.googleClientId = request.thirtPartySettings.googleSettings.googleClientId;
+				thirtPartySettings.googleSettings.packageId = request.thirtPartySettings.googleSettings.packageId;
+				thirtPartySettings.googleSettings.publicRSAKey = request.thirtPartySettings.googleSettings.publicRSAKey;
 
 				(<GoogleService>this.gnServer.getGoogleService()).init({
 					googleClientId: thirtPartySettings.googleSettings.googleClientId,
@@ -167,14 +162,9 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.thirtPartySettings.facebookSettings != null) {
-				if (request.thirtPartySettings.facebookSettings.facebookAppId != null)
-					thirtPartySettings.facebookSettings.facebookAppId = request.thirtPartySettings.facebookSettings.facebookAppId;
-
-				if (request.thirtPartySettings.facebookSettings.facebookAppToken != null)
-					thirtPartySettings.facebookSettings.facebookAppToken = request.thirtPartySettings.facebookSettings.facebookAppToken;
-
-				if (request.thirtPartySettings.facebookSettings.facebookInappSecret != null)
-					thirtPartySettings.facebookSettings.facebookInappSecret = request.thirtPartySettings.facebookSettings.facebookInappSecret;
+				thirtPartySettings.facebookSettings.facebookAppId = request.thirtPartySettings.facebookSettings.facebookAppId;
+				thirtPartySettings.facebookSettings.facebookAppToken = request.thirtPartySettings.facebookSettings.facebookAppToken;
+				thirtPartySettings.facebookSettings.facebookInappSecret = request.thirtPartySettings.facebookSettings.facebookInappSecret;
 
 				(<FacebookService>this.gnServer.getFacebookService()).init({
 					facebookAppId: thirtPartySettings.facebookSettings.facebookAppId,
@@ -184,20 +174,11 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.thirtPartySettings.appleSettings != null) {
-				if (request.thirtPartySettings.appleSettings.appleClientId != null)
-					thirtPartySettings.appleSettings.appleClientId = request.thirtPartySettings.appleSettings.appleClientId;
-
-				if (request.thirtPartySettings.appleSettings.issuerId != null)
-					thirtPartySettings.appleSettings.issuerId = request.thirtPartySettings.appleSettings.issuerId;
-
-				if (request.thirtPartySettings.appleSettings.keyId != null)
-					thirtPartySettings.appleSettings.keyId = request.thirtPartySettings.appleSettings.keyId;
-
-				if (request.thirtPartySettings.appleSettings.p8Content != null)
-					thirtPartySettings.appleSettings.p8Content = request.thirtPartySettings.appleSettings.p8Content;
-
-				if (request.thirtPartySettings.appleSettings.sandboxEnable != null)
-					thirtPartySettings.appleSettings.sandboxEnable = request.thirtPartySettings.appleSettings.sandboxEnable;
+				thirtPartySettings.appleSettings.appleClientId = request.thirtPartySettings.appleSettings.appleClientId;
+				thirtPartySettings.appleSettings.issuerId = request.thirtPartySettings.appleSettings.issuerId;
+				thirtPartySettings.appleSettings.keyId = request.thirtPartySettings.appleSettings.keyId;
+				thirtPartySettings.appleSettings.p8Content = request.thirtPartySettings.appleSettings.p8Content;
+				thirtPartySettings.appleSettings.sandboxEnable = request.thirtPartySettings.appleSettings.sandboxEnable;
 
 				(<AppleService>this.gnServer.getAppleService()).init({
 					appleClientId: thirtPartySettings.appleSettings.appleClientId,
@@ -209,8 +190,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.thirtPartySettings.gameCenterSettings != null) {
-				if (request.thirtPartySettings.gameCenterSettings.packageId != null)
-					thirtPartySettings.gameCenterSettings.packageId = request.thirtPartySettings.gameCenterSettings.packageId;
+				thirtPartySettings.gameCenterSettings.packageId = request.thirtPartySettings.gameCenterSettings.packageId;
 
 				(<GameCenterService>this.gnServer.getGameCenterService()).init({
 					bundleId: thirtPartySettings.gameCenterSettings.packageId,
@@ -218,17 +198,10 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 
 			if (request.thirtPartySettings.googlePlayGameSettings != null) {
-				if (request.thirtPartySettings.googlePlayGameSettings.applicationId != null)
-					thirtPartySettings.googlePlayGameSettings.applicationId = request.thirtPartySettings.googlePlayGameSettings.applicationId;
-
-				if (request.thirtPartySettings.googlePlayGameSettings.clientId != null)
-					thirtPartySettings.googlePlayGameSettings.clientId = request.thirtPartySettings.googlePlayGameSettings.clientId;
-
-				if (request.thirtPartySettings.googlePlayGameSettings.clientSecret != null)
-					thirtPartySettings.googlePlayGameSettings.clientSecret = request.thirtPartySettings.googlePlayGameSettings.clientSecret;
-
-				if (request.thirtPartySettings.googlePlayGameSettings.redirectUri != null)
-					thirtPartySettings.googlePlayGameSettings.redirectUri = request.thirtPartySettings.googlePlayGameSettings.redirectUri;
+				thirtPartySettings.googlePlayGameSettings.applicationId = request.thirtPartySettings.googlePlayGameSettings.applicationId;
+				thirtPartySettings.googlePlayGameSettings.clientId = request.thirtPartySettings.googlePlayGameSettings.clientId;
+				thirtPartySettings.googlePlayGameSettings.clientSecret = request.thirtPartySettings.googlePlayGameSettings.clientSecret;
+				thirtPartySettings.googlePlayGameSettings.redirectUri = request.thirtPartySettings.googlePlayGameSettings.redirectUri;
 
 				(<GooglePlayGameService>this.gnServer.getGooglePlayGameService()).init({
 					applicationId: thirtPartySettings.googlePlayGameSettings.applicationId,
@@ -605,12 +578,12 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			// Stores the resolved email settings instance for the current execution flow.
 			let emailSettings = masterGameSettings.getEmailSettings();
 
-			if (request.emailSettings.sendFrom) emailSettings.sendFrom = request.emailSettings.sendFrom;
-			if (request.emailSettings.secure != null) emailSettings.secure = request.emailSettings.secure;
-			if (request.emailSettings.host) emailSettings.host = request.emailSettings.host;
-			if (request.emailSettings.port) emailSettings.port = request.emailSettings.port;
-			if (request.emailSettings.username) emailSettings.username = request.emailSettings.username;
-			if (request.emailSettings.password) emailSettings.password = request.emailSettings.password;
+			emailSettings.sendFrom = request.emailSettings.sendFrom;
+			emailSettings.secure = request.emailSettings.secure;
+			emailSettings.host = request.emailSettings.host;
+			emailSettings.port = request.emailSettings.port;
+			emailSettings.username = request.emailSettings.username;
+			emailSettings.password = request.emailSettings.password;
 
 			(<EmailService>this.gnServer.getEmailService()).init(emailSettings.host, emailSettings.port, emailSettings.secure, emailSettings.username, emailSettings.password, emailSettings.sendFrom);
 			(<EmailService>this.gnServer.getEmailService()).run();
@@ -622,11 +595,11 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			// Stores the resolved push notification settings instance for the current execution flow.
 			let pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
 
-			if (request.pushNotificationSettings.projectId) pushNotificationSettings.projectId = request.pushNotificationSettings.projectId;
-			if (request.pushNotificationSettings.clientEmail) pushNotificationSettings.clientEmail = request.pushNotificationSettings.clientEmail;
-			if (request.pushNotificationSettings.privateKey) pushNotificationSettings.privateKey = request.pushNotificationSettings.privateKey;
+			pushNotificationSettings.projectId = request.pushNotificationSettings.projectId;
+			pushNotificationSettings.clientEmail = request.pushNotificationSettings.clientEmail;
+			pushNotificationSettings.privateKey = request.pushNotificationSettings.privateKey;
 
-			(<PushNotificationService>this.gnServer.getPushNotificationService()).init(request.pushNotificationSettings.projectId, request.pushNotificationSettings.clientEmail, request.pushNotificationSettings.privateKey);
+			(<PushNotificationService>this.gnServer.getPushNotificationService()).init(pushNotificationSettings.projectId, pushNotificationSettings.clientEmail, pushNotificationSettings.privateKey);
 			(<PushNotificationService>this.gnServer.getPushNotificationService()).run();
 
 			masterGameSettings.setPushNotificationSettings(pushNotificationSettings);
