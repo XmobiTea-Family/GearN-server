@@ -117,11 +117,9 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 				if (groupType == OwnerType.GamePlayer) {
 					// Stores the member item value used in the current execution flow.
 					let memberItem = group.getMember(authInfo.getUserId());
-					if (memberItem != null) {
-						if (memberItem.status == GroupStatus.Member) {
-							allowMethod = true;
-							owned = true;
-						}
+					if (memberItem != null && memberItem.status == GroupStatus.Member) {
+						allowMethod = true;
+						owned = true;
 					}
 				}
 				else if (groupType == OwnerType.CharacterPlayer) {
@@ -139,13 +137,11 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 
 								// Stores the member item value used in the current execution flow.
 								let memberItem = group.getMember(characterPlayer.characterId);
-								if (memberItem != null) {
-									if (memberItem.status == GroupStatus.Member) {
-										allowMethod = true;
-										owned = true;
+								if (memberItem != null && memberItem.status == GroupStatus.Member) {
+									allowMethod = true;
+									owned = true;
 
-										break;
-									}
+									break;
 								}
 							}
 						}
