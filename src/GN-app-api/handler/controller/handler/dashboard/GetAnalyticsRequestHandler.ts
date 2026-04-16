@@ -268,7 +268,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 			// Stores the GearN database system value used in the current execution flow.
 			let gnDatabaseSystem = new GNHashtable();
 
-			if (bigAnalyticsItem.operationSystem) {
+			if (bigAnalyticsItem.databaseSystem) {
 				gnDatabaseSystem.add(ParameterCode.FsTotalSizeInBytes, bigAnalyticsItem.databaseSystem.fsTotalSizeInBytes);
 				gnDatabaseSystem.add(ParameterCode.FsUsedSizeInBytes, bigAnalyticsItem.databaseSystem.fsUsedSizeInBytes);
 				gnDatabaseSystem.add(ParameterCode.TotalSizeInBytes, bigAnalyticsItem.databaseSystem.totalSizeInBytes);
@@ -284,7 +284,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 			// Stores the GearN database system value used in the current execution flow.
 			let gnDatabaseSystem = new GNHashtable();
 
-			if (bigAnalyticsItem.operationSystem) {
+			if (bigAnalyticsItem.logDatabaseSystem) {
 				gnDatabaseSystem.add(ParameterCode.FsTotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsTotalSizeInBytes);
 				gnDatabaseSystem.add(ParameterCode.FsUsedSizeInBytes, bigAnalyticsItem.logDatabaseSystem.fsUsedSizeInBytes);
 				gnDatabaseSystem.add(ParameterCode.TotalSizeInBytes, bigAnalyticsItem.logDatabaseSystem.totalSizeInBytes);
