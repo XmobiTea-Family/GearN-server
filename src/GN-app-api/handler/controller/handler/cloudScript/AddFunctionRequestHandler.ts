@@ -164,12 +164,6 @@ export class AddFunctionRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
-		if (request.script.includes("GNNetwork")) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExecuteError);
-			operationResponse.setParameter(ParameterCode.ErrorMessage, "Can not use keywork GNNetwork on cloudscript");
-			return operationResponse;
-		}
-
 		// Stores the response value used in the current execution flow.
 		let response = await cloudScriptService.addCloudScriptFunction(request.script, request.isLive, request.canExecute);
 

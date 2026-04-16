@@ -10,6 +10,7 @@ import { GNServerSettingsOptions } from "@xmobitea/gn-typescript-client";
 import { GNServer } from "./../../GNServer";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { CloudScriptEvent } from "./CloudScriptEventService";
+import { CloudScriptSecurityValidator } from "./CloudScriptSecurityValidator";
 
 const execFileAsync = promisify(execFile);
 
@@ -295,6 +296,16 @@ export class CloudScriptService implements ICloudScriptService {
 	 * @returns Resolves with the operation result.
 	 */
 	public async addCloudScriptFunction(script: string, isLive: boolean, canExecute: boolean): Promise<{ success: boolean, errorMessage?: string, version?: string }> {
+		let validationResult = CloudScriptSecurityValidator.validateFunctionScript(script);
+		if (!validationResult.success) {
+			return {
+				success: false,
+				errorMessage: validationResult.errorMessage,
+			};
+		}
+
+		let normalizedScript = validationResult.normalizedScript;
+
 		// Stores the version value used in the current execution flow.
 		let version = StringUtility.generateRandomString(7, 0);
 
@@ -302,7 +313,7 @@ export class CloudScriptService implements ICloudScriptService {
 		let fullScriptJs: string;
 
 		try {
-			fullScriptJs = await this.compileCloudScript(script, version);
+			fullScriptJs = await this.compileCloudScript(normalizedScript, version);
 		}
 		catch (err) {
 			return {
@@ -336,7 +347,7 @@ export class CloudScriptService implements ICloudScriptService {
 
 		this.cloudScriptFunctionCollection.insertOne({
 			version: version,
-			script: script,
+			script: normalizedScript,
 			fullScript: fullScriptJs,
 			canExecute: canExecute,
 			isLive: isLive,

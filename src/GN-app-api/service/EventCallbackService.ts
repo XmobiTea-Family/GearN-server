@@ -19,6 +19,7 @@ import { ParameterCode } from "./../../GN-common/constant/parameterCode/Paramete
 import { GNHashtable } from "./../../GN-common/common/GNData";
 import { MatchmakingTicketCanMatch } from "./../service/IMatchmakingService";
 import { CloudScriptEvent } from "./CloudScriptEventService";
+import { CloudScriptSecurityValidator } from "./CloudScriptSecurityValidator";
 
 const execFileAsync = promisify(execFile);
 
@@ -1401,6 +1402,15 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	 * @returns Resolves with the operation result.
 	 */
 	public async addCloudScriptFunction(eventName: string, script: string): Promise<{ success: boolean; errorMessage?: string; version?: string }> {
+		let childScriptValidationResult = CloudScriptSecurityValidator.validateEventCallbackScript(eventName, script);
+		if (!childScriptValidationResult.success) {
+			return {
+				success: false,
+				errorMessage: childScriptValidationResult.errorMessage,
+			};
+		}
+
+		let normalizedScript = childScriptValidationResult.normalizedScript;
 		let type = eventName.split("_")[0];
 		let version = StringUtility.generateRandomString(7, 0);
 
@@ -1426,7 +1436,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			let thisChildScript = cloudFunction.childScripts[i];
 
 			if (thisChildScript.eventName == eventName) {
-				finalScript += script;
+				finalScript += normalizedScript;
 				finalScript += "\n";
 			} else if (thisChildScript.hasEdit) {
 				finalScript += thisChildScript.script;
@@ -1434,10 +1444,20 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			}
 		}
 
+		let finalScriptValidationResult = CloudScriptSecurityValidator.validateEventCallbackBundle(finalScript);
+		if (!finalScriptValidationResult.success) {
+			return {
+				success: false,
+				errorMessage: finalScriptValidationResult.errorMessage,
+			};
+		}
+
+		let normalizedFinalScript = finalScriptValidationResult.normalizedScript;
+
 		let fullScriptJs: string;
 
 		try {
-			fullScriptJs = await this.compileCloudScript(script, version);
+			fullScriptJs = await this.compileCloudScript(normalizedFinalScript, version);
 		} catch (err) {
 			return {
 				success: false,
@@ -1452,7 +1472,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		this.gnServer.getHttpApp().getClusterHandler().sendEvent("addEventCloudScriptFunction", { type: type, eventName: eventName, version: version, fullScriptJs: fullScriptJs, script: script, }, false);
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("addEventCloudScriptFunction", { type: type, eventName: eventName, version: version, fullScriptJs: fullScriptJs, script: normalizedScript, }, false);
 
 		let finalVersion = cloudFunction.type + "_" + cloudFunction.version;
 		setTimeout(() => {
@@ -1472,7 +1492,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			childScripts: cloudFunction.childScripts,
 		});
 
-		childScript.script = script;
+		childScript.script = normalizedScript;
 		childScript.hasEdit = true;
 
 		cloudFunction.version = version;

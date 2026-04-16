@@ -91,12 +91,6 @@ export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		if (request.script.includes("GNNetwork")) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExecuteError);
-			operationResponse.setParameter(ParameterCode.ErrorMessage, "Can not use keywork GNNetwork on cloudscript");
-			return operationResponse;
-		}
-
 		// Stores the response value used in the current execution flow.
 		let response = await this.gnServer.getEventCallbackCloudScriptService().addCloudScriptFunction(request.eventName, request.script);
 
