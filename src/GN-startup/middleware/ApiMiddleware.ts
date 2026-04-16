@@ -52,8 +52,8 @@ export class ApiMiddleware {
 	// Optional global CCU ceiling. `-1` disables the gate.
 	private maxCCU: number;
 
-    // Known game ids loaded at startup. Used to validate global secrets against explicit game ids.
-    private gameIds: string[];
+	// Known game ids loaded at startup. Used to validate global secrets against explicit game ids.
+	private gameIds: string[];
 
 	/**
 	 * Sets the secret info collection.
@@ -110,13 +110,13 @@ export class ApiMiddleware {
 		return this.headerIP;
 	}
 
-    /**
-     * Sets the game IDs.
-     * @param gameIds Provides the game IDs value used by this operation.
-     */
-    public setGameIds(gameIds: string[]) {
-        this.gameIds = gameIds;
-    }
+	/**
+	 * Sets the game IDs.
+	 * @param gameIds Provides the game IDs value used by this operation.
+	 */
+	public setGameIds(gameIds: string[]) {
+		this.gameIds = gameIds;
+	}
 
 	/**
 	 * Starts periodic maintenance for the auth cache and DAU/CCU helper state.
@@ -614,9 +614,9 @@ export class ApiMiddleware {
 				// Global secrets are cloned per-request so a concrete game id can be injected safely.
 				let gameId: string = req.header(Commands.RequestGameIdCmd);
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
-                else {
-                    if (!this.gameIds.includes(gameId)) return ReturnCode.SecretInvalid;
-                }
+				else {
+					if (!this.gameIds.includes(gameId)) return ReturnCode.SecretInvalid;
+				}
 
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;
@@ -723,9 +723,9 @@ export class ApiMiddleware {
 				// Global secrets are cloned per-socket so the resolved game id does not mutate the cached secret.
 				let gameId = socket.data.gameId as string;
 				if (!gameId) gameId = ApiMiddleware.DEFAULT_GAME_ID;
-                else {
-                    if (!this.gameIds.includes(gameId)) return next(ReturnCode.SecretInvalid);
-                }
+				else {
+					if (!this.gameIds.includes(gameId)) return next(ReturnCode.SecretInvalid);
+				}
 
 				let secretInfoAny = structuredClone(secretInfo) as any;
 				secretInfoAny.getGameId = secretInfo.getGameId;
