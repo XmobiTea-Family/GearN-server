@@ -96,6 +96,14 @@ export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
 		// Stores the result value used in the current execution flow.
+		let resultSecretInfo = await collection.findOne({ type: "secretInfo", secretKey: request.secretKey });
+
+		if (resultSecretInfo == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.SecretInfoNotFound);
+			return operationResponse;
+		}
+
+		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ type: "account", userId: request.userId });
 
 		if (result == null) {
@@ -106,7 +114,7 @@ export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 		// Stores the master admin player value used in the current execution flow.
 		let masterAdminPlayer = new MasterAdminPlayer(result, collection);
 		masterAdminPlayer.setSecretKey(request.secretKey);
-		masterAdminPlayer.saveAsync();
+		await masterAdminPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
