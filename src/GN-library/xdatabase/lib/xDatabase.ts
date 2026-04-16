@@ -3494,12 +3494,16 @@ export class xDatabase {
 
 		// Stores the answer value used in the current execution flow.
 		let answer: { [k: string]: boolean } = {};
-		
+
 		let keys = Object.keys(findOptions);
 		keys.forEach((key: string) => {
 			if (findOptions[key] == true) answer[key] = true;
 		});
 
 		return answer;
+	}
+
+	public startSession(): mongoDB.ClientSession {
+		return this.client.startSession();
 	}
 }

@@ -199,7 +199,7 @@ export class MongoObject {
 	 * Saves the async.
 	 * @returns Resolves with the operation result.
 	 */
-	public async saveAsync(): Promise<mongoDB.UpdateResult> {
+	public async saveAsync(session?: mongoDB.ClientSession): Promise<mongoDB.UpdateResult> {
 		if (this.updateFilter == null) {
 			return {
 				acknowledged: false,
@@ -212,7 +212,10 @@ export class MongoObject {
 
 		return await this.collection.updateOne(
 			{ _id: this._id },
-			this.updateFilter
+			this.updateFilter,
+			{
+				session: session,
+			}
 		);
 	}
 }
