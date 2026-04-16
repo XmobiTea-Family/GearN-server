@@ -260,7 +260,7 @@ export class GNServer {
 			thiz.executeSendEventToMoreUser(data);
 		});
 
-		this.getHttpApp().getClusterHandler().onEvent("executeSendEventToAllPlayer", data => {
+		this.getHttpApp().getClusterHandler().onEvent("sendEventToAllPlayer", data => {
 			thiz.executeSendEventToAllPlayer(data);
 		});
 
