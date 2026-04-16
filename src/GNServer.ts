@@ -264,6 +264,10 @@ export class GNServer {
 			thiz.executeSendEventToAllPlayer(data);
 		});
 
+		this.getHttpApp().getClusterHandler().onEvent("revokeAdminAuthToken", data => {
+			thiz.executeRevokeAdminAuthToken(data);
+		});
+
 		if (onRunSuccess != null) onRunSuccess();
 	}
 
@@ -808,6 +812,22 @@ export class GNServer {
 		let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
 
 		return this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent, data.useMsgPack);
+	}
+
+	private executeRevokeAdminAuthToken(data: {
+		userId: string,
+	}) {
+		if (this.isPrimary()) {
+			this.apiMiddleware.removeAllAuthInfosInDb(data.userId);
+		}
+
+		let authInfos = this.apiMiddleware.getAuthInfosByUserIdInMemCache(data.userId);
+
+		for (const authInfo of authInfos) {
+			authInfo.setIsRemove(true);
+
+			this.getApiMiddleware().updateAuthInfo(authInfo, false);
+		}
 	}
 
 	// public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {

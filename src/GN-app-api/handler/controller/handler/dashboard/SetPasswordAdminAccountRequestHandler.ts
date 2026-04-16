@@ -111,6 +111,10 @@ export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAdminAuthToken", {
+			userId: request.userId,
+		});
+
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetPasswordAdminAccount", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;

@@ -400,25 +400,39 @@ export class ApiMiddleware {
 	/**
 	 * Executes the update secret info workflow asynchronously.
 	 * @param secretInfo Provides the secret info value used by this operation.
+	 * @param withoutSave If yes, no save to db.
 	 */
-	public async updateSecretInfo(secretInfo: SecretInfo): Promise<void> {
+	public async updateSecretInfo(secretInfo: SecretInfo, withoutSave: boolean = false): Promise<void> {
 		// Stores the secret key value used in the current execution flow.
 		let secretKey = secretInfo.getSecretKey();
 
 		this.secretInfoDict.set(secretKey, secretInfo);
-		await this.secretInfoCollection.updateOne({ secretKey: secretKey }, { $set: secretInfo.toDocumentData() }, { upsert: true });
+
+		if (!withoutSave)
+			await this.secretInfoCollection.updateOne({ secretKey: secretKey }, { $set: secretInfo.toDocumentData() }, { upsert: true });
 	}
 
 	/**
 	 * Executes the update auth info workflow asynchronously.
 	 * @param authInfo Provides the auth info value used by this operation.
+	 * @param withoutSave If yes, no save to db.
 	 */
-	public async updateAuthInfo(authInfo: AuthInfo): Promise<void> {
+	public async updateAuthInfo(authInfo: AuthInfo, withoutSave: boolean = false): Promise<void> {
 		// Stores the GearN token value used in the current execution flow.
 		let gnToken = authInfo.getGNToken();
 
 		this.authInfoDict.set(gnToken, authInfo);
-		await this.authInfoCollection.updateOne({ gnToken: gnToken }, { $set: authInfo.toDocumentData() });
+
+		if (!withoutSave)
+			await this.authInfoCollection.updateOne({ gnToken: gnToken }, { $set: authInfo.toDocumentData() });
+	}
+
+	public async removeAllAuthInfosInDb(userId: string): Promise<void> {
+		await this.authInfoCollection.updateMany({ userId: userId }, {
+			$set: {
+				isRemove: true,
+			}
+		});
 	}
 
 	/**
