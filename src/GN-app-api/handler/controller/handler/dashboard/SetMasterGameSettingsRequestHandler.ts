@@ -121,7 +121,6 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetMasterGameSettings", request);
-		await this.applySettings(request);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
@@ -605,7 +604,8 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			masterGameSettings.setPushNotificationSettings(pushNotificationSettings);
 		}
 
-		masterGameSettings.saveAsync();
+		if (this.gnServer.isPrimary())
+			masterGameSettings.saveAsync();
 	}
 
 	/**

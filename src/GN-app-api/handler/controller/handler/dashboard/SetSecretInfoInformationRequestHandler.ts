@@ -7,7 +7,7 @@ import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
-import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretPermissionItem, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/SecretInfoItem";
@@ -218,23 +218,54 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 
 		secretInfoItem.saveAsync();
 
-		// Stores the new secret info value used in the current execution flow.
-		let newSecretInfo = SecretInfo.Builder()
-			.setGameId(secretInfoItem.getGameId())
-			.setIsRemove(secretInfoItem.getRemove())
-			.setPermission(secretInfoItem.getPermission())
-			.setRole(secretInfoItem.getRole())
-			.setSecretKey(secretInfoItem.getSecretKey())
-			.setTsExpire(secretInfoItem.getTsExpire())
-			.setDescription(secretInfoItem.getDescription())
-			.build();
-
-		this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
+		await this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetSecretInfoInformation", {
+			gameId: secretInfoItem.getGameId(),
+			isRemove: secretInfoItem.getRemove(),
+			permission: secretInfoItem.getPermission(),
+			role: secretInfoItem.getRole(),
+			secretKey: secretInfoItem.getSecretKey(),
+			tsExpire: secretInfoItem.getTsExpire(),
+			description: secretInfoItem.getDescription(),
+		});
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetSecretInfoInformation", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
+	}
+
+	private applySettings(secretInfo: {
+		gameId: string,
+		isRemove: boolean,
+		permission: SecretPermissionItem,
+		role: number,
+		secretKey: string,
+		tsExpire: number,
+		description: string,
+	}): void {
+		// Stores the new secret info value used in the current execution flow.
+		let newSecretInfo = SecretInfo.Builder()
+			.setGameId(secretInfo.gameId)
+			.setIsRemove(secretInfo.isRemove)
+			.setPermission(secretInfo.permission)
+			.setRole(secretInfo.role)
+			.setSecretKey(secretInfo.secretKey)
+			.setTsExpire(secretInfo.tsExpire)
+			.setDescription(secretInfo.description)
+			.build();
+
+		this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo, !this.gnServer.isPrimary());
+	}
+
+	/**
+	 * Executes the init workflow.
+	 */
+	protected init(): void {
+		// Stores the thiz value used in the current execution flow.
+		let thiz = this;
+		this.gnServer.getHttpApp().getClusterHandler().onEvent("dashboard_SetSecretInfoInformation", data => {
+			thiz.applySettings(data);
+		});
 	}
 }
