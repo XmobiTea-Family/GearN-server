@@ -233,7 +233,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetSecretInformation", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetSecretInfoInformation", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

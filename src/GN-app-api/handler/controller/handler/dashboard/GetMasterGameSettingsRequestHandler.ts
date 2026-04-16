@@ -327,7 +327,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetMasterGameSetings", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetMasterGameSettings", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

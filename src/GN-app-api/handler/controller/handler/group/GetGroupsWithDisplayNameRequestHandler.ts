@@ -210,7 +210,7 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupWithDisplayName", request, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupsWithDisplayName", request, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
     }

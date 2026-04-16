@@ -90,7 +90,7 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 	 */
 	private async execute(request: { gameId: string, type: number, key: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetBackupStatisticsLeaderboardKey", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_GetBackupStatisticsLeaderboardVersion", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -159,7 +159,7 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 		operationResponse.setParameter(ParameterCode.Results, gnResults);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetBackupStatisticsLeaderboardKey", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetBackupStatisticsLeaderboardVersion", request, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
