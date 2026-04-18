@@ -62,6 +62,8 @@ class SetMasterGameSettingsOperationRequest extends OperationRequest {
 
 export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
+	private static readonly GenericServiceNameValidRegex = /^[a-zA-Z0-9_-]+$/;
+
 	/**
 	 * Returns the code.
 	 */
@@ -89,6 +91,16 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
+		}
+
+		if (request.masterPlayerSettings) {
+			if (request.masterPlayerSettings.genericServiceSettings != null) {
+				for (const genericServiceSetting of request.masterPlayerSettings.genericServiceSettings) {
+					if (!SetMasterGameSettingsRequestHandler.GenericServiceNameValidRegex.test(genericServiceSetting.serviceName)) {
+						return this.newInvalidRequestParameters(request, "can not use special characters in generic service name " + genericServiceSetting.serviceName);
+					}
+				}
+			}
 		}
 
 		if (!secretInfo.getPermission().masterAdmin.setMasterGameSettings.selfEnable) {
