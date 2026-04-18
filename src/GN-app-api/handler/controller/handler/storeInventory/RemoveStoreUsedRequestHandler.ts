@@ -98,14 +98,10 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute(
-			{
-				storeId: request.storeId,
-				ownerIds: request.ownerIds,
-			},
-			secretInfo,
-			operationRequest
-		);
+		return this.execute({
+			storeId: request.storeId,
+			ownerIds: request.ownerIds,
+		}, secretInfo, operationRequest);
 	}
 
 	/**
@@ -126,14 +122,10 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute(
-			{
-				storeId: request.storeId,
-				ownerIds: request.ownerIds,
-			},
-			secretInfo,
-			operationRequest
-		);
+		return this.execute({
+			storeId: request.storeId,
+			ownerIds: request.ownerIds,
+		}, secretInfo, operationRequest);
 	}
 
 	/**
@@ -154,14 +146,10 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute(
-			{
-				storeId: request.storeId,
-				ownerIds: request.ownerIds,
-			},
-			secretInfo,
-			operationRequest
-		);
+		return this.execute({
+			storeId: request.storeId,
+			ownerIds: request.ownerIds,
+		}, secretInfo, operationRequest);
 	}
 
 	/**
