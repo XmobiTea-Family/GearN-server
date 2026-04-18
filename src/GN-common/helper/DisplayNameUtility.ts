@@ -115,6 +115,7 @@ export class DisplayNameUtility {
 				char == "8" ||
 				char == "9"
 			) inputReturn += char;
+			else inputReturn += char;
 		}
 
 		return inputReturn;
