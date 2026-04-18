@@ -51,6 +51,7 @@ import { GameCenterService } from "./GN-app-api/service/GameCenterService";
 import { ICountryIPDetailService } from "./GN-app-api/service/ICountryIPDetailService";
 import { CountryIPDetailService } from "./GN-app-api/service/CountryIPDetailService";
 import { MatchmakingTicketStatus } from "./GN-common/constant/enumType/MatchmakingTicketStatus";
+import { MatchStatus } from "./GN-common/constant/enumType/MatchStatus";
 import { ServerDetail } from "./GN-library/xdatabase/lib/entity/pro/ServerDetail";
 import { Debug } from "./GN-library/xdebug/lib/xDebug";
 import * as mongoDB from "mongodb";
@@ -1026,7 +1027,7 @@ export class GNServer {
 		}
 
 		let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
-		matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail, status: MatchmakingTicketStatus.Matched } });
+		matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail, status: MatchStatus.Matched } });
 
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Matched } });
@@ -1049,7 +1050,7 @@ export class GNServer {
 		Debug.logInfo("[GearN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
 
 		let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
-		matchCollection.updateOne({ matchId: matchId }, { $set: { status: MatchmakingTicketStatus.Canceled } });
+		matchCollection.updateOne({ matchId: matchId }, { $set: { status: MatchStatus.Canceled } });
 
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Canceled } });

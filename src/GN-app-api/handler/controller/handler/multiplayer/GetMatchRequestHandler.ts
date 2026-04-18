@@ -13,7 +13,6 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { Match } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Match";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
-import { MatchmakingTicketStatus } from "../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
 
 class GetMatchOperationRequest extends OperationRequest {
 	// Stores the match ID value used by this instance.

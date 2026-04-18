@@ -1,5 +1,6 @@
 import { DataValueType } from "../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 import { MatchmakingTicketStatus } from "./../../GN-common/constant/enumType/MatchmakingTicketStatus";
+import { MatchStatus } from "./../../GN-common/constant/enumType/MatchStatus";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { MatchmakingTicket } from "./../../GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
@@ -952,7 +953,7 @@ export class MatchmakingService implements IMatchmakingService {
                 tsCreate: number,
                 timeToMatchInSeconds: number,
                 ticketIds: string[],
-                status: MatchmakingTicketStatus,
+                status: MatchStatus,
             } = {
                 matchId: matchmakingTicketCanMatch.matchId,
                 queueName: matchmakingTicketCanMatch.queueName,
@@ -975,14 +976,14 @@ export class MatchmakingService implements IMatchmakingService {
                 tsCreate: xDatetime.getCurrentMilliseconds(),
                 timeToMatchInSeconds: -1,
                 ticketIds: [],
-                status: MatchmakingTicketStatus.Matched,
+                status: MatchStatus.Matched,
             };
 
             let matchmakingQueueSetting = matchmakingQueueSettings.find(x => x.queueName == matchmakingTicketCanMatch.queueName);
             if (matchmakingQueueSetting == null) continue;
 
             if (matchmakingQueueSetting.serverAllocation.enable) {
-                matchResult.status = MatchmakingTicketStatus.WaitingForServer;
+                matchResult.status = MatchStatus.WaitingForServer;
                 matchmakingTicketCanMatch.status = MatchmakingTicketStatus.WaitingForServer;
             }
 

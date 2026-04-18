@@ -97,6 +97,9 @@ export { MatchmakingMemberStatus };
 import { MatchmakingTicketStatus } from "./GN-common/constant/enumType/MatchmakingTicketStatus";
 export { MatchmakingTicketStatus };
 
+import { MatchStatus } from "./GN-common/constant/enumType/MatchStatus";
+export { MatchStatus };
+
 import { OwnerType } from "./GN-common/constant/enumType/OwnerType";
 export { OwnerType };
 
