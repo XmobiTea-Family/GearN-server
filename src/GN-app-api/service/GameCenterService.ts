@@ -1,10 +1,17 @@
 import { GameCenterAuth, IGameCenterService } from "./IGameCenterService";
 import axios from "axios";
 import { createVerify } from "crypto";
+import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 export class GameCenterService implements IGameCenterService {
+	private static readonly maxTimestampAgeMs: number = 5 * 60 * 1000;
+	private static readonly maxTimestampFutureMs: number = 30 * 1000;
+	private static readonly replayCacheExpireMs: number = GameCenterService.maxTimestampAgeMs + GameCenterService.maxTimestampFutureMs;
+
 	// Stores the public key cache collection used by this instance.
 	private publicKeyCache: Map<string, string>;
+	// Stores the replay auth cache collection used by this instance.
+	private replayAuthCache: Map<string, boolean>;
 	// Stores the bundle ID value used by this instance.
 	private bundleId: string;
 
@@ -13,6 +20,7 @@ export class GameCenterService implements IGameCenterService {
 	 */
 	constructor() {
 		this.publicKeyCache = new Map();
+		this.replayAuthCache = new Map();
 	}
 
 	/**
@@ -32,6 +40,34 @@ export class GameCenterService implements IGameCenterService {
 		// Stores the answer value used in the current execution flow.
 		let answer: { [k: string]: any } = {};
 		try {
+			// Stores the current milliseconds value used in the current execution flow.
+			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+			if (!Number.isInteger(auth.timestamp) || auth.timestamp <= 0) {
+				answer["error"] = "verify_failed";
+				answer["error_description"] = "timestamp invalid";
+				return answer;
+			}
+
+			if (auth.timestamp < currentMilliseconds - GameCenterService.maxTimestampAgeMs) {
+				answer["error"] = "verify_failed";
+				answer["error_description"] = "timestamp too old";
+				return answer;
+			}
+
+			if (auth.timestamp > currentMilliseconds + GameCenterService.maxTimestampFutureMs) {
+				answer["error"] = "verify_failed";
+				answer["error_description"] = "timestamp too new";
+				return answer;
+			}
+
+			// Stores the replay key value used in the current execution flow.
+			let replayKey = auth.playerId + ":" + auth.timestamp + ":" + auth.salt;
+			if (this.replayAuthCache.has(replayKey)) {
+				answer["error"] = "verify_failed";
+				answer["error_description"] = "request replayed";
+				return answer;
+			}
+
 			// Stores the public key value used in the current execution flow.
 			let publicKey = await this.getCertificate(auth.publicKeyUrl);
 
@@ -40,6 +76,9 @@ export class GameCenterService implements IGameCenterService {
 				answer["error_description"] = "can not verify";
 			}
 			else {
+				this.replayAuthCache.set(replayKey, true);
+				setTimeout(() => this.replayAuthCache.delete(replayKey), GameCenterService.replayCacheExpireMs).unref();
+
 				answer["playerId"] = auth.playerId;
 				answer["name"] = auth.name;
 			}
