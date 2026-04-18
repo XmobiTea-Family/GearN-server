@@ -511,7 +511,12 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				let $unset = {} as any;
 				$unset["playerStatistics." + key] = null;
 
-				await characterPlayerCollection.updateMany({}, {
+				let $filter = {} as any;
+				if (request.catalogId) {
+					$filter["catalogId"] = request.catalogId;
+				}
+
+				await characterPlayerCollection.updateMany($filter, {
 					$unset: $unset
 				});
 
@@ -639,7 +644,12 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				let $unset = {} as any;
 				$unset["groupStatistics." + key] = null;
 
-				await groupCollection.updateMany({}, {
+				let $filter = {} as any;
+				if (request.catalogId) {
+					$filter["catalogId"] = request.catalogId;
+				}
+
+				await groupCollection.updateMany($filter, {
 					$unset: $unset
 				});
 
@@ -760,7 +770,12 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				let $unset = {} as any;
 				$unset["itemStatistics." + key] = null;
 
-				await inventoryCollection.updateMany({}, {
+				let $filter = {} as any;
+				if (request.catalogId) {
+					$filter["catalogId"] = request.catalogId;
+				}
+
+				await inventoryCollection.updateMany($filter, {
 					$unset: $unset
 				});
 
