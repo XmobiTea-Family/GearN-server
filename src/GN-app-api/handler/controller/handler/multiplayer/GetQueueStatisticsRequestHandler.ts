@@ -168,6 +168,14 @@ export class GetQueueStatisticsRequestHandler extends MultiplayerBaseRequestHand
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		// Stores the resolved matchmaking queue settings instance for the current execution flow.
+		let matchmakingQueueSettings = this.getMatchmakingQueueSettings(request.queueName, secretInfo.getGameId());
+
+		if (matchmakingQueueSettings == null) {
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingQueueNotFound);
+			return operationResponse;
+		}
+
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
