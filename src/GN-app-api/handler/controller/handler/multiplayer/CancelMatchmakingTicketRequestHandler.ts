@@ -200,7 +200,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Canceled);
 			matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
 
-			matchmakingTicket.saveAsync();
+			await matchmakingTicket.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

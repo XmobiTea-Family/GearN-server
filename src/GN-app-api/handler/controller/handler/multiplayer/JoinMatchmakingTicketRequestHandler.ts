@@ -255,7 +255,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 			matchmakingTicket.setStatus(MatchmakingTicketStatus.WaitingForMatch);
 		}
 
-		matchmakingTicket.saveAsync();
+		await matchmakingTicket.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

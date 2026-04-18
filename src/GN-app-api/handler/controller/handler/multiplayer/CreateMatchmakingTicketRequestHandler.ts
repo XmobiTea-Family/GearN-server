@@ -283,7 +283,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			tsCreate: xDatetime.getCurrentMilliseconds(),
 		}
 
-		matchmakingTicketCollection.insertOne(result);
+		await matchmakingTicketCollection.insertOne(result);
 
 		operationResponse.setParameter(ParameterCode.TicketId, result.ticketId);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
