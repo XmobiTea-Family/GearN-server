@@ -24,6 +24,8 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 export abstract class GroupBaseRequestHandler extends RequestHandler {
 	// Stores the EXPIRED CACHE value used by this instance.
 	private static readonly EXPIRED_CACHE = 15 * xDatetime.ONE_MINUTE_MILLISECOND;
+	// Stores the GROUP MESSAGE CACHE LIMIT value used by this instance.
+	private static readonly GROUP_MESSAGE_CACHE_LIMIT = 150;
 
 	/**
 	 * Checks whether get all.
@@ -842,13 +844,16 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 		// Stores the cache data value used in the current execution flow.
 		let cacheData = this.gnServer.getCacheService(gameId);
+		// Stores the cache key value used in the current execution flow.
+		let cacheKey = "GroupMessages_" + groupId;
 
-		if (!(await cacheData.isValid("GroupMessages_" + groupId))) {
-			await cacheData.setData("GroupMessages_" + groupId, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
+		if (!(await cacheData.isValid(cacheKey))) {
+			await cacheData.setData(cacheKey, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
 		}
 
 		// Stores the group message items value used in the current execution flow.
-		let groupMessageItems = await cacheData.getData<Array<GroupMessageItem>>("GroupMessages_" + groupId);
+		let groupMessageItems = await cacheData.getData<Array<GroupMessageItem>>(cacheKey);
+		if (groupMessageItems == null) groupMessageItems = [];
 
 		// Stores the answer value used in the current execution flow.
 		let answer: GroupMessageItem[] = [];
@@ -860,6 +865,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 		let startI = skip;
 		// Stores the end i value used in the current execution flow.
 		let endI = skip + limit;
+		if (endI > GroupBaseRequestHandler.GROUP_MESSAGE_CACHE_LIMIT) endI = GroupBaseRequestHandler.GROUP_MESSAGE_CACHE_LIMIT;
 
 		for (let i = startI; i < endI; i++) {
 			if (i < groupMessageItems.length) {
@@ -914,17 +920,22 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 		// Stores the cache data value used in the current execution flow.
 		let cacheData = this.gnServer.getCacheService(gameId);
+		// Stores the cache key value used in the current execution flow.
+		let cacheKey = "GroupMessages_" + groupId;
 
-		if (!(await cacheData.isValid("GroupMessages_" + groupId))) {
-			await cacheData.setData("GroupMessages_" + groupId, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
+		if (!(await cacheData.isValid(cacheKey))) {
+			await cacheData.setData(cacheKey, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
 		}
 
 		await this.gnServer.getDatabase().createGroupMessageAsync(groupId, gameId, groupMessageItem.senderId, groupMessageItem.senderType, groupMessageItem.message, groupMessageItem.tsCreate);
 
 		// Stores the group message items value used in the current execution flow.
-		let groupMessageItems = await cacheData.getData<Array<GroupMessageItem>>("GroupMessages_" + groupId);
+		let groupMessageItems = await cacheData.getData<Array<GroupMessageItem>>(cacheKey);
+		if (groupMessageItems == null) groupMessageItems = [];
 
-		if (groupMessageItems.length > 150) groupMessageItems.splice(149, 1);
 		groupMessageItems.unshift(groupMessageItem);
+		if (groupMessageItems.length > GroupBaseRequestHandler.GROUP_MESSAGE_CACHE_LIMIT) groupMessageItems.splice(GroupBaseRequestHandler.GROUP_MESSAGE_CACHE_LIMIT);
+
+		await cacheData.setData(cacheKey, groupMessageItems, GroupBaseRequestHandler.EXPIRED_CACHE);
 	}
 }
