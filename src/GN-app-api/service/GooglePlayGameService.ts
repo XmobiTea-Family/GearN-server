@@ -77,7 +77,7 @@ export class GooglePlayGameService implements IGooglePlayGameService {
 		try {
 			// Stores the token info result value used in the current execution flow.
 			let tokenInfoResult = await axios.post(GooglePlayGameService.googleAPIUrl + GooglePlayGameService.googleAPITokenUrl, {
-				create_type: "authorization_code",
+				grant_type: "authorization_code",
 				redirect_uri: this.redirectUri,
 				code: authCode,
 				client_id: this.clientId,
