@@ -152,7 +152,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 			creatorId: request.creatorId,
 		} as any;
 
-		collection.insertOne(result);
+		await collection.insertOne(result);
 
 		{
 			// Stores the game player collection value used in the current execution flow.
