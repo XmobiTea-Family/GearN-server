@@ -189,6 +189,7 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerGroups: true,
+			owner: true,
 		}
 
 		// Stores the resolved character player settings instance for the current execution flow.
@@ -234,6 +235,8 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
+		this.gnServer.joinRoom(characterPlayer.getOwner().id, groupId);
+
 		// Stores the group value used in the current execution flow.
 		let group = await this.gnServer.getDatabase().createGroupAsync(result, secretInfo.getGameId());
 
@@ -253,6 +256,8 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 					otherCharacterPlayer.saveAsync();
 
 					group.setMember(groupMember.characterId, GroupStatus.WaitingAccept);
+				
+					this.gnServer.joinRoom(otherCharacterPlayer.getOwner().id, groupId);
 				}
 			}
 
