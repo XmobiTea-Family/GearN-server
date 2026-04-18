@@ -38,7 +38,7 @@ class CreateGroupItemOperationRequest extends OperationRequest {
 	public displayName?: string;
 
 	// Stores the amount value used by this instance.
-	@NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, isOptional: true })
+	@NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, minValue: 1, maxValue: 256, isOptional: true })
 	public amount?: number;
 
 	/**
