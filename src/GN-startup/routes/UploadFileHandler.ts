@@ -242,10 +242,15 @@ export class UploadFileHandler {
 	 * Removes the file.
 	 * @param fullPath Provides the full path value used by this operation.
 	 */
-	public removeFile(fullPath: string): void {
-		fs.rm(fullPath, err => {
+	public removeFile(fullPath: string): boolean {
+		try {
+			fs.rmSync(fullPath);
+			return true;
+		}
+		catch (err) {
 			Debug.logError("[GearN] remove file at path " + fullPath + ", error " + err);
-		});
+			return false;
+		}
 	}
 
 }
