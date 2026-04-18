@@ -149,13 +149,13 @@ export class LoginByCustomDeviceIdRequestHandler extends LoginBaseRequestHandler
 			// Stores the last IP detail value used in the current execution flow.
 			let lastIPDetail = masterPlayer.getLastIPDetail();
 			if (lastIPDetail.ipAddress != request.ipAddress) {
-				lastIPDetail.ipAddress = request.ipAddress;
 
 				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {
 					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
 					lastIPDetail.regionCode = ipDetailResponse.detail.regionCode ?? "Unknown";
+					lastIPDetail.ipAddress = request.ipAddress;
 
 					this.gnServer.getCountryIPDetailService().updateUserIP(masterPlayer.getUserId(), request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
 				}
