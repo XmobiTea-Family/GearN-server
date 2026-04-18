@@ -9,10 +9,11 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { Match } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Match";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
+import { MatchmakingTicketStatus } from "../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
 
 class GetMatchOperationRequest extends OperationRequest {
 	// Stores the match ID value used by this instance.
@@ -93,6 +94,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		}
 
 		return this.execute({
+			userId: authInfo.getUserId(),
 			matchId: request.matchId,
 			returnMember: request.returnMember,
 		}, secretInfo, operationRequest);
@@ -117,6 +119,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		}
 
 		return this.execute({
+			userId: null,
 			matchId: request.matchId,
 			returnMember: request.returnMember,
 		}, secretInfo, operationRequest);
@@ -141,6 +144,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		}
 
 		return this.execute({
+			userId: null,
 			matchId: request.matchId,
 			returnMember: request.returnMember,
 		}, secretInfo, operationRequest);
@@ -153,7 +157,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatch", request, secretInfo, operationRequest);
 		if (operationResponse != null) {
@@ -170,7 +174,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		let projection: any = null;
 		if (!request.returnMember) {
 			projection = {
-				members: false
+				members: false,
 			}
 		}
 
@@ -186,6 +190,15 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 
 		// Stores the match value used in the current execution flow.
 		let match = new Match(result, matchCollection);
+
+		if (secretInfo.getRole() == SecretRole.Player) {
+			// Stores the member value used in the current execution flow.
+			let members = match.getMembers();
+			if (!members.some(m => m.userId === request.userId)) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchNotFound);
+				return operationResponse;
+			}
+		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

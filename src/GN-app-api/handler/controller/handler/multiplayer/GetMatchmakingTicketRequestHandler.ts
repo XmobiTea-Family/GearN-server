@@ -120,7 +120,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		}
 
 		return this.execute({
-			userId: "",
+			userId: null,
 			ticketId: request.ticketId,
 			returnMember: request.returnMember,
 		}, secretInfo, operationRequest);
@@ -145,7 +145,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		}
 
 		return this.execute({
-			userId: "",
+			userId: null,
 			ticketId: request.ticketId,
 			returnMember: request.returnMember,
 		}, secretInfo, operationRequest);
