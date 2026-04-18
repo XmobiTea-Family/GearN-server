@@ -606,6 +606,10 @@ export class ApiMiddleware {
 				return ReturnCode.SecretInvalid;
 			}
 
+			if (secretInfo.isRemove()) {
+				return ReturnCode.SecretInvalid;
+			}
+
 			if (secretInfo.getTsExpire() != -1 && secretInfo.getTsExpire() < currentMilliseconds) {
 				return ReturnCode.SecretInvalid;
 			}
@@ -754,6 +758,14 @@ export class ApiMiddleware {
 
 			socket.data.isSecreted = true;
 			socket.data.secretInfo = secretInfo;
+		}
+
+		if (secretInfo.isRemove()) {
+
+			socket.data.isSecreted = false;
+			socket.data.secretInfo = null;
+
+			return next(ReturnCode.SecretInvalid);
 		}
 
 		if (secretInfo.getTsExpire() != -1 && secretInfo.getTsExpire() < currentMilliseconds) {
