@@ -4,11 +4,13 @@ import { createHmac } from "crypto";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 
 export class FacebookService implements IFacebookService {
+	private static readonly defaultScopes: string = "id,name,email";
+
 	// Stores the graph FBAPI URL value used by this instance.
 	private static readonly graphFBAPIUrl: string = "https://graph.facebook.com";
 	// Stores the graph FBAPI content URL value used by this instance.
-	private static readonly graphFBAPIContentURL: string = "/me?fields=$scopes&access_token=$access_token";//id,name,email,friends
-	private static readonly graphFBAPIVerifyURL: string = "/debug_token?input_token=$input_token&access_token=$access_token";
+	private static readonly graphFBAPIContentURL: string = "/me";
+	private static readonly graphFBAPIVerifyURL: string = "/debug_token";
 
 	// Stores the facebook app ID value used by this instance.
 	private facebookAppId: string;
@@ -44,12 +46,21 @@ export class FacebookService implements IFacebookService {
 		}
 		else {
 			try {
-				// Stores the scope str value used in the current execution flow.
-				let scopeStr = answer.scopes.join(",");
-
 				// Stores the result value used in the current execution flow.
-				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIContentURL.replace("$scopes", scopeStr).replace("$access_token", accessToken));
-				answer = result.data;
+				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIContentURL, {
+					params: {
+						fields: FacebookService.defaultScopes,
+						access_token: accessToken,
+					}
+				});
+
+				if (result.data?.error != null) {
+					answer["error"] = result.data.error.message ?? result.data.error;
+				}
+				else {
+					answer = result.data ?? {};
+					answer["scopes"] = appInfoByAccessTokenResult["scopes"] ?? [];
+				}
 			} catch (error) {
 				answer["error"] = error;
 			}
@@ -70,22 +81,38 @@ export class FacebookService implements IFacebookService {
 		if (!this.facebookAppToken) {
 			answer["error"] = "facebook app token null";
 		}
+		else if (!this.facebookAppId) {
+			answer["error"] = "facebook app id null";
+		}
 		else {
 			try {
 				// Stores the result value used in the current execution flow.
-				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIVerifyURL.replace("$access_token", this.facebookAppToken).replace("$input_token", accessToken));
+				let result = await axios.get(FacebookService.graphFBAPIUrl + FacebookService.graphFBAPIVerifyURL, {
+					params: {
+						input_token: accessToken,
+						access_token: this.facebookAppToken,
+					}
+				});
 
-				if (result.data.data.error) {
-					answer["error"] = result.data.data.error.message;
+				// Stores the data value used in the current execution flow.
+				let data = result.data?.data;
+				if (data == null) {
+					answer["error"] = "facebook verify data null";
+				}
+				else if (data.error != null) {
+					answer["error"] = data.error.message ?? data.error;
+				}
+				else if (data.is_valid !== true) {
+					answer["error"] = "access token invalid";
+				}
+				else if (data.app_id !== this.facebookAppId) {
+					answer["error"] = "facebook app id invalid";
+				}
+				else if (data.expires_at != null && data.expires_at * 1000 < xDatetime.getCurrentMilliseconds()) {
+					answer["error"] = "access token expired";
 				}
 				else {
-					// Stores the data value used in the current execution flow.
-					let data = result.data.data;
-
-					if (data.expires_at * 1000 < xDatetime.getCurrentMilliseconds()) {
-						answer["error"] = "access token expired";
-					}
-					else answer = data;
+					answer = data;
 				}
 			} catch (error) {
 				answer["error"] = error;
