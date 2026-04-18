@@ -29,8 +29,8 @@ export class DefaultApplicationStartup {
 			.setSocketPort(2901)
 			.setExpiredToken(2 * 24 * 60 * 60 * 1000)
 			.setPrivateKeyToken("defaultApplicationStartup")
-			.setInitRootUsername("admin")
-			.setInitRootPassword("password")
+			.setInitRootUsername("gearnadmin")
+			.setInitRootPassword("gearnpassword")
 			.setRestoreRootPassword("")
 			.build();
 

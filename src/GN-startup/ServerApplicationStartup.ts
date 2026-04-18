@@ -53,8 +53,8 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
 			.setSocketPort(gnApplicationSettings["socketPort"] ?? 2901)
 			.setExpiredToken(gnApplicationSettings["expiredTokenInMs"] ?? 172800000)
 			.setPrivateKeyToken(gnApplicationSettings["privateKeyToken"] ?? "privateKeyToken")
-			.setInitRootUsername(gnApplicationSettings["initRootUsername"] ?? "admin")
-			.setInitRootPassword(gnApplicationSettings["initRootPassword"] ?? "password")
+			.setInitRootUsername(gnApplicationSettings["initRootUsername"] ?? "gearnadmin")
+			.setInitRootPassword(gnApplicationSettings["initRootPassword"] ?? "gearnpassword")
 			.setRestoreRootPassword(gnApplicationSettings["restoreRootPassword"] ?? "")
 			.build();
 
