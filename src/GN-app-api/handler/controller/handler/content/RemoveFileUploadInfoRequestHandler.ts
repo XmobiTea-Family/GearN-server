@@ -190,7 +190,12 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 			// Stores the file upload value used in the current execution flow.
 			let fileUpload = uploadFileInfo.getFileUpload();
 			if (fileUpload != null) {
-				this.gnServer.getHttpApp().getUploadFileHandler().removeFile(fileUpload.fullPath);
+				if (!this.gnServer.getHttpApp().getUploadFileHandler().removeFile(fileUpload.fullPath)) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+					operationResponse.setDebugMessage("the origin file is dir remove failed");
+
+					return operationResponse;
+				}
 				// remove khoi storage nao
 			}
 
