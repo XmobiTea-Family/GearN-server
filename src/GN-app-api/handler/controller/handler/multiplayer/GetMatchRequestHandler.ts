@@ -195,6 +195,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		gnMatch.add(ParameterCode.TsCreate, match.getTsCreate());
 		gnMatch.add(ParameterCode.QueueName, match.getQueueName());
 		gnMatch.add(ParameterCode.TimeToMatchInSeconds, match.getTimeToMatchInSeconds());
+		gnMatch.add(ParameterCode.Status, match.getStatus());
 
 		if (request.returnMember) {
 			// Stores the GearN members value used in the current execution flow.

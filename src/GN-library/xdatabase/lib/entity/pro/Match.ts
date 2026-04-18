@@ -17,6 +17,8 @@ export class Match extends MongoObject {
 	private static readonly _tsCreate: string = "tsCreate";
 	// Defines the internal field key for time to match in seconds.
 	private static readonly _timeToMatchInSeconds: string = "timeToMatchInSeconds";
+	// Defines the internal field key for status.
+	private static readonly _status: string = "status";
 
 	// Stores the DOT value used by this instance.
 	static readonly DOT: string = ".";
@@ -34,6 +36,9 @@ export class Match extends MongoObject {
 
 	// Stores the server detail value used by this instance.
 	private serverDetail: ServerDetail;
+
+	// Stores the status value used by this instance.
+	private status: number;
 
 	/**
 	 * Initializes a new match instance.
@@ -58,6 +63,7 @@ export class Match extends MongoObject {
 	 */
 	private setDocumentMatch(result: mongoDB.WithId<mongoDB.Document>): void {
 		this.serverDetail = result[Match._serverDetail];
+		this.status = result[Match._status];
 	}
 
 	/**
@@ -99,6 +105,23 @@ export class Match extends MongoObject {
 	public setServerDetail(serverDetail: ServerDetail): void {
 		this.serverDetail = serverDetail;
 		this.set(Match._serverDetail, this.serverDetail);
+	}
+
+	/**
+	 * Returns the status.
+	 * @returns Returns the status.
+	 */
+	public getStatus(): number {
+		return this.status;
+	}
+
+	/**
+	 * Sets the status.
+	 * @param status Provides the status value used by this operation.
+	 */
+	public setStatus(status: number): void {
+		this.status = status;
+		this.set(Match._status, this.status);
 	}
 
 	/**

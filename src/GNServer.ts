@@ -1026,7 +1026,7 @@ export class GNServer {
 		}
 
 		let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
-		matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail } });
+		matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail, status: MatchmakingTicketStatus.Matched } });
 
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Matched } });
@@ -1049,7 +1049,7 @@ export class GNServer {
 		Debug.logInfo("[GearN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
 
 		let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
-		matchCollection.updateOne({ matchId: matchId }, { $set: {} });
+		matchCollection.updateOne({ matchId: matchId }, { $set: { status: MatchmakingTicketStatus.Canceled } });
 
 		let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 		matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Canceled } });

@@ -1,3 +1,4 @@
+import { DataValueType } from "../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 import { MatchmakingTicketStatus } from "./../../GN-common/constant/enumType/MatchmakingTicketStatus";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { MatchmakingTicket } from "./../../GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
@@ -929,11 +930,34 @@ export class MatchmakingService implements IMatchmakingService {
             let matchmakingTicketCanMatch = matchmakingTicketCanMatchs[i];
 
             // `serverDetail` starts empty and may be filled later by server-allocation callbacks.
-            let matchResult = {
+            let matchResult: {
+                matchId: string,
+                queueName: string,
+                members: {
+                    teamId: string,
+                    userId: string,
+                    attribute: {
+                        [k: string]: DataValueType;
+                    },
+                }[],
+                serverDetail: {
+                    ipV4Address: "127.0.0.1",
+                    ports: {
+                        name: string,
+                        publicPort: number,
+                        privatePort: number,
+                        protocol: 1 | 2, // 1 for UDP, 2 for TCP
+                    }[]
+                },
+                tsCreate: number,
+                timeToMatchInSeconds: number,
+                ticketIds: string[],
+                status: MatchmakingTicketStatus,
+            } = {
                 matchId: matchmakingTicketCanMatch.matchId,
                 queueName: matchmakingTicketCanMatch.queueName,
-                members: [] as any,
-                serverDetail: null as any,
+                members: [],
+                serverDetail: null,
                 // serverDetail: {
                 //     ipV4Address: "127.0.0.1",
                 //     ports: [{
@@ -950,13 +974,15 @@ export class MatchmakingService implements IMatchmakingService {
                 // },
                 tsCreate: xDatetime.getCurrentMilliseconds(),
                 timeToMatchInSeconds: -1,
-                ticketIds: [] as any,
+                ticketIds: [],
+                status: MatchmakingTicketStatus.Matched,
             };
 
             let matchmakingQueueSetting = matchmakingQueueSettings.find(x => x.queueName == matchmakingTicketCanMatch.queueName);
             if (matchmakingQueueSetting == null) continue;
 
             if (matchmakingQueueSetting.serverAllocation.enable) {
+                matchResult.status = MatchmakingTicketStatus.WaitingForServer;
                 matchmakingTicketCanMatch.status = MatchmakingTicketStatus.WaitingForServer;
             }
 
