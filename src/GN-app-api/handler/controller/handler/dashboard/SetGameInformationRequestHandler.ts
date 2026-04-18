@@ -455,6 +455,30 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 			return operationResponse;
 		}
 
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetGameInformation", request);
+
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetGameInformation", request, secretInfo, operationRequest, operationResponse);
+
+		return operationResponse;
+	}
+
+	/**
+	 * Executes the apply settings workflow asynchronously.
+	 * @param request Provides the request value used by this operation.
+	 */
+	private async applySettings(request: { gameId: string, gameName: string, gameDescription: string, gameIconUrl: string, gameSettings: GameSettingsParam, matchmakingQueueSettings: Array<MatchmakingQueueSettingsParam> }) {
+		// Stores the collection value used in the current execution flow.
+		let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
+
+		// Stores the result value used in the current execution flow.
+		let result = await collection.findOne({ type: "gameSettings", gameId: request.gameId });
+
+		if (result == null) {
+			return;
+		}
+
 		// Stores the game item value used in the current execution flow.
 		let gameItem = new GameItem(result, collection);
 
@@ -2136,12 +2160,19 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 			gameItem.setMatchmakingQueueSettings(matchmakingQueueSettings);
 		}
 
-		gameItem.saveAsync();
-
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetGameInformation", request, secretInfo, operationRequest, operationResponse);
-
-		return operationResponse;
+		if (this.gnServer.isPrimary())
+			await gameItem.saveAsync();
 	}
+
+	/**
+	 * Executes the init workflow.
+	 */
+	protected override init(): void {
+		// Stores the thiz value used in the current execution flow.
+		let thiz = this;
+		this.gnServer.getHttpApp().getClusterHandler().onEvent("dashboard_SetGameInformation", data => {
+			thiz.applySettings(data);
+		});
+	}
+
 }
