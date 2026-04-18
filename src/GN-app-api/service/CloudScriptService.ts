@@ -139,10 +139,14 @@ export class CloudScriptService implements ICloudScriptService {
 		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
 		this.gnServer.getHttpApp().getClusterHandler().onEvent("addCloudScriptFunction", data => {
+			if (data.gameId != thiz.gameId) return;
+			
 			thiz.remoteAddCloudScriptFunction(data);
 		});
 
 		this.gnServer.getHttpApp().getClusterHandler().onEvent("editCloudScriptFunction", data => {
+			if (data.gameId != thiz.gameId) return;
+			
 			thiz.remoteEditCloudScriptFunction(data);
 		});
 
@@ -329,7 +333,7 @@ export class CloudScriptService implements ICloudScriptService {
 			};
 		}
 
-		this.gnServer.getHttpApp().getClusterHandler().sendEvent("addCloudScriptFunction", { version: version, fullScriptJs: fullScriptJs, canExecute: canExecute, isLive: isLive, }, false);
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("addCloudScriptFunction", { version: version, fullScriptJs: fullScriptJs, canExecute: canExecute, isLive: isLive, gameId: this.gameId, }, false);
 
 		if (canExecute) {
 			this.loadCloudScriptFunctionWorker(version, fullScriptJs);
@@ -345,7 +349,7 @@ export class CloudScriptService implements ICloudScriptService {
 			this.liveLatestVersion = version;
 		}
 
-		this.cloudScriptFunctionCollection.insertOne({
+		await this.cloudScriptFunctionCollection.insertOne({
 			version: version,
 			script: normalizedScript,
 			fullScript: fullScriptJs,
@@ -536,11 +540,11 @@ export class CloudScriptService implements ICloudScriptService {
 			}
 		}
 
-		this.gnServer.getHttpApp().getClusterHandler().sendEvent("editCloudScriptFunction", { version: version, canExecute: canExecute, isLive: isLive, }, false);
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("editCloudScriptFunction", { version: version, canExecute: canExecute, isLive: isLive, gameId: this.gameId, }, false);
 
 		cloudFunction.canExecute = canExecute;
 
-		this.cloudScriptFunctionCollection.updateOne({
+		await this.cloudScriptFunctionCollection.updateOne({
 			version: version,
 		}, {
 			$set: {
@@ -552,7 +556,7 @@ export class CloudScriptService implements ICloudScriptService {
 		if (isLive) {
 			if (this.liveLatestVersion != version) {
 				if (this.liveLatestVersion) {
-					this.cloudScriptFunctionCollection.updateOne({
+					await this.cloudScriptFunctionCollection.updateOne({
 						version: this.liveLatestVersion,
 					}, {
 						$set: {
