@@ -877,6 +877,11 @@ export class GNServer {
 					socketId: socket.id,
 					userId: authInfo.getUserId(),
 				});
+
+				let secretInfo: SecretInfo = socket.data.secretInfo;
+				if (secretInfo) {
+					this.getDatabase().removeGamePlayerSocketId(authInfo.getUserId(), secretInfo.getGameId());
+				}
 			}
 		}
 
@@ -905,32 +910,41 @@ export class GNServer {
 					playerGroups: true,
 					playerCharacters: true,
 				}).then(async gamePlayer => {
-					if (socket != null && socket.connected && gamePlayer) {
-						for (const playerGroup of gamePlayer.getAllPlayerGroups()) {
-							if (playerGroup.status == GroupStatus.Member) {
-								this.joinRoom(userId, playerGroup.groupId);
+					if (gamePlayer != null) {
+						if (socket != null && socket.connected && gamePlayer) {
+							for (const playerGroup of gamePlayer.getAllPlayerGroups()) {
+								if (playerGroup.status == GroupStatus.Member) {
+									this.joinRoom(userId, playerGroup.groupId);
+								}
 							}
-						}
 
-						for (const playerCharacter of gamePlayer.getAllPlayerCharacters()) {
-							const characterPlayer = await this.getDatabase().loadCharacterPlayerAsync(playerCharacter.characterId, secretInfo.getGameId(), {
-								playerGroups: true,
-							});
+							for (const playerCharacter of gamePlayer.getAllPlayerCharacters()) {
+								const characterPlayer = await this.getDatabase().loadCharacterPlayerAsync(playerCharacter.characterId, secretInfo.getGameId(), {
+									playerGroups: true,
+								});
 
-							if (socket != null && socket.connected) {
-								if (characterPlayer) {
-									for (const playerGroup of characterPlayer.getAllPlayerGroups()) {
-										if (playerGroup.status == GroupStatus.Member) {
-											this.joinRoom(userId, playerGroup.groupId);
+								if (socket != null && socket.connected) {
+									if (characterPlayer) {
+										for (const playerGroup of characterPlayer.getAllPlayerGroups()) {
+											if (playerGroup.status == GroupStatus.Member) {
+												this.joinRoom(userId, playerGroup.groupId);
+											}
 										}
 									}
 								}
-							}
-							else {
-								break;
+								else {
+									break;
+								}
 							}
 						}
+
+						if (socket != null && socket.connected) {
+							gamePlayer.setSocketId(socket.id);
+
+							await gamePlayer.saveAsync();
+						}
 					}
+
 				});
 			}
 		}

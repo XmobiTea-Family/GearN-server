@@ -1535,6 +1535,13 @@ export class xDatabase {
 		return null;
 	}
 
+	public async removeGamePlayerSocketId(userId: string, gameId: string): Promise<void> {
+		// Stores the collection value used in the current execution flow.
+		let collection = this.systemGameCollection("GamePlayer", gameId);
+
+		await collection.updateOne({ userId: userId }, { $set: { socketId: "" } });
+	}
+
 	/**
 	 * Creates the game player async.
 	 * @param result Provides the result value used by this operation.
@@ -2880,7 +2887,7 @@ export class xDatabase {
 		$sort["itemStatistics." + key + ".value"] = direction;
 		// $sort["itemStatistics." + key + ".tsLastUpdate"] = 1;
 
-		let results = await collection.find({}, {
+		let results = await collection.find($filter, {
 			projection: this.getFindOptions(inventoryFindOptions)
 		}).sort($sort);
 		return this.convertToInventories(results, collection);
