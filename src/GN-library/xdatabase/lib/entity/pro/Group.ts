@@ -301,10 +301,10 @@ export class Group extends DataObjectBase {
 	}
 
 	/**
-	 * Removes the item data.
+	 * Removes the group data.
 	 * @param key Provides the key value used by this operation.
 	 */
-	public removeItemData(key: string): void {
+	public removeGroupData(key: string): void {
 		// Stores the group data item value used in the current execution flow.
 		let groupDataItem = this.groupDatas.find(x => x.key == key);
 		if (groupDataItem != null) {

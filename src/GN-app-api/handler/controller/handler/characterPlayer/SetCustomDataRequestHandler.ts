@@ -11,10 +11,11 @@ import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CustomDataParam } from "./model/CustomDataParam";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { PermissionDataItem } from "../../../../../GN-common/constant/enumType/PermissionDataItem";
 
 class SetCustomDataOperationRequest extends OperationRequest {
 
@@ -187,6 +188,12 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 				operationResponse.setDebugMessage("CustomKey not found " + key);
 				return operationResponse;
 			}
+
+			if (<PermissionDataItem>customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("CustomKey is readOnly " + key + ", change it by server or admin role");
+				return operationResponse;
+			}
 		}
 
 		// Stores the character player find options value used in the current execution flow.
@@ -222,23 +229,30 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 			// Stores the value value used in the current execution flow.
 			let value = customDataParameter.value;
 
-			if (value == null) {
-				characterPlayer.removeCustomData(key);
+			let permission = <PermissionDataItem>customDatasSettingsItem.permission;
+
+			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+
 			}
 			else {
-				if (value instanceof GNData) {
-					value = (value as GNData).toData();
+				if (value == null) {
+					characterPlayer.removeCustomData(key);
+				}
+				else {
+					if (value instanceof GNData) {
+						value = (value as GNData).toData();
+					}
+
+					characterPlayer.setCustomData(key, value as DataValueType);
 				}
 
-				characterPlayer.setCustomData(key, value as DataValueType);
+				// Stores the GearN item data value used in the current execution flow.
+				let gnCustomData = new GNHashtable();
+				gnCustomData.add(ParameterCode.Key, key);
+				gnCustomData.add(ParameterCode.Value, customDataParameter.value);
+
+				gnCustomDatas.add(gnCustomData);
 			}
-
-			// Stores the GearN player data value used in the current execution flow.
-			let gnPlayerData = new GNHashtable();
-			gnPlayerData.add(ParameterCode.Key, key);
-			gnPlayerData.add(ParameterCode.Value, customDataParameter.value);
-
-			gnCustomDatas.add(gnPlayerData);
 		}
 
 		characterPlayer.saveAsync();

@@ -186,6 +186,12 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 				operationResponse.setDebugMessage("DataKey not found " + key);
 				return operationResponse;
 			}
+
+			if (<PermissionDataItem>playerDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("DataKey is readOnly " + key + ", change it by server or admin role");
+				return operationResponse;
+			}
 		}
 
 		// Stores the character player find options value used in the current execution flow.
@@ -225,11 +231,16 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 			}
 			else {
-				if (value != null && value instanceof GNData) {
-					value = (value as GNData).toData();
+				if (value == null) {
+					characterPlayer.setPlayerData(key, null);
 				}
+				else {
+					if (value instanceof GNData) {
+						value = (value as GNData).toData();
+					}
 
-				characterPlayer.setPlayerData(key, value as DataValueType);
+					characterPlayer.setPlayerData(key, value as DataValueType);
+				}
 
 				// Stores the GearN player data value used in the current execution flow.
 				let gnPlayerData = new GNHashtable();

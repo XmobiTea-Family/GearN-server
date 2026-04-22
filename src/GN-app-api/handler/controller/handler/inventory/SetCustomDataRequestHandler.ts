@@ -11,10 +11,11 @@ import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CustomDataParam } from "./model/CustomDataParam";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { PermissionDataItem } from "../../../../../GN-common/constant/enumType/PermissionDataItem";
 
 class SetCustomDataOperationRequest extends OperationRequest {
 
@@ -173,7 +174,6 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 		let inventorySettings = this.gnServer.getGNSettings().getInventorySettings(secretInfo.getGameId());
 
 		for (let i = 0; i < request.customDatas.length; i++) {
-
 			// Stores the custom data parameter value used in the current execution flow.
 			let customDataParameter = request.customDatas[i];
 
@@ -185,6 +185,12 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 			if (customDatasSettingsItem == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("CustomKey not found " + key);
+				return operationResponse;
+			}
+
+			if (<PermissionDataItem>customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("CustomKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
 			}
 		}
@@ -208,7 +214,6 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 		let gnCustomDatas = new GNArray();
 
 		for (let i = 0; i < request.customDatas.length; i++) {
-
 			// Stores the custom data parameter value used in the current execution flow.
 			let customDataParameter = request.customDatas[i];
 
@@ -222,23 +227,30 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 			// Stores the value value used in the current execution flow.
 			let value = customDataParameter.value;
 
-			if (value == null) {
-				inventory.removeCustomData(key);
+			let permission = <PermissionDataItem>customDatasSettingsItem.permission;
+
+			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+
 			}
 			else {
-				if (value instanceof GNData) {
-					value = (value as GNData).toData();
+				if (value == null) {
+					inventory.removeCustomData(key);
+				}
+				else {
+					if (value instanceof GNData) {
+						value = (value as GNData).toData();
+					}
+
+					inventory.setCustomData(key, value as DataValueType);
 				}
 
-				inventory.setCustomData(key, value as DataValueType);
+				// Stores the GearN item data value used in the current execution flow.
+				let gnCustomData = new GNHashtable();
+				gnCustomData.add(ParameterCode.Key, key);
+				gnCustomData.add(ParameterCode.Value, customDataParameter.value);
+
+				gnCustomDatas.add(gnCustomData);
 			}
-
-			// Stores the GearN item data value used in the current execution flow.
-			let gnItemData = new GNHashtable();
-			gnItemData.add(ParameterCode.Key, key);
-			gnItemData.add(ParameterCode.Value, customDataParameter.value);
-
-			gnCustomDatas.add(gnItemData);
 		}
 
 		inventory.saveAsync();

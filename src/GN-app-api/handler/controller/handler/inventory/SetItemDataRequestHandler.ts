@@ -179,11 +179,18 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 			// Stores the key value used in the current execution flow.
 			let key = itemDataParam.key;
+
 			// Stores the item datas settings item value used in the current execution flow.
 			let itemDatasSettingsItem = inventorySettings.itemDatasSettings.find(x => x.key == key);
 			if (itemDatasSettingsItem == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("DataKey not found " + key);
+				return operationResponse;
+			}
+
+			if (<PermissionDataItem>itemDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("DataKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
 			}
 		}
@@ -212,6 +219,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 			// Stores the key value used in the current execution flow.
 			let key = itemDataParam.key;
+
 			// Stores the item datas settings item value used in the current execution flow.
 			let itemDatasSettingsItem = inventorySettings.itemDatasSettings.find(x => x.key == key);
 			if (itemDatasSettingsItem == null) continue;
@@ -225,11 +233,16 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 
 			}
 			else {
-				if (value != null && value instanceof GNData) {
-					value = (value as GNData).toData();
+				if (value == null) {
+					inventory.removeItemData(key);
 				}
+				else {
+					if (value instanceof GNData) {
+						value = (value as GNData).toData();
+					}
 
-				inventory.setItemData(key, value as DataValueType);
+					inventory.setItemData(key, value as DataValueType);
+				}
 
 				// Stores the GearN item data value used in the current execution flow.
 				let gnItemData = new GNHashtable();

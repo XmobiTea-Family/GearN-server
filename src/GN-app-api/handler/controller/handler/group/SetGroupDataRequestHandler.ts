@@ -187,6 +187,12 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 				operationResponse.setDebugMessage("DataKey not found " + key);
 				return operationResponse;
 			}
+
+			if (<PermissionDataItem>groupDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+				operationResponse.setDebugMessage("DataKey is readOnly " + key + ", change it by server or admin role");
+				return operationResponse;
+			}
 		}
 
 		// Stores the group find options value used in the current execution flow.
@@ -226,11 +232,16 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 
 			}
 			else {
-				if (value != null && value instanceof GNData) {
-					value = (value as GNData).toData();
+				if (value == null) {
+					group.removeGroupData(key);
 				}
+				else {
+					if (value instanceof GNData) {
+						value = (value as GNData).toData();
+					}
 
-				group.setGroupData(key, value as DataValueType);
+					group.setGroupData(key, value as DataValueType);
+				}
 
 				// Stores the GearN group data value used in the current execution flow.
 				let gnGroupData = new GNHashtable();
