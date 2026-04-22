@@ -151,8 +151,6 @@ export class UploadFileMiddleware {
 		let fileId = req.params.fileId;
 		if (!fileId) return res.sendStatus(400);
 
-		// Stores the req any value used in the current execution flow.
-		let reqAny = req as any;
 		if (req.isAuthenticated === true) {
 			// Stores the doc value used in the current execution flow.
 			let doc = await this.uploadFileInfoCollection.findOne({ fileId: fileId });
@@ -162,8 +160,7 @@ export class UploadFileMiddleware {
 			if (doc["tsUploadExpire"] < xDatetime.getCurrentMilliseconds()) return res.sendStatus(408);
 
 			// Stores the file name value used in the current execution flow.
-			let fileName = doc["fileName"];
-			reqAny.fileName = fileName;
+			req.fileName = doc["fileName"];
 
 			return next();
 		}

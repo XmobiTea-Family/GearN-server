@@ -228,7 +228,18 @@ interface CloudScriptRequestSocket {
 	request: { [k: string]: any };
 }
 
-type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket;
+
+interface CloudScriptRequestVerifyGenericService {
+	requestId: string,
+	eventName: string,
+	eventType: EventCallbackType.SystemAuthenticate,
+	request: {
+		serviceName: string,
+		serviceData: {
+			[k: string]: any;
+		},
+	},
+};
 
 interface CloudScriptResponse {
 	// Stores the stats value used by this contract.
@@ -597,7 +608,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestSystem = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.System,
@@ -668,7 +679,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestSystemMatchmaking = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.SystemMatchmaking,
@@ -746,7 +757,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestEvent = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.Event,
@@ -868,7 +879,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestPre = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.Pre,
@@ -974,7 +985,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestVerifyGenericService = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.SystemAuthenticate,
@@ -1098,7 +1109,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestSystemAuthenticate = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.SystemAuthenticate,
@@ -1217,7 +1228,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			isDefault: boolean;
 			// Indicates whether only master admin should be allowed.
 			onlyMasterAdmin: boolean;
-		} = null as any;
+		} = null;
 		if (secretInfo) {
 			finalSecretInfo = {
 				gameId: secretInfo.getGameId(),
@@ -1232,7 +1243,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			};
 		}
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestPost = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.Post,
@@ -1327,7 +1338,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		let cloudScriptRequest: CloudScriptRequest = {
+		let cloudScriptRequest: CloudScriptRequestSocket = {
 			requestId: requestId,
 			eventName: eventName,
 			eventType: EventCallbackType.Socket,

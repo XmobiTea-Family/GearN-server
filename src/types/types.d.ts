@@ -8,6 +8,7 @@ declare global {
 			authInfo: AuthInfo,
 			secretInfo: SecretInfo,
 			xip: string,
+			fileName: string,
 		}
 	}
 }
