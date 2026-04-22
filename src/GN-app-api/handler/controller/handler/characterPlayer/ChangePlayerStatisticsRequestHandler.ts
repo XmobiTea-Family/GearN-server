@@ -217,6 +217,8 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
+		let logs: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
+
 		for (let i = 0; i < request.playerStatistics.length; i++) {
 			// Stores the player statistics parameter value used in the current execution flow.
 			let playerStatisticsParam = request.playerStatistics[i];
@@ -277,7 +279,15 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 
 				gnPlayerStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, newValue, request.log);
+				logs.push({
+					characterId: request.characterId,
+					key: key,
+					amount: playerStatisticsParam.value,
+					startValue: oldValue,
+					finalValue: newValue,
+					tsCreate: currentMilliseconds,
+					log: request.log
+				});
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
 				if (value > playerStatistics.value) {
@@ -292,7 +302,15 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 					characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+					logs.push({
+						characterId: request.characterId,
+						key: key,
+						amount: playerStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -311,7 +329,15 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					logs.push({
+						characterId: request.characterId,
+						key: key,
+						amount: playerStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: playerStatistics.value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
@@ -327,7 +353,15 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 					characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+					logs.push({
+						characterId: request.characterId,
+						key: key,
+						amount: playerStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -346,7 +380,15 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					logs.push({
+						characterId: request.characterId,
+						key: key,
+						amount: playerStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: playerStatistics.value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
@@ -361,11 +403,21 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 				characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+				logs.push({
+					characterId: request.characterId,
+					key: key,
+					amount: playerStatisticsParam.value,
+					startValue: oldValue,
+					finalValue: value,
+					tsCreate: currentMilliseconds,
+					log: request.log
+				});
 			}
 
 			gnPlayerStatistics.add(gnPlayerStatistic);
 		}
+
+		this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogsAsync(logs, secretInfo.getGameId());
 
 		characterPlayer.saveAsync();
 

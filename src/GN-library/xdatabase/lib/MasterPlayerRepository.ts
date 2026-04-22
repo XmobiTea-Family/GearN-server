@@ -775,51 +775,14 @@ export class MasterPlayerRepository extends AbstractBaseRepository {
 	}
 
 	/**
-		 * Executes the insert master player statistics log async workflow asynchronously.
-		 * @param userId Indicates whether r ID should be used.
-		 * @param key Provides the key value used by this operation.
-		 * @param amount Provides the amount value used by this operation.
-		 * @param startValue Provides the start value value used by this operation.
-		 * @param finalValue Provides the final value value used by this operation.
-		 * @param log Provides the log value used by this operation.
-		 */
-	public async insertMasterPlayerStatisticsLogAsync(userId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.logRuntimeCollection("MasterPlayer.StatisticsLog");
-
-		await collection.insertOne({
-			userId: userId,
-			key: key,
-			amount: amount,
-			startValue: startValue,
-			finalValue: finalValue,
-			tsCreate: xDatetime.getCurrentMilliseconds(),
-			log: log,
-		});
-	}
-
-	/**
 	 * Executes the insert master player currency log async workflow asynchronously.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 * @param startValue Provides the start value value used by this operation.
-	 * @param finalValue Provides the final value value used by this operation.
-	 * @param log Provides the log value used by this operation.
+	 * @param requests Provides the requests value used by this operation.
 	 */
-	public async insertMasterPlayerCurrencyLogAsync(userId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+	public async insertMasterPlayerCurrencyLogsAsync(requests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[]): Promise<void> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeCollection("MasterPlayer.CurrencyLog");
 
-		await collection.insertOne({
-			userId: userId,
-			key: key,
-			amount: amount,
-			startValue: startValue,
-			finalValue: finalValue,
-			tsCreate: xDatetime.getCurrentMilliseconds(),
-			log: log,
-		});
+		await collection.insertMany(requests);
 	}
 
 	/**

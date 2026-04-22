@@ -202,7 +202,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 			};
 
 			// Stores the log requests value used in the current execution flow.
-			let logRequests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
+			let logs: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 			for (let i = 0; i < masterPlayers.length; i++) {
 				// Stores the master player value used in the current execution flow.
@@ -235,7 +235,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 					// Stores the amount value used in the current execution flow.
 					let amount = value - playerStatisticsSettingsItem.initialValue;
 
-					logRequests.push({
+					logs.push({
 						userId: userId,
 						amount: -amount,
 						startValue: value,
@@ -257,7 +257,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 			await backupStatisticsLeaderboardCollection.insertOne(backupData);
 
-			this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogsAsync(logRequests);
+			this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogsAsync(logs);
 
 			Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + masterPlayerCollection.collectionName + " success");
 		}
@@ -334,7 +334,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				};
 
 				// Stores the log requests value used in the current execution flow.
-				let logRequests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
+				let logs: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 				for (let i = 0; i < gamePlayers.length; i++) {
 					// Stores the game player value used in the current execution flow.
@@ -367,7 +367,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 						// Stores the amount value used in the current execution flow.
 						let amount = value - playerStatisticsSettingsItem.initialValue;
 
-						logRequests.push({
+						logs.push({
 							userId: userId,
 							amount: -amount,
 							startValue: value,
@@ -389,7 +389,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 				await backupStatisticsLeaderboardCollection.insertOne(backupData);
 
-				this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogsAsync(logRequests, gameId);
+				this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogsAsync(logs, gameId);
 
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + gamePlayerCollection.collectionName + " success");
 			}
@@ -462,7 +462,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				};
 
 				// Stores the log requests value used in the current execution flow.
-				let logRequests: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
+				let logs: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 				for (let i = 0; i < characterPlayers.length; i++) {
 					// Stores the character player value used in the current execution flow.
@@ -495,7 +495,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 						// Stores the amount value used in the current execution flow.
 						let amount = value - playerStatisticsSettingsItem.initialValue;
 
-						logRequests.push({
+						logs.push({
 							characterId: characterId,
 							amount: -amount,
 							startValue: value,
@@ -522,7 +522,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 				await backupStatisticsLeaderboardCollection.insertOne(backupData);
 
-				this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogsAsync(logRequests, gameId);
+				this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogsAsync(logs, gameId);
 
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + characterPlayerCollection.collectionName + " success");
 			}
@@ -595,7 +595,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				};
 
 				// Stores the log requests value used in the current execution flow.
-				let logRequests: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
+				let logs: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 				for (let i = 0; i < groups.length; i++) {
 					// Stores the group value used in the current execution flow.
@@ -628,7 +628,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 						// Stores the amount value used in the current execution flow.
 						let amount = value - groupStatisticsSettingsItem.initialValue;
 
-						logRequests.push({
+						logs.push({
 							groupId: groupId,
 							amount: -amount,
 							startValue: value,
@@ -655,7 +655,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 				await backupStatisticsLeaderboardCollection.insertOne(backupData);
 
-				this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogsAsync(logRequests, gameId);
+				this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogsAsync(logs, gameId);
 
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + groupCollection.collectionName + " success");
 			}
@@ -721,7 +721,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				};
 
 				// Stores the log requests value used in the current execution flow.
-				let logRequests: { itemId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
+				let logs: { itemId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 				for (let i = 0; i < inventories.length; i++) {
 					// Stores the inventory value used in the current execution flow.
@@ -754,7 +754,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 						// Stores the amount value used in the current execution flow.
 						let amount = value - itemStatisticsSettingsItem.initialValue;
 
-						logRequests.push({
+						logs.push({
 							itemId: itemId,
 							amount: -amount,
 							startValue: value,
@@ -781,7 +781,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 				await backupStatisticsLeaderboardCollection.insertOne(backupData);
 
-				this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogsAsync(logRequests, gameId);
+				this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogsAsync(logs, gameId);
 
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + inventoryCollection.collectionName + " success");
 			}

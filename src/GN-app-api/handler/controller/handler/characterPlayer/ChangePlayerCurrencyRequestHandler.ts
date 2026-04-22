@@ -14,6 +14,7 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { PlayerCurrencyParam } from "./model/PlayerCurrencyParam";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class ChangePlayerCurrencyOperationRequest extends OperationRequest {
 
@@ -212,9 +213,10 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 		// Stores the GearN player currencies value used in the current execution flow.
 		let gnPlayerCurrencies = new GNArray();
 
-		let logs: {
-			key: string, amount: number, startValue: number, finalValue: number
-		}[] = [];
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		let logs: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 		for (let i = 0; i < request.playerCurrencies.length; i++) {
 			// Stores the player currency parameter value used in the current execution flow.
@@ -252,10 +254,13 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 			}
 
 			logs.push({
+				characterId: request.characterId,
 				key: key,
 				amount: amount,
 				startValue: startValue,
 				finalValue: serverValue,
+				tsCreate: currentMilliseconds,
+				log: request.log
 			});
 
 			// Stores the GearN player currency value used in the current execution flow.
@@ -274,9 +279,7 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 			}
 		}
 
-		for (const log of logs) {
-			this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.characterId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
-		}
+		this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 		characterPlayer.saveAsync();
 

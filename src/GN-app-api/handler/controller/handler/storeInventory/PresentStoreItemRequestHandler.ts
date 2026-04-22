@@ -16,6 +16,7 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { StoreReceiveType } from "./../../../../../GN-common/constant/enumType/StoreReceiveType";
 import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class PresentStoreItemOperationRequest extends OperationRequest {
 
@@ -316,6 +317,9 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 		// Stores the complete store items collection used in the current execution flow.
 		let allStoreItems = storeInventory.getAllStoreItems();
 
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
 		if (request.type == OwnerType.CharacterPlayer) {
 			// Stores the character player value used in the current execution flow.
 			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
@@ -373,6 +377,8 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 					}
 				}
 			}
+
+			let logs: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 			{
 				for (let i = 0; i < allStoreCurrencies.length; i++) {
@@ -432,9 +438,19 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					logs.push({
+						characterId: request.id,
+						key: storeCurrency.key,
+						amount: storeCurrency.value,
+						startValue: oldValue,
+						finalValue: serverValue,
+						tsCreate: currentMilliseconds,
+						log: "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
+					});
 				}
 			}
+
+			this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 			characterPlayer.saveAsync();
 
@@ -465,6 +481,8 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 			let gnPlayerCurrencies = new GNArray();
 			// Stores the GearN player inventories value used in the current execution flow.
 			let gnPlayerInventories = new GNArray();
+
+			let logs: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 			{
 				for (let i = 0; i < allStoreItems.length; i++) {
@@ -559,9 +577,19 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					logs.push({
+						userId: request.id,
+						key: storeCurrency.key,
+						amount: storeCurrency.value,
+						startValue: oldValue,
+						finalValue: serverValue,
+						tsCreate: currentMilliseconds,
+						log: "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log
+					});
 				}
 			}
+
+			this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 			gamePlayer.saveAsync();
 
@@ -592,6 +620,8 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 			let gnCurrencies = new GNArray();
 			// Stores the GearN inventories value used in the current execution flow.
 			let gnInventories = new GNArray();
+
+			let logs: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 			{
 				for (let i = 0; i < allStoreItems.length; i++) {
@@ -685,9 +715,20 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 					});
 
 					gnCurrencies.add(gnPlayerCurrency);
-					this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+
+					logs.push({
+						groupId: request.id,
+						key: storeCurrency.key,
+						amount: storeCurrency.value,
+						startValue: oldValue,
+						finalValue: serverValue,
+						tsCreate: currentMilliseconds,
+						log: "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log
+					});
 				}
 			}
+
+			this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 			group.saveAsync();
 

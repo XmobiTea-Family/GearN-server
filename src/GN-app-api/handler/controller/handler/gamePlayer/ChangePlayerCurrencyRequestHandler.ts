@@ -14,6 +14,7 @@ import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { PlayerCurrencyParam } from "./model/PlayerCurrencyParam";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class ChangePlayerCurrencyOperationRequest extends OperationRequest {
 
@@ -227,9 +228,10 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 		// Stores the GearN player currencies value used in the current execution flow.
 		let gnPlayerCurrencies = new GNArray();
 
-		let logs: {
-			key: string, amount: number, startValue: number, finalValue: number
-		}[] = [];
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		let logs: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 		for (let i = 0; i < request.playerCurrencies.length; i++) {
 			// Stores the player currency parameter value used in the current execution flow.
@@ -270,10 +272,13 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 			}
 
 			logs.push({
+				userId: request.userId,
 				key: key,
 				amount: amount,
 				startValue: startValue,
 				finalValue: serverValue,
+				tsCreate: currentMilliseconds,
+				log: request.log
 			});
 
 			// Stores the GearN player currency value used in the current execution flow.
@@ -292,9 +297,7 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 			}
 		}
 
-		for (const log of logs) {
-			this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogAsync(request.userId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
-		}
+		this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 		gamePlayer.saveAsync();
 

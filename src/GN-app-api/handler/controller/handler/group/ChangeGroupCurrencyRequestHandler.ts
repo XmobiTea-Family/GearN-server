@@ -14,6 +14,7 @@ import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/enti
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupCurrencyParam } from "./model/GroupCurrencyParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class ChangeGroupCurrencyOperationRequest extends OperationRequest {
 
@@ -212,9 +213,10 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		// Stores the GearN group currencies value used in the current execution flow.
 		let gnGroupCurrencies = new GNArray();
 
-		let logs: {
-			key: string, amount: number, startValue: number, finalValue: number
-		}[] = [];
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		let logs: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 		for (let i = 0; i < request.groupCurrencies.length; i++) {
 			// Stores the group currency parameter value used in the current execution flow.
@@ -252,13 +254,14 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			}
 
 			logs.push({
+				groupId: request.groupId,
 				key: key,
 				amount: amount,
 				startValue: startValue,
 				finalValue: serverValue,
+				tsCreate: currentMilliseconds,
+				log: request.log
 			});
-
-
 
 			// Stores the GearN group currency value used in the current execution flow.
 			let gnGroupCurrency = new GNHashtable();
@@ -276,9 +279,7 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			}
 		}
 
-		for (const log of logs) {
-			this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogAsync(request.groupId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
-		}
+		this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 		group.saveAsync();
 

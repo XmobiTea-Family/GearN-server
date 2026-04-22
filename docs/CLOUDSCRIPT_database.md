@@ -14,7 +14,7 @@ Dùng `database` khi:
 
 - Bạn cần đọc hoặc ghi MongoDB nội bộ của GearN.
 - Bạn cần query dữ liệu game theo đúng schema hiện tại.
-- Bạn cần dùng helper có sẵn của `xDatabase` như `gamePlayerRepository.loadGamePlayerAsync`, `groupRepository.loadGroupAsync`, `gamePlayerRepository.insertGamePlayerStatisticsLogAsync`.
+- Bạn cần dùng helper có sẵn của `xDatabase` như `gamePlayerRepository.loadGamePlayerAsync`, `groupRepository.loadGroupAsync`, `gamePlayerRepository.insertGamePlayerStatisticsLogsAsync`.
 - Bạn cần làm việc với runtime data, system data, meta data, hoặc log database.
 
 Không nên dùng `database` khi:
@@ -118,8 +118,8 @@ Ví dụ:
 
 Ví dụ:
 
-- `database.gamePlayerRepository.insertGamePlayerStatisticsLogAsync(...)`
-- `database.gamePlayerRepository.insertGamePlayerCurrencyLogAsync(...)`
+- `database.gamePlayerRepository.insertGamePlayerStatisticsLogsAsync(...)`
+- `database.gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(...)`
 - `database.groupRepository.createGroupMessageAsync(...)`
 - `database.groupRepository.loadGroupMessagesAsync(...)`
 - `database.storeInventoryRepository.getStoreInventoryUsedAsync(...)`
@@ -377,8 +377,12 @@ handlers["dbInsertGamePlayerLog"] = async (args: any, context, log) => {
     const finalValue = typeof args?.finalValue === "number" ? args.finalValue : startValue + amount;
     const logMessage = typeof args?.logMessage === "string" && args.logMessage.length > 0 ? args.logMessage : "CloudScript statistic log";
 
-    await database.gamePlayerRepository.insertGamePlayerStatisticsLogAsync(userId, gameId, key, amount, startValue, finalValue, logMessage);
-    await database.gamePlayerRepository.insertGamePlayerCurrencyLogAsync(userId, gameId, key, amount, startValue, finalValue, logMessage);
+    await database.gamePlayerRepository.insertGamePlayerStatisticsLogsAsync([{
+        userId, key, amount, startValue, finalValue, log: logMessage, tsCreate: Date.now()
+    }], gameId);
+    await database.gamePlayerRepository.insertGamePlayerCurrencyLogsAsync([{
+        userId, key, amount, startValue, finalValue, log: logMessage, tsCreate: Date.now()
+    }], gameId);
 
     const statisticLogCursor = await database.loadGamePlayerStatisticsLogAsync({ userId: userId, key: key }, gameId, 5);
     const currencyLogCursor = await database.loadGamePlayerCurrencyLogAsync({ userId: userId, key: key }, gameId, 5);

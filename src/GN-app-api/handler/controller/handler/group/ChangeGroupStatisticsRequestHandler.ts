@@ -217,6 +217,8 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
+		let logs: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
+
 		for (let i = 0; i < request.groupStatistics.length; i++) {
 			// Stores the group statistics parameter value used in the current execution flow.
 			let groupStatisticsParam = request.groupStatistics[i];
@@ -277,7 +279,15 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 
 				gnGroupStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, newValue, request.log);
+				logs.push({
+					groupId: request.groupId,
+					key: key,
+					amount: groupStatisticsParam.value,
+					startValue: oldValue,
+					finalValue: newValue,
+					tsCreate: currentMilliseconds,
+					log: request.log
+				});
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
 				if (value > groupStatistics.value) {
@@ -292,7 +302,15 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 					group.setGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
+					logs.push({
+						groupId: request.groupId,
+						key: key,
+						amount: groupStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 				else {
 					if (groupStatisticsSettingsItem.maximumValue != null) {
@@ -311,7 +329,15 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 
 					gnGroupStatistic.add(ParameterCode.Value, groupStatistics.value);
 
-					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, groupStatistics.value, request.log);
+					logs.push({
+						groupId: request.groupId,
+						key: key,
+						amount: groupStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: groupStatistics.value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
@@ -327,7 +353,15 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 					group.setGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
+					logs.push({
+						groupId: request.groupId,
+						key: key,
+						amount: groupStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 				else {
 					if (groupStatisticsSettingsItem.maximumValue != null) {
@@ -346,7 +380,15 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 
 					gnGroupStatistic.add(ParameterCode.Value, groupStatistics.value);
 
-					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, groupStatistics.value, request.log);
+					logs.push({
+						groupId: request.groupId,
+						key: key,
+						amount: groupStatisticsParam.value,
+						startValue: oldValue,
+						finalValue: groupStatistics.value,
+						tsCreate: currentMilliseconds,
+						log: request.log
+					});
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
@@ -361,11 +403,21 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 				group.setGroupStatistics(key, value, currentMilliseconds);
 				gnGroupStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
+				logs.push({
+					groupId: request.groupId,
+					key: key,
+					amount: groupStatisticsParam.value,
+					startValue: oldValue,
+					finalValue: value,
+					tsCreate: currentMilliseconds,
+					log: request.log
+				});
 			}
 
 			gnGroupStatistics.add(gnGroupStatistic);
 		}
+
+		this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogsAsync(logs, secretInfo.getGameId());
 
 		group.saveAsync();
 

@@ -377,6 +377,9 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 		// Stores the complete store items collection used in the current execution flow.
 		let allStoreItems = storeInventory.getAllStoreItems();
 
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
 		if (request.type == OwnerType.CharacterPlayer) {
 			// Stores the character player value used in the current execution flow.
 			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
@@ -399,6 +402,8 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 			let gnPlayerCurrencies = new GNArray();
 			// Stores the GearN player inventories value used in the current execution flow.
 			let gnPlayerInventories = new GNArray();
+
+			let logs: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 			{
 				for (let i = 0; i < allStoreItems.length; i++) {
@@ -493,9 +498,19 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log);
+					logs.push({
+						characterId: request.id,
+						key: storeCurrency.key,
+						amount: storeCurrency.value,
+						startValue: oldValue,
+						finalValue: serverValue,
+						tsCreate: currentMilliseconds,
+						log: "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log,
+					});
 				}
 			}
+
+			this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 			characterPlayer.saveAsync();
 
@@ -526,6 +541,8 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 			let gnPlayerCurrencies = new GNArray();
 			// Stores the GearN player inventories value used in the current execution flow.
 			let gnPlayerInventories = new GNArray();
+
+			let logs: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 			{
 				for (let i = 0; i < allStoreItems.length; i++) {
@@ -620,9 +637,20 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log);
+					logs.push({
+						userId: request.id,
+						key: storeCurrency.key,
+						amount: storeCurrency.value,
+						startValue: oldValue,
+						finalValue: serverValue,
+						tsCreate: currentMilliseconds,
+						log: "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log
+					});
 				}
 			}
+
+
+			this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 			gamePlayer.saveAsync();
 
@@ -653,6 +681,8 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 			let gnCurrencies = new GNArray();
 			// Stores the GearN inventories value used in the current execution flow.
 			let gnInventories = new GNArray();
+
+			let logs: { groupId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 
 			{
 				for (let i = 0; i < allStoreItems.length; i++) {
@@ -745,10 +775,21 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 						value: serverValue,
 					});
 
-					this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log);
+					logs.push({
+						groupId: request.id,
+						key: storeCurrency.key,
+						amount: storeCurrency.value,
+						startValue: oldValue,
+						finalValue: serverValue,
+						tsCreate: currentMilliseconds,
+						log: "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log
+					});
+
 					gnCurrencies.add(gnPlayerCurrency);
 				}
 			}
+
+			this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogsAsync(logs, secretInfo.getGameId());
 
 			group.saveAsync();
 
@@ -766,7 +807,7 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 				id: request.id,
 				type: request.type
 			},
-			tsCreate: xDatetime.getCurrentMilliseconds(),
+			tsCreate: currentMilliseconds,
 			productId: productId,
 			store: "AppleAppStore",
 		});
@@ -779,7 +820,7 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 		let inAppPurchase = storeInventory.getInAppPurchase();
 		if (inAppPurchase.analyticsPrice) {
 			this.gnServer.getDatabase().systemCollection("StoreAnalytics").insertOne({
-				tsCreate: xDatetime.getCurrentMilliseconds(),
+				tsCreate: currentMilliseconds,
 				price: inAppPurchase.analyticsPrice,
 				storeId: storeInventory.getStoreId(),
 			});

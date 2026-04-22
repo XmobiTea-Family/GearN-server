@@ -354,31 +354,6 @@ export class GamePlayerRepository extends AbstractBaseRepository {
 	}
 
 	/**
-	 * Executes the insert game player statistics log async workflow asynchronously.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 * @param startValue Provides the start value value used by this operation.
-	 * @param finalValue Provides the final value value used by this operation.
-	 * @param log Provides the log value used by this operation.
-	 */
-	public async insertGamePlayerStatisticsLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
-
-		await collection.insertOne({
-			userId: userId,
-			key: key,
-			amount: amount,
-			startValue: startValue,
-			finalValue: finalValue,
-			tsCreate: xDatetime.getCurrentMilliseconds(),
-			log: log,
-		});
-	}
-
-	/**
 	 * Executes the insert game player statistics logs async workflow asynchronously.
 	 * @param requests Provides the requests value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
@@ -392,27 +367,14 @@ export class GamePlayerRepository extends AbstractBaseRepository {
 
 	/**
 	 * Executes the insert game player currency log async workflow asynchronously.
-	 * @param userId Indicates whether r ID should be used.
+	 * @param requests Provides the requests value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 * @param startValue Provides the start value value used by this operation.
-	 * @param finalValue Provides the final value value used by this operation.
-	 * @param log Provides the log value used by this operation.
 	 */
-	public async insertGamePlayerCurrencyLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
+	public async insertGamePlayerCurrencyLogsAsync(requests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 
-		await collection.insertOne({
-			userId: userId,
-			key: key,
-			amount: amount,
-			startValue: startValue,
-			finalValue: finalValue,
-			tsCreate: xDatetime.getCurrentMilliseconds(),
-			log: log,
-		});
+		await collection.insertMany(requests);
 	}
 
 	/**
