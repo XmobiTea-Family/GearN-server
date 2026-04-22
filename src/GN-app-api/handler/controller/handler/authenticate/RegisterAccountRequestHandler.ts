@@ -108,7 +108,7 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 		let masterPlayerFindOptions: MasterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
 
 		if (masterPlayer != null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountUsernameExists);
@@ -141,7 +141,7 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 			this.gnServer.getCountryIPDetailService().updateUserIP(newMasterPlayerResult["userId"], request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
 		}
 
-		masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
+		masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.createMasterPlayerAsync(newMasterPlayerResult);
 
 		operationResponse.setParameter(ParameterCode.NewlyCreated, true);
 

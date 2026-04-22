@@ -142,7 +142,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGenericServiceAsync(request.serviceName, serviceId, masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerByGenericServiceAsync(request.serviceName, serviceId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			if (!request.createPlayerIfNotExists) {
@@ -180,7 +180,7 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 					this.gnServer.getCountryIPDetailService().updateUserIP(newMasterPlayerResult["userId"], request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
 				}
 
-				masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
+				masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.createMasterPlayerAsync(newMasterPlayerResult);
 				operationResponse.setParameter(ParameterCode.NewlyCreated, true);
 			}
 		}

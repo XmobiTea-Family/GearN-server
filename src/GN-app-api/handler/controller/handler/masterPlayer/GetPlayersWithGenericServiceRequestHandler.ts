@@ -185,7 +185,7 @@ export class GetPlayersWithGenericServiceRequestHandler extends MasterPlayerBase
 		let gnResults = new GNArray();
 
 		// Stores the master players value used in the current execution flow.
-		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersWithGenericServiceAsync(request.serviceName, request.genericIds, masterPlayerFindOptions);
+		let masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersWithGenericServiceAsync(request.serviceName, request.genericIds, masterPlayerFindOptions);
 
 		for (let i = 0; i < masterPlayers.length; i++) {
 			// Stores the master player value used in the current execution flow.

@@ -178,7 +178,7 @@ export class GetPlayersWithGooglePlayGameServiceRequestHandler extends MasterPla
 		let gnResults = new GNArray();
 
 		// Stores the master players value used in the current execution flow.
-		let masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersWithGooglePlayGameServiceAsync(request.playerIds, masterPlayerFindOptions);
+		let masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersWithGooglePlayGameServiceAsync(request.playerIds, masterPlayerFindOptions);
 
 		for (let i = 0; i < masterPlayers.length; i++) {
 			// Stores the master player value used in the current execution flow.

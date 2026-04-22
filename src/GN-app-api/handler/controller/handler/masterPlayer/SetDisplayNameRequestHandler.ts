@@ -196,7 +196,7 @@ export class SetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler
 
 		if (request.uniqueDisplayName) {
 			// Stores the master player with this display name value used in the current execution flow.
-			let masterPlayerWithThisDisplayName = await this.gnServer.getDatabase().loadMasterPlayerWithDisplayNameAsync(request.displayName, masterPlayerFindOptions);
+			let masterPlayerWithThisDisplayName = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerWithDisplayNameAsync(request.displayName, masterPlayerFindOptions);
 
 			if (masterPlayerWithThisDisplayName != null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameHasUse);
@@ -205,7 +205,7 @@ export class SetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);

@@ -112,7 +112,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerByAccountUsernameAsync(request.username.toLowerCase(), masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);

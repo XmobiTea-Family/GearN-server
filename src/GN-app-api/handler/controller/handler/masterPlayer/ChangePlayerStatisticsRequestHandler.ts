@@ -217,7 +217,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
@@ -292,7 +292,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 
 				gnPlayerStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, newValue, request.log);
+				this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, newValue, request.log);
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
 				if (value > playerStatistics.value) {
@@ -307,7 +307,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 					masterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -326,7 +326,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
@@ -342,7 +342,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 					masterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -361,7 +361,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
@@ -376,7 +376,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 				masterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
+				this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogAsync(request.userId, key, playerStatisticsParam.value, oldValue, value, request.log);
 			}
 
 			gnPlayerStatistics.add(gnPlayerStatistic);

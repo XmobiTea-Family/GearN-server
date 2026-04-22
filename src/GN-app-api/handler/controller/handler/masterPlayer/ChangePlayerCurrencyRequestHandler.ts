@@ -215,7 +215,7 @@ export class ChangePlayerCurrencyRequestHandler extends MasterPlayerBaseRequestH
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
@@ -293,7 +293,7 @@ export class ChangePlayerCurrencyRequestHandler extends MasterPlayerBaseRequestH
 		}
 
 		for (const log of logs) {
-			this.gnServer.getDatabase().insertMasterPlayerCurrencyLogAsync(request.userId, log.key, log.amount, log.startValue, log.finalValue, request.log);
+			this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerCurrencyLogAsync(request.userId, log.key, log.amount, log.startValue, log.finalValue, request.log);
 		}
 
 		masterPlayer.saveAsync();

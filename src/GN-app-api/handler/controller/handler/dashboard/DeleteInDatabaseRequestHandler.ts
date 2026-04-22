@@ -110,7 +110,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 
 		if (request.type == OwnerType.MasterPlayer) {
 			// Xoa toan bo du lieu nguoi choi, gom data co trong game data
-			let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.id);
+			let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.id);
 
 			if (masterPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);

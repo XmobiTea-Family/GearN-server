@@ -110,7 +110,7 @@ export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandle
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByAndroidDeviceIdAsync(request.androidDeviceId, masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerByAndroidDeviceIdAsync(request.androidDeviceId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			if (!request.createPlayerIfNotExists) {
@@ -140,7 +140,7 @@ export class LoginByAndroidDeviceIdRequestHandler extends LoginBaseRequestHandle
 					this.gnServer.getCountryIPDetailService().updateUserIP(newMasterPlayerResult["userId"], request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
 				}
 
-				masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
+				masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.createMasterPlayerAsync(newMasterPlayerResult);
 				operationResponse.setParameter(ParameterCode.NewlyCreated, true);
 			}
 		}

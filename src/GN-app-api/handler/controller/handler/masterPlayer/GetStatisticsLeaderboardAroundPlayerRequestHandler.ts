@@ -286,7 +286,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 			// Stores the direction value used in the current execution flow.
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-			thisPosition = await this.gnServer.getDatabase().loadPositionMasterPlayerLeaderboardWithStatisticsAsync(request.key, request.userId, playerStatisticsSettingsItem.initialValue, direction);
+			thisPosition = await this.gnServer.getDatabase().masterPlayerRepository.loadPositionMasterPlayerLeaderboardWithStatisticsAsync(request.key, request.userId, playerStatisticsSettingsItem.initialValue, direction);
 
 			if (thisPosition != -1) {
 				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
@@ -297,7 +297,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 				if (request.skip + request.limit <= 100) {
 					masterPlayerFindOptions = null;
 
-					masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, direction, masterPlayerFindOptions);
+					masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, direction, masterPlayerFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= masterPlayers.length) break;
@@ -320,7 +320,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends MasterPl
 					await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, direction, masterPlayerFindOptions);
+					masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, direction, masterPlayerFindOptions);
 
 					for (let i = 0; i < masterPlayers.length; i++) {
 						// Stores the master player value used in the current execution flow.

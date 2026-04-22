@@ -196,7 +196,7 @@ export class LinkEditorDeviceIdRequestHandler extends MasterPlayerBaseRequestHan
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
@@ -211,7 +211,7 @@ export class LinkEditorDeviceIdRequestHandler extends MasterPlayerBaseRequestHan
 		}
 
 		// Stores the other master player value used in the current execution flow.
-		let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByEditorDeviceIdAsync(request.editorDeviceId, masterPlayerFindOptions);
+		let otherMasterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerByEditorDeviceIdAsync(request.editorDeviceId, masterPlayerFindOptions);
 		if (otherMasterPlayer != null && otherMasterPlayer.getUserId() != masterPlayer.getUserId()) {
 			if (!request.forceLink) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherAccount);

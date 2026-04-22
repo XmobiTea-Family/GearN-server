@@ -270,7 +270,7 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 				if (request.skip + request.limit <= 100) {
 					masterPlayerFindOptions = null;
 
-					masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, direction, masterPlayerFindOptions);
+					masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, direction, masterPlayerFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= masterPlayers.length) break;
@@ -293,7 +293,7 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 					await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, direction, masterPlayerFindOptions);
+					masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, direction, masterPlayerFindOptions);
 
 					for (let i = 0; i < masterPlayers.length; i++) {
 
@@ -384,7 +384,7 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 				gnResult.add(ParameterCode.UserId, result.userId);
 
 				// Stores the master player value used in the current execution flow.
-				let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(result.userId, masterPlayerFindOptions);
+				let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(result.userId, masterPlayerFindOptions);
 
 				if (masterPlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 

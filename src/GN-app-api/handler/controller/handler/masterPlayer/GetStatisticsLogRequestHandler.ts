@@ -228,7 +228,7 @@ export class GetStatisticsLogRequestHandler extends RequestHandler {
 		let gnResults = new GNArray();
 
 		// Stores the results value used in the current execution flow.
-		let results = await this.gnServer.getDatabase().loadMasterPlayerStatisticsLogAsync($filter, request.limit);
+		let results = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerStatisticsLogAsync($filter, request.limit);
 
 		// Stores the token value used in the current execution flow.
 		let token: string;

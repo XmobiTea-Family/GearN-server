@@ -238,7 +238,7 @@ export class GetLastLoginLeaderboardRequestHandler extends MasterPlayerBaseReque
 			if (request.skip + request.limit <= 100) {
 				masterPlayerFindOptions = null;
 
-				masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithLastLoginAsync(0, 100, masterPlayerFindOptions);
+				masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithLastLoginAsync(0, 100, masterPlayerFindOptions);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= masterPlayers.length) break;
@@ -261,7 +261,7 @@ export class GetLastLoginLeaderboardRequestHandler extends MasterPlayerBaseReque
 				await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
-				masterPlayers = await this.gnServer.getDatabase().loadMasterPlayersLeaderboardWithLastLoginAsync(request.skip, request.limit, masterPlayerFindOptions);
+				masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithLastLoginAsync(request.skip, request.limit, masterPlayerFindOptions);
 
 				for (let i = 0; i < masterPlayers.length; i++) {
 

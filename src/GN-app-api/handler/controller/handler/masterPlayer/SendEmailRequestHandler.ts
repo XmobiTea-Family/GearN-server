@@ -189,7 +189,7 @@ export class SendEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, {
 			email: true,
 		});
 

@@ -158,7 +158,7 @@ export class LoginByGameCenterRequestHandler extends LoginBaseRequestHandler {
 		}
 
 		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByGameCenterAsync(playerId, masterPlayerFindOptions);
+		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerByGameCenterAsync(playerId, masterPlayerFindOptions);
 
 		if (masterPlayer == null) {
 			if (!request.createPlayerIfNotExists) {
@@ -190,7 +190,7 @@ export class LoginByGameCenterRequestHandler extends LoginBaseRequestHandler {
 					this.gnServer.getCountryIPDetailService().updateUserIP(newMasterPlayerResult["userId"], request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
 				}
 
-				masterPlayer = await this.gnServer.getDatabase().createMasterPlayerAsync(newMasterPlayerResult);
+				masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.createMasterPlayerAsync(newMasterPlayerResult);
 				operationResponse.setParameter(ParameterCode.NewlyCreated, true);
 			}
 		}

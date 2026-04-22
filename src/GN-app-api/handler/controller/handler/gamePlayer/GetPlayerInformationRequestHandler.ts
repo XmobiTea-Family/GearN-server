@@ -234,7 +234,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 			}
 			else {
 				// Stores the master player value used in the current execution flow.
-				let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, {});
+				let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, {});
 				if (!masterPlayer) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 					return operationResponse;
