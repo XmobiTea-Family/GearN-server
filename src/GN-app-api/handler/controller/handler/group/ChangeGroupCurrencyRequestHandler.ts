@@ -14,7 +14,7 @@ import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/enti
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupCurrencyParam } from "./model/GroupCurrencyParam";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class ChangeGroupCurrencyOperationRequest extends OperationRequest {
 

@@ -2,7 +2,7 @@ import * as mongoDB from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { Inventory } from "./entity/pro/Inventory";
-import { xDatetime } from "../../xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { InventoryFindOptions } from "./entity/pro/findOptions/InventoryFindOptions";
 
 export class InventoryRepository extends AbstractBaseRepository {

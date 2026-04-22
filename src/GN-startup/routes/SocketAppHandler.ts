@@ -14,7 +14,7 @@ import { xDatabase } from "./../../GN-library/xdatabase/lib/xDatabase";
 import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
 import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
-import { AuthInfo } from "../../GN-common/entity/AuthInfo";
+import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { DebugSupport } from "./utils/DebugSupport";
 
 interface OnSocketAuthenticate {

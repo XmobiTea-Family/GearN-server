@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as mongoDB from "mongodb";
-import { MatchmakingMemberStatus } from "../src/GN-common/constant/enumType/MatchmakingMemberStatus";
-import { MatchmakingTicketStatus } from "../src/GN-common/constant/enumType/MatchmakingTicketStatus";
-import { DataValueType } from "../src/GN-library/xdatabase/lib/entity/pro/type/DataValueType";
-import { MatchmakingTicket } from "../src/GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
-import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleAttributeSource, RuleExpansionType, RuleStringCompairType, RuleType, SetIntersectionRule, StringRule, TeamDifferenceRule, TeamSizeBalanceRule, TeamTicketSizeSimilarityRule, xMatchmakingQueueSettings } from "../src/GN-library/xsettings/lib/entity/xMatchmakingQueueSettings";
-import { MatchmakingService } from "../src/GN-app-api/service/MatchmakingService";
-import { MatchmakingTicketCanMatch } from "../src/GN-app-api/service/IMatchmakingService";
+import { MatchmakingMemberStatus } from "./../src/GN-common/constant/enumType/MatchmakingMemberStatus";
+import { MatchmakingTicketStatus } from "./../src/GN-common/constant/enumType/MatchmakingTicketStatus";
+import { DataValueType } from "./../src/GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { MatchmakingTicket } from "./../src/GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
+import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleAttributeSource, RuleExpansionType, RuleStringCompairType, RuleType, SetIntersectionRule, StringRule, TeamDifferenceRule, TeamSizeBalanceRule, TeamTicketSizeSimilarityRule, xMatchmakingQueueSettings } from "./../src/GN-library/xsettings/lib/entity/xMatchmakingQueueSettings";
+import { MatchmakingService } from "./../src/GN-app-api/service/MatchmakingService";
+import { MatchmakingTicketCanMatch } from "./../src/GN-app-api/service/IMatchmakingService";
 
 type TicketMemberInput = {
     userId: string;

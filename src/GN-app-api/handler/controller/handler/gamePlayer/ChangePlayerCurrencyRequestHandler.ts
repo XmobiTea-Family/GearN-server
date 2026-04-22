@@ -14,7 +14,7 @@ import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { PlayerCurrencyParam } from "./model/PlayerCurrencyParam";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class ChangePlayerCurrencyOperationRequest extends OperationRequest {
 

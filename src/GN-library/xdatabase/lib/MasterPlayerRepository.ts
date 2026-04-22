@@ -2,7 +2,7 @@ import * as mongoDB from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { MasterPlayer } from "./entity/pro/MasterPlayer";
-import { xDatetime } from "../../xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { MasterPlayerFindOptions } from "./entity/pro/findOptions/MasterPlayerFindOptions";
 
 export class MasterPlayerRepository extends AbstractBaseRepository {

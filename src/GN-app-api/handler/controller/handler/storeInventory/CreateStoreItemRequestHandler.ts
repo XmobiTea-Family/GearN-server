@@ -15,7 +15,7 @@ import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
-import { StoreItemType } from "../../../../../GN-common/constant/enumType/StoreItemType";
+import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
 
 class CreateStoreItemOperationRequest extends OperationRequest {
 

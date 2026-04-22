@@ -16,7 +16,7 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { StoreReceiveType } from "./../../../../../GN-common/constant/enumType/StoreReceiveType";
 import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class PresentStoreItemOperationRequest extends OperationRequest {
 

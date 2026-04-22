@@ -14,7 +14,7 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
-import { GroupStatus } from "../../../../../GN-common/constant/enumType/GroupStatus";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 
 class SetOwnerOperationRequest extends OperationRequest {
 

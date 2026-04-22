@@ -1,4 +1,4 @@
-import { DataValueType } from "../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { DataValueType } from "./../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 import { MatchmakingTicketStatus } from "./../../GN-common/constant/enumType/MatchmakingTicketStatus";
 import { MatchStatus } from "./../../GN-common/constant/enumType/MatchStatus";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";

@@ -2,7 +2,7 @@ import * as mongoDB from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { GamePlayer } from "./entity/pro/GamePlayer";
-import { xDatetime } from "../../xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { GamePlayerFindOptions } from "./entity/pro/findOptions/GamePlayerFindOptions";
 
 export class GamePlayerRepository extends AbstractBaseRepository {

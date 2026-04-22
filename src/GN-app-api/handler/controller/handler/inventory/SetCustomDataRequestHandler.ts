@@ -15,7 +15,7 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { CustomDataParam } from "./model/CustomDataParam";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
-import { PermissionDataItem } from "../../../../../GN-common/constant/enumType/PermissionDataItem";
+import { PermissionDataItem } from "./../../../../../GN-common/constant/enumType/PermissionDataItem";
 
 class SetCustomDataOperationRequest extends OperationRequest {
 

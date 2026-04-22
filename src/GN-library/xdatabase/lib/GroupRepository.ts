@@ -2,7 +2,7 @@ import * as mongoDB from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { Group } from "./entity/pro/Group";
-import { xDatetime } from "../../xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { GroupFindOptions } from "./entity/pro/findOptions/GroupFindOptions";
 
 export class GroupRepository extends AbstractBaseRepository {

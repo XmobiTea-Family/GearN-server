@@ -1,4 +1,4 @@
-import { DataValueType } from "../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { DataValueType } from "./../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 export interface MatchmakingTicketCanMatch {
 	// Stores the match ID value used by this contract.
