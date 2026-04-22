@@ -179,7 +179,7 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		let gnResults = new GNArray();
 
 		// Stores the result value used in the current execution flow.
-		let result = await this.gnServer.getDatabase().getStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId());
+		let result = await this.gnServer.getDatabase().storeInventoryRepository.getStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId());
 
 		if (result != null) {
 			for (let i = 0; i < result.useIds.length; i++) {

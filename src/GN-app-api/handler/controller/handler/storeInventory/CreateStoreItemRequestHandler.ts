@@ -171,7 +171,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		let storeId = request.storeId ?? StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
 
 		// Stores the old store inventory value used in the current execution flow.
-		let oldStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(storeId, secretInfo.getGameId(), {
+		let oldStoreInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryAsync(storeId, secretInfo.getGameId(), {
 			storeId: true,
 		});
 
@@ -201,7 +201,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
-		await this.gnServer.getDatabase().createStoreInventoryAsync(result, secretInfo.getGameId());
+		await this.gnServer.getDatabase().storeInventoryRepository.createStoreInventoryAsync(result, secretInfo.getGameId());
 
 		operationResponse.setParameter(ParameterCode.StoreId, storeId);
 

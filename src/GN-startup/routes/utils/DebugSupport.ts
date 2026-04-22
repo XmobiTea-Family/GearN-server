@@ -3,8 +3,8 @@ import { Request } from "./../../../GN-common/entity/operationRequest/base/Reque
 import { CodeHelper } from "./../../../GN-common/helper/CodeHelper";
 
 export class DebugSupport {
-    public static flatAndSecurityRequest(request: Request): Record<string, any> {
-        const answer: Record<string, any> = {};
+    public static flatAndSecurityRequest(request: Request): Record<string, unknown> {
+        const answer: Record<string, unknown> = {};
 
         answer.operationCode = request.getOperationCode();
         answer.requestType = CodeHelper.getRequestTypeName(request.getRequestType());
@@ -60,11 +60,11 @@ export class DebugSupport {
     public static flatAndSecurityFinalData(finalData: {
         returnCode: number,
         responseId?: number,
-        parameters?: Record<string, any>,
+        parameters?: Record<string, unknown>,
         invalidRequestParameters?: (string | number)[][],
         debugMessage?: string,
-    }): Record<string, any> {
-        const answer: Record<string, any> = {};
+    }): Record<string, unknown> {
+        const answer: Record<string, unknown> = {};
 
         answer.returnCode = CodeHelper.getReturnCodeName(finalData.returnCode);
         answer.responseId = finalData.responseId ?? null;
@@ -101,8 +101,8 @@ export class DebugSupport {
         return secretKey.slice(0, 6) + '*'.repeat(secretKey.length - 6);
     }
 
-    private static securityParameters(parameters: Record<string, any>): Record<string, any> {
-        const answer: Record<string, any> = {};
+    private static securityParameters(parameters: Record<string, unknown>): Record<string, unknown> {
+        const answer: Record<string, unknown> = {};
 
         for (const key in parameters) {
             const value = parameters[key];
@@ -138,7 +138,7 @@ export class DebugSupport {
                     answer[key] = arrayAnswer;
                 }
                 else {
-                    answer[key] = this.securityParameters(value);
+                    answer[key] = this.securityParameters(value as Record<string, unknown>);
                 }
             }
             else {

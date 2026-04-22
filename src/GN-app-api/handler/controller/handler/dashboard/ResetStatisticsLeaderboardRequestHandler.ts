@@ -689,7 +689,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + inventoryCollection.collectionName + " starting");
 
 				// Stores the inventories value used in the current execution flow.
-				let inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAllAsync(key, request.catalogId, gameId, direction, inventoryFindOptions);
+				let inventories = await this.gnServer.getDatabase().inventoryRepository.loadInventoriesLeaderboardWithStatisticsAllAsync(key, request.catalogId, gameId, direction, inventoryFindOptions);
 
 				// Stores the backup data value used in the current execution flow.
 				let backupData: {
@@ -781,7 +781,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 				await backupStatisticsLeaderboardCollection.insertOne(backupData);
 
-				this.gnServer.getDatabase().insertInventoryStatisticsLogsAsync(logRequests, gameId);
+				this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogsAsync(logRequests, gameId);
 
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + inventoryCollection.collectionName + " success");
 			}

@@ -960,7 +960,7 @@
         "childScripts": [
             {
                 "eventName": "group_AddMember",
-                "script": "\npreHandlers.group_AddMember = async (request: { groupId: string, userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_AddMember = async (request: { groupId: string, userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.group_AddMember = async (request: { groupId: string, memberId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_AddMember = async (request: { groupId: string, memberId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -970,7 +970,7 @@
             },
             {
                 "eventName": "group_ChangeGroupCurrency",
-                "script": "\npreHandlers.group_ChangeGroupCurrency = async (request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_ChangeGroupCurrency = async (request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.group_ChangeGroupCurrency = async (request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_ChangeGroupCurrency = async (request: { groupId: string, groupCurrencies: Array<GroupCurrencyParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1110,7 +1110,7 @@
             },
             {
                 "eventName": "group_RemoveMember",
-                "script": "\npreHandlers.group_RemoveMember = async (request: { groupId: string, userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_RemoveMember = async (request: { groupId: string, userId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.group_RemoveMember = async (request: { groupId: string, memberId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.group_RemoveMember = async (request: { groupId: string, memberId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {
@@ -1814,7 +1814,7 @@
             },
             {
                 "eventName": "multiplayer_GetMatch",
-                "script": "\npreHandlers.multiplayer_GetMatch = async (request: { matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetMatch = async (request: { matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.multiplayer_GetMatch = async (request: { userId: string, matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.multiplayer_GetMatch = async (request: { userId: string, matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

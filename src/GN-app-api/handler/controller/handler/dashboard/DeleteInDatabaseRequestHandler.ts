@@ -181,7 +181,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 		}
 		else if (request.type == OwnerType.Inventory) {
 			// Stores the inventory value used in the current execution flow.
-			let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.id, request.gameId);
+			let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.id, request.gameId);
 
 			if (inventory == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
@@ -292,7 +292,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 		}
 		else if (request.type == OwnerType.StoreInventory) {
 			// Stores the store inventory value used in the current execution flow.
-			let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.id, request.gameId);
+			let storeInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryAsync(request.id, request.gameId);
 
 			if (storeInventory == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
@@ -552,7 +552,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				let playerInventory = playerInventories[i];
 
 				// Stores the inventory value used in the current execution flow.
-				let inventory = await this.gnServer.getDatabase().loadInventoryAsync(playerInventory.itemId, gameId);
+				let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(playerInventory.itemId, gameId);
 
 				if (inventory != null) {
 					// Stores the results value used in the current execution flow.
@@ -745,7 +745,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				let playerInventory = playerInventories[i];
 
 				// Stores the inventory value used in the current execution flow.
-				let inventory = await this.gnServer.getDatabase().loadInventoryAsync(playerInventory.itemId, gameId);
+				let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(playerInventory.itemId, gameId);
 
 				if (inventory != null) {
 					// Stores the results value used in the current execution flow.
@@ -979,7 +979,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				let groupInventory = groupInventories[i];
 
 				// Stores the inventory value used in the current execution flow.
-				let inventory = await this.gnServer.getDatabase().loadInventoryAsync(groupInventory.itemId, gameId);
+				let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(groupInventory.itemId, gameId);
 
 				if (inventory != null) {
 					// Stores the results value used in the current execution flow.

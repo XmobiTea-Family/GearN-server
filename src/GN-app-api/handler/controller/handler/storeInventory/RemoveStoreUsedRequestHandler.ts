@@ -169,7 +169,7 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		await this.gnServer.getDatabase().removeStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.ownerIds);
+		await this.gnServer.getDatabase().storeInventoryRepository.removeStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.ownerIds);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

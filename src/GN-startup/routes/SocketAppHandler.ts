@@ -500,10 +500,16 @@ export class SocketAppHandler {
 	private sendResponseForSocket(socket: Socket, operationResponse: OperationResponse, useMsgPack: boolean) {
 		let socketData = OperationHelper.toResponseSocketData(operationResponse);
 
-		let finalData = {
+		let finalData: {
+			returnCode: number,
+			responseId: number,
+			parameters?: Record<string, unknown>,
+			invalidRequestParameters?: (string | number)[][],
+			debugMessage?: string,
+		} = {
 			returnCode: socketData.returnCode,
 			responseId: socketData.responseId,
-		} as any;
+		};
 
 		if (socketData.parameters) {
 			finalData.parameters = socketData.parameters;

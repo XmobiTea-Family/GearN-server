@@ -192,7 +192,7 @@ export class GetStoreItemsWithTagRequestHandler extends StoreItemBaseRequestHand
 		let gnResults = new GNArray();
 
 		// Stores the store inventorys value used in the current execution flow.
-		let storeInventorys = await this.gnServer.getDatabase().loadStoreInventoriesWithTagAsync(request.key, request.value, request.skip, request.limit, secretInfo.getGameId(), storeInventoryFindOptions);
+		let storeInventorys = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoriesWithTagAsync(request.key, request.value, request.skip, request.limit, secretInfo.getGameId(), storeInventoryFindOptions);
 
 		for (let i = 0; i < storeInventorys.length; i++) {
 			// Stores the store inventory value used in the current execution flow.

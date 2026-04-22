@@ -231,7 +231,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		// Stores the store inventory value used in the current execution flow.
-		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
+		let storeInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
 
 		if (storeInventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
@@ -245,7 +245,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) {
 			// Stores the purchase count value used in the current execution flow.
-			let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id);
+			let purchaseCount = await this.gnServer.getDatabase().storeInventoryRepository.getCountStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id);
 
 			if (purchaseCount != 0) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadPurchaseAndNonConsumable);
@@ -697,9 +697,9 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 			operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		}
 
-		this.gnServer.getDatabase().insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, StoreReceiveType.Present, request.log);
+		this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, StoreReceiveType.Present, request.log);
 
-		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id, request.type);
+		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id, request.type);
 
 		operationResponse.setParameter(ParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));
 		operationResponse.setParameter(ParameterCode.StoreItems, this.generateStoreItems(storeInventory));

@@ -191,7 +191,7 @@ export class GetItemsWithDisplayNameRequestHandler extends ItemBaseRequestHandle
         let gnResults = new GNArray();
 
         // Stores the inventorys value used in the current execution flow.
-        let inventorys = await this.gnServer.getDatabase().loadInventoriesWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), inventoryFindOptions);
+        let inventorys = await this.gnServer.getDatabase().inventoryRepository.loadInventoriesWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), inventoryFindOptions);
 
         for (let i = 0; i < inventorys.length; i++) {
             // Stores the inventory value used in the current execution flow.

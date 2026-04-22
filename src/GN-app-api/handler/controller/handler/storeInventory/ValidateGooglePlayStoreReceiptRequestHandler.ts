@@ -292,7 +292,7 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 		}
 
 		// Stores the store inventory value used in the current execution flow.
-		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryByGooglePlayStoreAsync(productId, secretInfo.getGameId(), null);
+		let storeInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryByGooglePlayStoreAsync(productId, secretInfo.getGameId(), null);
 
 		if (storeInventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
@@ -306,7 +306,7 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 
 		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) {
 			// Stores the purchase count value used in the current execution flow.
-			let purchaseCount = await this.gnServer.getDatabase().getCountStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id);
+			let purchaseCount = await this.gnServer.getDatabase().storeInventoryRepository.getCountStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id);
 
 			if (purchaseCount != 0) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadPurchaseAndNonConsumable);
@@ -771,9 +771,9 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 			store: "GooglePlayStore",
 		});
 
-		this.gnServer.getDatabase().insertStoreInventoryLogAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, transactionId, StoreReceiveType.GooglePlayStore, request.log);
+		this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryLogAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, transactionId, StoreReceiveType.GooglePlayStore, request.log);
 
-		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
+		if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
 
 		// Stores the in app purchase value used in the current execution flow.
 		let inAppPurchase = storeInventory.getInAppPurchase();

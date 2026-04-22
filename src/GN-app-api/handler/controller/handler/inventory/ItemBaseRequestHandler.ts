@@ -94,7 +94,7 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 
 		if (!answer && permissionRules.selfEnable) {
 			// Stores the inventory value used in the current execution flow.
-			let inventory = await this.gnServer.getDatabase().loadInventoryAsync(itemId, gameId, { owner: true });
+			let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(itemId, gameId, { owner: true });
 
 			if (inventory != null) {
 				// Stores the owner value used in the current execution flow.

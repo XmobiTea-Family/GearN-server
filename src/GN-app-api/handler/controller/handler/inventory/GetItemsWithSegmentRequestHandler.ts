@@ -191,7 +191,7 @@ export class GetItemsWithSegmentRequestHandler extends ItemBaseRequestHandler {
 		let gnResults = new GNArray();
 
 		// Stores the inventorys value used in the current execution flow.
-		let inventorys = await this.gnServer.getDatabase().loadInventoriesWithSegmentAsync(request.segment, request.skip, request.limit, secretInfo.getGameId(), inventoryFindOptions);
+		let inventorys = await this.gnServer.getDatabase().inventoryRepository.loadInventoriesWithSegmentAsync(request.segment, request.skip, request.limit, secretInfo.getGameId(), inventoryFindOptions);
 
 		for (let i = 0; i < inventorys.length; i++) {
 			// Stores the inventory value used in the current execution flow.

@@ -106,7 +106,7 @@ export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
 
 		if (secretInfo.getPermission().inventory.getItemInformation.selfEnable) {
 			// Stores the inventory value used in the current execution flow.
-			let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), { owner: true });
+			let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), { owner: true });
 			if (inventory != null) {
 				// Stores the owner value used in the current execution flow.
 				let owner = inventory.getOwner();
@@ -235,7 +235,7 @@ export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
 		let inventoryFindOptions = this.convertToInventoryFindOptions(request.infoRequestParam);
 
 		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);

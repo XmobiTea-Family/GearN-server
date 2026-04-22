@@ -232,7 +232,7 @@ export class GetCreateLeaderboardRequestHandler extends StoreItemBaseRequestHand
 			if (request.skip + request.limit <= 100) {
 				storeInventoryFindOptions = null;
 
-				storeInventorys = await this.gnServer.getDatabase().loadStoreInventoriesLeaderboardWithCreateAsync(0, 100, secretInfo.getGameId(), storeInventoryFindOptions);
+				storeInventorys = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoriesLeaderboardWithCreateAsync(0, 100, secretInfo.getGameId(), storeInventoryFindOptions);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= storeInventorys.length) break;
@@ -255,7 +255,7 @@ export class GetCreateLeaderboardRequestHandler extends StoreItemBaseRequestHand
 				await cacheData.setData(cacheKey, storeInventorys, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
-				storeInventorys = await this.gnServer.getDatabase().loadStoreInventoriesLeaderboardWithCreateAsync(request.skip, request.limit, secretInfo.getGameId(), storeInventoryFindOptions);
+				storeInventorys = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoriesLeaderboardWithCreateAsync(request.skip, request.limit, secretInfo.getGameId(), storeInventoryFindOptions);
 
 				for (let i = 0; i < storeInventorys.length; i++) {
 

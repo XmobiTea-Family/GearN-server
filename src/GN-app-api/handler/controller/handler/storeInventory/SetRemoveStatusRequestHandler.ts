@@ -171,7 +171,7 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		}
 
 		// Stores the store inventory value used in the current execution flow.
-		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), storeInventoryFindOptions);
+		let storeInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), storeInventoryFindOptions);
 
 		if (storeInventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);

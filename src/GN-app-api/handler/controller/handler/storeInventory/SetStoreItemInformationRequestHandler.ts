@@ -227,7 +227,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
 		// Stores the store inventory value used in the current execution flow.
-		let storeInventory = await this.gnServer.getDatabase().loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
+		let storeInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryAsync(request.storeId, secretInfo.getGameId(), null);
 
 		if (storeInventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemNotFound);
@@ -287,7 +287,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			let googlePlayStoreId = request.inAppPurchase.googlePlayStoreId;
 
 			if (appleAppStoreId) {
-				const storeStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryByAppleAppStoreAsync(appleAppStoreId, secretInfo.getGameId(), { storeId: true });
+				const storeStoreInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryByAppleAppStoreAsync(appleAppStoreId, secretInfo.getGameId(), { storeId: true });
 
 				if (storeStoreInventory != null && storeStoreInventory.getStoreId() != request.storeId) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreInvalid);
@@ -298,7 +298,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			}
 
 			if (facebookStoreId) {
-				const storeStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryByFacebookStoreAsync(facebookStoreId, secretInfo.getGameId(), { storeId: true });
+				const storeStoreInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryByFacebookStoreAsync(facebookStoreId, secretInfo.getGameId(), { storeId: true });
 
 				if (storeStoreInventory != null && storeStoreInventory.getStoreId() != request.storeId) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreInvalid);
@@ -309,7 +309,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			}
 
 			if (googlePlayStoreId) {
-				const storeStoreInventory = await this.gnServer.getDatabase().loadStoreInventoryByGooglePlayStoreAsync(googlePlayStoreId, secretInfo.getGameId(), { storeId: true });
+				const storeStoreInventory = await this.gnServer.getDatabase().storeInventoryRepository.loadStoreInventoryByGooglePlayStoreAsync(googlePlayStoreId, secretInfo.getGameId(), { storeId: true });
 
 				if (storeStoreInventory != null && storeStoreInventory.getStoreId() != request.storeId) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreInvalid);

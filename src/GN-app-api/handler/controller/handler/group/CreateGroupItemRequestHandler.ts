@@ -255,7 +255,7 @@ export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
 		result["tags"] = {};
 
 		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().createInventoryAsync(result, secretInfo.getGameId());
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(result, secretInfo.getGameId());
 
 		group.setGroupInventory(itemId, request.catalogId, request.classId);
 		group.saveAsync();

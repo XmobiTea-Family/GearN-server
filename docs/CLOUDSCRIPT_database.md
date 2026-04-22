@@ -99,7 +99,7 @@ Một số method không trả raw document mà trả object wrapper:
 - `database.loadGamePlayerAsync(...)`
 - `database.loadGroupAsync(...)`
 - `database.loadInventoryAsync(...)`
-- `database.loadStoreInventoryAsync(...)`
+- `database.storeInventoryRepository.loadStoreInventoryAsync(...)`
 - `database.loadUploadFileInfoAsync(...)`
 
 Các object này có getter/setter và hỗ trợ `saveAsync()`.
@@ -112,7 +112,7 @@ Ví dụ:
 - `database.loadGamePlayersWithSegmentAsync(...)`
 - `database.loadGamePlayersLeaderboardWithStatisticsAsync(...)`
 - `database.loadGroupsWithTagAsync(...)`
-- `database.loadInventoriesWithDisplayNameNormalizeRegexAsync(...)`
+- `database.inventoryRepository.loadInventoriesWithDisplayNameNormalizeRegexAsync(...)`
 
 ### Business helper
 
@@ -122,8 +122,8 @@ Ví dụ:
 - `database.insertGamePlayerCurrencyLogAsync(...)`
 - `database.createGroupMessageAsync(...)`
 - `database.loadGroupMessagesAsync(...)`
-- `database.getStoreInventoryUsedAsync(...)`
-- `database.insertStoreInventoryUsedAsync(...)`
+- `database.storeInventoryRepository.getStoreInventoryUsedAsync(...)`
+- `database.storeInventoryRepository.insertStoreInventoryUsedAsync(...)`
 
 ## 6. Raw collection dùng khi nào
 
@@ -417,8 +417,8 @@ handlers["dbStoreInventoryUsageDemo"] = async (args: any, context, log) => {
 
     await database.insertStoreInventoryUsedAsync(storeId, gameId, ownerId, ownerType);
 
-    const count = await database.getCountStoreInventoryUsedAsync(storeId, gameId, ownerId);
-    const used = await database.getStoreInventoryUsedAsync(storeId, gameId);
+    const count = await database.storeInventoryRepository.getCountStoreInventoryUsedAsync(storeId, gameId, ownerId);
+    const used = await database.storeInventoryRepository.getStoreInventoryUsedAsync(storeId, gameId);
 
     return {
         count: count,

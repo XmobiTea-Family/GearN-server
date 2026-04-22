@@ -254,8 +254,20 @@ export class ApiMiddleware {
 		let secretInfo = this.secretInfoDict.get(secretKey);
 		if (secretInfo == null) {
 			// Stores the secret info result value used in the current execution flow.
-			let secretInfoResult = await this.secretInfoCollection.findOne({ secretKey: secretKey });
+			let secretInfoResult = await this.secretInfoCollection.findOne({ secretKey: secretKey }) as {
+				_id: mongoDB.ObjectId,
+				permission: SecretPermissionItem,
+				secretKey: string,
+				isRemove: boolean,
+				role: number,
+				tsExpire: number,
+				gameId: string,
+				onlyMasterAdmin: boolean,
+				isDefault: boolean,
+				description: string,
 
+			};
+			
 			if (secretInfoResult != null) {
 				// let secretRole = <SecretRole>secretInfoResult["role"];
 
@@ -622,7 +634,7 @@ export class ApiMiddleware {
 					if (!this.gameIds.includes(gameId)) return ReturnCode.SecretInvalid;
 				}
 
-				let secretInfoAny = structuredClone(secretInfo) as any;
+				let secretInfoAny = structuredClone(secretInfo);
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
 				secretInfoAny.getRole = secretInfo.getRole;
@@ -731,7 +743,7 @@ export class ApiMiddleware {
 					if (!this.gameIds.includes(gameId)) return next(ReturnCode.SecretInvalid);
 				}
 
-				let secretInfoAny = structuredClone(secretInfo) as any;
+				let secretInfoAny = structuredClone(secretInfo);
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
 				secretInfoAny.getRole = secretInfo.getRole;

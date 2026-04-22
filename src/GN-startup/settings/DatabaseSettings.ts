@@ -11,7 +11,7 @@ abstract class BuilderBase {
 	protected logDatabaseName: string;
 
 	// Stores the options collection used by this instance.
-	protected options: { [k: string]: any };
+	protected options: { [k: string]: unknown };
 
 	/**
 	 * Returns the connection string.
@@ -49,7 +49,7 @@ abstract class BuilderBase {
 	 * Returns the options.
 	 * @returns Returns the options.
 	 */
-	public getOptions(): { [k: string]: any } {
+	public getOptions(): { [k: string]: unknown } {
 		return this.options;
 	}
 
@@ -106,7 +106,7 @@ class Builder extends BuilderBase implements IBuilder<DatabaseSettings> {
 	 * @param options Provides the options value used by this operation.
 	 * @returns Returns the current builder instance.
 	 */
-	public setOptions(options: { [k: string]: any }): Builder {
+	public setOptions(options: { [k: string]: unknown }): Builder {
 		this.options = options;
 		return this;
 	}

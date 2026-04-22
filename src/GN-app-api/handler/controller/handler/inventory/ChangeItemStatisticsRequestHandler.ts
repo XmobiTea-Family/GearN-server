@@ -202,7 +202,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 		}
 
 		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
 		if (inventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
@@ -277,7 +277,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 				gnItemStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, newValue, request.log);
+				this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, newValue, request.log);
 
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
@@ -293,7 +293,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					inventory.setItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (itemStatisticsSettingsItem.maximumValue != null) {
@@ -312,7 +312,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 					gnItemStatistic.add(ParameterCode.Value, itemStatistics.value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, itemStatistics.value, request.log);
+					this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, itemStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
@@ -328,7 +328,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 					inventory.setItemStatistics(key, value, currentMilliseconds);
 					gnItemStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (itemStatisticsSettingsItem.maximumValue != null) {
@@ -347,7 +347,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 
 					gnItemStatistic.add(ParameterCode.Value, itemStatistics.value);
 
-					this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, itemStatistics.value, request.log);
+					this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, itemStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
@@ -362,7 +362,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 				inventory.setItemStatistics(key, value, currentMilliseconds);
 				gnItemStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
+				this.gnServer.getDatabase().inventoryRepository.insertInventoryStatisticsLogAsync(request.itemId, secretInfo.getGameId(), key, itemStatisticsParam.value, oldValue, value, request.log);
 			}
 
 			gnItemStatistics.add(gnItemStatistic);

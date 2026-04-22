@@ -278,7 +278,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 				if (request.skip + request.limit <= 100) {
 					inventoryFindOptions = null;
 
-					inventorys = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+					inventorys = await this.gnServer.getDatabase().inventoryRepository.loadInventoriesLeaderboardWithStatisticsAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= inventorys.length) break;
@@ -301,7 +301,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 					await cacheData.setData(cacheKey, inventorys, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					inventorys = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+					inventorys = await this.gnServer.getDatabase().inventoryRepository.loadInventoriesLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
 
 					for (let i = 0; i < inventorys.length; i++) {
 
@@ -395,7 +395,7 @@ export class GetStatisticsLeaderboardRequestHandler extends ItemBaseRequestHandl
 				gnResult.add(ParameterCode.ItemId, result.itemId);
 
 				// Stores the inventory value used in the current execution flow.
-				let inventory = await this.gnServer.getDatabase().loadInventoryAsync(result.itemId, gameId, inventoryFindOptions);
+				let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(result.itemId, gameId, inventoryFindOptions);
 				if (inventory != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(inventory, request.infoRequestParam, gameId));
 
 				gnResults.add(gnResult);

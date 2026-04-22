@@ -125,7 +125,7 @@ export class HttpAppHandler {
 		// 	return res.json([ReturnCode.OperationInvalid]);
 		// });
 
-		this.router.post("/ts", (req: express.Request, res: express.Response): any => {
+		this.router.post("/ts", (req: express.Request, res: express.Response): express.Response => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
 			return res.status(200).json({
@@ -133,7 +133,7 @@ export class HttpAppHandler {
 			});
 		});
 
-		this.router.get("/ts", (req: express.Request, res: express.Response): any => {
+		this.router.get("/ts", (req: express.Request, res: express.Response): express.Response => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
 			return res.status(200).json({
@@ -141,7 +141,7 @@ export class HttpAppHandler {
 			});
 		});
 
-		this.router.post("/getAuthInfo", async (req: express.Request, res: express.Response): Promise<any> => {
+		this.router.post("/getAuthInfo", async (req: express.Request, res: express.Response): Promise<express.Response> => {
 			res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
 			// Stores the auth token value used in the current execution flow.
@@ -182,7 +182,7 @@ export class HttpAppHandler {
 			});
 		});
 
-		this.router.get("/getAuthInfo", async (req: express.Request, res: express.Response): Promise<any> => {
+		this.router.get("/getAuthInfo", async (req: express.Request, res: express.Response): Promise<express.Response> => {
 			// Stores the auth token value used in the current execution flow.
 			let authToken = req.query.authToken as string;
 
@@ -252,7 +252,7 @@ export class HttpAppHandler {
 				this.apiJsonRouter
 			);
 
-			this.apiJsonRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<any> => {
+			this.apiJsonRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<express.Response> => {
 				// Stores the operation response value used in the current execution flow.
 				let operationResponse = await this.onHttpRequest(req);
 
@@ -263,9 +263,14 @@ export class HttpAppHandler {
 					let httpData = OperationHelper.toResponseHttpData(operationResponse);
 
 					// Stores the final data value used in the current execution flow.
-					let finalData = {
+					let finalData: {
+						returnCode: number,
+						parameters?: Record<string, unknown>,
+						invalidRequestParameters?: (string | number)[][],
+						debugMessage?: string,
+					} = {
 						returnCode: httpData.returnCode,
-					} as any;
+					};
 
 					if (httpData.parameters) {
 						finalData.parameters = httpData.parameters;
@@ -341,7 +346,7 @@ export class HttpAppHandler {
 				this.apiMsgPackRouter
 			);
 
-			this.apiMsgPackRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<any> => {
+			this.apiMsgPackRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<express.Response> => {
 				// Stores the operation response value used in the current execution flow.
 				let operationResponse = await this.onHttpRequest(req);
 
@@ -352,9 +357,14 @@ export class HttpAppHandler {
 					let httpData = OperationHelper.toResponseHttpData(operationResponse);
 
 					// Stores the final data value used in the current execution flow.
-					let finalData = {
+					let finalData: {
+						returnCode: number,
+						parameters?: Record<string, unknown>,
+						invalidRequestParameters?: (string | number)[][],
+						debugMessage?: string,
+					} = {
 						returnCode: httpData.returnCode,
-					} as any;
+					};
 
 					if (httpData.parameters) {
 						finalData.parameters = httpData.parameters;

@@ -127,7 +127,7 @@ export class UploadFileHandler {
 			// 	return this.antiDdosMiddleware.addPendingDownloadRequest(req, res, next);
 			// }),
 
-			async (req: express.Request, res: express.Response): Promise<any> => {
+			async (req: express.Request, res: express.Response) => {
 				// this.antiDdosMiddleware.removePendingDownloadRequest(req, res);
 
 				let downloadToken = req.params.downloadToken;
@@ -205,7 +205,7 @@ export class UploadFileHandler {
 			wrap((req, res, next) => {
 				return this.uploadFileMiddleware.handleUpload().single(Commands.File)(req, res, next as NextFunction);
 			}),
-			async (req: express.Request, res: express.Response): Promise<any> => {
+			async (req: express.Request, res: express.Response): Promise<express.Response> => {
 				this.antiDdosMiddleware.removePendingUploadRequest(req, res);
 
 				// Stores the file value used in the current execution flow.

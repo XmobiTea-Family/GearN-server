@@ -282,7 +282,7 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 			// Stores the direction value used in the current execution flow.
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-			thisPosition = await this.gnServer.getDatabase().loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), itemStatisticsSettingsItem.initialValue, direction);
+			thisPosition = await this.gnServer.getDatabase().inventoryRepository.loadPositionInventoryLeaderboardWithStatisticsAsync(request.key, request.itemId, request.catalogId, secretInfo.getGameId(), itemStatisticsSettingsItem.initialValue, direction);
 
 			if (thisPosition != -1) {
 				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
@@ -294,7 +294,7 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 					inventoryFindOptions = null;
 
 					// Cache the first 100 leaderboard items from this position so later slices reuse the same window safely.
-					inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+					inventories = await this.gnServer.getDatabase().inventoryRepository.loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= inventories.length) break;
@@ -317,7 +317,7 @@ export class GetStatisticsLeaderboardAroundItemRequestHandler extends ItemBaseRe
 					await cacheData.setData(cacheKey, inventories, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					inventories = await this.gnServer.getDatabase().loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
+					inventories = await this.gnServer.getDatabase().inventoryRepository.loadInventoriesLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, inventoryFindOptions);
 
 					for (let i = 0; i < inventories.length; i++) {
 

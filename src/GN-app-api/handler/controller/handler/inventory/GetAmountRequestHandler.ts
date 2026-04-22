@@ -169,7 +169,7 @@ export class GetAmountRequestHandler extends ItemBaseRequestHandler {
 		}
 
 		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().loadInventoryAsync(request.itemId, request.gameId, inventoryFindOptions);
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, request.gameId, inventoryFindOptions);
 
 		if (inventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
