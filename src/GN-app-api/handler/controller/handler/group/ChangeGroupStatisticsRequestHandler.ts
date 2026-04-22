@@ -202,7 +202,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		}
 
 		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
+		let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
@@ -277,7 +277,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 
 				gnGroupStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, newValue, request.log);
+				this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, newValue, request.log);
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
 				if (value > groupStatistics.value) {
@@ -292,7 +292,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 					group.setGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (groupStatisticsSettingsItem.maximumValue != null) {
@@ -311,7 +311,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 
 					gnGroupStatistic.add(ParameterCode.Value, groupStatistics.value);
 
-					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, groupStatistics.value, request.log);
+					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, groupStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
@@ -327,7 +327,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 					group.setGroupStatistics(key, value, currentMilliseconds);
 					gnGroupStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (groupStatisticsSettingsItem.maximumValue != null) {
@@ -346,7 +346,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 
 					gnGroupStatistic.add(ParameterCode.Value, groupStatistics.value);
 
-					this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, groupStatistics.value, request.log);
+					this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, groupStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
@@ -361,7 +361,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 				group.setGroupStatistics(key, value, currentMilliseconds);
 				gnGroupStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
+				this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogAsync(request.groupId, secretInfo.getGameId(), key, groupStatisticsParam.value, oldValue, value, request.log);
 			}
 
 			gnGroupStatistics.add(gnGroupStatistic);

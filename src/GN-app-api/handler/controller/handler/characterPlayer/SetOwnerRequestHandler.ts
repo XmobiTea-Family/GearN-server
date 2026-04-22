@@ -228,7 +228,7 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 				if (groupItem.status == GroupStatus.Member) {
 					this.gnServer.joinRoom(request.newOwnerId, groupItem.groupId);
 
-					const group = await this.gnServer.getDatabase().loadGroupAsync(groupItem.groupId, secretInfo.getGameId());
+					const group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(groupItem.groupId, secretInfo.getGameId());
 					if (group != null) {
 						let hasCharacter = false;
 						for (let playerCharacter of playerCharacters) {

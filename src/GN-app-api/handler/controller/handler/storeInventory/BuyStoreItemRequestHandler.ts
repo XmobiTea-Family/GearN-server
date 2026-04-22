@@ -759,7 +759,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		}
 		else if (request.type == OwnerType.Group) {
 			// Stores the group value used in the current execution flow.
-			let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, secretInfo.getGameId(), {
+			let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.id, secretInfo.getGameId(), {
 				groupCurrencies: true,
 				groupInventories: true,
 			});
@@ -864,7 +864,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 					});
 
 					gnCurrencies.add(gnGroupCurrency);
-					this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), priceCurrency.key, -priceCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), priceCurrency.key, -priceCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 
@@ -960,7 +960,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 					});
 
 					gnCurrencies.add(gnPlayerCurrency);
-					this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 

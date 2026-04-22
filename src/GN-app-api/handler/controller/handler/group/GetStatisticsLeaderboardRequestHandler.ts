@@ -278,7 +278,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GroupBaseRequestHand
 				if (request.skip + request.limit <= 100) {
 					groupFindOptions = null;
 
-					groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
+					groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithStatisticsAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= groups.length) break;
@@ -301,7 +301,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GroupBaseRequestHand
 					await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
+					groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
 
 					for (let i = 0; i < groups.length; i++) {
 
@@ -395,7 +395,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GroupBaseRequestHand
 				gnResult.add(ParameterCode.GroupId, result.groupId);
 
 				// Stores the group value used in the current execution flow.
-				let group = await this.gnServer.getDatabase().loadGroupAsync(result.groupId, gameId, groupFindOptions);
+				let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(result.groupId, gameId, groupFindOptions);
 
 				if (group != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(group, request.infoRequestParam, gameId));
 

@@ -191,7 +191,7 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
         let gnResults = new GNArray();
 
         // Stores the groups value used in the current execution flow.
-        let groups = await this.gnServer.getDatabase().loadGroupsWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
+        let groups = await this.gnServer.getDatabase().groupRepository.loadGroupsWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
 
         for (let i = 0; i < groups.length; i++) {
             // Stores the group value used in the current execution flow.

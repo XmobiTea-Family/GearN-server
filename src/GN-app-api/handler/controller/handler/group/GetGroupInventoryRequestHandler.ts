@@ -173,7 +173,7 @@ export class GetGroupInventoryRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
+		let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);

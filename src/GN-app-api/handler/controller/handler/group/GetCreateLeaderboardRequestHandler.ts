@@ -238,7 +238,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 			if (request.skip + request.limit <= 100) {
 				groupFindOptions = null;
 
-				groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCreateAsync(0, 100, secretInfo.getGameId(), groupFindOptions);
+				groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithCreateAsync(0, 100, secretInfo.getGameId(), groupFindOptions);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= groups.length) break;
@@ -261,7 +261,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 				await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
-				groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCreateAsync(request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
+				groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithCreateAsync(request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
 
 				for (let i = 0; i < groups.length; i++) {
 

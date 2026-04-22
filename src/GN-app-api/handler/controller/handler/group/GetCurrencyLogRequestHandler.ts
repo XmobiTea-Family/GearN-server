@@ -218,7 +218,7 @@ export class GetCurrencyLogRequestHandler extends GroupBaseRequestHandler {
 		let gnResults = new GNArray();
 
 		// Stores the results value used in the current execution flow.
-		let results = await this.gnServer.getDatabase().loadGroupCurrencyLogAsync($filter, secretInfo.getGameId(), request.limit);
+		let results = await this.gnServer.getDatabase().groupRepository.loadGroupCurrencyLogAsync($filter, secretInfo.getGameId(), request.limit);
 
 		// Stores the token value used in the current execution flow.
 		let token: string;

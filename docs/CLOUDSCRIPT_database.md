@@ -14,7 +14,7 @@ Dùng `database` khi:
 
 - Bạn cần đọc hoặc ghi MongoDB nội bộ của GearN.
 - Bạn cần query dữ liệu game theo đúng schema hiện tại.
-- Bạn cần dùng helper có sẵn của `xDatabase` như `loadGamePlayerAsync`, `loadGroupAsync`, `insertGamePlayerStatisticsLogAsync`.
+- Bạn cần dùng helper có sẵn của `xDatabase` như `loadGamePlayerAsync`, `groupRepository.loadGroupAsync`, `insertGamePlayerStatisticsLogAsync`.
 - Bạn cần làm việc với runtime data, system data, meta data, hoặc log database.
 
 Không nên dùng `database` khi:
@@ -97,7 +97,7 @@ Dùng khi bạn cần tạo collection hoặc tạo index.
 Một số method không trả raw document mà trả object wrapper:
 
 - `database.loadGamePlayerAsync(...)`
-- `database.loadGroupAsync(...)`
+- `database.groupRepository.loadGroupAsync(...)`
 - `database.loadInventoryAsync(...)`
 - `database.storeInventoryRepository.loadStoreInventoryAsync(...)`
 - `database.loadUploadFileInfoAsync(...)`
@@ -111,7 +111,7 @@ Ví dụ:
 - `database.loadGamePlayersWithTagAsync(...)`
 - `database.loadGamePlayersWithSegmentAsync(...)`
 - `database.loadGamePlayersLeaderboardWithStatisticsAsync(...)`
-- `database.loadGroupsWithTagAsync(...)`
+- `database.groupRepository.loadGroupsWithTagAsync(...)`
 - `database.inventoryRepository.loadInventoriesWithDisplayNameNormalizeRegexAsync(...)`
 
 ### Business helper
@@ -120,8 +120,8 @@ Ví dụ:
 
 - `database.insertGamePlayerStatisticsLogAsync(...)`
 - `database.insertGamePlayerCurrencyLogAsync(...)`
-- `database.createGroupMessageAsync(...)`
-- `database.loadGroupMessagesAsync(...)`
+- `database.groupRepository.createGroupMessageAsync(...)`
+- `database.groupRepository.loadGroupMessagesAsync(...)`
 - `database.storeInventoryRepository.getStoreInventoryUsedAsync(...)`
 - `database.storeInventoryRepository.insertStoreInventoryUsedAsync(...)`
 
@@ -399,9 +399,9 @@ handlers["dbGroupMessageDemo"] = async (args: any, context, log) => {
     const senderType = typeof args?.senderType === "number" ? args.senderType : 1;
     const message = typeof args?.message === "string" && args.message.length > 0 ? args.message : "Hello from cloud script";
 
-    await database.createGroupMessageAsync(groupId, gameId, senderId, senderType, message, Date.now());
+    await database.groupRepository.createGroupMessageAsync(groupId, gameId, senderId, senderType, message, Date.now());
 
-    const cursor = await database.loadGroupMessagesAsync(groupId, gameId, 0, 10);
+    const cursor = await database.groupRepository.loadGroupMessagesAsync(groupId, gameId, 0, 10);
     const messages = await cursor.toArray();
 
     return {

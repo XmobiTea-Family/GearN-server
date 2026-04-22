@@ -224,7 +224,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			}
 			else if (owner.type == OwnerType.Group) {
 				// Stores the group value used in the current execution flow.
-				let group = await this.gnServer.getDatabase().loadGroupAsync(inventory.getOwner().id, request.gameId);
+				let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(inventory.getOwner().id, request.gameId);
 				if (group != null) {
 					if (group.hasGroupInventory(inventory.getItemId())) {
 						group.removeGroupInventory(inventory.getItemId());
@@ -235,7 +235,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 		}
 		else if (request.type == OwnerType.Group) {
 			// Stores the group value used in the current execution flow.
-			let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, request.gameId);
+			let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.id, request.gameId);
 
 			if (group == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
@@ -531,7 +531,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				let playerGroup = playerGroups[i];
 
 				// Stores the group value used in the current execution flow.
-				let group = await this.gnServer.getDatabase().loadGroupAsync(playerGroup.groupId, gameId);
+				let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(playerGroup.groupId, gameId);
 
 				if (group != null) {
 					// Stores the results value used in the current execution flow.
@@ -724,7 +724,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				let playerGroup = playerGroups[i];
 
 				// Stores the group value used in the current execution flow.
-				let group = await this.gnServer.getDatabase().loadGroupAsync(playerGroup.groupId, gameId);
+				let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(playerGroup.groupId, gameId);
 
 				if (group != null) {
 					// Stores the results value used in the current execution flow.

@@ -282,7 +282,7 @@ export class GetStatisticsLeaderboardAroundGroupRequestHandler extends GroupBase
 			// Stores the direction value used in the current execution flow.
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-			thisPosition = await this.gnServer.getDatabase().loadPositionGroupLeaderboardWithStatisticsAsync(request.key, request.groupId, request.catalogId, secretInfo.getGameId(), groupStatisticsSettingsItem.initialValue, direction);
+			thisPosition = await this.gnServer.getDatabase().groupRepository.loadPositionGroupLeaderboardWithStatisticsAsync(request.key, request.groupId, request.catalogId, secretInfo.getGameId(), groupStatisticsSettingsItem.initialValue, direction);
 
 			if (thisPosition != -1) {
 				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
@@ -293,7 +293,7 @@ export class GetStatisticsLeaderboardAroundGroupRequestHandler extends GroupBase
 				if (request.skip + request.limit <= 100) {
 					groupFindOptions = null;
 
-					groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
+					groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= groups.length) break;
@@ -316,7 +316,7 @@ export class GetStatisticsLeaderboardAroundGroupRequestHandler extends GroupBase
 					await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
+					groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, groupFindOptions);
 
 					for (let i = 0; i < groups.length; i++) {
 						// Stores the group value used in the current execution flow.

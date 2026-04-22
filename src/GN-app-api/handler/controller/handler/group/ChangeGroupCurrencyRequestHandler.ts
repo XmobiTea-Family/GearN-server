@@ -200,7 +200,7 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
+		let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
@@ -277,7 +277,7 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		for (const log of logs) {
-			this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.groupId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
+			this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogAsync(request.groupId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
 		}
 
 		group.saveAsync();

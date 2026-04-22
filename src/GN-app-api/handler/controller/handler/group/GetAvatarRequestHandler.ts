@@ -169,7 +169,7 @@ export class GetAvatarRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, request.gameId, groupFindOptions);
+		let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, request.gameId, groupFindOptions);
 
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);

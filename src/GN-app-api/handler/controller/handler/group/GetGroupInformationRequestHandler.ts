@@ -106,7 +106,7 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 
 		if (secretInfo.getPermission().group.getGroupInformation.selfEnable) {
 			// Stores the group value used in the current execution flow.
-			let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), {
+			let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, secretInfo.getGameId(), {
 				members: true,
 				groupType: true,
 			});
@@ -240,7 +240,7 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 		let groupFindOptions = this.convertToGroupFindOptions(request.infoRequestParam);
 
 		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
+		let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);

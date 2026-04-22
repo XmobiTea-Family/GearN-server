@@ -100,7 +100,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 		if (!answer && permissionRules.selfEnable) {
 			// Stores the group value used in the current execution flow.
-			let group = await this.gnServer.getDatabase().loadGroupAsync(groupId, gameId, {
+			let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(groupId, gameId, {
 				members: true,
 				groupType: true,
 			});
@@ -887,7 +887,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 	 */
 	private async getDatabaseGroupMessage(groupId: string, gameId: string): Promise<GroupMessageItem[]> {
 		// Stores the group messages results value used in the current execution flow.
-		let groupMessagesResults = await this.gnServer.getDatabase().loadGroupMessagesAsync(groupId, gameId, 0, 150);
+		let groupMessagesResults = await this.gnServer.getDatabase().groupRepository.loadGroupMessagesAsync(groupId, gameId, 0, 150);
 
 		// Stores the answer value used in the current execution flow.
 		let answer: GroupMessageItem[] = [];
@@ -927,7 +927,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 			await cacheData.setData(cacheKey, await this.getDatabaseGroupMessage(groupId, gameId), GroupBaseRequestHandler.EXPIRED_CACHE);
 		}
 
-		await this.gnServer.getDatabase().createGroupMessageAsync(groupId, gameId, groupMessageItem.senderId, groupMessageItem.senderType, groupMessageItem.message, groupMessageItem.tsCreate);
+		await this.gnServer.getDatabase().groupRepository.createGroupMessageAsync(groupId, gameId, groupMessageItem.senderId, groupMessageItem.senderType, groupMessageItem.message, groupMessageItem.tsCreate);
 
 		// Stores the group message items value used in the current execution flow.
 		let groupMessageItems = await cacheData.getData<Array<GroupMessageItem>>(cacheKey);

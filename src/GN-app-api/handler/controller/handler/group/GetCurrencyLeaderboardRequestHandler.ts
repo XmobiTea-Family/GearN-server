@@ -264,7 +264,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
 			if (request.skip + request.limit <= 100) {
 				groupFindOptions = null;
 
-				groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), groupFindOptions);
+				groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithCurrenciesAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), groupFindOptions);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= groups.length) break;
@@ -287,7 +287,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
 				await cacheData.setData(cacheKey, groups, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
-				groups = await this.gnServer.getDatabase().loadGroupsLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), groupFindOptions);
+				groups = await this.gnServer.getDatabase().groupRepository.loadGroupsLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), groupFindOptions);
 
 				for (let i = 0; i < groups.length; i++) {
 

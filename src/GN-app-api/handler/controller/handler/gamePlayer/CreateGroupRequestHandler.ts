@@ -251,7 +251,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		result["tags"] = {};
 
 		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().createGroupAsync(result, secretInfo.getGameId());
+		let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId());
 
 		if (request.groupMembers != null) {
 			for (let i = 0; i < request.groupMembers.length; i++) {

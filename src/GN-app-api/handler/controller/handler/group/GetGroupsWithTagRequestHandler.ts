@@ -209,7 +209,7 @@ export class GetGroupsWithTagRequestHandler extends GroupBaseRequestHandler {
 		let gnResults = new GNArray();
 
 		// Stores the groups value used in the current execution flow.
-		let groups = await this.gnServer.getDatabase().loadGroupsWithTagAsync(request.key, request.value, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
+		let groups = await this.gnServer.getDatabase().groupRepository.loadGroupsWithTagAsync(request.key, request.value, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
 
 		for (let i = 0; i < groups.length; i++) {
 			// Stores the group value used in the current execution flow.

@@ -191,7 +191,7 @@ export class GetGroupsWithSegmentRequestHandler extends GroupBaseRequestHandler 
 		let gnResults = new GNArray();
 
 		// Stores the groups value used in the current execution flow.
-		let groups = await this.gnServer.getDatabase().loadGroupsWithSegmentAsync(request.segment, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
+		let groups = await this.gnServer.getDatabase().groupRepository.loadGroupsWithSegmentAsync(request.segment, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
 
 		for (let i = 0; i < groups.length; i++) {
 			// Stores the group value used in the current execution flow.

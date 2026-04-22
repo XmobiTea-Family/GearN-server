@@ -28,10 +28,10 @@ export abstract class AbstractBaseRepository {
 	}
 
 	/**
-		 * Runs the time collection workflow.
-		 * @param collectionName Provides the collection name value used by this operation.
-		 * @returns Returns the operation result.
-		 */
+	 * Runs the time collection workflow.
+	 * @param collectionName Provides the collection name value used by this operation.
+	 * @returns Returns the operation result.
+	 */
 	public runtimeCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
 		return this.collection<TSchema>(AbstractBaseRepository.RUNTIME + collectionName);
 	}

@@ -206,7 +206,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 				let ownerType = <OwnerType>owner.type;
 				if (ownerType == OwnerType.Group) {
 					// Stores the group value used in the current execution flow.
-					let group = await this.gnServer.getDatabase().loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });
+					let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });
 					if (group != null) {
 						if (group.hasGroupInventory(request.itemId)) {
 							group.removeGroupInventory(request.itemId);

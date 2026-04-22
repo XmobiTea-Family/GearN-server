@@ -633,7 +633,7 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 		}
 		else if (request.type == OwnerType.Group) {
 			// Stores the group value used in the current execution flow.
-			let group = await this.gnServer.getDatabase().loadGroupAsync(request.id, secretInfo.getGameId(), {
+			let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.id, secretInfo.getGameId(), {
 				groupCurrencies: true,
 				groupInventories: true,
 			});
@@ -745,7 +745,7 @@ export class ValidateAppleAppStoreReceiptRequestHandler extends StoreItemBaseReq
 						value: serverValue,
 					});
 
-					this.gnServer.getDatabase().insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateAppleAppStore " + storeInventory.getStoreId() + ", log: " + request.log);
 					gnCurrencies.add(gnPlayerCurrency);
 				}
 			}

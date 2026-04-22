@@ -238,7 +238,7 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		this.gnServer.joinRoom(characterPlayer.getOwner().id, groupId);
 
 		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().createGroupAsync(result, secretInfo.getGameId());
+		let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId());
 
 		if (request.groupMembers != null) {
 			for (let i = 0; i < request.groupMembers.length; i++) {
