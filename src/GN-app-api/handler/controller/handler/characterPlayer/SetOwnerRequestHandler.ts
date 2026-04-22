@@ -232,7 +232,7 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 					if (group != null) {
 						let hasCharacter = false;
 						for (let playerCharacter of playerCharacters) {
-							if (group.hasMember(playerCharacter.characterId)) {
+							if (group.hasMember(playerCharacter.characterId) && group.getMember(playerCharacter.characterId).status == GroupStatus.Member) {
 								hasCharacter = true;
 								break;
 							}

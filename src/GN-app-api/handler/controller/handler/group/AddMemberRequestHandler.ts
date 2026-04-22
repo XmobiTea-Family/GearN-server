@@ -460,6 +460,8 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
+
+					this.gnServer.joinRoom(characterPlayer.getOwner().id, request.groupId);
 				}
 				else {
 					group.setMember(request.memberId, GroupStatus.SentRequestAndWaitingAccept);
@@ -509,6 +511,8 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 
 						this.gnServer.sendEventToRoom(request.groupId, groupMemberUpdateOperationEvent);
 					}
+
+					this.gnServer.joinRoom(characterPlayer.getOwner().id, request.groupId);
 				}
 			}
 			else {
