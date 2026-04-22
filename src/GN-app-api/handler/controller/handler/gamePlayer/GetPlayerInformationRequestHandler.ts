@@ -275,6 +275,13 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 				}
 			}
 
+			const lastCheck = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), {});
+			if (lastCheck != null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameIsExists);
+				operationResponse.setDebugMessage("create game player but already exists, userId: " + request.userId);
+				return operationResponse;
+			}
+
 			gamePlayer = await this.gnServer.getDatabase().createGamePlayerAsync(result, secretInfo.getGameId());
 		}
 
