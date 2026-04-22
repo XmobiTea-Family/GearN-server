@@ -278,7 +278,7 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 				if (request.skip + request.limit <= 100) {
 					characterPlayerFindOptions = null;
 
-					characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
+					characterPlayers = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= characterPlayers.length) break;
@@ -301,7 +301,7 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 					await cacheData.setData(cacheKey, characterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
+					characterPlayers = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, request.catalogId, secretInfo.getGameId(), direction, characterPlayerFindOptions);
 
 					for (let i = 0; i < characterPlayers.length; i++) {
 
@@ -394,7 +394,7 @@ export class GetStatisticsLeaderboardRequestHandler extends CharacterPlayerBaseR
 				gnResult.add(ParameterCode.CharacterId, result.characterId);
 
 				// Stores the character player value used in the current execution flow.
-				let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(result.characterId, gameId, characterPlayerFindOptions);
+				let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(result.characterId, gameId, characterPlayerFindOptions);
 
 				if (characterPlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(characterPlayer, request.infoRequestParam, gameId));
 

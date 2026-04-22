@@ -328,7 +328,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 		if (request.type == OwnerType.CharacterPlayer) {
 			// Stores the character player value used in the current execution flow.
-			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
+			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
 				playerCurrencies: true,
 				playerInventories: true,
 			});
@@ -434,7 +434,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 						value: serverValue
 					});
 
-					this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), priceCurrency.key, -priceCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), priceCurrency.key, -priceCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 
@@ -530,7 +530,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 

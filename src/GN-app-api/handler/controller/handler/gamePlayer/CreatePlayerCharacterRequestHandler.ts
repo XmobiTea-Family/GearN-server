@@ -220,7 +220,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 
 		if (request.uniqueDisplayName && request.displayName) {
 			// Stores the character player with this display name value used in the current execution flow.
-			let characterPlayerWithThisDisplayName = await this.gnServer.getDatabase().loadCharacterPlayerWithDisplayNameAsync(request.displayName, secretInfo.getGameId(), { displayName: true });
+			let characterPlayerWithThisDisplayName = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerWithDisplayNameAsync(request.displayName, secretInfo.getGameId(), { displayName: true });
 
 			if (characterPlayerWithThisDisplayName != null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameHasUse);
@@ -276,7 +276,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		}
 
 		// Stores the character player value used in the current execution flow.
-		let characterPlayer = await this.gnServer.getDatabase().createCharacterPlayerAsync(result, secretInfo.getGameId());
+		let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.createCharacterPlayerAsync(result, secretInfo.getGameId());
 
 		gamePlayer.setPlayerCharacter(characterId, request.catalogId);
 		gamePlayer.saveAsync();

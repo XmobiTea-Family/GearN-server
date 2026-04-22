@@ -919,7 +919,7 @@ export class GNServer {
 							}
 
 							for (const playerCharacter of gamePlayer.getAllPlayerCharacters()) {
-								const characterPlayer = await this.getDatabase().loadCharacterPlayerAsync(playerCharacter.characterId, secretInfo.getGameId(), {
+								const characterPlayer = await this.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(playerCharacter.characterId, secretInfo.getGameId(), {
 									playerGroups: true,
 								});
 

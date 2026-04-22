@@ -216,7 +216,7 @@ export class SetRemoveStatusRequestHandler extends ItemBaseRequestHandler {
 			}
 			else if (ownerType == OwnerType.CharacterPlayer) {
 				// Stores the character player value used in the current execution flow.
-				let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
+				let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
 				if (characterPlayer != null) {
 					if (characterPlayer.hasPlayerInventory(request.itemId)) {
 						characterPlayer.removePlayerInventory(request.itemId);

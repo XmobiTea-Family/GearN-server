@@ -200,7 +200,7 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 		}
 
 		// Stores the character player value used in the current execution flow.
-		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+		let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
@@ -275,7 +275,7 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 		}
 
 		for (const log of logs) {
-			this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.characterId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
+			this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.characterId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
 		}
 
 		characterPlayer.saveAsync();

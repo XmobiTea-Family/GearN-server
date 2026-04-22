@@ -204,7 +204,7 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		}
 
 		// Stores the character player value used in the current execution flow.
-		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+		let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
@@ -248,7 +248,7 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 				if (groupMember.characterId == request.characterId) continue;
 
 				// Stores the other character player value used in the current execution flow.
-				let otherCharacterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(groupMember.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+				let otherCharacterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(groupMember.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 				if (otherCharacterPlayer != null) {
 

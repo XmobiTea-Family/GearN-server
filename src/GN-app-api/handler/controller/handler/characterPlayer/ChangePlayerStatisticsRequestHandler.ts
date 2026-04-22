@@ -202,7 +202,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 		}
 
 		// Stores the character player value used in the current execution flow.
-		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+		let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 		if (characterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
@@ -277,7 +277,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 
 				gnPlayerStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, newValue, request.log);
+				this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, newValue, request.log);
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
 				if (value > playerStatistics.value) {
@@ -292,7 +292,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 					characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -311,7 +311,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
@@ -327,7 +327,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 					characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -346,7 +346,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
@@ -361,7 +361,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 				characterPlayer.setPlayerStatistics(key, value, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+				this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerStatisticsLogAsync(request.characterId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
 			}
 
 			gnPlayerStatistics.add(gnPlayerStatistic);

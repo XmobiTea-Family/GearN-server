@@ -151,7 +151,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 		}
 		else if (request.type == OwnerType.CharacterPlayer) {
 			// Stores the character player value used in the current execution flow.
-			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, request.gameId);
+			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, request.gameId);
 
 			if (characterPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
@@ -214,7 +214,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			}
 			else if (owner.type == OwnerType.CharacterPlayer) {
 				// Stores the character player value used in the current execution flow.
-				let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(inventory.getOwner().id, request.gameId);
+				let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(inventory.getOwner().id, request.gameId);
 				if (characterPlayer != null) {
 					if (characterPlayer.hasPlayerInventory(inventory.getItemId())) {
 						characterPlayer.removePlayerInventory(inventory.getItemId());
@@ -258,7 +258,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 
 				if (memberId.length == 11) {
 					// Stores the character player value used in the current execution flow.
-					let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(memberId, request.gameId);
+					let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(memberId, request.gameId);
 					if (characterPlayer != null) {
 						if (characterPlayer.hasPlayerGroup(groupId)) {
 							characterPlayer.removePlayerGroup(groupId);
@@ -473,7 +473,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				let playerCharacter = playerCharacters[i];
 
 				// Stores the character player value used in the current execution flow.
-				let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(playerCharacter.characterId, gameId);
+				let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(playerCharacter.characterId, gameId);
 
 				if (characterPlayer != null) {
 					// Stores the results value used in the current execution flow.
@@ -687,7 +687,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				let playerFriend = playerFriends[i];
 
 				// Stores the friend player value used in the current execution flow.
-				let friendPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(playerFriend.friendId, gameId);
+				let friendPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(playerFriend.friendId, gameId);
 				if (friendPlayer != null) {
 					// Stores the results value used in the current execution flow.
 					let results = await this.deleteFriendPlayerInCharacterPlayer(characterPlayer, gameId, friendPlayer);

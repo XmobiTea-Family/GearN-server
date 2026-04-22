@@ -218,7 +218,7 @@ export class GetCurrencyLogRequestHandler extends CharacterPlayerBaseRequestHand
 		let gnResults = new GNArray();
 
 		// Stores the results value used in the current execution flow.
-		let results = await this.gnServer.getDatabase().loadCharacterPlayerCurrencyLogAsync($filter, secretInfo.getGameId(), request.limit);
+		let results = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerCurrencyLogAsync($filter, secretInfo.getGameId(), request.limit);
 
 		// Stores the token value used in the current execution flow.
 		let token: string;

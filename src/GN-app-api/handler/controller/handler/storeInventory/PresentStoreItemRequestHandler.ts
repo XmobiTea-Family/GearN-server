@@ -318,7 +318,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 		if (request.type == OwnerType.CharacterPlayer) {
 			// Stores the character player value used in the current execution flow.
-			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
+			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
 				playerCurrencies: true,
 				playerInventories: true,
 			});
@@ -432,7 +432,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "PresentStoreItem " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 

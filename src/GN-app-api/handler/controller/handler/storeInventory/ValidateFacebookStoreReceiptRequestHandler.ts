@@ -379,7 +379,7 @@ export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseReq
 
 		if (request.type == OwnerType.CharacterPlayer) {
 			// Stores the character player value used in the current execution flow.
-			let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
+			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
 				playerCurrencies: true,
 				playerInventories: true,
 			});
@@ -493,7 +493,7 @@ export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseReq
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateFacebookStore " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 

@@ -218,7 +218,7 @@ export class GetStatisticsLogRequestHandler extends CharacterPlayerBaseRequestHa
 		let gnResults = new GNArray();
 
 		// Stores the results value used in the current execution flow.
-		let results = await this.gnServer.getDatabase().loadCharacterPlayerStatisticsLogAsync($filter, secretInfo.getGameId(), request.limit);
+		let results = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerStatisticsLogAsync($filter, secretInfo.getGameId(), request.limit);
 
 		// Stores the token value used in the current execution flow.
 		let token: string;
