@@ -219,7 +219,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 				}
 
 				// Stores the new item owner player value used in the current execution flow.
-				let newItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
+				let newItemOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
 				if (newItemOwnerPlayer == null) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
 					return operationResponse;
@@ -271,7 +271,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 				}
 
 				// Stores the current item owner player value used in the current execution flow.
-				let currentItemOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
+				let currentItemOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
 				if (currentItemOwnerPlayer != null) {
 					if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
 						currentItemOwnerPlayer.removePlayerInventory(request.itemId);

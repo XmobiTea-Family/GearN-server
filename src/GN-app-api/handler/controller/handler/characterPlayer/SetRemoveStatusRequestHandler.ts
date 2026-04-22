@@ -190,7 +190,7 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 			// Stores the owner value used in the current execution flow.
 			let owner = characterPlayer.getOwner();
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
 			if (gamePlayer != null) {
 				if (gamePlayer.hasPlayerCharacter(request.characterId)) {
 					gamePlayer.removePlayerCharacter(request.characterId);

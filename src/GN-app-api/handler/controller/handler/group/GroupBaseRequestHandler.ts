@@ -117,7 +117,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 				}
 				else if (groupType == OwnerType.CharacterPlayer) {
 					// Stores the game player value used in the current execution flow.
-					let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, { playerCharacters: true });
+					let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(userId, gameId, { playerCharacters: true });
 
 					if (gamePlayer != null) {
 						// Stores the character players value used in the current execution flow.
@@ -142,7 +142,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 			}
 
 			// // Stores the game player value used in the current execution flow.
-			// let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, { playerGroups: true });
+			// let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(userId, gameId, { playerGroups: true });
 
 			// if (gamePlayer != null) {
 			// 	// Stores the player group value used in the current execution flow.
@@ -797,7 +797,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 			}
 
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, gamePlayerFindOptions);
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(userId, gameId, gamePlayerFindOptions);
 			if (gamePlayer == null) {
 				return false;
 			}

@@ -42,7 +42,7 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
 
 		if (matchmakingQueueSettings.rules != null) {
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = matchmakingQueueSettings.rules.find(x => (x as any).attributeSource == RuleAttributeSource.PlayerData) == null ? null : await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, {
+			let gamePlayer = matchmakingQueueSettings.rules.find(x => (x as any).attributeSource == RuleAttributeSource.PlayerData) == null ? null : await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(userId, gameId, {
 				playerDatas: true,
 			});
 

@@ -103,7 +103,7 @@ export abstract class CharacterPlayerBaseRequestHandler extends RequestHandler {
 
 		if (!answer && permissionRules.selfEnable) {
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(userId, gameId, { playerCharacters: true });
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(userId, gameId, { playerCharacters: true });
 
 			if (gamePlayer != null) {
 				if (gamePlayer.hasPlayerCharacter(characterId)) answer = true;

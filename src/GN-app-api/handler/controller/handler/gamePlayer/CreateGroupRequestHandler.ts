@@ -219,7 +219,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		// Stores the game player value used in the current execution flow.
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
@@ -261,7 +261,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 				if (groupMember.userId == request.userId) continue;
 
 				// Stores the other game player value used in the current execution flow.
-				let otherGamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(groupMember.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+				let otherGamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(groupMember.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 				if (otherGamePlayer != null) {
 

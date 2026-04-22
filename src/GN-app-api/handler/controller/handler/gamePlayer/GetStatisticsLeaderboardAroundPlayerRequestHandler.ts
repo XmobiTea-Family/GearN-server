@@ -286,7 +286,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 			// Stores the direction value used in the current execution flow.
 			let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
 
-			thisPosition = await this.gnServer.getDatabase().loadPositionGamePlayerLeaderboardWithStatisticsAsync(request.key, request.userId, secretInfo.getGameId(), playerStatisticsSettingsItem.initialValue, direction);
+			thisPosition = await this.gnServer.getDatabase().gamePlayerRepository.loadPositionGamePlayerLeaderboardWithStatisticsAsync(request.key, request.userId, secretInfo.getGameId(), playerStatisticsSettingsItem.initialValue, direction);
 
 			if (thisPosition != -1) {
 				await cacheData.setData(positionCacheKey, thisPosition, xDatetime.ONE_MINUTE_MILLISECOND * 5);
@@ -297,7 +297,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 				if (request.skip + request.limit <= 100) {
 					gamePlayerFindOptions = null;
 
-					gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, secretInfo.getGameId(), direction, gamePlayerFindOptions);
+					gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithStatisticsAsync(request.key, thisPosition, 100, secretInfo.getGameId(), direction, gamePlayerFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= gamePlayers.length) break;
@@ -320,7 +320,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends GamePlay
 					await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, secretInfo.getGameId(), direction, gamePlayerFindOptions);
+					gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithStatisticsAsync(request.key, thisPosition + request.skip, request.limit, secretInfo.getGameId(), direction, gamePlayerFindOptions);
 
 					for (let i = 0; i < gamePlayers.length; i++) {
 

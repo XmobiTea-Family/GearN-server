@@ -116,7 +116,7 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 		else if (secretInfo.getPermission().storeInventory.validateGooglePlayStoreReceipt.selfEnable) {
 			if (request.type == OwnerType.CharacterPlayer) {
 				// Stores the game player value used in the current execution flow.
-				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
+				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
 				if (gamePlayer != null) {
 					if (gamePlayer.hasPlayerCharacter(request.id)) {
@@ -131,7 +131,7 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 			}
 			else if (request.type == OwnerType.Group) {
 				// Stores the game player value used in the current execution flow.
-				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
+				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
 
 				if (gamePlayer != null) {
 					// Stores the group item value used in the current execution flow.
@@ -506,7 +506,7 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 		}
 		else if (request.type == OwnerType.GamePlayer) {
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
 				playerCurrencies: true,
 				playerInventories: true,
 			});
@@ -620,7 +620,7 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 
 					gnPlayerCurrencies.add(gnPlayerCurrency);
 
-					this.gnServer.getDatabase().insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateGooglePlayStore " + storeInventory.getStoreId() + ", log: " + request.log);
+					this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogAsync(request.id, secretInfo.getGameId(), storeCurrency.key, storeCurrency.value, oldValue, serverValue, "ValidateGooglePlayStore " + storeInventory.getStoreId() + ", log: " + request.log);
 				}
 			}
 

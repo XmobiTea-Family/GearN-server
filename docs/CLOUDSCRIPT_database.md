@@ -14,7 +14,7 @@ Dùng `database` khi:
 
 - Bạn cần đọc hoặc ghi MongoDB nội bộ của GearN.
 - Bạn cần query dữ liệu game theo đúng schema hiện tại.
-- Bạn cần dùng helper có sẵn của `xDatabase` như `loadGamePlayerAsync`, `groupRepository.loadGroupAsync`, `insertGamePlayerStatisticsLogAsync`.
+- Bạn cần dùng helper có sẵn của `xDatabase` như `gamePlayerRepository.loadGamePlayerAsync`, `groupRepository.loadGroupAsync`, `gamePlayerRepository.insertGamePlayerStatisticsLogAsync`.
 - Bạn cần làm việc với runtime data, system data, meta data, hoặc log database.
 
 Không nên dùng `database` khi:
@@ -96,7 +96,7 @@ Dùng khi bạn cần tạo collection hoặc tạo index.
 
 Một số method không trả raw document mà trả object wrapper:
 
-- `database.loadGamePlayerAsync(...)`
+- `database.gamePlayerRepository.loadGamePlayerAsync(...)`
 - `database.groupRepository.loadGroupAsync(...)`
 - `database.loadInventoryAsync(...)`
 - `database.storeInventoryRepository.loadStoreInventoryAsync(...)`
@@ -108,9 +108,9 @@ Các object này có getter/setter và hỗ trợ `saveAsync()`.
 
 Ví dụ:
 
-- `database.loadGamePlayersWithTagAsync(...)`
-- `database.loadGamePlayersWithSegmentAsync(...)`
-- `database.loadGamePlayersLeaderboardWithStatisticsAsync(...)`
+- `database.gamePlayerRepository.loadGamePlayersWithTagAsync(...)`
+- `database.gamePlayerRepository.loadGamePlayersWithSegmentAsync(...)`
+- `database.gamePlayerRepository.loadGamePlayersLeaderboardWithStatisticsAsync(...)`
 - `database.groupRepository.loadGroupsWithTagAsync(...)`
 - `database.inventoryRepository.loadInventoriesWithDisplayNameNormalizeRegexAsync(...)`
 
@@ -118,8 +118,8 @@ Ví dụ:
 
 Ví dụ:
 
-- `database.insertGamePlayerStatisticsLogAsync(...)`
-- `database.insertGamePlayerCurrencyLogAsync(...)`
+- `database.gamePlayerRepository.insertGamePlayerStatisticsLogAsync(...)`
+- `database.gamePlayerRepository.insertGamePlayerCurrencyLogAsync(...)`
 - `database.groupRepository.createGroupMessageAsync(...)`
 - `database.groupRepository.loadGroupMessagesAsync(...)`
 - `database.storeInventoryRepository.getStoreInventoryUsedAsync(...)`
@@ -298,7 +298,7 @@ handlers["dbLoadAndMutateGamePlayer"] = async (args: any, context, log) => {
     const dataKey = typeof args?.dataKey === "string" && args.dataKey.length > 0 ? args.dataKey : "cloudScriptLastUpdateTs";
     const segment = typeof args?.segment === "string" && args.segment.length > 0 ? args.segment : "cloud-script-demo";
 
-    const gamePlayer = await database.loadGamePlayerAsync(userId, gameId);
+    const gamePlayer = await database.gamePlayerRepository.loadGamePlayerAsync(userId, gameId);
     if (gamePlayer == null) {
         throw new Error("gamePlayer not found");
     }
@@ -327,7 +327,7 @@ handlers["dbFindGamePlayersByTag"] = async (args: any, context, log) => {
     const skip = typeof args?.skip === "number" ? args.skip : 0;
     const limit = typeof args?.limit === "number" ? args.limit : 10;
 
-    const gamePlayers = await database.loadGamePlayersWithTagAsync(tagKey, tagValue, skip, limit, gameId);
+    const gamePlayers = await database.gamePlayerRepository.loadGamePlayersWithTagAsync(tagKey, tagValue, skip, limit, gameId);
 
     const results = gamePlayers.map((gamePlayer) => {
         return {
@@ -350,7 +350,7 @@ handlers["dbGamePlayerLeaderboard"] = async (args: any, context, log) => {
     const limit = typeof args?.limit === "number" ? args.limit : 10;
     const direction = args?.direction === 1 ? 1 : -1;
 
-    const gamePlayers = await database.loadGamePlayersLeaderboardWithStatisticsAsync(statisticKey, skip, limit, gameId, direction);
+    const gamePlayers = await database.gamePlayerRepository.loadGamePlayersLeaderboardWithStatisticsAsync(statisticKey, skip, limit, gameId, direction);
 
     const results = gamePlayers.map((gamePlayer) => {
         const statistic = gamePlayer.getPlayerStatistics(statisticKey);
@@ -377,8 +377,8 @@ handlers["dbInsertGamePlayerLog"] = async (args: any, context, log) => {
     const finalValue = typeof args?.finalValue === "number" ? args.finalValue : startValue + amount;
     const logMessage = typeof args?.logMessage === "string" && args.logMessage.length > 0 ? args.logMessage : "CloudScript statistic log";
 
-    await database.insertGamePlayerStatisticsLogAsync(userId, gameId, key, amount, startValue, finalValue, logMessage);
-    await database.insertGamePlayerCurrencyLogAsync(userId, gameId, key, amount, startValue, finalValue, logMessage);
+    await database.gamePlayerRepository.insertGamePlayerStatisticsLogAsync(userId, gameId, key, amount, startValue, finalValue, logMessage);
+    await database.gamePlayerRepository.insertGamePlayerCurrencyLogAsync(userId, gameId, key, amount, startValue, finalValue, logMessage);
 
     const statisticLogCursor = await database.loadGamePlayerStatisticsLogAsync({ userId: userId, key: key }, gameId, 5);
     const currencyLogCursor = await database.loadGamePlayerCurrencyLogAsync({ userId: userId, key: key }, gameId, 5);

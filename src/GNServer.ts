@@ -880,7 +880,7 @@ export class GNServer {
 
 				let secretInfo: SecretInfo = socket.data.secretInfo;
 				if (secretInfo) {
-					this.getDatabase().removeGamePlayerSocketId(authInfo.getUserId(), secretInfo.getGameId());
+					this.getDatabase().gamePlayerRepository.removeGamePlayerSocketId(authInfo.getUserId(), secretInfo.getGameId());
 				}
 			}
 		}
@@ -906,7 +906,7 @@ export class GNServer {
 
 			let secretInfo: SecretInfo = socket.data.secretInfo;
 			if (secretInfo) {
-				this.getDatabase().loadGamePlayerAsync(userId, secretInfo.getGameId(), {
+				this.getDatabase().gamePlayerRepository.loadGamePlayerAsync(userId, secretInfo.getGameId(), {
 					playerGroups: true,
 					playerCharacters: true,
 				}).then(async gamePlayer => {

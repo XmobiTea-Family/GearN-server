@@ -107,7 +107,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 
 		if (secretInfo.getPermission().characterPlayer.getPlayerInformation.selfEnable) {
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
 			if (gamePlayer != null) {
 				if (gamePlayer.hasPlayerCharacter(request.characterId)) {

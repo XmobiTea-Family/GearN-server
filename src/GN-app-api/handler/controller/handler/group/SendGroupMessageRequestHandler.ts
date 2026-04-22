@@ -231,7 +231,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 		}
 		else if (groupType == OwnerType.CharacterPlayer) {
 			if (request.userId) {
-				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), {
+				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), {
 					playerCharacters: true,
 				});
 

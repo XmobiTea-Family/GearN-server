@@ -191,7 +191,7 @@ export class GetPlayersWithSegmentRequestHandler extends GamePlayerBaseRequestHa
 		let gnResults = new GNArray();
 
 		// Stores the game players value used in the current execution flow.
-		let gamePlayers = await this.gnServer.getDatabase().loadGamePlayersWithSegmentAsync(request.segment, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersWithSegmentAsync(request.segment, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		for (let i = 0; i < gamePlayers.length; i++) {
 			// Stores the game player value used in the current execution flow.

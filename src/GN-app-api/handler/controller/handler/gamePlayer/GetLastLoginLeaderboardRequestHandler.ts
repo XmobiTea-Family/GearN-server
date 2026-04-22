@@ -238,7 +238,7 @@ export class GetLastLoginLeaderboardRequestHandler extends GamePlayerBaseRequest
 			if (request.skip + request.limit <= 100) {
 				gamePlayerFindOptions = null;
 
-				gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithLastLoginAsync(0, 100, secretInfo.getGameId(), gamePlayerFindOptions);
+				gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithLastLoginAsync(0, 100, secretInfo.getGameId(), gamePlayerFindOptions);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= gamePlayers.length) break;
@@ -261,7 +261,7 @@ export class GetLastLoginLeaderboardRequestHandler extends GamePlayerBaseRequest
 				await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
-				gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithLastLoginAsync(request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
+				gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithLastLoginAsync(request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
 
 				for (let i = 0; i < gamePlayers.length; i++) {
 

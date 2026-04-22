@@ -270,7 +270,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 				if (request.skip + request.limit <= 100) {
 					gamePlayerFindOptions = null;
 
-					gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, secretInfo.getGameId(), direction, gamePlayerFindOptions);
+					gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, secretInfo.getGameId(), direction, gamePlayerFindOptions);
 
 					for (let i = request.skip; i < request.skip + request.limit; i++) {
 						if (i >= gamePlayers.length) break;
@@ -293,7 +293,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 					await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 				}
 				else {
-					gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), direction, gamePlayerFindOptions);
+					gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), direction, gamePlayerFindOptions);
 
 					for (let i = 0; i < gamePlayers.length; i++) {
 
@@ -386,7 +386,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GamePlayerBaseReques
 				gnResult.add(ParameterCode.UserId, result.userId);
 
 				// Stores the game player value used in the current execution flow.
-				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(result.userId, gameId, gamePlayerFindOptions);
+				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(result.userId, gameId, gamePlayerFindOptions);
 
 				if (gamePlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, gameId));
 

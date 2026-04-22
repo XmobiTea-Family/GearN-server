@@ -302,7 +302,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + gamePlayerCollection.collectionName + " starting");
 
 				// Stores the game players value used in the current execution flow.
-				let gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithStatisticsAllAsync(key, gameId, direction, gamePlayerFindOptions);
+				let gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithStatisticsAllAsync(key, gameId, direction, gamePlayerFindOptions);
 
 				// Stores the backup data value used in the current execution flow.
 				let backupData: {
@@ -389,7 +389,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 
 				await backupStatisticsLeaderboardCollection.insertOne(backupData);
 
-				this.gnServer.getDatabase().insertGamePlayerStatisticsLogsAsync(logRequests, gameId);
+				this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogsAsync(logRequests, gameId);
 
 				Debug.log("[GearN] ResetStatisticsLeaderboard for key " + key + " at " + gamePlayerCollection.collectionName + " success");
 			}

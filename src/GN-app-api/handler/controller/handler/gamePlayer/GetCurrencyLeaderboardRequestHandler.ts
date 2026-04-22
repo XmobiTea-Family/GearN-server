@@ -256,7 +256,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GamePlayerBaseRequestH
 			if (request.skip + request.limit <= 100) {
 				gamePlayerFindOptions = null;
 
-				gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithCurrenciesAsync(request.key, 0, 100, secretInfo.getGameId(), gamePlayerFindOptions);
+				gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithCurrenciesAsync(request.key, 0, 100, secretInfo.getGameId(), gamePlayerFindOptions);
 
 				for (let i = request.skip; i < request.skip + request.limit; i++) {
 					if (i >= gamePlayers.length) break;
@@ -279,7 +279,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GamePlayerBaseRequestH
 				await cacheData.setData(cacheKey, gamePlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
 			}
 			else {
-				gamePlayers = await this.gnServer.getDatabase().loadGamePlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
+				gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersLeaderboardWithCurrenciesAsync(request.key, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
 
 				for (let i = 0; i < gamePlayers.length; i++) {
 

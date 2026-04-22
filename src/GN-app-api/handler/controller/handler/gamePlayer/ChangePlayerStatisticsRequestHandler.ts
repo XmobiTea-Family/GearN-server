@@ -217,7 +217,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 		}
 
 		// Stores the game player value used in the current execution flow.
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
@@ -292,7 +292,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 
 				gnPlayerStatistic.add(ParameterCode.Value, newValue);
 
-				this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, newValue, request.log);
+				this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, newValue, request.log);
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Maximum) {
 				if (value > playerStatistics.value) {
@@ -307,7 +307,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 					gamePlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -326,7 +326,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum) {
@@ -342,7 +342,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 					gamePlayer.setPlayerStatistics(key, value, currentMilliseconds);
 					gnPlayerStatistic.add(ParameterCode.Value, value);
 
-					this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+					this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
 				}
 				else {
 					if (playerStatisticsSettingsItem.maximumValue != null) {
@@ -361,7 +361,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 
 					gnPlayerStatistic.add(ParameterCode.Value, playerStatistics.value);
 
-					this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
+					this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, playerStatistics.value, request.log);
 				}
 			}
 			else if (statisticsAggregationMethod == xStatisticsAggregationMethod.Last) {
@@ -376,7 +376,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 				gamePlayer.setPlayerStatistics(key, value, currentMilliseconds);
 				gnPlayerStatistic.add(ParameterCode.Value, value);
 
-				this.gnServer.getDatabase().insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
+				this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogAsync(request.userId, secretInfo.getGameId(), key, playerStatisticsParam.value, oldValue, value, request.log);
 			}
 
 			gnPlayerStatistics.add(gnPlayerStatistic);

@@ -209,7 +209,7 @@ export class GetPlayersWithTagRequestHandler extends GamePlayerBaseRequestHandle
 		let gnResults = new GNArray();
 
 		// Stores the game players value used in the current execution flow.
-		let gamePlayers = await this.gnServer.getDatabase().loadGamePlayersWithTagAsync(request.key, request.value, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersWithTagAsync(request.key, request.value, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		for (let i = 0; i < gamePlayers.length; i++) {
 			// Stores the game player value used in the current execution flow.

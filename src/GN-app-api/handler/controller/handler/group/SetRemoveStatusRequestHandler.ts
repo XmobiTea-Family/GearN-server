@@ -201,7 +201,7 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 					let member = members[i];
 
 					// Stores the game player value used in the current execution flow.
-					let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
+					let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
 					if (gamePlayer != null) {
 						if (gamePlayer.hasPlayerGroup(request.groupId)) {
 							gamePlayer.removePlayerGroup(request.groupId);

@@ -255,7 +255,7 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 		}
 		else {
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), null);
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), null);
 
 			if (gamePlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
@@ -279,7 +279,7 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ga
 			}
 
 			// Stores the complete game players collection used in the current execution flow.
-			let allGamePlayers = await this.gnServer.getDatabase().loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds, secretInfo.getGameId(), null);
+			let allGamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds, secretInfo.getGameId(), null);
 
 			allGamePlayers.push(gamePlayer);
 

@@ -225,7 +225,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 		let gamePlayerFindOptions = this.convertToGamePlayerFindOptions(request.infoRequestParam);
 
 		// Stores the game player value used in the current execution flow.
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
 			if (!request.createPlayerIfNotExists) {
@@ -275,14 +275,14 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 				}
 			}
 
-			const lastCheck = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), {});
+			const lastCheck = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), {});
 			if (lastCheck != null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameIsExists);
 				operationResponse.setDebugMessage("create game player but already exists, userId: " + request.userId);
 				return operationResponse;
 			}
 
-			gamePlayer = await this.gnServer.getDatabase().createGamePlayerAsync(result, secretInfo.getGameId());
+			gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.createGamePlayerAsync(result, secretInfo.getGameId());
 		}
 
 		if (request.updateTsLastLogin) {

@@ -218,7 +218,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 			}
 
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.memberId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.memberId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 			if (gamePlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MemberNotFound);
@@ -313,7 +313,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 				group.saveAsync();
 
 				let hasCharacter = false;
-				let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(characterPlayer.getOwner().id, secretInfo.getGameId(), { playerCharacters: true });
+				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(characterPlayer.getOwner().id, secretInfo.getGameId(), { playerCharacters: true });
 				if (gamePlayer != null) {
 					let playerCharacters = gamePlayer.getAllPlayerCharacters();
 

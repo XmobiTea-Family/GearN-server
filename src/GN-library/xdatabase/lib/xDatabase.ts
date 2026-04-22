@@ -2,11 +2,7 @@ import * as mongoDB from "mongodb";
 
 import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
 import { MasterPlayer } from "./entity/pro/MasterPlayer";
-import { GamePlayer } from "./entity/pro/GamePlayer";
-import { CharacterPlayer } from "./entity/pro/CharacterPlayer";
 import { MasterPlayerFindOptions } from "./entity/pro/findOptions/MasterPlayerFindOptions";
-import { GamePlayerFindOptions } from "./entity/pro/findOptions/GamePlayerFindOptions";
-import { CharacterPlayerFindOptions } from "./entity/pro/findOptions/CharacterPlayerFindOptions";
 import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { UploadFileInfo } from "./entity/pro/UploadFileInfo";
 import { FileUploadInfoFindOptions } from "./entity/pro/findOptions/FileUploadInfoFindOptions";
@@ -14,6 +10,7 @@ import { InventoryRepository } from "./InventoryRepository";
 import { StoreInventoryRepository } from "./StoreInventoryRepository";
 import { GroupRepository } from "./GroupRepository";
 import { CharacterPlayerRepository } from "./CharacterPlayerRepository";
+import { GamePlayerRepository } from "./GamePlayerRepository";
 
 interface OnMongoRunError {
 	(error: mongoDB.AnyError): void;
@@ -57,6 +54,11 @@ export class xDatabase {
 	private _characterPlayerRepository: CharacterPlayerRepository;
 	public get characterPlayerRepository(): CharacterPlayerRepository {
 		return this._characterPlayerRepository;
+	}
+
+	private _gamePlayerRepository: GamePlayerRepository;
+	public get gamePlayerRepository(): GamePlayerRepository {
+		return this._gamePlayerRepository;
 	}
 
 	/**
@@ -118,6 +120,7 @@ export class xDatabase {
 		this._storeInventoryRepository = new StoreInventoryRepository(this.client, this.db, this.logClient, this.logDb);
 		this._groupRepository = new GroupRepository(this.client, this.db, this.logClient, this.logDb);
 		this._characterPlayerRepository = new CharacterPlayerRepository(this.client, this.db, this.logClient, this.logDb);
+		this._gamePlayerRepository = new GamePlayerRepository(this.client, this.db, this.logClient, this.logDb);
 	}
 
 	/**
@@ -1160,434 +1163,14 @@ export class xDatabase {
 	}
 
 	/**
-	 * Converts the to game players.
-	 * @param results Provides the results value used by this operation.
-	 * @param collection Provides the collection value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async convertToGamePlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<GamePlayer>> {
-		// Stores the answer value used in the current execution flow.
-		let answer: Array<GamePlayer> = [];
-
-		while (await results.hasNext()) {
-			answer.push(new GamePlayer(await results.next(), collection));
-		}
-
-		return answer;
-	}
-
-	/**
-	 * Loads the game players with segment async.
-	 * @param segment Provides the segment value used by this operation.
-	 * @param skip Provides the skip value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersWithSegmentAsync(segment: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the results value used in the current execution flow.
-		let results = await collection.find({ segments: segment }, {
-			projection: this.getFindOptions(gamePlayerFindOptions),
-			sort: {
-				_id: -1
-			}
-		}).skip(skip).limit(limit);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the game players with tag async.
-	 * @param key Provides the key value used by this operation.
-	 * @param value Provides the value value used by this operation.
-	 * @param skip Provides the skip value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersWithTagAsync(key: string, value: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the filter value used in the current execution flow.
-		let $filter = {} as any;
-		$filter["tags." + key] = value;
-
-		// Stores the results value used in the current execution flow.
-		let results = await collection.find($filter, {
-			projection: this.getFindOptions(gamePlayerFindOptions),
-			sort: {
-				_id: -1
-			}
-		}).skip(skip).limit(limit);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the game player with display name async.
-	 * @param displayName Provides the display name value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayerWithDisplayNameAsync(displayName: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemCollection("GamePlayer");
-
-		// Stores the result value used in the current execution flow.
-		let result = await collection.findOne({ displayName: displayName }, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		});
-
-		if (!result) return null;
-		return new GamePlayer(result, collection);
-	}
-
-	/**
-	 * Loads the game player with display name normalize async.
-	 * @param displayNameNormalize Provides the display name normalize value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayerWithDisplayNameNormalizeAsync(displayNameNormalize: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemCollection("GamePlayer");
-
-		// Stores the result value used in the current execution flow.
-		let result = await collection.findOne({ displayNameNormalize: displayNameNormalize }, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		});
-
-		if (!result) return null;
-		return new GamePlayer(result, collection);
-	}
-
-	/**
-	 * Loads the game players with display name normalize regex async.
-	 * @param keyword Provides the keyword value used by this operation.
-	 * @param skip Provides the skip value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersWithDisplayNameNormalizeRegexAsync(keyword: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the results value used in the current execution flow.
-		let results = await collection.find({ displayNameNormalize: { $regex: keyword } }, {
-			projection: this.getFindOptions(gamePlayerFindOptions),
-			sort: {
-				_id: -1
-			}
-		}).skip(skip).limit(limit);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the game players leaderboard with statistics async.
-	 * @param key Provides the key value used by this operation.
-	 * @param skip Provides the skip value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param direction Provides the direction value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersLeaderboardWithStatisticsAsync(key: string, skip: number, limit: number, gameId: string, direction: -1 | 1, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the sort value used in the current execution flow.
-		let $sort = {} as any;
-		$sort["playerStatistics." + key + ".value"] = direction;
-		// $sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
-
-		let results = await collection.find({}, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		}).sort($sort).skip(skip).limit(limit);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the game players leaderboard with statistics all async.
-	 * @param key Provides the key value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param direction Provides the direction value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersLeaderboardWithStatisticsAllAsync(key: string, gameId: string, direction: -1 | 1, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the filter value used in the current execution flow.
-		let $filter = {} as any;
-		$filter["playerStatistics." + key + ".value"] = { $ne: null };
-
-		// Stores the sort value used in the current execution flow.
-		let $sort = {} as any;
-		$sort["playerStatistics." + key + ".value"] = direction;
-		// $sort["playerStatistics." + key + ".tsLastUpdate"] = direction;
-
-		let results = await collection.find($filter, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		}).sort($sort);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the game players leaderboard with create async.
-	 * @param skip Provides the skip value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersLeaderboardWithCreateAsync(skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the sort value used in the current execution flow.
-		let $sort = {} as any;
-		$sort["_id"] = -1;
-
-		// Stores the results value used in the current execution flow.
-		let results = await collection.find({}, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		}).sort($sort).skip(skip).limit(limit);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the game players leaderboard with last login async.
-	 * @param skip Provides the skip value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersLeaderboardWithLastLoginAsync(skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the sort value used in the current execution flow.
-		let $sort = {} as any;
-		$sort["tsLastLogin"] = -1;
-
-		// Stores the results value used in the current execution flow.
-		let results = await collection.find({}, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		}).sort($sort).skip(skip).limit(limit);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the friend game players leaderboard with statistics async.
-	 * @param friendIds Provides the friend IDs value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadFriendGamePlayersLeaderboardWithStatisticsAsync(friendIds: string[], gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the results value used in the current execution flow.
-		let results = await collection.find({ userId: { $in: friendIds } }, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		});
-
-		// Stores the answer value used in the current execution flow.
-		let answer: GamePlayer[] = [];
-
-		while (await results.hasNext()) {
-			// Stores the result value used in the current execution flow.
-			let result = await results.next();
-			answer.push(new GamePlayer(result, collection));
-		}
-
-		return answer;
-	}
-
-	/**
-	 * Loads the game players leaderboard with currencies async.
-	 * @param key Provides the key value used by this operation.
-	 * @param skip Provides the skip value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayersLeaderboardWithCurrenciesAsync(key: string, skip: number, limit: number, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<Array<GamePlayer>> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the sort value used in the current execution flow.
-		let $sort = {} as any;
-		$sort["playerCurrencies." + key + ".value"] = -1;
-
-		// Stores the results value used in the current execution flow.
-		let results = await collection.find({}, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		}).sort($sort).skip(skip).limit(limit);
-		return this.convertToGamePlayers(results, collection);
-	}
-
-	/**
-	 * Loads the position game player leaderboard with statistics async.
-	 * @param key Provides the key value used by this operation.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param initialValue Provides the initial value value used by this operation.
-	 * @param direction Provides the direction value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadPositionGamePlayerLeaderboardWithStatisticsAsync(key: string, userId: string, gameId: string, initialValue: number, direction: -1 | 1): Promise<number> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the master player find options value used in the current execution flow.
-		let masterPlayerFindOptions: MasterPlayerFindOptions = {
-			playerStatistics: true
-		};
-
-		// Stores the this player value used in the current execution flow.
-		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, masterPlayerFindOptions);
-		if (thisPlayer == null) return -1;
-
-		// Stores the score value used in the current execution flow.
-		let score = initialValue;
-		// Stores the timestamp last update value used in the current execution flow.
-		let tsLastUpdate = xDatetime.getCurrentMilliseconds();
-
-		// Stores the player statistics value used in the current execution flow.
-		let playerStatistics = thisPlayer.getPlayerStatistics(key);
-		if (playerStatistics != null) {
-			score = playerStatistics.value;
-			tsLastUpdate = playerStatistics.tsLastUpdate;
-		}
-
-		// Stores the filter value used in the current execution flow.
-		let $filter = {} as any;
-		if (direction == -1) {
-			// let condition1 = {} as any;
-			// let condition2 = {} as any;
-
-			$filter["playerStatistics." + key + ".value"] = { $gt: score };
-			// condition2["playerStatistics." + key + ".value"] = score;
-			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
-
-			// $filter.$or = [condition1, condition2];
-		}
-		else {
-			// let condition1 = {} as any;
-			// let condition2 = {} as any;
-
-			$filter["playerStatistics." + key + ".value"] = { $lt: score };
-			// condition2["playerStatistics." + key + ".value"] = score;
-			// condition2["playerStatistics." + key + ".tsLastUpdate"] = { $lt: tsLastUpdate };
-
-			// $filter.$or = [condition1, condition2];
-		}
-
-		return await collection.countDocuments($filter);
-	}
-
-	/**
-	 * Loads the position game player leaderboard with currencies async.
-	 * @param key Provides the key value used by this operation.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadPositionGamePlayerLeaderboardWithCurrenciesAsync(key: string, userId: string, gameId: string): Promise<number> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the game player find options value used in the current execution flow.
-		let gamePlayerFindOptions: GamePlayerFindOptions = {
-			playerCurrencies: true
-		};
-
-		// Stores the this player value used in the current execution flow.
-		let thisPlayer = await this.loadGamePlayerAsync(userId, gameId, gamePlayerFindOptions);
-		if (thisPlayer == null) return -1;
-
-		// Stores the score value used in the current execution flow.
-		let score = 0;
-		// Stores the player currencies value used in the current execution flow.
-		let playerCurrencies = thisPlayer.getPlayerCurrency(key);
-		if (playerCurrencies != null) {
-			score = playerCurrencies.value;
-		}
-
-		// Stores the filter value used in the current execution flow.
-		let $filter = {} as any;
-
-		$filter["playerCurrencies." + key + ".value"] = {
-			$gt: score,
-		}
-		return await collection.countDocuments($filter);
-	}
-
-	/**
-	 * Loads the game player async.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadGamePlayerAsync(userId: string, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		// Stores the result value used in the current execution flow.
-		let result = await collection.findOne({ userId: userId }, {
-			projection: this.getFindOptions(gamePlayerFindOptions)
-		});
-
-		if (result) {
-			return new GamePlayer(result, collection);
-		}
-
-		return null;
-	}
-
-	public async removeGamePlayerSocketId(userId: string, gameId: string): Promise<void> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		await collection.updateOne({ userId: userId }, { $set: { socketId: "" } });
-	}
-
-	/**
-	 * Creates the game player async.
-	 * @param result Provides the result value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async createGamePlayerAsync(result: any, gameId: string): Promise<GamePlayer> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemGameCollection("GamePlayer", gameId);
-
-		await collection.insertOne(result);
-		return new GamePlayer(result, collection);
-	}
-
-	/**
-	 * Executes the insert master player statistics log async workflow asynchronously.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 * @param startValue Provides the start value value used by this operation.
-	 * @param finalValue Provides the final value value used by this operation.
-	 * @param log Provides the log value used by this operation.
-	 */
+		 * Executes the insert master player statistics log async workflow asynchronously.
+		 * @param userId Indicates whether r ID should be used.
+		 * @param key Provides the key value used by this operation.
+		 * @param amount Provides the amount value used by this operation.
+		 * @param startValue Provides the start value value used by this operation.
+		 * @param finalValue Provides the final value value used by this operation.
+		 * @param log Provides the log value used by this operation.
+		 */
 	public async insertMasterPlayerStatisticsLogAsync(userId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeCollection("MasterPlayer.StatisticsLog");
@@ -1662,93 +1245,6 @@ export class xDatabase {
 		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
 	}
 
-	/**
-	 * Executes the insert game player statistics log async workflow asynchronously.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 * @param startValue Provides the start value value used by this operation.
-	 * @param finalValue Provides the final value value used by this operation.
-	 * @param log Provides the log value used by this operation.
-	 */
-	public async insertGamePlayerStatisticsLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
-
-		await collection.insertOne({
-			userId: userId,
-			key: key,
-			amount: amount,
-			startValue: startValue,
-			finalValue: finalValue,
-			tsCreate: xDatetime.getCurrentMilliseconds(),
-			log: log,
-		});
-	}
-
-	/**
-	 * Executes the insert game player statistics logs async workflow asynchronously.
-	 * @param requests Provides the requests value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 */
-	public async insertGamePlayerStatisticsLogsAsync(requests: { userId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[], gameId: string): Promise<void> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
-
-		await collection.insertMany(requests);
-	}
-
-	/**
-	 * Executes the insert game player currency log async workflow asynchronously.
-	 * @param userId Indicates whether r ID should be used.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 * @param startValue Provides the start value value used by this operation.
-	 * @param finalValue Provides the final value value used by this operation.
-	 * @param log Provides the log value used by this operation.
-	 */
-	public async insertGamePlayerCurrencyLogAsync(userId: string, gameId: string, key: string, amount: number, startValue: number, finalValue: number, log: string): Promise<void> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
-
-		await collection.insertOne({
-			userId: userId,
-			key: key,
-			amount: amount,
-			startValue: startValue,
-			finalValue: finalValue,
-			tsCreate: xDatetime.getCurrentMilliseconds(),
-			log: log,
-		});
-	}
-
-	/**
-	 * Loads the game player statistics log async.
-	 * @param $filter Provides the filter value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 */
-	public async loadGamePlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
-
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
-	}
-
-	/**
-	 * Loads the game player currency log async.
-	 * @param $filter Provides the filter value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @param limit Provides the limit value used by this operation.
-	 */
-	public async loadGamePlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
-
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
-	}
 
 	/**
 	 * Loads the upload file info async.

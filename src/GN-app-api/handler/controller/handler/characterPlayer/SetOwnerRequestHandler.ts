@@ -187,7 +187,7 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 		// Stores the owner value used in the current execution flow.
 		let owner = characterPlayer.getOwner();
 
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
+		let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
 
 		if (gamePlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
@@ -201,14 +201,14 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 			}
 
 			// Stores the new character owner player value used in the current execution flow.
-			let newCharacterOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let newCharacterOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
 			if (newCharacterOwnerPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
 				return operationResponse;
 			}
 
 			// Stores the current character owner player value used in the current execution flow.
-			let currentCharacterOwnerPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
+			let currentCharacterOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
 			if (currentCharacterOwnerPlayer != null) {
 				if (currentCharacterOwnerPlayer.hasPlayerCharacter(request.characterId)) {
 					currentCharacterOwnerPlayer.removePlayerCharacter(request.characterId);

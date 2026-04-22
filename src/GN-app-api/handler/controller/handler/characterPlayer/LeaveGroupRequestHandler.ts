@@ -261,7 +261,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 			group.saveAsync();
 
 			let hasCharacter = false;
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(characterPlayer.getOwner().id, secretInfo.getGameId(), { playerCharacters: true });
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(characterPlayer.getOwner().id, secretInfo.getGameId(), { playerCharacters: true });
 			if (gamePlayer != null) {
 				let playerCharacters = gamePlayer.getAllPlayerCharacters();
 

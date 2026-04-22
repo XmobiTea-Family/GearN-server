@@ -196,7 +196,7 @@ export class SetDisplayNameRequestHandler extends GamePlayerBaseRequestHandler {
 
 		if (request.uniqueDisplayName) {
 			// Stores the game player with this display name value used in the current execution flow.
-			let gamePlayerWithThisDisplayName = await this.gnServer.getDatabase().loadGamePlayerWithDisplayNameAsync(request.displayName, gamePlayerFindOptions);
+			let gamePlayerWithThisDisplayName = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerWithDisplayNameAsync(request.displayName, gamePlayerFindOptions);
 
 			if (gamePlayerWithThisDisplayName != null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameHasUse);
@@ -205,7 +205,7 @@ export class SetDisplayNameRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		// Stores the game player value used in the current execution flow.
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);

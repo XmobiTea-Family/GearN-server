@@ -218,7 +218,7 @@ export class AddMemberRequestHandler extends GroupBaseRequestHandler {
 			}
 
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.memberId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.memberId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 			if (gamePlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MemberNotFound);

@@ -191,7 +191,7 @@ export class GetPlayersWithDisplayNameRequestHandler extends GamePlayerBaseReque
         let gnResults = new GNArray();
 
         // Stores the game players value used in the current execution flow.
-        let gamePlayers = await this.gnServer.getDatabase().loadGamePlayersWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
+        let gamePlayers = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayersWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), gamePlayerFindOptions);
 
         for (let i = 0; i < gamePlayers.length; i++) {
             // Stores the game player value used in the current execution flow.

@@ -215,7 +215,7 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 		}
 
 		// Stores the game player value used in the current execution flow.
-		let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+		let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 		if (gamePlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
@@ -293,7 +293,7 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 		}
 
 		for (const log of logs) {
-			this.gnServer.getDatabase().insertGamePlayerCurrencyLogAsync(request.userId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
+			this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogAsync(request.userId, secretInfo.getGameId(), log.key, log.amount, log.startValue, log.finalValue, request.log);
 		}
 
 		gamePlayer.saveAsync();

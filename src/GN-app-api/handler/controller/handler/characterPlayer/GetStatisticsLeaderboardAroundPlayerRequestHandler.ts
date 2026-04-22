@@ -124,7 +124,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends Characte
 
 		if (secretInfo.getPermission().characterPlayer.getStatisticsLeaderboardAroundPlayer.selfEnable) {
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
 
 			if (gamePlayer != null) {
 				if (gamePlayer.hasPlayerCharacter(request.characterId)) {

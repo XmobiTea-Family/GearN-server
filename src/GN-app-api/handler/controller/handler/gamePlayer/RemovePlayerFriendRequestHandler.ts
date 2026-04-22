@@ -193,9 +193,9 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 			}
 
 			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 			// Stores the friend player value used in the current execution flow.
-			let friendPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let friendPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
 
 			if (gamePlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
