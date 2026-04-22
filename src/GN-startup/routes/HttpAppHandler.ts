@@ -312,6 +312,7 @@ export class HttpAppHandler {
 				wrap((req, res, next) => {
 					return this.antiDdosMiddleware.checkMaxRequestPerSecondPerPeerViaMsgPack(req, res, next);
 				}),
+				express.raw({ type: Commands.APPLICATION_MSGPACK, limit: "10mb" }),
 				(req, res, next) => {
 					if (req.header(Commands.CONTENT_TYPE) === Commands.APPLICATION_MSGPACK) {
 						// Stores the buffer value used in the current execution flow.
