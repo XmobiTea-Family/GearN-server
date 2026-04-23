@@ -53,25 +53,8 @@ interface CloudScriptRequestPre {
 	request: { [k: string]: any };
 	// Stores the role value used by this contract.
 	role: number;
-	// Stores the secret info value used by this contract.
-	secretInfo: {
-		// Stores the secret key value used by this contract.
-		secretKey: string;
-		// Stores the description value used by this contract.
-		description: string;
-		// Indicates whether remove.
-		remove: boolean;
-		// Stores the timestamp expire value used by this contract.
-		tsExpire: number;
-		// Stores the permission value used by this contract.
-		permission: SecretPermissionItem;
-		// Stores the game ID value used by this contract.
-		gameId: string;
-		// Indicates whether default.
-		isDefault: boolean;
-		// Indicates whether only master admin should be allowed.
-		onlyMasterAdmin: boolean;
-	};
+	// Stores the custom tags value used by this contract.
+	customTags: { [k: string]: any };
 	// Stores the operation request value used by this contract.
 	operationRequest: {
 		// Stores the operation code value used by this contract.
@@ -94,25 +77,8 @@ interface CloudScriptRequestPost {
 	request: { [k: string]: any };
 	// Stores the role value used by this contract.
 	role: number;
-	// Stores the secret info value used by this contract.
-	secretInfo: {
-		// Stores the secret key value used by this contract.
-		secretKey: string;
-		// Stores the description value used by this contract.
-		description: string;
-		// Indicates whether remove.
-		remove: boolean;
-		// Stores the timestamp expire value used by this contract.
-		tsExpire: number;
-		// Stores the permission value used by this contract.
-		permission: SecretPermissionItem;
-		// Stores the game ID value used by this contract.
-		gameId: string;
-		// Indicates whether default.
-		isDefault: boolean;
-		// Indicates whether only master admin should be allowed.
-		onlyMasterAdmin: boolean;
-	};
+	// Stores the custom tags value used by this contract.
+	customTags: { [k: string]: any };
 	// Stores the operation request value used by this contract.
 	operationRequest: {
 		// Stores the operation code value used by this contract.
@@ -185,25 +151,8 @@ interface CloudScriptRequestSystemAuthenticate {
 		// Stores the parameters value used by this contract.
 		parameters: {};
 	};
-	// Stores the secret info value used by this contract.
-	secretInfo?: {
-		// Stores the secret key value used by this contract.
-		secretKey: string;
-		// Stores the description value used by this contract.
-		description: string;
-		// Indicates whether remove.
-		remove: boolean;
-		// Stores the timestamp expire value used by this contract.
-		tsExpire: number;
-		// Stores the permission value used by this contract.
-		permission: SecretPermissionItem;
-		// Stores the game ID value used by this contract.
-		gameId: string;
-		// Indicates whether default.
-		isDefault: boolean;
-		// Indicates whether only master admin should be allowed.
-		onlyMasterAdmin: boolean;
-	};
+	// Stores the custom tags value used by this contract.
+	customTags: { [k: string]: any };
 };
 
 interface CloudScriptRequestEvent {
@@ -847,39 +796,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Serialize `SecretInfo` into a plain object because it will cross a worker-process boundary.
-		let finalSecretInfo: {
-			// Stores the secret key value used by this contract.
-			secretKey: string;
-			// Stores the description value used by this contract.
-			description: string;
-			// Indicates whether remove.
-			remove: boolean;
-			// Stores the timestamp expire value used by this contract.
-			tsExpire: number;
-			// Stores the permission value used by this contract.
-			permission: SecretPermissionItem;
-			// Stores the game ID value used by this contract.
-			gameId: string;
-			// Indicates whether default.
-			isDefault: boolean;
-			// Indicates whether only master admin should be allowed.
-			onlyMasterAdmin: boolean;
-		} = null as any;
-
-		if (secretInfo) {
-			finalSecretInfo = {
-				gameId: secretInfo.getGameId(),
-				description: secretInfo.getDescription(),
-				isDefault: secretInfo.getIsDefault(),
-				onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
-				permission: secretInfo.getPermission(),
-				remove: secretInfo.isRemove(),
-				secretKey: secretInfo.getSecretKey(),
-				tsExpire: secretInfo.getTsExpire(),
-			};
-		}
-
 		let cloudScriptRequest: CloudScriptRequestPre = {
 			requestId: requestId,
 			eventName: eventName,
@@ -890,7 +806,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				requestId: operationRequest.getRequestId(),
 			},
 			request: request,
-			secretInfo: finalSecretInfo,
+			customTags: operationRequest.getParameters()?.getGNHashtable(ParameterCode.CustomTags)?.toData() ?? null,
 			role: role,
 		};
 
@@ -1076,38 +992,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Serialize `SecretInfo` into a plain object because workers cannot receive class instances directly.
-		let finalSecretInfo: {
-			// Stores the secret key value used by this contract.
-			secretKey: string;
-			// Stores the description value used by this contract.
-			description: string;
-			// Indicates whether remove.
-			remove: boolean;
-			// Stores the timestamp expire value used by this contract.
-			tsExpire: number;
-			// Stores the permission value used by this contract.
-			permission: SecretPermissionItem;
-			// Stores the game ID value used by this contract.
-			gameId: string;
-			// Indicates whether default.
-			isDefault: boolean;
-			// Indicates whether only master admin should be allowed.
-			onlyMasterAdmin: boolean;
-		} = null as any;
-		if (secretInfo) {
-			finalSecretInfo = {
-				gameId: secretInfo.getGameId(),
-				description: secretInfo.getDescription(),
-				isDefault: secretInfo.getIsDefault(),
-				onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
-				permission: secretInfo.getPermission(),
-				remove: secretInfo.isRemove(),
-				secretKey: secretInfo.getSecretKey(),
-				tsExpire: secretInfo.getTsExpire(),
-			};
-		}
-
 		let cloudScriptRequest: CloudScriptRequestSystemAuthenticate = {
 			requestId: requestId,
 			eventName: eventName,
@@ -1123,7 +1007,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				returnCode: operationResponse.getReturnCode(),
 			},
 			request: request,
-			secretInfo: finalSecretInfo,
+			customTags: operationRequest.getParameters()?.getGNHashtable(ParameterCode.CustomTags)?.toData() ?? null,
 		};
 
 		cloudScriptWorker.send(cloudScriptRequest);
@@ -1208,38 +1092,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let requestId = StringUtility.generateRandomString(10, 0);
 
-		// Serialize `SecretInfo` into a plain object because workers cannot receive class instances directly.
-		let finalSecretInfo: {
-			// Stores the secret key value used by this contract.
-			secretKey: string;
-			// Stores the description value used by this contract.
-			description: string;
-			// Indicates whether remove.
-			remove: boolean;
-			// Stores the timestamp expire value used by this contract.
-			tsExpire: number;
-			// Stores the permission value used by this contract.
-			permission: SecretPermissionItem;
-			// Stores the game ID value used by this contract.
-			gameId: string;
-			// Indicates whether default.
-			isDefault: boolean;
-			// Indicates whether only master admin should be allowed.
-			onlyMasterAdmin: boolean;
-		} = null;
-		if (secretInfo) {
-			finalSecretInfo = {
-				gameId: secretInfo.getGameId(),
-				description: secretInfo.getDescription(),
-				isDefault: secretInfo.getIsDefault(),
-				onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
-				permission: secretInfo.getPermission(),
-				remove: secretInfo.isRemove(),
-				secretKey: secretInfo.getSecretKey(),
-				tsExpire: secretInfo.getTsExpire(),
-			};
-		}
-
 		let cloudScriptRequest: CloudScriptRequestPost = {
 			requestId: requestId,
 			eventName: eventName,
@@ -1255,7 +1107,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				returnCode: operationResponse.getReturnCode(),
 			},
 			request: request,
-			secretInfo: finalSecretInfo,
+			customTags: operationRequest.getParameters()?.getGNHashtable(ParameterCode.CustomTags)?.toData() ?? null,
 			role: role,
 		};
 

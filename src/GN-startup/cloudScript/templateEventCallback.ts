@@ -186,27 +186,8 @@ interface CloudScriptRequestPre {
 	request: { [k: string]: any };
 	// Stores the role value used by this contract.
 	role: SecretRole;
-	// Stores the secret info value used by this contract.
-	secretInfo: {
-		// Stores the secret key value used by this contract.
-		secretKey: string;
-		// Stores the description value used by this contract.
-		description: string;
-		// Stores the role value used by this contract.
-		role: number;
-		// Indicates whether remove.
-		remove: boolean;
-		// Stores the timestamp expire value used by this contract.
-		tsExpire: number;
-		// Stores the permission value used by this contract.
-		permission: SecretPermissionItem;
-		// Stores the game ID value used by this contract.
-		gameId: string;
-		// Indicates whether default.
-		isDefault: boolean;
-		// Indicates whether only master admin should be allowed.
-		onlyMasterAdmin: boolean;
-	};
+	// Stores the custom tags value used by this contract.
+	customTags: { [k: string]: any };
 	// Stores the operation request value used by this contract.
 	operationRequest: {
 		// Stores the operation code value used by this contract.
@@ -229,27 +210,8 @@ interface CloudScriptRequestPost {
 	request: { [k: string]: any };
 	// Stores the role value used by this contract.
 	role: SecretRole;
-	// Stores the secret info value used by this contract.
-	secretInfo: {
-		// Stores the secret key value used by this contract.
-		secretKey: string;
-		// Stores the description value used by this contract.
-		description: string;
-		// Stores the role value used by this contract.
-		role: number;
-		// Indicates whether remove.
-		remove: boolean;
-		// Stores the timestamp expire value used by this contract.
-		tsExpire: number;
-		// Stores the permission value used by this contract.
-		permission: SecretPermissionItem;
-		// Stores the game ID value used by this contract.
-		gameId: string;
-		// Indicates whether default.
-		isDefault: boolean;
-		// Indicates whether only master admin should be allowed.
-		onlyMasterAdmin: boolean;
-	};
+	// Stores the custom tags value used by this contract.
+	customTags: { [k: string]: any };
 	// Stores the operation request value used by this contract.
 	operationRequest: {
 		// Stores the operation code value used by this contract.
@@ -322,27 +284,8 @@ interface CloudScriptRequestSystemAuthenticate {
 		// Stores the parameters value used by this contract.
 		parameters: {};
 	};
-	// Stores the secret info value used by this contract.
-	secretInfo?: {
-		// Stores the secret key value used by this contract.
-		secretKey: string;
-		// Stores the description value used by this contract.
-		description: string;
-		// Stores the role value used by this contract.
-		role: number;
-		// Indicates whether remove.
-		remove: boolean;
-		// Stores the timestamp expire value used by this contract.
-		tsExpire: number;
-		// Stores the permission value used by this contract.
-		permission: SecretPermissionItem;
-		// Stores the game ID value used by this contract.
-		gameId: string;
-		// Indicates whether default.
-		isDefault: boolean;
-		// Indicates whether only master admin should be allowed.
-		onlyMasterAdmin: boolean;
-	};
+	// Stores the custom tags value used by this contract.
+	customTags: { [k: string]: any };
 };
 
 interface CloudScriptRequestEvent {
@@ -409,8 +352,8 @@ interface FunctionRequestPre {
 	request: { [k: string]: any };
 	// Stores the role value used by this contract.
 	role: SecretRole;
-	// Stores the secret info value used by this contract.
-	secretInfo: SecretInfo;
+	// Stores the custom tags value used by this contract.
+	customTags: GNHashtable;
 	// Stores the operation request value used by this contract.
 	operationRequest: OperationRequest;
 	// Stores the log value used by this contract.
@@ -422,8 +365,8 @@ interface FunctionRequestPost {
 	request: { [k: string]: any };
 	// Stores the role value used by this contract.
 	role: SecretRole;
-	// Stores the secret info value used by this contract.
-	secretInfo: SecretInfo;
+	// Stores the custom tags value used by this contract.
+	customTags: GNHashtable;
 	// Stores the operation request value used by this contract.
 	operationRequest: OperationRequest;
 	// Stores the operation response value used by this contract.
@@ -456,8 +399,8 @@ interface FunctionRequestSystemMatchmaking {
 interface FunctionRequestSystemAuthenticate {
 	// Stores the request collection used by this contract.
 	request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any } };
-	// Stores the secret info value used by this contract.
-	secretInfo: SecretInfo;
+	// Stores the custom tags value used by this contract.
+	customTags: GNHashtable;
 	// Stores the operation request value used by this contract.
 	operationRequest: OperationRequest;
 	// Stores the operation response value used by this contract.
@@ -563,28 +506,11 @@ process?.on("message", async (request: CloudScriptRequest) => {
 			operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
 		}
 
-		// Stores the origin secret info value used in the current execution flow.
-		let originSecretInfo = request.secretInfo;
-		// Stores the secret info value used in the current execution flow.
-		let secretInfo: SecretInfo = null as any;
-		if (originSecretInfo) {
-			secretInfo = SecretInfo.Builder()
-				.setSecretKey(originSecretInfo.secretKey)
-				.setDescription(originSecretInfo.description)
-				.setIsRemove(originSecretInfo.remove)
-				.setTsExpire(originSecretInfo.tsExpire)
-				.setPermission(originSecretInfo.permission)
-				.setGameId(originSecretInfo.gameId)
-				.setIsDefault(originSecretInfo.isDefault)
-				.setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
-				.build();
-		}
-
 		if (request.eventType == EventCallbackType.Pre) {
 			// Stores the function request value used in the current execution flow.
 			let functionRequest: FunctionRequestPre = {
 				operationRequest: operationRequest,
-				secretInfo: secretInfo,
+				customTags: request.customTags == null ? null : GNHashtable.builder().addAll(request.customTags).build(),
 				request: request.request,
 				role: request.role,
 				/**
@@ -618,7 +544,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 			let functionRequest: FunctionRequestPost = {
 				operationRequest: operationRequest,
 				operationResponse: operationResponse,
-				secretInfo: secretInfo,
+				customTags: request.customTags == null ? null : GNHashtable.builder().addAll(request.customTags).build(),
 				request: request.request,
 				role: request.role,
 				/**
@@ -680,23 +606,6 @@ process?.on("message", async (request: CloudScriptRequest) => {
 				operationRequest.setParameters(GNHashtable.builder().addAll(originOperationRequest.parameters).build());
 			}
 
-			// Stores the origin secret info value used in the current execution flow.
-			let originSecretInfo = request.secretInfo;
-			// Stores the secret info value used in the current execution flow.
-			let secretInfo: SecretInfo = null as any;
-			if (originSecretInfo) {
-				secretInfo = SecretInfo.Builder()
-					.setSecretKey(originSecretInfo.secretKey)
-					.setDescription(originSecretInfo.description)
-					.setIsRemove(originSecretInfo.remove)
-					.setTsExpire(originSecretInfo.tsExpire)
-					.setPermission(originSecretInfo.permission)
-					.setGameId(originSecretInfo.gameId)
-					.setIsDefault(originSecretInfo.isDefault)
-					.setIsOnlyMasterAdmin(originSecretInfo.onlyMasterAdmin)
-					.build();
-			}
-
 			// Stores the origin operation response value used in the current execution flow.
 			let originOperationResponse = request.operationResponse;
 			// Stores the operation response value used in the current execution flow.
@@ -716,7 +625,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 			let functionRequest: FunctionRequestSystemAuthenticate = {
 				operationRequest: operationRequest,
 				operationResponse: operationResponse,
-				secretInfo: secretInfo,
+				customTags: request.customTags == null ? null : GNHashtable.builder().addAll(request.customTags).build(),
 				request: {
 					userId: request.request.userId,
 					ipAddress: request.request.ipAddress,
@@ -945,7 +854,7 @@ async function ___handleSystemAuthenticateFunction(name: string, request: Functi
 
 	try {
 		// Stores the result value used in the current execution flow.
-		let result = await handler(request.request as any, request.secretInfo, request.operationRequest, request.operationResponse as any, request.log);
+		let result = await handler(request.request, request.customTags, request.operationRequest, request.operationResponse, request.log);
 
 		if (result) {
 			answer.result = {
@@ -1076,7 +985,7 @@ async function ___handlePreFunction(name: string, request: FunctionRequestPre): 
 
 	try {
 		// Stores the result value used in the current execution flow.
-		let result = await handler(request.request, request.role, request.secretInfo, request.operationRequest, request.log);
+		let result = await handler(request.request, request.role, request.customTags, request.operationRequest, request.log);
 
 		if (result)
 			answer.result = {
@@ -1123,7 +1032,7 @@ async function ___handlePostFunction(name: string, request: FunctionRequestPost)
 
 	try {
 		// Stores the result value used in the current execution flow.
-		let result = await handler(request.request, request.role, request.secretInfo, request.operationRequest, request.operationResponse as any, request.log);
+		let result = await handler(request.request, request.role, request.customTags, request.operationRequest, request.operationResponse, request.log);
 
 		if (result) {
 			answer.result = {
@@ -1181,22 +1090,22 @@ process.env.gnServerSettingsOptions = "";
 process.env.gnAuthToken = "";
 
 // Stores the pre handlers value used by this module.
-const preHandlers: Record<string, (request: any, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => Promise<OperationResponse | null>> = {};
+const preHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, log: (log: any) => void) => Promise<OperationResponse | null>> = {};
 
 // Stores the post handlers value used by this module.
-const postHandlers: Record<string, (request: any, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
+const postHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
 
 // Stores the system handlers value used by this module.
 const systemHandlers: Record<string, (log: (log: any) => void) => Promise<void>> = {};
 
 // Stores the event handlers value used by this module.
-const eventHandlers: Record<string, (request: any, operationEvent: OperationEvent, log: (log: any) => void) => Promise<void>> = {};
+const eventHandlers: Record<string, (request: { [k: string]: any }, operationEvent: OperationEvent, log: (log: any) => void) => Promise<void>> = {};
 
 // Stores the system matchmaking handlers value used by this module.
 const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void) => Promise<{ success: boolean }>> = {};
 
 // Stores the system authenticate handlers value used by this module.
-const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
+const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
 
 // Stores the system generic service handlers value used by this module.
 const systemGenericServiceHandlers: Record<string, (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void) => Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>> = {};
