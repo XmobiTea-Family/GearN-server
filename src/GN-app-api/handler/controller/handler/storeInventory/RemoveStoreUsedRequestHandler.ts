@@ -17,7 +17,7 @@ import {
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 
 class RemoveStoreUsedOperationRequest extends OperationRequest {
@@ -101,7 +101,7 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			ownerIds: request.ownerIds,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -125,7 +125,7 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			ownerIds: request.ownerIds,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -149,7 +149,7 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			ownerIds: request.ownerIds,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -159,9 +159,9 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { storeId: string, ownerIds: string[] }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { storeId: string, ownerIds: string[] }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_RemoveStoreUsed", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_RemoveStoreUsed", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -173,7 +173,7 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_RemoveStoreUsed", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_RemoveStoreUsed", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

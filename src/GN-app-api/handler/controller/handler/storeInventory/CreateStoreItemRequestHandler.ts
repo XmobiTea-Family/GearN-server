@@ -10,7 +10,7 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
@@ -99,7 +99,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			displayName: request.displayName,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -123,7 +123,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			displayName: request.displayName,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -147,7 +147,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			displayName: request.displayName,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -157,9 +157,9 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { storeId: string, displayName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { storeId: string, displayName: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_CreateStoreItem", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_CreateStoreItem", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -207,7 +207,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_CreateStoreItem", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_CreateStoreItem", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

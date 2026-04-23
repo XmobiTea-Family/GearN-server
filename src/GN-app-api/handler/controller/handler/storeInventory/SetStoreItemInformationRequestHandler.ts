@@ -142,7 +142,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			displayName: request.displayName,
 			avatar: request.avatar,
 			tags: request.tags,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -174,7 +174,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			displayName: request.displayName,
 			avatar: request.avatar,
 			tags: request.tags,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -206,7 +206,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			displayName: request.displayName,
 			avatar: request.avatar,
 			tags: request.tags,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -216,9 +216,9 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { storeId: string, storeItemType: number, storeDatas: Array<StoreDataParam>, storeItems: Array<StoreItemParam>, storeCurrencies: Array<CurrencyParam>, priceCurrencies: Array<CurrencyParam>, inAppPurchase: InAppPurchaseParam, displayName: string, avatar: AvatarParam, tags: Array<TagParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { storeId: string, storeItemType: number, storeDatas: Array<StoreDataParam>, storeItems: Array<StoreItemParam>, storeCurrencies: Array<CurrencyParam>, priceCurrencies: Array<CurrencyParam>, inAppPurchase: InAppPurchaseParam, displayName: string, avatar: AvatarParam, tags: Array<TagParam> }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -366,7 +366,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("storeInventory_SetStoreItemInformation", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
