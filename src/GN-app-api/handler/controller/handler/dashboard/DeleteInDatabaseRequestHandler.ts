@@ -88,7 +88,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			type: request.type,
 			gameId: request.gameId,
 			log: request.log,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -98,9 +98,9 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { id: string, type: number, gameId: string, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { id: string, type: number, gameId: string, log: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_DeleteInDatabase", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_DeleteInDatabase", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -324,7 +324,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_DeleteInDatabase", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_DeleteInDatabase", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

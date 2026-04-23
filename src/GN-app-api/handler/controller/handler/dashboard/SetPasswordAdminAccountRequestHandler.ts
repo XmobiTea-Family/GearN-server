@@ -73,7 +73,7 @@ export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
 		return this.execute({
 			userId: request.userId,
 			password: request.password,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -83,9 +83,9 @@ export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, password: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetPasswordAdminAccount", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetPasswordAdminAccount", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -115,7 +115,7 @@ export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
 			userId: request.userId,
 		});
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetPasswordAdminAccount", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetPasswordAdminAccount", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

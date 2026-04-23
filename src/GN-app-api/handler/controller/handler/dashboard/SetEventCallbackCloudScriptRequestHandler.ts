@@ -71,7 +71,7 @@ export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 		return this.execute({
 			eventName: request.eventName,
 			script: request.script,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -81,9 +81,9 @@ export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { eventName: string, script: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { eventName: string, script: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetEventCallbackCloudScript", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_SetEventCallbackCloudScript", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -102,7 +102,7 @@ export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorMessage, response.errorMessage);
 		}
 
-		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetEventCallbackCloudScript", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetEventCallbackCloudScript", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
