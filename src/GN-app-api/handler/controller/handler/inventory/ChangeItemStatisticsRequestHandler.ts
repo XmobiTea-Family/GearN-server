@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 import { ItemStatisticsParam } from "./model/ItemStatisticsParam";
@@ -107,7 +107,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			itemStatistics: request.itemStatistics,
 			log: request.log,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -132,7 +132,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			itemStatistics: request.itemStatistics,
 			log: request.log,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -157,7 +157,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			itemStatistics: request.itemStatistics,
 			log: request.log,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -167,9 +167,9 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { itemId: string, itemStatistics: Array<ItemStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { itemId: string, itemStatistics: Array<ItemStatisticsParam>, log: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_ChangeItemStatistics", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_ChangeItemStatistics", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -375,7 +375,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("inventory_ChangeItemStatistics", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("inventory_ChangeItemStatistics", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

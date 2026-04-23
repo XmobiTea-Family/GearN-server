@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 
 class GetSegmentOperationRequest extends OperationRequest {
@@ -94,7 +94,7 @@ export class GetSegmentRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -117,7 +117,7 @@ export class GetSegmentRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -140,7 +140,7 @@ export class GetSegmentRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -150,9 +150,9 @@ export class GetSegmentRequestHandler extends ItemBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { itemId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { itemId: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetSegment", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetSegment", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -181,7 +181,7 @@ export class GetSegmentRequestHandler extends ItemBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("inventory_GetSegment", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("inventory_GetSegment", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

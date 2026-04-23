@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
@@ -108,7 +108,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			newOwnerId: request.newOwnerId,
 			newOwnerType: request.newOwnerType,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -133,7 +133,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			newOwnerId: request.newOwnerId,
 			newOwnerType: request.newOwnerType,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -158,7 +158,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			newOwnerId: request.newOwnerId,
 			newOwnerType: request.newOwnerType,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -168,9 +168,9 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { itemId: string, newOwnerId: string, newOwnerType: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { itemId: string, newOwnerId: string, newOwnerType: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetOwner", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetOwner", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -301,7 +301,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetOwner", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetOwner", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
