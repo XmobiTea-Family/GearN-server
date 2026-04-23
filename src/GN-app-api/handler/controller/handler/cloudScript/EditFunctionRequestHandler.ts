@@ -9,7 +9,7 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 class EditFunctionOperationRequest extends OperationRequest {
@@ -95,7 +95,7 @@ export class EditFunctionRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, secretInfo, operationRequest);
+		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -116,7 +116,7 @@ export class EditFunctionRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, secretInfo, operationRequest);
+		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -137,19 +137,20 @@ export class EditFunctionRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, secretInfo, operationRequest);
+		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
 	 * Executes the execute workflow asynchronously.
 	 * @param request Provides the request value used by this operation.
+	 * @param role Provides the role value used by this operation.
 	 * @param secretInfo Provides the secret info value used by this operation.
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { version: string, canExecute: boolean, isLive: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { version: string, canExecute: boolean, isLive: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_EditFunction", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_EditFunction", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -175,7 +176,7 @@ export class EditFunctionRequestHandler extends RequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorMessage, response.errorMessage);
 		}
 
-		await this.gnServer.getPostEventCallbackService().onEvent("cloudScript_EditFunction", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("cloudScript_EditFunction", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

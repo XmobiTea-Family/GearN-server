@@ -9,7 +9,7 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 import { GNArray, GNHashtableBuilder } from "./../../../../../GN-common/common/GNData";
 
@@ -84,7 +84,7 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({}, secretInfo, operationRequest);
+		return this.execute({}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -105,7 +105,7 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({}, secretInfo, operationRequest);
+		return this.execute({}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -126,19 +126,20 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({}, secretInfo, operationRequest);
+		return this.execute({}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
 	 * Executes the execute workflow asynchronously.
 	 * @param request Provides the request value used by this operation.
+	 * @param role Provides the role value used by this operation.
 	 * @param secretInfo Provides the secret info value used by this operation.
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: {}, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_GetFunctions", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("cloudScript_GetFunctions", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -173,7 +174,7 @@ export class GetFunctionsRequestHandler extends RequestHandler {
 		operationResponse.setParameter(ParameterCode.LatestVersion, cloudScriptService.getLatestVersion());
 		operationResponse.setParameter(ParameterCode.LiveLatestVersion, cloudScriptService.getLiveLatestVersion());
 
-		await this.gnServer.getPostEventCallbackService().onEvent("cloudScript_GetFunctions", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("cloudScript_GetFunctions", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
