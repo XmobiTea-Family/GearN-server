@@ -8,7 +8,7 @@ import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
@@ -97,7 +97,7 @@ export class SetContentDataRequestHandler extends RequestHandler {
 		return this.execute({
 			configs: request.configs,
 			label: request.label,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -121,7 +121,7 @@ export class SetContentDataRequestHandler extends RequestHandler {
 		return this.execute({
 			configs: request.configs,
 			label: request.label,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -145,7 +145,7 @@ export class SetContentDataRequestHandler extends RequestHandler {
 		return this.execute({
 			configs: request.configs,
 			label: request.label,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -155,9 +155,9 @@ export class SetContentDataRequestHandler extends RequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { configs: Array<ContentDataParam>, label: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { configs: Array<ContentDataParam>, label: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_SetContentData", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_SetContentData", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -195,7 +195,7 @@ export class SetContentDataRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("content_SetContentData", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("content_SetContentData", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

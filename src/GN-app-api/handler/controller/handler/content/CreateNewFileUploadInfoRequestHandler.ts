@@ -9,7 +9,7 @@ import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 
@@ -91,7 +91,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		return this.execute({
 			fileName: request.fileName,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -114,7 +114,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		return this.execute({
 			fileName: request.fileName,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -137,7 +137,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		return this.execute({
 			fileName: request.fileName,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -147,9 +147,9 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { fileName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { fileName: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_CreateNewFileUploadInfo", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_CreateNewFileUploadInfo", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -175,7 +175,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("content_CreateNewFileUploadInfo", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("content_CreateNewFileUploadInfo", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
