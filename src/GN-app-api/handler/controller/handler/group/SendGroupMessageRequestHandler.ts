@@ -253,8 +253,6 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			}
 		}
 
-		// Stores the role value used in the current execution flow.
-		let role = <SecretRole>secretInfo.getRole();
 		if (role == SecretRole.Player) {
 			if (!(await this.isMember(group, request.userId, secretInfo.getGameId()))) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerNotMember);
