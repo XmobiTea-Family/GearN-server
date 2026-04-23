@@ -60,7 +60,7 @@ export class RemoveAdminAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.removeAdminAccount.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.removeAdminAccount.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

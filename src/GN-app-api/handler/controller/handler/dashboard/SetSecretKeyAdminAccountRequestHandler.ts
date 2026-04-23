@@ -65,7 +65,7 @@ export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.setSecretKeyAdminAccount.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.setSecretKeyAdminAccount.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

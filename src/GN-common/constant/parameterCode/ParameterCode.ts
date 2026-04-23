@@ -230,7 +230,7 @@ export class ParameterCode {
 	public static readonly Group: string = "group";
 	public static readonly Inventory: string = "inventory";
 	public static readonly StoreInventory: string = "storeInventory";
-	public static readonly MasterAdmin: string = "masterAdmin";
+	public static readonly Dashboard: string = "dashboard";
 
 	public static readonly LoginByAccount: string = "loginByAccount";
 	public static readonly LoginByAndroidDeviceId: string = "loginByAndroidDeviceId";

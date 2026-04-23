@@ -70,7 +70,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.createSecretInfo.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.createSecretInfo.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -562,7 +562,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getStoreUsed: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				removeStoreUsed: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 			},
-			masterAdmin: {
+			dashboard: {
 				setMasterGameSettings: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				createAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				removeAdminAccount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -1054,7 +1054,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getStoreUsed: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				removeStoreUsed: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 			},
-			masterAdmin: {
+			dashboard: {
 				setMasterGameSettings: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				createAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -1546,7 +1546,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getStoreUsed: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				removeStoreUsed: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 			},
-			masterAdmin: {
+			dashboard: {
 				setMasterGameSettings: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				createAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
@@ -2039,7 +2039,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getStoreUsed: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeStoreUsed: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 			},
-			masterAdmin: {
+			dashboard: {
 				setMasterGameSettings: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				createAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeAdminAccount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },

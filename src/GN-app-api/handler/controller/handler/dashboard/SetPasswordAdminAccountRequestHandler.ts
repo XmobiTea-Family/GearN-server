@@ -66,7 +66,7 @@ export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.setPasswordAdminAccount.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.setPasswordAdminAccount.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

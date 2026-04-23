@@ -89,7 +89,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.resetStatisticsLeaderboard.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.resetStatisticsLeaderboard.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

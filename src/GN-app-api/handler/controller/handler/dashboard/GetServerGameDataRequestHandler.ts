@@ -113,7 +113,7 @@ export class GetServerGameDataRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getServerGameData.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getServerGameData.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

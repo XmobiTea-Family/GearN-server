@@ -56,7 +56,7 @@ export class GetAdminAccountListRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getAdminAccountList.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getAdminAccountList.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

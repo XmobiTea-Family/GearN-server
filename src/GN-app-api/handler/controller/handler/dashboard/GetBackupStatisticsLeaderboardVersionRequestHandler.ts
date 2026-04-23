@@ -70,7 +70,7 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getBackupStatisticsLeaderboardVersion.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getBackupStatisticsLeaderboardVersion.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

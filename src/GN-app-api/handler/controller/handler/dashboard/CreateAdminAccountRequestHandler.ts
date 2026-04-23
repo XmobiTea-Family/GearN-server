@@ -70,7 +70,7 @@ export class CreateAdminAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.createAdminAccount.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.createAdminAccount.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

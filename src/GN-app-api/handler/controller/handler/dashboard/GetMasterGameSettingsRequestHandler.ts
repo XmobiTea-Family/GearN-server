@@ -57,7 +57,7 @@ export class GetMasterGameSettingsRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getMasterGameSettings.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getMasterGameSettings.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

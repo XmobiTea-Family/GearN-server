@@ -103,7 +103,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			}
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.setMasterGameSettings.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.setMasterGameSettings.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

@@ -55,7 +55,7 @@ export class GetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getEventCallbackCloudScript.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getEventCallbackCloudScript.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

@@ -79,7 +79,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.deleteInDatabase.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.deleteInDatabase.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

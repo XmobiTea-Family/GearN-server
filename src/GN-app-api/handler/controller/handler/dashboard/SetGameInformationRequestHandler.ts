@@ -93,7 +93,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.setGameInformation.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.setGameInformation.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

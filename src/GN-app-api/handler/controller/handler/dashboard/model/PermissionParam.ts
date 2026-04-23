@@ -47,8 +47,8 @@ export class PermissionParam {
 	public storeInventory?: StoreInventoryPermissionRulesParam;
 
 	// Stores the master admin value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.MasterAdmin, isOptional: true })
-	public masterAdmin?: MasterAdminPermissionRulesParam;
+	@GNHashtableDataMember({ code: ParameterCode.Dashboard, isOptional: true })
+	public dashboard?: MasterAdminPermissionRulesParam;
 
 	// Stores the multiplayer value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.Multiplayer, isOptional: true })

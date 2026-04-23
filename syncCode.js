@@ -370,7 +370,7 @@ var secretPermissionItem = {
 		validateGooglePlayStoreReceipt: {},
 		validateFacebookStoreReceipt: {},
 	},
-	masterAdmin: {
+	dashboard: {
 		setMasterGameSettings: {},
 		createAdminAccount: {},
 		removeAdminAccount: {},
@@ -445,7 +445,7 @@ function mainCSharp() {
 	syncCodeCSharp("authenticate", ["LoginBaseRequestHandler.ts"], "Authenticate");
 	syncCodeCSharp("characterPlayer", ["CharacterPlayerBaseRequestHandler.ts"], "CharacterPlayer");
 	syncCodeCSharp("content", [], "Content");
-	syncCodeCSharp("dashboard", [], "MasterAdmin");
+	syncCodeCSharp("dashboard", [], "Dashboard");
 	syncCodeCSharp("gamePlayer", ["GamePlayerBaseRequestHandler.ts"], "GamePlayer");
 	syncCodeCSharp("group", ["GroupBaseRequestHandler.ts"], "Group");
 	syncCodeCSharp("inventory", ["ItemBaseRequestHandler.ts"], "Inventory");
@@ -455,7 +455,7 @@ function mainCSharp() {
 	syncModelCodeCSharp("authenticate", "Authenticate");
 	syncModelCodeCSharp("characterPlayer", "CharacterPlayer");
 	syncModelCodeCSharp("content", "Content");
-	syncModelCodeCSharp("dashboard", "MasterAdmin");
+	syncModelCodeCSharp("dashboard", "Dashboard");
 	syncModelCodeCSharp("gamePlayer", "GamePlayer");
 	syncModelCodeCSharp("group", "Group");
 	syncModelCodeCSharp("inventory", "Inventory");
@@ -844,7 +844,7 @@ function mainTypescript() {
 	// syncApiCodeTypescript("cloudScript", [], "CloudScript");
 	// syncApiCodeTypescript("content", [], "Content");
 
-	syncApiCodeTypescript("dashboard", [], "MasterAdmin");
+	syncApiCodeTypescript("dashboard", [], "Dashboard");
 	// syncApiCodeTypescript("gamePlayer", ["GamePlayerBaseRequestHandler.ts"], "GamePlayer");
 	// syncApiCodeTypescript("group", ["GroupBaseRequestHandler.ts", "GroupMessageItem.ts"], "Group");
 	// syncApiCodeTypescript("inventory", ["ItemBaseRequestHandler.ts"], "Inventory");
@@ -855,7 +855,7 @@ function mainTypescript() {
 	// syncModelCodeTypescript("authenticate", "Authenticate");
 	// syncModelCodeTypescript("characterPlayer", "CharacterPlayer");
 	// syncModelCodeTypescript("content", "Content");
-	// syncModelCodeTypescript("dashboard", "MasterAdmin");
+	// syncModelCodeTypescript("dashboard", "Dashboard");
 	// syncModelCodeTypescript("gamePlayer", "GamePlayer");
 	// syncModelCodeTypescript("group", "Group");
 	// syncModelCodeTypescript("inventory", "Inventory");

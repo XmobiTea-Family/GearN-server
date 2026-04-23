@@ -76,7 +76,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.setSecretInfoInformation.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.setSecretInfoInformation.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

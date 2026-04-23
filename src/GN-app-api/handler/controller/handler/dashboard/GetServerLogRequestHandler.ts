@@ -67,7 +67,7 @@ export class GetServerLogRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getServerLog.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getServerLog.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

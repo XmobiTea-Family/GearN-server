@@ -61,7 +61,7 @@ export class GetUsernameAdminAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getUsernameAdminAccount.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getUsernameAdminAccount.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

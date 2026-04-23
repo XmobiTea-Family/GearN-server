@@ -111,7 +111,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getAnalytics.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getAnalytics.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

@@ -598,126 +598,126 @@ export class ServerApplication extends BuilderBase {
 				let permission = CreateSecretInfoRequestHandler.generateRecommendAdminPermission();
 
 				{
-					permission.masterAdmin.setMasterGameSettings = {
+					permission.dashboard.setMasterGameSettings = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.createAdminAccount = {
+					permission.dashboard.createAdminAccount = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.removeAdminAccount = {
+					permission.dashboard.removeAdminAccount = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.setPasswordAdminAccount = {
+					permission.dashboard.setPasswordAdminAccount = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.setSecretKeyAdminAccount = {
+					permission.dashboard.setSecretKeyAdminAccount = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.setGameInformation = {
+					permission.dashboard.setGameInformation = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.createGame = {
+					permission.dashboard.createGame = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.changePasswordAdminAccount = {
+					permission.dashboard.changePasswordAdminAccount = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.getAdminAccountList = {
+					permission.dashboard.getAdminAccountList = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.getGameInformation = {
+					permission.dashboard.getGameInformation = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.getGameList = {
+					permission.dashboard.getGameList = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.getMasterGameSettings = {
+					permission.dashboard.getMasterGameSettings = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.getSecretInfoInformation = {
+					permission.dashboard.getSecretInfoInformation = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.getSecretInfoList = {
+					permission.dashboard.getSecretInfoList = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.createSecretInfo = {
+					permission.dashboard.createSecretInfo = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.setSecretInfoInformation = {
+					permission.dashboard.setSecretInfoInformation = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.getEventCallbackCloudScript = {
+					permission.dashboard.getEventCallbackCloudScript = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
 						serverSelfEnable: false,
 					};
 
-					permission.masterAdmin.setEventCallbackCloudScript = {
+					permission.dashboard.setEventCallbackCloudScript = {
 						selfEnable: false,
 						adminSelfEnable: false,
 						otherSelfEnable: false,
@@ -726,11 +726,11 @@ export class ServerApplication extends BuilderBase {
 				}
 
 				let adminPermission = structuredClone(permission);
-				// adminPermission.masterAdmin.createAdminAccount.selfEnable = false;
-				// adminPermission.masterAdmin.removeAdminAccount.selfEnable = false;
-				// adminPermission.masterAdmin.setPasswordAdminAccount.selfEnable = false;
-				// adminPermission.masterAdmin.setSecretKeyAdminAccount.selfEnable = false;
-				// adminPermission.masterAdmin.createGame.selfEnable = false;
+				// adminPermission.dashboard.createAdminAccount.selfEnable = false;
+				// adminPermission.dashboard.removeAdminAccount.selfEnable = false;
+				// adminPermission.dashboard.setPasswordAdminAccount.selfEnable = false;
+				// adminPermission.dashboard.setSecretKeyAdminAccount.selfEnable = false;
+				// adminPermission.dashboard.createGame.selfEnable = false;
 
 				let result = {
 					type: "secretInfo",

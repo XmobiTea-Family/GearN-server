@@ -66,7 +66,7 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.changePasswordAdminAccount.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.changePasswordAdminAccount.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

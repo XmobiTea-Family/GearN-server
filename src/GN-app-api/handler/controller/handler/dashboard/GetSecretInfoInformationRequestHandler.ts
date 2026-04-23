@@ -60,7 +60,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getSecretInfoInformation.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getSecretInfoInformation.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -4464,14 +4464,14 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 		}
 
 		{
-			// Stores the GearN master admin value used in the current execution flow.
-			let gnMasterAdmin = new GNHashtable();
-			// Stores the master admin value used in the current execution flow.
-			let masterAdmin = permission.masterAdmin;
+			// Stores the GearN dashboard value used in the current execution flow.
+			let gnDashboard = new GNHashtable();
+			// Stores the dashboard value used in the current execution flow.
+			let dashboard = permission.dashboard;
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.setMasterGameSettings;
+				let permissionRules = dashboard.setMasterGameSettings;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4480,12 +4480,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.SetMasterGameSettings, gnPermissionRules);
+				gnDashboard.add(ParameterCode.SetMasterGameSettings, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.createAdminAccount;
+				let permissionRules = dashboard.createAdminAccount;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4494,12 +4494,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.CreateAdminAccount, gnPermissionRules);
+				gnDashboard.add(ParameterCode.CreateAdminAccount, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.removeAdminAccount;
+				let permissionRules = dashboard.removeAdminAccount;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4508,12 +4508,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.RemoveAdminAccount, gnPermissionRules);
+				gnDashboard.add(ParameterCode.RemoveAdminAccount, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.setPasswordAdminAccount;
+				let permissionRules = dashboard.setPasswordAdminAccount;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4522,12 +4522,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.SetPasswordAdminAccount, gnPermissionRules);
+				gnDashboard.add(ParameterCode.SetPasswordAdminAccount, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.setSecretKeyAdminAccount;
+				let permissionRules = dashboard.setSecretKeyAdminAccount;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4536,12 +4536,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.SetSecretKeyAdminAccount, gnPermissionRules);
+				gnDashboard.add(ParameterCode.SetSecretKeyAdminAccount, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.setGameInformation;
+				let permissionRules = dashboard.setGameInformation;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4550,12 +4550,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.SetGameInformation, gnPermissionRules);
+				gnDashboard.add(ParameterCode.SetGameInformation, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.createGame;
+				let permissionRules = dashboard.createGame;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4564,12 +4564,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.CreateGame, gnPermissionRules);
+				gnDashboard.add(ParameterCode.CreateGame, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.changePasswordAdminAccount;
+				let permissionRules = dashboard.changePasswordAdminAccount;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4578,12 +4578,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.ChangePasswordAdminAccount, gnPermissionRules);
+				gnDashboard.add(ParameterCode.ChangePasswordAdminAccount, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getAdminAccountList;
+				let permissionRules = dashboard.getAdminAccountList;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4592,12 +4592,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetAdminAccountList, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetAdminAccountList, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getGameInformation;
+				let permissionRules = dashboard.getGameInformation;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4606,12 +4606,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetGameInformation, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetGameInformation, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getGameList;
+				let permissionRules = dashboard.getGameList;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4620,12 +4620,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetGameList, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetGameList, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getMasterGameSettings;
+				let permissionRules = dashboard.getMasterGameSettings;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4634,12 +4634,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetMasterGameSettings, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetMasterGameSettings, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getServerLog;
+				let permissionRules = dashboard.getServerLog;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4648,12 +4648,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetServerLog, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetServerLog, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getSecretInfoInformation;
+				let permissionRules = dashboard.getSecretInfoInformation;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4662,12 +4662,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetSecretInfoInformation, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetSecretInfoInformation, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getSecretInfoList;
+				let permissionRules = dashboard.getSecretInfoList;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4676,12 +4676,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetSecretInfoList, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetSecretInfoList, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.createSecretInfo;
+				let permissionRules = dashboard.createSecretInfo;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4690,12 +4690,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.CreateSecretInfo, gnPermissionRules);
+				gnDashboard.add(ParameterCode.CreateSecretInfo, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.setSecretInfoInformation;
+				let permissionRules = dashboard.setSecretInfoInformation;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4704,12 +4704,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.SetSecretInfoInformation, gnPermissionRules);
+				gnDashboard.add(ParameterCode.SetSecretInfoInformation, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getUsernameAdminAccount;
+				let permissionRules = dashboard.getUsernameAdminAccount;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4718,12 +4718,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetUsernameAdminAccount, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetUsernameAdminAccount, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getAnalytics;
+				let permissionRules = dashboard.getAnalytics;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4732,12 +4732,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetAnalytics, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetAnalytics, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getEventCallbackCloudScript;
+				let permissionRules = dashboard.getEventCallbackCloudScript;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4746,12 +4746,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetEventCallbackCloudScript, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetEventCallbackCloudScript, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.setEventCallbackCloudScript;
+				let permissionRules = dashboard.setEventCallbackCloudScript;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4760,12 +4760,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.SetEventCallbackCloudScript, gnPermissionRules);
+				gnDashboard.add(ParameterCode.SetEventCallbackCloudScript, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.resetStatisticsLeaderboard;
+				let permissionRules = dashboard.resetStatisticsLeaderboard;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4774,12 +4774,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.ResetStatisticsLeaderboard, gnPermissionRules);
+				gnDashboard.add(ParameterCode.ResetStatisticsLeaderboard, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getBackupStatisticsLeaderboardVersion;
+				let permissionRules = dashboard.getBackupStatisticsLeaderboardVersion;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4788,12 +4788,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetBackupStatisticsLeaderboardVersion, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetBackupStatisticsLeaderboardVersion, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.getServerGameData;
+				let permissionRules = dashboard.getServerGameData;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -4802,12 +4802,12 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.GetServerGameData, gnPermissionRules);
+				gnDashboard.add(ParameterCode.GetServerGameData, gnPermissionRules);
 			}
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterAdmin.deleteInDatabase;
+				let permissionRules = dashboard.deleteInDatabase;
 				if (permissionRules == null) {
 					permissionRules = {
 						selfEnable: false,
@@ -4824,10 +4824,10 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterAdmin.add(ParameterCode.DeleteInDatabase, gnPermissionRules);
+				gnDashboard.add(ParameterCode.DeleteInDatabase, gnPermissionRules);
 			}
 
-			gnPermission.add(ParameterCode.MasterAdmin, gnMasterAdmin);
+			gnPermission.add(ParameterCode.Dashboard, gnDashboard);
 		}
 
 		{

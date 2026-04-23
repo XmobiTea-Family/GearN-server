@@ -55,7 +55,7 @@ export class GetGameListRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.getGameList.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.getGameList.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

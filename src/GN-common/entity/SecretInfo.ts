@@ -94,7 +94,7 @@ export interface ContentPermissionRules {
 	serverSelfEnable: boolean;
 }
 
-export interface MasterAdminPermissionRules {
+export interface DashboardPermissionRules {
 	// Indicates whether self enable.
 	selfEnable: boolean;
 	// Indicates whether other self enable.
@@ -875,57 +875,57 @@ export interface SecretPermissionItem {
 		removeStoreUsed: StoreInventoryPermissionRules,
 	},
 	// Stores the master admin value used by this contract.
-	masterAdmin: {
+	dashboard: {
 		// Stores the set master game settings value used by this contract.
-		setMasterGameSettings: MasterAdminPermissionRules,
+		setMasterGameSettings: DashboardPermissionRules,
 		// Stores the create admin account value used by this contract.
-		createAdminAccount: MasterAdminPermissionRules,
+		createAdminAccount: DashboardPermissionRules,
 		// Stores the remove admin account value used by this contract.
-		removeAdminAccount: MasterAdminPermissionRules,
+		removeAdminAccount: DashboardPermissionRules,
 		// Stores the set password admin account value used by this contract.
-		setPasswordAdminAccount: MasterAdminPermissionRules,
+		setPasswordAdminAccount: DashboardPermissionRules,
 		// Stores the set secret key admin account value used by this contract.
-		setSecretKeyAdminAccount: MasterAdminPermissionRules,
+		setSecretKeyAdminAccount: DashboardPermissionRules,
 		// Stores the set game information value used by this contract.
-		setGameInformation: MasterAdminPermissionRules,
+		setGameInformation: DashboardPermissionRules,
 		// Stores the create game value used by this contract.
-		createGame: MasterAdminPermissionRules,
+		createGame: DashboardPermissionRules,
 		// Stores the change password admin account value used by this contract.
-		changePasswordAdminAccount: MasterAdminPermissionRules,
+		changePasswordAdminAccount: DashboardPermissionRules,
 		// Stores the get admin account list value used by this contract.
-		getAdminAccountList: MasterAdminPermissionRules,
+		getAdminAccountList: DashboardPermissionRules,
 		// Stores the get game information value used by this contract.
-		getGameInformation: MasterAdminPermissionRules,
+		getGameInformation: DashboardPermissionRules,
 		// Stores the get game list value used by this contract.
-		getGameList: MasterAdminPermissionRules,
+		getGameList: DashboardPermissionRules,
 		// Stores the get master game settings value used by this contract.
-		getMasterGameSettings: MasterAdminPermissionRules,
+		getMasterGameSettings: DashboardPermissionRules,
 		// Stores the get server log value used by this contract.
-		getServerLog: MasterAdminPermissionRules,
+		getServerLog: DashboardPermissionRules,
 		// Stores the get secret info information value used by this contract.
-		getSecretInfoInformation: MasterAdminPermissionRules,
+		getSecretInfoInformation: DashboardPermissionRules,
 		// Stores the get secret info list value used by this contract.
-		getSecretInfoList: MasterAdminPermissionRules,
+		getSecretInfoList: DashboardPermissionRules,
 		// Stores the create secret info value used by this contract.
-		createSecretInfo: MasterAdminPermissionRules,
+		createSecretInfo: DashboardPermissionRules,
 		// Stores the set secret info information value used by this contract.
-		setSecretInfoInformation: MasterAdminPermissionRules,
+		setSecretInfoInformation: DashboardPermissionRules,
 		// Stores the get username admin account value used by this contract.
-		getUsernameAdminAccount: MasterAdminPermissionRules,
+		getUsernameAdminAccount: DashboardPermissionRules,
 		// Stores the get analytics value used by this contract.
-		getAnalytics: MasterAdminPermissionRules,
+		getAnalytics: DashboardPermissionRules,
 		// Stores the get event callback cloud script value used by this contract.
-		getEventCallbackCloudScript: MasterAdminPermissionRules,
+		getEventCallbackCloudScript: DashboardPermissionRules,
 		// Stores the set event callback cloud script value used by this contract.
-		setEventCallbackCloudScript: MasterAdminPermissionRules,
+		setEventCallbackCloudScript: DashboardPermissionRules,
 		// Stores the reset statistics leaderboard value used by this contract.
-		resetStatisticsLeaderboard: MasterAdminPermissionRules,
+		resetStatisticsLeaderboard: DashboardPermissionRules,
 		// Stores the get backup statistics leaderboard version value used by this contract.
-		getBackupStatisticsLeaderboardVersion: MasterAdminPermissionRules,
+		getBackupStatisticsLeaderboardVersion: DashboardPermissionRules,
 		// Stores the get server game data value used by this contract.
-		getServerGameData: MasterAdminPermissionRules,
+		getServerGameData: DashboardPermissionRules,
 		// Stores the delete in database value used by this contract.
-		deleteInDatabase: MasterAdminPermissionRules,
+		deleteInDatabase: DashboardPermissionRules,
 	},
 	// Stores the multiplayer value used by this contract.
 	multiplayer: {

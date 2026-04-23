@@ -64,7 +64,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterAdmin.createGame.selfEnable) {
+		if (!secretInfo.getPermission().dashboard.createGame.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
