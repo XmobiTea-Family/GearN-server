@@ -102,7 +102,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 		return this.execute({
 			characterId: request.characterId,
 			playerDatas: request.playerDatas
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -126,7 +126,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 		return this.execute({
 			characterId: request.characterId,
 			playerDatas: request.playerDatas
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -150,7 +150,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 		return this.execute({
 			characterId: request.characterId,
 			playerDatas: request.playerDatas
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -160,9 +160,9 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { characterId: string, playerDatas: Array<PlayerDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { characterId: string, playerDatas: Array<PlayerDataParam> }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetPlayerData", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetPlayerData", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -259,7 +259,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_SetPlayerData", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_SetPlayerData", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

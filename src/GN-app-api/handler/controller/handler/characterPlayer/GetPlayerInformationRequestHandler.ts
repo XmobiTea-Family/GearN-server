@@ -10,7 +10,7 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
@@ -133,7 +133,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 			characterId: request.characterId,
 			infoRequestParam: request.infoRequestParam,
 			updateTsLastLogin: updateTsLastLogin,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -160,7 +160,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 			characterId: request.characterId,
 			infoRequestParam: request.infoRequestParam,
 			updateTsLastLogin: false,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -187,7 +187,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 			characterId: request.characterId,
 			infoRequestParam: request.infoRequestParam,
 			updateTsLastLogin: false,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -197,9 +197,9 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { characterId: string, infoRequestParam: InfoRequestParam, updateTsLastLogin: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { characterId: string, infoRequestParam: InfoRequestParam, updateTsLastLogin: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetPlayerInformation", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetPlayerInformation", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -227,7 +227,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetPlayerInformation", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetPlayerInformation", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

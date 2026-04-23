@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
@@ -105,7 +105,7 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 		return this.execute({
 			characterId: request.characterId,
 			groupId: request.groupId,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -129,7 +129,7 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 		return this.execute({
 			characterId: request.characterId,
 			groupId: request.groupId,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -153,7 +153,7 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 		return this.execute({
 			characterId: request.characterId,
 			groupId: request.groupId,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -163,9 +163,9 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { characterId: string, groupId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { characterId: string, groupId: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_JoinGroup", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_JoinGroup", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -391,7 +391,7 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_JoinGroup", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_JoinGroup", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

@@ -1793,6 +1793,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 			eventName: eventName,
 			tsCreate: xDatetime.getCurrentMilliseconds(),
 			request: request,
+			role: role,
 			operationRequest: OperationHelper.toDataOperationRequest(operationRequest),
 			originRequest: OperationHelper.toDataFromRequest((operationRequest as any).originRequest),
 			operationResponse: operationResponseToData,
