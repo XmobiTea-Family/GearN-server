@@ -1,4 +1,4 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+﻿import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
 import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
@@ -13,7 +13,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 
 import bcrypt from "bcrypt";
 import { InfoRequestParam } from "./model/InfoRequestParam";
@@ -84,7 +84,7 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 			password: request.password,
 			infoRequestParam: request.infoRequestParam,
 			ipAddress: (request as any).originRequest.getIP(),
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -94,9 +94,9 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { username: string, password: string, infoRequestParam: InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { username: string, password: string, infoRequestParam: InfoRequestParam, ipAddress: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_RegisterAccount", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_RegisterAccount", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -166,7 +166,7 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 			}
 		}, secretInfo, operationRequest, operationResponse);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RegisterAccount", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RegisterAccount", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

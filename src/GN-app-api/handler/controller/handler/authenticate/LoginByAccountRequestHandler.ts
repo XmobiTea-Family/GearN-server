@@ -1,4 +1,4 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+﻿import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
 import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
@@ -83,7 +83,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			password: request.password,
 			infoRequestParam: request.infoRequestParam,
 			ipAddress: (request as any).originRequest.getIP(),
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -93,9 +93,9 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { username: string, password: string, infoRequestParam: InfoRequestParam, ipAddress: string, }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { username: string, password: string, infoRequestParam: InfoRequestParam, ipAddress: string, }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByAccount", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByAccount", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -168,7 +168,7 @@ export class LoginByAccountRequestHandler extends LoginBaseRequestHandler {
 			}
 		}, secretInfo, operationRequest, operationResponse);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByAccount", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByAccount", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

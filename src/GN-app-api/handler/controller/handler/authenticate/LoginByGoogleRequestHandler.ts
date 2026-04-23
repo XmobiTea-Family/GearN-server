@@ -1,4 +1,4 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+﻿import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
 import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
@@ -14,7 +14,7 @@ import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/l
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { LoginBaseRequestHandler } from "./LoginBaseRequestHandler";
 import { GoogleLoginType } from "./../../../../../GN-common/constant/enumType/GoogleLoginType";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class LoginByGoogleOperationRequest extends OperationRequest {
@@ -88,7 +88,7 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 			createPlayerIfNotExists: request.createPlayerIfNotExists,
 			infoRequestParam: request.infoRequestParam,
 			ipAddress: (request as any).originRequest.getIP(),
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -98,9 +98,9 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { token: string, googleLoginType: GoogleLoginType, createPlayerIfNotExists: boolean, infoRequestParam: InfoRequestParam, ipAddress: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { token: string, googleLoginType: GoogleLoginType, createPlayerIfNotExists: boolean, infoRequestParam: InfoRequestParam, ipAddress: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByGoogle", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("authenticate_LoginByGoogle", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -214,7 +214,7 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 			}
 		}, secretInfo, operationRequest, operationResponse);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByGoogle", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_LoginByGoogle", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
