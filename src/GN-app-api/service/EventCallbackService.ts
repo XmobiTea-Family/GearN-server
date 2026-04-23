@@ -1,5 +1,5 @@
 import { OperationHelper } from "./../../GN-common/entity/operationHelper/OperationHelper";
-import { SecretInfo, SecretPermissionItem } from "./../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretPermissionItem, SecretRole } from "./../../GN-common/entity/SecretInfo";
 import { OperationRequest } from "./../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../GN-common/entity/operationResponse/OperationResponse";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
@@ -42,6 +42,8 @@ interface CloudScriptRequestPre {
 	eventName: string;
 	// Stores the request collection used by this contract.
 	request: { [k: string]: any };
+	// Stores the role value used by this contract.
+	role: number;
 	// Stores the secret info value used by this contract.
 	secretInfo: {
 		// Stores the secret key value used by this contract.
@@ -83,6 +85,8 @@ interface CloudScriptRequestPost {
 	eventName: string;
 	// Stores the request collection used by this contract.
 	request: { [k: string]: any };
+	// Stores the role value used by this contract.
+	role: number;
 	// Stores the secret info value used by this contract.
 	secretInfo: {
 		// Stores the secret key value used by this contract.
@@ -323,17 +327,12 @@ export interface IEventCallbackCloudScriptService {
 	 * Executes the post.
 	 * @param eventName Provides the event name value used by this operation.
 	 * @param request Provides the request value used by this operation.
+	 * @param role Provides the role value used by this operation.
 	 * @param secretInfo Provides the secret info value used by this operation.
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @param operationResponse Provides the operation response value used by this operation.
 	 */
-	executePost(
-		eventName: string,
-		request: { [k: string]: any },
-		secretInfo: SecretInfo,
-		operationRequest: OperationRequest,
-		operationResponse: OperationResponse
-	): Promise<void>;
+	executePost(eventName: string, request: { [k: string]: any }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse): Promise<void>;
 	/**
 	 * Executes the event.
 	 * @param eventName Provides the event name value used by this operation.
@@ -345,11 +344,12 @@ export interface IEventCallbackCloudScriptService {
 	 * Executes the pre.
 	 * @param eventName Provides the event name value used by this operation.
 	 * @param request Provides the request value used by this operation.
+	 * @param role Provides the role value used by this operation.
 	 * @param secretInfo Provides the secret info value used by this operation.
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	executePre(eventName: string, request: { [k: string]: any }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
+	executePre(eventName: string, request: { [k: string]: any }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse>;
 	/**
 	 * Executes the authenticate.
 	 * @param request Provides the request value used by this operation.
@@ -832,6 +832,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	public async executePre(
 		eventName: string,
 		request: { [k: string]: any },
+		role: SecretRole,
 		secretInfo: SecretInfo,
 		operationRequest: OperationRequest
 	): Promise<OperationResponse> {
@@ -890,6 +891,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			},
 			request: request,
 			secretInfo: finalSecretInfo,
+			role: role,
 		};
 
 		cloudScriptWorker.send(cloudScriptRequest);
@@ -1196,6 +1198,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	public async executePost(
 		eventName: string,
 		request: { [k: string]: any },
+		role: SecretRole,
 		secretInfo: SecretInfo,
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse
@@ -1259,6 +1262,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			},
 			request: request,
 			secretInfo: finalSecretInfo,
+			role: role,
 		};
 
 		cloudScriptWorker.send(cloudScriptRequest);
@@ -1770,6 +1774,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 	 * Persists the post-event log, runs the post cloud script, then executes local post subscribers.
 	 * @param eventName Request event name.
 	 * @param request Mutable request context.
+	 * @param role Role context.
 	 * @param secretInfo Authenticated secret context.
 	 * @param operationRequest Request that produced the response.
 	 * @param operationResponse Final response produced by the handler pipeline.
@@ -1777,6 +1782,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 	public async onEvent(
 		eventName: string,
 		request: {},
+		role: SecretRole,
 		secretInfo: SecretInfo,
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse
@@ -1795,7 +1801,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 		});
 
 		if (this.cloudScriptService) {
-			await this.cloudScriptService.executePost(eventName, request, secretInfo, operationRequest, operationResponse);
+			await this.cloudScriptService.executePost(eventName, request, role, secretInfo, operationRequest, operationResponse);
 		}
 
 		if (!this.eventLstDict.has(eventName)) {
@@ -1858,13 +1864,14 @@ export class PreEventCallbackService implements IPreEventCallbackService {
 	 * Returning a non-null `OperationResponse` short-circuits the normal request handler.
 	 * @param eventName Request event name.
 	 * @param request Mutable request context.
+	 * @param role Role context.
 	 * @param secretInfo Authenticated secret context.
 	 * @param operationRequest Request entering the handler pipeline.
 	 * @returns Resolves with the operation result.
 	 */
-	public async onEvent(eventName: string, request: {}, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	public async onEvent(eventName: string, request: {}, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		if (this.cloudScriptService) {
-			let operationResponse = await this.cloudScriptService.executePre(eventName, request, secretInfo, operationRequest);
+			let operationResponse = await this.cloudScriptService.executePre(eventName, request, role, secretInfo, operationRequest);
 
 			if (operationResponse) return operationResponse;
 		}

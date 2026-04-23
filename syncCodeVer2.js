@@ -219,13 +219,13 @@ function readAllTsFiles(name) {
 					};
 
 					let script = "\n";
-					script += "preHandlers." + childScript.eventName + " = async (" + spls2 + ", secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n";
+					script += "preHandlers." + childScript.eventName + " = async (" + spls2 + ", role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n";
 					script += "\n";
 					script += "\treturn null;\n";
 					script += "}\n";
 					script += "\n";
 
-					script += "postHandlers." + childScript.eventName + " = async (" + spls2 + ", secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n";
+					script += "postHandlers." + childScript.eventName + " = async (" + spls2 + ", role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n";
 					script += "\n";
 					script += "\treturn operationResponse;\n";
 					script += "}\n";

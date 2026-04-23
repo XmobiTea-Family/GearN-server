@@ -177,8 +177,8 @@ export { AbstractConstructor, FieldDataType, GNObjectFieldMetadata, GNObjectMeta
 import { InvalidMember } from "./GN-common/entity/InvalidMember";
 export { InvalidMember };
 
-import { SecretInfo, SecretPermissionItem } from "./GN-common/entity/SecretInfo";
-export { SecretInfo, SecretPermissionItem };
+import { SecretInfo, SecretPermissionItem, SecretRole } from "./GN-common/entity/SecretInfo";
+export { SecretInfo, SecretPermissionItem, SecretRole };
 
 import { TokenPayload } from "./GN-common/entity/TokenPayload";
 export { TokenPayload };

@@ -1,4 +1,4 @@
-import { SecretInfo, SecretPermissionItem } from "./../../index";
+import { SecretInfo, SecretPermissionItem, SecretRole } from "./../../index";
 import { AuthInfo } from "./../../index";
 import { authenticate_InfoRequestParam as authenticate_InfoRequestParam } from "./../../index";
 import { characterPlayer_InfoRequestParam as characterPlayer_InfoRequestParam } from "./../../index";
@@ -175,6 +175,8 @@ interface CloudScriptRequestPre {
 	eventName: string;
 	// Stores the request collection used by this contract.
 	request: { [k: string]: any };
+	// Stores the role value used by this contract.
+	role: SecretRole;
 	// Stores the secret info value used by this contract.
 	secretInfo: {
 		// Stores the secret key value used by this contract.
@@ -216,6 +218,8 @@ interface CloudScriptRequestPost {
 	eventName: string;
 	// Stores the request collection used by this contract.
 	request: { [k: string]: any };
+	// Stores the role value used by this contract.
+	role: SecretRole;
 	// Stores the secret info value used by this contract.
 	secretInfo: {
 		// Stores the secret key value used by this contract.
@@ -361,7 +365,7 @@ interface CloudScriptRequestSocket {
 	request: { [k: string]: any };
 }
 
-type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket;
+type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket | FunctionRequestSystemVerifyGenericService;
 
 interface CloudScriptResponse {
 	// Stores the stats value used by this contract.
@@ -382,6 +386,8 @@ interface CloudScriptResponse {
 interface FunctionRequestPre {
 	// Stores the request collection used by this contract.
 	request: { [k: string]: any };
+	// Stores the role value used by this contract.
+	role: SecretRole;
 	// Stores the secret info value used by this contract.
 	secretInfo: SecretInfo;
 	// Stores the operation request value used by this contract.
@@ -393,6 +399,8 @@ interface FunctionRequestPre {
 interface FunctionRequestPost {
 	// Stores the request collection used by this contract.
 	request: { [k: string]: any };
+	// Stores the role value used by this contract.
+	role: SecretRole;
 	// Stores the secret info value used by this contract.
 	secretInfo: SecretInfo;
 	// Stores the operation request value used by this contract.
@@ -552,6 +560,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 				operationRequest: operationRequest,
 				secretInfo: secretInfo,
 				request: request.request,
+				role: request.role,
 				/**
 				 * Executes the log workflow.
 				 * @param log Provides the log value used by this operation.
@@ -585,6 +594,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 				operationResponse: operationResponse,
 				secretInfo: secretInfo,
 				request: request.request,
+				role: request.role,
 				/**
 				 * Executes the log workflow.
 				 * @param log Provides the log value used by this operation.
@@ -1041,7 +1051,7 @@ async function ___handlePreFunction(name: string, request: FunctionRequestPre): 
 
 	try {
 		// Stores the result value used in the current execution flow.
-		let result = await handler(request.request, request.secretInfo, request.operationRequest, request.log);
+		let result = await handler(request.request, request.role, request.secretInfo, request.operationRequest, request.log);
 
 		if (result)
 			answer.result = {
@@ -1088,7 +1098,7 @@ async function ___handlePostFunction(name: string, request: FunctionRequestPost)
 
 	try {
 		// Stores the result value used in the current execution flow.
-		let result = await handler(request.request, request.secretInfo, request.operationRequest, request.operationResponse as any, request.log);
+		let result = await handler(request.request, request.role, request.secretInfo, request.operationRequest, request.operationResponse as any, request.log);
 
 		if (result) {
 			answer.result = {
@@ -1142,10 +1152,10 @@ process.env.dbConnection = "";
 process.env.gnServerSettingsOptions = "";
 
 // Stores the pre handlers value used by this module.
-const preHandlers: Record<string, (request: any, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => Promise<OperationResponse | null>> = {};
+const preHandlers: Record<string, (request: any, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => Promise<OperationResponse | null>> = {};
 
 // Stores the post handlers value used by this module.
-const postHandlers: Record<string, (request: any, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
+const postHandlers: Record<string, (request: any, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
 
 // Stores the system handlers value used by this module.
 const systemHandlers: Record<string, (log: (log: any) => void) => Promise<void>> = {};
