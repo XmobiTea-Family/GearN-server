@@ -98,7 +98,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 			userId: authInfo.getUserId(),
 			ticketId: request.ticketId,
 			returnMember: request.returnMember,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -123,7 +123,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 			userId: null,
 			ticketId: request.ticketId,
 			returnMember: request.returnMember,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -148,7 +148,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 			userId: null,
 			ticketId: request.ticketId,
 			returnMember: request.returnMember,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -158,9 +158,9 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, ticketId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, ticketId: string, returnMember: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -231,7 +231,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 
 		operationResponse.setParameter(ParameterCode.MatchmakingTicket, gnMatchmakingTicket);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetMatchmakingTicket", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

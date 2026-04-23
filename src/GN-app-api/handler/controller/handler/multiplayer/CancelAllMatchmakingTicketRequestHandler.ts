@@ -9,7 +9,7 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MatchmakingTicketStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingTicketStatus";
 import { MatchmakingMemberStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingMemberStatus";
 import { MatchmakingTicket } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
@@ -97,7 +97,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 		return this.execute({
 			userId: authInfo.getUserId(),
 			queueName: request.queueName
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -121,7 +121,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 		return this.execute({
 			userId: request.userId,
 			queueName: request.queueName
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -145,7 +145,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 		return this.execute({
 			userId: request.userId,
 			queueName: request.queueName
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -155,9 +155,9 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, queueName: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, queueName: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_CancelAllMatchmakingTicket", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_CancelAllMatchmakingTicket", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -206,7 +206,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 		operationResponse.setParameter(ParameterCode.TicketIds, ticketIds);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_CancelAllMatchmakingTicket", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_CancelAllMatchmakingTicket", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

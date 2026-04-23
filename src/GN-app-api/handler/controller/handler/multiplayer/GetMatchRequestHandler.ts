@@ -96,7 +96,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 			userId: authInfo.getUserId(),
 			matchId: request.matchId,
 			returnMember: request.returnMember,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -121,7 +121,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 			userId: null,
 			matchId: request.matchId,
 			returnMember: request.returnMember,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -146,7 +146,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 			userId: null,
 			matchId: request.matchId,
 			returnMember: request.returnMember,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -156,9 +156,9 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, matchId: string, returnMember: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, matchId: string, returnMember: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatch", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("multiplayer_GetMatch", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -267,7 +267,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.Match, gnMatch);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetMatch", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("multiplayer_GetMatch", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
