@@ -365,7 +365,19 @@ interface CloudScriptRequestSocket {
 	request: { [k: string]: any };
 }
 
-type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket | FunctionRequestSystemVerifyGenericService;
+interface CloudScriptRequestVerifyGenericService {
+	requestId: string,
+	eventName: string,
+	eventType: EventCallbackType.SystemAuthenticate,
+	request: {
+		serviceName: string,
+		serviceData: {
+			[k: string]: any;
+		},
+	},
+};
+
+type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket | CloudScriptRequestVerifyGenericService;
 
 interface CloudScriptResponse {
 	// Stores the stats value used by this contract.
@@ -645,7 +657,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
 		handleResponse = await ___handleSystemMatchmakingFunction(request.eventName, functionRequest);
 	}
 	else if (request.eventType == EventCallbackType.SystemAuthenticate) {
-		if (request.operationRequest != null) {
+		if ("operationRequest" in request) {
 			// Stores the origin operation request value used in the current execution flow.
 			let originOperationRequest = request.operationRequest;
 			// Stores the operation request value used in the current execution flow.
