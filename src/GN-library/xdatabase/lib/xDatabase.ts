@@ -1,8 +1,6 @@
 import * as mongoDB from "mongodb";
 
 import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
-import { UploadFileInfo } from "./entity/pro/UploadFileInfo";
-import { FileUploadInfoFindOptions } from "./entity/pro/findOptions/FileUploadInfoFindOptions";
 import { MasterPlayerRepository } from "./MasterPlayerRepository";
 import { GamePlayerRepository } from "./GamePlayerRepository";
 import { CharacterPlayerRepository } from "./CharacterPlayerRepository";
@@ -19,8 +17,6 @@ export class xDatabase {
 	private static readonly DOT: string = ".";
 	// Stores the RUNTIME value used by this instance.
 	private static readonly RUNTIME: string = "Runtime" + xDatabase.DOT;
-	// Stores the META value used by this instance.
-	private static readonly META: string = "Meta" + xDatabase.DOT;
 	// Stores the SYSTEM value used by this instance.
 	private static readonly SYSTEM: string = "System" + xDatabase.DOT;
 
@@ -137,15 +133,6 @@ export class xDatabase {
 	}
 
 	/**
-	 * Executes the meta collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public metaCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
-		return this.collection<TSchema>(xDatabase.META + collectionName);
-	}
-
-	/**
 	 * Executes the system collection workflow.
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
@@ -162,16 +149,6 @@ export class xDatabase {
 	 */
 	public runtimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
 		return this.collection<TSchema>(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
-	}
-
-	/**
-	 * Executes the meta game collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public metaGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
-		return this.collection<TSchema>(xDatabase.META + gameId + xDatabase.DOT + collectionName);
 	}
 
 	/**
@@ -236,15 +213,6 @@ export class xDatabase {
 	}
 
 	/**
-	 * Executes the log meta collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public logMetaCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
-		return this.logCollection<TSchema>(xDatabase.META + collectionName);
-	}
-
-	/**
 	 * Executes the log system collection workflow.
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
@@ -261,16 +229,6 @@ export class xDatabase {
 	 */
 	public logRuntimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
 		return this.logCollection<TSchema>(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
-	}
-
-	/**
-	 * Executes the log meta game collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public logMetaGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
-		return this.logCollection<TSchema>(xDatabase.META + gameId + xDatabase.DOT + collectionName);
 	}
 
 	/**
@@ -323,41 +281,6 @@ export class xDatabase {
 		}
 
 		collection.createIndex(index, createIndexesOptions);
-	}
-
-	/**
-	 * Loads the upload file info async.
-	 * @param fileId Provides the file ID value used by this operation.
-	 * @param fileUploadInfoFindOptions Provides the file upload info find options value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async loadUploadFileInfoAsync(fileId: string, fileUploadInfoFindOptions?: FileUploadInfoFindOptions): Promise<UploadFileInfo> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemCollection("UploadFileInfo");
-
-		// Stores the result value used in the current execution flow.
-		let result = await collection.findOne({ fileId: fileId }, {
-			projection: this.getFindOptions(fileUploadInfoFindOptions)
-		});
-
-		if (result) {
-			return new UploadFileInfo(result, collection);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Creates the upload file info async.
-	 * @param result Provides the result value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async createUploadFileInfoAsync(result: any): Promise<UploadFileInfo> {
-		// Stores the collection value used in the current execution flow.
-		let collection = this.systemCollection("UploadFileInfo");
-
-		await collection.insertOne(result);
-		return new UploadFileInfo(result, collection);
 	}
 
 	/**

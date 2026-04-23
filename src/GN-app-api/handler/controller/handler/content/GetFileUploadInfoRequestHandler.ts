@@ -12,6 +12,7 @@ import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { UploadFileInfo } from "./../../../../../GN-library/xdatabase/lib/entity/pro/UploadFileInfo";
 
 class GetFileUploadInfoOperationRequest extends OperationRequest {
 
@@ -157,13 +158,19 @@ export class GetFileUploadInfoRequestHandler extends RequestHandler {
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		// Stores the upload file info value used in the current execution flow.
-		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId);
+		let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
 
-		if (uploadFileInfo == null) {
+		// Stores the upload file info value used in the current execution flow.
+		let uploadFileInfoResult = await uploadFileInfoCollection.findOne({
+			fileId: request.fileId
+		});
+
+		if (uploadFileInfoResult == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
 			return operationResponse;
 		}
+
+		let uploadFileInfo = new UploadFileInfo(uploadFileInfoResult, uploadFileInfoCollection);
 
 		if (uploadFileInfo.getGameId() != secretInfo.getGameId()) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);

@@ -65,7 +65,6 @@ Dùng khi bạn muốn thao tác MongoDB native collection trực tiếp.
 - `database.logMetaCollection(collectionName)`
 - `database.logSystemCollection(collectionName)`
 - `database.logRuntimeGameCollection(collectionName, gameId)`
-- `database.logMetaGameCollection(collectionName, gameId)`
 - `database.logSystemGameCollection(collectionName, gameId)`
 - `database.logCollection(fullCollectionName)`
 
@@ -100,7 +99,6 @@ Một số method không trả raw document mà trả object wrapper:
 - `database.groupRepository.loadGroupAsync(...)`
 - `database.loadInventoryAsync(...)`
 - `database.storeInventoryRepository.loadStoreInventoryAsync(...)`
-- `database.loadUploadFileInfoAsync(...)`
 
 Các object này có getter/setter và hỗ trợ `saveAsync()`.
 
@@ -430,22 +428,6 @@ handlers["dbStoreInventoryUsageDemo"] = async (args: any, context, log) => {
     };
 };
 
-handlers["dbUploadFileInfoDemo"] = async (args: any, context, log) => {
-    const fileId = requireString(args?.fileId, "fileId");
-
-    const uploadFileInfo = await database.loadUploadFileInfoAsync(fileId);
-    if (uploadFileInfo == null) {
-        throw new Error("uploadFileInfo not found");
-    }
-
-    return {
-        fileId: uploadFileInfo.getFileId(),
-        userId: uploadFileInfo.getUserId(),
-        fileName: uploadFileInfo.getFileName(),
-        tsUploadExpire: uploadFileInfo.getTsUploadExpire(),
-        tsCreate: uploadFileInfo.getTsCreate()
-    };
-};
 ```
 
 ## 8. Các dạng đang được cover trong file này

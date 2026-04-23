@@ -14,6 +14,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { Md5Generate } from "./../../../../../GN-common/helper/Md5Generate";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { UploadFileInfo } from "./../../../../../GN-library/xdatabase/lib/entity/pro/UploadFileInfo";
 
 class RequestDownloadFileUploadInfoOperationRequest extends OperationRequest {
 
@@ -159,17 +160,25 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
+		let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
+
 		// Stores the upload file info value used in the current execution flow.
-		let uploadFileInfo = await this.gnServer.getDatabase().loadUploadFileInfoAsync(request.fileId, {
-			removeStatus: true,
-			fileUpload: true,
-			gameId: true,
+		let uploadFileInfoResult = await uploadFileInfoCollection.findOne({
+			fileId: request.fileId
+		}, {
+			projection: {
+				removeStatus: true,
+				fileUpload: true,
+				gameId: true,
+			}
 		});
 
-		if (uploadFileInfo == null) {
+		if (uploadFileInfoResult == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
 			return operationResponse;
 		}
+
+		let uploadFileInfo = new UploadFileInfo(uploadFileInfoResult, uploadFileInfoCollection);
 
 		if (uploadFileInfo.getGameId() != secretInfo.getGameId()) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);

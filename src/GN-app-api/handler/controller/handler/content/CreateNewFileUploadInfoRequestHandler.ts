@@ -169,7 +169,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 			gameId: secretInfo.getGameId(),
 		};
 
-		await this.gnServer.getDatabase().createUploadFileInfoAsync(doc);
+		await this.gnServer.getDatabase().systemCollection("UploadFileInfo").insertOne(doc);
 
 		operationResponse.setParameter(ParameterCode.FileId, doc["fileId"]);
 

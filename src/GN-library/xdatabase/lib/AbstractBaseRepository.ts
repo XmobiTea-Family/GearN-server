@@ -5,8 +5,6 @@ export abstract class AbstractBaseRepository {
 	private static readonly DOT: string = ".";
 	// Stores the RUNTIME value used by this instance.
 	private static readonly RUNTIME: string = "Runtime" + AbstractBaseRepository.DOT;
-	// Stores the META value used by this instance.
-	private static readonly META: string = "Meta" + AbstractBaseRepository.DOT;
 	// Stores the SYSTEM value used by this instance.
 	private static readonly SYSTEM: string = "System" + AbstractBaseRepository.DOT;
 
@@ -37,15 +35,6 @@ export abstract class AbstractBaseRepository {
 	}
 
 	/**
-	 * Executes the meta collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public metaCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
-		return this.collection<TSchema>(AbstractBaseRepository.META + collectionName);
-	}
-
-	/**
 	 * Executes the system collection workflow.
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
@@ -62,16 +51,6 @@ export abstract class AbstractBaseRepository {
 	 */
 	public runtimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
 		return this.collection<TSchema>(AbstractBaseRepository.RUNTIME + gameId + AbstractBaseRepository.DOT + collectionName);
-	}
-
-	/**
-	 * Executes the meta game collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public metaGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
-		return this.collection<TSchema>(AbstractBaseRepository.META + gameId + AbstractBaseRepository.DOT + collectionName);
 	}
 
 	/**
@@ -103,15 +82,6 @@ export abstract class AbstractBaseRepository {
 	}
 
 	/**
-	 * Executes the log meta collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public logMetaCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
-		return this.logCollection<TSchema>(AbstractBaseRepository.META + collectionName);
-	}
-
-	/**
 	 * Executes the log system collection workflow.
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
@@ -128,16 +98,6 @@ export abstract class AbstractBaseRepository {
 	 */
 	public logRuntimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
 		return this.logCollection<TSchema>(AbstractBaseRepository.RUNTIME + gameId + AbstractBaseRepository.DOT + collectionName);
-	}
-
-	/**
-	 * Executes the log meta game collection workflow.
-	 * @param collectionName Provides the collection name value used by this operation.
-	 * @param gameId Provides the game ID value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public logMetaGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
-		return this.logCollection<TSchema>(AbstractBaseRepository.META + gameId + AbstractBaseRepository.DOT + collectionName);
 	}
 
 	/**
