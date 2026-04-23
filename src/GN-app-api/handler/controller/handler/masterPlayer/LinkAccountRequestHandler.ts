@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 
 import bcrypt from "bcrypt";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
@@ -126,7 +126,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			username: request.username,
 			password: request.password,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -152,7 +152,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			username: request.username,
 			password: request.password,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -178,7 +178,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			username: request.username,
 			password: request.password,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -188,9 +188,9 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, username: string, password: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, username: string, password: string, forceLink: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkAccount", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkAccount", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -252,7 +252,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkAccount", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkAccount", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

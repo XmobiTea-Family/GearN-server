@@ -120,7 +120,7 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 		return this.execute({
 			userId: request.userId,
 			infoRequestParam: request.infoRequestParam,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -146,7 +146,7 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 		return this.execute({
 			userId: request.userId,
 			infoRequestParam: request.infoRequestParam,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -172,7 +172,7 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 		return this.execute({
 			userId: request.userId,
 			infoRequestParam: request.infoRequestParam,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -182,9 +182,9 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, infoRequestParam: InfoRequestParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetPlayerInformation", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetPlayerInformation", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -207,7 +207,7 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetPlayerInformation", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetPlayerInformation", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

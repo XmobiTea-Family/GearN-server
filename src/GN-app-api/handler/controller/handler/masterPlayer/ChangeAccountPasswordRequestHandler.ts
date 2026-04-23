@@ -12,7 +12,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 
 import bcrypt from "bcrypt";
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class ChangeAccountPasswordOperationRequest extends OperationRequest {
@@ -92,7 +92,7 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 			userId: request.userId,
 			currentPassword: request.currentPassword,
 			password: request.password,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -102,9 +102,9 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, currentPassword: string, password: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, currentPassword: string, password: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_ChangeAccountPassword", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_ChangeAccountPassword", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -147,7 +147,7 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_ChangeAccountPassword", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_ChangeAccountPassword", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

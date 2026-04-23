@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
 class LinkLinuxDeviceIdOperationRequest extends OperationRequest {
@@ -119,7 +119,7 @@ export class LinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 			userId: request.userId,
 			linuxDeviceId: request.linuxDeviceId,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -144,7 +144,7 @@ export class LinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 			userId: request.userId,
 			linuxDeviceId: request.linuxDeviceId,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -169,7 +169,7 @@ export class LinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 			userId: request.userId,
 			linuxDeviceId: request.linuxDeviceId,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -179,9 +179,9 @@ export class LinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, linuxDeviceId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, linuxDeviceId: string, forceLink: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkLinuxDeviceId", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkLinuxDeviceId", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -239,7 +239,7 @@ export class LinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkLinuxDeviceId", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkLinuxDeviceId", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

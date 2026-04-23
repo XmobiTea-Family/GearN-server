@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GoogleLoginType } from "./../../../../../GN-common/constant/enumType/GoogleLoginType";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 
@@ -125,7 +125,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 			token: request.token,
 			googleLoginType: <GoogleLoginType>request.type,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -151,7 +151,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 			token: request.token,
 			googleLoginType: <GoogleLoginType>request.type,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -177,7 +177,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 			token: request.token,
 			googleLoginType: <GoogleLoginType>request.type,
 			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -187,9 +187,9 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, token: string, googleLoginType: GoogleLoginType, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, token: string, googleLoginType: GoogleLoginType, forceLink: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkGoogle", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkGoogle", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -264,7 +264,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkGoogle", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkGoogle", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
