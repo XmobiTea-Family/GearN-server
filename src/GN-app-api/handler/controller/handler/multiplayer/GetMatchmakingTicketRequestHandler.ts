@@ -182,7 +182,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		// Stores the matchmaking ticket value used in the current execution flow.
 		let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
-		if (secretInfo.getRole() == SecretRole.Player) {
+		if (role == SecretRole.Player) {
 			// Stores the member value used in the current execution flow.
 			let member = matchmakingTicket.getMember(request.userId);
 			if (member == null) {

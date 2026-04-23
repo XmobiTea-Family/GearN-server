@@ -569,7 +569,7 @@
             },
             {
                 "eventName": "dashboard_CreateSecretInfo",
-                "script": "\npreHandlers.dashboard_CreateSecretInfo = async (request: { secretKey: string, gameId: string, role: number, creatorId: string, permissionParam: PermissionParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_CreateSecretInfo = async (request: { secretKey: string, gameId: string, role: number, creatorId: string, permissionParam: PermissionParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "script": "\npreHandlers.dashboard_CreateSecretInfo = async (request: { secretKey: string, gameId: string, creatorId: string, permissionParam: PermissionParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.dashboard_CreateSecretInfo = async (request: { secretKey: string, gameId: string, creatorId: string, permissionParam: PermissionParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

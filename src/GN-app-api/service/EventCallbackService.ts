@@ -50,8 +50,6 @@ interface CloudScriptRequestPre {
 		secretKey: string;
 		// Stores the description value used by this contract.
 		description: string;
-		// Stores the role value used by this contract.
-		role: number;
 		// Indicates whether remove.
 		remove: boolean;
 		// Stores the timestamp expire value used by this contract.
@@ -93,8 +91,6 @@ interface CloudScriptRequestPost {
 		secretKey: string;
 		// Stores the description value used by this contract.
 		description: string;
-		// Stores the role value used by this contract.
-		role: number;
 		// Indicates whether remove.
 		remove: boolean;
 		// Stores the timestamp expire value used by this contract.
@@ -186,8 +182,6 @@ interface CloudScriptRequestSystemAuthenticate {
 		secretKey: string;
 		// Stores the description value used by this contract.
 		description: string;
-		// Stores the role value used by this contract.
-		role: number;
 		// Indicates whether remove.
 		remove: boolean;
 		// Stores the timestamp expire value used by this contract.
@@ -850,8 +844,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			secretKey: string;
 			// Stores the description value used by this contract.
 			description: string;
-			// Stores the role value used by this contract.
-			role: number;
 			// Indicates whether remove.
 			remove: boolean;
 			// Stores the timestamp expire value used by this contract.
@@ -874,7 +866,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
 				permission: secretInfo.getPermission(),
 				remove: secretInfo.isRemove(),
-				role: secretInfo.getRole(),
 				secretKey: secretInfo.getSecretKey(),
 				tsExpire: secretInfo.getTsExpire(),
 			};
@@ -1082,8 +1073,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			secretKey: string;
 			// Stores the description value used by this contract.
 			description: string;
-			// Stores the role value used by this contract.
-			role: number;
 			// Indicates whether remove.
 			remove: boolean;
 			// Stores the timestamp expire value used by this contract.
@@ -1105,7 +1094,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
 				permission: secretInfo.getPermission(),
 				remove: secretInfo.isRemove(),
-				role: secretInfo.getRole(),
 				secretKey: secretInfo.getSecretKey(),
 				tsExpire: secretInfo.getTsExpire(),
 			};
@@ -1217,8 +1205,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			secretKey: string;
 			// Stores the description value used by this contract.
 			description: string;
-			// Stores the role value used by this contract.
-			role: number;
 			// Indicates whether remove.
 			remove: boolean;
 			// Stores the timestamp expire value used by this contract.
@@ -1240,7 +1226,6 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 				onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
 				permission: secretInfo.getPermission(),
 				remove: secretInfo.isRemove(),
-				role: secretInfo.getRole(),
 				secretKey: secretInfo.getSecretKey(),
 				tsExpire: secretInfo.getTsExpire(),
 			};

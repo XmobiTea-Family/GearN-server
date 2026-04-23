@@ -132,8 +132,6 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			secretInfoItem.setDescription(request.description);
 		}
 
-		// let secretRole = <SecretRole>secretInfoItem.getRole();
-
 		if (request.permissionParam) {
 			// Stores the permission any value used in the current execution flow.
 			let permissionAny = secretInfoItem.getPermission() as any;
@@ -222,7 +220,6 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			gameId: secretInfoItem.getGameId(),
 			isRemove: secretInfoItem.getRemove(),
 			permission: secretInfoItem.getPermission(),
-			role: secretInfoItem.getRole(),
 			secretKey: secretInfoItem.getSecretKey(),
 			tsExpire: secretInfoItem.getTsExpire(),
 			description: secretInfoItem.getDescription(),
@@ -239,7 +236,6 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 		gameId: string,
 		isRemove: boolean,
 		permission: SecretPermissionItem,
-		role: number,
 		secretKey: string,
 		tsExpire: number,
 		description: string,
@@ -249,7 +245,6 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			.setGameId(secretInfo.gameId)
 			.setIsRemove(secretInfo.isRemove)
 			.setPermission(secretInfo.permission)
-			.setRole(secretInfo.role)
 			.setSecretKey(secretInfo.secretKey)
 			.setTsExpire(secretInfo.tsExpire)
 			.setDescription(secretInfo.description)

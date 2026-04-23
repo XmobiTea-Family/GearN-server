@@ -188,7 +188,7 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 				return operationResponse;
 			}
 
-			if (<PermissionDataItem>groupDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (<PermissionDataItem>groupDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("DataKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
@@ -228,7 +228,7 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 			// Stores the permission value used in the current execution flow.
 			let permission = <PermissionDataItem>groupDatasSettingsItem.permission;
 
-			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 
 			}
 			else {

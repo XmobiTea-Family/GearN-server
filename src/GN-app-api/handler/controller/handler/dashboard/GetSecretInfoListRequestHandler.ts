@@ -87,11 +87,7 @@ export class GetSecretInfoListRequestHandler extends RequestHandler {
 		let results = await collection.find({ type: "secretInfo" }, { secretKey: true, role: true } as any);
 
 		// Stores the GearN admin secret keys value used in the current execution flow.
-		let gnAdminSecretKeys = new GNArray();
-		// Stores the GearN server secret keys value used in the current execution flow.
-		let gnServerSecretKeys = new GNArray();
-		// Stores the GearN player secret keys value used in the current execution flow.
-		let gnPlayerSecretKeys = new GNArray();
+		let gnSecretKeys = new GNArray();
 
 		while (await results.hasNext()) {
 			// Stores the secret info item value used in the current execution flow.
@@ -101,16 +97,10 @@ export class GetSecretInfoListRequestHandler extends RequestHandler {
 			let gnSecretInfoItem = new GNHashtable();
 			gnSecretInfoItem.add(ParameterCode.SecretKey, secretInfoItem.getSecretKey());
 
-			// Stores the role value used in the current execution flow.
-			let role = <SecretRole>secretInfoItem.getRole();
-			if (role == SecretRole.Admin) gnAdminSecretKeys.add(gnSecretInfoItem);
-			else if (role == SecretRole.Server) gnServerSecretKeys.add(gnSecretInfoItem);
-			else gnPlayerSecretKeys.add(gnSecretInfoItem);
+			gnSecretKeys.add(gnSecretInfoItem);
 		}
 
-		operationResponse.setParameter(ParameterCode.AdminSecretKeys, gnAdminSecretKeys);
-		operationResponse.setParameter(ParameterCode.ServerSecretKeys, gnServerSecretKeys);
-		operationResponse.setParameter(ParameterCode.PlayerSecretKeys, gnPlayerSecretKeys);
+		operationResponse.setParameter(ParameterCode.SecretKeys, gnSecretKeys);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

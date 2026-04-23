@@ -25,10 +25,6 @@ class CreateSecretInfoOperationRequest extends OperationRequest {
 	@StringDataMember({ code: ParameterCode.GameId, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
 	public gameId?: string;
 
-	// Stores the role value used by this instance.
-	@NumberDataMember({ code: ParameterCode.Role, mustInt: true, minValue: 1, maxValue: 3 })
-	public role: number;
-
 	// Stores the permission parameter value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.PermissionParam, isOptional: true })
 	public permissionParam?: PermissionParam;
@@ -82,7 +78,6 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 			secretKey: request.secretKey,
 			creatorId: authInfo.getUserId(),
 			gameId: request.gameId,
-			role: request.role,
 			permissionParam: request.permissionParam,
 		}, SecretRole.Player, secretInfo, operationRequest);
 	}
@@ -94,8 +89,8 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { secretKey: string, gameId: string, role: number, creatorId: string, permissionParam: PermissionParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		if (!request.secretKey) request.secretKey = StringUtility.generateRandomString(20, 0);
+	private async execute(request: { secretKey: string, gameId: string, creatorId: string, permissionParam: PermissionParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+		if (!request.secretKey) request.secretKey = StringUtility.generateRandomString(64, 0);
 
 		// Stores the operation response value used in the current execution flow.
 		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("dashboard_CreateSecretInfo", request, role, secretInfo, operationRequest);
@@ -118,13 +113,12 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		}
 
 		// Stores the permission value used in the current execution flow.
-		let permission = request.permissionParam ?? (request.role == SecretRole.Player ? CreateSecretInfoRequestHandler.generateRecommendPlayerPermission() : request.role == SecretRole.Server ? CreateSecretInfoRequestHandler.generateRecommendServerPermission() : request.role == SecretRole.Admin ? CreateSecretInfoRequestHandler.generateRecommendAdminPermission() : CreateSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false));
+		let permission = request.permissionParam ?? CreateSecretInfoRequestHandler.generateRecommendPlayerPermission();
 
 		result = {
 			type: "secretInfo",
 			secretKey: request.secretKey,
 			gameId: request.gameId,
-			role: request.role,
 			permission: permission,
 			creatorId: request.creatorId,
 			remove: false,
@@ -143,7 +137,6 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 			.setGameId(secretInfoItem.getGameId())
 			.setIsRemove(secretInfoItem.getRemove())
 			.setPermission(secretInfoItem.getPermission())
-			.setRole(secretInfoItem.getRole())
 			.setSecretKey(secretInfoItem.getSecretKey())
 			.setTsExpire(secretInfoItem.getTsExpire())
 			.setDescription(secretInfoItem.getDescription())

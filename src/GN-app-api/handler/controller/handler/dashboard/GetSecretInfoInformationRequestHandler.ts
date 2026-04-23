@@ -100,7 +100,6 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 
 		operationResponse.setParameter(ParameterCode.SecretKey, secretInfoItem.getSecretKey());
 		operationResponse.setParameter(ParameterCode.GameId, secretInfoItem.getGameId());
-		operationResponse.setParameter(ParameterCode.Role, secretInfoItem.getRole());
 		operationResponse.setParameter(ParameterCode.TsCreate, secretInfoItem.getTsCreate());
 		operationResponse.setParameter(ParameterCode.CreatorId, secretInfoItem.getCreatorId());
 		operationResponse.setParameter(ParameterCode.Remove, secretInfoItem.getRemove());

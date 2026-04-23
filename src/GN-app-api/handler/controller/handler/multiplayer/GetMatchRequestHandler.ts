@@ -190,7 +190,7 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
 		// Stores the match value used in the current execution flow.
 		let match = new Match(result, matchCollection);
 
-		if (secretInfo.getRole() == SecretRole.Player) {
+		if (role == SecretRole.Player) {
 			// Stores the member value used in the current execution flow.
 			let members = match.getMembers();
 			if (!members.some(m => m.userId === request.userId)) {

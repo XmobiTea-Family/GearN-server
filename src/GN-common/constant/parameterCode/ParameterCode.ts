@@ -667,8 +667,6 @@ export class ParameterCode {
 	public static readonly GetStoreUsed: string = "getStoreUsed";
 	public static readonly RemoveStoreUsed: string = "removeStoreUsed";
 
-	public static readonly AdminSecretKeys: string = "adminSecretKeys";
-	public static readonly ServerSecretKeys: string = "serverSecretKeys";
-	public static readonly PlayerSecretKeys: string = "playerSecretKeys";
+	public static readonly SecretKeys: string = "secretKeys";
 
 }

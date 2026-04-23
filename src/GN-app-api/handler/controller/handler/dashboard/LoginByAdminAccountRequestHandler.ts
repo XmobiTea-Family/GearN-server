@@ -135,7 +135,7 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 		let userId = masterAdminPlayer.getUserId();
 
 		// Stores the new auth info value used in the current execution flow.
-		let newAuthInfo = await this.gnServer.getApiMiddleware().generateAuthInfo({
+		let newAuthInfo = await this.gnServer.getApiMiddleware().generateAuthInfoForAdmin({
 			secretKey: masterAdminPlayer.getSecretKey(),
 			userId: userId,
 			gnToken: null

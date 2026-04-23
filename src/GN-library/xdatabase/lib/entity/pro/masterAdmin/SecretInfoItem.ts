@@ -8,8 +8,6 @@ export class SecretInfoItem extends MasterAdminMongoObject {
 	private static readonly _gameId: string = "gameId";
 	// Defines the internal field key for secret key.
 	private static readonly _secretKey: string = "secretKey";
-	// Defines the internal field key for role.
-	private static readonly _role: string = "role";
 	// Defines the internal field key for remove.
 	private static readonly _remove: string = "remove";
 	// Defines the internal field key for timestamp expire.
@@ -27,8 +25,6 @@ export class SecretInfoItem extends MasterAdminMongoObject {
 	private readonly gameId: string;
 	// Stores the secret key value used by this instance.
 	private readonly secretKey: string;
-	// Stores the role value used by this instance.
-	private readonly role: number;
 	// Stores the timestamp create value used by this instance.
 	private readonly tsCreate: number;
 	// Stores the creator ID value used by this instance.
@@ -53,7 +49,6 @@ export class SecretInfoItem extends MasterAdminMongoObject {
 
 		this.gameId = result[SecretInfoItem._gameId];
 		this.secretKey = result[SecretInfoItem._secretKey];
-		this.role = result[SecretInfoItem._role];
 		this.tsCreate = result[SecretInfoItem._tsCreate];
 		this.creatorId = result[SecretInfoItem._creatorId];
 
@@ -85,14 +80,6 @@ export class SecretInfoItem extends MasterAdminMongoObject {
 	 */
 	public getSecretKey(): string {
 		return this.secretKey;
-	}
-
-	/**
-	 * Returns the role.
-	 * @returns Returns the role.
-	 */
-	public getRole(): number {
-		return this.role;
 	}
 
 	/**

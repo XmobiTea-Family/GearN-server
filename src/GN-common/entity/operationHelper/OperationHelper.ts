@@ -142,7 +142,6 @@ export class OperationHelper {
 		if (secretInfo == null) return null;
 
 		return {
-			role: CodeHelper.getSecretRoleName(secretInfo.getRole()),
 			gameId: secretInfo.getGameId(),
 		}
 	}

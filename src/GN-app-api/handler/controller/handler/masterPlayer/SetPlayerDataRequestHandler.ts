@@ -202,7 +202,7 @@ export class SetPlayerDataRequestHandler extends MasterPlayerBaseRequestHandler 
 				return operationResponse;
 			}
 
-			if (<PermissionDataItem>playerDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (<PermissionDataItem>playerDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("DataKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
@@ -242,7 +242,7 @@ export class SetPlayerDataRequestHandler extends MasterPlayerBaseRequestHandler 
 			// Stores the permission value used in the current execution flow.
 			let permission = <PermissionDataItem>playerDatasSettingsItem.permission;
 
-			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 
 			}
 			else {

@@ -188,7 +188,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 				return operationResponse;
 			}
 
-			if (<PermissionDataItem>itemDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (<PermissionDataItem>itemDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("DataKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
@@ -229,7 +229,7 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 			// Stores the permission value used in the current execution flow.
 			let permission = <PermissionDataItem>itemDatasSettingsItem.permission;
 
-			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 
 			}
 			else {

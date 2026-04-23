@@ -34,7 +34,6 @@ export class DebugSupport {
             answer.secretInfo = {
                 gameId: secretInfo.getGameId(),
                 secretKey: this.securitySecretKey(authInfo.getSecretKey()),
-                role: CodeHelper.getRequestRoleName(secretInfo.getRole()),
                 isRemove: secretInfo.isRemove(),
                 tsExpire: secretInfo.getTsExpire(),
                 description: secretInfo.getDescription(),

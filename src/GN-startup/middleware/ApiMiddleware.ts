@@ -231,6 +231,74 @@ export class ApiMiddleware {
 	}
 
 	/**
+	 * Mints a signed auth token for admin, mirrors it to MongoDB, and caches the resolved `AuthInfo`.
+	 * @param payload Provides the payload value used by this operation.
+	 * @returns Returns the operation result.
+	 */
+	public async generateAuthInfoForAdmin(payload: TokenPayload): Promise<AuthInfo> {
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		payload.gnToken = payload.gnToken ?? "gn.b_" + StringUtility.generateRandomString(10, 0);
+
+		let tsExpire = currentMilliseconds + xDatetime.ONE_DAY_MILLISECOND;
+
+		let authToken = jwt.sign(payload, this.privateKeyToken, {
+			expiresIn: "1d",
+			algorithm: "HS512"
+		});
+
+		let authInfo = AuthInfo.Builder()
+			.setGNToken(payload.gnToken)
+			.setAuthToken(authToken)
+			.setUserId(payload.userId)
+			.setIsRemove(false)
+			.setTsExpire(tsExpire)
+			.setTsLastUpdate(currentMilliseconds)
+			.setTsCreate(currentMilliseconds)
+			.setSecretKey(payload.secretKey)
+			.build();
+
+		this.authInfoDict.set(payload.gnToken, authInfo);
+
+		await this.authInfoCollection.insertOne(authInfo.toDocumentData());
+
+		return authInfo;
+	}
+
+	/**
+	 * Mints a signed auth token for cloudScript, mirrors it to MongoDB, and caches the resolved `AuthInfo`.
+	 * @param payload Provides the payload value used by this operation.
+	 * @returns Returns the operation result.
+	 */
+	public async generateAuthInfoForCloudScript(payload: TokenPayload): Promise<AuthInfo> {
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		payload.gnToken = payload.gnToken ?? "gn.c_" + StringUtility.generateRandomString(10, 0);
+
+		let tsExpire = currentMilliseconds + xDatetime.ONE_DAY_MILLISECOND;
+
+		let authToken = jwt.sign(payload, this.privateKeyToken, {
+			expiresIn: "1h",
+			algorithm: "HS512"
+		});
+
+		let authInfo = AuthInfo.Builder()
+			.setGNToken(payload.gnToken)
+			.setAuthToken(authToken)
+			.setUserId(payload.userId)
+			.setIsRemove(false)
+			.setTsExpire(tsExpire)
+			.setTsLastUpdate(currentMilliseconds)
+			.setTsCreate(currentMilliseconds)
+			.setSecretKey(payload.secretKey)
+			.build();
+
+		this.authInfoDict.set(payload.gnToken, authInfo);
+
+		return authInfo;
+	}
+
+	/**
 	 * Executes the verify auth token workflow.
 	 * @param authToken Provides the auth token value used by this operation.
 	 * @returns Returns the operation result.
@@ -267,7 +335,7 @@ export class ApiMiddleware {
 				description: string,
 
 			};
-			
+
 			if (secretInfoResult != null) {
 				// let secretRole = <SecretRole>secretInfoResult["role"];
 
@@ -342,7 +410,6 @@ export class ApiMiddleware {
 				secretInfo = SecretInfo.Builder()
 					.setSecretKey(secretInfoResult["secretKey"])
 					.setIsRemove(secretInfoResult["isRemove"])
-					.setRole(secretInfoResult["role"])
 					.setTsExpire(secretInfoResult["tsExpire"])
 					.setGameId(secretInfoResult["gameId"])
 					.setPermission(defaultSecretPermissionItem)
@@ -637,14 +704,12 @@ export class ApiMiddleware {
 				let secretInfoAny = structuredClone(secretInfo);
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
-				secretInfoAny.getRole = secretInfo.getRole;
 				secretInfoAny.getSecretKey = secretInfo.getSecretKey;
 				secretInfoAny.getTsExpire = secretInfo.getTsExpire;
 				secretInfoAny.isRemove = secretInfo.isRemove;
 				secretInfoAny.setGameId = secretInfo.setGameId;
 				secretInfoAny.setIsRemove = secretInfo.setIsRemove;
 				secretInfoAny.setPermission = secretInfo.setPermission;
-				secretInfoAny.setRole = secretInfo.setRole;
 				secretInfoAny.setSecretKey = secretInfo.setSecretKey;
 				secretInfoAny.setTsExpire = secretInfo.setTsExpire;
 				secretInfoAny.getIsDefault = secretInfo.getIsDefault;
@@ -746,14 +811,12 @@ export class ApiMiddleware {
 				let secretInfoAny = structuredClone(secretInfo);
 				secretInfoAny.getGameId = secretInfo.getGameId;
 				secretInfoAny.getPermission = secretInfo.getPermission;
-				secretInfoAny.getRole = secretInfo.getRole;
 				secretInfoAny.getSecretKey = secretInfo.getSecretKey;
 				secretInfoAny.getTsExpire = secretInfo.getTsExpire;
 				secretInfoAny.isRemove = secretInfo.isRemove;
 				secretInfoAny.setGameId = secretInfo.setGameId;
 				secretInfoAny.setIsRemove = secretInfo.setIsRemove;
 				secretInfoAny.setPermission = secretInfo.setPermission;
-				secretInfoAny.setRole = secretInfo.setRole;
 				secretInfoAny.setSecretKey = secretInfo.setSecretKey;
 				secretInfoAny.setTsExpire = secretInfo.setTsExpire;
 				secretInfoAny.getIsDefault = secretInfo.getIsDefault;

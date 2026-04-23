@@ -438,8 +438,7 @@ export class ServerApplication extends BuilderBase {
 		});
 
 		// CloudScript workers reuse the default admin secret so internal callbacks can call back into the server.
-		let secretInfoResults = await secretInfoCollection.find({ isDefault: true }).toArray();
-		let secretInfo = secretInfoResults.at(0);
+		let secretInfo = await secretInfoCollection.findOne({ isDefault: true, onlyMasterAdmin: false });
 		let secretKey = secretInfo == null ? "" : secretInfo["secretKey"];
 
 		let gnServerSettingsOptions: GNServerSettingsOptions = {
@@ -737,7 +736,6 @@ export class ServerApplication extends BuilderBase {
 					type: "secretInfo",
 					secretKey: "admin_" + StringUtility.generateRandomString(14, 0),
 					gameId: "",
-					role: <number>SecretRole.Admin,
 					permission: adminPermission,
 					creatorId: userId,
 					remove: false,
@@ -754,7 +752,6 @@ export class ServerApplication extends BuilderBase {
 					.setGameId(secretInfoItem.getGameId())
 					.setIsRemove(secretInfoItem.getRemove())
 					.setPermission(secretInfoItem.getPermission())
-					.setRole(secretInfoItem.getRole())
 					.setSecretKey(secretInfoItem.getSecretKey())
 					.setTsExpire(secretInfoItem.getTsExpire())
 					.setDescription(secretInfoItem.getDescription())
@@ -772,9 +769,8 @@ export class ServerApplication extends BuilderBase {
 				{
 					let result = {
 						type: "secretInfo",
-						secretKey: "game_" + StringUtility.generateRandomString(15, 0),
+						secretKey: "game_" + StringUtility.generateRandomString(59, 0),
 						gameId: "dev",
-						role: <number>SecretRole.Player,
 						permission: permission,
 						creatorId: userId,
 						remove: false,
@@ -791,7 +787,6 @@ export class ServerApplication extends BuilderBase {
 						.setGameId(secretInfoItem.getGameId())
 						.setIsRemove(secretInfoItem.getRemove())
 						.setPermission(secretInfoItem.getPermission())
-						.setRole(secretInfoItem.getRole())
 						.setSecretKey(secretInfoItem.getSecretKey())
 						.setTsExpire(secretInfoItem.getTsExpire())
 						.setDescription(secretInfoItem.getDescription())
@@ -805,9 +800,8 @@ export class ServerApplication extends BuilderBase {
 				{
 					let result = {
 						type: "secretInfo",
-						secretKey: "game_" + StringUtility.generateRandomString(15, 0),
+						secretKey: "game_" + StringUtility.generateRandomString(59, 0),
 						gameId: "live",
-						role: <number>SecretRole.Player,
 						permission: permission,
 						creatorId: userId,
 						remove: false,
@@ -824,7 +818,6 @@ export class ServerApplication extends BuilderBase {
 						.setGameId(secretInfoItem.getGameId())
 						.setIsRemove(secretInfoItem.getRemove())
 						.setPermission(secretInfoItem.getPermission())
-						.setRole(secretInfoItem.getRole())
 						.setSecretKey(secretInfoItem.getSecretKey())
 						.setTsExpire(secretInfoItem.getTsExpire())
 						.setDescription(secretInfoItem.getDescription())
@@ -837,19 +830,18 @@ export class ServerApplication extends BuilderBase {
 			}
 
 			// Bootstrap root credentials come from application settings because no DB state exists yet.
-			let rootUsername = this.applicationSettings.getInitRootUsername() ?? "admin";
-			let rootPassword = this.applicationSettings.getInitRootPassword() ?? "password";
+			let rootUsername = this.applicationSettings.getInitRootUsername() ?? "gearnadmin";
+			let rootPassword = this.applicationSettings.getInitRootPassword() ?? "gearnpassword";
 
 			// Create the only master-admin secret separately so the first root account can log in immediately.
 			{
 				let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
-				let secretKey = StringUtility.generateRandomString(20, 0);
+				let secretKey = StringUtility.generateRandomString(64, 0);
 
 				let newSecretInfo = SecretInfo.Builder()
 					.setGameId("")
 					.setIsRemove(false)
 					.setPermission(permission)
-					.setRole(<number>SecretRole.Admin)
 					.setSecretKey(secretKey)
 					.setTsExpire(-1)
 					.setDescription("default root admin secret info")
@@ -925,7 +917,7 @@ export class ServerApplication extends BuilderBase {
 			await masterPlayerCollection.createIndex({ "external.apple.appleId": 1 }, { background: true, sparse: true, name: "external.apple.appleId_1" });
 			await masterPlayerCollection.createIndex({ "external.google.googleId": 1 }, { background: true, sparse: true, name: "external.google.googleId_1" });
 			await masterPlayerCollection.createIndex({ "external.facebook.facebookId": 1 }, { background: true, sparse: true, name: "external.facebook.facebookId_1" });
-			
+
 			await masterPlayerCollection.createIndex({ "external.googlePlayGameService.playerId": 1 }, { background: true, sparse: true, name: "external.googlePlayGameService.playerId_1" });
 			await masterPlayerCollection.createIndex({ "external.gameCenter.playerId": 1 }, { background: true, sparse: true, name: "external.gameCenter.playerId_1" });
 

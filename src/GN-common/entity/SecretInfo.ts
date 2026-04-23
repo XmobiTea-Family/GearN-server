@@ -968,8 +968,6 @@ export interface SecretPermissionItem {
 abstract class BuilderBase {
 	// Stores the secret key value used by this instance.
 	protected secretKey: string;
-	// Stores the role value used by this instance.
-	protected role: number;
 	// Indicates whether remove.
 	protected remove: boolean;
 	// Stores the timestamp expire value used by this instance.
@@ -999,14 +997,6 @@ abstract class BuilderBase {
 	 */
 	public getPermission(): SecretPermissionItem {
 		return this.permission;
-	}
-
-	/**
-	 * Returns the role.
-	 * @returns Returns the role.
-	 */
-	public getRole(): number {
-		return this.role;
 	}
 
 	/**
@@ -1081,15 +1071,6 @@ abstract class BuilderBase {
 	 * @returns Returns the current builder instance.
 	 */
 	public setGameId(gameId: string): Builder {
-		return this as Builder;
-	}
-
-	/**
-	 * Sets the role.
-	 * @param role Provides the role value used by this operation.
-	 * @returns Returns the current builder instance.
-	 */
-	public setRole(role: number): Builder {
 		return this as Builder;
 	}
 
@@ -1171,16 +1152,6 @@ class Builder extends BuilderBase implements IBuilder<SecretInfo> {
 	}
 
 	/**
-	 * Sets the role.
-	 * @param role Provides the role value used by this operation.
-	 * @returns Returns the current builder instance.
-	 */
-	public setRole(role: number): Builder {
-		this.role = role;
-		return this;
-	}
-
-	/**
 	 * Sets the timestamp expire.
 	 * @param tsExpire Provides the timestamp expire value used by this operation.
 	 * @returns Returns the current builder instance.
@@ -1246,7 +1217,6 @@ export class SecretInfo extends BuilderBase {
 		super();
 
 		this.secretKey = builder.getSecretKey();
-		this.role = builder.getRole();
 		this.remove = builder.isRemove();
 		this.tsExpire = builder.getTsExpire();
 		this.description = builder.getDescription();
@@ -1273,7 +1243,6 @@ export class SecretInfo extends BuilderBase {
 		// Stores the doc value used in the current execution flow.
 		let doc = {
 			"secretKey": this.secretKey,
-			"role": this.role,
 			"isRemove": this.remove,
 			"tsExpire": this.tsExpire,
 			"description": this.description,

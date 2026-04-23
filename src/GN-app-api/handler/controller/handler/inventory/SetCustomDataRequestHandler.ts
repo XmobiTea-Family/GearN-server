@@ -188,7 +188,7 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 				return operationResponse;
 			}
 
-			if (<PermissionDataItem>customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (<PermissionDataItem>customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("CustomKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
@@ -229,7 +229,7 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 
 			let permission = <PermissionDataItem>customDatasSettingsItem.permission;
 
-			if (permission == PermissionDataItem.ReadOnly && <SecretRole>secretInfo.getRole() == SecretRole.Player) {
+			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
 
 			}
 			else {
