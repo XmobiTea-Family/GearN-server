@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 
 class GetPlayerCharacterOperationRequest extends OperationRequest {
@@ -114,7 +114,7 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		return this.execute({
 			userId: request.userId,
 			characterCatalogIds: request.characterCatalogIds,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -138,7 +138,7 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		return this.execute({
 			userId: request.userId,
 			characterCatalogIds: request.characterCatalogIds,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -162,7 +162,7 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		return this.execute({
 			userId: request.userId,
 			characterCatalogIds: request.characterCatalogIds,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -172,9 +172,9 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, characterCatalogIds: Array<string> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, characterCatalogIds: Array<string> }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayerCharacter", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayerCharacter", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -203,7 +203,7 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayerCharacter", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayerCharacter", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

@@ -10,7 +10,7 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
@@ -113,7 +113,7 @@ export class GetPlayersWithTagRequestHandler extends GamePlayerBaseRequestHandle
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -142,7 +142,7 @@ export class GetPlayersWithTagRequestHandler extends GamePlayerBaseRequestHandle
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -171,7 +171,7 @@ export class GetPlayersWithTagRequestHandler extends GamePlayerBaseRequestHandle
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -181,9 +181,9 @@ export class GetPlayersWithTagRequestHandler extends GamePlayerBaseRequestHandle
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { key: string, value: string, skip: number, limit: number, infoRequestParam: InfoRequestParam }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { key: string, value: string, skip: number, limit: number, infoRequestParam: InfoRequestParam }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayersWithTag", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetPlayersWithTag", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -229,7 +229,7 @@ export class GetPlayersWithTagRequestHandler extends GamePlayerBaseRequestHandle
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayersWithTag", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetPlayersWithTag", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

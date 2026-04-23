@@ -117,7 +117,7 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			customDatas: request.customDatas
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -142,7 +142,7 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			customDatas: request.customDatas
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -166,7 +166,7 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			customDatas: request.customDatas
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -176,9 +176,9 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { userId: string, customDatas: Array<CustomDataParam> }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { userId: string, customDatas: Array<CustomDataParam> }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_SetCustomData", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_SetCustomData", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -278,7 +278,7 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_SetCustomData", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_SetCustomData", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
