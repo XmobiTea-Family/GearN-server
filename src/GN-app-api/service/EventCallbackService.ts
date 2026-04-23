@@ -31,6 +31,15 @@ enum EventCallbackType {
 	SystemAuthenticate = 5,
 	Event = 6,
 	Socket = 7,
+
+	AuthToken = 100,
+}
+
+interface CloudScriptRequestAuthToken {
+	// Stores the event type value used by this contract.
+	eventType: EventCallbackType.AuthToken;
+
+	gnAuthToken: string,
 }
 
 interface CloudScriptRequestPre {
@@ -576,7 +585,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 			if (!this.cloudScriptFunctionDict.has(cloudScriptFunction.type)) {
 				this.cloudScriptFunctionDict.set(cloudScriptFunction.type, cloudScriptFunction);
-				this.loadCloudScriptFunctionWorker(cloudScriptFunction.type, cloudScriptFunction.version, cloudScriptFunction.fullScript);
+				await this.loadCloudScriptFunctionWorker(cloudScriptFunction.type, cloudScriptFunction.version, cloudScriptFunction.fullScript);
 			}
 		}
 	}
@@ -591,7 +600,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			Debug.logError("[GearN] [SystemEventCallback] system not found");
 			return;
 		}
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
 			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
@@ -664,7 +673,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			return { success: false };
 		}
 		let eventName = "systemMatchmaking_RequestServerDetail";
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
 			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
@@ -742,7 +751,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		if (cloudFunction == null) {
 			return;
 		}
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
 			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
@@ -830,7 +839,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		secretInfo: SecretInfo,
 		operationRequest: OperationRequest
 	): Promise<OperationResponse> {
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(eventName.split("_")[0], eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(eventName.split("_")[0], eventName);
 
 		if (cloudScriptWorker == null) {
 			return null;
@@ -969,7 +978,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			return { success: false, serviceId: null, errorMessage: "systemAuthenticate does not implement" };
 		}
 		let eventName = "systemAuthenticate_VerifyGenericService";
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
 			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
@@ -1058,7 +1067,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		}
 
 		let eventName = "systemAuthenticate_OnAuthenticateSuccess";
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
 			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
@@ -1191,7 +1200,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		operationRequest: OperationRequest,
 		operationResponse: OperationResponse
 	): Promise<void> {
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(eventName.split("_")[0], eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(eventName.split("_")[0], eventName);
 
 		if (cloudScriptWorker == null) {
 			return;
@@ -1318,7 +1327,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		if (cloudFunction == null) {
 			return;
 		}
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(cloudFunction.type, eventName);
 
 		if (cloudScriptWorker == null) {
 			Debug.logError("[GearN] [SystemEventCallback] worker not found at " + cloudFunction.type);
@@ -1378,7 +1387,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	 * @param eventName Concrete event name inside that script family.
 	 * @returns Child-process worker able to execute the requested event.
 	 */
-	private loadCloudScriptFunctionWorkerFromCache(type: string, eventName: string): ChildProcess {
+	private async loadCloudScriptFunctionWorkerFromCache(type: string, eventName: string): Promise<ChildProcess> {
 		let cloudFunction = this.cloudScriptFunctionDict.get(type);
 		if (cloudFunction == null) return null;
 
@@ -1389,7 +1398,27 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
 		let cloudScriptWorker = this.cloudScriptWorkerDict.get(finalVersion);
 		if (cloudScriptWorker == null) {
-			return this.loadCloudScriptFunctionWorker(cloudFunction.type, cloudFunction.version, cloudFunction.fullScript);
+			return await this.loadCloudScriptFunctionWorker(cloudFunction.type, cloudFunction.version, cloudFunction.fullScript);
+		}
+
+		let currentMillseconds = xDatetime.getCurrentMilliseconds();
+
+		if (cloudScriptWorker.nextRefreshAuthToken < currentMillseconds) {
+			let cloudScriptUserId = "c_" + finalVersion + "_" + StringUtility.generateRandomString(10, 0);
+
+			let cloudScriptRequestAuthToken: CloudScriptRequestAuthToken = {
+				eventType: EventCallbackType.AuthToken,
+				gnAuthToken: (await this.gnServer.getApiMiddleware().generateAuthInfoForCloudScript({
+					userId: cloudScriptUserId,
+					secretKey: this.gnServerSettingsOptions.clientSecretKey,
+					gnToken: null,
+				}, xDatetime.ONE_HOUR_MILLISECOND)).getAuthToken(),
+			}
+
+			cloudScriptWorker.send(cloudScriptRequestAuthToken);
+
+			cloudScriptWorker.nextRefreshAuthToken = currentMillseconds + 59 * 60 * 1000;
+			cloudScriptWorker.cloudScriptUserId = cloudScriptUserId;
 		}
 
 		return cloudScriptWorker;
@@ -1482,7 +1511,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			}
 		}, this.executeTimeoutInMs + 10000);
 
-		this.loadCloudScriptFunctionWorker(type, version, fullScriptJs);
+		await this.loadCloudScriptFunctionWorker(type, version, fullScriptJs);
 
 		await this.backupCloudScriptFunctionCollection.insertOne({
 			type: cloudFunction.type,
@@ -1621,7 +1650,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 			}
 		}, this.executeTimeoutInMs + 10000);
 
-		this.loadCloudScriptFunctionWorker(type, version, fullScriptJs);
+		await this.loadCloudScriptFunctionWorker(type, version, fullScriptJs);
 
 		childScript.script = script;
 		childScript.hasEdit = true;
@@ -1638,13 +1667,13 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	 * @param fullScript Compiled JavaScript source that the worker executes.
 	 * @returns Spawned worker process.
 	 */
-	private loadCloudScriptFunctionWorker(type: string, version: string, fullScript: string): ChildProcess {
+	private async loadCloudScriptFunctionWorker(type: string, version: string, fullScript: string): Promise<ChildProcess> {
 		let finalVersion = type + "_" + version;
 
 		let filePath = __dirname + "/./GN-startup/cloudScript/" + finalVersion + ".js";
 		fs.writeFileSync(filePath, fullScript);
 
-		return this.loadCloudScriptWorker(type, version);
+		return await this.loadCloudScriptWorker(type, version);
 	}
 
 	/**
@@ -1653,18 +1682,28 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	 * @param version Version identifier appended to the worker filename.
 	 * @returns Spawned worker process.
 	 */
-	private loadCloudScriptWorker(type: string, version: string): ChildProcess {
+	private async loadCloudScriptWorker(type: string, version: string): Promise<ChildProcess> {
 		let finalVersion = type + "_" + version;
 		let filePath = __dirname + "/./GN-startup/cloudScript/" + finalVersion + ".js";
 
 		Debug.log("[GearN] [EventCallback] run cloudScript " + finalVersion);
 
+		let cloudScriptUserId = "c_" + version + "_" + StringUtility.generateRandomString(10, 0);
+
 		let cloudScriptWorker = fork(filePath, {
 			env: {
 				gnServerSettingsOptions: JSON.stringify(this.gnServerSettingsOptions),
 				dbConnection: JSON.stringify(this.dbConnection),
+				gnAuthToken: (await this.gnServer.getApiMiddleware().generateAuthInfoForCloudScript({
+					secretKey: this.gnServerSettingsOptions.clientSecretKey,
+					userId: cloudScriptUserId,
+					gnToken: null,
+				}, xDatetime.ONE_HOUR_MILLISECOND)).getAuthToken(),
 			},
 		});
+
+		cloudScriptWorker.nextRefreshAuthToken = xDatetime.getCurrentMilliseconds() + 59 * 60 * 1000;
+		cloudScriptWorker.cloudScriptUserId = cloudScriptUserId;
 
 		let thiz = this;
 		cloudScriptWorker.on("message", (cloudScriptResponse: CloudScriptResponse) => {
@@ -1682,7 +1721,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 		cloudScriptWorker.on("exit", (code) => {
 			Debug.log("[GearN] [EventCallback] terminal cloudScript " + finalVersion + " with code " + code);
 
-			thiz.cloudScriptWorkerDict.delete(finalVersion);
+			if (thiz.cloudScriptWorkerDict.get(finalVersion) === cloudScriptWorker) {
+				thiz.cloudScriptWorkerDict.delete(finalVersion);
+				// thiz.cloudScriptWorkerFailedDict.delete(finalVersion);
+			}
+
+			if (cloudScriptWorker.cloudScriptUserId) this.gnServer.getApiMiddleware().removeAllAuthInfosInDb(cloudScriptWorker.cloudScriptUserId);
 		});
 
 		this.cloudScriptWorkerDict.set(finalVersion, cloudScriptWorker);

@@ -270,12 +270,12 @@ export class ApiMiddleware {
 	 * @param payload Provides the payload value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public async generateAuthInfoForCloudScript(payload: TokenPayload): Promise<AuthInfo> {
+	public async generateAuthInfoForCloudScript(payload: TokenPayload, expiredAfterMs: number): Promise<AuthInfo> {
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		payload.gnToken = payload.gnToken ?? "gn.c_" + StringUtility.generateRandomString(10, 0);
 
-		let tsExpire = currentMilliseconds + xDatetime.ONE_DAY_MILLISECOND;
+		let tsExpire = currentMilliseconds + expiredAfterMs;
 
 		let authToken = jwt.sign(payload, this.privateKeyToken, {
 			expiresIn: "1h",
@@ -294,6 +294,8 @@ export class ApiMiddleware {
 			.build();
 
 		this.authInfoDict.set(payload.gnToken, authInfo);
+
+		await this.authInfoCollection.insertOne(authInfo.toDocumentData());
 
 		return authInfo;
 	}

@@ -81,6 +81,10 @@ import { CloudScriptSocket } from "./CloudScriptSocket";
 import { CloudScriptMail } from "./CloudScriptMail";
 import { CloudScriptPushNotification } from "./CloudScriptPushNotification";
 
+interface CloudScriptRequestAuthToken {
+	gnAuthToken: string,
+}
+
 interface CloudScriptRequest {
 	// Stores the request ID value used by this contract.
 	requestId: string;
@@ -214,7 +218,12 @@ const ConvertArray = (results: any[]) => {
 	return answer;
 }
 
-process?.on("message", async (request: CloudScriptRequest) => {
+process?.on("message", async (request: CloudScriptRequest | CloudScriptRequestAuthToken) => {
+	if ("gnAuthToken" in request) {
+		GNNetwork.getAuthenticateStatus().setAuthToken(request.gnAuthToken);
+		return;
+	}
+
 	// Stores the start time value used in the current execution flow.
 	let startTime = performance.now();
 	// Stores the start memory usage value used in the current execution flow.
@@ -352,6 +361,9 @@ const gameId: string = process.env.gameId ?? "";
 
 	GNNetwork.init(gnServerSettings);
 	GNNetwork.setGameId(gameId);
+
+	GNNetwork.getAuthenticateStatus().setAuthToken(process.env.gnAuthToken);
+	GNNetwork.getAuthenticateStatus().setUserId("cloudScript");
 }
 
 // Stores the admin value used by this module.
@@ -376,6 +388,7 @@ const pushNotification = new CloudScriptPushNotification();
 // release for the security
 process.env.dbConnection = "";
 process.env.gnServerSettingsOptions = "";
+process.env.gnAuthToken = "";
 
 // Stores the handlers value used by this module.
 const handlers: Record<string, (args: any, context: { userId: string; customTags: { [k: string]: any } }, log: (log: any) => void) => any> = {};

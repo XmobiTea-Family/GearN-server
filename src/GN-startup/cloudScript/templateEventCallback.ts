@@ -164,6 +164,15 @@ enum EventCallbackType {
 	SystemAuthenticate = 5,
 	Event = 6,
 	Socket = 7,
+
+	AuthToken = 100,
+}
+
+interface CloudScriptRequestAuthToken {
+	// Stores the event type value used by this contract.
+	eventType: EventCallbackType.AuthToken;
+
+	gnAuthToken: string,
 }
 
 interface CloudScriptRequestPre {
@@ -377,7 +386,7 @@ interface CloudScriptRequestVerifyGenericService {
 	},
 };
 
-type CloudScriptRequest = CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket | CloudScriptRequestVerifyGenericService;
+type CloudScriptRequest = CloudScriptRequestAuthToken | CloudScriptRequestPre | CloudScriptRequestPost | CloudScriptRequestSystem | CloudScriptRequestSystemMatchmaking | CloudScriptRequestSystemAuthenticate | CloudScriptRequestEvent | CloudScriptRequestSocket | CloudScriptRequestVerifyGenericService;
 
 interface CloudScriptResponse {
 	// Stores the stats value used by this contract.
@@ -514,6 +523,12 @@ interface FunctionResponse {
 }
 
 process?.on("message", async (request: CloudScriptRequest) => {
+	if (request.eventType == EventCallbackType.AuthToken) {
+		GNNetwork.getAuthenticateStatus().setAuthToken(request.gnAuthToken);
+
+		return;
+	}
+
 	// Stores the start time value used in the current execution flow.
 	let startTime = performance.now();
 	// Stores the start memory usage value used in the current execution flow.
@@ -1134,6 +1149,9 @@ async function ___handlePostFunction(name: string, request: FunctionRequestPost)
 	gnServerSettings.config(gnServerSettingsOptions);
 
 	GNNetwork.init(gnServerSettings);
+
+	GNNetwork.getAuthenticateStatus().setAuthToken(process.env.gnAuthToken);
+	GNNetwork.getAuthenticateStatus().setUserId("cloudScript");
 }
 
 // Stores the admin value used by this module.
@@ -1160,6 +1178,7 @@ const pushNotification = new CloudScriptPushNotification();
 // release after init success
 process.env.dbConnection = "";
 process.env.gnServerSettingsOptions = "";
+process.env.gnAuthToken = "";
 
 // Stores the pre handlers value used by this module.
 const preHandlers: Record<string, (request: any, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest, log: (log: any) => void) => Promise<OperationResponse | null>> = {};

@@ -14,6 +14,10 @@ import { CloudScriptSecurityValidator } from "./CloudScriptSecurityValidator";
 
 const execFileAsync = promisify(execFile);
 
+interface CloudScriptRequestAuthToken {
+	gnAuthToken: string,
+}
+
 interface CloudScriptRequest {
 	// Stores the request ID value used by this contract.
 	requestId: string,
@@ -140,13 +144,13 @@ export class CloudScriptService implements ICloudScriptService {
 		let thiz = this;
 		this.gnServer.getHttpApp().getClusterHandler().onEvent("addCloudScriptFunction", data => {
 			if (data.gameId != thiz.gameId) return;
-			
+
 			thiz.remoteAddCloudScriptFunction(data);
 		});
 
 		this.gnServer.getHttpApp().getClusterHandler().onEvent("editCloudScriptFunction", data => {
 			if (data.gameId != thiz.gameId) return;
-			
+
 			thiz.remoteEditCloudScriptFunction(data);
 		});
 
@@ -184,7 +188,7 @@ export class CloudScriptService implements ICloudScriptService {
 				this.liveLatestVersion = cloudScriptFunctionResult["version"];
 
 				if (cloudScriptFunctionResult.canExecute)
-					this.loadCloudScriptFunctionWorker(this.liveLatestVersion, cloudScriptFunctionResult["fullScript"]);
+					await this.loadCloudScriptFunctionWorker(this.liveLatestVersion, cloudScriptFunctionResult["fullScript"]);
 			}
 		}
 	}
@@ -202,7 +206,7 @@ export class CloudScriptService implements ICloudScriptService {
 		if (!version) version = this.liveLatestVersion;
 
 		// Stores the cloud script worker value used in the current execution flow.
-		let cloudScriptWorker = this.loadCloudScriptFunctionWorkerFromCache(version);
+		let cloudScriptWorker = await this.loadCloudScriptFunctionWorkerFromCache(version);
 
 		if (cloudScriptWorker == null) {
 			return {
@@ -336,7 +340,7 @@ export class CloudScriptService implements ICloudScriptService {
 		this.gnServer.getHttpApp().getClusterHandler().sendEvent("addCloudScriptFunction", { version: version, fullScriptJs: fullScriptJs, canExecute: canExecute, isLive: isLive, gameId: this.gameId, }, false);
 
 		if (canExecute) {
-			this.loadCloudScriptFunctionWorker(version, fullScriptJs);
+			await this.loadCloudScriptFunctionWorker(version, fullScriptJs);
 		}
 
 		if (isLive) {
@@ -460,7 +464,7 @@ export class CloudScriptService implements ICloudScriptService {
 		let isLive = request.isLive;
 
 		if (canExecute) {
-			this.loadCloudScriptFunctionWorker(version, fullScriptJs);
+			await this.loadCloudScriptFunctionWorker(version, fullScriptJs);
 		}
 
 		if (isLive) {
@@ -663,7 +667,7 @@ export class CloudScriptService implements ICloudScriptService {
 	 * @param version Provides the version value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	private loadCloudScriptFunctionWorkerFromCache(version: string): ChildProcess {
+	private async loadCloudScriptFunctionWorkerFromCache(version: string): Promise<ChildProcess> {
 		if (!version) return null;
 
 		// Stores the cloud script worker value used in the current execution flow.
@@ -675,7 +679,26 @@ export class CloudScriptService implements ICloudScriptService {
 			if (cloudFunction == null) return null;
 			if (!cloudFunction.canExecute) return null;
 
-			return this.loadCloudScriptFunctionWorker(version, cloudFunction.fullScript);
+			return await this.loadCloudScriptFunctionWorker(version, cloudFunction.fullScript);
+		}
+
+		let currentMillseconds = xDatetime.getCurrentMilliseconds();
+
+		if (cloudScriptWorker.nextRefreshAuthToken < currentMillseconds) {
+			let cloudScriptUserId = "c_" + version + "_" + StringUtility.generateRandomString(10, 0);
+
+			let cloudScriptRequestAuthToken: CloudScriptRequestAuthToken = {
+				gnAuthToken: (await this.gnServer.getApiMiddleware().generateAuthInfoForCloudScript({
+					userId: cloudScriptUserId,
+					secretKey: this.gnServerSettingsOptions.clientSecretKey,
+					gnToken: null,
+				}, xDatetime.ONE_HOUR_MILLISECOND)).getAuthToken(),
+			}
+
+			cloudScriptWorker.send(cloudScriptRequestAuthToken);
+
+			cloudScriptWorker.nextRefreshAuthToken = currentMillseconds + 59 * 60 * 1000;
+			cloudScriptWorker.cloudScriptUserId = cloudScriptUserId;
 		}
 
 		return cloudScriptWorker;
@@ -687,14 +710,14 @@ export class CloudScriptService implements ICloudScriptService {
 	 * @param fullScript Provides the full script value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	private loadCloudScriptFunctionWorker(version: string, fullScript: string): ChildProcess {
+	private async loadCloudScriptFunctionWorker(version: string, fullScript: string): Promise<ChildProcess> {
 		if (!version) return null;
 
 		// Stores the file path value used in the current execution flow.
 		let filePath = __dirname + "/./GN-startup/cloudScript/" + version + ".js";
 		fs.writeFileSync(filePath, fullScript);
 
-		return this.loadCloudScriptWorker(version);
+		return await this.loadCloudScriptWorker(version);
 	}
 
 	/**
@@ -702,11 +725,13 @@ export class CloudScriptService implements ICloudScriptService {
 	 * @param version Provides the version value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	private loadCloudScriptWorker(version: string): ChildProcess {
+	private async loadCloudScriptWorker(version: string): Promise<ChildProcess> {
 		// Stores the file path value used in the current execution flow.
 		let filePath = __dirname + "/./GN-startup/cloudScript/" + version + ".js";
 
 		Debug.log("[GearN] [CloudScript] run cloudScript " + version);
+
+		let cloudScriptUserId = "c_" + version + "_" + StringUtility.generateRandomString(10, 0);
 
 		// Stores the cloud script worker value used in the current execution flow.
 		let cloudScriptWorker = fork(filePath, {
@@ -714,8 +739,16 @@ export class CloudScriptService implements ICloudScriptService {
 				gameId: this.gameId,
 				gnServerSettingsOptions: JSON.stringify(this.gnServerSettingsOptions),
 				dbConnection: JSON.stringify(this.dbConnection),
+				gnAuthToken: (await this.gnServer.getApiMiddleware().generateAuthInfoForCloudScript({
+					secretKey: this.gnServerSettingsOptions.clientSecretKey,
+					userId: cloudScriptUserId,
+					gnToken: null,
+				}, xDatetime.ONE_HOUR_MILLISECOND)).getAuthToken(),
 			}
 		});
+
+		cloudScriptWorker.nextRefreshAuthToken = xDatetime.getCurrentMilliseconds() + 59 * 60 * 1000;
+		cloudScriptWorker.cloudScriptUserId = cloudScriptUserId;
 
 		// Stores the thiz value used in the current execution flow.
 		let thiz = this;
@@ -743,6 +776,8 @@ export class CloudScriptService implements ICloudScriptService {
 				thiz.cloudScriptWorkerDict.delete(version);
 				thiz.cloudScriptWorkerFailedDict.delete(version);
 			}
+
+			if (cloudScriptWorker.cloudScriptUserId) this.gnServer.getApiMiddleware().removeAllAuthInfosInDb(cloudScriptWorker.cloudScriptUserId);
 		});
 
 		this.cloudScriptWorkerDict.set(version, cloudScriptWorker);
