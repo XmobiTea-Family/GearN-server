@@ -110,7 +110,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			message: request.message,
 			senderId: request.senderId,
 			userId: authInfo.getUserId(),
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -135,7 +135,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			groupId: request.groupId,
 			message: request.message,
 			senderId: request.senderId,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -160,7 +160,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			groupId: request.groupId,
 			message: request.message,
 			senderId: request.senderId,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -170,9 +170,9 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { groupId: string, message: string, senderId: string, userId?: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, message: string, senderId: string, userId?: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SendGroupMessage", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_SendGroupMessage", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -302,7 +302,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("group_SendGroupMessage", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("group_SendGroupMessage", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

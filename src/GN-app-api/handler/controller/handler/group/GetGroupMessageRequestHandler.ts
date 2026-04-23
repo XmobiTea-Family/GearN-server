@@ -106,7 +106,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			skip: request.skip,
 			limit: request.limit,
 			userId: authInfo.getUserId(),
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -131,7 +131,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			groupId: request.groupId,
 			skip: request.skip,
 			limit: request.limit,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -156,7 +156,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			groupId: request.groupId,
 			skip: request.skip,
 			limit: request.limit,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -166,9 +166,9 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { groupId: string, skip: number, limit: number, userId?: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, skip: number, limit: number, userId?: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetGroupMessage", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetGroupMessage", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -258,7 +258,7 @@ export class GetGroupMessageRequestHandler extends GroupBaseRequestHandler {
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupMessage", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupMessage", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

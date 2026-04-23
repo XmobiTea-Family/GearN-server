@@ -11,7 +11,7 @@ import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 import { GroupStatisticsParam } from "./model/GroupStatisticsParam";
@@ -107,7 +107,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 			groupId: request.groupId,
 			groupStatistics: request.groupStatistics,
 			log: request.log,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -132,7 +132,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 			groupId: request.groupId,
 			groupStatistics: request.groupStatistics,
 			log: request.log,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -157,7 +157,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 			groupId: request.groupId,
 			groupStatistics: request.groupStatistics,
 			log: request.log,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -167,9 +167,9 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { groupId: string, groupStatistics: Array<GroupStatisticsParam>, log: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { groupId: string, groupStatistics: Array<GroupStatisticsParam>, log: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_ChangeGroupStatistics", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_ChangeGroupStatistics", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -426,7 +426,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("group_ChangeGroupStatistics", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("group_ChangeGroupStatistics", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

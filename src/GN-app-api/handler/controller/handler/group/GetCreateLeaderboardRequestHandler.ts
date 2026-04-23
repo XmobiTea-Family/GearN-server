@@ -10,7 +10,7 @@ import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHa
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { Group } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Group";
@@ -110,7 +110,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Player, secretInfo, operationRequest);
 	}
 
 	/**
@@ -138,7 +138,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Server, secretInfo, operationRequest);
 	}
 
 	/**
@@ -166,7 +166,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
-		}, secretInfo, operationRequest);
+		}, SecretRole.Admin, secretInfo, operationRequest);
 	}
 
 	/**
@@ -176,9 +176,9 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 	 * @param operationRequest Provides the operation request value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async execute(request: { skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+	private async execute(request: { skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetCreateLeaderboard", request, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetCreateLeaderboard", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -286,7 +286,7 @@ export class GetCreateLeaderboardRequestHandler extends GroupBaseRequestHandler 
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("group_GetCreateLeaderboard", request, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("group_GetCreateLeaderboard", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}
