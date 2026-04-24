@@ -204,7 +204,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		// Stores the group type value used in the current execution flow.
-		let groupType = <OwnerType>group.getGroupType();
+		let groupType = group.getGroupType();
 		if (groupType != OwnerType.GamePlayer) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;

@@ -199,7 +199,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		// Stores the group type value used in the current execution flow.
-		let groupType = <OwnerType>group.getGroupType();
+		let groupType = group.getGroupType();
 
 		// Stores the catalog ID value used in the current execution flow.
 		let catalogId = group.getCatalogId();

@@ -188,7 +188,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 				return operationResponse;
 			}
 
-			if (<PermissionDataItem>playerDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
+			if (playerDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("DataKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
@@ -254,7 +254,7 @@ export class SetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 			// Stores the value value used in the current execution flow.
 			let value = playerDataParam.value;
 			// Stores the permission value used in the current execution flow.
-			let permission = <PermissionDataItem>playerDatasSettingsItem.permission;
+			let permission = playerDatasSettingsItem.permission;
 
 			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
 

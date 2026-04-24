@@ -776,7 +776,7 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 	 */
 	protected async isMember(group: Group, userId: string, gameId: string): Promise<boolean> {
 		// Stores the group type value used in the current execution flow.
-		let groupType = <OwnerType>group.getGroupType();
+		let groupType = group.getGroupType();
 
 		if (groupType == OwnerType.GamePlayer) {
 			if (!group.hasMember(userId)) {

@@ -201,7 +201,7 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 			group.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
 
 			// Stores the group type value used in the current execution flow.
-			let groupType = <OwnerType>group.getGroupType();
+			let groupType = group.getGroupType();
 
 			// Stores the members value used in the current execution flow.
 			let members = group.getAllMembers();

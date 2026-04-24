@@ -202,7 +202,7 @@ export class SetRemoveStatusRequestHandler extends ItemBaseRequestHandler {
 			// Stores the owner value used in the current execution flow.
 			let owner = inventory.getOwner();
 			// Stores the owner type value used in the current execution flow.
-			let ownerType = <OwnerType>owner.type;
+			let ownerType = owner.type;
 			if (ownerType == OwnerType.Group) {
 				// Stores the group value used in the current execution flow.
 				let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });

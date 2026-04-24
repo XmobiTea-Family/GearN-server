@@ -186,10 +186,19 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = inventory.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+				operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
 
-		
+				return operationResponse;
+			}
+		}
+
 		// Stores the item type value used in the current execution flow.
-		let itemType = <ItemType>inventory.getItemType();
+		let itemType = inventory.getItemType();
 		if (itemType == ItemType.NonStackable) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotStackable);
 			return operationResponse;
@@ -206,7 +215,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 				// Stores the owner value used in the current execution flow.
 				let owner = inventory.getOwner();
 				// Stores the owner type value used in the current execution flow.
-				let ownerType = <OwnerType>owner.type;
+				let ownerType = owner.type;
 				if (ownerType == OwnerType.Group) {
 					// Stores the group value used in the current execution flow.
 					let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });

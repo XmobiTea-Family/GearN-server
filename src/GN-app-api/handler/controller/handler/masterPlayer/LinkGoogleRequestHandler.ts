@@ -124,7 +124,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			token: request.token,
-			googleLoginType: <GoogleLoginType>request.type,
+			googleLoginType: request.type,
 			forceLink: request.forceLink
 		}, SecretRole.Client, secretInfo, operationRequest);
 	}
@@ -150,7 +150,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			token: request.token,
-			googleLoginType: <GoogleLoginType>request.type,
+			googleLoginType: request.type,
 			forceLink: request.forceLink
 		}, SecretRole.Server, secretInfo, operationRequest);
 	}
@@ -176,7 +176,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			token: request.token,
-			googleLoginType: <GoogleLoginType>request.type,
+			googleLoginType: request.type,
 			forceLink: request.forceLink
 		}, SecretRole.Admin, secretInfo, operationRequest);
 	}

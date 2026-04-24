@@ -84,7 +84,7 @@ export class LoginByGoogleRequestHandler extends LoginBaseRequestHandler {
 
 		return this.execute({
 			token: request.token,
-			googleLoginType: <GoogleLoginType>request.type,
+			googleLoginType: request.type,
 			createPlayerIfNotExists: request.createPlayerIfNotExists,
 			infoRequestParam: request.infoRequestParam,
 			ipAddress: (request as any).originRequest.getIP(),

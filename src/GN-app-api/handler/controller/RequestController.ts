@@ -118,7 +118,7 @@ export class RequestController {
 	 */
 	public async handleRequest(request: Request): Promise<OperationResponse> {
 		let operationCode = request.getOperationCode();
-		let role = <RequestRole>request.getRole();
+		let role = request.getRole();
 
 		// Admin and server roles are authenticated upstream through secrets, not client auth tokens.
 		let isAuthenticated = request.isAuthenticated();
