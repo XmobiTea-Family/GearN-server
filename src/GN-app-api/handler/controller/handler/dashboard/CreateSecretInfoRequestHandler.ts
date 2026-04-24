@@ -228,7 +228,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				setDisplayName: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getTsCreate: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getIpAddressCreate: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
-				setTsLastLogin: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
+				updateTsLastLogin: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getTsLastLogin: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				setPlayerBan: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
 				getPlayerBan: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable, },
@@ -704,7 +704,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getTsCreate: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getIpAddressCreate: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
-				setTsLastLogin: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
+				updateTsLastLogin: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 				getTsLastLogin: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
 
 				setPlayerBan: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true, },
@@ -1196,7 +1196,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getTsCreate: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getIpAddressCreate: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
-				setTsLastLogin: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
+				updateTsLastLogin: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 				getTsLastLogin: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
 
 				setPlayerBan: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false, },
@@ -1689,7 +1689,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getTsCreate: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				getIpAddressCreate: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
-				setTsLastLogin: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				updateTsLastLogin: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				getTsLastLogin: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 
 				setPlayerBan: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },

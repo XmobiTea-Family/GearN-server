@@ -1690,11 +1690,6 @@
                 "hasEdit": false
             },
             {
-                "eventName": "masterPlayer_SetTsLastLogin",
-                "script": "\npreHandlers.masterPlayer_SetTsLastLogin = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_SetTsLastLogin = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
                 "eventName": "masterPlayer_UnlinkAccount",
                 "script": "\npreHandlers.masterPlayer_UnlinkAccount = async (request: { userId: string, username: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_UnlinkAccount = async (request: { userId: string, username: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -1772,6 +1767,11 @@
             {
                 "eventName": "masterPlayer_UnlinkWindowsPhoneDeviceId",
                 "script": "\npreHandlers.masterPlayer_UnlinkWindowsPhoneDeviceId = async (request: { userId: string, windowsPhoneDeviceId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_UnlinkWindowsPhoneDeviceId = async (request: { userId: string, windowsPhoneDeviceId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "masterPlayer_UpdateTsLastLogin",
+                "script": "\npreHandlers.masterPlayer_UpdateTsLastLogin = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (log: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_UpdateTsLastLogin = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             }
         ]

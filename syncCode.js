@@ -62,7 +62,7 @@ var secretPermissionItem = {
 		getTsCreate: {},
 		getIpAddressCreate: {},
 
-		setTsLastLogin: {},
+		updateTsLastLogin: {},
 		getTsLastLogin: {},
 
 		setPlayerBan: {},

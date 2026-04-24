@@ -1,21 +1,21 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo, SecretRole } from "../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
-import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
 
-class SetTsLastLoginOperationRequest extends OperationRequest {
+class UpdateTsLastLoginOperationRequest extends OperationRequest {
 
 	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
@@ -31,7 +31,7 @@ class SetTsLastLoginOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerSetTsLastLoginOperationRequest extends SetTsLastLoginOperationRequest {
+class ServerUpdateTsLastLoginOperationRequest extends UpdateTsLastLoginOperationRequest {
 
 	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
@@ -47,7 +47,7 @@ class ServerSetTsLastLoginOperationRequest extends SetTsLastLoginOperationReques
 	}
 }
 
-class AdminSetTsLastLoginOperationRequest extends ServerSetTsLastLoginOperationRequest {
+class AdminUpdateTsLastLoginOperationRequest extends ServerUpdateTsLastLoginOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -59,20 +59,20 @@ class AdminSetTsLastLoginOperationRequest extends ServerSetTsLastLoginOperationR
 	}
 }
 
-export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler {
+export class UpdateTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler {
 
 	/**
 	 * Returns the code.
 	 */
 	public override getCode() {
-		return OperationCode.SetTsLastLogin;
+		return OperationCode.UpdateTsLastLogin;
 	}
 
 	/**
 	 * Returns the common operation request.
 	 */
 	public override getCommonOperationRequest() {
-		return SetTsLastLoginOperationRequest;
+		return UpdateTsLastLoginOperationRequest;
 	}
 
 	/**
@@ -91,19 +91,19 @@ export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler
 		}
 
 		if (!request.userId) {
-			if (!secretInfo.getPermission().masterPlayer.setTsLastLogin.selfEnable) {
+			if (!secretInfo.getPermission().masterPlayer.updateTsLastLogin.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 
 			request.userId = authInfo.getUserId();
 		}
 		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().masterPlayer.setTsLastLogin.otherSelfEnable) {
+			if (!secretInfo.getPermission().masterPlayer.updateTsLastLogin.otherSelfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
 		else {
-			if (!secretInfo.getPermission().masterPlayer.setTsLastLogin.selfEnable) {
+			if (!secretInfo.getPermission().masterPlayer.updateTsLastLogin.selfEnable) {
 				return this.newOperationNotAllowError(request);
 			}
 		}
@@ -121,13 +121,13 @@ export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetTsLastLoginOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerUpdateTsLastLoginOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.setTsLastLogin.serverSelfEnable) {
+		if (!secretInfo.getPermission().masterPlayer.updateTsLastLogin.serverSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -144,13 +144,13 @@ export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetTsLastLoginOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminUpdateTsLastLoginOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().masterPlayer.setTsLastLogin.adminSelfEnable) {
+		if (!secretInfo.getPermission().masterPlayer.updateTsLastLogin.adminSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
@@ -168,7 +168,7 @@ export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler
 	 */
 	private async execute(request: { userId: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SetTsLastLogin", request, role, secretInfo, operationRequest);
+		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_UpdateTsLastLogin", request, role, secretInfo, operationRequest);
 		if (operationResponse != null) {
 			return operationResponse;
 		}
@@ -209,7 +209,7 @@ export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SetTsLastLogin", request, role, secretInfo, operationRequest, operationResponse);
+		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_UpdateTsLastLogin", request, role, secretInfo, operationRequest, operationResponse);
 
 		return operationResponse;
 	}

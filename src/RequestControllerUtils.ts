@@ -64,7 +64,7 @@ import { GetDisplayNameRequestHandler as MasterPlayer_GetDisplayNameRequestHandl
 import { SetDisplayNameRequestHandler as MasterPlayer_SetDisplayNameRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SetDisplayNameRequestHandler";
 import { GetTsCreateRequestHandler as MasterPlayer_GetTsCreateRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetTsCreateRequestHandler";
 import { GetIpAddressCreateRequestHandler as MasterPlayer_GetIpAddressCreateRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetIpAddressCreateRequestHandler";
-import { SetTsLastLoginRequestHandler as MasterPlayer_SetTsLastLoginRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SetTsLastLoginRequestHandler";
+import { UpdateTsLastLoginRequestHandler as MasterPlayer_UpdateTsLastLoginRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/UpdateTsLastLoginRequestHandler";
 import { GetTsLastLoginRequestHandler as MasterPlayer_GetTsLastLoginRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetTsLastLoginRequestHandler";
 import { SetPlayerBanRequestHandler as MasterPlayer_SetPlayerBanRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SetPlayerBanRequestHandler";
 import { GetPlayerBanRequestHandler as MasterPlayer_GetPlayerBanRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetPlayerBanRequestHandler";
@@ -437,7 +437,7 @@ export class RequestControllerUtils {
 			requestController.addHandler(requestTypeValue, new MasterPlayer_SetDisplayNameRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new MasterPlayer_GetTsCreateRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new MasterPlayer_GetIpAddressCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetTsLastLoginRequestHandler(gnServer), true);
+			requestController.addHandler(requestTypeValue, new MasterPlayer_UpdateTsLastLoginRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new MasterPlayer_GetTsLastLoginRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new MasterPlayer_SetPlayerBanRequestHandler(gnServer), true);
 			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerBanRequestHandler(gnServer), true);

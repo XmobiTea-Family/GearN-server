@@ -187,7 +187,7 @@ export class OperationCode {
 	public static readonly GetItemInformation: string = "getItemInformation";
 	public static readonly GetAmount: string = "getAmount";
 	public static readonly GetItemType: string = "getItemType";
-	public static readonly SetTsLastLogin: string = "setTsLastLogin";
+	public static readonly UpdateTsLastLogin: string = "updateTsLastLogin";
 	public static readonly SetRemoveStatus: string = "setRemoveStatus";
 	public static readonly SetAmount: string = "setAmount";
 	public static readonly RemoveGroup: string = "removeGroup";

@@ -173,8 +173,8 @@ export class MasterPlayerPermissionRulesParam {
 	public getIpAddressCreate?: PermissionRulesParam;
 
 	// Stores the set timestamp last login value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.SetTsLastLogin, isOptional: true })
-	public setTsLastLogin?: PermissionRulesParam;
+	@GNHashtableDataMember({ code: ParameterCode.UpdateTsLastLogin, isOptional: true })
+	public updateTsLastLogin?: PermissionRulesParam;
 
 	// Stores the get timestamp last login value used by this instance.
 	@GNHashtableDataMember({ code: ParameterCode.GetTsLastLogin, isOptional: true })

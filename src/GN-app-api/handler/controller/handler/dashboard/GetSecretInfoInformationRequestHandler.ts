@@ -984,7 +984,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 
 			{
 				// Stores the permission rules value used in the current execution flow.
-				let permissionRules = masterPlayer.setTsLastLogin;
+				let permissionRules = masterPlayer.updateTsLastLogin;
 				// Stores the GearN permission rules value used in the current execution flow.
 				let gnPermissionRules = new GNHashtable();
 
@@ -993,7 +993,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 				gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
 				gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-				gnMasterPlayer.add(ParameterCode.SetTsLastLogin, gnPermissionRules);
+				gnMasterPlayer.add(ParameterCode.UpdateTsLastLogin, gnPermissionRules);
 			}
 
 			{

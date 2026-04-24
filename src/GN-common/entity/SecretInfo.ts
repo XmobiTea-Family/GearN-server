@@ -271,7 +271,7 @@ export interface SecretPermissionItem {
 		getIpAddressCreate: MasterPlayerPermissionRules,
 
 		// Stores the set timestamp last login value used by this contract.
-		setTsLastLogin: MasterPlayerPermissionRules,
+		updateTsLastLogin: MasterPlayerPermissionRules,
 		// Stores the get timestamp last login value used by this contract.
 		getTsLastLogin: MasterPlayerPermissionRules,
 

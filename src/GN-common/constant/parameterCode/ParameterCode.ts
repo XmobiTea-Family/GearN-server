@@ -287,7 +287,7 @@ export class ParameterCode {
 	public static readonly SetDisplayName: string = "setDisplayName";
 	public static readonly GetTsCreate: string = "getTsCreate";
 	public static readonly GetIpAddressCreate: string = "getIpAddressCreate";
-	public static readonly SetTsLastLogin: string = "setTsLastLogin";
+	public static readonly UpdateTsLastLogin: string = "updateTsLastLogin";
 	public static readonly GetTsLastLogin: string = "getTsLastLogin";
 	public static readonly SetPlayerBan: string = "setPlayerBan";
 	public static readonly GetPlayerBan: string = "getPlayerBan";
