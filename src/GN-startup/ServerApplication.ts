@@ -458,9 +458,7 @@ export class ServerApplication extends BuilderBase {
 			pingTimeout: 20000,
 
 			logType: <number>LogType.Off,
-			adminSecretKey: secretKey,
-			serverSecretKey: secretKey,
-			clientSecretKey: secretKey,
+			secretKey: secretKey,
 		}
 
 		// Worker processes receive the same DB connection metadata instead of opening a separate config source.

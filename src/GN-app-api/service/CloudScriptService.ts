@@ -690,7 +690,7 @@ export class CloudScriptService implements ICloudScriptService {
 			let cloudScriptRequestAuthToken: CloudScriptRequestAuthToken = {
 				gnAuthToken: (await this.gnServer.getApiMiddleware().generateAuthInfoForCloudScript({
 					userId: cloudScriptUserId,
-					secretKey: this.gnServerSettingsOptions.clientSecretKey,
+					secretKey: this.gnServerSettingsOptions.secretKey,
 					gnToken: null,
 				}, xDatetime.ONE_HOUR_MILLISECOND)).getAuthToken(),
 			}
@@ -740,7 +740,7 @@ export class CloudScriptService implements ICloudScriptService {
 				gnServerSettingsOptions: JSON.stringify(this.gnServerSettingsOptions),
 				dbConnection: JSON.stringify(this.dbConnection),
 				gnAuthToken: (await this.gnServer.getApiMiddleware().generateAuthInfoForCloudScript({
-					secretKey: this.gnServerSettingsOptions.clientSecretKey,
+					secretKey: this.gnServerSettingsOptions.secretKey,
 					userId: cloudScriptUserId,
 					gnToken: null,
 				}, xDatetime.ONE_HOUR_MILLISECOND)).getAuthToken(),
