@@ -234,7 +234,9 @@ export class SetItemDataRequestHandler extends ItemBaseRequestHandler {
 			}
 			else {
 				if (value == null) {
-					inventory.removeItemData(key);
+					if (inventory.hasItemData(key)) {
+						inventory.removeItemData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {

@@ -245,7 +245,9 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 			}
 			else {
 				if (value == null) {
-					group.removeGroupData(key);
+					if (group.hasGroupData(key)) {
+						group.removeGroupData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {

@@ -268,7 +268,9 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 			}
 			else {
 				if (value == null) {
-					masterPlayer.removeCustomData(key);
+					if (masterPlayer.hasCustomData(key)) {
+						masterPlayer.removeCustomData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {

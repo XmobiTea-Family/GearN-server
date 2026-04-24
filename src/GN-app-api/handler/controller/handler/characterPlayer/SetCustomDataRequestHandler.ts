@@ -265,7 +265,9 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 			}
 			else {
 				if (value == null) {
-					characterPlayer.removeCustomData(key);
+					if (characterPlayer.hasCustomData(key)) {
+						characterPlayer.removeCustomData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {

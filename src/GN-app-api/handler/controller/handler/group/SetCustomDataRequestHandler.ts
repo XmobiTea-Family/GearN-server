@@ -248,7 +248,9 @@ export class SetCustomDataRequestHandler extends GroupBaseRequestHandler {
 			}
 			else {
 				if (value == null) {
-					group.removeCustomData(key);
+					if (group.hasCustomData(key)) {
+						group.removeCustomData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {

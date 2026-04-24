@@ -267,7 +267,9 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 			}
 			else {
 				if (value == null) {
-					gamePlayer.removeCustomData(key);
+					if (gamePlayer.hasCustomData(key)) {
+						gamePlayer.removeCustomData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {

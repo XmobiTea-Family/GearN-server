@@ -234,7 +234,9 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 			}
 			else {
 				if (value == null) {
-					inventory.removeCustomData(key);
+					if (inventory.hasCustomData(key)) {
+						inventory.removeCustomData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {

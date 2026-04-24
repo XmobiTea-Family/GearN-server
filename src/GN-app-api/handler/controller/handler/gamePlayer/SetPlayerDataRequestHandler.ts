@@ -262,7 +262,9 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 			}
 			else {
 				if (value == null) {
-					gamePlayer.removePlayerData(key);
+					if (gamePlayer.hasPlayerData(key)) {
+						gamePlayer.removePlayerData(key);
+					}
 				}
 				else {
 					if (value instanceof GNData) {
