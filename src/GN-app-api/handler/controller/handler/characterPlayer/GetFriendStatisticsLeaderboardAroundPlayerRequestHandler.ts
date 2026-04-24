@@ -110,15 +110,18 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ch
 			return this.newInvalidRequestParameters(request);
 		}
 
-		// Tracks whether method is allowed.
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer);
-
-		if (!allowMethod) {
+		if (!secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer.otherSelfEnable && !secretInfo.getPermission().characterPlayer.getPlayerInformation.selfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
+		// Tracks whether method is allowed.
+		let allowMethod = false;
 		// Stores the owned value used in the current execution flow.
 		let owned = false;
+
+		if (secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer.otherSelfEnable) {
+			allowMethod = true;
+		}
 
 		if (secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer.selfEnable) {
 			// Stores the game player value used in the current execution flow.
@@ -130,6 +133,10 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ch
 					owned = true;
 				}
 			}
+		}
+
+		if (!allowMethod) {
+			return this.newOperationNotAllowError(request);
 		}
 
 		if (owned) {

@@ -178,10 +178,10 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
 
-		// Stores the resolved game player settings instance for the current execution flow.
-		let gamePlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+		// Stores the resolved character player settings instance for the current execution flow.
+		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 		// Stores the player friend catalog settings item value used in the current execution flow.
-		let playerFriendCatalogSettingsItem = gamePlayerSettings.playerFriendCatalogSettings.find(x => x.catalogId == request.catalogId);
+		let playerFriendCatalogSettingsItem = characterPlayerSettings.playerFriendCatalogSettings.find(x => x.catalogId == request.catalogId);
 
 		if (playerFriendCatalogSettingsItem == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
@@ -190,16 +190,16 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		}
 
 		if (request.characterId != request.friendId) {
-			// Stores the game player find options value used in the current execution flow.
-			let gamePlayerFindOptions: CharacterPlayerFindOptions = {
+			// Stores the character player find options value used in the current execution flow.
+			let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 				playerFriends: true,
 				owner: true
 			}
 
 			// Stores the character player value used in the current execution flow.
-			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 			// Stores the friend player value used in the current execution flow.
-			let friendPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
+			let friendPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.friendId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 			if (characterPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
