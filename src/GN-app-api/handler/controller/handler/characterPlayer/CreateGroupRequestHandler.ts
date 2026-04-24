@@ -13,8 +13,8 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
-import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { GroupMemberParam } from "./model/GroupMemberParam";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
@@ -190,6 +190,8 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerGroups: true,
 			owner: true,
+			playerBan: true,
+			removeStatus: true,
 		}
 
 		// Stores the resolved character player settings instance for the current execution flow.
@@ -213,6 +215,30 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		if (role == SecretRole.Client) {
+			// Stores the character ban value used in the current execution flow.
+			let playerBan = characterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
+
+					return operationResponse;
+				}
+			}
+
+			let removeStatus = characterPlayer.getRemoveStatus();
+
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+				operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
+		}
+
 		// Stores the group ID value used in the current execution flow.
 		let groupId = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
 
@@ -256,7 +282,7 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 					otherCharacterPlayer.saveAsync();
 
 					group.setMember(groupMember.characterId, GroupStatus.WaitingAccept);
-				
+
 					this.gnServer.joinRoom(otherCharacterPlayer.getOwner().id, groupId);
 				}
 			}

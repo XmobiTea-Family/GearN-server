@@ -171,6 +171,7 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			removeStatus: true,
+			playerBan: true,
 			owner: true,
 		}
 
@@ -182,10 +183,36 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 			return operationResponse;
 		}
 
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		if (role == SecretRole.Client) {
+			// Stores the character ban value used in the current execution flow.
+			let playerBan = characterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
+
+					return operationResponse;
+				}
+			}
+
+			let removeStatus = characterPlayer.getRemoveStatus();
+
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+				operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
+		}
+
 		// Stores the remove status value used in the current execution flow.
 		let removeStatus = characterPlayer.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {
-			characterPlayer.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
+			characterPlayer.setRemoveStatus(currentMilliseconds, request.reason);
 
 			// Stores the owner value used in the current execution flow.
 			let owner = characterPlayer.getOwner();

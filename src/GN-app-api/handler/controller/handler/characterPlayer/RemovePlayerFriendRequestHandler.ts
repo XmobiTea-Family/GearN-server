@@ -175,7 +175,9 @@ export class RemovePlayerFriendRequestHandler extends CharacterPlayerBaseRequest
 			// Stores the character player find options value used in the current execution flow.
 			let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 				playerFriends: true,
-				owner: true
+				owner: true,
+				playerBan: true,
+				removeStatus: true,
 			}
 
 			// Stores the character player value used in the current execution flow.
@@ -188,13 +190,36 @@ export class RemovePlayerFriendRequestHandler extends CharacterPlayerBaseRequest
 				return operationResponse;
 			}
 
+			// Stores the current milliseconds value used in the current execution flow.
+			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+			if (role == SecretRole.Client) {
+				// Stores the character ban value used in the current execution flow.
+				let playerBan = characterPlayer.getPlayerBan();
+
+				if (playerBan.tsExpire != 0) {
+					if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+						operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+						operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
+
+						return operationResponse;
+					}
+				}
+
+				let removeStatus = characterPlayer.getRemoveStatus();
+
+				if (removeStatus.tsRemove != 0) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+					operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
+
+					return operationResponse;
+				}
+			}
+
 			if (friendPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
 				return operationResponse;
 			}
-
-			// Stores the current milliseconds value used in the current execution flow.
-			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 			if (characterPlayer.hasPlayerFriend(request.friendId)) {
 				// Stores the player friend item value used in the current execution flow.

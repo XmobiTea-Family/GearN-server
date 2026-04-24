@@ -193,26 +193,52 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 			// Stores the character player find options value used in the current execution flow.
 			let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 				playerFriends: true,
-				owner: true
+				owner: true,
+				playerBan: true,
+				removeStatus: true,
 			}
 
 			// Stores the character player value used in the current execution flow.
 			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
-			// Stores the friend player value used in the current execution flow.
-			let friendPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.friendId, secretInfo.getGameId(), characterPlayerFindOptions);
 
 			if (characterPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
 				return operationResponse;
 			}
 
+			// Stores the current milliseconds value used in the current execution flow.
+			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+			if (role == SecretRole.Client) {
+				// Stores the character ban value used in the current execution flow.
+				let playerBan = characterPlayer.getPlayerBan();
+
+				if (playerBan.tsExpire != 0) {
+					if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+						operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+						operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
+
+						return operationResponse;
+					}
+				}
+
+				let removeStatus = characterPlayer.getRemoveStatus();
+
+				if (removeStatus.tsRemove != 0) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+					operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
+
+					return operationResponse;
+				}
+			}
+
+			// Stores the friend player value used in the current execution flow.
+			let friendPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.friendId, secretInfo.getGameId(), characterPlayerFindOptions);
+
 			if (friendPlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
 				return operationResponse;
 			}
-
-			// Stores the current milliseconds value used in the current execution flow.
-			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 			if (!characterPlayer.hasPlayerFriend(request.friendId)) {
 				if (playerFriendCatalogSettingsItem.forceAcceptFriend) {

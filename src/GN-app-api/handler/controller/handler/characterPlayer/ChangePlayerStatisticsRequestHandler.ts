@@ -199,6 +199,8 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerStatistics: true,
+			playerBan: true,
+			removeStatus: true,
 		}
 
 		// Stores the character player value used in the current execution flow.
@@ -209,13 +211,36 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 			return operationResponse;
 		}
 
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		if (role == SecretRole.Client) {
+			// Stores the character ban value used in the current execution flow.
+			let playerBan = characterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
+
+					return operationResponse;
+				}
+			}
+
+			let removeStatus = characterPlayer.getRemoveStatus();
+
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+				operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
+		}
+
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
 		// Stores the GearN player statistics value used in the current execution flow.
 		let gnPlayerStatistics = new GNArray();
-
-		// Stores the current milliseconds value used in the current execution flow.
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		let logs: { characterId: string, key: string, amount: number, startValue: number, finalValue: number, tsCreate: number, log: string }[] = [];
 

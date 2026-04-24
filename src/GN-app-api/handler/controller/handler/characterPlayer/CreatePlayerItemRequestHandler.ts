@@ -13,8 +13,8 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
-import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
@@ -196,6 +196,8 @@ export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 		// Stores the character player find options value used in the current execution flow.
 		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
 			playerInventories: true,
+			playerBan: true,
+			removeStatus: true,
 		}
 
 		// Stores the resolved character player settings instance for the current execution flow.
@@ -223,6 +225,32 @@ export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 			return operationResponse;
 		}
 
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+		if (role == SecretRole.Client) {
+			// Stores the character ban value used in the current execution flow.
+			let playerBan = characterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
+
+					return operationResponse;
+				}
+			}
+
+			let removeStatus = characterPlayer.getRemoveStatus();
+
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+				operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
+		}
+
 		// Stores the amount value used in the current execution flow.
 		let amount = request.amount;
 
@@ -232,8 +260,6 @@ export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 
 		// Stores the item ID value used in the current execution flow.
 		let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
-		// Stores the current milliseconds value used in the current execution flow.
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		// Stores the result value used in the current execution flow.
 		let result = {} as any;
