@@ -189,17 +189,11 @@ export class GetOnlineStatusRequestHandler extends GamePlayerBaseRequestHandler 
 			return operationResponse;
 		}
 
-		// Stores the socket ID value used in the current execution flow.
-		let socketId = gamePlayer.getSocketId();
-		// Stores the timestamp last login value used in the current execution flow.
-		let tsLastLogin = gamePlayer.getTsLastLogin();
+		// Stores the GearN info response parameters value used in the current execution flow.
+		let gnInfoResponseParameters = new GNHashtable();
+		gnInfoResponseParameters.add(ParameterCode.OnlineStatus, this.generateOnlineStatus(gamePlayer));
 
-		// Stores the GearN online status value used in the current execution flow.
-		let gnOnlineStatus = new GNHashtable();
-		gnOnlineStatus.add(ParameterCode.TsLastLogin, tsLastLogin);
-		gnOnlineStatus.add(ParameterCode.SocketId, socketId);
-
-		operationResponse.setParameter(ParameterCode.OnlineStatus, gnOnlineStatus);
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

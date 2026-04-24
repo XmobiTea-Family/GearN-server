@@ -38,7 +38,7 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 			&& infoRequestParam.playerGroups
 			&& infoRequestParam.playerFriends
 
-			&& infoRequestParam.tsLastLogin
+			&& (infoRequestParam.tsLastLogin || infoRequestParam.onlineStatus)
 			&& infoRequestParam.ipAddressCreate
 			&& infoRequestParam.countryCode;
 	}
@@ -74,6 +74,10 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 		if (infoRequestParam.tsLastLogin) answer.tsLastLogin = infoRequestParam.tsLastLogin;
 		if (infoRequestParam.ipAddressCreate) answer.ipAddressCreate = infoRequestParam.ipAddressCreate;
 		if (infoRequestParam.countryCode) answer.countryCode = infoRequestParam.countryCode;
+		if (infoRequestParam.onlineStatus) {
+			answer.tsLastLogin = infoRequestParam.onlineStatus;
+			answer.socketId = infoRequestParam.onlineStatus;
+		}
 
 		return answer;
 	}
@@ -152,6 +156,11 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 		if (!secretInfo.getPermission().gamePlayer.getPlayerFriend.selfEnable) {
 			infoRequestParam.playerFriends = false;
 		}
+
+		if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.selfEnable) {
+			infoRequestParam.onlineStatus = false;
+		}
+
 	}
 
 	/**
@@ -228,6 +237,11 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 		if (!secretInfo.getPermission().gamePlayer.getPlayerFriend.otherSelfEnable) {
 			infoRequestParam.playerFriends = false;
 		}
+
+		if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.otherSelfEnable) {
+			infoRequestParam.onlineStatus = false;
+		}
+
 	}
 
 	/**
@@ -303,6 +317,10 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 
 		if (!secretInfo.getPermission().gamePlayer.getPlayerFriend.serverSelfEnable) {
 			infoRequestParam.playerFriends = false;
+		}
+
+		if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.serverSelfEnable) {
+			infoRequestParam.onlineStatus = false;
 		}
 
 	}
@@ -382,6 +400,10 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 			infoRequestParam.playerFriends = false;
 		}
 
+		if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.adminSelfEnable) {
+			infoRequestParam.onlineStatus = false;
+		}
+
 	}
 
 	/**
@@ -445,6 +467,9 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 
 		if (infoRequestParam.countryCode)
 			answer.add(ParameterCode.CountryCode, this.generateCountryCode(gamePlayer));
+
+		if (infoRequestParam.onlineStatus)
+			answer.add(ParameterCode.OnlineStatus, this.generateOnlineStatus(gamePlayer));
 
 		return answer;
 	}
@@ -850,4 +875,18 @@ export abstract class GamePlayerBaseRequestHandler extends RequestHandler {
 	protected generateCountryCode(gamePlayer: GamePlayer): string {
 		return gamePlayer.getCountryCode();
 	}
+
+	/**
+	 * Executes the generate online status workflow.
+	 * @param gamePlayer Provides the game player value used by this operation.
+	 * @returns Returns the operation result.
+	 */
+	protected generateOnlineStatus(gamePlayer: GamePlayer): GNHashtable {
+		let gnOnlineStatus = new GNHashtable();
+		gnOnlineStatus.add(ParameterCode.TsLastLogin, gamePlayer.getTsLastLogin());
+		gnOnlineStatus.add(ParameterCode.SocketId, gamePlayer.getSocketId());
+
+		return gnOnlineStatus;
+	}
+
 }
