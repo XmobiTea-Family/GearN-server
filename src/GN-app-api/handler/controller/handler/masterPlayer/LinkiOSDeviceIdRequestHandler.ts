@@ -213,7 +213,7 @@ export class LinkiOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHandle
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
@@ -250,7 +250,23 @@ export class LinkiOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHandle
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+
+		if (role == SecretRole.Client) {
+			if (secretInfo.getPermission().masterPlayer.getExternal.selfEnable) {
+				gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+			}
+		}
+		else if (role == SecretRole.Server) {
+			if (secretInfo.getPermission().masterPlayer.getExternal.serverSelfEnable) {
+				gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+			}
+		}
+		else if (role == SecretRole.Admin) {
+			if (secretInfo.getPermission().masterPlayer.getExternal.adminSelfEnable) {
+				gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+			}
+		}
+
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
