@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { BanItem } from "./BanItem";
 import { DataItem } from "./DataItem";
@@ -49,7 +49,7 @@ export class PlayerBase extends DataObjectBase {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.setDocumentPlayerBase(result);
@@ -59,7 +59,7 @@ export class PlayerBase extends DataObjectBase {
 	 * Sets the document player base.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentPlayerBase(result: mongoDB.WithId<mongoDB.Document>): void {
+	private setDocumentPlayerBase(result: mongodb.WithId<mongodb.Document>): void {
 		this.playerBan = result[PlayerBase._playerBan];
 
 		this.playerCurrencies = result[PlayerBase._playerCurrencies] != null ? new Map(Object.entries(result[PlayerBase._playerCurrencies])) : null;

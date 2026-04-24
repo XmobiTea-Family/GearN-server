@@ -1,7 +1,7 @@
 import express from "express";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
 import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { Socket } from "socket.io";
 import { encode } from "@msgpack/msgpack";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
@@ -27,15 +27,15 @@ export class ApiMiddleware {
 	// Hot auth-token cache keyed by `gnToken`.
 	private authInfoDict: Map<string, AuthInfo>;
 	// Persistent auth-token storage in MongoDB.
-	private authInfoCollection: mongoDB.Collection<mongoDB.Document>;
+	private authInfoCollection: mongodb.Collection<mongodb.Document>;
 
 	// Hot secret cache keyed by secret key.
 	private secretInfoDict: Map<string, SecretInfo>;
 	// Persistent secret storage in MongoDB.
-	private secretInfoCollection: mongoDB.Collection<mongoDB.Document>;
+	private secretInfoCollection: mongodb.Collection<mongodb.Document>;
 
 	// Backing collection for global player/account lookups used by analytics-oriented auth gates.
-	private playerGameCollection: mongoDB.Collection<mongoDB.Document>;
+	private playerGameCollection: mongodb.Collection<mongodb.Document>;
 
 	// Token lifetime in milliseconds. `-1` means "effectively never expire".
 	private expiredToken: number = 2 * 1000 * 60 * 60 * 24;
@@ -59,7 +59,7 @@ export class ApiMiddleware {
 	 * Sets the secret info collection.
 	 * @param secretInfoCollection Provides the secret info collection used by this operation.
 	 */
-	public setSecretInfoCollection(secretInfoCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setSecretInfoCollection(secretInfoCollection: mongodb.Collection<mongodb.Document>) {
 		this.secretInfoCollection = secretInfoCollection;
 	}
 
@@ -67,7 +67,7 @@ export class ApiMiddleware {
 	 * Sets the auth info collection.
 	 * @param authInfoCollection Provides the auth info collection used by this operation.
 	 */
-	public setAuthInfoCollection(authInfoCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setAuthInfoCollection(authInfoCollection: mongodb.Collection<mongodb.Document>) {
 		this.authInfoCollection = authInfoCollection;
 	}
 
@@ -75,7 +75,7 @@ export class ApiMiddleware {
 	 * Sets the player game collection.
 	 * @param playerGameCollection Provides the player game collection used by this operation.
 	 */
-	public setPlayerGameCollection(playerGameCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setPlayerGameCollection(playerGameCollection: mongodb.Collection<mongodb.Document>) {
 		this.playerGameCollection = playerGameCollection;
 	}
 
@@ -325,7 +325,7 @@ export class ApiMiddleware {
 		if (secretInfo == null) {
 			// Stores the secret info result value used in the current execution flow.
 			let secretInfoResult = await this.secretInfoCollection.findOne({ secretKey: secretKey }) as {
-				_id: mongoDB.ObjectId,
+				_id: mongodb.ObjectId,
 				permission: SecretPermissionItem,
 				secretKey: string,
 				isRemove: boolean,

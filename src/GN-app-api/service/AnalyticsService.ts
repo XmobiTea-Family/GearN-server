@@ -2,7 +2,7 @@ import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { GNServer } from "./../../GNServer";
 import { BigAnalyticsItem, IAnalyticsService } from "./IAnalyticsService";
 import si from "systeminformation";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 /**
  * Periodically aggregates dashboard metrics from player activity, runtime logs, and host/database telemetry.
@@ -556,7 +556,7 @@ export class AnalyticsService implements IAnalyticsService {
 		//     let results = await eventCallbackPostCollection.aggregate([
 		//         {
 		//             $match: {
-		//                 _id: { $gt: mongoDB.ObjectId.createFromTime(millisecondsAt15MinutesAgo / 1000 - 1) }
+		//                 _id: { $gt: mongodb.ObjectId.createFromTime(millisecondsAt15MinutesAgo / 1000 - 1) }
 		//             }
 		//         },
 		//         {
@@ -626,7 +626,7 @@ export class AnalyticsService implements IAnalyticsService {
 			let now = xDatetime.getCurrentDate();
 			let month0h = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
 
-			let results = await eventCallbackPostCollection.find({ _id: { $gt: mongoDB.ObjectId.createFromTime(month0h.getTime() / 1000 - 1) } })
+			let results = await eventCallbackPostCollection.find({ _id: { $gt: mongodb.ObjectId.createFromTime(month0h.getTime() / 1000 - 1) } })
 
 			// Build both the rolling 15-minute cost view and the month-to-date cost view from the same log stream.
 			this.currentCost = {

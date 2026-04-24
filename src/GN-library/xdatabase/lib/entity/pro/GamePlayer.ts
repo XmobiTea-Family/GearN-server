@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { GamePlayerBase } from "./GamePlayerBase";
 
@@ -19,7 +19,7 @@ export class GamePlayer extends GamePlayerBase {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 		this.userId = result[GamePlayer._userId];
 
@@ -30,7 +30,7 @@ export class GamePlayer extends GamePlayerBase {
 	 * Sets the document game player.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentGamePlayer(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentGamePlayer(result: mongodb.WithId<mongodb.Document>) {
 		this.socketId = result[GamePlayer._socketId];
 		// this.playerPushs = result[GamePlayer._playerPushs];
 	}

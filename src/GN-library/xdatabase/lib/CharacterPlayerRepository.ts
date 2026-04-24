@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { CharacterPlayer } from "./entity/pro/CharacterPlayer";
@@ -426,7 +426,7 @@ export class CharacterPlayerRepository extends AbstractBaseRepository {
 	 * @param collection Provides the collection value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async convertToCharacterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<CharacterPlayer>> {
+	private async convertToCharacterPlayers(results: mongodb.FindCursor<mongodb.WithId<mongodb.Document>>, collection: mongodb.Collection<mongodb.Document>): Promise<Array<CharacterPlayer>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<CharacterPlayer> = [];
 

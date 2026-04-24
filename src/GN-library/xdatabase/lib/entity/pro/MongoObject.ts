@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 interface UpdateFilter {
 	// Stores the inc collection used by this contract.
@@ -26,12 +26,12 @@ export class MongoObject {
 	private static readonly EMPTY_STR: string = "";
 
 	// Stores the collection value used by this instance.
-	private readonly collection: mongoDB.Collection<mongoDB.Document>;
+	private readonly collection: mongodb.Collection<mongodb.Document>;
 
 	// Stores the ID value used by this instance.
-	protected readonly _id: mongoDB.ObjectId;
+	protected readonly _id: mongodb.ObjectId;
 	// Stores the origin result value used by this instance.
-	protected readonly originResult: mongoDB.WithId<mongoDB.Document>;
+	protected readonly originResult: mongodb.WithId<mongodb.Document>;
 
 	// Stores the update filter value used by this instance.
 	private updateFilter: UpdateFilter;
@@ -41,7 +41,7 @@ export class MongoObject {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		this.collection = collection;
 		this._id = result[MongoObject.__id];
 		this.originResult = result;
@@ -158,32 +158,32 @@ export class MongoObject {
 
 
 
-	// protected addToSet($addToSet: mongoDB.SetFields<mongoDB.Document>) {
+	// protected addToSet($addToSet: mongodb.SetFields<mongodb.Document>) {
 	// 	if (this.updateFilter == null) this.updateFilter = {};
 	// 	this.updateFilter.$addToSet = $addToSet;
 	// }
 
-	// protected pop($pop: mongoDB.OnlyFieldsOfType<mongoDB.Document, ReadonlyArray<any>, 1 | -1>) {
+	// protected pop($pop: mongodb.OnlyFieldsOfType<mongodb.Document, ReadonlyArray<any>, 1 | -1>) {
 	// 	if (this.updateFilter == null) this.updateFilter = {};
 	// 	this.updateFilter.$pop = $pop;
 	// }
 
-	// protected pull($pull: mongoDB.PullOperator<mongoDB.Document>) {
+	// protected pull($pull: mongodb.PullOperator<mongodb.Document>) {
 	// 	if (this.updateFilter == null) this.updateFilter = {};
 	// 	this.updateFilter.$pull = $pull;
 	// }
 
-	// protected push($push: mongoDB.PushOperator<mongoDB.Document>) {
+	// protected push($push: mongodb.PushOperator<mongodb.Document>) {
 	// 	if (this.updateFilter == null) this.updateFilter = {};
 	// 	this.updateFilter.$push = $push;
 	// }
 
-	// protected pullAll($pullAll: mongoDB.PullAllOperator<mongoDB.Document>) {
+	// protected pullAll($pullAll: mongodb.PullAllOperator<mongodb.Document>) {
 	// 	if (this.updateFilter == null) this.updateFilter = {};
 	// 	this.updateFilter.$pullAll = $pullAll;
 	// }
 
-	public getObjectId(): mongoDB.ObjectId {
+	public getObjectId(): mongodb.ObjectId {
 		return this._id;
 	}
 
@@ -191,7 +191,7 @@ export class MongoObject {
 	 * Returns the origin result.
 	 * @returns Returns the origin result.
 	 */
-	public getOriginResult(): mongoDB.WithId<mongoDB.Document> {
+	public getOriginResult(): mongodb.WithId<mongodb.Document> {
 		return this.originResult;
 	}
 
@@ -199,7 +199,7 @@ export class MongoObject {
 	 * Saves the async.
 	 * @returns Resolves with the operation result.
 	 */
-	public async saveAsync(session?: mongoDB.ClientSession): Promise<mongoDB.UpdateResult> {
+	public async saveAsync(session?: mongodb.ClientSession): Promise<mongodb.UpdateResult> {
 		if (this.updateFilter == null) {
 			return {
 				acknowledged: false,

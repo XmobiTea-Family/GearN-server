@@ -17,7 +17,7 @@ import { xDatabase } from "./../../GN-library/xdatabase/lib/xDatabase";
 import { GNServer } from "./../../GNServer";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { ICacheService, CacheItem } from "./ICacheService";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 export interface ICacheServiceController {
 	/**
@@ -146,7 +146,7 @@ export class MemoryCacheServiceController implements ICacheServiceController {
 
 export class MongoDbCacheServiceController implements ICacheServiceController {
 	// Stores the cache collection value used by this instance.
-	private cacheCollection: mongoDB.Collection<mongoDB.Document>;
+	private cacheCollection: mongodb.Collection<mongodb.Document>;
 	// Stores the database value used by this instance.
 	private database: xDatabase;
 
@@ -317,7 +317,7 @@ export class MongoDbCacheServiceController implements ICacheServiceController {
 	 * @param cacheCollection Provides the cache collection used by this operation.
 	 * @param database Provides the database value used by this operation.
 	 */
-	constructor(cacheCollection: mongoDB.Collection<mongoDB.Document>, database: xDatabase) {
+	constructor(cacheCollection: mongodb.Collection<mongodb.Document>, database: xDatabase) {
 		this.cacheCollection = cacheCollection;
 		this.database = database;
 	}

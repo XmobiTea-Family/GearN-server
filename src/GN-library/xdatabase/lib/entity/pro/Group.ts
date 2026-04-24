@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { DataObjectBase } from "./DataObjectBase";
 import { MemberItem } from "./MemberItem";
@@ -59,7 +59,7 @@ export class Group extends DataObjectBase {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.groupId = result[Group._groupId];
@@ -73,7 +73,7 @@ export class Group extends DataObjectBase {
 	 * Sets the document group.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentGroup(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentGroup(result: mongodb.WithId<mongodb.Document>) {
 		this.members = result[Group._members];
 		this.groupDatas = result[Group._groupDatas];
 		this.groupCurrencies = result[Group._groupCurrencies] != null ? new Map(Object.entries(result[Group._groupCurrencies])) : null;

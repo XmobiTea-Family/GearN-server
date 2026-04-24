@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 export abstract class AbstractBaseRepository {
 	// Stores the DOT value used by this instance.
@@ -9,16 +9,16 @@ export abstract class AbstractBaseRepository {
 	private static readonly SYSTEM: string = "System" + AbstractBaseRepository.DOT;
 
 	// Stores the client value used by this instance.
-	protected client: mongoDB.MongoClient;
+	protected client: mongodb.MongoClient;
 	// Stores the database value used by this instance.
-	protected db: mongoDB.Db;
+	protected db: mongodb.Db;
 
 	// Stores the log client value used by this instance.
-	protected logClient: mongoDB.MongoClient;
+	protected logClient: mongodb.MongoClient;
 	// Stores the log database value used by this instance.
-	protected logDb: mongoDB.Db;
+	protected logDb: mongodb.Db;
 
-	constructor(client: mongoDB.MongoClient, db: mongoDB.Db, logClient: mongoDB.MongoClient, logDb: mongoDB.Db) {
+	constructor(client: mongodb.MongoClient, db: mongodb.Db, logClient: mongodb.MongoClient, logDb: mongodb.Db) {
 		this.client = client;
 		this.db = db;
 		this.logClient = logClient;
@@ -30,7 +30,7 @@ export abstract class AbstractBaseRepository {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public runtimeCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public runtimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(AbstractBaseRepository.RUNTIME + collectionName);
 	}
 
@@ -39,7 +39,7 @@ export abstract class AbstractBaseRepository {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public systemCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public systemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(AbstractBaseRepository.SYSTEM + collectionName);
 	}
 
@@ -49,7 +49,7 @@ export abstract class AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public runtimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public runtimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(AbstractBaseRepository.RUNTIME + gameId + AbstractBaseRepository.DOT + collectionName);
 	}
 
@@ -59,7 +59,7 @@ export abstract class AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public systemGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public systemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(AbstractBaseRepository.SYSTEM + gameId + AbstractBaseRepository.DOT + collectionName);
 	}
 
@@ -68,7 +68,7 @@ export abstract class AbstractBaseRepository {
 	 * @param fullCollectionName Provides the full collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public collection<TSchema extends mongoDB.Document = mongoDB.Document>(fullCollectionName: string): mongoDB.Collection<TSchema> {
+	public collection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
 		return this.db.collection<TSchema>(fullCollectionName);
 	}
 
@@ -77,7 +77,7 @@ export abstract class AbstractBaseRepository {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logRuntimeCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public logRuntimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(AbstractBaseRepository.RUNTIME + collectionName);
 	}
 
@@ -86,7 +86,7 @@ export abstract class AbstractBaseRepository {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logSystemCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public logSystemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(AbstractBaseRepository.SYSTEM + collectionName);
 	}
 
@@ -96,7 +96,7 @@ export abstract class AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logRuntimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public logRuntimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(AbstractBaseRepository.RUNTIME + gameId + AbstractBaseRepository.DOT + collectionName);
 	}
 
@@ -106,7 +106,7 @@ export abstract class AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logSystemGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public logSystemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(AbstractBaseRepository.SYSTEM + gameId + AbstractBaseRepository.DOT + collectionName);
 	}
 
@@ -115,7 +115,7 @@ export abstract class AbstractBaseRepository {
 	 * @param fullCollectionName Provides the full collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logCollection<TSchema extends mongoDB.Document = mongoDB.Document>(fullCollectionName: string): mongoDB.Collection<TSchema> {
+	public logCollection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
 		return this.logDb.collection<TSchema>(fullCollectionName);
 	}
 

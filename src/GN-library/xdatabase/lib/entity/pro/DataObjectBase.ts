@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { AvatarItem } from "./AvatarItem";
 import { MongoObject } from "./MongoObject";
@@ -46,7 +46,7 @@ export class DataObjectBase extends MongoObject {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.setDocumentDataObjectBase(result);
@@ -56,7 +56,7 @@ export class DataObjectBase extends MongoObject {
 	 * Sets the document data object base.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentDataObjectBase(result: mongoDB.WithId<mongoDB.Document>): void {
+	private setDocumentDataObjectBase(result: mongodb.WithId<mongodb.Document>): void {
 		this.segments = result[DataObjectBase._segments];
 		this.customDatas = result[DataObjectBase._customDatas] != null ? new Map(Object.entries(result[DataObjectBase._customDatas])) : null;
 

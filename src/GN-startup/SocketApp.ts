@@ -5,7 +5,7 @@ import http from "http";
 import { SocketAppHandler } from "./routes/SocketAppHandler";
 import { createAdapter } from "@socket.io/mongo-adapter";
 import { Emitter } from "@socket.io/mongo-emitter";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { ApiMiddleware } from "./middleware/ApiMiddleware";
 import { AntiDdosMiddleware } from "./middleware/AntiDdosMiddleware";
 import { GNServer } from "./../GNServer";
@@ -140,7 +140,7 @@ export class SocketApp {
 	 * Sets the emitter.
 	 * @param adapterEventCollection Provides the adapter event collection used by this operation.
 	 */
-	public setEmitter(adapterEventCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setEmitter(adapterEventCollection: mongodb.Collection<mongodb.Document>) {
 		this.emitter = new Emitter(adapterEventCollection);
 
 		if (this.appSettings.getUseEmitter() && this.socketAppHandler != null) {

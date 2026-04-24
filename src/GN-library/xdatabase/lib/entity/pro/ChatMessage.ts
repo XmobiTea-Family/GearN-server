@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { MongoObject } from "./MongoObject";
 import { OwnerItem } from "./OwnerItem";
@@ -44,7 +44,7 @@ export class ChatMessage extends MongoObject {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.messageId = result[ChatMessage._messageId];
@@ -57,7 +57,7 @@ export class ChatMessage extends MongoObject {
 	 * Sets the document chat message.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentChatMessage(result: mongoDB.WithId<mongoDB.Document>): void {
+	private setDocumentChatMessage(result: mongodb.WithId<mongodb.Document>): void {
 		this.sender = result[ChatMessage._sender];
 
 		this.message = result[ChatMessage._message];

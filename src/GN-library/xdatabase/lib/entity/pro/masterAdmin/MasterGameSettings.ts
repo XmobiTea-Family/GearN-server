@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { MasterAdminMongoObject } from "./MasterAdminMongoObject";
 import { xThirtPartySettings } from "./../../../../../xsettings/lib/entity/xThirtPartySettings";
@@ -30,7 +30,7 @@ export class MasterGameSettings extends MasterAdminMongoObject {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.setDocumentMasterGameSettings(result);
@@ -40,7 +40,7 @@ export class MasterGameSettings extends MasterAdminMongoObject {
 	 * Sets the document master game settings.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentMasterGameSettings(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentMasterGameSettings(result: mongodb.WithId<mongodb.Document>) {
 		this.thirtPartySettings = result[MasterGameSettings._thirtPartySettings];
 		this.masterPlayerSettings = result[MasterGameSettings._masterPlayerSettings];
 		this.emailSettings = result[MasterGameSettings._emailSettings];

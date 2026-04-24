@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { OnRunSuccess } from "./../../xbuilder/lib/OnRunSuccess";
 import { MasterPlayerRepository } from "./MasterPlayerRepository";
@@ -9,7 +9,7 @@ import { InventoryRepository } from "./InventoryRepository";
 import { StoreInventoryRepository } from "./StoreInventoryRepository";
 
 interface OnMongoRunError {
-	(error: mongoDB.AnyError): void;
+	(error: mongodb.AnyError): void;
 }
 
 export class xDatabase {
@@ -21,14 +21,14 @@ export class xDatabase {
 	private static readonly SYSTEM: string = "System" + xDatabase.DOT;
 
 	// Stores the client value used by this instance.
-	private client: mongoDB.MongoClient;
+	private client: mongodb.MongoClient;
 	// Stores the database value used by this instance.
-	private db: mongoDB.Db;
+	private db: mongodb.Db;
 
 	// Stores the log client value used by this instance.
-	private logClient: mongoDB.MongoClient;
+	private logClient: mongodb.MongoClient;
 	// Stores the log database value used by this instance.
-	private logDb: mongoDB.Db;
+	private logDb: mongodb.Db;
 
 	private _masterPlayerRepository: MasterPlayerRepository;
 	public get masterPlayerRepository(): MasterPlayerRepository {
@@ -64,7 +64,7 @@ export class xDatabase {
 	 * Returns the database.
 	 * @returns Returns the database.
 	 */
-	public getDb(): mongoDB.Db {
+	public getDb(): mongodb.Db {
 		return this.db;
 	}
 
@@ -72,7 +72,7 @@ export class xDatabase {
 	 * Returns the log database.
 	 * @returns Returns the log database.
 	 */
-	public getLogDb(): mongoDB.Db {
+	public getLogDb(): mongodb.Db {
 		return this.logDb;
 	}
 
@@ -84,8 +84,8 @@ export class xDatabase {
 	 * @param logDbName Provides the log database name value used by this operation.
 	 * @param options Provides the options value used by this operation.
 	 */
-	public init(url: string, dbName: string, logUrl: string, logDbName: string, options?: mongoDB.MongoClientOptions): void {
-		this.client = new mongoDB.MongoClient(url, options);
+	public init(url: string, dbName: string, logUrl: string, logDbName: string, options?: mongodb.MongoClientOptions): void {
+		this.client = new mongodb.MongoClient(url, options);
 
 		this.db = this.client.db(dbName);
 
@@ -94,7 +94,7 @@ export class xDatabase {
 			this.logDb = this.db;
 		}
 		else {
-			this.logClient = new mongoDB.MongoClient(logUrl, options);
+			this.logClient = new mongodb.MongoClient(logUrl, options);
 			this.logDb = this.logClient.db(logDbName);
 		}
 	}
@@ -128,7 +128,7 @@ export class xDatabase {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public runtimeCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public runtimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(xDatabase.RUNTIME + collectionName);
 	}
 
@@ -137,7 +137,7 @@ export class xDatabase {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public systemCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public systemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(xDatabase.SYSTEM + collectionName);
 	}
 
@@ -147,7 +147,7 @@ export class xDatabase {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public runtimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public runtimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
 	}
 
@@ -157,7 +157,7 @@ export class xDatabase {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public systemGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public systemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.collection<TSchema>(xDatabase.SYSTEM + gameId + xDatabase.DOT + collectionName);
 	}
 
@@ -166,7 +166,7 @@ export class xDatabase {
 	 * @param fullCollectionName Provides the full collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public collection<TSchema extends mongoDB.Document = mongoDB.Document>(fullCollectionName: string): mongoDB.Collection<TSchema> {
+	public collection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
 		return this.db.collection<TSchema>(fullCollectionName);
 	}
 
@@ -175,7 +175,7 @@ export class xDatabase {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @param options Provides the options value used by this operation.
 	 */
-	public createCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, options?: mongoDB.CreateCollectionOptions) {
+	public createCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, options?: mongodb.CreateCollectionOptions) {
 		return this.db.createCollection<TSchema>(collectionName, options)
 	}
 
@@ -185,12 +185,12 @@ export class xDatabase {
 	 * @param index Provides the index value used by this operation.
 	 * @param options Provides the options value used by this operation.
 	 */
-	public createIndex<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
+	public createIndex<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.collection<TSchema>(collectionName);
 
 		// Stores the create indexes options value used in the current execution flow.
-		let createIndexesOptions: mongoDB.CreateIndexesOptions = {
+		let createIndexesOptions: mongodb.CreateIndexesOptions = {
 			background: true,
 		};
 
@@ -208,7 +208,7 @@ export class xDatabase {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logRuntimeCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public logRuntimeCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(xDatabase.RUNTIME + collectionName);
 	}
 
@@ -217,7 +217,7 @@ export class xDatabase {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logSystemCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string): mongoDB.Collection<TSchema> {
+	public logSystemCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(xDatabase.SYSTEM + collectionName);
 	}
 
@@ -227,7 +227,7 @@ export class xDatabase {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logRuntimeGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public logRuntimeGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(xDatabase.RUNTIME + gameId + xDatabase.DOT + collectionName);
 	}
 
@@ -237,7 +237,7 @@ export class xDatabase {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logSystemGameCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, gameId: string): mongoDB.Collection<TSchema> {
+	public logSystemGameCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, gameId: string): mongodb.Collection<TSchema> {
 		return this.logCollection<TSchema>(xDatabase.SYSTEM + gameId + xDatabase.DOT + collectionName);
 	}
 
@@ -246,7 +246,7 @@ export class xDatabase {
 	 * @param fullCollectionName Provides the full collection name value used by this operation.
 	 * @returns Returns the operation result.
 	 */
-	public logCollection<TSchema extends mongoDB.Document = mongoDB.Document>(fullCollectionName: string): mongoDB.Collection<TSchema> {
+	public logCollection<TSchema extends mongodb.Document = mongodb.Document>(fullCollectionName: string): mongodb.Collection<TSchema> {
 		return this.logDb.collection<TSchema>(fullCollectionName);
 	}
 
@@ -255,7 +255,7 @@ export class xDatabase {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @param options Provides the options value used by this operation.
 	 */
-	public logCreateCollection<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, options?: mongoDB.CreateCollectionOptions) {
+	public logCreateCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, options?: mongodb.CreateCollectionOptions) {
 		return this.logDb.createCollection<TSchema>(collectionName, options)
 	}
 
@@ -265,12 +265,12 @@ export class xDatabase {
 	 * @param index Provides the index value used by this operation.
 	 * @param options Provides the options value used by this operation.
 	 */
-	public logCreateIndex<TSchema extends mongoDB.Document = mongoDB.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
+	public logCreateIndex<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logCollection<TSchema>(collectionName);
 
 		// Stores the create indexes options value used in the current execution flow.
-		let createIndexesOptions: mongoDB.CreateIndexesOptions = {
+		let createIndexesOptions: mongodb.CreateIndexesOptions = {
 			background: true,
 		};
 
@@ -302,7 +302,7 @@ export class xDatabase {
 		return answer;
 	}
 
-	public startSession(): mongoDB.ClientSession {
+	public startSession(): mongodb.ClientSession {
 		return this.client.startSession();
 	}
 }

@@ -5,7 +5,7 @@ import { OperationResponse } from "./../../GN-common/entity/operationResponse/Op
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { IPostEventCallbackService, IPreEventCallbackService, OnPostCallbackFunction, OnPreCallbackFunction } from "./IEventCallbackService";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
@@ -375,8 +375,8 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	private cloudScriptWaitingResponseCallbackDict: Map<string, (cloudScriptResponse: CloudScriptResponse) => void>;
 
 	// Primary and backup collections that persist cloud-script source and versions.
-	private cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>;
-	private backupCloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>;
+	private cloudScriptFunctionCollection: mongodb.Collection<mongodb.Document>;
+	private backupCloudScriptFunctionCollection: mongodb.Collection<mongodb.Document>;
 
 	// Runtime dependencies required to spawn workers and execute cloud scripts.
 	private gnServer: GNServer;
@@ -489,7 +489,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	 * Registers the primary collection that stores cloud-script versions and source code.
 	 * @param cloudScriptFunctionCollection Mongo collection for active cloud-script bundles.
 	 */
-	public setCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongodb.Collection<mongodb.Document>): void {
 		this.cloudScriptFunctionCollection = cloudScriptFunctionCollection;
 	}
 
@@ -497,7 +497,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 	 * Registers the backup collection used when rotating or restoring cloud-script bundles.
 	 * @param cloudScriptFunctionCollection Mongo collection for backup cloud-script bundles.
 	 */
-	public setBackupCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setBackupCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongodb.Collection<mongodb.Document>): void {
 		this.backupCloudScriptFunctionCollection = cloudScriptFunctionCollection;
 	}
 
@@ -1599,7 +1599,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 	}
 
 	// Runtime log collection and optional cloud-script bridge invoked after handlers finish.
-	private eventCallbackLogCollection: mongoDB.Collection<mongoDB.Document>;
+	private eventCallbackLogCollection: mongodb.Collection<mongodb.Document>;
 	private cloudScriptService: IEventCallbackCloudScriptService;
 
 	/**
@@ -1639,7 +1639,7 @@ export class PostEventCallbackService implements IPostEventCallbackService {
 	 * Injects the runtime collection used to persist post-event logs.
 	 * @param eventCallbackLogCollection Mongo collection used for post-event log documents.
 	 */
-	public setEventCallbackLogCollection(eventCallbackLogCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setEventCallbackLogCollection(eventCallbackLogCollection: mongodb.Collection<mongodb.Document>): void {
 		this.eventCallbackLogCollection = eventCallbackLogCollection;
 	}
 

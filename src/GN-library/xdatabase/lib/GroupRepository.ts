@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { Group } from "./entity/pro/Group";
@@ -301,7 +301,7 @@ export class GroupRepository extends AbstractBaseRepository {
 	 * @param limit Provides the limit value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async loadGroupMessagesAsync(groupId: string, gameId: string, skip: number, limit: number): Promise<mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>> {
+	public async loadGroupMessagesAsync(groupId: string, gameId: string, skip: number, limit: number): Promise<mongodb.FindCursor<mongodb.WithId<mongodb.Document>>> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.runtimeGameCollection("Group.Message", gameId);
 
@@ -322,7 +322,7 @@ export class GroupRepository extends AbstractBaseRepository {
 	 * @param tsCreate Provides the timestamp create value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createGroupMessageAsync(groupId: string, gameId: string, senderId: string, senderType: number, message: string, tsCreate: number): Promise<mongoDB.Document> {
+	public async createGroupMessageAsync(groupId: string, gameId: string, senderId: string, senderType: number, message: string, tsCreate: number): Promise<mongodb.Document> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.runtimeGameCollection("Group.Message", gameId);
 
@@ -391,7 +391,7 @@ export class GroupRepository extends AbstractBaseRepository {
 	 * @param collection Provides the collection value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async convertToGroups(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<Group>> {
+	private async convertToGroups(results: mongodb.FindCursor<mongodb.WithId<mongodb.Document>>, collection: mongodb.Collection<mongodb.Document>): Promise<Array<Group>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<Group> = [];
 

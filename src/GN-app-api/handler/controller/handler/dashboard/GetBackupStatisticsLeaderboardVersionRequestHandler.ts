@@ -12,7 +12,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 
 class GetBackupStatisticsLeaderboardVersionOperationRequest extends OperationRequest {
@@ -102,7 +102,7 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 		let type = request.type;
 
 		// Stores the backup statistics leaderboard collection value used in the current execution flow.
-		let backupStatisticsLeaderboardCollection: mongoDB.Collection<mongoDB.Document>;
+		let backupStatisticsLeaderboardCollection: mongodb.Collection<mongodb.Document>;
 		if (type == OwnerType.MasterPlayer) {
 			backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
 		}

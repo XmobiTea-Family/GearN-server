@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { MasterAdminMongoObject } from "./MasterAdminMongoObject";
 import { xGameSettings } from "./../../../../../xsettings/lib/entity/xGameSettings";
@@ -45,7 +45,7 @@ export class GameItem extends MasterAdminMongoObject {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.gameId = result[GameItem._gameId];
@@ -59,7 +59,7 @@ export class GameItem extends MasterAdminMongoObject {
 	 * Sets the document master game item.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentMasterGameItem(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentMasterGameItem(result: mongodb.WithId<mongodb.Document>) {
 		this.gameName = result[GameItem._gameName];
 		this.gameDescription = result[GameItem._gameDescription];
 		this.gameIconUrl = result[GameItem._gameIconUrl];

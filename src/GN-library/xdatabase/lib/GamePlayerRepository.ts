@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { GamePlayer } from "./entity/pro/GamePlayer";
@@ -409,7 +409,7 @@ export class GamePlayerRepository extends AbstractBaseRepository {
 	 * @param collection Provides the collection value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async convertToGamePlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<GamePlayer>> {
+	private async convertToGamePlayers(results: mongodb.FindCursor<mongodb.WithId<mongodb.Document>>, collection: mongodb.Collection<mongodb.Document>): Promise<Array<GamePlayer>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<GamePlayer> = [];
 

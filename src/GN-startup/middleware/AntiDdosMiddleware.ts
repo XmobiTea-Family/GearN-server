@@ -4,7 +4,7 @@ import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 import { encode } from "@msgpack/msgpack";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import { AuthInfo } from "./../../GN-common/entity/AuthInfo";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { Commands } from "./../../GN-common/constant/Commands";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
@@ -53,8 +53,8 @@ export class AntiDdosMiddleware {
 	private currentHttpDownloadRequestCount: number;
 
 	// Collections used to persist DDoS reports and ban rules.
-	private reportDdosCollection: mongoDB.Collection<mongoDB.Document>;
-	private banDdosCollection: mongoDB.Collection<mongoDB.Document>;
+	private reportDdosCollection: mongodb.Collection<mongodb.Document>;
+	private banDdosCollection: mongodb.Collection<mongodb.Document>;
 
 	// Socket request-rate and payload-size limits.
 	private socketMaxRequestPerSecondPerIp: number;
@@ -81,7 +81,7 @@ export class AntiDdosMiddleware {
 	 * Sets the report DDoS collection.
 	 * @param reportDdosCollection Provides the report DDoS collection used by this operation.
 	 */
-	public setReportDdosCollection(reportDdosCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setReportDdosCollection(reportDdosCollection: mongodb.Collection<mongodb.Document>) {
 		this.reportDdosCollection = reportDdosCollection;
 	}
 
@@ -89,7 +89,7 @@ export class AntiDdosMiddleware {
 	 * Sets the ban DDoS collection.
 	 * @param banDdosCollection Provides the ban DDoS collection used by this operation.
 	 */
-	public setBanDdosCollection(banDdosCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setBanDdosCollection(banDdosCollection: mongodb.Collection<mongodb.Document>) {
 		this.banDdosCollection = banDdosCollection;
 	}
 

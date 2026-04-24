@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { ExternalItem } from "./ExternalItem";
 import { PlayerBase } from "./PlayerBase";
@@ -33,7 +33,7 @@ export class MasterPlayer extends PlayerBase {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 		this.userId = result[MasterPlayer._userId];
 
@@ -44,7 +44,7 @@ export class MasterPlayer extends PlayerBase {
 	 * Sets the document master player.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentMasterPlayer(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentMasterPlayer(result: mongodb.WithId<mongodb.Document>) {
 		this.external = result[MasterPlayer._external];
 
 		if (result[MasterPlayer._external] != null) {

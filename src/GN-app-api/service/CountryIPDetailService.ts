@@ -1,5 +1,5 @@
 import axios from "axios";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { ICountryIPDetailService, IPDetailResponse } from "./ICountryIPDetailService";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
@@ -9,9 +9,9 @@ export class CountryIPDetailService implements ICountryIPDetailService {
 	private getIPApiUrl: string;
 
 	// Stores the country code region collection value used by this instance.
-	private countryCodeRegionCollection: mongoDB.Collection;
+	private countryCodeRegionCollection: mongodb.Collection;
 	// Stores the IP address user collection value used by this instance.
-	private ipAddressUserCollection: mongoDB.Collection;
+	private ipAddressUserCollection: mongodb.Collection;
 
 	/**
 	 * Executes the init workflow.
@@ -19,7 +19,7 @@ export class CountryIPDetailService implements ICountryIPDetailService {
 	 * @param countryCodeRegionCollection Provides the country code region collection used by this operation.
 	 * @param ipAddressUserCollection Provides the IP address user collection used by this operation.
 	 */
-	public init(getIPApiUrl: string, countryCodeRegionCollection: mongoDB.Collection, ipAddressUserCollection: mongoDB.Collection) {
+	public init(getIPApiUrl: string, countryCodeRegionCollection: mongodb.Collection, ipAddressUserCollection: mongodb.Collection) {
 		this.getIPApiUrl = getIPApiUrl;
 		this.countryCodeRegionCollection = countryCodeRegionCollection;
 		this.ipAddressUserCollection = ipAddressUserCollection;

@@ -1,6 +1,6 @@
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { IConfigService, ConfigItem } from "./IConfigService";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 export class ConfigService implements IConfigService {
 	// Stores the configuration dictionary collection used by this instance.
@@ -9,7 +9,7 @@ export class ConfigService implements IConfigService {
 	// Stores the game ID value used by this instance.
 	private gameId: string;
 	// Stores the configuration collection value used by this instance.
-	private configCollection: mongoDB.Collection<mongoDB.Document>;
+	private configCollection: mongodb.Collection<mongodb.Document>;
 
 	private intervalId: NodeJS.Timeout;
 
@@ -18,7 +18,7 @@ export class ConfigService implements IConfigService {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param configCollection Provides the configuration collection used by this operation.
 	 */
-	public setConfigCollection(gameId: string, configCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setConfigCollection(gameId: string, configCollection: mongodb.Collection<mongodb.Document>): void {
 		this.gameId = gameId;
 		this.configCollection = configCollection;
 	}

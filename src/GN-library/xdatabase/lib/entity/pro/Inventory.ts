@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { DataItem } from "./DataItem";
 import { DataObjectBase } from "./DataObjectBase";
@@ -57,7 +57,7 @@ export class Inventory extends DataObjectBase {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.itemId = result[Inventory._itemId];
@@ -72,7 +72,7 @@ export class Inventory extends DataObjectBase {
 	 * Sets the document inventory.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentInventory(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentInventory(result: mongodb.WithId<mongodb.Document>) {
 
 		this.amount = result[Inventory._amount];
 		this.owner = result[Inventory._owner];

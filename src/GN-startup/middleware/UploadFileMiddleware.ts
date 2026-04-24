@@ -1,5 +1,5 @@
 import multer from "multer";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
 import express from "express";
 import fs from "fs";
@@ -10,7 +10,7 @@ export class UploadFileMiddleware {
 	private static readonly ReservedFileNames = new Set(["CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"]);
 
 	// Stores the upload file info collection value used by this instance.
-	private uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>;
+	private uploadFileInfoCollection: mongodb.Collection<mongodb.Document>;
 	// Stores the upload path value used by this instance.
 	private uploadPath: string;
 	// Stores the max size upload value used by this instance.
@@ -46,7 +46,7 @@ export class UploadFileMiddleware {
 	 * Sets the upload file info collection.
 	 * @param uploadFileInfoCollection Provides the upload file info collection used by this operation.
 	 */
-	public setUploadFileInfoCollection(uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>) {
+	public setUploadFileInfoCollection(uploadFileInfoCollection: mongodb.Collection<mongodb.Document>) {
 		this.uploadFileInfoCollection = uploadFileInfoCollection;
 	}
 

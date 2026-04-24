@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { MasterPlayer } from "./entity/pro/MasterPlayer";
@@ -826,7 +826,7 @@ export class MasterPlayerRepository extends AbstractBaseRepository {
 	 * @param collection Provides the collection value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async convertToMasterPlayers(results: mongoDB.FindCursor<mongoDB.WithId<mongoDB.Document>>, collection: mongoDB.Collection<mongoDB.Document>): Promise<Array<MasterPlayer>> {
+	private async convertToMasterPlayers(results: mongodb.FindCursor<mongodb.WithId<mongodb.Document>>, collection: mongodb.Collection<mongodb.Document>): Promise<Array<MasterPlayer>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<MasterPlayer> = [];
 

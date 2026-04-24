@@ -54,7 +54,7 @@ import { MatchmakingTicketStatus } from "./GN-common/constant/enumType/Matchmaki
 import { MatchStatus } from "./GN-common/constant/enumType/MatchStatus";
 import { ServerDetail } from "./GN-library/xdatabase/lib/entity/pro/ServerDetail";
 import { Debug } from "./GN-library/xdebug/lib/xDebug";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { GNHashtable } from "./GN-common/common/GNData";
 import { RequestControllerUtils } from "./RequestControllerUtils";
 import { AuthInfo } from "./GN-common/entity/AuthInfo";
@@ -148,7 +148,7 @@ export class GNServer {
 	// Stores the waiting server detail dict collection used by this instance.
 	private waitingServerDetailDict: Map<string, NodeJS.Timeout>;
 	// Stores the post event callback collection value used by this instance.
-	private postEventCallbackCollection: mongoDB.Collection<mongoDB.Document>;
+	private postEventCallbackCollection: mongodb.Collection<mongodb.Document>;
 
 	/**
 	 * Initializes a new GearN server instance.

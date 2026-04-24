@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import { MatchmakingMemberStatus } from "./../src/GN-common/constant/enumType/MatchmakingMemberStatus";
 import { MatchmakingTicketStatus } from "./../src/GN-common/constant/enumType/MatchmakingTicketStatus";
 import { DataValueType } from "./../src/GN-library/xdatabase/lib/entity/pro/type/DataValueType";
@@ -16,7 +16,7 @@ type TicketMemberInput = {
 };
 
 const queueName = "rankedQueue";
-const collectionStub = {} as mongoDB.Collection<mongoDB.Document>;
+const collectionStub = {} as mongodb.Collection<mongodb.Document>;
 
 function createQueueSettings(overrides: Partial<xMatchmakingQueueSettings> = {}): xMatchmakingQueueSettings {
     return {
@@ -31,7 +31,7 @@ function createQueueSettings(overrides: Partial<xMatchmakingQueueSettings> = {})
 
 function createTicket(ticketId: string, members: TicketMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
     return new MatchmakingTicket({
-        _id: new mongoDB.ObjectId(),
+        _id: new mongodb.ObjectId(),
         ticketId: ticketId,
         queueName: queueName,
         creatorId: members[0].userId,

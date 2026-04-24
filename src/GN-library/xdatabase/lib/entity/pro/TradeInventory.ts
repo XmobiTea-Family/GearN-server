@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { DataItem } from "./DataItem";
 import { DataObjectBase } from "./DataObjectBase";
@@ -58,7 +58,7 @@ export class TradeInventory extends DataObjectBase {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.tradeId = result[TradeInventory._tradeId];
@@ -70,7 +70,7 @@ export class TradeInventory extends DataObjectBase {
 	 * Sets the document trade inventory.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentTradeInventory(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentTradeInventory(result: mongodb.WithId<mongodb.Document>) {
 
 		this.tradeItems = result[TradeInventory._tradeItems];
 		this.owner = result[TradeInventory._owner];

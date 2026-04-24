@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { DataObjectBase } from "./DataObjectBase";
 import { RemoveStatusItem } from "./RemoveStatusItem";
@@ -80,7 +80,7 @@ export class StoreInventory extends DataObjectBase {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 
 		this.storeId = result[StoreInventory._storeId];
@@ -92,7 +92,7 @@ export class StoreInventory extends DataObjectBase {
 	 * Sets the document store inventory.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentStoreInventory(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentStoreInventory(result: mongodb.WithId<mongodb.Document>) {
 		this.storeItemType = result[StoreInventory._storeItemType];
 		this.storeItems = result[StoreInventory._storeItems];
 		this.storeCurrencies = result[StoreInventory._storeCurrencies];

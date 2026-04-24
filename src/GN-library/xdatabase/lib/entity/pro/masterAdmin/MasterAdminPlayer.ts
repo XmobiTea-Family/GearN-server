@@ -1,4 +1,4 @@
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 import { MasterAdminMongoObject } from "./MasterAdminMongoObject";
 
@@ -26,7 +26,7 @@ export class MasterAdminPlayer extends MasterAdminMongoObject {
 	 * @param result Provides the result value used by this operation.
 	 * @param collection Provides the collection value used by this operation.
 	 */
-	constructor(result: mongoDB.WithId<mongoDB.Document>, collection: mongoDB.Collection<mongoDB.Document>) {
+	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
 		super(result, collection);
 		this.userId = result[MasterAdminPlayer._userId];
 
@@ -37,7 +37,7 @@ export class MasterAdminPlayer extends MasterAdminMongoObject {
 	 * Sets the document master admin player.
 	 * @param result Provides the result value used by this operation.
 	 */
-	private setDocumentMasterAdminPlayer(result: mongoDB.WithId<mongoDB.Document>) {
+	private setDocumentMasterAdminPlayer(result: mongodb.WithId<mongodb.Document>) {
 		this.username = result[MasterAdminPlayer._username];
 		this.password = result[MasterAdminPlayer._password];
 		this.secretKey = result[MasterAdminPlayer._secretKey];

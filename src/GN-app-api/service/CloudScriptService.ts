@@ -1,6 +1,6 @@
 import { ExecuteResponseStatus, ExecuteResult, ICloudScriptService } from "./ICloudScriptService";
 import { ChildProcess, execFile, fork } from "child_process";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
@@ -67,9 +67,9 @@ export class CloudScriptService implements ICloudScriptService {
 	private liveLatestVersion: string;
 
 	// Stores the cloud script function collection value used by this instance.
-	private cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>;
+	private cloudScriptFunctionCollection: mongodb.Collection<mongodb.Document>;
 	// Stores the cloud script function log collection value used by this instance.
-	private cloudScriptFunctionLogCollection: mongoDB.Collection<mongoDB.Document>;
+	private cloudScriptFunctionLogCollection: mongodb.Collection<mongodb.Document>;
 
 	// Stores the GearN server value used by this instance.
 	private gnServer: GNServer;
@@ -122,7 +122,7 @@ export class CloudScriptService implements ICloudScriptService {
 	 * Sets the cloud script function collection.
 	 * @param cloudScriptFunctionCollection Provides the cloud script function collection used by this operation.
 	 */
-	public setCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setCloudScriptFunctionCollection(cloudScriptFunctionCollection: mongodb.Collection<mongodb.Document>): void {
 		this.cloudScriptFunctionCollection = cloudScriptFunctionCollection;
 	}
 
@@ -130,7 +130,7 @@ export class CloudScriptService implements ICloudScriptService {
 	 * Sets the cloud script function log collection.
 	 * @param cloudScriptFunctionLogCollection Provides the cloud script function log collection used by this operation.
 	 */
-	public setCloudScriptFunctionLogCollection(cloudScriptFunctionLogCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setCloudScriptFunctionLogCollection(cloudScriptFunctionLogCollection: mongodb.Collection<mongodb.Document>): void {
 		this.cloudScriptFunctionLogCollection = cloudScriptFunctionLogCollection;
 	}
 

@@ -19,7 +19,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { StoreItemBaseRequestHandler } from "./StoreItemBaseRequestHandler";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 
 class GetStoreLogOperationRequest extends OperationRequest {
 
@@ -219,8 +219,8 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 			}
 		}
 
-		if (request.token && mongoDB.ObjectId.isValid(request.token)) {
-			$filter["_id"] = { $lt: new mongoDB.ObjectId(request.token) };
+		if (request.token && mongodb.ObjectId.isValid(request.token)) {
+			$filter["_id"] = { $lt: new mongodb.ObjectId(request.token) };
 		}
 
 		// Stores the GearN results value used in the current execution flow.

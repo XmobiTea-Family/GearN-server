@@ -1,6 +1,6 @@
 import { UploadFileMiddleware } from "./../middleware/UploadFileMiddleware";
 import { ApiMiddleware } from "./../middleware/ApiMiddleware";
-import * as mongoDB from "mongodb";
+import * as mongodb from "mongodb";
 import fs from "fs";
 import express, { NextFunction } from "express";
 import { wrap } from "./utils/wrap";
@@ -24,9 +24,9 @@ export class UploadFileHandler {
 	// Stores the upload path value used by this instance.
 	private uploadPath: string;
 	// Stores the upload file info collection value used by this instance.
-	private uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>;
+	private uploadFileInfoCollection: mongodb.Collection<mongodb.Document>;
 	// Stores the download file session collection value used by this instance.
-	private downloadFileSessionCollection: mongoDB.Collection<mongoDB.Document>;
+	private downloadFileSessionCollection: mongodb.Collection<mongodb.Document>;
 
 	/**
 	 * Sets the router.
@@ -72,7 +72,7 @@ export class UploadFileHandler {
 	 * Sets the upload file info collection.
 	 * @param uploadFileInfoCollection Provides the upload file info collection used by this operation.
 	 */
-	public setUploadFileInfoCollection(uploadFileInfoCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setUploadFileInfoCollection(uploadFileInfoCollection: mongodb.Collection<mongodb.Document>): void {
 		this.uploadFileInfoCollection = uploadFileInfoCollection;
 	}
 
@@ -80,7 +80,7 @@ export class UploadFileHandler {
 	 * Sets the download file session collection.
 	 * @param downloadFileSessionCollection Provides the download file session collection used by this operation.
 	 */
-	public setDownloadFileSessionCollection(downloadFileSessionCollection: mongoDB.Collection<mongoDB.Document>): void {
+	public setDownloadFileSessionCollection(downloadFileSessionCollection: mongodb.Collection<mongodb.Document>): void {
 		this.downloadFileSessionCollection = downloadFileSessionCollection;
 	}
 
