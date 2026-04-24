@@ -123,7 +123,7 @@ export class AddPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler 
 			userId: request.userId,
 			friendId: request.friendId,
 			catalogId: request.catalogId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

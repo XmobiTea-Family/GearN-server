@@ -96,7 +96,7 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 		return this.execute({
 			fileId: request.fileId,
 			reason: request.reason,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -82,7 +82,7 @@ export class LoginByWindowsPhoneDeviceIdRequestHandler extends LoginBaseRequestH
 			createPlayerIfNotExists: request.createPlayerIfNotExists,
 			infoRequestParam: request.infoRequestParam,
 			ipAddress: (request as any).originRequest.getIP(),
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

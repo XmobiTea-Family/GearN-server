@@ -103,7 +103,7 @@ export class JoinMatchmakingTicketRequestHandler extends MultiplayerBaseRequestH
 			userId: authInfo.getUserId(),
 			ticketId: request.ticketId,
 			attribute: request.attribute,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

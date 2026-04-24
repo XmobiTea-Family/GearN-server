@@ -110,7 +110,7 @@ export class GetCurrencyLogRequestHandler extends GroupBaseRequestHandler {
 			token: request.token,
 			limit: request.limit,
 			groupId: request.groupId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

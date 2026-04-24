@@ -99,7 +99,7 @@ export class AddSegmentRequestHandler extends GroupBaseRequestHandler {
 		return this.execute({
 			groupId: request.groupId,
 			segment: request.value,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

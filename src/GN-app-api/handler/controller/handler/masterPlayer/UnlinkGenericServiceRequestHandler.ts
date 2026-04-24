@@ -119,7 +119,7 @@ export class UnlinkGenericServiceRequestHandler extends MasterPlayerBaseRequestH
 			userId: request.userId,
 			serviceName: request.serviceName,
 			serviceId: request.serviceId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -101,7 +101,7 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 		return this.execute({
 			characterId: request.characterId,
 			newOwnerId: request.newOwnerId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -99,7 +99,7 @@ export class GetPlayerCurrencyRequestHandler extends CharacterPlayerBaseRequestH
 		return this.execute({
 			characterId: request.characterId,
 			playerCurrencyKeys: request.playerCurrencyKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

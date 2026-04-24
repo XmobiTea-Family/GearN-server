@@ -114,7 +114,7 @@ export class UnlinkAndroidDeviceIdRequestHandler extends MasterPlayerBaseRequest
 		return this.execute({
 			userId: request.userId,
 			androidDeviceId: request.androidDeviceId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

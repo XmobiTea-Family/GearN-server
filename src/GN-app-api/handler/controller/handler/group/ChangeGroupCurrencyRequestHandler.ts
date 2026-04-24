@@ -106,7 +106,7 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 			groupId: request.groupId,
 			groupCurrencies: request.groupCurrencies,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

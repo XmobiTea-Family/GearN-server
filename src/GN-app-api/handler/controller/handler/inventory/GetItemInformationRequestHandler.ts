@@ -159,7 +159,7 @@ export class GetItemInformationRequestHandler extends ItemBaseRequestHandler {
 		return this.execute({
 			itemId: request.itemId,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

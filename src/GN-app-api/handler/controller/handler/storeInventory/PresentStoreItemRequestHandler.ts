@@ -151,7 +151,7 @@ export class PresentStoreItemRequestHandler extends StoreItemBaseRequestHandler 
 			id: request.id,
 			type: request.type,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

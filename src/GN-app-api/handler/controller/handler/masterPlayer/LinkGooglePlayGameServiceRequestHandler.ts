@@ -119,7 +119,7 @@ export class LinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseReq
 			userId: request.userId,
 			token: request.token,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

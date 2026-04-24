@@ -98,7 +98,7 @@ export class GetPlayersWithGooglePlayGameServiceRequestHandler extends MasterPla
 		return this.execute({
 			playerIds: request.playerIds,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

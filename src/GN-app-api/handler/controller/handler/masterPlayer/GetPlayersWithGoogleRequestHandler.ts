@@ -98,7 +98,7 @@ export class GetPlayersWithGoogleRequestHandler extends MasterPlayerBaseRequestH
 		return this.execute({
 			googleIds: request.googleIds,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

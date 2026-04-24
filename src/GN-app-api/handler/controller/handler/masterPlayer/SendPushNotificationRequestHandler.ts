@@ -139,7 +139,7 @@ export class SendPushNotificationRequestHandler extends MasterPlayerBaseRequestH
 			sound: request.sound,
 			icon: request.icon,
 			data: request.data?.toData() ?? null,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

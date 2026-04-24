@@ -118,7 +118,7 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 		return this.execute({
 			userId: request.userId,
 			friendId: request.friendId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

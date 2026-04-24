@@ -114,7 +114,7 @@ export class GetTagRequestHandler extends GamePlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			tagKeys: request.tagKeys
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

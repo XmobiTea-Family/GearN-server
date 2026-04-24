@@ -94,7 +94,7 @@ export class GetAvatarRequestHandler extends CharacterPlayerBaseRequestHandler {
 
 		return this.execute({
 			characterId: request.characterId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

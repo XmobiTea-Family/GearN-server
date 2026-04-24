@@ -95,7 +95,7 @@ export class GetAmountRequestHandler extends ItemBaseRequestHandler {
 		return this.execute({
 			itemId: request.itemId,
 			gameId: secretInfo.getGameId()
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

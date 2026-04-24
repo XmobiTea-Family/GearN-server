@@ -86,7 +86,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 			tsExpire: request.tsExpire,
 			permissionParam: request.permissionParam,
 			description: request.description,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

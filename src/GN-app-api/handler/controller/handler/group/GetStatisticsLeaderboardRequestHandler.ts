@@ -126,7 +126,7 @@ export class GetStatisticsLeaderboardRequestHandler extends GroupBaseRequestHand
 			loadFromCache: request.loadFromCache,
 			version: request.version,
 			catalogId: request.catalogId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

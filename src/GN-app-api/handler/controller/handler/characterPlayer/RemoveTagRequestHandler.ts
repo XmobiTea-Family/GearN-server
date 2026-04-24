@@ -99,7 +99,7 @@ export class RemoveTagRequestHandler extends CharacterPlayerBaseRequestHandler {
 		return this.execute({
 			characterId: request.characterId,
 			tag: request.key
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -108,7 +108,7 @@ export class GetCreateLeaderboardRequestHandler extends StoreItemBaseRequestHand
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

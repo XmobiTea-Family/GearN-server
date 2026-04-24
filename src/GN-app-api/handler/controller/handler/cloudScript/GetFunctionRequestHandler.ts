@@ -87,7 +87,7 @@ export class GetFunctionRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ version: request.version }, SecretRole.Player, secretInfo, operationRequest);
+		return this.execute({ version: request.version }, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

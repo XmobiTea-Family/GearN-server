@@ -120,7 +120,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			groupId: request.groupId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

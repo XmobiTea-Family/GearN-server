@@ -114,7 +114,7 @@ export class UnlinkWindowsPhoneDeviceIdRequestHandler extends MasterPlayerBaseRe
 		return this.execute({
 			userId: request.userId,
 			windowsPhoneDeviceId: request.windowsPhoneDeviceId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -97,7 +97,7 @@ export class SetContentDataRequestHandler extends RequestHandler {
 		return this.execute({
 			configs: request.configs,
 			label: request.label,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

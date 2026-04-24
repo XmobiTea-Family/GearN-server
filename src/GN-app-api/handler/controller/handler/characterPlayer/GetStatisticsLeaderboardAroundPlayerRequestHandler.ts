@@ -149,7 +149,7 @@ export class GetStatisticsLeaderboardAroundPlayerRequestHandler extends Characte
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
 			catalogId: request.catalogId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

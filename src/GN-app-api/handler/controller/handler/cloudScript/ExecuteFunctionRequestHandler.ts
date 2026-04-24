@@ -123,7 +123,7 @@ export class ExecuteFunctionRequestHandler extends RequestHandler {
 			functionName: request.functionName,
 			functionParameters: request.functionParameters,
 			version: request.version,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

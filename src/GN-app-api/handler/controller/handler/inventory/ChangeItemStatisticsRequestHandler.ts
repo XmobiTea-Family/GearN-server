@@ -107,7 +107,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			itemStatistics: request.itemStatistics,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

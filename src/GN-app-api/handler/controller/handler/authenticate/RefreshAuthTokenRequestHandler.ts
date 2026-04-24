@@ -64,7 +64,7 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
 		return this.execute({
 			userId: authInfo.getUserId(),
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

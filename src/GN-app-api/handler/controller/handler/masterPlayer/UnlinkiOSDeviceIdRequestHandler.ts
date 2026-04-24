@@ -114,7 +114,7 @@ export class UnlinkiOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 		return this.execute({
 			userId: request.userId,
 			iOSDeviceId: request.iOSDeviceId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -114,7 +114,7 @@ export class UnlinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandl
 		return this.execute({
 			userId: request.userId,
 			playerId: request.playerId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -129,7 +129,7 @@ export class GetServerGameDataRequestHandler extends RequestHandler {
 				country: request.country,
 				version: request.version,
 			}
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

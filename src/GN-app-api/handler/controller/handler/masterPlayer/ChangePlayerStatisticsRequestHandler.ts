@@ -122,7 +122,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 			userId: request.userId,
 			playerStatistics: request.playerStatistics,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

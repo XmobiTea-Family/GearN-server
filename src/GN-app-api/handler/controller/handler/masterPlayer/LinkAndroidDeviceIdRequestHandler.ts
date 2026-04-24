@@ -119,7 +119,7 @@ export class LinkAndroidDeviceIdRequestHandler extends MasterPlayerBaseRequestHa
 			userId: request.userId,
 			androidDeviceId: request.androidDeviceId,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

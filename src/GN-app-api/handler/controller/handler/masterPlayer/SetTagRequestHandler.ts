@@ -119,7 +119,7 @@ export class SetTagRequestHandler extends MasterPlayerBaseRequestHandler {
 			userId: request.userId,
 			key: request.key,
 			value: request.value,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

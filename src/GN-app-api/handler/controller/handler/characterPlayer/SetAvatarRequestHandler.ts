@@ -104,7 +104,7 @@ export class SetAvatarRequestHandler extends CharacterPlayerBaseRequestHandler {
 			characterId: request.characterId,
 			type: request.type,
 			value: request.value
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

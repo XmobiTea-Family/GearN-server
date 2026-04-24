@@ -74,7 +74,7 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 			userId: authInfo.getUserId(),
 			currentPassword: request.currentPassword,
 			password: request.password,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

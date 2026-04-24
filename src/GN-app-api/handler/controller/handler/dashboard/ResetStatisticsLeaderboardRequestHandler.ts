@@ -100,7 +100,7 @@ export class ResetStatisticsLeaderboardRequestHandler extends RequestHandler {
 			gameId: request.gameId,
 			log: request.log,
 			catalogId: request.catalogId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -114,7 +114,7 @@ export class GetPlayerCharacterRequestHandler extends GamePlayerBaseRequestHandl
 		return this.execute({
 			userId: request.userId,
 			characterCatalogIds: request.characterCatalogIds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

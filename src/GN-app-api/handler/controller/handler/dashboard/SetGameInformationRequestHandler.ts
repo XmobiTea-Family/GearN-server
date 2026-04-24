@@ -424,7 +424,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 			gameIconUrl: request.gameIconUrl,
 			gameSettings: request.gameSettings,
 			matchmakingQueueSettings: request.matchmakingQueueSettings,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

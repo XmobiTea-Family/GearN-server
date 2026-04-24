@@ -114,7 +114,7 @@ export class RemovePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		return this.execute({
 			userId: request.userId,
 			characterId: request.characterId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

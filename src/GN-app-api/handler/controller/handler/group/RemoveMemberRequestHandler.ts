@@ -106,7 +106,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 		return this.execute({
 			groupId: request.groupId,
 			memberId: request.memberId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

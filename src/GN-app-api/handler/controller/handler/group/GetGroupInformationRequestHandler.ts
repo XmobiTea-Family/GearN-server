@@ -164,7 +164,7 @@ export class GetGroupInformationRequestHandler extends GroupBaseRequestHandler {
 		return this.execute({
 			groupId: request.groupId,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

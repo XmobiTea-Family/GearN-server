@@ -110,7 +110,7 @@ export class GetStatisticsLogRequestHandler extends ItemBaseRequestHandler {
 			token: request.token,
 			limit: request.limit,
 			itemId: request.itemId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -98,7 +98,7 @@ export class GetCustomDataRequestHandler extends ItemBaseRequestHandler {
 		return this.execute({
 			itemId: request.itemId,
 			customDataKeys: request.customDataKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

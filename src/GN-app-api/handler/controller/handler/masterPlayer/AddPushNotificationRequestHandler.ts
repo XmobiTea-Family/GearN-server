@@ -121,7 +121,7 @@ export class AddPushNotificationRequestHandler extends MasterPlayerBaseRequestHa
 			userId: request.userId,
 			token: request.token,
 			platformType: request.platformType,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

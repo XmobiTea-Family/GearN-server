@@ -119,7 +119,7 @@ export class LinkEditorDeviceIdRequestHandler extends MasterPlayerBaseRequestHan
 			userId: request.userId,
 			editorDeviceId: request.editorDeviceId,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

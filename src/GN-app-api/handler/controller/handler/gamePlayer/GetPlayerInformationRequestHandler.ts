@@ -143,7 +143,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 			createPlayerIfNotExists: createPlayerIfNotExists,
 			updateTsLastLogin: updateTsLastLogin,
 			ipAddress: ipAddressCreate,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -107,7 +107,7 @@ export class GetAllMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			returnMember: request.returnMember,
 			skip: request.skip,
 			limit: request.limit,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

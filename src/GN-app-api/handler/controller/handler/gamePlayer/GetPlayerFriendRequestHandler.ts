@@ -114,7 +114,7 @@ export class GetPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler 
 		return this.execute({
 			userId: request.userId,
 			friendCatalogIds: request.friendCatalogIds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

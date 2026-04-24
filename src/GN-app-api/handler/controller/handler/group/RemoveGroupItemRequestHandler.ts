@@ -99,7 +99,7 @@ export class RemoveGroupItemRequestHandler extends GroupBaseRequestHandler {
 		return this.execute({
 			groupId: request.groupId,
 			itemId: request.itemId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

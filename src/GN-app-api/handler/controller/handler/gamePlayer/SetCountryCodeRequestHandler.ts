@@ -114,7 +114,7 @@ export class SetCountryCodeRequestHandler extends GamePlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			countryCode: request.countryCode
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

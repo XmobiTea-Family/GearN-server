@@ -112,7 +112,7 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
 			masterPlayerSettings: request.masterPlayerSettings,
 			emailSettings: request.emailSettings,
 			pushNotificationSettings: request.pushNotificationSettings,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

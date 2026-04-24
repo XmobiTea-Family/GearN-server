@@ -114,7 +114,7 @@ export class GetPlayerInventoryRequestHandler extends GamePlayerBaseRequestHandl
 		return this.execute({
 			userId: request.userId,
 			itemCatalogIds: request.itemCatalogIds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

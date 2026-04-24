@@ -118,7 +118,7 @@ export class SendEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 			userId: request.userId,
 			subject: request.subject,
 			contentHtml: request.contentHtml,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -73,7 +73,7 @@ export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
 		return this.execute({
 			userId: request.userId,
 			password: request.password,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

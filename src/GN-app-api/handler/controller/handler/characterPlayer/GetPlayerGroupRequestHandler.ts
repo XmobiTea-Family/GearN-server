@@ -99,7 +99,7 @@ export class GetPlayerGroupRequestHandler extends CharacterPlayerBaseRequestHand
 		return this.execute({
 			characterId: request.characterId,
 			groupCatalogIds: request.groupCatalogIds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

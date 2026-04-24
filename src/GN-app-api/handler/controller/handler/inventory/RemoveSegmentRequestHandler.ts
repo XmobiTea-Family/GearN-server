@@ -99,7 +99,7 @@ export class RemoveSegmentRequestHandler extends ItemBaseRequestHandler {
 		return this.execute({
 			itemId: request.itemId,
 			segment: request.value
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

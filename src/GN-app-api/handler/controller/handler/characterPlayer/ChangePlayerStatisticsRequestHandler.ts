@@ -107,7 +107,7 @@ export class ChangePlayerStatisticsRequestHandler extends CharacterPlayerBaseReq
 			characterId: request.characterId,
 			playerStatistics: request.playerStatistics,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

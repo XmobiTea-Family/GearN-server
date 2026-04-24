@@ -114,7 +114,7 @@ export class UnlinkFacebookRequestHandler extends MasterPlayerBaseRequestHandler
 		return this.execute({
 			userId: request.userId,
 			facebookId: request.facebookId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

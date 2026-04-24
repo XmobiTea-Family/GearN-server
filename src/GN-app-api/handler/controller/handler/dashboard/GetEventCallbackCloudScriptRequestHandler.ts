@@ -59,7 +59,7 @@ export class GetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({}, SecretRole.Player, secretInfo, operationRequest);
+		return this.execute({}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

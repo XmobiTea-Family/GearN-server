@@ -103,7 +103,7 @@ export class GetPlayersWithGenericServiceRequestHandler extends MasterPlayerBase
 			serviceName: request.serviceName,
 			genericIds: request.genericIds,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

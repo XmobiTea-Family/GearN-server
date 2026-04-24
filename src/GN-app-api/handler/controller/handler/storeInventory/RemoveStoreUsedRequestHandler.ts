@@ -101,7 +101,7 @@ export class RemoveStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			ownerIds: request.ownerIds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

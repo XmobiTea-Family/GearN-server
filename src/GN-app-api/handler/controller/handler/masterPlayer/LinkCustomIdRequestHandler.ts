@@ -119,7 +119,7 @@ export class LinkCustomIdRequestHandler extends MasterPlayerBaseRequestHandler {
 			userId: request.userId,
 			customId: request.customId,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

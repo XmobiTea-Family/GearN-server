@@ -99,7 +99,7 @@ export class GetPlayerInventoryRequestHandler extends CharacterPlayerBaseRequest
 		return this.execute({
 			characterId: request.characterId,
 			itemCatalogIds: request.itemCatalogIds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

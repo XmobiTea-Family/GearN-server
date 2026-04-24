@@ -99,7 +99,7 @@ export class RemoveTagRequestHandler extends GroupBaseRequestHandler {
 		return this.execute({
 			groupId: request.groupId,
 			tag: request.key
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

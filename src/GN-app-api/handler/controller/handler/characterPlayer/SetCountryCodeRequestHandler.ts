@@ -99,7 +99,7 @@ export class SetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 		return this.execute({
 			characterId: request.characterId,
 			countryCode: request.countryCode
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

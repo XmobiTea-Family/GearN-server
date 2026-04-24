@@ -98,7 +98,7 @@ export class GetStoreUsedRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute(
 			{
 				storeId: request.storeId,
-			}, SecretRole.Player, secretInfo,
+			}, SecretRole.Client, secretInfo,
 			operationRequest
 		);
 	}

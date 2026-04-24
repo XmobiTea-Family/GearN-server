@@ -107,7 +107,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 			groupId: request.groupId,
 			groupStatistics: request.groupStatistics,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -109,7 +109,7 @@ export class GetSegmentRequestHandler extends GamePlayerBaseRequestHandler {
 
 		return this.execute({
 			userId: request.userId
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -108,7 +108,7 @@ export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBase
             infoRequestParam: request.infoRequestParam,
             skip: request.skip,
             limit: request.limit,
-        }, SecretRole.Player, secretInfo, operationRequest);
+        }, SecretRole.Client, secretInfo, operationRequest);
     }
 
     /**

@@ -114,7 +114,7 @@ export class RemovePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		return this.execute({
 			userId: request.userId,
 			itemId: request.itemId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

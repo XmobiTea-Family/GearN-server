@@ -98,7 +98,7 @@ export class GetPlayersWithAppleRequestHandler extends MasterPlayerBaseRequestHa
 		return this.execute({
 			appleIds: request.appleIds,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

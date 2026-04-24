@@ -114,7 +114,7 @@ export class UnlinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHa
 		return this.execute({
 			userId: request.userId,
 			linuxDeviceId: request.linuxDeviceId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -68,7 +68,7 @@ export class GetGameInformationRequestHandler extends RequestHandler {
 
 		return this.execute({
 			gameId: request.gameId
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

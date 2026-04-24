@@ -104,7 +104,7 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 			characterId: request.characterId,
 			displayName: request.displayName,
 			uniqueDisplayName: request.uniqueDisplayName,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

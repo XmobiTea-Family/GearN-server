@@ -114,7 +114,7 @@ export class GetPlayerStatisticsRequestHandler extends GamePlayerBaseRequestHand
 		return this.execute({
 			userId: request.userId,
 			statisticsKeys: request.statisticsKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

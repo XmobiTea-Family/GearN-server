@@ -114,7 +114,7 @@ export class UnlinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseR
 		return this.execute({
 			userId: request.userId,
 			playerId: request.playerId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

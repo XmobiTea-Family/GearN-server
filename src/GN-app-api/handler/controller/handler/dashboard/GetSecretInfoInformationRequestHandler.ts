@@ -64,7 +64,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ secretKey: request.secretKey }, SecretRole.Player, secretInfo, operationRequest);
+		return this.execute({ secretKey: request.secretKey }, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -114,7 +114,7 @@ export class GetPlayerStatisticsRequestHandler extends MasterPlayerBaseRequestHa
 		return this.execute({
 			userId: request.userId,
 			playerStatisticsKeys: request.playerStatisticsKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

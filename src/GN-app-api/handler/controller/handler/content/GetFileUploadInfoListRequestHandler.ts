@@ -97,7 +97,7 @@ export class GetFileUploadInfoListRequestHandler extends RequestHandler {
 		return this.execute({
 			skip: request.skip,
 			limit: request.limit,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

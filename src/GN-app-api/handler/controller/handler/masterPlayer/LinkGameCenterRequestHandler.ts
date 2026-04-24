@@ -144,7 +144,7 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 			salt: request.salt,
 			timestamp: request.timestamp,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

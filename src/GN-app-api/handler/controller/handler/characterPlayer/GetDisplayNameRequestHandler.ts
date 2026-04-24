@@ -93,7 +93,7 @@ export class GetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 
 		return this.execute({
 			characterId: request.characterId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

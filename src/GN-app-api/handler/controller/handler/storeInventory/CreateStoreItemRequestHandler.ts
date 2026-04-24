@@ -99,7 +99,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			displayName: request.displayName,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

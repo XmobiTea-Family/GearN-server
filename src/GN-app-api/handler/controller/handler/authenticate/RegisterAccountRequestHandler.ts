@@ -84,7 +84,7 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 			password: request.password,
 			infoRequestParam: request.infoRequestParam,
 			ipAddress: (request as any).originRequest.getIP(),
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

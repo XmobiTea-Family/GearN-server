@@ -98,7 +98,7 @@ export class SetDisplayNameRequestHandler extends ItemBaseRequestHandler {
 		return this.execute({
 			itemId: request.itemId,
 			displayName: request.displayName
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

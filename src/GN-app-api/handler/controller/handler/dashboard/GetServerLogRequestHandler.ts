@@ -71,7 +71,7 @@ export class GetServerLogRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ skip: request.skip, limit: request.limit }, SecretRole.Player, secretInfo, operationRequest);
+		return this.execute({ skip: request.skip, limit: request.limit }, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

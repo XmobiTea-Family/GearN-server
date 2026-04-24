@@ -128,7 +128,7 @@ export class GetAnalyticsRequestHandler extends RequestHandler {
 					cost: request.cost,
 					monthlyCost: request.monthlyCost,
 				}
-			}, SecretRole.Player, secretInfo,
+			}, SecretRole.Client, secretInfo,
 			operationRequest
 		);
 	}

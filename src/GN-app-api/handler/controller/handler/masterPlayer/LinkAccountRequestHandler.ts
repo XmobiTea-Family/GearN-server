@@ -126,7 +126,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			username: request.username,
 			password: request.password,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

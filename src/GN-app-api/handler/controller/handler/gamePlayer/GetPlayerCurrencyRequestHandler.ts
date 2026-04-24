@@ -114,7 +114,7 @@ export class GetPlayerCurrencyRequestHandler extends GamePlayerBaseRequestHandle
 		return this.execute({
 			userId: request.userId,
 			playerCurrencyKeys: request.playerCurrencyKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

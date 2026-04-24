@@ -110,7 +110,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			message: request.message,
 			senderId: request.senderId,
 			userId: authInfo.getUserId(),
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**
@@ -253,7 +253,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 			}
 		}
 
-		if (role == SecretRole.Player) {
+		if (role == SecretRole.Client) {
 			if (!(await this.isMember(group, request.userId, secretInfo.getGameId()))) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerNotMember);
 				return operationResponse;

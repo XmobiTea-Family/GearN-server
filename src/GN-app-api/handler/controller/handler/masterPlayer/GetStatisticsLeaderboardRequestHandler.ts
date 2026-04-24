@@ -121,7 +121,7 @@ export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequ
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
 			version: request.version,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

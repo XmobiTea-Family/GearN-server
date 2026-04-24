@@ -114,7 +114,7 @@ export class UnlinkAppleRequestHandler extends MasterPlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			appleId: request.appleId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

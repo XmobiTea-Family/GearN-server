@@ -94,7 +94,7 @@ export class GetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 
 		return this.execute({
 			characterId: request.characterId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

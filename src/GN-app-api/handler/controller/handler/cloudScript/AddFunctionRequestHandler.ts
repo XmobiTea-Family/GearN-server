@@ -95,7 +95,7 @@ export class AddFunctionRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ script: request.script, canExecute: request.canExecute, isLive: request.isLive }, SecretRole.Player, secretInfo, operationRequest);
+		return this.execute({ script: request.script, canExecute: request.canExecute, isLive: request.isLive }, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -97,7 +97,7 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 		return this.execute({
 			userId: authInfo.getUserId(),
 			queueName: request.queueName
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

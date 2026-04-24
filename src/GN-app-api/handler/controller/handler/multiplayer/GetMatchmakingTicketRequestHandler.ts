@@ -98,7 +98,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 			userId: authInfo.getUserId(),
 			ticketId: request.ticketId,
 			returnMember: request.returnMember,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**
@@ -182,7 +182,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
 		// Stores the matchmaking ticket value used in the current execution flow.
 		let matchmakingTicket = new MatchmakingTicket(result, matchmakingTicketCollection);
 
-		if (role == SecretRole.Player) {
+		if (role == SecretRole.Client) {
 			// Stores the member value used in the current execution flow.
 			let member = matchmakingTicket.getMember(request.userId);
 			if (member == null) {

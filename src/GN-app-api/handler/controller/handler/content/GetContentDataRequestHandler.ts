@@ -95,7 +95,7 @@ export class GetContentDataRequestHandler extends RequestHandler {
 		return this.execute({
 			keys: request.keys,
 			label: request.label,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

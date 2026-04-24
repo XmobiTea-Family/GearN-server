@@ -119,7 +119,7 @@ export class GetStoreLogRequestHandler extends StoreItemBaseRequestHandler {
 				id: request.id,
 				limit: request.limit,
 				token: request.token,
-			}, SecretRole.Player, secretInfo,
+			}, SecretRole.Client, secretInfo,
 			operationRequest
 		);
 	}

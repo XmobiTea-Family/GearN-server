@@ -99,7 +99,7 @@ export class RemovePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 		return this.execute({
 			characterId: request.characterId,
 			itemId: request.itemId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

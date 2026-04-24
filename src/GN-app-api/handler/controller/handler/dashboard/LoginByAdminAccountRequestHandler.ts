@@ -69,7 +69,7 @@ export class LoginByAdminAccountRequestHandler extends RequestHandler {
 		return this.execute({
 			username: request.username,
 			password: request.password,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

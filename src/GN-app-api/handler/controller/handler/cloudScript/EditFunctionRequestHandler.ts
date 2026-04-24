@@ -95,7 +95,7 @@ export class EditFunctionRequestHandler extends RequestHandler {
 			return this.newOperationNotAllowError(request);
 		}
 
-		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, SecretRole.Player, secretInfo, operationRequest);
+		return this.execute({ version: request.version, canExecute: request.canExecute, isLive: request.isLive }, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

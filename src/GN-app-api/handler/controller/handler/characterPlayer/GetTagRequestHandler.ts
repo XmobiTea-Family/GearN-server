@@ -99,7 +99,7 @@ export class GetTagRequestHandler extends CharacterPlayerBaseRequestHandler {
 		return this.execute({
 			characterId: request.characterId,
 			tagKeys: request.tagKeys
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

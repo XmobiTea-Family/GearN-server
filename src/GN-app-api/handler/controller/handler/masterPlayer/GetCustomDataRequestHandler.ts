@@ -114,7 +114,7 @@ export class GetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		return this.execute({
 			userId: request.userId,
 			customDataKeys: request.customDataKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

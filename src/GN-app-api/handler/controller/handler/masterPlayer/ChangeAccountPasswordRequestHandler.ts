@@ -92,7 +92,7 @@ export class ChangeAccountPasswordRequestHandler extends MasterPlayerBaseRequest
 			userId: request.userId,
 			currentPassword: request.currentPassword,
 			password: request.password,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -129,7 +129,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			displayName: request.displayName,
 			ipAddress: (request as any).originRequest.getIP(),
 			uniqueDisplayName: request.uniqueDisplayName,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

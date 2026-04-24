@@ -96,7 +96,7 @@ export class GetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 		return this.execute({
 			storeId: request.storeId,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

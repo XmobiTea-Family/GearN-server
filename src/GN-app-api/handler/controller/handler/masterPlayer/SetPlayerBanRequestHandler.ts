@@ -120,7 +120,7 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 			userId: request.userId,
 			tsExpire: request.tsExpire,
 			reason: request.reason
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

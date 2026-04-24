@@ -110,7 +110,7 @@ export class GetStatisticsLogRequestHandler extends CharacterPlayerBaseRequestHa
 			token: request.token,
 			limit: request.limit,
 			characterId: request.characterId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -116,7 +116,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 			queueName: request.queueName,
 			attribute: request.attribute,
 			members: request.members,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

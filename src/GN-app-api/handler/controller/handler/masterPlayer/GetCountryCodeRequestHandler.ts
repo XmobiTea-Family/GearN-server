@@ -109,7 +109,7 @@ export class GetCountryCodeRequestHandler extends MasterPlayerBaseRequestHandler
 
 		return this.execute({
 			userId: request.userId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

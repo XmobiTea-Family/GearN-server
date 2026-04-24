@@ -101,7 +101,7 @@ export class GetAllMatchRequestHandler extends MultiplayerBaseRequestHandler {
 			returnMember: request.returnMember,
 			skip: request.skip,
 			limit: request.limit,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

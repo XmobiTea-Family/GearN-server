@@ -99,7 +99,7 @@ export class GetGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 		return this.execute({
 			groupId: request.groupId,
 			groupCurrencyKeys: request.groupCurrencyKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -106,7 +106,7 @@ export class ChangePlayerCurrencyRequestHandler extends CharacterPlayerBaseReque
 			characterId: request.characterId,
 			playerCurrencies: request.playerCurrencies,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

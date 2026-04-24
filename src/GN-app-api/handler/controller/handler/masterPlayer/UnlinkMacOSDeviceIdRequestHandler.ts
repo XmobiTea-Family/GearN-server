@@ -114,7 +114,7 @@ export class UnlinkMacOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHa
 		return this.execute({
 			userId: request.userId,
 			macOSDeviceId: request.macOSDeviceId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -134,7 +134,7 @@ export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 			classId: request.classId,
 			displayName: request.displayName,
 			amount: request.amount,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -114,7 +114,7 @@ export class UnlinkEditorDeviceIdRequestHandler extends MasterPlayerBaseRequestH
 		return this.execute({
 			userId: request.userId,
 			editorDeviceId: request.editorDeviceId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

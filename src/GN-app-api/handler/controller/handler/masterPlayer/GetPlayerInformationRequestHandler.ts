@@ -120,7 +120,7 @@ export class GetPlayerInformationRequestHandler extends MasterPlayerBaseRequestH
 		return this.execute({
 			userId: request.userId,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

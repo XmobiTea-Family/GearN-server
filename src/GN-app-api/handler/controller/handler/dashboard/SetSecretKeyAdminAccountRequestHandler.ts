@@ -72,7 +72,7 @@ export class SetSecretKeyAdminAccountRequestHandler extends RequestHandler {
 		return this.execute({
 			userId: request.userId,
 			secretKey: request.secretKey,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

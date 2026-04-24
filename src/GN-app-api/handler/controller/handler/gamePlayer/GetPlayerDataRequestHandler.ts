@@ -114,7 +114,7 @@ export class GetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			playerDataKeys: request.playerDataKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

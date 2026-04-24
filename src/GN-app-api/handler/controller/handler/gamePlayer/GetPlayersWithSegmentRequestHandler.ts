@@ -108,7 +108,7 @@ export class GetPlayersWithSegmentRequestHandler extends GamePlayerBaseRequestHa
 			skip: request.skip,
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

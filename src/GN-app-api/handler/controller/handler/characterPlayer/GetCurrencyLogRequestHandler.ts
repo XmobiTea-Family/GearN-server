@@ -110,7 +110,7 @@ export class GetCurrencyLogRequestHandler extends CharacterPlayerBaseRequestHand
 			token: request.token,
 			limit: request.limit,
 			characterId: request.characterId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

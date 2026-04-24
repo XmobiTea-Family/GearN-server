@@ -125,7 +125,7 @@ export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHan
 			serviceName: request.serviceName,
 			serviceData: request.serviceData.toData(),
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

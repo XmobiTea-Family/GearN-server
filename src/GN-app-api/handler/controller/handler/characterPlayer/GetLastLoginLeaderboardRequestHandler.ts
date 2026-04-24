@@ -110,7 +110,7 @@ export class GetLastLoginLeaderboardRequestHandler extends CharacterPlayerBaseRe
 			limit: request.limit,
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

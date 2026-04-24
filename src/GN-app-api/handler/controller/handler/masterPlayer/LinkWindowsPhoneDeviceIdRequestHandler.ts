@@ -119,7 +119,7 @@ export class LinkWindowsPhoneDeviceIdRequestHandler extends MasterPlayerBaseRequ
 			userId: request.userId,
 			windowsPhoneDeviceId: request.windowsPhoneDeviceId,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

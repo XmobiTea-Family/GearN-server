@@ -91,7 +91,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 
 		return this.execute({
 			fileName: request.fileName,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

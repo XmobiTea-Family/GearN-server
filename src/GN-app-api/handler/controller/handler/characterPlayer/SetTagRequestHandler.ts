@@ -104,7 +104,7 @@ export class SetTagRequestHandler extends CharacterPlayerBaseRequestHandler {
 			characterId: request.characterId,
 			key: request.key,
 			value: request.value,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

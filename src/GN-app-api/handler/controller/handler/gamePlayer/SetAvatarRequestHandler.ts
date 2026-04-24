@@ -119,7 +119,7 @@ export class SetAvatarRequestHandler extends GamePlayerBaseRequestHandler {
 			userId: request.userId,
 			type: request.type,
 			value: request.value
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

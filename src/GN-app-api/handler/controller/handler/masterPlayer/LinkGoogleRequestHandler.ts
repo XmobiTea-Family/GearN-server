@@ -125,7 +125,7 @@ export class LinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 			token: request.token,
 			googleLoginType: <GoogleLoginType>request.type,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

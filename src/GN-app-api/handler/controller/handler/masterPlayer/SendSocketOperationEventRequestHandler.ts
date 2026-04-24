@@ -119,7 +119,7 @@ export class SendSocketOperationEventRequestHandler extends MasterPlayerBaseRequ
 			userId: request.userId,
 			eventCode: request.eventCode,
 			eventParameters: request.eventParameters?.toData() ?? null,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

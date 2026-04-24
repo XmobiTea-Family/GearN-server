@@ -99,7 +99,7 @@ export class GetPlayerStatisticsRequestHandler extends CharacterPlayerBaseReques
 		return this.execute({
 			characterId: request.characterId,
 			statisticsKeys: request.statisticsKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -99,7 +99,7 @@ export class AddSegmentRequestHandler extends CharacterPlayerBaseRequestHandler 
 		return this.execute({
 			characterId: request.characterId,
 			segment: request.value,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

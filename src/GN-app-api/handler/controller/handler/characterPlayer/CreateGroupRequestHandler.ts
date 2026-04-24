@@ -114,7 +114,7 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 			catalogId: request.catalogId,
 			groupMembers: request.groupMembers,
 			displayName: request.displayName,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

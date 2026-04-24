@@ -142,7 +142,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			displayName: request.displayName,
 			avatar: request.avatar,
 			tags: request.tags,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -78,7 +78,7 @@ export class CreateAdminAccountRequestHandler extends RequestHandler {
 			username: request.username,
 			password: request.password,
 			secretKey: request.secretKey,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -120,7 +120,7 @@ export class GetCurrencyLeaderboardRequestHandler extends GroupBaseRequestHandle
 			infoRequestParam: request.infoRequestParam,
 			loadFromCache: request.loadFromCache,
 			catalogId: request.catalogId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

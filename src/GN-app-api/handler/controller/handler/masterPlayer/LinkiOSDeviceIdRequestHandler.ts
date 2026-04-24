@@ -119,7 +119,7 @@ export class LinkiOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHandle
 			userId: request.userId,
 			iOSDeviceId: request.iOSDeviceId,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -98,7 +98,7 @@ export class ListMatchmakingTicketsForPlayerRequestHandler extends MultiplayerBa
 		return this.execute({
 			userId: authInfo.getUserId(),
 			queueName: request.queueName,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

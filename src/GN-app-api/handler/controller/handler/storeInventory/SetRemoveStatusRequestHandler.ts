@@ -97,7 +97,7 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		return this.execute({
 			storeId: request.storeId,
 			reason: request.reason,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

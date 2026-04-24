@@ -100,7 +100,7 @@ export class GetQueueStatisticsRequestHandler extends MultiplayerBaseRequestHand
 		return this.execute({
 			queueName: request.queueName,
 			timeInSeconds: request.timeInSeconds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

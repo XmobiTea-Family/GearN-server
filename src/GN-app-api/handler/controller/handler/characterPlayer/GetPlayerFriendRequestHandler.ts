@@ -99,7 +99,7 @@ export class GetPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 		return this.execute({
 			characterId: request.characterId,
 			friendCatalogIds: request.friendCatalogIds,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

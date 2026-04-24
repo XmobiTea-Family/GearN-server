@@ -71,7 +71,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 		return this.execute({
 			gameId: request.gameId,
 			creatorId: authInfo.getUserId(),
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

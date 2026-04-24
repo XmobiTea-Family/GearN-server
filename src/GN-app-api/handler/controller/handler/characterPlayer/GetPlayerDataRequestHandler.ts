@@ -99,7 +99,7 @@ export class GetPlayerDataRequestHandler extends CharacterPlayerBaseRequestHandl
 		return this.execute({
 			characterId: request.characterId,
 			playerDataKeys: request.playerDataKeys,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

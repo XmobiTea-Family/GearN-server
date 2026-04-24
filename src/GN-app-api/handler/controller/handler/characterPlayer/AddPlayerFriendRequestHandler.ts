@@ -108,7 +108,7 @@ export class AddPlayerFriendRequestHandler extends CharacterPlayerBaseRequestHan
 			characterId: request.characterId,
 			friendId: request.friendId,
 			catalogId: request.catalogId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

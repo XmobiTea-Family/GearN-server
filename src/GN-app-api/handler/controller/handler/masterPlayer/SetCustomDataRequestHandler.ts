@@ -117,7 +117,7 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 		return this.execute({
 			userId: request.userId,
 			customDatas: request.customDatas
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**
@@ -205,7 +205,7 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 				return operationResponse;
 			}
 
-			if (<PermissionDataItem>customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
+			if (<PermissionDataItem>customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 				operationResponse.setDebugMessage("CustomKey is readOnly " + key + ", change it by server or admin role");
 				return operationResponse;
@@ -247,7 +247,7 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 
 			let permission = <PermissionDataItem>customDatasSettingsItem.permission;
 
-			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Player) {
+			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
 
 			}
 			else {

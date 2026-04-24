@@ -119,7 +119,7 @@ export class LinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 			userId: request.userId,
 			linuxDeviceId: request.linuxDeviceId,
 			forceLink: request.forceLink
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

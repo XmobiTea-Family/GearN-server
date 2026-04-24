@@ -94,7 +94,7 @@ export class GetCatalogIdRequestHandler extends GroupBaseRequestHandler {
 
 		return this.execute({
 			groupId: request.groupId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

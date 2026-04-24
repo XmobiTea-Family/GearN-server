@@ -114,7 +114,7 @@ export class RemoveSegmentRequestHandler extends MasterPlayerBaseRequestHandler 
 		return this.execute({
 			userId: request.userId,
 			segment: request.value
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

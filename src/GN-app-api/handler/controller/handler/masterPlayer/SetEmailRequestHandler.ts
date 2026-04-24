@@ -116,7 +116,7 @@ export class SetEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			email: request.email
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

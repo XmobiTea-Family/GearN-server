@@ -98,7 +98,7 @@ export class GetPlayersWithFacebookRequestHandler extends MasterPlayerBaseReques
 		return this.execute({
 			facebookIds: request.facebookIds,
 			infoRequestParam: request.infoRequestParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

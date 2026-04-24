@@ -79,7 +79,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 			creatorId: authInfo.getUserId(),
 			gameId: request.gameId,
 			permissionParam: request.permissionParam,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

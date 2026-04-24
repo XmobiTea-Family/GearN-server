@@ -94,7 +94,7 @@ export class RequestDownloadFileUploadInfoRequestHandler extends RequestHandler 
 
 		return this.execute({
 			fileId: request.fileId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

@@ -114,7 +114,7 @@ export class UnlinkCustomIdRequestHandler extends MasterPlayerBaseRequestHandler
 		return this.execute({
 			userId: request.userId,
 			customId: request.customId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

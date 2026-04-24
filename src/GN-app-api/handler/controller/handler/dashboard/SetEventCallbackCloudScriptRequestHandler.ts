@@ -71,7 +71,7 @@ export class SetEventCallbackCloudScriptRequestHandler extends RequestHandler {
 		return this.execute({
 			eventName: request.eventName,
 			script: request.script,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

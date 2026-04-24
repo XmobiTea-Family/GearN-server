@@ -133,7 +133,7 @@ export class GetPlayerInformationRequestHandler extends CharacterPlayerBaseReque
 			characterId: request.characterId,
 			infoRequestParam: request.infoRequestParam,
 			updateTsLastLogin: updateTsLastLogin,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

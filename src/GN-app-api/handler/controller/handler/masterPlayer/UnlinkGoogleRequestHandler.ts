@@ -114,7 +114,7 @@ export class UnlinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 		return this.execute({
 			userId: request.userId,
 			googleId: request.googleId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

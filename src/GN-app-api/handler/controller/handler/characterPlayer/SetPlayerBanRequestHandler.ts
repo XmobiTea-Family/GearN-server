@@ -104,7 +104,7 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 			characterId: request.characterId,
 			tsExpire: request.tsExpire,
 			reason: request.reason
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

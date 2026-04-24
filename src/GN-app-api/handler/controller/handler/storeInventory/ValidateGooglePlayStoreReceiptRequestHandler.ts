@@ -153,7 +153,7 @@ export class ValidateGooglePlayStoreReceiptRequestHandler extends StoreItemBaseR
 			id: request.id,
 			type: request.type,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

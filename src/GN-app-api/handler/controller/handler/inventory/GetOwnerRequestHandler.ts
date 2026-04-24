@@ -94,7 +94,7 @@ export class GetOwnerRequestHandler extends ItemBaseRequestHandler {
 
 		return this.execute({
 			itemId: request.itemId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

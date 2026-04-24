@@ -88,7 +88,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			type: request.type,
 			gameId: request.gameId,
 			log: request.log,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

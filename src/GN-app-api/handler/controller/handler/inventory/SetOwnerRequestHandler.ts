@@ -108,7 +108,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			itemId: request.itemId,
 			newOwnerId: request.newOwnerId,
 			newOwnerType: request.newOwnerType,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

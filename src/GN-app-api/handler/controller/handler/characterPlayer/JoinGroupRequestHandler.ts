@@ -105,7 +105,7 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 		return this.execute({
 			characterId: request.characterId,
 			groupId: request.groupId,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**

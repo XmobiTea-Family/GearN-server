@@ -78,7 +78,7 @@ export class GetBackupStatisticsLeaderboardVersionRequestHandler extends Request
 			gameId: request.gameId,
 			type: request.type,
 			key: request.key,
-		}, SecretRole.Player, secretInfo, operationRequest);
+		}, SecretRole.Client, secretInfo, operationRequest);
 	}
 
 	/**
