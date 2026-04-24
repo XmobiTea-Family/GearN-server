@@ -170,6 +170,7 @@ export class AddSegmentRequestHandler extends ItemBaseRequestHandler {
 		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			segments: true,
+			removeStatus: true,
 		}
 
 		// Stores the inventory value used in the current execution flow.
@@ -178,6 +179,17 @@ export class AddSegmentRequestHandler extends ItemBaseRequestHandler {
 		if (inventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = inventory.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+				operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
 		}
 
 		if (!inventory.hasSegment(request.segment)) {

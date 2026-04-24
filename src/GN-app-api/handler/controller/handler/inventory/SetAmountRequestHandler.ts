@@ -175,6 +175,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 			amount: true,
 			itemType: true,
 			owner: true,
+			removeStatus: true,
 		}
 
 		// Stores the inventory value used in the current execution flow.
@@ -185,6 +186,8 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+
+		
 		// Stores the item type value used in the current execution flow.
 		let itemType = <ItemType>inventory.getItemType();
 		if (itemType == ItemType.NonStackable) {

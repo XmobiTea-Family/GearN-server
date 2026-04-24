@@ -183,6 +183,7 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			owner: true,
 			catalogId: true,
 			classId: true,
+			removeStatus: true,
 		}
 
 		// Stores the inventory value used in the current execution flow.
@@ -191,6 +192,17 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 		if (inventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = inventory.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+				operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
 		}
 
 		// Stores the owner value used in the current execution flow.

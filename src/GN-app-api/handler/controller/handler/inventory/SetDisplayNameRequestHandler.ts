@@ -169,6 +169,7 @@ export class SetDisplayNameRequestHandler extends ItemBaseRequestHandler {
 		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			displayName: true,
+			removeStatus: true,
 		}
 
 		// Stores the inventory value used in the current execution flow.
@@ -179,6 +180,8 @@ export class SetDisplayNameRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+
+		
 		inventory.setDisplayName(request.displayName);
 		inventory.saveAsync();
 

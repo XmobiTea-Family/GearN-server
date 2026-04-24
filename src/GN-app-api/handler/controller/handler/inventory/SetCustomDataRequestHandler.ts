@@ -198,6 +198,7 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			customDatas: true,
+			removeStatus: true,
 		}
 
 		// Stores the inventory value used in the current execution flow.
@@ -206,6 +207,17 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 		if (inventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = inventory.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+				operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
 		}
 
 		// Stores the GearN info response parameters value used in the current execution flow.

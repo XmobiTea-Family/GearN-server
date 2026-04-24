@@ -199,6 +199,8 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 		let removeStatus = group.getRemoveStatus();
 		if (removeStatus.tsRemove != 0) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+			operationResponse.setDebugMessage("Group is removed, reason " + removeStatus.reason);
+			
 			return operationResponse;
 		}
 

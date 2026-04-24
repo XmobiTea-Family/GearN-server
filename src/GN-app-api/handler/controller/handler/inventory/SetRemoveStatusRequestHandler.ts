@@ -183,6 +183,17 @@ export class SetRemoveStatusRequestHandler extends ItemBaseRequestHandler {
 			return operationResponse;
 		}
 
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = inventory.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+				operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
+		}
+
 		// Stores the remove status value used in the current execution flow.
 		let removeStatus = inventory.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {

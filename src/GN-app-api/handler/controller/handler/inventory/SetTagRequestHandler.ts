@@ -177,6 +177,7 @@ export class SetTagRequestHandler extends ItemBaseRequestHandler {
 		// Stores the inventory find options value used in the current execution flow.
 		let inventoryFindOptions: InventoryFindOptions = {
 			tags: true,
+			removeStatus: true,
 		}
 
 		// Stores the resolved inventory settings instance for the current execution flow.
@@ -195,6 +196,17 @@ export class SetTagRequestHandler extends ItemBaseRequestHandler {
 		if (inventory == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = inventory.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+				operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
 		}
 
 		inventory.setTag(request.key, request.value);
