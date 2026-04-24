@@ -199,6 +199,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			groupStatistics: true,
+			removeStatus: true,
 		}
 
 		// Stores the group value used in the current execution flow.
@@ -207,6 +208,17 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = group.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+				operationResponse.setDebugMessage("Group is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
 		}
 
 		// Stores the GearN info response parameters value used in the current execution flow.

@@ -177,6 +177,7 @@ export class SetAvatarRequestHandler extends GroupBaseRequestHandler {
 		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			avatar: true,
+			removeStatus: true,
 		}
 
 		// Stores the group value used in the current execution flow.
@@ -185,6 +186,17 @@ export class SetAvatarRequestHandler extends GroupBaseRequestHandler {
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = group.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+				operationResponse.setDebugMessage("Group is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
 		}
 
 		group.setAvatar(request.type, request.value);

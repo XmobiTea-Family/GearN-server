@@ -184,6 +184,17 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = group.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+				operationResponse.setDebugMessage("Group is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
+		}
+
 		// Stores the remove status value used in the current execution flow.
 		let removeStatus = group.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {

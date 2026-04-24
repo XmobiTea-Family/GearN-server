@@ -196,6 +196,7 @@ export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
 		// Stores the group find options value used in the current execution flow.
 		let groupFindOptions: GroupFindOptions = {
 			groupInventories: true,
+			removeStatus: true,
 		}
 
 		// Stores the resolved group settings instance for the current execution flow.
@@ -221,6 +222,17 @@ export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
 		if (group == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the remove status value used in the current execution flow.
+			let removeStatus = group.getRemoveStatus();
+			if (removeStatus.tsRemove != 0) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+				operationResponse.setDebugMessage("Group is removed, reason " + removeStatus.reason);
+
+				return operationResponse;
+			}
 		}
 
 		// Stores the amount value used in the current execution flow.
