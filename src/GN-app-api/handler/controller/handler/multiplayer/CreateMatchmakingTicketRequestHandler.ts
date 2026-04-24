@@ -224,7 +224,7 @@ export class CreateMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		}
 
 		if (isJoinOtherTicket) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingPlayerHasJoinedOtherTicket);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingPlayerJoinedOtherTicket);
 			return operationResponse;
 		}
 

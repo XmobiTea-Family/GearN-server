@@ -100,7 +100,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 		let result = await collection.findOne({ type: "gameSettings", gameId: gameId });
 
 		if (result != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameIsExists);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameExists);
 			return operationResponse;
 		}
 

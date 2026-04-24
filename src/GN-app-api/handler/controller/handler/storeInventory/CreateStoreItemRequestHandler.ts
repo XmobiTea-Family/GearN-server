@@ -176,7 +176,7 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		});
 
 		if (oldStoreInventory != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadExists);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemExists);
 			return operationResponse;
 		}
 

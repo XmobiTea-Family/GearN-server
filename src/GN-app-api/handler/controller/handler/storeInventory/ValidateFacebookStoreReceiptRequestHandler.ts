@@ -300,7 +300,7 @@ export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseReq
 		}
 
 		if (storeInventory.getRemoveStatus().tsRemove != 0) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadBeenRemove);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemRemoved);
 			return operationResponse;
 		}
 
@@ -309,7 +309,7 @@ export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseReq
 			let purchaseCount = await this.gnServer.getDatabase().storeInventoryRepository.getCountStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id);
 
 			if (purchaseCount != 0) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadPurchaseAndNonConsumable);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemPurchasedAndNonConsumable);
 				return operationResponse;
 			}
 		}

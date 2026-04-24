@@ -223,7 +223,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			let characterPlayerWithThisDisplayName = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerWithDisplayNameAsync(request.displayName, secretInfo.getGameId(), { displayName: true });
 
 			if (characterPlayerWithThisDisplayName != null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameHasUse);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameUsed);
 				return operationResponse;
 			}
 		}

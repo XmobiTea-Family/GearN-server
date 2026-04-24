@@ -108,7 +108,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 		let result = await collection.findOne({ type: "secretInfo", secretKey: request.secretKey });
 
 		if (result != null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.SecretInfoIsExists);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.SecretInfoExists);
 			return operationResponse;
 		}
 

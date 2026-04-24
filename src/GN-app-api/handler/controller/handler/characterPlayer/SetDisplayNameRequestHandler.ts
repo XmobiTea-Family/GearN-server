@@ -184,7 +184,7 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 			let characterPlayerWithThisDisplayName = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerWithDisplayNameAsync(request.displayName, secretInfo.getGameId(), characterPlayerFindOptions);
 
 			if (characterPlayerWithThisDisplayName != null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameHasUse);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameUsed);
 				return operationResponse;
 			}
 		}

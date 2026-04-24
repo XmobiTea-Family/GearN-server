@@ -199,7 +199,7 @@ export class SetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler
 			let masterPlayerWithThisDisplayName = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerWithDisplayNameAsync(request.displayName, masterPlayerFindOptions);
 
 			if (masterPlayerWithThisDisplayName != null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameHasUse);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameUsed);
 				return operationResponse;
 			}
 		}

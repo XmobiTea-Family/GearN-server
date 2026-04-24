@@ -240,7 +240,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		}
 
 		if (storeInventory.getRemoveStatus().tsRemove != 0) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadBeenRemove);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemRemoved);
 			return operationResponse;
 		}
 
@@ -249,7 +249,7 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 			let purchaseCount = await this.gnServer.getDatabase().storeInventoryRepository.getCountStoreInventoryUsedAsync(request.storeId, secretInfo.getGameId(), request.id);
 
 			if (purchaseCount != 0) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemHadPurchaseAndNonConsumable);
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.StoreItemPurchasedAndNonConsumable);
 				return operationResponse;
 			}
 		}

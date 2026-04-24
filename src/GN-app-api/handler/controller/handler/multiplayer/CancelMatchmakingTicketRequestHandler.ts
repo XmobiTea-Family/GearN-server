@@ -192,7 +192,7 @@ export class CancelMatchmakingTicketRequestHandler extends MultiplayerBaseReques
 		// Stores the member value used in the current execution flow.
 		let member = matchmakingTicket.getMember(request.userId);
 		if (member == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingPlayerHasNotJoinedTicket);
+			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MatchmakingPlayerNotJoinedTicket);
 			return operationResponse;
 		}
 
