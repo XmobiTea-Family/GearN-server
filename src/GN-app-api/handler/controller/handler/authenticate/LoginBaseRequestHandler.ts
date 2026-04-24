@@ -697,7 +697,7 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		// Stores the answer value used in the current execution flow.
-		let answer = {} as any;
+		let answer: Record<string, any> = {};
 
 		answer["userId"] = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
 		answer["external"] = {};

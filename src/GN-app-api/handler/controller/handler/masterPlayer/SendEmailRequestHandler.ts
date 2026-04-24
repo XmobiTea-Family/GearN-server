@@ -12,6 +12,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SendEmailOperationRequest extends OperationRequest {
 
@@ -191,12 +192,28 @@ export class SendEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 		// Stores the master player value used in the current execution flow.
 		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, {
 			email: true,
+			playerBan: true,
 		});
 
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 
 			return operationResponse;
+		}
+
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = masterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
+
+					return operationResponse;
+				}
+			}
 		}
 
 		// Stores the email value used in the current execution flow.

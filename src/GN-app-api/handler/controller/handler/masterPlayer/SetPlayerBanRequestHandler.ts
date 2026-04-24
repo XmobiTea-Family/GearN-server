@@ -203,6 +203,21 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
 			return operationResponse;
 		}
 
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = masterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
+
+					return operationResponse;
+				}
+			}
+		}
+
 		masterPlayer.setPlayerBan(request.tsExpire, request.reason);
 		masterPlayer.saveAsync();
 

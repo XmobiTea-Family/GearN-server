@@ -13,6 +13,8 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class SendSocketOperationEventOperationRequest extends OperationRequest {
 
@@ -188,6 +190,34 @@ export class SendSocketOperationEventRequestHandler extends MasterPlayerBaseRequ
 
 		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
 		operationResponse.setReturnCode(ReturnCode.Ok);
+
+		if (role == SecretRole.Client) {
+			// Stores the master player find options value used in the current execution flow.
+			let masterPlayerFindOptions: MasterPlayerFindOptions = {
+				playerBan: true,
+			}
+
+			// Stores the master player value used in the current execution flow.
+			let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+
+			if (masterPlayer == null) {
+				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
+				return operationResponse;
+			}
+
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = masterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
+
+					return operationResponse;
+				}
+			}
+		}
 
 		this.gnServer.sendEventTo(request.userId, new OperationEvent(request.eventCode, request.eventParameters != null ? GNHashtable.builder().addAll(request.eventParameters).build() : null));
 

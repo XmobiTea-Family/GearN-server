@@ -179,6 +179,7 @@ export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler
 		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			tsLastLogin: true,
+			playerBan: true,
 		}
 
 		// Stores the master player value used in the current execution flow.
@@ -187,6 +188,20 @@ export class SetTsLastLoginRequestHandler extends MasterPlayerBaseRequestHandler
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
+		}
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = masterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
+					
+					return operationResponse;
+				}
+			}
 		}
 
 		masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());

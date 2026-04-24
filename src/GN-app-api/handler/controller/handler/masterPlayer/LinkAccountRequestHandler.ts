@@ -15,6 +15,7 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 
 import bcrypt from "bcrypt";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class LinkAccountOperationRequest extends OperationRequest {
 
@@ -202,6 +203,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			external: true,
 			userId: true,
+			playerBan: true,
 		}
 
 		// Stores the master player value used in the current execution flow.
@@ -210,6 +212,20 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
+		}
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = masterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
+					
+					return operationResponse;
+				}
+			}
 		}
 
 		// Stores the external value used in the current execution flow.

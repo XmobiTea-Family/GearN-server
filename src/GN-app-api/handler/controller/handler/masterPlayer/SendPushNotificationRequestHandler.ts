@@ -12,6 +12,7 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
 
 class SendPushNotificationOperationRequest extends OperationRequest {
@@ -220,6 +221,7 @@ export class SendPushNotificationRequestHandler extends MasterPlayerBaseRequestH
 		// Stores the master player find options value used in the current execution flow.
 		let masterPlayerFindOptions: MasterPlayerFindOptions = {
 			pushNotifications: true,
+			playerBan: true,
 		}
 
 		// Stores the master player value used in the current execution flow.
@@ -228,6 +230,20 @@ export class SendPushNotificationRequestHandler extends MasterPlayerBaseRequestH
 		if (masterPlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
 			return operationResponse;
+		}
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = masterPlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
+					
+					return operationResponse;
+				}
+			}
 		}
 
 		// Stores the complete push notifications collection used in the current execution flow.
