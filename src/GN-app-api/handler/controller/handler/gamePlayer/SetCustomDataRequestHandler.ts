@@ -14,6 +14,7 @@ import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CustomDataParam } from "./model/CustomDataParam";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 import { PermissionDataItem } from "./../../../../../GN-common/constant/enumType/PermissionDataItem";
 
@@ -223,6 +224,20 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		if (gamePlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
+		}
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = gamePlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
+					
+					return operationResponse;
+				}
+			}
 		}
 
 		// Stores the GearN info response parameters value used in the current execution flow.

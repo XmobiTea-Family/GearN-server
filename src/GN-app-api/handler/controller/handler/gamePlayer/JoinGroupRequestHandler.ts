@@ -13,8 +13,8 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
-import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../../GN-common/constant/EventCode";
@@ -239,6 +239,20 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		if (gamePlayer == null) {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
+		}
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = gamePlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
+					
+					return operationResponse;
+				}
+			}
 		}
 
 		// Stores the current milliseconds value used in the current execution flow.

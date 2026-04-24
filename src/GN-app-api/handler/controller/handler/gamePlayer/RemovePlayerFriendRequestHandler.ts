@@ -189,7 +189,8 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 		if (request.userId != request.friendId) {
 			// Stores the game player find options value used in the current execution flow.
 			let gamePlayerFindOptions: GamePlayerFindOptions = {
-				playerFriends: true
+				playerFriends: true,
+				playerBan: true,
 			}
 
 			// Stores the game player value used in the current execution flow.
@@ -200,6 +201,21 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 			if (gamePlayer == null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 				return operationResponse;
+			}
+
+			if (role == SecretRole.Client) {
+				// Stores the player ban value used in the current execution flow.
+				let playerBan = gamePlayer.getPlayerBan();
+
+				if (playerBan.tsExpire != 0) {
+					let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+					if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+						operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+						operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
+
+						return operationResponse;
+					}
+				}
 			}
 
 			if (friendPlayer == null) {

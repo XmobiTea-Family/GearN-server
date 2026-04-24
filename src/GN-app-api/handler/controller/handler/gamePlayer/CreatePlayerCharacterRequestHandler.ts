@@ -235,6 +235,20 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
 			return operationResponse;
 		}
+		if (role == SecretRole.Client) {
+			// Stores the player ban value used in the current execution flow.
+			let playerBan = gamePlayer.getPlayerBan();
+
+			if (playerBan.tsExpire != 0) {
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
+					
+					return operationResponse;
+				}
+			}
+		}
 
 		// Stores the character ID value used in the current execution flow.
 		let characterId = StringUtility.generateRandomString(11, this.gnServer.getIdTypeCase());
