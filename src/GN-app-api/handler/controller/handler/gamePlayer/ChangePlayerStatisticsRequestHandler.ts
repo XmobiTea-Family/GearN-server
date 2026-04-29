@@ -214,6 +214,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerStatistics: true,
+			playerBan: true,
 		}
 
 		// Stores the game player value used in the current execution flow.

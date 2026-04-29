@@ -193,6 +193,7 @@ export class SetDisplayNameRequestHandler extends GamePlayerBaseRequestHandler {
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			displayName: true,
+			playerBan: true,
 		}
 
 		if (request.uniqueDisplayName) {

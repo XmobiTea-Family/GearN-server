@@ -186,6 +186,7 @@ export class RemovePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerInventories: true,
+			playerBan: true,
 		}
 
 		// Stores the game player value used in the current execution flow.

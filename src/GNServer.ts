@@ -269,6 +269,10 @@ export class GNServer {
 			thiz.executeRevokeAdminAuthToken(data);
 		});
 
+		this.getHttpApp().getClusterHandler().onEvent("revokeAuthToken", data => {
+			thiz.executeRevokeAuthToken(data);
+		});
+
 		if (onRunSuccess != null) onRunSuccess();
 	}
 
@@ -816,6 +820,22 @@ export class GNServer {
 	}
 
 	private executeRevokeAdminAuthToken(data: {
+		userId: string,
+	}) {
+		if (this.isPrimary()) {
+			this.apiMiddleware.removeAllAuthInfosInDb(data.userId);
+		}
+
+		let authInfos = this.apiMiddleware.getAuthInfosByUserIdInMemCache(data.userId);
+
+		for (const authInfo of authInfos) {
+			authInfo.setIsRemove(true);
+
+			this.getApiMiddleware().updateAuthInfo(authInfo, false);
+		}
+	}
+
+	private executeRevokeAuthToken(data: {
 		userId: string,
 	}) {
 		if (this.isPrimary()) {

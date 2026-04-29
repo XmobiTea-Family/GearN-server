@@ -107,6 +107,11 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 		if (playerBan.tsExpire != 0 && (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds)) {
 			operationResponse.setParameter(ParameterCode.PlayerBan, this.generatePlayerBan(masterPlayer));
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+
+			masterPlayer.setTsLastLogin(currentMilliseconds);
+			await masterPlayer.saveAsync();
+
+			return operationResponse;
 		}
 		else {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
@@ -123,6 +128,10 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
 		masterPlayer.setTsLastLogin(currentMilliseconds);
 		await masterPlayer.saveAsync();
+
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAuthToken", {
+			userId: request.userId,
+		});
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, role, secretInfo, operationRequest, operationResponse);
 

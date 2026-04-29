@@ -213,6 +213,7 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerCurrencies: true,
+			playerBan: true,
 		}
 
 		// Stores the game player value used in the current execution flow.

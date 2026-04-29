@@ -97,8 +97,8 @@ init_create_GNConfigDebugJson() {
 			"certFilePath": "",
 			"expiredTokenInMs": 172800000,
             "privateKeyToken": "privateKeyDefault",
-            "initRootUsername": "admin",
-			"initRootPassword": "password",
+            "initRootUsername": "gearnadmin",
+			"initRootPassword": "gearnpassword",
 			"restoreRootPassword": ""
 		},
 

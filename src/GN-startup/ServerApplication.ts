@@ -733,7 +733,7 @@ export class ServerApplication extends BuilderBase {
 
 				let result = {
 					type: "secretInfo",
-					secretKey: "admin_" + StringUtility.generateRandomString(14, 0),
+					secretKey: "admin_" + StringUtility.generateRandomString(26, 0),
 					gameId: "",
 					permission: adminPermission,
 					creatorId: userId,
@@ -768,7 +768,7 @@ export class ServerApplication extends BuilderBase {
 				{
 					let result = {
 						type: "secretInfo",
-						secretKey: "game_" + StringUtility.generateRandomString(59, 0),
+						secretKey: "game_" + StringUtility.generateRandomString(27, 0),
 						gameId: "dev",
 						permission: permission,
 						creatorId: userId,
@@ -799,7 +799,7 @@ export class ServerApplication extends BuilderBase {
 				{
 					let result = {
 						type: "secretInfo",
-						secretKey: "game_" + StringUtility.generateRandomString(59, 0),
+						secretKey: "game_" + StringUtility.generateRandomString(27, 0),
 						gameId: "live",
 						permission: permission,
 						creatorId: userId,
@@ -835,7 +835,7 @@ export class ServerApplication extends BuilderBase {
 			// Create the only master-admin secret separately so the first root account can log in immediately.
 			{
 				let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
-				let secretKey = StringUtility.generateRandomString(64, 0);
+				let secretKey = StringUtility.generateRandomString(32, 0);
 
 				let newSecretInfo = SecretInfo.Builder()
 					.setGameId("")

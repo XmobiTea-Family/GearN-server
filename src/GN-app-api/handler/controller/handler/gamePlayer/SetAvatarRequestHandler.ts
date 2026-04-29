@@ -193,6 +193,7 @@ export class SetAvatarRequestHandler extends GamePlayerBaseRequestHandler {
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			avatar: true,
+			playerBan: true,
 		}
 
 		// Stores the game player value used in the current execution flow.

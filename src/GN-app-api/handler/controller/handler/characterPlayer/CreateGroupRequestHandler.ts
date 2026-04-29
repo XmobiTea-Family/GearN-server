@@ -282,8 +282,6 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 					otherCharacterPlayer.saveAsync();
 
 					group.setMember(groupMember.characterId, GroupStatus.WaitingAccept);
-
-					this.gnServer.joinRoom(otherCharacterPlayer.getOwner().id, groupId);
 				}
 			}
 

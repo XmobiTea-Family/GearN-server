@@ -216,6 +216,7 @@ export class SetCustomDataRequestHandler extends GamePlayerBaseRequestHandler {
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			customDatas: true,
+			playerBan: true,
 		}
 
 		// Stores the game player value used in the current execution flow.

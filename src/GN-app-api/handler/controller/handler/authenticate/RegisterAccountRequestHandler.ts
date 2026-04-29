@@ -150,10 +150,12 @@ export class RegisterAccountRequestHandler extends LoginBaseRequestHandler {
 
 		await this.setupAuthInfo(operationResponse, masterPlayer, secretInfo);
 
-		if (operationResponse.getParameters().getNumber(ParameterCode.ErrorCode) != ErrorCode.PlayerBan) {
-			operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+		if (operationResponse.getParameters().getNumber(ParameterCode.ErrorCode) == ErrorCode.PlayerBan) {
+			return operationResponse;
 		}
+
+		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
 		await this.gnServer.getEventCallbackCloudScriptService().executeAuthenticate({
 			authenticationType: "registerAccount",

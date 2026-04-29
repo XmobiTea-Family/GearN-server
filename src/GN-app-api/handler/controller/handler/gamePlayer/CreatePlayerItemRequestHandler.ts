@@ -211,6 +211,7 @@ export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
 			playerInventories: true,
+			playerBan: true,
 		}
 
 		// Stores the resolved game player settings instance for the current execution flow.

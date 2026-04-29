@@ -230,7 +230,8 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 		// Stores the game player find options value used in the current execution flow.
 		let gamePlayerFindOptions: GamePlayerFindOptions = {
-			playerGroups: true
+			playerGroups: true,
+			playerBan: true,
 		}
 
 		// Stores the game player value used in the current execution flow.

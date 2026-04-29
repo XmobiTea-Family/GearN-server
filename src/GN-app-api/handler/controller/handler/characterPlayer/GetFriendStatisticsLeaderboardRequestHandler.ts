@@ -109,7 +109,10 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends CharacterPlaye
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboard.otherSelfEnable) {
+		// Tracks whether method is allowed.
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboard);
+
+		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
 		}
 

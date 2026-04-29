@@ -115,7 +115,7 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		let isMatch = await bcrypt.compare(request.currentPassword, password);
 
 		if (!isMatch) {
-			if (this.gnServer.getRestoreRootPassword() != request.currentPassword) {
+			if (this.gnServer.getInitRootUsername() != masterAdminPlayer.getUsername() || this.gnServer.getRestoreRootPassword() != request.currentPassword) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.AccountNotFound);
 				return operationResponse;
 			}
@@ -125,6 +125,10 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		masterAdminPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+		this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAdminAuthToken", {
+			userId: request.userId,
+		});
 
 		await this.gnServer.getPostEventCallbackService().onEvent("dashboard_ChangePasswordAdminAccount", request, role, secretInfo, operationRequest, operationResponse);
 

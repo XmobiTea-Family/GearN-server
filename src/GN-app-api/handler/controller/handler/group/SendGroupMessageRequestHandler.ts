@@ -237,7 +237,7 @@ export class SendGroupMessageRequestHandler extends GroupBaseRequestHandler {
 					playerCharacters: true,
 				});
 
-				if (!gamePlayer.hasPlayerCharacter(request.senderId)) {
+				if (gamePlayer == null || !gamePlayer.hasPlayerCharacter(request.senderId)) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerNotMember);
 					operationResponse.setDebugMessage("GamePlayer not owned of the CharacterPlayer with senderId");
 				

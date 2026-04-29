@@ -110,41 +110,14 @@ export class GetFriendStatisticsLeaderboardAroundPlayerRequestHandler extends Ch
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer.otherSelfEnable && !secretInfo.getPermission().characterPlayer.getPlayerInformation.selfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
-
 		// Tracks whether method is allowed.
-		let allowMethod = false;
-		// Stores the owned value used in the current execution flow.
-		let owned = false;
-
-		if (secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer.otherSelfEnable) {
-			allowMethod = true;
-		}
-
-		if (secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer.selfEnable) {
-			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(authInfo.getUserId(), secretInfo.getGameId(), { playerCharacters: true });
-
-			if (gamePlayer != null) {
-				if (gamePlayer.hasPlayerCharacter(request.characterId)) {
-					allowMethod = true;
-					owned = true;
-				}
-			}
-		}
+		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.getFriendStatisticsLeaderboardAroundPlayer);
 
 		if (!allowMethod) {
 			return this.newOperationNotAllowError(request);
 		}
 
-		if (owned) {
-			this.generateInfoRequestParamForOwner(secretInfo, request.infoRequestParam);
-		}
-		else {
-			this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
-		}
+		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
 
 		return this.execute({
 			characterId: request.characterId,
