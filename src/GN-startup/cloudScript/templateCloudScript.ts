@@ -360,7 +360,6 @@ const gameId: string = process.env.gameId ?? "";
 	gnServerSettings.config(gnServerSettingsOptions);
 
 	GNNetwork.init(gnServerSettings);
-	GNNetwork.setGameId(gameId);
 
 	GNNetwork.getAuthenticateStatus().setAuthToken(process.env.gnAuthToken);
 	GNNetwork.getAuthenticateStatus().setUserId("cloudScript");

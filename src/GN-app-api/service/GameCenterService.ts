@@ -214,7 +214,8 @@ export class GameCenterService implements IGameCenterService {
 		let publicKey = this.convertX509CertToPEM(buffer.toString("base64"));
 
 		// check reponse has cache header to save cache timer 
-		let cacheHeader = response.headers["cache-control"];
+		let cacheHeaderValue = response.headers["cache-control"];
+		let cacheHeader = Array.isArray(cacheHeaderValue) ? cacheHeaderValue.join(",") : cacheHeaderValue?.toString();
 		if (cacheHeader) {
 			// Stores the max age sec value used in the current execution flow.
 			const maxAgeSec = cacheHeader.match(/max-age=([0-9]+)/);

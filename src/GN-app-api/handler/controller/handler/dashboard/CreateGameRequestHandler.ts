@@ -446,7 +446,7 @@ export class CreateGameRequestHandler extends RequestHandler {
 					// Stores the database connection value used in the current execution flow.
 					let dbConnection = (oldCloudScriptService as any).dbConnection;
 
-					cloudScriptService.init(gameId, gnServerSettingsOptions, {
+					cloudScriptService.init(gameId, structuredClone(gnServerSettingsOptions), {
 						url: dbConnection.url,
 						dbName: dbConnection.dbName,
 						logUrl: dbConnection.logUrl,

@@ -113,6 +113,7 @@ export class CloudScriptService implements ICloudScriptService {
 	public init(gameId: string, gnServerSettingsOptions: GNServerSettingsOptions, dbConnection: DbConnection, gnServer: GNServer, executeTimeoutInMs: number): void {
 		this.gameId = gameId;
 		this.gnServerSettingsOptions = gnServerSettingsOptions;
+		this.gnServerSettingsOptions.gameId = gameId;
 		this.dbConnection = dbConnection;
 		this.gnServer = gnServer;
 		this.executeTimeoutInMs = executeTimeoutInMs;

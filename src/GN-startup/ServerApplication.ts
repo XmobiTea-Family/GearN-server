@@ -459,6 +459,7 @@ export class ServerApplication extends BuilderBase {
 
 			logType: <number>LogType.Off,
 			secretKey: secretKey,
+			gameId: "",
 		}
 
 		// Worker processes receive the same DB connection metadata instead of opening a separate config source.
@@ -480,7 +481,7 @@ export class ServerApplication extends BuilderBase {
 			let cloudScriptFunctionCollection = this.gnServer.getDatabase().systemCollection("EventCallback.CloudScript");
 			eventCallbackCloudScriptService.setCloudScriptFunctionCollection(cloudScriptFunctionCollection);
 
-			eventCallbackCloudScriptService.init(gnServerSettingsOptions, dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
+			eventCallbackCloudScriptService.init(structuredClone(gnServerSettingsOptions), dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
 			eventCallbackCloudScriptService.run();
 		}
 
@@ -525,7 +526,7 @@ export class ServerApplication extends BuilderBase {
 				{
 					// Every loaded game gets its own CloudScript worker bound to game-specific collections.
 					let cloudScriptService = <CloudScriptService>this.gnServer.getCloudScriptService(gameId);
-					cloudScriptService.init(gameId, gnServerSettingsOptions, dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
+					cloudScriptService.init(gameId, structuredClone(gnServerSettingsOptions), dbConnection, this.gnServer, this.getOtherSettings().getCloudScriptExecuteTimeoutInMs());
 					cloudScriptService.run();
 				}
 
