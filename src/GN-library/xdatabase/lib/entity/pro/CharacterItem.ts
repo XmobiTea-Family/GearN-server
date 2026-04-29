@@ -1,6 +1,10 @@
+/**
+ * Lightweight reference to a character owned by a player.
+ * Stored in `playerCharacters` on GamePlayerBase so the player's character list can be inspected without querying the character collection.
+ */
 export interface CharacterItem {
-	// Stores the character ID value used by this contract.
+	/** Globally unique character identifier; used to load the full CharacterPlayer entity when detailed access is needed. */
 	characterId: string;
-	// Stores the catalog ID value used by this contract.
+	/** Catalog id describing the character template/class (e.g. warrior, mage). Used to resolve the original character configuration. */
 	catalogId: string;
 }

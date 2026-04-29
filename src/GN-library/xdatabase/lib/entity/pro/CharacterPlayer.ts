@@ -4,25 +4,29 @@ import { GamePlayerBase } from "./GamePlayerBase";
 import { OwnerItem } from "./OwnerItem";
 import { RemoveStatusItem } from "./RemoveStatusItem";
 
+/**
+ * Character that belongs to a player inside a game; extends GamePlayerBase so the player's full business surface applies to the character too.
+ * Unlike CharacterItem (lightweight reference only), this is the full entity with its own inventory, groups, friends...
+ */
 export class CharacterPlayer extends GamePlayerBase {
-	// Defines the internal field key for character ID.
+	/** MongoDB field name for the character id — the system-wide unique identifier. */
 	private static readonly _characterId: string = "characterId";
-	// Defines the internal field key for catalog ID.
+	/** MongoDB field name for the character catalog id (the template the character was created from). */
 	private static readonly _catalogId: string = "catalogId";
-	// Defines the internal field key for owner.
+	/** MongoDB field name for the character's owner (player). */
 	private static readonly _owner: string = "owner";
-	// Defines the internal field key for remove status.
+	/** MongoDB field name for the soft-delete state (if any). */
 	private static readonly _removeStatus: string = "removeStatus";
 
-	// Stores the character ID value used by this instance.
+	/** Character id; immutable after creation, used as the join key inside CharacterItem references. */
 	private readonly characterId: string;
-	// Stores the catalog ID value used by this instance.
+	/** Catalog id identifying the character template (warrior, mage...); immutable after creation. */
 	private readonly catalogId: string;
 
-	// Stores the owner value used by this instance.
+	/** Owner (player) of this character; typically owner.type = player and owner.id = userId. */
 	private owner: OwnerItem;
 
-	// Stores the remove status value used by this instance.
+	/** Soft-delete state of the character; null means the character is still active. */
 	private removeStatus: RemoveStatusItem;
 
 	/**

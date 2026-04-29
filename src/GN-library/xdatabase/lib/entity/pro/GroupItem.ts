@@ -1,9 +1,14 @@
+/**
+ * Lightweight reference to a group the player belongs to.
+ * Stored in `playerGroups` on GamePlayerBase so the player's group list can be displayed without querying the group collection.
+ */
 export interface GroupItem {
-	// Stores the group ID value used by this contract.
+	/** Group identifier; used to load the full Group entity when detailed access is needed. */
 	groupId: string;
-	// Stores the catalog ID value used by this contract.
+	/** Catalog id describing the group kind (guild, clan, party...). */
 	catalogId: string;
-	// Stores the status value used by this contract.
+	/** Player membership state inside the group, matching the GroupStatus enum (e.g. pending invite, member, left). */
 	status: number;		// GroupStatus
+	/** Epoch ms of the most recent status change; supports filtering and sync of recent updates. */
 	tsLastStatusUpdate: number;
 }

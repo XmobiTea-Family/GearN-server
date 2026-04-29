@@ -4,47 +4,51 @@ import { MongoObject } from "./MongoObject";
 import { DataValueType } from "./type/DataValueType";
 import { MatchmakingTicketMember } from "./MatchmakingTicketMember";
 
+/**
+ * A matchmaking ticket queued for a match; may contain several players queueing together (a party).
+ * Once the matchmaking conditions are met, the ticket is linked to a Match via `matchId`.
+ */
 export class MatchmakingTicket extends MongoObject {
-	// Defines the internal field key for ticket ID.
+	/** MongoDB field name for ticketId — the matchmaking ticket's unique business key. */
 	private static readonly _ticketId: string = "ticketId";
-	// Defines the internal field key for queue name.
+	/** MongoDB field name for queueName — the matchmaking queue this ticket joins. */
 	private static readonly _queueName: string = "queueName";
-	// Defines the internal field key for creator ID.
+	/** MongoDB field name for the id of the ticket creator (party leader). */
 	private static readonly _creatorId: string = "creatorId";
-	// Defines the internal field key for give up after seconds.
+	/** MongoDB field name for the maximum wait time (seconds) before the ticket auto-cancels. */
 	private static readonly _giveUpAfterSeconds: string = "giveUpAfterSeconds";
-	// Indicates whether r IDs should be used.
+	/** MongoDB field name for the flattened userId list (used for fast per-user ticket lookup). */
 	private static readonly _userIds: string = "userIds";
-	// Defines the internal field key for members.
+	/** MongoDB field name for the member list with their attributes. */
 	private static readonly _members: string = "members";
-	// Defines the internal field key for status.
+	/** MongoDB field name for the ticket lifecycle state. */
 	private static readonly _status: string = "status";
-	// Defines the internal field key for match ID.
+	/** MongoDB field name for matchId — populated when the ticket has matched. */
 	private static readonly _matchId: string = "matchId";
-	// Defines the internal field key for timestamp create.
+	/** MongoDB field name for the ticket-creation timestamp. */
 	private static readonly _tsCreate: string = "tsCreate";
 
-	// Stores the DOT value used by this instance.
+	/** Path separator used when building dotted field paths for MongoDB update operators. */
 	static readonly DOT: string = ".";
 
-	// Stores the ticket ID value used by this instance.
+	/** Ticket id; unique business key; immutable after creation. */
 	private readonly ticketId: string;
-	// Stores the queue name value used by this instance.
+	/** Name of the matchmaking queue this ticket joined (e.g. ranked_5v5, casual_1v1); immutable. */
 	private readonly queueName: string;
-	// Stores the creator ID value used by this instance.
+	/** Id of the player who created the ticket (party leader); immutable because ticket-control privileges stay with the creator. */
 	private readonly creatorId: string;
-	// Stores the give up after seconds value used by this instance.
+	/** Maximum wait time (seconds) before auto-cancel; immutable because it is configured at creation. */
 	private readonly giveUpAfterSeconds: number;
-	// Indicates whether r IDs should be used.
+	/** Flattened userId list extracted from `members`, used for MongoDB indexing/per-user ticket lookup. */
 	private readonly userIds: Array<string>;
-	// Stores the members value used by this instance.
+	/** Member list with state and matchmaking attributes; immutable because the roster is frozen for the ticket's lifetime. */
 	private readonly members: Array<MatchmakingTicketMember>;
 
-	// Stores the timestamp create value used by this instance.
+	/** Epoch ms when the ticket was created; immutable. */
 	private readonly tsCreate: number;
-	// Stores the status value used by this instance.
+	/** Ticket lifecycle state per the enum (waiting / matched / cancelled / expired). */
 	private status: number;
-	// Stores the match ID value used by this instance.
+	/** Match id assigned when the ticket has matched; null while still queueing. */
 	private matchId: string;
 
 	/**

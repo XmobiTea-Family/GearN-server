@@ -6,23 +6,27 @@ import { xMasterPlayerSettings } from "./../../../../../xsettings/lib/entity/xMa
 import { xEmailSettings } from "./../../../../../xsettings/lib/entity/xEmailSettings";
 import { xPushNotificationSettings } from "./../../../../../xsettings/lib/entity/xPushNotificationSettings";
 
+/**
+ * Global master-admin configuration applied across the whole system (not tied to a single game).
+ * Includes third-party integrations, master player rules, email delivery, and push notification configuration.
+ */
 export class MasterGameSettings extends MasterAdminMongoObject {
-	// Defines the internal field key for thirt party settings.
+	/** MongoDB field name for the third-party integration configuration (Google, Facebook, Apple...). */
 	private static readonly _thirtPartySettings: string = "thirtPartySettings";
-	// Defines the internal field key for master player settings.
+	/** MongoDB field name for the MasterPlayer configuration (signup rules, password policy...). */
 	private static readonly _masterPlayerSettings: string = "masterPlayerSettings";
-	// Defines the internal field key for email settings.
+	/** MongoDB field name for the email-delivery configuration (SMTP, sender, templates). */
 	private static readonly _emailSettings: string = "emailSettings";
-	// Defines the internal field key for push notification settings.
+	/** MongoDB field name for the push-notification configuration (FCM key, APNs cert). */
 	private static readonly _pushNotificationSettings: string = "pushNotificationSettings";
 
-	// Stores the thirt party settings value used by this instance.
+	/** Configuration for system-wide external identity providers. */
 	private thirtPartySettings: xThirtPartySettings;
-	// Stores the master player settings value used by this instance.
+	/** Configuration applied to MasterPlayer (signup, login, password policy). */
 	private masterPlayerSettings: xMasterPlayerSettings;
-	// Stores the email settings value used by this instance.
+	/** Email server configuration (SMTP, sender info) used by every system email. */
 	private emailSettings: xEmailSettings;
-	// Stores the push notification settings value used by this instance.
+	/** Push notification configuration (FCM/APNs credentials, default sender, retry policy...). */
 	private pushNotificationSettings: xPushNotificationSettings;
 
 	/**

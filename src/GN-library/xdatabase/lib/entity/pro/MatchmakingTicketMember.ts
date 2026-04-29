@@ -1,13 +1,17 @@
 import { DataValueType } from "./type/DataValueType";
 
+/**
+ * Member of a MatchmakingTicket waiting to be matched.
+ * Each member maps to one player; once a match is found, members are promoted to MatchMember inside the resulting Match entity.
+ */
 export interface MatchmakingTicketMember {
-	// Indicates whether r ID should be used.
+	/** Player id queueing inside this ticket. */
 	userId: string;
-	// Stores the status value used by this contract.
+	/** Member readiness state inside the ticket (e.g. pending, ready, accepted, declined). */
 	status: number;
-	// Stores the attribute collection used by this contract.
+	/** Per-player attributes (rank, level, region...) used by the matchmaking engine as matching criteria. */
 	attribute: { [k: string]: DataValueType };
-	// Stores the attribute for queue collection used by this contract.
+	/** Attributes scoped to the current queue, kept separate from `attribute` because each queue may have different requirements. */
 	attributeForQueue: { [k: string]: DataValueType };
 
 }

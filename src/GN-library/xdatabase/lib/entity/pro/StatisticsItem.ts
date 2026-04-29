@@ -1,6 +1,10 @@
+/**
+ * Single numeric statistic (kill count, win count, score...) attached to a player/group/item.
+ * The statistic key lives in the surrounding `Map<string, StatisticsItem>`; this entry only holds the value and last-update timestamp.
+ */
 export interface StatisticsItem {
-	// Stores the value value used by this contract.
+	/** Current value of the statistic; mutated through changeStatistics-style helpers. */
 	value: number;
-	// Stores the timestamp last update value used by this contract.
+	/** Epoch ms of the last update; used by periodic leaderboards and recent-change filtering. */
 	tsLastUpdate: number
 }

@@ -5,74 +5,89 @@ import { RemoveStatusItem } from "./RemoveStatusItem";
 import { DataItem } from "./DataItem";
 import { DataValueType } from "./type/DataValueType";
 
+/**
+ * One sellable item slot in a store, holding the item template and the amount granted per purchase.
+ * Unlike InventoryItem (an owned reference), this is a "for sale" description in the store.
+ */
 interface StoreInventoryItem {
-	// Stores the catalog ID value used by this contract.
+	/** Catalog id of the item being sold (the item template). */
 	catalogId: string;
-	// Stores the class ID value used by this contract.
+	/** Class id of the item; used to load the right class configuration when granting it to the buyer. */
 	classId: string;
-	// Stores the amount value used by this contract.
+	/** Amount of the item granted to the buyer for each successful purchase. */
 	amount: number;
 }
 
+/**
+ * A currency slot inside a store (either sold or used as a price).
+ * Represents a (currency code, amount) pair — distinct from the dedicated CurrencyItem (which only carries value). */
 interface CurrencyItem {
-	// Stores the key value used by this contract.
+	/** Currency code (gold, gem, ticket...). */
 	key: string;
-	// Stores the value value used by this contract.
+	/** Currency amount (granted on purchase, or the price). */
 	value: number;
 }
 
+/**
+ * In-App Purchase configuration for a store item: per-store product ids plus an analytics price.
+ * When the item is sold via IAP, the server validates the receipt for each store using these ids.
+ */
 interface InAppPurchase {
-	// Stores the apple app store ID value used by this contract.
+	/** Product id registered on the Apple App Store; matches the SKU in App Store Connect. */
 	appleAppStoreId: string,
-	// Stores the google play store ID value used by this contract.
+	/** Product id registered on Google Play; matches the SKU in Play Console. */
 	googlePlayStoreId: string,
-	// Stores the facebook store ID value used by this contract.
+	/** Product id on the Facebook store (when the game has a Facebook canvas build). */
 	facebookStoreId: string,
-	// Stores the analytics price value used by this contract.
+	/** USD price used for analytics/revenue reporting, decoupled from the per-store actual prices. */
 	analyticsPrice: number,
 }
 
+/**
+ * One store entry inside a game, configuring the items sold and what the player must pay.
+ * Can be sold for in-game currency or for real money via IAP.
+ */
 export class StoreInventory extends DataObjectBase {
-	// Defines the internal field key for store ID.
+	/** MongoDB field name for storeId — the store entry's unique business key. */
 	private static readonly _storeId: string = "storeId";
-	// Defines the internal field key for store item type.
+	/** MongoDB field name for storeItemType — the kind of store entry (e.g. bundle, single, IAP). */
 	private static readonly _storeItemType: string = "storeItemType";
 
-	// Defines the internal field key for store items.
+	/** MongoDB field name for the items the store entry sells. */
 	private static readonly _storeItems: string = "storeItems";
-	// Defines the internal field key for store currencies.
+	/** MongoDB field name for the currencies the store grants on purchase (when the store sells currency instead of items). */
 	private static readonly _storeCurrencies: string = "storeCurrencies";
 
-	// Defines the internal field key for price currencies.
+	/** MongoDB field name for the currencies that act as the price. */
 	private static readonly _priceCurrencies: string = "priceCurrencies";
-	// Defines the internal field key for in app purchase.
+	/** MongoDB field name for the IAP configuration when the store entry is sold for real money. */
 	private static readonly _inAppPurchase: string = "inAppPurchase";
 
-	// Defines the internal field key for store datas.
+	/** MongoDB field name for the store-scoped custom data list. */
 	private static readonly _storeDatas: string = "storeDatas";
 
-	// Defines the internal field key for remove status.
+	/** MongoDB field name for the soft-delete state (store entry disabled). */
 	private static readonly _removeStatus: string = "removeStatus";
 
-	// Stores the store ID value used by this instance.
+	/** Store id; unique business key; immutable after creation. */
 	private readonly storeId: string;
 
-	// Stores the store items value used by this instance.
+	/** Items granted to the player when they purchase this store entry. */
 	private storeItems: Array<StoreInventoryItem>;
-	// Stores the store item type value used by this instance.
+	/** Store entry kind (bundle/single/IAP/event...) per the business enum. */
 	private storeItemType: number;
-	// Stores the store currencies value used by this instance.
+	/** Currencies granted to the player on purchase (e.g. selling a gem pack). */
 	private storeCurrencies: Array<CurrencyItem>;
 
-	// Stores the price currencies value used by this instance.
+	/** Currencies acting as the price (the player must hold enough of each). */
 	private priceCurrencies: Array<CurrencyItem>;
-	// Stores the in app purchase value used by this instance.
+	/** IAP configuration when the store entry is sold for real money; null when only in-game currencies are accepted. */
 	private inAppPurchase: InAppPurchase;
 
-	// Stores the store datas value used by this instance.
+	/** Store-scoped key-value custom data extensions (e.g. banner, promo note). */
 	private storeDatas: Array<DataItem>;
 
-	// Stores the remove status value used by this instance.
+	/** Soft-delete state; present when the store entry is disabled/withdrawn. */
 	private removeStatus: RemoveStatusItem;
 
 	/**

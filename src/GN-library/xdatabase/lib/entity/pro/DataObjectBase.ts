@@ -5,40 +5,44 @@ import { MongoObject } from "./MongoObject";
 import { DataValueType } from "./type/DataValueType";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 
+/**
+ * Shared base for business entities that own a "profile" — adds the common fields on top of MongoObject.
+ * Provides segments (cohorting), custom datas (extension fields), display name, avatar, tags... so every player/group/inventory/store presents a consistent surface.
+ */
 export class DataObjectBase extends MongoObject {
-	// Defines the internal field key for segments.
+	/** MongoDB field name for the segments array (cohort labels used for batched filtering/querying). */
 	private static readonly _segments: string = "segments";
-	// Defines the internal field key for custom datas.
+	/** MongoDB field name for the map of free-form extension data on the entity. */
 	private static readonly _customDatas: string = "customDatas";
 
-	// Defines the internal field key for timestamp create.
+	/** MongoDB field name for the entity creation timestamp (epoch ms). */
 	private static readonly _tsCreate: string = "tsCreate";
 
-	// Defines the internal field key for display name.
+	/** MongoDB field name for the user/admin-supplied display name. */
 	private static readonly _displayName: string = "displayName";
-	// Defines the internal field key for display name normalize.
+	/** MongoDB field name for the normalized display name (lower-cased, accents stripped) used for case-insensitive search. */
 	private static readonly _displayNameNormalize: string = "displayNameNormalize";
-	// Defines the internal field key for avatar.
+	/** MongoDB field name for the entity avatar. */
 	private static readonly _avatar: string = "avatar";
-	// Defines the internal field key for tags.
+	/** MongoDB field name for the tags map (arbitrary key-value labels). */
 	private static readonly _tags: string = "tags";
 
-	// Stores the DOT value used by this instance.
+	/** Path separator used when building dotted field paths for MongoDB update operators (e.g. `playerCurrencies.gold.value`). */
 	static readonly DOT: string = ".";
 
-	// Stores the segments value used by this instance.
+	/** Cohort labels (segments) attached to the entity, used for analytics/marketing/cohort filtering. */
 	private segments: Array<string>;
-	// Stores the custom datas collection used by this instance.
+	/** Custom data map allowing gameplay/integration code to persist extra fields without schema changes. */
 	private customDatas: Map<string, DataValueType>;
 
-	// Stores the display name value used by this instance.
+	/** Display name of the entity (player nickname, group name, store name...). */
 	private displayName: string;
-	// Stores the avatar value used by this instance.
+	/** Avatar representing the entity. See AvatarItem for the detailed shape. */
 	private avatar: AvatarItem;
 
-	// Stores the timestamp create value used by this instance.
+	/** Epoch ms at which the entity was first created in the database; immutable after creation. */
 	private tsCreate: number;
-	// Stores the tags collection used by this instance.
+	/** Tag map for the entity — key-value labels attached by the system/admins for flexible classification. */
 	private tags: Map<string, string>;
 
 	/**

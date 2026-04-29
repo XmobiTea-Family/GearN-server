@@ -2,16 +2,20 @@ import * as mongodb from "mongodb";
 
 import { GamePlayerBase } from "./GamePlayerBase";
 
+/**
+ * Player of a specific game; the entity gameplay code interacts with the most.
+ * Adds `userId` (the player's identifier inside this game) and `socketId` (the current real-time connection identifier).
+ */
 export class GamePlayer extends GamePlayerBase {
-	// Indicates whether r ID should be used.
+	/** MongoDB field name for userId — the link to the system-wide MasterPlayer. */
 	private static readonly _userId: string = "userId";
-	// Defines the internal field key for socket ID.
+	/** MongoDB field name for socketId — the player's current socket connection identifier. */
 	private static readonly _socketId: string = "socketId";
 
-	// Indicates whether r ID should be used.
+	/** Player id inside this game; equal to MasterPlayer's `userId`; immutable after creation. */
 	private readonly userId: string;
 
-	// Stores the socket ID value used by this instance.
+	/** Player's current socket connection id; empty when offline; changes on each reconnect. */
 	private socketId: string;
 
 	/**

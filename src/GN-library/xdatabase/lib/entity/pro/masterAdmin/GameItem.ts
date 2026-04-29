@@ -4,40 +4,44 @@ import { MasterAdminMongoObject } from "./MasterAdminMongoObject";
 import { xGameSettings } from "./../../../../../xsettings/lib/entity/xGameSettings";
 import { xMatchmakingQueueSettings } from "./../../../../../xsettings/lib/entity/xMatchmakingQueueSettings";
 
+/**
+ * A game registered in the GearN system (multi-tenant: each tenant is a game).
+ * Holds metadata, gameplay configuration (xGameSettings) and the matchmaking queue configuration the game offers.
+ */
 export class GameItem extends MasterAdminMongoObject {
-	// Defines the internal field key for game ID.
+	/** MongoDB field name for gameId — unique business key identifying the game (tenant). */
 	private static readonly _gameId: string = "gameId";
-	// Defines the internal field key for game name.
+	/** MongoDB field name for the game display name. */
 	private static readonly _gameName: string = "gameName";
-	// Defines the internal field key for game description.
+	/** MongoDB field name for the game description. */
 	private static readonly _gameDescription: string = "gameDescription";
-	// Defines the internal field key for game icon URL.
+	/** MongoDB field name for the game icon URL. */
 	private static readonly _gameIconUrl: string = "gameIconUrl";
-	// Defines the internal field key for timestamp create.
+	/** MongoDB field name for the game creation timestamp. */
 	private static readonly _tsCreate: string = "tsCreate";
-	// Defines the internal field key for creator ID.
+	/** MongoDB field name for the id of the admin who created the game. */
 	private static readonly _creatorId: string = "creatorId";
-	// Defines the internal field key for game settings.
+	/** MongoDB field name for the gameplay configuration (xGameSettings). */
 	private static readonly _gameSettings: string = "gameSettings";
-	// Defines the internal field key for matchmaking queue settings.
+	/** MongoDB field name for the array of matchmaking queue configurations available to the game. */
 	private static readonly _matchmakingQueueSettings: string = "matchmakingQueueSettings";
 
-	// Stores the game ID value used by this instance.
+	/** Game (tenant) id; unique business key; immutable after creation. */
 	private readonly gameId: string;
-	// Stores the timestamp create value used by this instance.
+	/** Epoch ms when the game was created; immutable. */
 	private readonly tsCreate: number;
-	// Stores the creator ID value used by this instance.
+	/** Id of the admin who created the game; immutable so the original owner stays traceable. */
 	private readonly creatorId: string;
 
-	// Stores the game name value used by this instance.
+	/** Game display name shown to users/admins. */
 	private gameName: string;
-	// Stores the game description value used by this instance.
+	/** Short free-text description of the game; aids search/management. */
 	private gameDescription: string;
-	// Stores the game icon URL value used by this instance.
+	/** Game icon URL shown in the dashboard and client launcher. */
 	private gameIconUrl: string;
-	// Stores the game settings value used by this instance.
+	/** Aggregated gameplay configuration (player, character, group, inventory settings...). */
 	private gameSettings: xGameSettings;
-	// Stores the matchmaking queue settings list used by this instance.
+	/** Matchmaking queue configurations exposed by the game (e.g. ranked_5v5, casual_1v1). */
 	private matchmakingQueueSettings: xMatchmakingQueueSettings[];
 
 	/**

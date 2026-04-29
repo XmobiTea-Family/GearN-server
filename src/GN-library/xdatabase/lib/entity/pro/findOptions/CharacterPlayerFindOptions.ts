@@ -1,44 +1,49 @@
+/**
+ * Projection options for querying CharacterPlayer from MongoDB.
+ * Setting a flag to `true` includes the matching field in the result; `false` excludes it.
+ * The goal is to keep the response payload small when callers only need a subset of the document.
+ */
 export interface CharacterPlayerFindOptions {
-	// Indicates whether character ID.
+	/** Whether to include `characterId` (the character id). */
 	characterId?: boolean,
-	// Indicates whether catalog ID.
+	/** Whether to include `catalogId` (the character template). */
 	catalogId?: boolean,
-	// Indicates whether owner.
+	/** Whether to include the character's `owner`. */
 	owner?: boolean,
-	// Indicates whether remove status.
+	/** Whether to include the soft-delete state (`removeStatus`). */
 	removeStatus?: boolean,
-	// Indicates whether segments.
+	/** Whether to include the segments array (cohort labels). */
 	segments?: boolean,
-	// Indicates whether custom datas.
+	/** Whether to include custom datas (the DataObjectBase-level extension data). */
 	customDatas?: boolean,
-	// Indicates whether display name.
+	/** Whether to include the character display name. */
 	displayName?: boolean,
-	// Indicates whether avatar.
+	/** Whether to include the character avatar. */
 	avatar?: boolean,
-	// Indicates whether timestamp create.
+	/** Whether to include the creation timestamp (`tsCreate`). */
 	tsCreate?: boolean,
-	// Indicates whether tags.
+	/** Whether to include the tags map. */
 	tags?: boolean,
-	// Indicates whether player ban.
+	/** Whether to include the active ban (`playerBan`). */
 	playerBan?: boolean,
-	// Indicates whether player datas.
+	/** Whether to include the player-scoped custom data list (`playerDatas`). */
 	playerDatas?: boolean,
-	// Indicates whether player currencies.
+	/** Whether to include the player currency map. */
 	playerCurrencies?: boolean,
-	// Indicates whether player statistics.
+	/** Whether to include the player statistics map. */
 	playerStatistics?: boolean,
-	// Indicates whether player characters.
+	/** Whether to include the player's owned-character list. */
 	playerCharacters?: boolean,
-	// Indicates whether player inventories.
+	/** Whether to include the player's inventory item list. */
 	playerInventories?: boolean,
-	// Indicates whether player groups.
+	/** Whether to include the player's group memberships. */
 	playerGroups?: boolean,
-	// Indicates whether player friends.
+	/** Whether to include the player's friend list. */
 	playerFriends?: boolean,
-	// Indicates whether timestamp last login.
+	/** Whether to include the most-recent login timestamp. */
 	tsLastLogin?: boolean,
-	// Indicates whether IP address create.
+	/** Whether to include the IP captured at account creation. */
 	ipAddressCreate?: boolean,
-	// Indicates whether country code.
+	/** Whether to include the country code derived from the account-creation IP. */
 	countryCode?: boolean,
 }

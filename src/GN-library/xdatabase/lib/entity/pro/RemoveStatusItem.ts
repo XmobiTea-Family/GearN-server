@@ -1,6 +1,10 @@
+/**
+ * Soft-delete marker attached to an entity.
+ * When present, the entity is treated as deleted (excluded from business queries) but kept in the database for audit/recovery.
+ */
 export interface RemoveStatusItem {
-	// Stores the timestamp remove value used by this contract.
+	/** Epoch ms at which the entity was marked as removed; serves as the anchor for any later hard-delete sweep. */
 	tsRemove: number;
-	// Stores the reason value used by this contract.
+	/** Why the entity was removed (user action, admin action, policy violation...). Optional. */
 	reason?: string;
 }

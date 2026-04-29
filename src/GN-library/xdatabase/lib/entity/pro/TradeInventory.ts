@@ -9,48 +9,52 @@ import { DataValueType } from "./type/DataValueType";
 import { CurrencyItem } from "./CurrencyItem";
 import { InventoryItem } from "./InventoryItem";
 
+/**
+ * A trade/sale of items between two owners in the player-to-player marketplace.
+ * Holds the listed items, the asking price, seller/buyer and the completion timestamp.
+ */
 export class TradeInventory extends DataObjectBase {
-	// Defines the internal field key for trade ID.
+	/** MongoDB field name for tradeId — the trade's unique business key. */
 	private static readonly _tradeId: string = "tradeId";
-	// Defines the internal field key for trade items.
+	/** MongoDB field name for the items listed for sale/trade. */
 	private static readonly _tradeItems: string = "tradeItems";
-	// Defines the internal field key for owner.
+	/** MongoDB field name for the owner (the seller). */
 	private static readonly _owner: string = "owner";
-	// Defines the internal field key for buyer.
+	/** MongoDB field name for the buyer (filled in once the trade completes). */
 	private static readonly _buyer: string = "buyer";
-	// Defines the internal field key for timestamp buy.
+	/** MongoDB field name for the trade-completion timestamp. */
 	private static readonly _tsBuy: string = "tsBuy";
-	// Defines the internal field key for prices.
+	/** MongoDB field name for the price map keyed by currency. */
 	private static readonly _prices: string = "prices";
 
-	// Defines the internal field key for item datas.
+	/** MongoDB field name for the trade-scoped custom data list. */
 	private static readonly _itemDatas: string = "itemDatas";
-	// Defines the internal field key for item statistics.
+	/** MongoDB field name for the trade-related statistics map. */
 	private static readonly _itemStatistics: string = "itemStatistics";
 
-	// Defines the internal field key for remove status.
+	/** MongoDB field name for the soft-delete state (trade cancelled/expired). */
 	private static readonly _removeStatus: string = "removeStatus";
 
-	// Stores the trade ID value used by this instance.
+	/** Trade id; the unique business key; immutable after creation. */
 	private readonly tradeId: string;
 
-	// Stores the trade items value used by this instance.
+	/** Items listed for sale/trade in this transaction. */
 	private tradeItems: Array<InventoryItem>;
-	// Stores the owner value used by this instance.
+	/** Owner (seller) — owns the items in `tradeItems` until the trade completes. */
 	private owner: OwnerItem;
-	// Stores the buyer value used by this instance.
+	/** Buyer — populated once the trade completes; null while the trade is still open. */
 	private buyer: OwnerItem;
-	// Stores the timestamp buy value used by this instance.
+	/** Epoch ms at which the trade completed; null while the trade is still open. */
 	private tsBuy: number;
-	// Stores the prices collection used by this instance.
+	/** Price map keyed by currency code; value is the required amount. A trade can demand multiple currencies. */
 	private prices: Map<string, CurrencyItem>;
 
-	// Stores the item datas value used by this instance.
+	/** Trade-scoped key-value custom data (e.g. a note from the seller). */
 	private itemDatas: Array<DataItem>;
-	// Stores the item statistics collection used by this instance.
+	/** Statistics map related to this trade. */
 	private itemStatistics: Map<string, StatisticsItem>;
 
-	// Stores the remove status value used by this instance.
+	/** Soft-delete state; present when the trade is cancelled or expired. */
 	private removeStatus: RemoveStatusItem;
 
 	/**

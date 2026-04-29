@@ -7,49 +7,53 @@ import { RemoveStatusItem } from "./RemoveStatusItem";
 import { StatisticsItem } from "./StatisticsItem";
 import { DataValueType } from "./type/DataValueType";
 
+/**
+ * An item instance in someone's inventory, belonging to an owner (player or group).
+ * This is the full entity with amount, owner, item datas, statistics... — distinct from InventoryItem (the lightweight reference).
+ */
 export class Inventory extends DataObjectBase {
-	// Defines the internal field key for amount.
+	/** MongoDB field name for the current item amount. */
 	private static readonly _amount: string = "amount";
-	// Defines the internal field key for item ID.
+	/** MongoDB field name for itemId (business key identifying the item instance). */
 	private static readonly _itemId: string = "itemId";
-	// Defines the internal field key for class ID.
+	/** MongoDB field name for classId (the configuration class the item belongs to). */
 	private static readonly _classId: string = "classId";
-	// Defines the internal field key for catalog ID.
+	/** MongoDB field name for catalogId (the original template the item was created from). */
 	private static readonly _catalogId: string = "catalogId";
-	// Defines the internal field key for item type.
+	/** MongoDB field name for itemType (usage kind: stackable, unique, equippable...). */
 	private static readonly _itemType: string = "itemType";
-	// Defines the internal field key for owner.
+	/** MongoDB field name for the item's owner. */
 	private static readonly _owner: string = "owner";
 
-	// Defines the internal field key for item datas.
+	/** MongoDB field name for the item's custom data array (free-form extensions). */
 	private static readonly _itemDatas: string = "itemDatas";
-	// Defines the internal field key for item statistics.
+	/** MongoDB field name for the item's statistics map (use count, kill count...). */
 	private static readonly _itemStatistics: string = "itemStatistics";
 
-	// Defines the internal field key for remove status.
+	/** MongoDB field name for the soft-delete state. */
 	private static readonly _removeStatus: string = "removeStatus";
 
-	// Stores the item ID value used by this instance.
+	/** Item instance id; immutable after creation, the unique business key. */
 	private readonly itemId: string;
-	// Stores the class ID value used by this instance.
+	/** Item class id (weapon, armor, consumable...); immutable so the class configuration reference stays accurate. */
 	private readonly classId: string;
-	// Stores the catalog ID value used by this instance.
+	/** Catalog (template) id the item was created from; immutable. */
 	private readonly catalogId: string;
-	// Stores the item type value used by this instance.
+	/** Item usage kind per the business enum (1 = stackable, 2 = unique, ...); immutable. */
 	private readonly itemType: number;
 
-	// Stores the amount value used by this instance.
+	/** Current item count in this inventory entry; always 1 for unique items. */
 	private amount: number;
 
-	// Stores the owner value used by this instance.
+	/** Current owner of the item (player or group); changes on trade/transfer. */
 	private owner: OwnerItem;
 
-	// Stores the item datas value used by this instance.
+	/** Per-item custom data as key-value extensions (e.g. enchant level, durability...). */
 	private itemDatas: Array<DataItem>;
-	// Stores the item statistics collection used by this instance.
+	/** Map of per-item statistics (kills, uses...). */
 	private itemStatistics: Map<string, StatisticsItem>;
 
-	// Stores the remove status value used by this instance.
+	/** Soft-delete state; null means the item is still active. */
 	private removeStatus: RemoveStatusItem;
 
 	/**

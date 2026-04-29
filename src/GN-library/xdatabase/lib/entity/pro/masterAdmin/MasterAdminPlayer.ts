@@ -2,23 +2,27 @@ import * as mongodb from "mongodb";
 
 import { MasterAdminMongoObject } from "./MasterAdminMongoObject";
 
+/**
+ * Administrator account for the system (operates the dashboard — not a game player).
+ * Separated from MasterPlayer to constrain access and tighten security.
+ */
 export class MasterAdminPlayer extends MasterAdminMongoObject {
-	// Indicates whether r ID should be used.
+	/** MongoDB field name for the admin userId (distinct from MasterPlayer's userId). */
 	private static readonly _userId: string = "userId";
-	// Indicates whether rname should be used.
+	/** MongoDB field name for the admin username used to sign into the dashboard. */
 	private static readonly _username: string = "username";
-	// Defines the internal field key for password.
+	/** MongoDB field name for the admin's hashed password. */
 	private static readonly _password: string = "password";
-	// Defines the internal field key for secret key.
+	/** MongoDB field name for the secret key used for 2FA or admin request signing. */
 	private static readonly _secretKey: string = "secretKey";
 
-	// Indicates whether r ID should be used.
+	/** Admin id within the system; immutable after creation, used as the foreign-key reference. */
 	private readonly userId: string;
-	// Indicates whether rname should be used.
+	/** Admin username (dashboard login); unique across all admins in the system. */
 	private username: string;
-	// Stores the password value used by this instance.
+	/** Hashed password; never stored as plain text. */
 	private password: string;
-	// Stores the secret key value used by this instance.
+	/** Secret key used for 2FA/MFA or signing sensitive admin requests. */
 	private secretKey: string;
 
 	/**

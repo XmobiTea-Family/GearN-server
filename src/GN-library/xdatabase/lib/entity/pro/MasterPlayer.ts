@@ -5,27 +5,31 @@ import { PlayerBase } from "./PlayerBase";
 import { IPDetailItem } from "./IPDetailItem";
 import { PushNotificationItem } from "./PushNotificationItem";
 
+/**
+ * System-wide player (master account) that exists independently of any specific game.
+ * Holds authentication info (external providers), contact email, the most recent login IP, and registered push-notification devices.
+ */
 export class MasterPlayer extends PlayerBase {
-	// Defines the internal field key for external.
+	/** MongoDB field name for the linked authentication sources (device, account, social). */
 	private static readonly _external: string = "external";
-	// Indicates whether r ID should be used.
+	/** MongoDB field name for the master userId — the system-wide player identifier. */
 	private static readonly _userId: string = "userId";
-	// Defines the internal field key for email.
+	/** MongoDB field name for the primary contact email. */
 	private static readonly _email: string = "email";
-	// Defines the internal field key for last IP detail.
+	/** MongoDB field name for the IP/region details of the most recent login. */
 	private static readonly _lastIPDetail: string = "lastIPDetail";
-	// Defines the internal field key for push notifications.
+	/** MongoDB field name for the list of push-notification device registrations. */
 	private static readonly _pushNotifications: string = "pushNotifications";
 
-	// Indicates whether r ID should be used.
+	/** Master id of the player; used as the foreign key by every GamePlayer that belongs to the same user. */
 	private readonly userId: string;
-	// Stores the external value used by this instance.
+	/** Set of authentication methods the player has linked (device id, account, Google, Facebook, Apple...). */
 	private external: ExternalItem;
-	// Stores the email value used by this instance.
+	/** Player's contact email; used for password recovery and notifications. */
 	private email: string;
-	// Stores the last IP detail value used by this instance.
+	/** IP and geographical region of the most recent login; refreshed on every login. */
 	private lastIPDetail: IPDetailItem;
-	// Stores the push notifications value used by this instance.
+	/** Devices (token + platform) registered to receive push notifications for the player. */
 	private pushNotifications: Array<PushNotificationItem>;
 
 	/**

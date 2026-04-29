@@ -2,11 +2,15 @@ import * as mongodb from "mongodb";
 
 import { MongoObject } from "./../MongoObject";
 
+/**
+ * Base class for every document in the master-admin collection (system-wide administration).
+ * Adds the `type` field so different document kinds can share a single collection (single-collection inheritance pattern).
+ */
 export class MasterAdminMongoObject extends MongoObject {
-	// Defines the internal field key for type.
+	/** MongoDB field name for the discriminator type, used to distinguish document kinds when several entities share one collection. */
 	private static readonly _type: string = "type";
 
-	// Stores the type value used by this instance.
+	/** Discriminator type of the document (e.g. "Game", "MasterAdminPlayer", "SecretInfoItem"); immutable after creation. */
 	private readonly type: string;
 
 	/**

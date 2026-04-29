@@ -6,23 +6,27 @@ import { InventoryItem } from "./InventoryItem";
 import { GroupItem } from "./GroupItem";
 import { FriendItem } from "./FriendItem";
 
+/**
+ * Base class for players that belong to a specific game (extends PlayerBase further).
+ * Adds character, inventory, group and friend lists — entities that are characteristic of multi-player gameplay.
+ */
 export class GamePlayerBase extends PlayerBase {
-	// Defines the internal field key for player characters.
+	/** MongoDB field name for the player's owned character list (quick reference only — not the full character entity). */
 	private static readonly _playerCharacters: string = "playerCharacters";
-	// Defines the internal field key for player inventories.
+	/** MongoDB field name for the inventory items the player is currently carrying. */
 	private static readonly _playerInventories: string = "playerInventories";
-	// Defines the internal field key for player groups.
+	/** MongoDB field name for the groups the player belongs to or is awaiting approval in. */
 	private static readonly _playerGroups: string = "playerGroups";
-	// Defines the internal field key for player friends.
+	/** MongoDB field name for the player's friend list. */
 	private static readonly _playerFriends: string = "playerFriends";
 
-	// Stores the player characters value used by this instance.
+	/** Reference array of characters currently owned by the player (each entry is a CharacterItem — id + catalog only). */
 	private playerCharacters: Array<CharacterItem>;
-	// Stores the player inventories value used by this instance.
+	/** Reference array of inventory items the player owns (id + catalog + class only — no amount/state). */
 	private playerInventories: Array<InventoryItem>;
-	// Stores the player groups value used by this instance.
+	/** Reference array of groups the player belongs to, each carrying its membership state. */
 	private playerGroups: Array<GroupItem>;
-	// Stores the player friends value used by this instance.
+	/** Reference array of friends, each carrying the current relationship state. */
 	private playerFriends: Array<FriendItem>;
 
 	/**

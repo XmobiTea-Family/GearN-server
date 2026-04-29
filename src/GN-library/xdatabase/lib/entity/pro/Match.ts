@@ -4,40 +4,44 @@ import { MongoObject } from "./MongoObject";
 import { MatchMember } from "./MatchMember";
 import { ServerDetail } from "./ServerDetail";
 
+/**
+ * A match created once matchmaking has resolved.
+ * Holds the team-finalized member roster, the allocated server, and the lifecycle state (waiting for server, in-progress, ended).
+ */
 export class Match extends MongoObject {
-	// Defines the internal field key for match ID.
+	/** MongoDB field name for matchId — the match's unique business key. */
 	private static readonly _matchId: string = "matchId";
-	// Defines the internal field key for queue name.
+	/** MongoDB field name for queueName — the matchmaking queue that produced this match. */
 	private static readonly _queueName: string = "queueName";
-	// Defines the internal field key for members.
+	/** MongoDB field name for the team-assigned member roster. */
 	private static readonly _members: string = "members";
-	// Defines the internal field key for server detail.
+	/** MongoDB field name for the allocated server information. */
 	private static readonly _serverDetail: string = "serverDetail";
-	// Defines the internal field key for timestamp create.
+	/** MongoDB field name for the match-creation timestamp. */
 	private static readonly _tsCreate: string = "tsCreate";
-	// Defines the internal field key for time to match in seconds.
+	/** MongoDB field name for the expected match duration in seconds. */
 	private static readonly _timeToMatchInSeconds: string = "timeToMatchInSeconds";
-	// Defines the internal field key for status.
+	/** MongoDB field name for the match lifecycle state. */
 	private static readonly _status: string = "status";
 
-	// Stores the DOT value used by this instance.
+	/** Path separator used when building dotted field paths for MongoDB update operators (e.g. `members.0.status`). */
 	static readonly DOT: string = ".";
 
-	// Stores the match ID value used by this instance.
+	/** Match id; unique business key; immutable after creation. */
 	private readonly matchId: string;
-	// Stores the queue name value used by this instance.
+	/** Name of the matchmaking queue that produced this match (e.g. ranked_5v5); immutable. */
 	private readonly queueName: string;
-	// Stores the members value used by this instance.
+	/** Team-finalized member roster of the match; immutable because the roster is frozen at match creation. */
 	private readonly members: Array<MatchMember>;
-	// Stores the timestamp create value used by this instance.
+	/** Epoch ms when the match was created; immutable. */
 	private readonly tsCreate: number;
-	// Stores the time to match in seconds value used by this instance.
+	/** Expected match duration in seconds from the start; used as the match-server timeout and cleanup window. */
 	private readonly timeToMatchInSeconds: number;
 
-	// Stores the server detail value used by this instance.
+	/** Server endpoint (IP/ports) allocated to the match; null while still awaiting server allocation. */
 	private serverDetail: ServerDetail;
 
-	// Stores the status value used by this instance.
+	/** Match lifecycle state per the enum (waiting for server / in-progress / ended / cancelled). */
 	private status: number;
 
 	/**

@@ -4,39 +4,43 @@ import { MongoObject } from "./MongoObject";
 import { OwnerItem } from "./OwnerItem";
 import { RemoveStatusItem } from "./RemoveStatusItem";
 
+/**
+ * Chat message in a group's chat channel (guild chat, party chat...).
+ * Supports editing (`tsLastUpdate`) and soft delete (`removeStatus`) for audit trail.
+ */
 export class ChatMessage extends MongoObject {
-	// Defines the internal field key for message ID.
+	/** MongoDB field name for messageId — the message's unique business key. */
 	private static readonly _messageId: string = "messageId";
-	// Defines the internal field key for group ID.
+	/** MongoDB field name for groupId — which group the channel belongs to. */
 	private static readonly _groupId: string = "groupId";
-	// Defines the internal field key for sender.
+	/** MongoDB field name for the sender. */
 	private static readonly _sender: string = "sender";
-	// Defines the internal field key for message.
+	/** MongoDB field name for the message body. */
 	private static readonly _message: string = "message";
-	// Defines the internal field key for timestamp create.
+	/** MongoDB field name for the message-send timestamp. */
 	private static readonly _tsCreate: string = "tsCreate";
-	// Defines the internal field key for timestamp last update.
+	/** MongoDB field name for the most recent edit timestamp. */
 	private static readonly _tsLastUpdate: string = "tsLastUpdate";
-	// Defines the internal field key for remove status.
+	/** MongoDB field name for the soft-delete state (message recalled). */
 	private static readonly _removeStatus: string = "removeStatus";
 
-	// Stores the message ID value used by this instance.
+	/** Message id; unique business key; immutable after creation. */
 	private readonly messageId: string;
-	// Stores the group ID value used by this instance.
+	/** Group id this message belongs to; immutable (a message can't be moved to another group). */
 	private readonly groupId: string;
 
-	// Stores the sender value used by this instance.
+	/** Message sender (OwnerItem so the sender may be a player or the system). */
 	private sender: OwnerItem;
 
-	// Stores the message value used by this instance.
+	/** Message text; mutable if the user edits the message. */
 	private message: string;
 
-	// Stores the timestamp create value used by this instance.
+	/** Epoch ms when the message was first sent. */
 	private tsCreate: number;
-	// Stores the timestamp last update value used by this instance.
+	/** Epoch ms of the most recent edit; equal to tsCreate if it has never been edited. */
 	private tsLastUpdate: number;
 
-	// Stores the remove status value used by this instance.
+	/** Soft-delete state; present when the message is recalled/removed by the user or a moderator. */
 	private removeStatus: RemoveStatusItem;
 
 	/**

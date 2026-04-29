@@ -1,28 +1,32 @@
+/**
+ * Projection options for querying StoreInventory from MongoDB.
+ * Useful for store listings — skip irrelevant fields to keep response sizes small.
+ */
 export interface StoreInventoryFindOptions {
-	// Indicates whether store ID.
+	/** Whether to include the storeId. */
 	storeId?: boolean,
-	// Indicates whether store items.
+	/** Whether to include the items the store sells. */
 	storeItems?: boolean,
-	// Indicates whether store item type.
+	/** Whether to include the storeItemType (store entry kind). */
 	storeItemType?: boolean,
-	// Indicates whether store currencies.
+	/** Whether to include the currencies granted on purchase (`storeCurrencies`). */
 	storeCurrencies?: boolean,
-	// Indicates whether price currencies.
+	/** Whether to include the price currencies (`priceCurrencies`). */
 	priceCurrencies?: boolean,
-	// Indicates whether in app purchase.
+	/** Whether to include the IAP configuration. */
 	inAppPurchase?: boolean,
-	// Indicates whether remove status.
+	/** Whether to include the soft-delete state (store entry disabled). */
 	removeStatus?: boolean,
 
-	// Indicates whether display name.
+	/** Whether to include the store entry display name. */
 	displayName?: boolean,
-	// Indicates whether avatar.
+	/** Whether to include the store entry avatar/icon. */
 	avatar?: boolean,
-	// Indicates whether timestamp create.
+	/** Whether to include the store entry creation timestamp. */
 	tsCreate?: boolean,
-	// Indicates whether tags.
+	/** Whether to include the tags map. */
 	tags?: boolean,
 
-	// Indicates whether store datas.
+	/** Whether to include the store-scoped custom data list (`storeDatas`). */
 	storeDatas?: boolean,
 }

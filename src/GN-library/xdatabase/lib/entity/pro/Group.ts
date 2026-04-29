@@ -9,49 +9,53 @@ import { InventoryItem } from "./InventoryItem";
 import { RemoveStatusItem } from "./RemoveStatusItem";
 import { DataValueType } from "./type/DataValueType";
 
+/**
+ * A group (guild, clan, party...) in the game with members, a shared inventory, shared currencies and shared statistics.
+ * The full entity; the player-side lightweight reference lives in GroupItem.
+ */
 export class Group extends DataObjectBase {
-	// Defines the internal field key for group ID.
+	/** MongoDB field name for groupId — the group's unique business key. */
 	private static readonly _groupId: string = "groupId";
-	// Defines the internal field key for group type.
+	/** MongoDB field name for groupType (group kind: guild, clan, party — per the business enum). */
 	private static readonly _groupType: string = "groupType";
 
-	// Defines the internal field key for catalog ID.
+	/** MongoDB field name for catalogId (the group template/preset). */
 	private static readonly _catalogId: string = "catalogId";
-	// Defines the internal field key for members.
+	/** MongoDB field name for the group's member list. */
 	private static readonly _members: string = "members";
 
-	// Defines the internal field key for group datas.
+	/** MongoDB field name for the group-scoped custom data list. */
 	private static readonly _groupDatas: string = "groupDatas";
-	// Defines the internal field key for group currencies.
+	/** MongoDB field name for the group's shared currency map. */
 	private static readonly _groupCurrencies: string = "groupCurrencies";
-	// Defines the internal field key for group statistics.
+	/** MongoDB field name for the group's shared statistics map. */
 	private static readonly _groupStatistics: string = "groupStatistics";
-	// Defines the internal field key for group inventories.
+	/** MongoDB field name for the group's shared inventory list. */
 	private static readonly _groupInventories: string = "groupInventories";
 
-	// Defines the internal field key for remove status.
+	/** MongoDB field name for the soft-delete state. */
 	private static readonly _removeStatus: string = "removeStatus";
 
-	// Stores the group ID value used by this instance.
+	/** Group id; the unique business key; immutable after creation. */
 	private readonly groupId: string;
-	// Stores the group type value used by this instance.
+	/** Group kind per the enum (guild, clan, party...); immutable because each kind has different business rules. */
 	private readonly groupType: number;
-	// Stores the catalog ID value used by this instance.
+	/** Catalog/template id of the group; immutable. */
 	private readonly catalogId: string;
 
-	// Stores the members value used by this instance.
+	/** Group members, each carrying their membership state (leader, officer, member...). */
 	private members: Array<MemberItem>;
 
-	// Stores the group currencies collection used by this instance.
+	/** Group-shared currency map (guild gold, contribution points...). */
 	private groupCurrencies: Map<string, CurrencyItem>;
-	// Stores the group statistics collection used by this instance.
+	/** Group-shared statistics map (total wins, group level...). */
 	private groupStatistics: Map<string, StatisticsItem>;
-	// Stores the group datas value used by this instance.
+	/** Group-scoped key-value custom data extensions. */
 	private groupDatas: Array<DataItem>;
-	// Stores the group inventories value used by this instance.
+	/** Group-shared inventory items (the guild storage). */
 	private groupInventories: Array<InventoryItem>;
 
-	// Stores the remove status value used by this instance.
+	/** Soft-delete state; null means the group is still active. */
 	private removeStatus: RemoveStatusItem;
 
 	/**

@@ -1,40 +1,44 @@
+/**
+ * Projection options for querying GamePlayer from MongoDB.
+ * Lets callers load only the profile, or the full characters/inventories/groups/friends surface as needed.
+ */
 export interface GamePlayerFindOptions {
-    // Indicates whether r ID should be used.
+    /** Whether to include the userId (player id within the game). */
     userId?: boolean,
-    // Indicates whether socket ID.
+    /** Whether to include the socketId (current real-time connection). */
     socketId?: boolean,
-    // Indicates whether segments.
+    /** Whether to include the segments array. */
     segments?: boolean,
-    // Indicates whether custom datas.
+    /** Whether to include the custom datas (DataObjectBase-level). */
     customDatas?: boolean,
-    // Indicates whether display name.
+    /** Whether to include the display name. */
     displayName?: boolean,
-    // Indicates whether avatar.
+    /** Whether to include the avatar. */
     avatar?: boolean,
-    // Indicates whether timestamp create.
+    /** Whether to include the in-game player creation timestamp. */
     tsCreate?: boolean,
-    // Indicates whether tags.
+    /** Whether to include the tags map. */
     tags?: boolean,
-    // Indicates whether player ban.
+    /** Whether to include the active ban (`playerBan`). */
     playerBan?: boolean,
-    // Indicates whether player datas.
+    /** Whether to include the player-scoped custom data list (`playerDatas`). */
     playerDatas?: boolean,
-    // Indicates whether player currencies.
+    /** Whether to include the player currency map. */
     playerCurrencies?: boolean,
-    // Indicates whether player statistics.
+    /** Whether to include the player statistics map. */
     playerStatistics?: boolean,
-    // Indicates whether player characters.
+    /** Whether to include the player's owned-character list. */
     playerCharacters?: boolean,
-    // Indicates whether player inventories.
+    /** Whether to include the player's inventory item list. */
     playerInventories?: boolean,
-    // Indicates whether player groups.
+    /** Whether to include the player's group memberships. */
     playerGroups?: boolean,
-    // Indicates whether player friends.
+    /** Whether to include the player's friend list. */
     playerFriends?: boolean,
-    // Indicates whether timestamp last login.
+    /** Whether to include the most-recent login timestamp. */
     tsLastLogin?: boolean,
-    // Indicates whether IP address create.
+    /** Whether to include the IP captured at account creation. */
     ipAddressCreate?: boolean,
-    // Indicates whether country code.
+    /** Whether to include the country code derived from the account-creation IP. */
     countryCode?: boolean,
 }

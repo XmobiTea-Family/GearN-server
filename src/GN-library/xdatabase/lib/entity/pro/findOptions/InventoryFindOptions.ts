@@ -1,34 +1,38 @@
+/**
+ * Projection options for querying Inventory from MongoDB.
+ * Useful when listing many items: load just id/amount/owner to keep the payload small, skipping datas/statistics.
+ */
 export interface InventoryFindOptions {
-	// Indicates whether item ID.
+	/** Whether to include the itemId (instance). */
 	itemId?: boolean,
-	// Indicates whether catalog ID.
+	/** Whether to include the catalogId (item template). */
 	catalogId?: boolean,
-	// Indicates whether class ID.
+	/** Whether to include the classId (item grouping). */
 	classId?: boolean,
-	// Indicates whether item type.
+	/** Whether to include the itemType (usage kind). */
 	itemType?: boolean,
-	// Indicates whether amount.
+	/** Whether to include the amount. */
 	amount?: boolean,
-	// Indicates whether owner.
+	/** Whether to include the owner information. */
 	owner?: boolean,
-	// Indicates whether remove status.
+	/** Whether to include the soft-delete state. */
 	removeStatus?: boolean,
 
-	// Indicates whether segments.
+	/** Whether to include the segments array. */
 	segments?: boolean,
-	// Indicates whether custom datas.
+	/** Whether to include the custom datas (DataObjectBase-level). */
 	customDatas?: boolean,
-	// Indicates whether display name.
+	/** Whether to include the display name (item override). */
 	displayName?: boolean,
-	// Indicates whether avatar.
+	/** Whether to include the avatar (icon). */
 	avatar?: boolean,
-	// Indicates whether timestamp create.
+	/** Whether to include the item creation timestamp. */
 	tsCreate?: boolean,
-	// Indicates whether tags.
+	/** Whether to include the tags map. */
 	tags?: boolean,
 
-	// Indicates whether item datas.
+	/** Whether to include the item-scoped custom data list (`itemDatas`). */
 	itemDatas?: boolean,
-	// Indicates whether item statistics.
+	/** Whether to include the item statistics map (`itemStatistics`). */
 	itemStatistics?: boolean,
 }

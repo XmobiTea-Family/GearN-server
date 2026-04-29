@@ -3,40 +3,44 @@ import * as mongodb from "mongodb";
 import { MasterAdminMongoObject } from "./MasterAdminMongoObject";
 import { SecretPermissionItem } from "./../../../../../../GN-common/entity/SecretInfo";
 
+/**
+ * A secret key issued to a game for calling server APIs / CloudScript.
+ * Each key carries a permission set, an expiration, and can be revoked (`remove`).
+ */
 export class SecretInfoItem extends MasterAdminMongoObject {
-	// Defines the internal field key for game ID.
+	/** MongoDB field name for the gameId the secret key is bound to. */
 	private static readonly _gameId: string = "gameId";
-	// Defines the internal field key for secret key.
+	/** MongoDB field name for the actual secret key value. */
 	private static readonly _secretKey: string = "secretKey";
-	// Defines the internal field key for remove.
+	/** MongoDB field name for the revocation flag. */
 	private static readonly _remove: string = "remove";
-	// Defines the internal field key for timestamp expire.
+	/** MongoDB field name for the key expiration timestamp. */
 	private static readonly _tsExpire: string = "tsExpire";
-	// Defines the internal field key for permission.
+	/** MongoDB field name for the key's permission set. */
 	private static readonly _permission: string = "permission";
-	// Defines the internal field key for timestamp create.
+	/** MongoDB field name for the key creation timestamp. */
 	private static readonly _tsCreate: string = "tsCreate";
-	// Defines the internal field key for description.
+	/** MongoDB field name for the human-readable purpose description of the key. */
 	private static readonly _description: string = "description";
-	// Defines the internal field key for creator ID.
+	/** MongoDB field name for the id of the admin who created the key. */
 	private static readonly _creatorId: string = "creatorId";
 
-	// Stores the game ID value used by this instance.
+	/** Game id the secret key is bound to; immutable after creation (a key belongs to a specific game). */
 	private readonly gameId: string;
-	// Stores the secret key value used by this instance.
+	/** Secret key value (long random string); immutable — issued keys are not allowed to be edited. */
 	private readonly secretKey: string;
-	// Stores the timestamp create value used by this instance.
+	/** Epoch ms when the key was created; immutable. */
 	private readonly tsCreate: number;
-	// Stores the creator ID value used by this instance.
+	/** Id of the admin who created this secret key; immutable for traceability. */
 	private readonly creatorId: string;
 
-	// Indicates whether remove.
+	/** Revocation flag — true once an admin revokes the key; the server refuses requests using a revoked key. */
 	private remove: boolean;
-	// Stores the timestamp expire value used by this instance.
+	/** Epoch ms when the key expires; after this point the key is no longer accepted even if `remove` is false. */
 	private tsExpire: number;
-	// Stores the description value used by this instance.
+	/** Description of the key's purpose (entered by the admin) to disambiguate multiple keys of the same game. */
 	private description: string;
-	// Stores the permission value used by this instance.
+	/** Permission set attached to the key; decides which APIs/scopes the key may call. */
 	private permission: SecretPermissionItem;
 
 	/**

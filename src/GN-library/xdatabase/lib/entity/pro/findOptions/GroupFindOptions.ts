@@ -1,34 +1,38 @@
+/**
+ * Projection options for querying Group from MongoDB.
+ * Lets callers pick the fields they actually need; especially useful when listing groups (no need for inventory/statistics).
+ */
 export interface GroupFindOptions {
-	// Indicates whether group ID.
+	/** Whether to include the groupId. */
 	groupId?: boolean,
-	// Indicates whether group type.
+	/** Whether to include the group kind (`groupType`). */
 	groupType?: boolean,
-	// Indicates whether catalog ID.
+	/** Whether to include the catalogId (group template). */
 	catalogId?: boolean,
-	// Indicates whether members.
+	/** Whether to include the group member list. */
 	members?: boolean,
-	// Indicates whether remove status.
+	/** Whether to include the soft-delete state. */
 	removeStatus?: boolean,
 
-	// Indicates whether segments.
+	/** Whether to include the segments array (cohort labels). */
 	segments?: boolean,
-	// Indicates whether custom datas.
+	/** Whether to include the custom datas (DataObjectBase-level). */
 	customDatas?: boolean,
-	// Indicates whether display name.
+	/** Whether to include the group display name. */
 	displayName?: boolean,
-	// Indicates whether avatar.
+	/** Whether to include the group avatar. */
 	avatar?: boolean,
-	// Indicates whether timestamp create.
+	/** Whether to include the group creation timestamp. */
 	tsCreate?: boolean,
-	// Indicates whether tags.
+	/** Whether to include the tags map. */
 	tags?: boolean,
 
-	// Indicates whether group datas.
+	/** Whether to include the group-scoped custom data list (`groupDatas`). */
 	groupDatas?: boolean,
-	// Indicates whether group currencies.
+	/** Whether to include the group currency map. */
 	groupCurrencies?: boolean,
-	// Indicates whether group statistics.
+	/** Whether to include the group statistics map. */
 	groupStatistics?: boolean,
-	// Indicates whether group inventories.
+	/** Whether to include the group-shared inventory list. */
 	groupInventories?: boolean,
 }

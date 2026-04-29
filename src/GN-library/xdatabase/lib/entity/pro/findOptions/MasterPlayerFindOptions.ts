@@ -1,38 +1,42 @@
+/**
+ * Projection options for querying MasterPlayer (the system-wide player) from MongoDB.
+ * Lets callers load only the basic profile, or the full external/email/push surface as needed.
+ */
 export interface MasterPlayerFindOptions {
-	// Indicates whether r ID should be used.
+	/** Whether to include the master userId. */
 	userId?: boolean,
-	// Indicates whether last IP detail.
+	/** Whether to include the most-recent login IP/region (`lastIPDetail`). */
 	lastIPDetail?: boolean,
-	// Indicates whether external.
+	/** Whether to include the external identity sources (device, social, account). */
 	external?: boolean,
-	// Indicates whether segments.
+	/** Whether to include the segments array (cohort labels). */
 	segments?: boolean,
-	// Indicates whether custom datas.
+	/** Whether to include the custom datas. */
 	customDatas?: boolean,
-	// Indicates whether display name.
+	/** Whether to include the display name. */
 	displayName?: boolean,
-	// Indicates whether avatar.
+	/** Whether to include the avatar. */
 	avatar?: boolean,
-	// Indicates whether timestamp create.
+	/** Whether to include the account creation timestamp. */
 	tsCreate?: boolean,
-	// Indicates whether tags.
+	/** Whether to include the tags map. */
 	tags?: boolean,
-	// Indicates whether player ban.
+	/** Whether to include the active ban (`playerBan`). */
 	playerBan?: boolean,
-	// Indicates whether player currencies.
+	/** Whether to include the player currency map. */
 	playerCurrencies?: boolean,
-	// Indicates whether player statistics.
+	/** Whether to include the player statistics map. */
 	playerStatistics?: boolean,
-	// Indicates whether player datas.
+	/** Whether to include the player-scoped custom data list (`playerDatas`). */
 	playerDatas?: boolean,
-	// Indicates whether IP address create.
+	/** Whether to include the IP captured at account creation. */
 	ipAddressCreate?: boolean,
-	// Indicates whether country code.
+	/** Whether to include the country code derived from the account-creation IP. */
 	countryCode?: boolean,
-	// Indicates whether timestamp last login.
+	/** Whether to include the most-recent login timestamp. */
 	tsLastLogin?: boolean,
-	// Indicates whether email.
+	/** Whether to include the contact email. */
 	email?: boolean,
-	// Indicates whether push notifications.
+	/** Whether to include the push-notification device list. */
 	pushNotifications?: boolean,
 }

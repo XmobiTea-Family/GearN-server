@@ -3,57 +3,65 @@ import * as mongodb from "mongodb";
 import { MongoObject } from "./MongoObject";
 import { RemoveStatusItem } from "./RemoveStatusItem";
 
+/**
+ * Information about a file that has actually been uploaded to storage (only present once the upload succeeds).
+ * Different from UploadFileInfo (which tracks the upload lifecycle) — FileUpload describes the real, final stored content.
+ */
 interface FileUpload {
-	// Stores the MIME type value used by this contract.
+	/** MIME type of the file (e.g. image/png, image/jpeg) — tells the client how to render it. */
 	mimeType: string;
-	// Stores the size value used by this contract.
+	/** File size in bytes; enforced against quota limits. */
 	size: number;
-	// Stores the folder file name value used by this contract.
+	/** Storage path including the folder name (per the storage backend layout). */
 	folderFileName: string;
-	// Stores the full path value used by this contract.
+	/** Full path or URL to the file; suitable for direct download. */
 	fullPath: string;
-	// Stores the short path value used by this contract.
+	/** Short (relative) path to the file; used to build URLs for different CDN/host configurations. */
 	shortPath: string;
-	// Stores the timestamp upload file value used by this contract.
+	/** Epoch ms when the file finished uploading; distinct from tsCreate (when the upload record was created). */
 	tsUploadFile: number;
 }
 
+/**
+ * Record tracking the lifecycle of a client-driven upload (pre-signed URL → awaiting upload → file uploaded).
+ * Holds the file identity, upload deadline and — once uploaded — the reference to the FileUpload payload.
+ */
 export class UploadFileInfo extends MongoObject {
-	// Defines the internal field key for file ID.
+	/** MongoDB field name for fileId — the upload record's unique business key. */
 	private static readonly _fileId: string = "fileId";
-	// Indicates whether r ID should be used.
+	/** MongoDB field name for userId — the player who initiated the upload. */
 	private static readonly _userId: string = "userId";
-	// Defines the internal field key for file name.
+	/** MongoDB field name for the file name supplied by the user at upload time. */
 	private static readonly _fileName: string = "fileName";
-	// Defines the internal field key for timestamp create.
+	/** MongoDB field name for the upload-record creation timestamp. */
 	private static readonly _tsCreate: string = "tsCreate";
-	// Defines the internal field key for timestamp upload expire.
+	/** MongoDB field name for the upload deadline; after this the pre-signed URL is invalid. */
 	private static readonly _tsUploadExpire: string = "tsUploadExpire";
-	// Defines the internal field key for remove status.
+	/** MongoDB field name for the soft-delete state. */
 	private static readonly _removeStatus: string = "removeStatus";
-	// Defines the internal field key for file upload.
+	/** MongoDB field name for the actual uploaded-file information (filled in once the upload succeeds). */
 	private static readonly _fileUpload: string = "fileUpload";
-	// Defines the internal field key for gameId.
+	/** MongoDB field name for gameId — which game the file belongs to (multi-tenant). */
 	private static readonly _gameId: string = "gameId";
 
-	// Stores the file ID value used by this instance.
+	/** File id; unique business key of the upload record; immutable after creation. */
 	private readonly fileId: string;
 
-	// Indicates whether r ID should be used.
+	/** Id of the player performing the upload; commonly used for file-access authorization. */
 	private userId: string;
-	// Stores the file name value used by this instance.
+	/** User-supplied display name (display only; the storage-side name is `folderFileName`). */
 	private fileName: string;
-	// Stores the timestamp create value used by this instance.
+	/** Epoch ms at which the upload record was created. */
 	private tsCreate: number;
-	// Stores the timestamp upload expire value used by this instance.
+	/** Epoch ms at which the upload deadline expires; after this the pre-signed URL stops working. */
 	private tsUploadExpire: number;
 
-	// Stores the remove status value used by this instance.
+	/** Soft-delete state of the upload record. */
 	private removeStatus: RemoveStatusItem;
-	// Stores the file upload value used by this instance.
+	/** Information about the actual uploaded file; null while the upload is still pending. */
 	private fileUpload: FileUpload;
 
-	// Stores the game Id value used by this instance.
+	/** Game id this file belongs to — used to keep tenant data separated (multi-tenant). */
 	private gameId: string;
 
 	/**

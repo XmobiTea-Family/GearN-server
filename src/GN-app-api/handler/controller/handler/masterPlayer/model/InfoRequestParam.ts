@@ -23,7 +23,7 @@ export class InfoRequestParam {
 	@BooleanDataMember({ code: ParameterCode.Avatar, isOptional: true, defaultValue: false })
 	public avatar?: boolean;
 
-	// Indicates whether timestamp create.
+	// Indicates whether timestamp create.CustomDataParam
 	@BooleanDataMember({ code: ParameterCode.TsCreate, isOptional: true, defaultValue: false })
 	public tsCreate?: boolean;
 

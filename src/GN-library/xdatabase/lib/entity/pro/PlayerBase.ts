@@ -7,41 +7,45 @@ import { CurrencyItem } from "./CurrencyItem";
 import { StatisticsItem } from "./StatisticsItem";
 import { DataValueType } from "./type/DataValueType";
 
+/**
+ * Shared base for every kind of player (MasterPlayer, GamePlayerBase and their subclasses).
+ * Adds player-specific information on top of DataObjectBase: ban, currencies, statistics, datas, ip/country, last-login timestamp.
+ */
 export class PlayerBase extends DataObjectBase {
-	// Defines the internal field key for player ban.
+	/** MongoDB field name for the player's active ban record. */
 	private static readonly _playerBan: string = "playerBan";
 
-	// Defines the internal field key for player currencies.
+	/** MongoDB field name for the player's currency map (gold, gem...). */
 	private static readonly _playerCurrencies: string = "playerCurrencies";
-	// Defines the internal field key for player statistics.
+	/** MongoDB field name for the player's statistics map. */
 	private static readonly _playerStatistics: string = "playerStatistics";
-	// Defines the internal field key for player datas.
+	/** MongoDB field name for the player's custom data list (player-scoped key-value extensions). */
 	private static readonly _playerDatas: string = "playerDatas";
 
-	// Defines the internal field key for IP address create.
+	/** MongoDB field name for the IP recorded when the player account was created. */
 	private static readonly _ipAddressCreate: string = "ipAddressCreate";
-	// Defines the internal field key for country code.
+	/** MongoDB field name for the country code derived from the account-creation IP. */
 	private static readonly _countryCode: string = "countryCode";
 
-	// Defines the internal field key for timestamp last login.
+	/** MongoDB field name for the most recent login timestamp; used for DAU/MAU and inactive-account detection. */
 	private static readonly _tsLastLogin: string = "tsLastLogin";
 
-	// Stores the player ban value used by this instance.
+	/** Active ban record for the player; null/undefined means the player is not banned. */
 	private playerBan: BanItem;
 
-	// Stores the player currencies collection used by this instance.
+	/** Player currency map: key is the currency code, value is the current balance (see CurrencyItem). */
 	private playerCurrencies: Map<string, CurrencyItem>;
-	// Stores the player statistics collection used by this instance.
+	/** Player statistics map: key is the statistic name, value is StatisticsItem (value + last-update ts). */
 	private playerStatistics: Map<string, StatisticsItem>;
 
-	// Stores the player datas value used by this instance.
+	/** Player-scoped custom data list of key-value extensions (separate from DataObjectBase.customDatas). */
 	private playerDatas: Array<DataItem>;
-	// Stores the IP address create value used by this instance.
+	/** IP captured when the account was first created; immutable, used for audit/anti-fraud. */
 	private ipAddressCreate: string;
-	// Stores the country code value used by this instance.
+	/** ISO country code derived from the account-creation IP; used to apply region-specific policy. */
 	private countryCode: string;
 
-	// Stores the timestamp last login value used by this instance.
+	/** Epoch ms of the player's most recent login; updated on every successful login. */
 	private tsLastLogin: number;
 
 	/**

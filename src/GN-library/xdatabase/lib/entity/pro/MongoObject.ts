@@ -1,39 +1,48 @@
 import * as mongodb from "mongodb";
 
+/**
+ * Container that batches the changes to apply to a MongoDB document inside a single `updateOne` call.
+ * Each field maps to a MongoDB update operator; only operators that actually carry data are sent over the wire.
+ */
 interface UpdateFilter {
-	// Stores the inc collection used by this contract.
+	/** MongoDB `$inc` operator: atomically increments/decrements numeric fields. */
 	$inc?: { [k: string]: number };
-	// Stores the min collection used by this contract.
+	/** MongoDB `$min` operator: only overwrites when the new value is smaller than the current one. */
 	$min?: { [k: string]: any };
-	// Stores the max collection used by this contract.
+	/** MongoDB `$max` operator: only overwrites when the new value is larger than the current one. */
 	$max?: { [k: string]: any };
-	// Stores the mul collection used by this contract.
+	/** MongoDB `$mul` operator: multiplies the current numeric value by the supplied factor. */
 	$mul?: { [k: string]: number };
-	// Stores the rename collection used by this contract.
+	/** MongoDB `$rename` operator: renames a field from old name to new name. */
 	$rename?: { [k: string]: string };
-	// Stores the set collection used by this contract.
+	/** MongoDB `$set` operator: directly assigns a value to a field (overwriting the previous value). */
 	$set?: { [k: string]: any };
-	// Stores the set on insert collection used by this contract.
+	/** MongoDB `$setOnInsert` operator: only assigns when the document is created via upsert; ignored on update. */
 	$setOnInsert?: { [k: string]: any };
-	// Stores the unset collection used by this contract.
+	/** MongoDB `$unset` operator: removes the field from the document (the supplied value is the empty string). */
 	$unset?: { [k: string]: string };
 }
 
+/**
+ * Base class for every entity persisted in MongoDB across the system.
+ * Accumulates pending changes in `updateFilter` and flushes them to the database through `saveAsync`,
+ * so business code only has to call `set/inc/unset...` and then save once at the end.
+ */
 export class MongoObject {
-	// Defines the internal field key for ID.
+	/** MongoDB's default `_id` field name — the primary key on every document. */
 	private static readonly __id: string = "_id";
-	// Stores the EMPTY STR value used by this instance.
+	/** Empty-string constant used as the value for `$unset` (MongoDB requires a value, even though it's ignored). */
 	private static readonly EMPTY_STR: string = "";
 
-	// Stores the collection value used by this instance.
+	/** Reference to the MongoDB Collection holding the document; used by `saveAsync` when executing `updateOne`. */
 	private readonly collection: mongodb.Collection<mongodb.Document>;
 
-	// Stores the ID value used by this instance.
+	/** ObjectId of the document; immutable, used as the `_id` filter on every update. */
 	protected readonly _id: mongodb.ObjectId;
-	// Stores the origin result value used by this instance.
+	/** Raw document loaded from MongoDB; subclasses can read it to access fields that aren't mapped to properties. */
 	protected readonly originResult: mongodb.WithId<mongodb.Document>;
 
-	// Stores the update filter value used by this instance.
+	/** Accumulator for changes to push to MongoDB; created lazily on the first mutate call. */
 	private updateFilter: UpdateFilter;
 
 	/**
