@@ -29,7 +29,8 @@ Kết luận: script hợp lệ không phải file TypeScript hoàn chỉnh. Nó
 
 ## 3. Rule bắt buộc
 
-- Luôn đăng ký function theo dạng `handlers["functionName"] = async (args, context, log) => { ... }`.
+- Luôn đăng ký function theo dạng `handlers["functionName"] = async (args, context, log) => { ... }` hoặc `handlers.functionName = (args, context, log) => { ... }`.
+- Top-level có thể khai báo helper bằng `function`, `class`, `type`, `interface`, hoặc `const`; `class` được phép dùng `extends` và `static`.
 - Không dùng trực tiếp chuỗi `GNNetwork` trong submitted script.
 - `functionName` nên nằm trong giới hạn `3..30` ký tự.
 - Khi pin version để execute, `version` phải đúng 7 ký tự.
@@ -42,6 +43,7 @@ Kết luận: script hợp lệ không phải file TypeScript hoàn chỉnh. Nó
 - Nếu `value` không stringify được, ví dụ object vòng tham chiếu, function sẽ lỗi. Chỉ log dữ liệu JSON-safe.
 - `return` chỉ nên là dữ liệu serialize an toàn: `null`, `boolean`, `number`, `string`, JSON object, JSON array, `GNHashtable`, `GNArray`.
 - Nếu cần fail rõ ràng, dùng `throw new Error("message")`.
+- Khi security policy từ chối script, `errorMessage` sẽ kèm `line`, `column`, và nội dung dòng source liên quan để debug nhanh hơn.
 
 Về `context.customTags`:
 

@@ -15,6 +15,7 @@ enum CloudScriptValidationMode {
 interface HandlerRegistration {
 	registryName: string;
 	handlerName: string;
+	node: ts.Node;
 }
 
 interface ValidationContext {
@@ -23,10 +24,21 @@ interface ValidationContext {
 	registrations: HandlerRegistration[];
 }
 
+interface EventRegistrationRule {
+	registryNames: Set<string>;
+	minRegistrations: number;
+	maxRegistrations: number;
+}
+
+interface CloudScriptPolicyViolation {
+	message: string;
+	node?: ts.Node;
+	position?: number;
+}
+
 export class CloudScriptSecurityValidator {
 
 	private static readonly lexicalFailFastPatterns: Array<{ pattern: RegExp, message: string }> = [
-		{ pattern: /GNNetwork/, message: "CloudScript security policy violation: keyword \"GNNetwork\" is not allowed" },
 		{ pattern: /\brequire\s*\(/, message: "CloudScript security policy violation: require(...) is not allowed" },
 		{ pattern: /\bimport\s*(?:["'{*]|\()/, message: "CloudScript security policy violation: import is not allowed" },
 		{ pattern: /\bprocess\b/, message: "CloudScript security policy violation: forbidden identifier \"process\"" },
@@ -140,7 +152,10 @@ export class CloudScriptSecurityValidator {
 		if (normalizedScript.includes("\0")) {
 			return {
 				success: false,
-				errorMessage: "CloudScript security policy violation: null byte is not allowed",
+				errorMessage: this.formatValidationError({
+					message: "CloudScript security policy violation: null byte is not allowed",
+					position: normalizedScript.indexOf("\0"),
+				}, normalizedScript),
 			};
 		}
 
@@ -148,7 +163,7 @@ export class CloudScriptSecurityValidator {
 		if (lexicalViolation != null) {
 			return {
 				success: false,
-				errorMessage: lexicalViolation,
+				errorMessage: this.formatValidationError(lexicalViolation, normalizedScript),
 			};
 		}
 
@@ -158,7 +173,10 @@ export class CloudScriptSecurityValidator {
 			let firstDiagnostic = parseDiagnostics[0];
 			return {
 				success: false,
-				errorMessage: `CloudScript security policy violation: parse error at ${firstDiagnostic.start ?? 0}`,
+				errorMessage: this.formatValidationError({
+					message: `CloudScript security policy violation: parse error: ${ts.flattenDiagnosticMessageText(firstDiagnostic.messageText, " ")}`,
+					position: firstDiagnostic.start ?? 0,
+				}, normalizedScript),
 			};
 		}
 
@@ -166,7 +184,7 @@ export class CloudScriptSecurityValidator {
 		if (statementViolation != null) {
 			return {
 				success: false,
-				errorMessage: statementViolation,
+				errorMessage: this.formatValidationError(statementViolation, normalizedScript),
 			};
 		}
 
@@ -174,7 +192,7 @@ export class CloudScriptSecurityValidator {
 		if (nodeViolation != null) {
 			return {
 				success: false,
-				errorMessage: nodeViolation,
+				errorMessage: this.formatValidationError(nodeViolation, normalizedScript),
 			};
 		}
 
@@ -182,7 +200,7 @@ export class CloudScriptSecurityValidator {
 		if (registrationViolation != null) {
 			return {
 				success: false,
-				errorMessage: registrationViolation,
+				errorMessage: this.formatValidationError(registrationViolation, normalizedScript),
 			};
 		}
 
@@ -204,28 +222,81 @@ export class CloudScriptSecurityValidator {
 		return (script ?? "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 	}
 
-	private static validateLexicalFailFast(script: string): string {
+	private static formatValidationError(violation: CloudScriptPolicyViolation, script: string): string {
+		let position = violation.position;
+		if (position == null && violation.node != null) {
+			let sourceFile = violation.node.getSourceFile();
+			position = violation.node.getStart(sourceFile, false);
+		}
+
+		if (position == null || position < 0) {
+			return violation.message;
+		}
+
+		let sourceLocation = this.getSourceLocation(script, position);
+		let sourceLine = this.getSourceLine(script, sourceLocation.line).replace(/\0/g, "\\0").trim();
+		if (sourceLine.length === 0) {
+			sourceLine = "(empty line)";
+		}
+
+		return `${violation.message} at line ${sourceLocation.line + 1}, column ${sourceLocation.column + 1}. Source: ${sourceLine}`;
+	}
+
+	private static getSourceLocation(script: string, position: number): { line: number, column: number } {
+		let safePosition = Math.max(0, Math.min(position, script.length));
+		let line = 0;
+		let column = 0;
+
+		for (let i = 0; i < safePosition; i++) {
+			if (script.charCodeAt(i) === 10) {
+				line++;
+				column = 0;
+			}
+			else {
+				column++;
+			}
+		}
+
+		return {
+			line: line,
+			column: column,
+		};
+	}
+
+	private static getSourceLine(script: string, line: number): string {
+		return script.split("\n")[line] ?? "";
+	}
+
+	private static validateLexicalFailFast(script: string): CloudScriptPolicyViolation {
 		for (let i = 0; i < this.lexicalFailFastPatterns.length; i++) {
 			let item = this.lexicalFailFastPatterns[i];
-			if (item.pattern.test(script)) {
-				return item.message;
+			item.pattern.lastIndex = 0;
+			let match = item.pattern.exec(script);
+			if (match != null) {
+				return {
+					message: item.message,
+					position: match.index,
+				};
 			}
 		}
 
 		return null;
 	}
 
-	private static validateTopLevelStatements(sourceFile: ts.SourceFile, context: ValidationContext): string {
+	private static validateTopLevelStatements(sourceFile: ts.SourceFile, context: ValidationContext): CloudScriptPolicyViolation {
 		for (let i = 0; i < sourceFile.statements.length; i++) {
 			let statement = sourceFile.statements[i];
 
-			if (ts.isFunctionDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) {
+			if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) {
 				continue;
 			}
 
 			if (ts.isVariableStatement(statement)) {
 				if ((statement.declarationList.flags & ts.NodeFlags.Const) === 0) {
-					return "CloudScript security policy violation: only top-level const declarations are allowed";
+					return {
+						message: "CloudScript security policy violation: only top-level const declarations are allowed",
+						node: statement,
+					};
 				}
 
 				for (let j = 0; j < statement.declarationList.declarations.length; j++) {
@@ -233,11 +304,17 @@ export class CloudScriptSecurityValidator {
 
 					let declarationNameViolation = this.validateDeclarationName(declaration.name);
 					if (declarationNameViolation != null) {
-						return declarationNameViolation;
+						return {
+							message: declarationNameViolation,
+							node: declaration.name,
+						};
 					}
 
 					if (declaration.initializer != null && this.isImmediateTopLevelExecution(declaration.initializer)) {
-						return "CloudScript security policy violation: top-level executable initializer is not allowed";
+						return {
+							message: "CloudScript security policy violation: top-level executable initializer is not allowed",
+							node: declaration.initializer,
+						};
 					}
 				}
 
@@ -247,14 +324,20 @@ export class CloudScriptSecurityValidator {
 			if (ts.isExpressionStatement(statement)) {
 				let registration = this.parseHandlerRegistration(statement.expression);
 				if (registration == null) {
-					return "CloudScript security policy violation: only handler registration is allowed at top-level";
+					return {
+						message: "CloudScript security policy violation: only handler registration is allowed at top-level",
+						node: statement.expression,
+					};
 				}
 
 				context.registrations.push(registration);
 				continue;
 			}
 
-			return `CloudScript security policy violation: top-level ${ts.SyntaxKind[statement.kind]} is not allowed`;
+			return {
+				message: `CloudScript security policy violation: top-level ${ts.SyntaxKind[statement.kind]} is not allowed`,
+				node: statement,
+			};
 		}
 
 		return null;
@@ -299,17 +382,8 @@ export class CloudScriptSecurityValidator {
 			return null;
 		}
 
-		if (!ts.isElementAccessExpression(expression.left) || !ts.isIdentifier(expression.left.expression)) {
-			return null;
-		}
-
-		let registryName = expression.left.expression.text;
-		if (!this.allowedHandlerRegistries.has(registryName)) {
-			return null;
-		}
-
-		let handlerName = this.readElementAccessString(expression.left.argumentExpression);
-		if (handlerName == null || handlerName.length === 0) {
+		let registration = this.parseHandlerRegistrationTarget(expression.left);
+		if (registration == null) {
 			return null;
 		}
 
@@ -318,10 +392,47 @@ export class CloudScriptSecurityValidator {
 			return null;
 		}
 
-		return {
-			registryName: registryName,
-			handlerName: handlerName,
-		};
+		return registration;
+	}
+
+	private static parseHandlerRegistrationTarget(expression: ts.Expression): HandlerRegistration {
+		if (ts.isElementAccessExpression(expression) && ts.isIdentifier(expression.expression)) {
+			let registryName = expression.expression.text;
+			if (!this.allowedHandlerRegistries.has(registryName)) {
+				return null;
+			}
+
+			let handlerName = this.readElementAccessString(expression.argumentExpression);
+			if (handlerName == null || handlerName.length === 0) {
+				return null;
+			}
+
+			return {
+				registryName: registryName,
+				handlerName: handlerName,
+				node: expression,
+			};
+		}
+
+		if (ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.expression)) {
+			let registryName = expression.expression.text;
+			if (!this.allowedHandlerRegistries.has(registryName)) {
+				return null;
+			}
+
+			let handlerName = expression.name.text;
+			if (handlerName.length === 0) {
+				return null;
+			}
+
+			return {
+				registryName: registryName,
+				handlerName: handlerName,
+				node: expression,
+			};
+		}
+
+		return null;
 	}
 
 	private static unwrapExpression(expression: ts.Expression): ts.Expression {
@@ -342,13 +453,16 @@ export class CloudScriptSecurityValidator {
 		return null;
 	}
 
-	private static validateNode(node: ts.Node, context: ValidationContext): string {
+	private static validateNode(node: ts.Node, context: ValidationContext): CloudScriptPolicyViolation {
 		let currentViolation = this.validateCurrentNode(node, context);
 		if (currentViolation != null) {
-			return currentViolation;
+			return {
+				message: currentViolation,
+				node: node,
+			};
 		}
 
-		let childViolation: string = null;
+		let childViolation: CloudScriptPolicyViolation = null;
 		ts.forEachChild(node, childNode => {
 			if (childViolation != null) {
 				return;
@@ -604,9 +718,11 @@ export class CloudScriptSecurityValidator {
 		return null;
 	}
 
-	private static validateRegistrations(context: ValidationContext): string {
+	private static validateRegistrations(context: ValidationContext): CloudScriptPolicyViolation {
 		if (context.registrations.length === 0) {
-			return "CloudScript security policy violation: at least one handler registration is required";
+			return {
+				message: "CloudScript security policy violation: at least one handler registration is required",
+			};
 		}
 
 		let duplicateCheck = new Set<string>();
@@ -615,7 +731,10 @@ export class CloudScriptSecurityValidator {
 			let duplicateKey = `${registration.registryName}:${registration.handlerName}`;
 
 			if (duplicateCheck.has(duplicateKey)) {
-				return `CloudScript security policy violation: duplicate handler registration "${registration.handlerName}"`;
+				return {
+					message: `CloudScript security policy violation: duplicate handler registration "${registration.handlerName}"`,
+					node: registration.node,
+				};
 			}
 
 			duplicateCheck.add(duplicateKey);
@@ -626,11 +745,17 @@ export class CloudScriptSecurityValidator {
 				let registration = context.registrations[i];
 
 				if (registration.registryName !== "handlers") {
-					return `CloudScript security policy violation: ${registration.registryName} is not allowed in CloudScript function mode`;
+					return {
+						message: `CloudScript security policy violation: ${registration.registryName} is not allowed in CloudScript function mode`,
+						node: registration.node,
+					};
 				}
 
 				if (registration.handlerName.length < 3 || registration.handlerName.length > 30) {
-					return "CloudScript security policy violation: handler name length must be between 3 and 30";
+					return {
+						message: "CloudScript security policy violation: handler name length must be between 3 and 30",
+						node: registration.node,
+					};
 				}
 			}
 
@@ -638,23 +763,35 @@ export class CloudScriptSecurityValidator {
 		}
 
 		if (context.mode === CloudScriptValidationMode.EventCallbackScript) {
-			if (context.registrations.length !== 1) {
-				return "CloudScript security policy violation: event callback script must register exactly one handler";
+			let expectedRule = this.getExpectedEventRegistrationRule(context.eventName);
+			if (expectedRule == null) {
+				return {
+					message: "CloudScript security policy violation: eventName prefix is invalid",
+				};
 			}
 
-			let expectedRegistryName = this.getExpectedEventRegistryName(context.eventName);
-			if (expectedRegistryName == null) {
-				return "CloudScript security policy violation: eventName prefix is invalid";
+			if (context.registrations.length < expectedRule.minRegistrations || context.registrations.length > expectedRule.maxRegistrations) {
+				return {
+					message: `CloudScript security policy violation: event callback script must register ${this.describeRegistrationCount(expectedRule)} handler(s); found ${context.registrations.length}`,
+				};
 			}
 
-			let registration = context.registrations[0];
+			for (let i = 0; i < context.registrations.length; i++) {
+				let registration = context.registrations[i];
 
-			if (registration.registryName !== expectedRegistryName) {
-				return `CloudScript security policy violation: ${registration.registryName} does not match eventName prefix`;
-			}
+				if (!expectedRule.registryNames.has(registration.registryName)) {
+					return {
+						message: `CloudScript security policy violation: ${registration.registryName} does not match eventName; expected ${this.describeRegistryNames(expectedRule.registryNames)}`,
+						node: registration.node,
+					};
+				}
 
-			if (registration.handlerName !== context.eventName) {
-				return "CloudScript security policy violation: event handler key must equal eventName";
+				if (registration.handlerName !== context.eventName) {
+					return {
+						message: "CloudScript security policy violation: event handler key must equal eventName",
+						node: registration.node,
+					};
+				}
 			}
 
 			return null;
@@ -664,7 +801,10 @@ export class CloudScriptSecurityValidator {
 			for (let i = 0; i < context.registrations.length; i++) {
 				let registration = context.registrations[i];
 				if (registration.registryName === "handlers") {
-					return "CloudScript security policy violation: handlers registry is not allowed in event callback bundle";
+					return {
+						message: "CloudScript security policy violation: handlers registry is not allowed in event callback bundle",
+						node: registration.node,
+					};
 				}
 			}
 		}
@@ -672,13 +812,50 @@ export class CloudScriptSecurityValidator {
 		return null;
 	}
 
-	private static getExpectedEventRegistryName(eventName: string): string {
+	private static getExpectedEventRegistrationRule(eventName: string): EventRegistrationRule {
 		if (!eventName) {
 			return null;
 		}
 
+		if (eventName === "systemAuthenticate_VerifyGenericService") {
+			return {
+				registryNames: new Set(["systemGenericServiceHandlers"]),
+				minRegistrations: 1,
+				maxRegistrations: 1,
+			};
+		}
+
 		let prefix = eventName.split("_")[0];
-		return this.eventRegistryByPrefix.get(prefix) ?? null;
+		let expectedRegistryName = this.eventRegistryByPrefix.get(prefix);
+		if (expectedRegistryName != null) {
+			return {
+				registryNames: new Set([expectedRegistryName]),
+				minRegistrations: 1,
+				maxRegistrations: 1,
+			};
+		}
+
+		if (!eventName.includes("_")) {
+			return null;
+		}
+
+		return {
+			registryNames: new Set(["preHandlers", "postHandlers"]),
+			minRegistrations: 1,
+			maxRegistrations: 2,
+		};
+	}
+
+	private static describeRegistrationCount(rule: EventRegistrationRule): string {
+		if (rule.minRegistrations === rule.maxRegistrations) {
+			return `${rule.minRegistrations}`;
+		}
+
+		return `${rule.minRegistrations}..${rule.maxRegistrations}`;
+	}
+
+	private static describeRegistryNames(registryNames: Set<string>): string {
+		return Array.from(registryNames.values()).join(" or ");
 	}
 
 	private static validateTranspiledOutput(script: string): string {

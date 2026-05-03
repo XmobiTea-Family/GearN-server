@@ -396,11 +396,25 @@ export class CloudScriptService implements ICloudScriptService {
 			let fullScriptTs = templateCloudScript.replace("//$replaceScript", script);
 
 			await fs.promises.writeFile(tempTsFilePath, fullScriptTs, "utf8");
-			await execFileAsync("npx", ["tsc", tempTsFilePath, "--allowJs", "--skipLibCheck", "--outDir", cloudScriptDirectoryPath], { windowsHide: true, shell: process.platform === "win32" });
+			// tsc ignores project config when a file path is passed, so keep helper classes native.
+			await execFileAsync("npx", [
+				"tsc",
+				tempTsFilePath,
+				"--target", "ES2022",
+				"--module", "commonjs",
+				"--moduleResolution", "node",
+				"--allowJs",
+				"--skipLibCheck",
+				"--esModuleInterop",
+				"--experimentalDecorators",
+				"--emitDecoratorMetadata",
+				"--outDir", cloudScriptDirectoryPath,
+			], { windowsHide: true, shell: process.platform == "win32", });
 			// await execFileAsync("npx tsc " + tempTsFilePath + " --allowJs --skipLibCheck --outDir " + tempJsFilePath);
 			return await fs.promises.readFile(tempJsFilePath, "utf8");
 		}
-		catch {
+		catch (err) {
+			Debug.logError("[GearN] [CloudScriptService] error when compileCloudScript " + err.message);
 			return null;
 		}
 		finally {

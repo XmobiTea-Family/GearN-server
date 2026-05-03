@@ -36,9 +36,9 @@ export class DebugSupport {
                 secretKey: this.securitySecretKey(authInfo.getSecretKey()),
                 isRemove: secretInfo.isRemove(),
                 tsExpire: secretInfo.getTsExpire(),
-                description: secretInfo.getDescription(),
-                isDefault: secretInfo.getIsDefault(),
-                onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
+                // description: secretInfo.getDescription(),
+                // isDefault: secretInfo.getIsDefault(),
+                // onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
             };
         }
         else {
@@ -97,7 +97,7 @@ export class DebugSupport {
     private static securitySecretKey(secretKey: string): string {
         if (!secretKey) return null;
 
-        return secretKey.slice(0, 6) + '*'.repeat(secretKey.length - 6);
+        return secretKey.slice(0, 6) + "*".repeat(secretKey.length - 12) + secretKey.slice(secretKey.length - 6);
     }
 
     private static securityParameters(parameters: Record<string, unknown>): Record<string, unknown> {

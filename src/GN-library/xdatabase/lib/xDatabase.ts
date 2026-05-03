@@ -283,25 +283,6 @@ export class xDatabase {
 		collection.createIndex(index, createIndexesOptions);
 	}
 
-	/**
-	 * Returns the find options.
-	 * @param findOptions Provides the find options value used by this operation.
-	 * @returns Returns the find options.
-	 */
-	private getFindOptions(findOptions: any): { [k: string]: boolean } {
-		if (findOptions == null) return null;
-
-		// Stores the answer value used in the current execution flow.
-		let answer: { [k: string]: boolean } = {};
-
-		let keys = Object.keys(findOptions);
-		keys.forEach((key: string) => {
-			if (findOptions[key] == true) answer[key] = true;
-		});
-
-		return answer;
-	}
-
 	public startSession(): mongodb.ClientSession {
 		return this.client.startSession();
 	}

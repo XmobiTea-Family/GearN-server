@@ -15,6 +15,7 @@ import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
 import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
 import { DebugSupport } from "./utils/DebugSupport";
+import { OperationCode } from "../../GN-common/constant/OperationCode";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;
@@ -284,7 +285,10 @@ export class HttpAppHandler {
 						finalData.debugMessage = httpData.debugMessage;
 					}
 
-					if (this.enableSendAndReceiveDebug) Debug.log("[HTTP SEND] %O", JSON.stringify(DebugSupport.flatAndSecurityFinalData(finalData)));
+					if (this.enableSendAndReceiveDebug) {
+						if (operationResponse.getOperationCode() != OperationCode.GetServerLog)
+							Debug.log("[HTTP SEND] %O", JSON.stringify(DebugSupport.flatAndSecurityFinalData(finalData)));
+					}
 
 					res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 					return res.send(finalData);
@@ -378,7 +382,10 @@ export class HttpAppHandler {
 						finalData.debugMessage = httpData.debugMessage;
 					}
 
-					if (this.enableSendAndReceiveDebug) Debug.log("[HTTP SEND] %O", JSON.stringify(DebugSupport.flatAndSecurityFinalData(finalData)));
+					if (this.enableSendAndReceiveDebug) {
+						if (operationResponse.getOperationCode() != OperationCode.GetServerLog)
+							Debug.log("[HTTP SEND] %O", JSON.stringify(DebugSupport.flatAndSecurityFinalData(finalData)));
+					}
 
 					// Stores the content value used in the current execution flow.
 					let content = Buffer.from(encode(finalData));
