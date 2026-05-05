@@ -500,7 +500,7 @@ export interface SecretPermissionItem {
 		// Stores the get create leaderboard value used by this contract.
 		getCreateLeaderboard: GamePlayerPermissionRules,
 		// Stores the get last login leaderboard value used by this contract.
-		getLastLoginLeaderboard: MasterPlayerPermissionRules,
+		getLastLoginLeaderboard: GamePlayerPermissionRules,
 
 		// Stores the get statistics log value used by this contract.
 		getStatisticsLog: GamePlayerPermissionRules,
