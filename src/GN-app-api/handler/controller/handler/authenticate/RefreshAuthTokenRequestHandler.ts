@@ -125,7 +125,7 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
 			operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
 
-			await this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAuthToken", {
+			this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAuthToken", {
 				userId: request.userId,
 				ignoreAuthToken: newAuthInfo.getAuthToken()
 			});

@@ -34,6 +34,13 @@ interface InstanceInfo extends InstanceInfoStatus {
 }
 
 export class ClusterHandler {
+	// Timeout per attempt when sending an event to another cluster node.
+	private static readonly SEND_EVENT_TIMEOUT_IN_MS: number = 10000;
+	// Maximum attempts per node. First attempt plus retries.
+	private static readonly SEND_EVENT_MAX_ATTEMPT: number = 3;
+	// Backoff delays applied before retry attempts.
+	private static readonly SEND_EVENT_RETRY_DELAYS_IN_MS: number[] = [200, 500];
+
 	// Stores the router value used by this instance.
 	private router: express.Express;
 	// Stores the cluster router value used by this instance.
@@ -429,25 +436,63 @@ export class ClusterHandler {
 	}
 
 	/**
+	 * Sleeps for the requested duration.
+	 * @param ms Provides the duration in milliseconds.
+	 */
+	private sleep(ms: number): Promise<void> {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	/**
+	 * Sends one event to one node with bounded retry.
+	 * @param nodeInfo Provides the target node information.
+	 * @param name Provides the event name.
+	 * @param data Provides the event data.
+	 * @returns Resolves with the send result.
+	 */
+	private async sendEventToNodeWithRetry(nodeInfo: NodeInfo, name: string, data?: any): Promise<void> {
+		let lastErrorMessage: string = "";
+		let lastStatus: number;
+
+		for (let attempt = 1; attempt <= ClusterHandler.SEND_EVENT_MAX_ATTEMPT; attempt++) {
+			if (attempt > 1) {
+				await this.sleep(ClusterHandler.SEND_EVENT_RETRY_DELAYS_IN_MS[attempt - 2] ?? ClusterHandler.SEND_EVENT_RETRY_DELAYS_IN_MS[ClusterHandler.SEND_EVENT_RETRY_DELAYS_IN_MS.length - 1]);
+			}
+
+			try {
+				const response = await axios.post(nodeInfo.fullUrl + "/cluster/sendEvent/" + name, data, {
+					headers: {
+						"pkt": this.privateKeyToken,
+						"Content-Type": "application/json"
+					},
+					timeout: ClusterHandler.SEND_EVENT_TIMEOUT_IN_MS,
+				});
+
+				lastStatus = response.status;
+
+				if (response.status == 200) {
+					return;
+				}
+
+				lastErrorMessage = "status " + response.status;
+			}
+			catch (err) {
+				lastErrorMessage = err instanceof Error ? err.message : String(err);
+			}
+		}
+
+		Debug.logError("[GearN] ClusterHandler sendEvent failed after " + ClusterHandler.SEND_EVENT_MAX_ATTEMPT + " attempts, event: " + name + ", instanceId: " + nodeInfo.instanceId + ", error: " + lastErrorMessage);
+	}
+
+	/**
 	 * Sends the event.
 	 * @param name Provides the name value used by this operation.
 	 * @param data Provides the data value used by this operation.
 	 * @param includeMe Provides the include me value used by this operation.
 	 */
 	public async sendEvent(name: string, data?: any, includeMe: boolean = true) {
-		for (let i = 0; i < this.allNodes.length; i++) {
-			// Stores the node info value used in the current execution flow.
-			let nodeInfo = this.allNodes[i];
-
-			if (nodeInfo.instanceId != this.instanceId)
-				axios.post(nodeInfo.fullUrl + "/cluster/sendEvent/" + name, data, { headers: { "pkt": this.privateKeyToken, "Content-Type": "application/json" } }).then(response => {
-					if (response.status != 200) {
-						Debug.logError("[GearN] ClusterHandler sendEvent failed with status " + response.status + ", instanceId: " + nodeInfo.instanceId);
-					}
-				}).catch(err => {
-					Debug.logError("[GearN] ClusterHandler sendEvent failed " + err.message + ", instanceId: " + nodeInfo.instanceId);
-				});
-		}
+		const targetNodes = this.allNodes.filter(nodeInfo => nodeInfo.instanceId != this.instanceId);
+		await Promise.all(targetNodes.map(nodeInfo => this.sendEventToNodeWithRetry(nodeInfo, name, data)));
 
 		if (includeMe) {
 			await this.callbackInvoke(name, data);
