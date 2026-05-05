@@ -508,8 +508,18 @@ export class ApiMiddleware {
 			await this.authInfoCollection.updateOne({ gnToken: gnToken }, { $set: authInfo.toDocumentData() });
 	}
 
-	public async removeAllAuthInfosInDb(userId: string): Promise<void> {
-		await this.authInfoCollection.updateMany({ userId: userId }, {
+	public async removeAllAuthInfosInDb(userId: string, ignoreAuthToken?: string): Promise<void> {
+		const filter: Record<string, any> = {
+			userId: userId
+		};
+
+		if (ignoreAuthToken) {
+			filter["authToken"] = {
+				$ne: ignoreAuthToken,
+			}
+		}
+
+		await this.authInfoCollection.updateMany(filter, {
 			$set: {
 				isRemove: true,
 			}

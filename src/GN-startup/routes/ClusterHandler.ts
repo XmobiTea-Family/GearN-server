@@ -450,7 +450,7 @@ export class ClusterHandler {
 		}
 
 		if (includeMe) {
-			this.callbackInvoke(name, data);
+			await this.callbackInvoke(name, data);
 		}
 	}
 

@@ -837,17 +837,20 @@ export class GNServer {
 
 	private executeRevokeAuthToken(data: {
 		userId: string,
+		ignoreAuthToken: string,
 	}) {
 		if (this.isPrimary()) {
-			this.apiMiddleware.removeAllAuthInfosInDb(data.userId);
+			this.apiMiddleware.removeAllAuthInfosInDb(data.userId, data.ignoreAuthToken);
 		}
 
 		let authInfos = this.apiMiddleware.getAuthInfosByUserIdInMemCache(data.userId);
 
 		for (const authInfo of authInfos) {
-			authInfo.setIsRemove(true);
+			if (authInfo.getAuthToken() != data.ignoreAuthToken) {
+				authInfo.setIsRemove(true);
 
-			this.getApiMiddleware().updateAuthInfo(authInfo, false);
+				this.getApiMiddleware().updateAuthInfo(authInfo, false);
+			}
 		}
 	}
 
