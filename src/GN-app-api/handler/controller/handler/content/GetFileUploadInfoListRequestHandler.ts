@@ -90,7 +90,7 @@ export class GetFileUploadInfoListRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().content.getFileUploadInfoList.selfEnable) {
+		if (!secretInfo.getPermission().content.getFileUploadInfoList.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

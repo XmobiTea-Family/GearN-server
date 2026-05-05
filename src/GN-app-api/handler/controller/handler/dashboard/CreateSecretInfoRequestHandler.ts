@@ -1906,13 +1906,13 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 				getCurrencyLog: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 			},
 			content: {
-				getContentData: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
+				getContentData: { selfEnable: false, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				setContentData: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				createNewFileUploadInfo: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				getFileUploadInfo: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				createNewFileUploadInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				getFileUploadInfo: { selfEnable: false, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 				getFileUploadInfoList: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
 				removeFileUploadInfo: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
-				requestDownloadFileUploadInfo: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },
+				requestDownloadFileUploadInfo: { selfEnable: false, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false, },
 			},
 			group: {
 				addSegment: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false, },

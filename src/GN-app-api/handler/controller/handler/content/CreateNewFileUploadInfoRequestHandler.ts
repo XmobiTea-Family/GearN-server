@@ -85,7 +85,7 @@ export class CreateNewFileUploadInfoRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().content.createNewFileUploadInfo.selfEnable) {
+		if (!secretInfo.getPermission().content.createNewFileUploadInfo.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 

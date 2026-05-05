@@ -89,7 +89,7 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 			return this.newInvalidRequestParameters(request);
 		}
 
-		if (!secretInfo.getPermission().content.removeFileUploadInfo.selfEnable) {
+		if (!secretInfo.getPermission().content.removeFileUploadInfo.otherSelfEnable) {
 			return this.newOperationNotAllowError(request);
 		}
 
