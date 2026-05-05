@@ -277,9 +277,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 
 			const lastCheck = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), {});
 			if (lastCheck != null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GameExists);
-				operationResponse.setDebugMessage("create game player but already exists, userId: " + request.userId);
-				return operationResponse;
+				return this.newOperationInternalServerError(operationRequest, "create game player but already exists, userId: " + request.userId);
 			}
 
 			gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.createGamePlayerAsync(result, secretInfo.getGameId());
