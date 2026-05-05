@@ -116,6 +116,10 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 		else {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
+			await this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAuthToken", {
+				userId: request.userId,
+			});
+
 			// Stores the new auth info value used in the current execution flow.
 			let newAuthInfo = await this.gnServer.getApiMiddleware().generateAuthInfo({
 				gnToken: null,
@@ -128,10 +132,6 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
 
 		masterPlayer.setTsLastLogin(currentMilliseconds);
 		await masterPlayer.saveAsync();
-
-		this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAuthToken", {
-			userId: request.userId,
-		});
 
 		await this.gnServer.getPostEventCallbackService().onEvent("authenticate_RefreshAuthToken", request, role, secretInfo, operationRequest, operationResponse);
 

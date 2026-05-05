@@ -192,11 +192,11 @@ export class LoginByGenericServiceRequestHandler extends LoginBaseRequestHandler
 				// Stores the IP detail response value used in the current execution flow.
 				let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 				if (ipDetailResponse.statusCode == "Ok") {
+					this.gnServer.getCountryIPDetailService().updateUserIP(masterPlayer.getUserId(), request.ipAddress, lastIPDetail.countryCode, lastIPDetail.regionCode, ipDetailResponse.detail.countryCode ?? "Unknown", ipDetailResponse.detail.regionCode ?? "Unknown");
+					
 					lastIPDetail.countryCode = ipDetailResponse.detail.countryCode ?? "Unknown";
 					lastIPDetail.regionCode = ipDetailResponse.detail.regionCode ?? "Unknown";
 					lastIPDetail.ipAddress = request.ipAddress;
-
-					this.gnServer.getCountryIPDetailService().updateUserIP(masterPlayer.getUserId(), request.ipAddress, null, null, lastIPDetail.countryCode, lastIPDetail.regionCode);
 				}
 
 				masterPlayer.setLastIPDetail(lastIPDetail);
