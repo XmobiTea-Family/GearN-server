@@ -121,7 +121,7 @@ export class GetServerLogRequestHandler extends RequestHandler {
 				remainSkip--;
 			} else {
 				remainLimit--;
-				if (remainLimit > 0) {
+				if (remainLimit > -1) {
 					// Stores the log value used in the current execution flow.
 					let log = logs[i];
 					gnLogs.add(log);
