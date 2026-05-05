@@ -220,7 +220,7 @@ export class UnlinkLinuxDeviceIdRequestHandler extends MasterPlayerBaseRequestHa
 
 		external.device.linuxDeviceId = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

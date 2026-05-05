@@ -220,7 +220,7 @@ export class UnlinkMacOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHa
 
 		external.device.macOSDeviceId = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

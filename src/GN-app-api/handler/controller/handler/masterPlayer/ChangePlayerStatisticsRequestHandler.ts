@@ -449,7 +449,7 @@ export class ChangePlayerStatisticsRequestHandler extends MasterPlayerBaseReques
 
 		this.gnServer.getDatabase().masterPlayerRepository.insertMasterPlayerStatisticsLogsAsync(logs);
 
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.PlayerStatistics, gnPlayerStatistics);
 

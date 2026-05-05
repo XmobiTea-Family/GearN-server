@@ -195,7 +195,7 @@ export class RemoveSegmentRequestHandler extends ItemBaseRequestHandler {
 		if (inventory.hasSegment(request.segment)) {
 			inventory.removeSegment(request.segment);
 
-			inventory.saveAsync();
+			await inventory.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

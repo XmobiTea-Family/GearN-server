@@ -193,7 +193,7 @@ export class SetDisplayNameRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		group.setDisplayName(request.displayName);
-		group.saveAsync();
+		await group.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

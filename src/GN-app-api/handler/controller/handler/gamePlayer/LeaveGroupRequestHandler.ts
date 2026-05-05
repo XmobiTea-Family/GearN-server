@@ -261,7 +261,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 		if (gamePlayer.hasPlayerGroup(request.groupId)) {
 			gamePlayer.removePlayerGroup(request.groupId);
-			gamePlayer.saveAsync();
+			await gamePlayer.saveAsync();
 
 			{
 				// Stores the GearN player groups value used in the current execution flow.
@@ -286,7 +286,7 @@ export class LeaveGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 		if (group.hasMember(request.userId)) {
 			group.removeMember(request.userId);
-			group.saveAsync();
+			await group.saveAsync();
 
 			{
 				// Stores the GearN members value used in the current execution flow.

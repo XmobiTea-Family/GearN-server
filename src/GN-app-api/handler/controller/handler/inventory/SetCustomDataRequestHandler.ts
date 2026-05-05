@@ -267,7 +267,7 @@ export class SetCustomDataRequestHandler extends ItemBaseRequestHandler {
 			}
 		}
 
-		inventory.saveAsync();
+		await inventory.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 

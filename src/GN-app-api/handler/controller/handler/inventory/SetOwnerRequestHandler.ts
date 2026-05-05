@@ -17,6 +17,7 @@ import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class SetOwnerOperationRequest extends OperationRequest {
 
@@ -205,110 +206,130 @@ export class SetOwnerRequestHandler extends ItemBaseRequestHandler {
 			}
 		}
 
+		const session = this.gnServer.getDatabase().startSession();
+
+
+
 		// Stores the owner value used in the current execution flow.
 		let owner = inventory.getOwner();
 		if (owner.id != request.newOwnerId) {
-			if (request.newOwnerType == OwnerType.Group) {
-				// Stores the group find options value used in the current execution flow.
-				let groupFindOptions: GroupFindOptions = {
-					groupInventories: true,
-				}
+			try {
+				session.startTransaction();
 
-				// Stores the new item owner player value used in the current execution flow.
-				let newItemOwnerPlayer = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.newOwnerId, secretInfo.getGameId(), groupFindOptions);
-				if (newItemOwnerPlayer == null) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
+				if (request.newOwnerType == OwnerType.Group) {
+					// Stores the group find options value used in the current execution flow.
+					let groupFindOptions: GroupFindOptions = {
+						groupInventories: true,
+					}
+
+					// Stores the new item owner player value used in the current execution flow.
+					let newItemOwnerPlayer = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.newOwnerId, secretInfo.getGameId(), groupFindOptions);
+					if (newItemOwnerPlayer == null) {
+						operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
+						return operationResponse;
+					}
+
+					newItemOwnerPlayer.setGroupInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
+					await newItemOwnerPlayer.saveAsync(session);
+				}
+				else if (request.newOwnerType == OwnerType.GamePlayer) {
+					// Stores the game player find options value used in the current execution flow.
+					let gamePlayerFindOptions: GamePlayerFindOptions = {
+						playerInventories: true,
+					}
+
+					// Stores the new item owner player value used in the current execution flow.
+					let newItemOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
+					if (newItemOwnerPlayer == null) {
+						operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
+						return operationResponse;
+					}
+
+					newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
+					await newItemOwnerPlayer.saveAsync(session);
+				}
+				else if (request.newOwnerType == OwnerType.CharacterPlayer) {
+					// Stores the character player find options value used in the current execution flow.
+					let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+						playerInventories: true,
+					}
+
+					// Stores the new item owner player value used in the current execution flow.
+					let newItemOwnerPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.newOwnerId, secretInfo.getGameId(), characterPlayerFindOptions);
+					if (newItemOwnerPlayer == null) {
+						operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
+						return operationResponse;
+					}
+
+					newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
+					await newItemOwnerPlayer.saveAsync(session);
+				}
+				else {
+					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerTypeNotSupport);
 					return operationResponse;
 				}
 
-				newItemOwnerPlayer.setGroupInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
-				newItemOwnerPlayer.saveAsync();
-			}
-			else if (request.newOwnerType == OwnerType.GamePlayer) {
-				// Stores the game player find options value used in the current execution flow.
-				let gamePlayerFindOptions: GamePlayerFindOptions = {
-					playerInventories: true,
-				}
+				if (owner.type == OwnerType.Group) {
+					// Stores the group find options value used in the current execution flow.
+					let groupFindOptions: GroupFindOptions = {
+						groupInventories: true,
+					}
 
-				// Stores the new item owner player value used in the current execution flow.
-				let newItemOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.newOwnerId, secretInfo.getGameId(), gamePlayerFindOptions);
-				if (newItemOwnerPlayer == null) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
-					return operationResponse;
-				}
-
-				newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
-				newItemOwnerPlayer.saveAsync();
-			}
-			else if (request.newOwnerType == OwnerType.CharacterPlayer) {
-				// Stores the character player find options value used in the current execution flow.
-				let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-					playerInventories: true,
-				}
-
-				// Stores the new item owner player value used in the current execution flow.
-				let newItemOwnerPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.newOwnerId, secretInfo.getGameId(), characterPlayerFindOptions);
-				if (newItemOwnerPlayer == null) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerNotFound);
-					return operationResponse;
-				}
-
-				newItemOwnerPlayer.setPlayerInventory(request.itemId, inventory.getCatalogId(), inventory.getClassId());
-				newItemOwnerPlayer.saveAsync();
-			}
-			else {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.OwnerTypeNotSupport);
-				return operationResponse;
-			}
-
-			if (owner.type == OwnerType.Group) {
-				// Stores the group find options value used in the current execution flow.
-				let groupFindOptions: GroupFindOptions = {
-					groupInventories: true,
-				}
-
-				// Stores the current item owner player value used in the current execution flow.
-				let currentItemOwnerPlayer = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), groupFindOptions);
-				if (currentItemOwnerPlayer != null) {
-					if (currentItemOwnerPlayer.hasGroupInventory(request.itemId)) {
-						currentItemOwnerPlayer.removeGroupInventory(request.itemId);
-						currentItemOwnerPlayer.saveAsync();
+					// Stores the current item owner player value used in the current execution flow.
+					let currentItemOwnerPlayer = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), groupFindOptions);
+					if (currentItemOwnerPlayer != null) {
+						if (currentItemOwnerPlayer.hasGroupInventory(request.itemId)) {
+							currentItemOwnerPlayer.removeGroupInventory(request.itemId);
+							await currentItemOwnerPlayer.saveAsync(session);
+						}
 					}
 				}
-			}
-			else if (owner.type == OwnerType.GamePlayer) {
-				// Stores the game player find options value used in the current execution flow.
-				let gamePlayerFindOptions: GamePlayerFindOptions = {
-					playerInventories: true,
-				}
+				else if (owner.type == OwnerType.GamePlayer) {
+					// Stores the game player find options value used in the current execution flow.
+					let gamePlayerFindOptions: GamePlayerFindOptions = {
+						playerInventories: true,
+					}
 
-				// Stores the current item owner player value used in the current execution flow.
-				let currentItemOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
-				if (currentItemOwnerPlayer != null) {
-					if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
-						currentItemOwnerPlayer.removePlayerInventory(request.itemId);
-						currentItemOwnerPlayer.saveAsync();
+					// Stores the current item owner player value used in the current execution flow.
+					let currentItemOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
+					if (currentItemOwnerPlayer != null) {
+						if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
+							currentItemOwnerPlayer.removePlayerInventory(request.itemId);
+							await currentItemOwnerPlayer.saveAsync(session);
+						}
 					}
 				}
-			}
-			else if (owner.type == OwnerType.CharacterPlayer) {
-				// Stores the character player find options value used in the current execution flow.
-				let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-					playerInventories: true,
-				}
+				else if (owner.type == OwnerType.CharacterPlayer) {
+					// Stores the character player find options value used in the current execution flow.
+					let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+						playerInventories: true,
+					}
 
-				// Stores the current item owner player value used in the current execution flow.
-				let currentItemOwnerPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), characterPlayerFindOptions);
-				if (currentItemOwnerPlayer != null) {
-					if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
-						currentItemOwnerPlayer.removePlayerInventory(request.itemId);
-						currentItemOwnerPlayer.saveAsync();
+					// Stores the current item owner player value used in the current execution flow.
+					let currentItemOwnerPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), characterPlayerFindOptions);
+					if (currentItemOwnerPlayer != null) {
+						if (currentItemOwnerPlayer.hasPlayerInventory(request.itemId)) {
+							currentItemOwnerPlayer.removePlayerInventory(request.itemId);
+							await currentItemOwnerPlayer.saveAsync(session);
+						}
 					}
 				}
-			}
 
-			inventory.setOwner(request.newOwnerId, request.newOwnerType);
-			inventory.saveAsync();
+				inventory.setOwner(request.newOwnerId, request.newOwnerType);
+				await inventory.saveAsync(session);
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
+			}
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

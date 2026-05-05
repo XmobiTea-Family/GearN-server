@@ -15,7 +15,7 @@ import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
 import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
 import { DebugSupport } from "./utils/DebugSupport";
-import { OperationCode } from "../../GN-common/constant/OperationCode";
+import { OperationCode } from "./../../GN-common/constant/OperationCode";
 
 interface OnHttpRequest {
 	(request: Request): Promise<OperationResponse>;

@@ -19,6 +19,8 @@ import { Group } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Grou
 import { Inventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
 import { StoreInventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/StoreInventory";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import * as mongodb from "mongodb";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class DeleteInDatabaseOperationRequest extends OperationRequest {
 
@@ -117,15 +119,36 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				return operationResponse;
 			}
 
-			// Stores the result value used in the current execution flow.
-			let result = {
-				type: "MasterPlayer",
-				log: request.log,
-				tsCreate: xDatetime.getCurrentMilliseconds(),
-				objs: await this.deleteMasterPlayer(masterPlayer),
+			let result: any;
+
+			const session = this.gnServer.getDatabase().startSession();
+
+			try {
+				session.startTransaction();
+
+				// Stores the result value used in the current execution flow.
+				result = {
+					type: "MasterPlayer",
+					log: request.log,
+					tsCreate: xDatetime.getCurrentMilliseconds(),
+					objs: await this.deleteMasterPlayer(masterPlayer, session),
+				}
+
+				await this.gnServer.getDatabase().systemCollection("MasterPlayer").deleteOne({ userId: masterPlayer.getUserId() }, { session: session });
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
 			}
 
-			this.gnServer.getDatabase().systemCollection("MasterPlayer").deleteOne({ userId: masterPlayer.getUserId() });
 			this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
 		}
 		else if (request.type == OwnerType.GamePlayer) {
@@ -137,16 +160,37 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				return operationResponse;
 			}
 
-			// Stores the result value used in the current execution flow.
-			let result = {
-				type: "GamePlayer",
-				gameId: request.gameId,
-				log: request.log,
-				tsCreate: xDatetime.getCurrentMilliseconds(),
-				objs: await this.deleteGamePlayer(gamePlayer, request.gameId),
+			let result: any;
+
+			const session = this.gnServer.getDatabase().startSession();
+
+			try {
+				session.startTransaction();
+
+				// Stores the result value used in the current execution flow.
+				result = {
+					type: "GamePlayer",
+					gameId: request.gameId,
+					log: request.log,
+					tsCreate: xDatetime.getCurrentMilliseconds(),
+					objs: await this.deleteGamePlayer(gamePlayer, request.gameId, session),
+				}
+
+				await this.gnServer.getDatabase().systemGameCollection("GamePlayer", request.gameId).deleteOne({ userId: gamePlayer.getUserId() }, { session: session });
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
 			}
 
-			this.gnServer.getDatabase().systemGameCollection("GamePlayer", request.gameId).deleteOne({ userId: gamePlayer.getUserId() });
 			this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
 		}
 		else if (request.type == OwnerType.CharacterPlayer) {
@@ -158,26 +202,47 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				return operationResponse;
 			}
 
-			// Stores the result value used in the current execution flow.
-			let result = {
-				type: "CharacterPlayer",
-				gameId: request.gameId,
-				log: request.log,
-				tsCreate: xDatetime.getCurrentMilliseconds(),
-				objs: await this.deleteCharacterPlayer(characterPlayer, request.gameId),
-			}
+			let result: any;
 
-			this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", request.gameId).deleteOne({ characterId: characterPlayer.getCharacterId() });
-			this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
+			const session = this.gnServer.getDatabase().startSession();
 
-			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(characterPlayer.getOwner().id, request.gameId);
-			if (gamePlayer != null) {
-				if (gamePlayer.hasPlayerCharacter(characterPlayer.getCharacterId())) {
-					gamePlayer.removePlayerCharacter(characterPlayer.getCharacterId());
-					gamePlayer.saveAsync();
+			try {
+				session.startTransaction();
+
+				// Stores the result value used in the current execution flow.
+				result = {
+					type: "CharacterPlayer",
+					gameId: request.gameId,
+					log: request.log,
+					tsCreate: xDatetime.getCurrentMilliseconds(),
+					objs: await this.deleteCharacterPlayer(characterPlayer, request.gameId, session),
 				}
+
+				await this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", request.gameId).deleteOne({ characterId: characterPlayer.getCharacterId() }, { session: session });
+
+				// Stores the game player value used in the current execution flow.
+				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(characterPlayer.getOwner().id, request.gameId);
+				if (gamePlayer != null) {
+					if (gamePlayer.hasPlayerCharacter(characterPlayer.getCharacterId())) {
+						gamePlayer.removePlayerCharacter(characterPlayer.getCharacterId());
+						await gamePlayer.saveAsync(session);
+					}
+				}
+
+				await session.commitTransaction();
 			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
+			}
+
+			this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
 		}
 		else if (request.type == OwnerType.Inventory) {
 			// Stores the inventory value used in the current execution flow.
@@ -188,50 +253,71 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				return operationResponse;
 			}
 
-			// Stores the result value used in the current execution flow.
-			let result = {
-				type: "Inventory",
-				gameId: request.gameId,
-				log: request.log,
-				tsCreate: xDatetime.getCurrentMilliseconds(),
-				objs: await this.deleteInventory(inventory, request.gameId),
+			let result: any;
+
+			const session = this.gnServer.getDatabase().startSession();
+
+			try {
+				session.startTransaction();
+
+				// Stores the result value used in the current execution flow.
+				result = {
+					type: "Inventory",
+					gameId: request.gameId,
+					log: request.log,
+					tsCreate: xDatetime.getCurrentMilliseconds(),
+					objs: await this.deleteInventory(inventory, request.gameId, session),
+				}
+
+				await this.gnServer.getDatabase().systemGameCollection("Inventory", request.gameId).deleteOne({ itemId: inventory.getItemId() }, { session: session });
+
+				// Stores the owner value used in the current execution flow.
+				let owner = inventory.getOwner();
+				if (owner.type == OwnerType.GamePlayer) {
+					// Stores the game player value used in the current execution flow.
+					let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(inventory.getOwner().id, request.gameId);
+					if (gamePlayer != null) {
+						if (gamePlayer.hasPlayerInventory(inventory.getItemId())) {
+							gamePlayer.removePlayerInventory(inventory.getItemId());
+							await gamePlayer.saveAsync(session);
+						}
+					}
+				}
+				else if (owner.type == OwnerType.CharacterPlayer) {
+					// Stores the character player value used in the current execution flow.
+					let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(inventory.getOwner().id, request.gameId);
+					if (characterPlayer != null) {
+						if (characterPlayer.hasPlayerInventory(inventory.getItemId())) {
+							characterPlayer.removePlayerInventory(inventory.getItemId());
+							await characterPlayer.saveAsync(session);
+						}
+					}
+				}
+				else if (owner.type == OwnerType.Group) {
+					// Stores the group value used in the current execution flow.
+					let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(inventory.getOwner().id, request.gameId);
+					if (group != null) {
+						if (group.hasGroupInventory(inventory.getItemId())) {
+							group.removeGroupInventory(inventory.getItemId());
+							await group.saveAsync(session);
+						}
+					}
+				}
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
 			}
 
-			this.gnServer.getDatabase().systemGameCollection("Inventory", request.gameId).deleteOne({ itemId: inventory.getItemId() });
 			this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
-
-			// Stores the owner value used in the current execution flow.
-			let owner = inventory.getOwner();
-			if (owner.type == OwnerType.GamePlayer) {
-				// Stores the game player value used in the current execution flow.
-				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(inventory.getOwner().id, request.gameId);
-				if (gamePlayer != null) {
-					if (gamePlayer.hasPlayerInventory(inventory.getItemId())) {
-						gamePlayer.removePlayerInventory(inventory.getItemId());
-						gamePlayer.saveAsync();
-					}
-				}
-			}
-			else if (owner.type == OwnerType.CharacterPlayer) {
-				// Stores the character player value used in the current execution flow.
-				let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(inventory.getOwner().id, request.gameId);
-				if (characterPlayer != null) {
-					if (characterPlayer.hasPlayerInventory(inventory.getItemId())) {
-						characterPlayer.removePlayerInventory(inventory.getItemId());
-						characterPlayer.saveAsync();
-					}
-				}
-			}
-			else if (owner.type == OwnerType.Group) {
-				// Stores the group value used in the current execution flow.
-				let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(inventory.getOwner().id, request.gameId);
-				if (group != null) {
-					if (group.hasGroupInventory(inventory.getItemId())) {
-						group.removeGroupInventory(inventory.getItemId());
-						group.saveAsync();
-					}
-				}
-			}
 		}
 		else if (request.type == OwnerType.Group) {
 			// Stores the group value used in the current execution flow.
@@ -245,49 +331,67 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			// Stores the group ID value used in the current execution flow.
 			let groupId = group.getGroupId();
 
-			// Stores the objs value used in the current execution flow.
-			let objs = await this.deleteGroup(group, request.gameId);
+			let result: any;
 
-			// Stores the complete members collection used in the current execution flow.
-			let allMembers = group.getAllMembers();
-			for (let i = 0; i < allMembers.length; i++) {
-				// Stores the member value used in the current execution flow.
-				let member = allMembers[i];
-				// Stores the member ID value used in the current execution flow.
-				let memberId = member.memberId;
+			const session = this.gnServer.getDatabase().startSession();
 
-				if (memberId.length == 11) {
-					// Stores the character player value used in the current execution flow.
-					let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(memberId, request.gameId);
-					if (characterPlayer != null) {
-						if (characterPlayer.hasPlayerGroup(groupId)) {
-							characterPlayer.removePlayerGroup(groupId);
-							characterPlayer.saveAsync();
+			try {
+				session.startTransaction();
+
+				// Stores the complete members collection used in the current execution flow.
+				let allMembers = group.getAllMembers();
+				for (let i = 0; i < allMembers.length; i++) {
+					// Stores the member value used in the current execution flow.
+					let member = allMembers[i];
+					// Stores the member ID value used in the current execution flow.
+					let memberId = member.memberId;
+
+					if (memberId.length == 11) {
+						// Stores the character player value used in the current execution flow.
+						let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(memberId, request.gameId);
+						if (characterPlayer != null) {
+							if (characterPlayer.hasPlayerGroup(groupId)) {
+								characterPlayer.removePlayerGroup(groupId);
+								await characterPlayer.saveAsync(session);
+							}
+						}
+					}
+					else if (memberId.length == 10) {
+						// Stores the game player value used in the current execution flow.
+						let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(memberId, request.gameId);
+						if (gamePlayer != null) {
+							if (gamePlayer.hasPlayerGroup(groupId)) {
+								gamePlayer.removePlayerGroup(groupId);
+								await gamePlayer.saveAsync(session);
+							}
 						}
 					}
 				}
-				else if (memberId.length == 10) {
-					// Stores the game player value used in the current execution flow.
-					let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(memberId, request.gameId);
-					if (gamePlayer != null) {
-						if (gamePlayer.hasPlayerGroup(groupId)) {
-							gamePlayer.removePlayerGroup(groupId);
-							gamePlayer.saveAsync();
-						}
-					}
+
+				// Stores the result value used in the current execution flow.
+				result = {
+					type: "Group",
+					gameId: request.gameId,
+					log: request.log,
+					tsCreate: xDatetime.getCurrentMilliseconds(),
+					objs: await this.deleteGroup(group, request.gameId, session),
 				}
+
+				await this.gnServer.getDatabase().systemGameCollection("Group", request.gameId).deleteOne({ groupId: groupId }, { session: session });
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
 			}
 
-			// Stores the result value used in the current execution flow.
-			let result = {
-				type: "Group",
-				gameId: request.gameId,
-				log: request.log,
-				tsCreate: xDatetime.getCurrentMilliseconds(),
-				objs: objs,
-			}
-
-			this.gnServer.getDatabase().systemGameCollection("Group", request.gameId).deleteOne({ groupId: groupId });
 			this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
 		}
 		else if (request.type == OwnerType.StoreInventory) {
@@ -302,19 +406,37 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			// Stores the store ID value used in the current execution flow.
 			let storeId = storeInventory.getStoreId();
 
-			// Stores the objs value used in the current execution flow.
-			let objs = await this.deleteStoreInventory(storeInventory, request.gameId);
+			let result: any;
 
-			// Stores the result value used in the current execution flow.
-			let result = {
-				type: "StoreInventory",
-				gameId: request.gameId,
-				log: request.log,
-				tsCreate: xDatetime.getCurrentMilliseconds(),
-				objs: objs,
+			const session = this.gnServer.getDatabase().startSession();
+
+			try {
+				session.startTransaction();
+
+				// Stores the result value used in the current execution flow.
+				result = {
+					type: "StoreInventory",
+					gameId: request.gameId,
+					log: request.log,
+					tsCreate: xDatetime.getCurrentMilliseconds(),
+					objs: await this.deleteStoreInventory(storeInventory, request.gameId),
+				}
+
+				await this.gnServer.getDatabase().systemGameCollection("StoreInventory", request.gameId).deleteOne({ storeId: storeId }, { session: session });
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
 			}
 
-			this.gnServer.getDatabase().systemGameCollection("StoreInventory", request.gameId).deleteOne({ storeId: storeId });
 			this.gnServer.getDatabase().logRuntimeCollection("DeleteInDatabase.Log").insertOne(result);
 		}
 		else {
@@ -334,7 +456,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 	 * @param masterPlayer Provides the master player value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async deleteMasterPlayer(masterPlayer: MasterPlayer): Promise<Array<{ [key: string]: any }>> {
+	private async deleteMasterPlayer(masterPlayer: MasterPlayer, session: mongodb.ClientSession): Promise<Array<{ [key: string]: any }>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<{ [key: string]: any }> = [];
 
@@ -357,7 +479,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(userId, gameId);
 			if (gamePlayer != null) {
 				// Stores the results value used in the current execution flow.
-				let results = await this.deleteGamePlayer(gamePlayer, gameId);
+				let results = await this.deleteGamePlayer(gamePlayer, gameId, session);
 
 				answer.push({
 					type: "GamePlayer",
@@ -365,7 +487,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 					objs: results
 				});
 
-				this.gnServer.getDatabase().systemGameCollection("GamePlayer", gameId).deleteOne({ userId: userId });
+				await this.gnServer.getDatabase().systemGameCollection("GamePlayer", gameId).deleteOne({ userId: userId }, { session: session });
 			}
 		}
 
@@ -429,7 +551,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 						backupResults[i].position -= 1;
 					}
 
-					backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } });
+					await backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } }, { session: session });
 
 					answer.push({
 						type: "MasterPlayer.StatisticsBackup",
@@ -452,7 +574,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async deleteGamePlayer(gamePlayer: GamePlayer, gameId: string): Promise<Array<{ [key: string]: any }>> {
+	private async deleteGamePlayer(gamePlayer: GamePlayer, gameId: string, session: mongodb.ClientSession): Promise<Array<{ [key: string]: any }>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<{ [key: string]: any }> = [];
 
@@ -477,12 +599,12 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 
 				if (characterPlayer != null) {
 					// Stores the results value used in the current execution flow.
-					let results = await this.deleteCharacterPlayer(characterPlayer, gameId);
+					let results = await this.deleteCharacterPlayer(characterPlayer, gameId, session);
 					answer.push(...results);
 				}
 			}
 
-			this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", gameId).deleteMany({ "owner.id": userId });
+			await this.gnServer.getDatabase().systemGameCollection("CharacterPlayer", gameId).deleteMany({ "owner.id": userId }, { session: session });
 		}
 
 		{
@@ -500,7 +622,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 					let results = await this.deleteFriendPlayerInGamePlayer(gamePlayer, gameId, friendPlayer);
 					answer.push(...results);
 
-					friendPlayer.saveAsync();
+					await friendPlayer.saveAsync(session);
 				}
 			}
 		}
@@ -521,7 +643,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				});
 			}
 
-			await groupMessageCollection.deleteMany({ senderId: userId });
+			await groupMessageCollection.deleteMany({ senderId: userId }, { session: session });
 
 			// Stores the player groups value used in the current execution flow.
 			let playerGroups = gamePlayer.getAllPlayerGroups();
@@ -538,7 +660,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 					let results = await this.deleteGroupInGamePlayer(gamePlayer, gameId, group);
 					answer.push(...results);
 
-					group.saveAsync();
+					await group.saveAsync(session);
 				}
 			}
 		}
@@ -556,12 +678,12 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 
 				if (inventory != null) {
 					// Stores the results value used in the current execution flow.
-					let results = await this.deleteInventory(inventory, gameId);
+					let results = await this.deleteInventory(inventory, gameId, session);
 					answer.push(...results);
 				}
 			}
 
-			this.gnServer.getDatabase().systemGameCollection("Inventory", gameId).deleteMany({ "owner.id": userId });
+			await this.gnServer.getDatabase().systemGameCollection("Inventory", gameId).deleteMany({ "owner.id": userId }, { session: session });
 		}
 
 		{
@@ -624,7 +746,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 						backupResults[i].position -= 1;
 					}
 
-					backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } });
+					await backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } }, { session: session });
 
 					answer.push({
 						type: "GamePlayer.StatisticsBackup",
@@ -666,7 +788,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async deleteCharacterPlayer(characterPlayer: CharacterPlayer, gameId: string): Promise<Array<{ [key: string]: any }>> {
+	private async deleteCharacterPlayer(characterPlayer: CharacterPlayer, gameId: string, session: mongodb.ClientSession): Promise<Array<{ [key: string]: any }>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<{ [key: string]: any }> = [];
 
@@ -693,7 +815,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 					let results = await this.deleteFriendPlayerInCharacterPlayer(characterPlayer, gameId, friendPlayer);
 					answer.push(...results);
 
-					friendPlayer.saveAsync();
+					await friendPlayer.saveAsync(session);
 				}
 			}
 		}
@@ -714,7 +836,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				});
 			}
 
-			await groupMessageCollection.deleteMany({ senderId: characterId });
+			await groupMessageCollection.deleteMany({ senderId: characterId }, { session: session });
 
 			// Stores the player groups value used in the current execution flow.
 			let playerGroups = characterPlayer.getAllPlayerGroups();
@@ -731,7 +853,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 					let results = await this.deleteGroupInCharacterPlayer(characterPlayer, gameId, group);
 					answer.push(...results);
 
-					group.saveAsync();
+					await group.saveAsync(session);
 				}
 			}
 		}
@@ -749,12 +871,12 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 
 				if (inventory != null) {
 					// Stores the results value used in the current execution flow.
-					let results = await this.deleteInventory(inventory, gameId);
+					let results = await this.deleteInventory(inventory, gameId, session);
 					answer.push(...results);
 				}
 			}
 
-			this.gnServer.getDatabase().systemGameCollection("Inventory", gameId).deleteMany({ "owner.id": characterId });
+			await this.gnServer.getDatabase().systemGameCollection("Inventory", gameId).deleteMany({ "owner.id": characterId }, { session: session });
 		}
 
 		{
@@ -817,7 +939,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 						backupResults[i].position -= 1;
 					}
 
-					backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } });
+					await backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } }, { session: session });
 
 					answer.push({
 						type: "CharacterPlayer.StatisticsBackup",
@@ -859,7 +981,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async deleteInventory(inventory: Inventory, gameId: string): Promise<Array<{ [key: string]: any }>> {
+	private async deleteInventory(inventory: Inventory, gameId: string, session: mongodb.ClientSession): Promise<Array<{ [key: string]: any }>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<{ [key: string]: any }> = [];
 
@@ -912,7 +1034,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 						backupResults[i].position -= 1;
 					}
 
-					backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } });
+					await backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } }, { session: session });
 
 					answer.push({
 						type: "Inventory.StatisticsBackup",
@@ -935,7 +1057,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	private async deleteGroup(group: Group, gameId: string): Promise<Array<{ [key: string]: any }>> {
+	private async deleteGroup(group: Group, gameId: string, session: mongodb.ClientSession): Promise<Array<{ [key: string]: any }>> {
 		// Stores the answer value used in the current execution flow.
 		let answer: Array<{ [key: string]: any }> = [];
 
@@ -966,7 +1088,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 				});
 			}
 
-			await this.gnServer.getDatabase().runtimeGameCollection("Group.Message", gameId).deleteMany({ groupId: groupId });
+			await this.gnServer.getDatabase().runtimeGameCollection("Group.Message", gameId).deleteMany({ groupId: groupId }, { session: session });
 			cacheData.removeData("GroupMessages_" + groupId);
 		}
 
@@ -983,12 +1105,12 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 
 				if (inventory != null) {
 					// Stores the results value used in the current execution flow.
-					let results = await this.deleteInventory(inventory, gameId);
+					let results = await this.deleteInventory(inventory, gameId, session);
 					answer.push(...results);
 				}
 			}
 
-			this.gnServer.getDatabase().systemGameCollection("Inventory", gameId).deleteMany({ "owner.id": groupId });
+			await this.gnServer.getDatabase().systemGameCollection("Inventory", gameId).deleteMany({ "owner.id": groupId }, { session: session });
 		}
 
 		{
@@ -1051,7 +1173,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 						backupResults[i].position -= 1;
 					}
 
-					backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } });
+					await backupStatisticsCollection.updateOne({ _id: result._id }, { $set: { results: backupResults } }, { session: session });
 
 					answer.push({
 						type: "Group.StatisticsBackup",
@@ -1102,7 +1224,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 		let userId = gamePlayer.getUserId();
 
 		if (friendPlayer.hasPlayerFriend(userId)) {
-			friendPlayer.removePlayerGroup(userId);
+			friendPlayer.removePlayerFriend(userId);
 		}
 
 		return answer;
@@ -1123,7 +1245,7 @@ export class DeleteInDatabaseRequestHandler extends RequestHandler {
 		let characterId = characterPlayer.getCharacterId();
 
 		if (friendPlayer.hasPlayerFriend(characterId)) {
-			friendPlayer.removePlayerGroup(characterId);
+			friendPlayer.removePlayerFriend(characterId);
 		}
 
 		return answer;

@@ -12,11 +12,13 @@ export class CharacterPlayerRepository extends AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createCharacterPlayerAsync(result: any, gameId: string): Promise<CharacterPlayer> {
+	public async createCharacterPlayerAsync(result: any, gameId: string, session?: mongodb.ClientSession): Promise<CharacterPlayer> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		await collection.insertOne(result);
+		await collection.insertOne(result, {
+			session: session,
+		});
 		return new CharacterPlayer(result, collection);
 	}
 

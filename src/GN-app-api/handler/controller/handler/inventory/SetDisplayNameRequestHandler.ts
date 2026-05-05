@@ -192,7 +192,7 @@ export class SetDisplayNameRequestHandler extends ItemBaseRequestHandler {
 		}
 
 		inventory.setDisplayName(request.displayName);
-		inventory.saveAsync();
+		await inventory.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

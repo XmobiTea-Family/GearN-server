@@ -232,7 +232,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 
 			if (group.hasMember(request.memberId)) {
 				group.removeMember(request.memberId);
-				group.saveAsync();
+				await group.saveAsync();
 
 				{
 					// Stores the GearN members value used in the current execution flow.
@@ -260,7 +260,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 
 			if (gamePlayer.hasPlayerGroup(request.groupId)) {
 				gamePlayer.removePlayerGroup(request.groupId);
-				gamePlayer.saveAsync();
+				await gamePlayer.saveAsync();
 
 				{
 					// Stores the GearN player groups value used in the current execution flow.
@@ -312,7 +312,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 
 			if (group.hasMember(request.memberId)) {
 				group.removeMember(request.memberId);
-				group.saveAsync();
+				await group.saveAsync();
 
 				let hasCharacter = false;
 				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(characterPlayer.getOwner().id, secretInfo.getGameId(), { playerCharacters: true });
@@ -352,7 +352,7 @@ export class RemoveMemberRequestHandler extends GroupBaseRequestHandler {
 
 			if (characterPlayer.hasPlayerGroup(request.groupId)) {
 				characterPlayer.removePlayerGroup(request.groupId);
-				characterPlayer.saveAsync();
+				await characterPlayer.saveAsync();
 
 				{
 					// Stores the GearN player groups value used in the current execution flow.

@@ -97,12 +97,13 @@ export class GamePlayerRepository extends AbstractBaseRepository {
 	/**
 	 * Loads the game player with display name async.
 	 * @param displayName Provides the display name value used by this operation.
+	 * @param gameId Provides the game ID value used by this operation.
 	 * @param gamePlayerFindOptions Provides the game player find options value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async loadGamePlayerWithDisplayNameAsync(displayName: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
+	public async loadGamePlayerWithDisplayNameAsync(displayName: string, gameId: string, gamePlayerFindOptions?: GamePlayerFindOptions): Promise<GamePlayer> {
 		// Stores the collection value used in the current execution flow.
-		let collection = this.systemCollection("GamePlayer");
+		let collection = this.systemGameCollection("GamePlayer", gameId);
 
 		// Stores the result value used in the current execution flow.
 		let result = await collection.findOne({ displayName: displayName }, {

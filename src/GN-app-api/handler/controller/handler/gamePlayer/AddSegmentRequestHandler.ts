@@ -214,7 +214,7 @@ export class AddSegmentRequestHandler extends GamePlayerBaseRequestHandler {
 		if (!gamePlayer.hasSegment(request.segment)) {
 			gamePlayer.addSegment(request.segment);
 
-			gamePlayer.saveAsync();
+			await gamePlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

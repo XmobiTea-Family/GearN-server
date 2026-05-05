@@ -239,7 +239,7 @@ export class CloudScriptSecurityValidator {
 			sourceLine = "(empty line)";
 		}
 
-		return `${violation.message} at line ${sourceLocation.line + 1}, column ${sourceLocation.column + 1}. Source: ${sourceLine}`;
+		return `${violation.message}, Source: ${sourceLine} [ts(-1)] [Line ${sourceLocation.line + 1}, Column ${sourceLocation.column + 1}]`;
 	}
 
 	private static getSourceLocation(script: string, position: number): { line: number, column: number } {

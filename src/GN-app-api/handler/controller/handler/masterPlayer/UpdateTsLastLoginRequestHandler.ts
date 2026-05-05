@@ -1,19 +1,19 @@
-import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
-import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo, SecretRole } from "../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
-import { xDatetime } from "../../../../../GN-library/xdatetime/lib/xDatetime";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class UpdateTsLastLoginOperationRequest extends OperationRequest {
 
@@ -205,7 +205,7 @@ export class UpdateTsLastLoginRequestHandler extends MasterPlayerBaseRequestHand
 		}
 
 		masterPlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

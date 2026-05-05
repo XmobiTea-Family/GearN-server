@@ -17,6 +17,7 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CreatePlayerCharacterOperationRequest extends OperationRequest {
 
@@ -245,7 +246,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
@@ -290,11 +291,29 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			}
 		}
 
-		// Stores the character player value used in the current execution flow.
-		let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.createCharacterPlayerAsync(result, secretInfo.getGameId());
+		const session = this.gnServer.getDatabase().startSession();
 
-		gamePlayer.setPlayerCharacter(characterId, request.catalogId);
-		gamePlayer.saveAsync();
+		try {
+			session.startTransaction();
+
+			// Stores the character player value used in the current execution flow.
+			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.createCharacterPlayerAsync(result, secretInfo.getGameId(), session);
+
+			gamePlayer.setPlayerCharacter(characterId, request.catalogId);
+			await gamePlayer.saveAsync(session);
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		// Stores the GearN player characters value used in the current execution flow.
 		let gnPlayerCharacters = new GNArray();
@@ -302,8 +321,8 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		// Stores the GearN player character value used in the current execution flow.
 		let gnPlayerCharacter = new GNHashtable();
 
-		gnPlayerCharacter.add(ParameterCode.CharacterId, characterPlayer.getCharacterId());
-		gnPlayerCharacter.add(ParameterCode.CatalogId, characterPlayer.getCatalogId());
+		gnPlayerCharacter.add(ParameterCode.CharacterId, characterId);
+		gnPlayerCharacter.add(ParameterCode.CatalogId, request.catalogId);
 
 		gnPlayerCharacters.add(gnPlayerCharacter);
 

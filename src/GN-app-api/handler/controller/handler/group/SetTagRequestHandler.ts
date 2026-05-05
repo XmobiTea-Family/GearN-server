@@ -210,7 +210,7 @@ export class SetTagRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		group.setTag(request.key, request.value);
-		group.saveAsync();
+		await group.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

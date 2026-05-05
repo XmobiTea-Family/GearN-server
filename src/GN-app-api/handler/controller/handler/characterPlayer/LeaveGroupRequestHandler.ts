@@ -257,7 +257,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 
 		if (characterPlayer.hasPlayerGroup(request.groupId)) {
 			characterPlayer.removePlayerGroup(request.groupId);
-			characterPlayer.saveAsync();
+			await characterPlayer.saveAsync();
 
 			{
 				// Stores the GearN player groups value used in the current execution flow.
@@ -283,7 +283,7 @@ export class LeaveGroupRequestHandler extends CharacterPlayerBaseRequestHandler 
 
 		if (group.hasMember(request.characterId)) {
 			group.removeMember(request.characterId);
-			group.saveAsync();
+			await group.saveAsync();
 
 			let hasCharacter = false;
 			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(characterPlayer.getOwner().id, secretInfo.getGameId(), { playerCharacters: true });

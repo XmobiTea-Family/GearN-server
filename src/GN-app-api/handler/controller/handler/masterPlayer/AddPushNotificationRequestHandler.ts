@@ -235,7 +235,7 @@ export class AddPushNotificationRequestHandler extends MasterPlayerBaseRequestHa
 			}
 
 			masterPlayer.setPushNotification(pushId, pushNotification);
-			masterPlayer.saveAsync();
+			await masterPlayer.saveAsync();
 		}
 		else {
 			pushId = oldPushNotification.pushId;

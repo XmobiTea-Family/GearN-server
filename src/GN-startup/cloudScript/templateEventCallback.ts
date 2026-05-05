@@ -1094,27 +1094,27 @@ process.env.gnServerSettingsOptions = "";
 process.env.gnAuthToken = "";
 
 // Stores the pre handlers value used by this module.
-const preHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, log: (log: any) => void) => Promise<OperationResponse | null>> = {};
+const preHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, log: (message: any) => void) => Promise<OperationResponse | null>> = {};
 
 // Stores the post handlers value used by this module.
-const postHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
+const postHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => Promise<OperationResponse>> = {};
 
 // Stores the system handlers value used by this module.
-const systemHandlers: Record<string, (log: (log: any) => void) => Promise<void>> = {};
+const systemHandlers: Record<string, (log: (message: any) => void) => Promise<void>> = {};
 
 // Stores the event handlers value used by this module.
-const eventHandlers: Record<string, (request: { [k: string]: any }, operationEvent: OperationEvent, log: (log: any) => void) => Promise<void>> = {};
+const eventHandlers: Record<string, (request: { [k: string]: any }, operationEvent: OperationEvent, log: (message: any) => void) => Promise<void>> = {};
 
 // Stores the system matchmaking handlers value used by this module.
-const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (log: any) => void) => Promise<{ success: boolean }>> = {};
+const systemMatchmakingHandlers: Record<string, (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (message: any) => void) => Promise<{ success: boolean }>> = {};
 
 // Stores the system authenticate handlers value used by this module.
-const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (log: any) => void) => Promise<OperationResponse>> = {};
+const systemAuthenticateHandlers: Record<string, (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => Promise<OperationResponse>> = {};
 
 // Stores the system generic service handlers value used by this module.
-const systemGenericServiceHandlers: Record<string, (serviceName: string, serviceData: { [k: string]: any; }, log: (log: any) => void) => Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>> = {};
+const systemGenericServiceHandlers: Record<string, (serviceName: string, serviceData: { [k: string]: any; }, log: (message: any) => void) => Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }>> = {};
 
 // Stores the socket handlers value used by this module.
-const socketHandlers: Record<string, (userId: string, socketId: string, log: (log: any) => void) => Promise<void>> = {};
+const socketHandlers: Record<string, (userId: string, socketId: string, log: (message: any) => void) => Promise<void>> = {};
 
 //$replaceScript

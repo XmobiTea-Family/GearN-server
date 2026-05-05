@@ -220,7 +220,7 @@ export class UnlinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseR
 
 		external.googlePlayGameService = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

@@ -220,7 +220,7 @@ export class UnlinkiOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 
 		external.device.iOSDeviceId = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

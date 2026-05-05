@@ -286,7 +286,7 @@ export class SetCustomDataRequestHandler extends CharacterPlayerBaseRequestHandl
 			}
 		}
 
-		characterPlayer.saveAsync();
+		await characterPlayer.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 

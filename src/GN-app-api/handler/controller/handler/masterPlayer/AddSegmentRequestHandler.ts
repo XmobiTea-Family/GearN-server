@@ -215,7 +215,7 @@ export class AddSegmentRequestHandler extends MasterPlayerBaseRequestHandler {
 
 		if (!masterPlayer.hasSegment(request.segment)) {
 			masterPlayer.addSegment(request.segment);
-			masterPlayer.saveAsync();
+			await masterPlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

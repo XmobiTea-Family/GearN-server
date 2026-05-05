@@ -220,7 +220,7 @@ export class UnlinkCustomDeviceIdRequestHandler extends MasterPlayerBaseRequestH
 
 		external.device.customDeviceId = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

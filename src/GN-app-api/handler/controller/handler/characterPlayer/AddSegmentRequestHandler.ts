@@ -212,7 +212,7 @@ export class AddSegmentRequestHandler extends CharacterPlayerBaseRequestHandler 
 		if (!characterPlayer.hasSegment(request.segment)) {
 			characterPlayer.addSegment(request.segment);
 
-			characterPlayer.saveAsync();
+			await characterPlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

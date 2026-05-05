@@ -239,14 +239,14 @@ export class LinkAndroidDeviceIdRequestHandler extends MasterPlayerBaseRequestHa
 			otherExternal.device.androidDeviceId = null;
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		if (external.device == null) external.device = {};
 
 		external.device.androidDeviceId = request.androidDeviceId;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

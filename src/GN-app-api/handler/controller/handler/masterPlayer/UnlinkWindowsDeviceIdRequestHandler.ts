@@ -220,7 +220,7 @@ export class UnlinkWindowsDeviceIdRequestHandler extends MasterPlayerBaseRequest
 
 		external.device.windowsDeviceId = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

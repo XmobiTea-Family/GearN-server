@@ -512,7 +512,7 @@ export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseReq
 
 			this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
-			characterPlayer.saveAsync();
+			await characterPlayer.saveAsync();
 
 			gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
 			gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
@@ -651,7 +651,7 @@ export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseReq
 
 			this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
-			gamePlayer.saveAsync();
+			await gamePlayer.saveAsync();
 
 			gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
 			gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
@@ -790,7 +790,7 @@ export class ValidateFacebookStoreReceiptRequestHandler extends StoreItemBaseReq
 
 			this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogsAsync(logs, secretInfo.getGameId());
 
-			group.saveAsync();
+			await group.saveAsync();
 
 			gnInfoResponseParameters.add(ParameterCode.Currencies, gnCurrencies);
 			gnInfoResponseParameters.add(ParameterCode.Inventories, gnInventories);

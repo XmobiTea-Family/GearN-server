@@ -212,7 +212,7 @@ export class RemoveTagRequestHandler extends CharacterPlayerBaseRequestHandler {
 		if (characterPlayer.hasTag(request.tag)) {
 			characterPlayer.removeTag(request.tag);
 
-			characterPlayer.saveAsync();
+			await characterPlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

@@ -39,7 +39,7 @@ class SetAvatarOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetAvatarOperationRequest extends SetAvatarOperationRequest {
+class ServerSetAvatarOperationRequest extends SetAvatarOperationRequest {
 
 	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
@@ -55,7 +55,7 @@ class ServerGetAvatarOperationRequest extends SetAvatarOperationRequest {
 	}
 }
 
-class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
+class AdminSetAvatarOperationRequest extends ServerSetAvatarOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -131,7 +131,7 @@ export class SetAvatarRequestHandler extends GamePlayerBaseRequestHandler {
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -156,7 +156,7 @@ export class SetAvatarRequestHandler extends GamePlayerBaseRequestHandler {
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -219,7 +219,7 @@ export class SetAvatarRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		gamePlayer.setAvatar(request.type, request.value);
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

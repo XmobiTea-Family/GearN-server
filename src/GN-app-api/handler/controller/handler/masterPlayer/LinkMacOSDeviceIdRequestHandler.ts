@@ -239,14 +239,14 @@ export class LinkMacOSDeviceIdRequestHandler extends MasterPlayerBaseRequestHand
 			otherExternal.device.macOSDeviceId = null;
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		if (external.device == null) external.device = {};
 
 		external.device.macOSDeviceId = request.macOSDeviceId;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

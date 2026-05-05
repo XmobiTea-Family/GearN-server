@@ -39,7 +39,7 @@ class SetPlayerBanOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
+class ServerSetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 
 	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
@@ -55,7 +55,7 @@ class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 	}
 }
 
-class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationRequest {
+class AdminSetPlayerBanOperationRequest extends ServerSetPlayerBanOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -131,7 +131,7 @@ export class SetPlayerBanRequestHandler extends GamePlayerBaseRequestHandler {
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerBanOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -156,7 +156,7 @@ export class SetPlayerBanRequestHandler extends GamePlayerBaseRequestHandler {
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerBanOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -219,7 +219,7 @@ export class SetPlayerBanRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		gamePlayer.setPlayerBan(request.tsExpire, request.reason);
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

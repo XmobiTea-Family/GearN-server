@@ -293,7 +293,7 @@ export class ChangeGroupCurrencyRequestHandler extends GroupBaseRequestHandler {
 
 		this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogsAsync(logs, secretInfo.getGameId());
 
-		group.saveAsync();
+		await group.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.GroupCurrencies, gnGroupCurrencies);
 

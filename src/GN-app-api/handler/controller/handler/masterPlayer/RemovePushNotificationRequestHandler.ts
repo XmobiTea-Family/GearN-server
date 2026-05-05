@@ -215,7 +215,7 @@ export class RemovePushNotificationRequestHandler extends MasterPlayerBaseReques
 			masterPlayer.removePushNotification(request.pushId);
 		}
 
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

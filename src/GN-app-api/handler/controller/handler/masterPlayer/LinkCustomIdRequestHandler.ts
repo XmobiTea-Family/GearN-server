@@ -239,14 +239,14 @@ export class LinkCustomIdRequestHandler extends MasterPlayerBaseRequestHandler {
 			otherExternal.custom = null;
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		external.custom = {
 			customId: request.customId
 		};
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

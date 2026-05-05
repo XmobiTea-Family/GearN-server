@@ -220,7 +220,7 @@ export class UnlinkGoogleRequestHandler extends MasterPlayerBaseRequestHandler {
 
 		external.google = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

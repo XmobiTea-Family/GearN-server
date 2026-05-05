@@ -198,7 +198,7 @@ export class SetDisplayNameRequestHandler extends GamePlayerBaseRequestHandler {
 
 		if (request.uniqueDisplayName) {
 			// Stores the game player with this display name value used in the current execution flow.
-			let gamePlayerWithThisDisplayName = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerWithDisplayNameAsync(request.displayName, gamePlayerFindOptions);
+			let gamePlayerWithThisDisplayName = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerWithDisplayNameAsync(request.displayName, secretInfo.getGameId(), gamePlayerFindOptions);
 
 			if (gamePlayerWithThisDisplayName != null) {
 				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.DisplayNameUsed);
@@ -222,14 +222,14 @@ export class SetDisplayNameRequestHandler extends GamePlayerBaseRequestHandler {
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
 		}
 
 		gamePlayer.setDisplayName(request.displayName);
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

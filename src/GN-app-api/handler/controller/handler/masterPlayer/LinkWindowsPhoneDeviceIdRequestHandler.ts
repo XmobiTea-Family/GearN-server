@@ -239,14 +239,14 @@ export class LinkWindowsPhoneDeviceIdRequestHandler extends MasterPlayerBaseRequ
 			otherExternal.device.windowsPhoneDeviceId = null;
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		if (external.device == null) external.device = {};
 
 		external.device.windowsPhoneDeviceId = request.windowsPhoneDeviceId;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

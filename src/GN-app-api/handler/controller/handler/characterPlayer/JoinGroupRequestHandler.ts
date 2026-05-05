@@ -19,6 +19,7 @@ import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/enti
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class JoinGroupOperationRequest extends OperationRequest {
 
@@ -257,11 +258,29 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 
 		if (!characterPlayer.hasPlayerGroup(request.groupId)) {
 			if (playerGroupCatalogSettingsItem.forceAcceptMember) {
-				characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
-				characterPlayer.saveAsync();
+				const session = this.gnServer.getDatabase().startSession();
 
-				group.setMember(request.characterId, GroupStatus.Member);
-				group.saveAsync();
+				try {
+					session.startTransaction();
+
+					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
+					await characterPlayer.saveAsync(session);
+
+					group.setMember(request.characterId, GroupStatus.Member);
+					await group.saveAsync(session);
+
+					await session.commitTransaction();
+				}
+				catch (err) {
+					await session.abortTransaction();
+
+					Debug.logError(err);
+
+					throw err;
+				}
+				finally {
+					await session.endSession();
+				}
 
 				this.gnServer.joinRoom(characterPlayer.getOwner().id, request.groupId);
 
@@ -308,11 +327,29 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 				}
 			}
 			else {
-				characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.SentRequestAndWaitingAccept, currentMilliseconds);
-				characterPlayer.saveAsync();
+				const session = this.gnServer.getDatabase().startSession();
 
-				group.setMember(request.characterId, GroupStatus.WaitingAccept);
-				group.saveAsync();
+				try {
+					session.startTransaction();
+
+					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+					await characterPlayer.saveAsync(session);
+
+					group.setMember(request.characterId, GroupStatus.WaitingAccept);
+					await group.saveAsync(session);
+
+					await session.commitTransaction();
+				}
+				catch (err) {
+					await session.abortTransaction();
+
+					Debug.logError(err);
+
+					throw err;
+				}
+				finally {
+					await session.endSession();
+				}
 
 				{
 					// Stores the GearN player groups value used in the current execution flow.
@@ -362,11 +399,29 @@ export class JoinGroupRequestHandler extends CharacterPlayerBaseRequestHandler {
 			let groupItem = characterPlayer.getPlayerGroup(request.groupId);
 
 			if (groupItem.status == GroupStatus.WaitingAccept) {
-				characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
-				characterPlayer.saveAsync();
+				const session = this.gnServer.getDatabase().startSession();
 
-				group.setMember(request.characterId, GroupStatus.Member);
-				group.saveAsync();
+				try {
+					session.startTransaction();
+
+					characterPlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
+					await characterPlayer.saveAsync(session);
+
+					group.setMember(request.characterId, GroupStatus.Member);
+					await group.saveAsync(session);
+
+					await session.commitTransaction();
+				}
+				catch (err) {
+					await session.abortTransaction();
+
+					Debug.logError(err);
+
+					throw err;
+				}
+				finally {
+					await session.endSession();
+				}
 
 				this.gnServer.joinRoom(characterPlayer.getOwner().id, request.groupId);
 

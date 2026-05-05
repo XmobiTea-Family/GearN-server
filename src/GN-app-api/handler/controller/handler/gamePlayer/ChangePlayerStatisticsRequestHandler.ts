@@ -449,7 +449,7 @@ export class ChangePlayerStatisticsRequestHandler extends GamePlayerBaseRequestH
 
 		this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerStatisticsLogsAsync(logs, secretInfo.getGameId());
 
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.PlayerStatistics, gnPlayerStatistics);
 

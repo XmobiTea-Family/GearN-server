@@ -215,7 +215,7 @@ export class RemovePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 		}
 
 		characterPlayer.removePlayerInventory(request.itemId);
-		characterPlayer.saveAsync();
+		await characterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

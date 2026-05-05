@@ -195,7 +195,7 @@ export class AddSegmentRequestHandler extends ItemBaseRequestHandler {
 		if (!inventory.hasSegment(request.segment)) {
 			inventory.addSegment(request.segment);
 
-			inventory.saveAsync();
+			await inventory.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

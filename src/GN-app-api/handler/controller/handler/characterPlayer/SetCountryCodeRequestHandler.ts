@@ -35,7 +35,7 @@ class SetCountryCodeOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetCountryCodeOperationRequest extends SetCountryCodeOperationRequest {
+class ServerSetCountryCodeOperationRequest extends SetCountryCodeOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -47,7 +47,7 @@ class ServerGetCountryCodeOperationRequest extends SetCountryCodeOperationReques
 	}
 }
 
-class AdminGetCountryCodeOperationRequest extends ServerGetCountryCodeOperationRequest {
+class AdminSetCountryCodeOperationRequest extends ServerSetCountryCodeOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -111,7 +111,7 @@ export class SetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCountryCodeOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetCountryCodeOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -135,7 +135,7 @@ export class SetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCountryCodeOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetCountryCodeOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -210,7 +210,7 @@ export class SetCountryCodeRequestHandler extends CharacterPlayerBaseRequestHand
 		}
 
 		characterPlayer.setCountryCode(request.countryCode);
-		characterPlayer.saveAsync();
+		await characterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

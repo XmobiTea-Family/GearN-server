@@ -15,6 +15,7 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
 
@@ -199,45 +200,65 @@ export class SetRemoveStatusRequestHandler extends ItemBaseRequestHandler {
 		if (removeStatus.tsRemove == 0) {
 			inventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
 
-			// Stores the owner value used in the current execution flow.
-			let owner = inventory.getOwner();
-			// Stores the owner type value used in the current execution flow.
-			let ownerType = owner.type;
-			if (ownerType == OwnerType.Group) {
-				// Stores the group value used in the current execution flow.
-				let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });
-				if (group != null) {
-					if (group.hasGroupInventory(request.itemId)) {
-						group.removeGroupInventory(request.itemId);
+			const session = this.gnServer.getDatabase().startSession();
 
-						group.saveAsync();
+			try {
+				session.startTransaction();
+
+				// Stores the owner value used in the current execution flow.
+				let owner = inventory.getOwner();
+				// Stores the owner type value used in the current execution flow.
+				let ownerType = owner.type;
+				if (ownerType == OwnerType.Group) {
+					// Stores the group value used in the current execution flow.
+					let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });
+					if (group != null) {
+						if (group.hasGroupInventory(request.itemId)) {
+							group.removeGroupInventory(request.itemId);
+
+							await group.saveAsync(session);
+						}
 					}
 				}
-			}
-			else if (ownerType == OwnerType.GamePlayer) {
-				// Stores the game player value used in the current execution flow.
-				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
-				if (gamePlayer != null) {
-					if (gamePlayer.hasPlayerInventory(request.itemId)) {
-						gamePlayer.removePlayerInventory(request.itemId);
+				else if (ownerType == OwnerType.GamePlayer) {
+					// Stores the game player value used in the current execution flow.
+					let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
+					if (gamePlayer != null) {
+						if (gamePlayer.hasPlayerInventory(request.itemId)) {
+							gamePlayer.removePlayerInventory(request.itemId);
 
-						gamePlayer.saveAsync();
+							await gamePlayer.saveAsync(session);
+						}
 					}
 				}
-			}
-			else if (ownerType == OwnerType.CharacterPlayer) {
-				// Stores the character player value used in the current execution flow.
-				let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
-				if (characterPlayer != null) {
-					if (characterPlayer.hasPlayerInventory(request.itemId)) {
-						characterPlayer.removePlayerInventory(request.itemId);
+				else if (ownerType == OwnerType.CharacterPlayer) {
+					// Stores the character player value used in the current execution flow.
+					let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
+					if (characterPlayer != null) {
+						if (characterPlayer.hasPlayerInventory(request.itemId)) {
+							characterPlayer.removePlayerInventory(request.itemId);
 
-						characterPlayer.saveAsync();
+							await characterPlayer.saveAsync(session);
+						}
 					}
 				}
+
+				await inventory.saveAsync(session);
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
 			}
 
-			inventory.saveAsync();
+
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

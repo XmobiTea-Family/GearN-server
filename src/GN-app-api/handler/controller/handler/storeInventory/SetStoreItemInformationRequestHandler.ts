@@ -348,7 +348,7 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
 			}
 		}
 
-		storeInventory.saveAsync();
+		await storeInventory.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(storeInventory, {
 			storeItems: true,

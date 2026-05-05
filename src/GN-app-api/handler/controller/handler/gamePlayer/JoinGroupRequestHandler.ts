@@ -19,6 +19,7 @@ import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/enti
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class JoinGroupOperationRequest extends OperationRequest {
 
@@ -250,7 +251,7 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
@@ -261,11 +262,29 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 
 		if (!gamePlayer.hasPlayerGroup(request.groupId)) {
 			if (playerGroupCatalogSettingsItem.forceAcceptMember) {
-				gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
-				gamePlayer.saveAsync();
+				const session = this.gnServer.getDatabase().startSession();
 
-				group.setMember(request.userId, GroupStatus.Member);
-				group.saveAsync();
+				try {
+					session.startTransaction();
+
+					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
+					await gamePlayer.saveAsync(session);
+
+					group.setMember(request.userId, GroupStatus.Member);
+					await group.saveAsync(session);
+
+					await session.commitTransaction();
+				}
+				catch (err) {
+					await session.abortTransaction();
+
+					Debug.logError(err);
+
+					throw err;
+				}
+				finally {
+					await session.endSession();
+				}
 
 				{
 					// Stores the GearN player groups value used in the current execution flow.
@@ -311,11 +330,29 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 				this.gnServer.joinRoom(request.userId, request.groupId);
 			}
 			else {
-				gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.SentRequestAndWaitingAccept, currentMilliseconds);
-				gamePlayer.saveAsync();
+				const session = this.gnServer.getDatabase().startSession();
 
-				group.setMember(request.userId, GroupStatus.WaitingAccept);
-				group.saveAsync();
+				try {
+					session.startTransaction();
+
+					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+					await gamePlayer.saveAsync(session);
+
+					group.setMember(request.userId, GroupStatus.WaitingAccept);
+					await group.saveAsync(session);
+
+					await session.commitTransaction();
+				}
+				catch (err) {
+					await session.abortTransaction();
+
+					Debug.logError(err);
+
+					throw err;
+				}
+				finally {
+					await session.endSession();
+				}
 
 				{
 					// Stores the GearN player groups value used in the current execution flow.
@@ -364,11 +401,29 @@ export class JoinGroupRequestHandler extends GamePlayerBaseRequestHandler {
 			let groupItem = gamePlayer.getPlayerGroup(request.groupId);
 
 			if (groupItem.status == GroupStatus.WaitingAccept) {
-				gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
-				gamePlayer.saveAsync();
+				const session = this.gnServer.getDatabase().startSession();
 
-				group.setMember(request.userId, GroupStatus.Member);
-				group.saveAsync();
+				try {
+					session.startTransaction();
+
+					gamePlayer.setPlayerGroup(request.groupId, catalogId, GroupStatus.Member, currentMilliseconds);
+					await gamePlayer.saveAsync(session);
+
+					group.setMember(request.userId, GroupStatus.Member);
+					await group.saveAsync(session);
+
+					await session.commitTransaction();
+				}
+				catch (err) {
+					await session.abortTransaction();
+
+					Debug.logError(err);
+
+					throw err;
+				}
+				finally {
+					await session.endSession();
+				}
 
 				{
 					// Stores the GearN player groups value used in the current execution flow.

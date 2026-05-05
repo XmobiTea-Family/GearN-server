@@ -219,7 +219,7 @@ export class SetEmailRequestHandler extends MasterPlayerBaseRequestHandler {
 		}
 
 		masterPlayer.setEmail(request.email);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

@@ -296,7 +296,7 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 			otherExternal.gameCenter = null;
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		external.gameCenter = {
@@ -305,7 +305,7 @@ export class LinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandler
 			email: email
 		};
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

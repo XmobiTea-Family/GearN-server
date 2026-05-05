@@ -210,7 +210,7 @@ export class SetTagRequestHandler extends ItemBaseRequestHandler {
 		}
 
 		inventory.setTag(request.key, request.value);
-		inventory.saveAsync();
+		await inventory.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

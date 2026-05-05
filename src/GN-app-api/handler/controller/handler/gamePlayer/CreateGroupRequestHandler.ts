@@ -19,6 +19,7 @@ import { GroupMemberParam } from "./model/GroupMemberParam";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CreateGroupOperationRequest extends OperationRequest {
 
@@ -235,7 +236,7 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
@@ -265,33 +266,62 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
-		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId());
+		const session = this.gnServer.getDatabase().startSession();
 
-		if (request.groupMembers != null) {
-			for (let i = 0; i < request.groupMembers.length; i++) {
-				// Stores the group member value used in the current execution flow.
-				let groupMember = request.groupMembers[i];
+		try {
+			session.startTransaction();
 
-				if (groupMember.userId == request.userId) continue;
+			// Stores the group value used in the current execution flow.
+			let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId(), session);
 
-				// Stores the other game player value used in the current execution flow.
-				let otherGamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(groupMember.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+			if (request.groupMembers != null) {
+				for (let i = 0; i < request.groupMembers.length; i++) {
+					// Stores the group member value used in the current execution flow.
+					let groupMember = request.groupMembers[i];
 
-				if (otherGamePlayer != null) {
+					if (groupMember.userId == request.userId) continue;
 
-					otherGamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
-					otherGamePlayer.saveAsync();
+					// Stores the other game player value used in the current execution flow.
+					let otherGamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(groupMember.userId, secretInfo.getGameId(), {
+						playerGroups: true,
+					});
 
-					group.setMember(groupMember.userId, GroupStatus.WaitingAccept);
+					if (otherGamePlayer != null) {
+						if (playerGroupCatalogSettingsItem.forceAcceptMember) {
+							otherGamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
+							await otherGamePlayer.saveAsync(session);
+
+							group.setMember(groupMember.userId, GroupStatus.Member);
+
+							this.gnServer.joinRoom(groupMember.userId, groupId);
+						}
+						else {
+							otherGamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
+							await otherGamePlayer.saveAsync(session);
+
+							group.setMember(groupMember.userId, GroupStatus.WaitingAccept);
+						}
+					}
 				}
+
+				await group.saveAsync(session);
 			}
 
-			group.saveAsync();
-		}
+			gamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
+			await gamePlayer.saveAsync(session);
 
-		gamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
-		gamePlayer.saveAsync();
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		// Stores the GearN player groups value used in the current execution flow.
 		let gnPlayerGroups = new GNArray();
@@ -299,8 +329,8 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		// Stores the GearN player group value used in the current execution flow.
 		let gnPlayerGroup = new GNHashtable();
 
-		gnPlayerGroup.add(ParameterCode.GroupId, group.getGroupId());
-		gnPlayerGroup.add(ParameterCode.CatalogId, group.getCatalogId());
+		gnPlayerGroup.add(ParameterCode.GroupId, groupId);
+		gnPlayerGroup.add(ParameterCode.CatalogId, request.catalogId);
 		gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 		gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 

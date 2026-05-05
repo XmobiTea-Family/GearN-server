@@ -217,7 +217,7 @@ export class RemovePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 		}
 
 		gamePlayer.removePlayerCharacter(request.characterId);
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

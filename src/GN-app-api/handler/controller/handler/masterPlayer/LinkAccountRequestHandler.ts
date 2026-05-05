@@ -248,7 +248,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			otherExternal.account = null;
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		// Stores the password hash value used in the current execution flow.
@@ -259,7 +259,7 @@ export class LinkAccountRequestHandler extends MasterPlayerBaseRequestHandler {
 			password: passwordHash
 		}
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

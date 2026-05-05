@@ -34,7 +34,7 @@ class RemoveFileUploadInfoOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetAvatarOperationRequest extends RemoveFileUploadInfoOperationRequest {
+class ServerRemoveFileUploadInfoOperationRequest extends RemoveFileUploadInfoOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -46,7 +46,7 @@ class ServerGetAvatarOperationRequest extends RemoveFileUploadInfoOperationReque
 	}
 }
 
-class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
+class AdminRemoveFileUploadInfoOperationRequest extends ServerRemoveFileUploadInfoOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -107,7 +107,7 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerRemoveFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -131,7 +131,7 @@ export class RemoveFileUploadInfoRequestHandler extends RequestHandler {
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminRemoveFileUploadInfoOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);

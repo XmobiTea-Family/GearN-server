@@ -39,7 +39,7 @@ class SetPlayerBanOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
+class ServerSetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -51,7 +51,7 @@ class ServerGetPlayerBanOperationRequest extends SetPlayerBanOperationRequest {
 	}
 }
 
-class AdminGetPlayerBanOperationRequest extends ServerGetPlayerBanOperationRequest {
+class AdminSetPlayerBanOperationRequest extends ServerSetPlayerBanOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -116,7 +116,7 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetPlayerBanOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -141,7 +141,7 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetPlayerBanOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetPlayerBanOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -216,7 +216,7 @@ export class SetPlayerBanRequestHandler extends CharacterPlayerBaseRequestHandle
 		}
 
 		characterPlayer.setPlayerBan(request.tsExpire, request.reason);
-		characterPlayer.saveAsync();
+		await characterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

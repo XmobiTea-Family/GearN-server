@@ -195,7 +195,7 @@ export class RemoveTagRequestHandler extends ItemBaseRequestHandler {
 		if (inventory.hasTag(request.tag)) {
 			inventory.removeTag(request.tag);
 
-			inventory.saveAsync();
+			await inventory.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

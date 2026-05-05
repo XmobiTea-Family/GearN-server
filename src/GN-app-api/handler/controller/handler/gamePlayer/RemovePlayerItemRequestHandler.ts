@@ -217,7 +217,7 @@ export class RemovePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		}
 
 		gamePlayer.removePlayerInventory(request.itemId);
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

@@ -16,6 +16,7 @@ import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestH
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class SetOwnerOperationRequest extends OperationRequest {
 
@@ -236,20 +237,40 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 				return operationResponse;
 			}
 
-			// Stores the current character owner player value used in the current execution flow.
-			let currentCharacterOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
-			if (currentCharacterOwnerPlayer != null) {
-				if (currentCharacterOwnerPlayer.hasPlayerCharacter(request.characterId)) {
-					currentCharacterOwnerPlayer.removePlayerCharacter(request.characterId);
-					currentCharacterOwnerPlayer.saveAsync();
+			const session = this.gnServer.getDatabase().startSession();
+
+			try {
+				session.startTransaction();
+
+				// Stores the current character owner player value used in the current execution flow.
+				let currentCharacterOwnerPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), gamePlayerFindOptions);
+				if (currentCharacterOwnerPlayer != null) {
+					if (currentCharacterOwnerPlayer.hasPlayerCharacter(request.characterId)) {
+						currentCharacterOwnerPlayer.removePlayerCharacter(request.characterId);
+						await currentCharacterOwnerPlayer.saveAsync(session);
+					}
 				}
+
+				newCharacterOwnerPlayer.setPlayerCharacter(request.characterId, characterPlayer.getCatalogId());
+				await newCharacterOwnerPlayer.saveAsync(session);
+
+				characterPlayer.setOwner(request.newOwnerId, owner.type);
+				await characterPlayer.saveAsync(session);
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
 			}
 
-			newCharacterOwnerPlayer.setPlayerCharacter(request.characterId, characterPlayer.getCatalogId());
-			newCharacterOwnerPlayer.saveAsync();
 
-			characterPlayer.setOwner(request.newOwnerId, owner.type);
-			characterPlayer.saveAsync();
 
 			let playerCharacters = gamePlayer.getAllPlayerCharacters().filter(x => x.characterId != request.characterId);
 

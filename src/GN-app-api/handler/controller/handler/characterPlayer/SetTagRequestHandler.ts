@@ -227,7 +227,7 @@ export class SetTagRequestHandler extends CharacterPlayerBaseRequestHandler {
 		}
 
 		characterPlayer.setTag(request.key, request.value);
-		characterPlayer.saveAsync();
+		await characterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

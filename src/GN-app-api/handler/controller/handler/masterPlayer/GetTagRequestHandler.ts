@@ -21,8 +21,8 @@ class GetTagOperationRequest extends OperationRequest {
 	public userId?: string;
 
 	// Stores the tag keys value used by this instance.
-	@GNArrayDataMember({ code: ParameterCode.TagKeys, elementCls: String })
-	public tagKeys: Array<string>;
+	@GNArrayDataMember({ code: ParameterCode.TagKeys, isOptional: true, elementCls: String })
+	public tagKeys?: Array<string>;
 
 	/**
 	 * Checks whether valid request.

@@ -38,7 +38,7 @@ class SetAvatarOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetAvatarOperationRequest extends SetAvatarOperationRequest {
+class ServerSetAvatarOperationRequest extends SetAvatarOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -50,7 +50,7 @@ class ServerGetAvatarOperationRequest extends SetAvatarOperationRequest {
 	}
 }
 
-class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
+class AdminSetAvatarOperationRequest extends ServerSetAvatarOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -115,7 +115,7 @@ export class SetAvatarRequestHandler extends ItemBaseRequestHandler {
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -140,7 +140,7 @@ export class SetAvatarRequestHandler extends ItemBaseRequestHandler {
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetAvatarOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -200,7 +200,7 @@ export class SetAvatarRequestHandler extends ItemBaseRequestHandler {
 		}
 
 		inventory.setAvatar(request.type, request.value);
-		inventory.saveAsync();
+		await inventory.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

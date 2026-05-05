@@ -287,7 +287,7 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 
 		if (request.updateTsLastLogin) {
 			gamePlayer.setTsLastLogin(xDatetime.getCurrentMilliseconds());
-			gamePlayer.saveAsync();
+			await gamePlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(gamePlayer, request.infoRequestParam, secretInfo.getGameId()));

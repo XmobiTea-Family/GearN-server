@@ -18,6 +18,7 @@ import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType"
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CreatePlayerItemOperationRequest extends OperationRequest {
 
@@ -247,7 +248,7 @@ export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
@@ -284,11 +285,29 @@ export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
-		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(result, secretInfo.getGameId());
+		const session = this.gnServer.getDatabase().startSession();
 
-		gamePlayer.setPlayerInventory(itemId, request.catalogId, request.classId);
-		gamePlayer.saveAsync();
+		try {
+			session.startTransaction();
+
+			// Stores the inventory value used in the current execution flow.
+			let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(result, secretInfo.getGameId(), session);
+
+			gamePlayer.setPlayerInventory(itemId, request.catalogId, request.classId);
+			await gamePlayer.saveAsync(session);
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		// Stores the GearN player inventories value used in the current execution flow.
 		let gnPlayerInventories = new GNArray();
@@ -296,9 +315,9 @@ export class CreatePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 		// Stores the GearN player inventory value used in the current execution flow.
 		let gnPlayerInventory = new GNHashtable();
 
-		gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
-		gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
-		gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
+		gnPlayerInventory.add(ParameterCode.ItemId, itemId);
+		gnPlayerInventory.add(ParameterCode.CatalogId, request.catalogId);
+		gnPlayerInventory.add(ParameterCode.ClassId, request.classId);
 
 		gnPlayerInventories.add(gnPlayerInventory);
 

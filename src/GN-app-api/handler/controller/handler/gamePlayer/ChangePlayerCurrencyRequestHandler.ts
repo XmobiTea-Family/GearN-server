@@ -314,7 +314,7 @@ export class ChangePlayerCurrencyRequestHandler extends GamePlayerBaseRequestHan
 
 		this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
 
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.PlayerCurrencies, gnPlayerCurrencies);
 

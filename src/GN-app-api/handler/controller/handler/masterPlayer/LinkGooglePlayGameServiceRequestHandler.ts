@@ -254,7 +254,7 @@ export class LinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseReq
 			otherExternal.googlePlayGameService = null;
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		external.googlePlayGameService = {
@@ -263,7 +263,7 @@ export class LinkGooglePlayGameServiceRequestHandler extends MasterPlayerBaseReq
 			email: email
 		};
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

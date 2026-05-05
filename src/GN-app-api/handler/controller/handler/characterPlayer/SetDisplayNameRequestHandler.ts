@@ -227,7 +227,7 @@ export class SetDisplayNameRequestHandler extends CharacterPlayerBaseRequestHand
 		}
 
 		characterPlayer.setDisplayName(request.displayName);
-		characterPlayer.saveAsync();
+		await characterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

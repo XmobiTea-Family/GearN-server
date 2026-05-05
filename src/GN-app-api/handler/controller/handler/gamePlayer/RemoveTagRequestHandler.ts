@@ -214,7 +214,7 @@ export class RemoveTagRequestHandler extends GamePlayerBaseRequestHandler {
 		if (gamePlayer.hasTag(request.key)) {
 			gamePlayer.removeTag(request.key);
 
-			gamePlayer.saveAsync();
+			await gamePlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

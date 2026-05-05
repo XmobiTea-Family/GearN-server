@@ -214,7 +214,7 @@ export class RemoveTagRequestHandler extends MasterPlayerBaseRequestHandler {
 		if (masterPlayer.hasTag(request.key)) {
 			masterPlayer.removeTag(request.key);
 
-			masterPlayer.saveAsync();
+			await masterPlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

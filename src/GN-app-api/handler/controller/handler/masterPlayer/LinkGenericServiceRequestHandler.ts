@@ -273,7 +273,7 @@ export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHan
 			otherExternal.genericService.genericServices.delete(request.serviceName);
 
 			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
+			await otherMasterPlayer.saveAsync();
 		}
 
 		if (external.genericService == null) external.genericService = {
@@ -285,7 +285,7 @@ export class LinkGenericServiceRequestHandler extends MasterPlayerBaseRequestHan
 		});
 
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		// Stores the GearN info response parameters value used in the current execution flow.
 		let gnInfoResponseParameters = new GNHashtable();

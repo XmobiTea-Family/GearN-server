@@ -122,7 +122,7 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
 		}
 
 		masterAdminPlayer.setPassword(await bcrypt.hash(request.password, 10));
-		masterAdminPlayer.saveAsync();
+		await masterAdminPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

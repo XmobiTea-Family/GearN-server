@@ -214,7 +214,7 @@ export class RemoveSegmentRequestHandler extends MasterPlayerBaseRequestHandler 
 		if (masterPlayer.hasSegment(request.segment)) {
 			masterPlayer.removeSegment(request.segment);
 
-			masterPlayer.saveAsync();
+			await masterPlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

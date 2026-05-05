@@ -214,7 +214,7 @@ export class RemoveSegmentRequestHandler extends GamePlayerBaseRequestHandler {
 		if (gamePlayer.hasSegment(request.segment)) {
 			gamePlayer.removeSegment(request.segment);
 
-			gamePlayer.saveAsync();
+			await gamePlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

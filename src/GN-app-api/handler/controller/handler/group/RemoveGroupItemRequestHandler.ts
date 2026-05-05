@@ -198,7 +198,7 @@ export class RemoveGroupItemRequestHandler extends GroupBaseRequestHandler {
 		}
 
 		group.removeGroupInventory(request.itemId);
-		group.saveAsync();
+		await group.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

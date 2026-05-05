@@ -194,7 +194,7 @@ export class RemoveTagRequestHandler extends GroupBaseRequestHandler {
 
 		if (group.hasTag(request.tag)) {
 			group.removeTag(request.tag);
-			group.saveAsync();
+			await group.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

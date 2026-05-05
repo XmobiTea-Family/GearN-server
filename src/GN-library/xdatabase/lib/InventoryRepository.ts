@@ -12,11 +12,13 @@ export class InventoryRepository extends AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createInventoryAsync(result: any, gameId: string): Promise<Inventory> {
+	public async createInventoryAsync(result: any, gameId: string, session?: mongodb.ClientSession): Promise<Inventory> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("Inventory", gameId);
 
-		await collection.insertOne(result);
+		await collection.insertOne(result, {
+			session: session,
+		});
 		return new Inventory(result, collection);
 	}
 

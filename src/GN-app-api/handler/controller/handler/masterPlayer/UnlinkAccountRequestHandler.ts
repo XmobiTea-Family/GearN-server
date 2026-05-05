@@ -220,7 +220,7 @@ export class UnlinkAccountRequestHandler extends MasterPlayerBaseRequestHandler 
 
 		external.account = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

@@ -220,7 +220,7 @@ export class UnlinkCustomIdRequestHandler extends MasterPlayerBaseRequestHandler
 
 		external.custom = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

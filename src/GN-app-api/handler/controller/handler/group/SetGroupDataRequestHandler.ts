@@ -266,7 +266,7 @@ export class SetGroupDataRequestHandler extends GroupBaseRequestHandler {
 			}
 		}
 
-		group.saveAsync();
+		await group.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.GroupDatas, gnGroupDatas);
 

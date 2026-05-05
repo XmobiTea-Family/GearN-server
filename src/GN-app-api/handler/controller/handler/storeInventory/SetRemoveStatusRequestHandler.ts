@@ -182,7 +182,7 @@ export class SetRemoveStatusRequestHandler extends StoreItemBaseRequestHandler {
 		let removeStatus = storeInventory.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {
 			storeInventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
-			storeInventory.saveAsync();
+			await storeInventory.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

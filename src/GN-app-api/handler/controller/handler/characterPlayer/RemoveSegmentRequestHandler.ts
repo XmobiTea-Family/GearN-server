@@ -212,7 +212,7 @@ export class RemoveSegmentRequestHandler extends CharacterPlayerBaseRequestHandl
 		if (characterPlayer.hasSegment(request.segment)) {
 			characterPlayer.removeSegment(request.segment);
 
-			characterPlayer.saveAsync();
+			await characterPlayer.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

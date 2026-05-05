@@ -231,7 +231,7 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 				let playerFriendItem = gamePlayer.getPlayerFriend(request.friendId);
 
 				gamePlayer.removePlayerFriend(request.friendId);
-				gamePlayer.saveAsync();
+				await gamePlayer.saveAsync();
 
 				{
 					// Stores the GearN player friends value used in the current execution flow.
@@ -259,7 +259,7 @@ export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandl
 				let playerFriendItem = friendPlayer.getPlayerFriend(request.userId);
 
 				friendPlayer.removePlayerFriend(request.userId);
-				friendPlayer.saveAsync();
+				await friendPlayer.saveAsync();
 
 				{
 					// Stores the GearN player friends value used in the current execution flow.

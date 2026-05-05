@@ -35,7 +35,7 @@ class SetCountryCodeOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetCountryCodeOperationRequest extends SetCountryCodeOperationRequest {
+class ServerSetCountryCodeOperationRequest extends SetCountryCodeOperationRequest {
 
 	// Indicates whether r ID should be used.
 	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
@@ -51,7 +51,7 @@ class ServerGetCountryCodeOperationRequest extends SetCountryCodeOperationReques
 	}
 }
 
-class AdminGetCountryCodeOperationRequest extends ServerGetCountryCodeOperationRequest {
+class AdminSetCountryCodeOperationRequest extends ServerSetCountryCodeOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -126,7 +126,7 @@ export class SetCountryCodeRequestHandler extends GamePlayerBaseRequestHandler {
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetCountryCodeOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetCountryCodeOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -150,7 +150,7 @@ export class SetCountryCodeRequestHandler extends GamePlayerBaseRequestHandler {
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetCountryCodeOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetCountryCodeOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -212,7 +212,7 @@ export class SetCountryCodeRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		gamePlayer.setCountryCode(request.countryCode);
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

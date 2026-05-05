@@ -390,6 +390,6 @@ process.env.gnServerSettingsOptions = "";
 process.env.gnAuthToken = "";
 
 // Stores the handlers value used by this module.
-const handlers: Record<string, (args: any, context: { userId: string; customTags: { [k: string]: any } }, log: (log: any) => void) => any> = {};
+const handlers: Record<string, (args: any, context: { userId: string; customTags: { [k: string]: any } }, log: (message: any) => void) => any> = {};
 
 //$replaceScript

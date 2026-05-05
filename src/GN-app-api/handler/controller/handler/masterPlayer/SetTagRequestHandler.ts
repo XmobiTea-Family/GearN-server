@@ -229,7 +229,7 @@ export class SetTagRequestHandler extends MasterPlayerBaseRequestHandler {
 		}
 
 		masterPlayer.setTag(request.key, request.value);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

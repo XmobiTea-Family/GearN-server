@@ -14,6 +14,7 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
 
@@ -35,7 +36,7 @@ class SetRemoveStatusOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetAvatarOperationRequest extends SetRemoveStatusOperationRequest {
+class ServerSetRemoveStatusOperationRequest extends SetRemoveStatusOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -47,7 +48,7 @@ class ServerGetAvatarOperationRequest extends SetRemoveStatusOperationRequest {
 	}
 }
 
-class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
+class AdminSetRemoveStatusOperationRequest extends ServerSetRemoveStatusOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -111,7 +112,7 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetRemoveStatusOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -135,7 +136,7 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetRemoveStatusOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -216,17 +217,36 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 
 			// Stores the owner value used in the current execution flow.
 			let owner = characterPlayer.getOwner();
-			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
-			if (gamePlayer != null) {
-				if (gamePlayer.hasPlayerCharacter(request.characterId)) {
-					gamePlayer.removePlayerCharacter(request.characterId);
 
-					gamePlayer.saveAsync();
+			const session = this.gnServer.getDatabase().startSession();
+
+			try {
+				session.startTransaction();
+
+				// Stores the game player value used in the current execution flow.
+				let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
+				if (gamePlayer != null) {
+					if (gamePlayer.hasPlayerCharacter(request.characterId)) {
+						gamePlayer.removePlayerCharacter(request.characterId);
+
+						await gamePlayer.saveAsync(session);
+					}
 				}
-			}
 
-			characterPlayer.saveAsync();
+				await characterPlayer.saveAsync(session);
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
+			}
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

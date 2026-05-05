@@ -284,7 +284,7 @@ export class SetPlayerDataRequestHandler extends GamePlayerBaseRequestHandler {
 			}
 		}
 
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.PlayerDatas, gnPlayerDatas);
 

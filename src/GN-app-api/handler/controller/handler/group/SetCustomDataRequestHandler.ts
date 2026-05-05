@@ -269,7 +269,7 @@ export class SetCustomDataRequestHandler extends GroupBaseRequestHandler {
 			}
 		}
 
-		group.saveAsync();
+		await group.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 

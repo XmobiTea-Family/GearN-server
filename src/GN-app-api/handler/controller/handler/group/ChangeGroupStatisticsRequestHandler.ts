@@ -431,7 +431,7 @@ export class ChangeGroupStatisticsRequestHandler extends GroupBaseRequestHandler
 
 		this.gnServer.getDatabase().groupRepository.insertGroupStatisticsLogsAsync(logs, secretInfo.getGameId());
 
-		group.saveAsync();
+		await group.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.GroupStatistics, gnGroupStatistics);
 

@@ -14,6 +14,7 @@ import { MatchmakingTicketStatus } from "./../../../../../GN-common/constant/enu
 import { MatchmakingMemberStatus } from "./../../../../../GN-common/constant/enumType/MatchmakingMemberStatus";
 import { MatchmakingTicket } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
 import { MultiplayerBaseRequestHandler } from "./MultiplayerBaseRequestHandler";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CancelAllMatchmakingTicketOperationRequest extends OperationRequest {
 
@@ -187,20 +188,56 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
 		// Stores the ticket IDs value used in the current execution flow.
 		let ticketIds: string[] = [];
 
-		while (await results.hasNext()) {
-			// Stores the matchmaking ticket value used in the current execution flow.
-			let matchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
+		// const session = this.gnServer.getDatabase().startSession();
 
-			// Stores the member value used in the current execution flow.
-			let member = matchmakingTicket.getMember(request.userId);
+		// try {
+		// 	session.startTransaction();
 
-			if (member.status == MatchmakingMemberStatus.Joined || member.status == MatchmakingMemberStatus.Pending) {
-				matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Canceled);
-				matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
-				matchmakingTicket.saveAsync();
+		// 	await session.commitTransaction();
+		// }
+		// catch (err) {
+		// 	await session.abortTransaction();
 
-				ticketIds.push(matchmakingTicket.getTicketId());
+		// 	Debug.logError(err);
+
+		// 	throw err;
+		// }
+		// finally {
+		// 	await session.endSession();
+		// }
+
+		const session = this.gnServer.getDatabase().startSession();
+
+		try {
+			session.startTransaction();
+
+			while (await results.hasNext()) {
+				// Stores the matchmaking ticket value used in the current execution flow.
+				let matchmakingTicket = new MatchmakingTicket(await results.next(), matchmakingTicketCollection);
+
+				// Stores the member value used in the current execution flow.
+				let member = matchmakingTicket.getMember(request.userId);
+
+				if (member.status == MatchmakingMemberStatus.Joined || member.status == MatchmakingMemberStatus.Pending) {
+					matchmakingTicket.setMemberStatus(request.userId, MatchmakingMemberStatus.Canceled);
+					matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
+					await matchmakingTicket.saveAsync(session);
+
+					ticketIds.push(matchmakingTicket.getTicketId());
+				}
 			}
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logException(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

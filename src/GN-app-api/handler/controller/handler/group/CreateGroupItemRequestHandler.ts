@@ -18,6 +18,7 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CreateGroupItemOperationRequest extends OperationRequest {
 
@@ -266,11 +267,29 @@ export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
-		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(result, secretInfo.getGameId());
+		const session = this.gnServer.getDatabase().startSession();
 
-		group.setGroupInventory(itemId, request.catalogId, request.classId);
-		group.saveAsync();
+		try {
+			session.startTransaction();
+
+			// Stores the inventory value used in the current execution flow.
+			let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(result, secretInfo.getGameId(), session);
+
+			group.setGroupInventory(itemId, request.catalogId, request.classId);
+			await group.saveAsync(session);
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		// Stores the GearN group inventories value used in the current execution flow.
 		let gnGroupInventories = new GNArray();
@@ -278,9 +297,9 @@ export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
 		// Stores the GearN group inventory value used in the current execution flow.
 		let gnGroupInventory = new GNHashtable();
 
-		gnGroupInventory.add(ParameterCode.ItemId, inventory.getItemId());
-		gnGroupInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
-		gnGroupInventory.add(ParameterCode.ClassId, inventory.getClassId());
+		gnGroupInventory.add(ParameterCode.ItemId, itemId);
+		gnGroupInventory.add(ParameterCode.CatalogId, request.catalogId);
+		gnGroupInventory.add(ParameterCode.ClassId, request.classId);
 
 		gnGroupInventories.add(gnGroupInventory);
 

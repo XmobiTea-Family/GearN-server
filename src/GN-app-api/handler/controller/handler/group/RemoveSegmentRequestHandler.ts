@@ -194,7 +194,7 @@ export class RemoveSegmentRequestHandler extends GroupBaseRequestHandler {
 
 		if (group.hasSegment(request.segment)) {
 			group.removeSegment(request.segment);
-			group.saveAsync();
+			await group.saveAsync();
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);

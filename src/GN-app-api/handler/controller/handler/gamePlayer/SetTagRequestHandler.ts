@@ -229,7 +229,7 @@ export class SetTagRequestHandler extends GamePlayerBaseRequestHandler {
 		}
 
 		gamePlayer.setTag(request.key, request.value);
-		gamePlayer.saveAsync();
+		await gamePlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

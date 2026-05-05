@@ -19,6 +19,7 @@ import { GroupMemberParam } from "./model/GroupMemberParam";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CreateGroupOperationRequest extends OperationRequest {
 
@@ -261,35 +262,64 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		result["avatar"] = { "type": 0, "value": "0" };
 		result["tags"] = {};
 
-		this.gnServer.joinRoom(characterPlayer.getOwner().id, groupId);
+		const session = this.gnServer.getDatabase().startSession();
 
-		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId());
+		try {
+			session.startTransaction();
 
-		if (request.groupMembers != null) {
-			for (let i = 0; i < request.groupMembers.length; i++) {
-				// Stores the group member value used in the current execution flow.
-				let groupMember = request.groupMembers[i];
+			// Stores the group value used in the current execution flow.
+			let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId(), session);
 
-				if (groupMember.characterId == request.characterId) continue;
+			if (request.groupMembers != null) {
+				for (let i = 0; i < request.groupMembers.length; i++) {
+					// Stores the group member value used in the current execution flow.
+					let groupMember = request.groupMembers[i];
 
-				// Stores the other character player value used in the current execution flow.
-				let otherCharacterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(groupMember.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+					if (groupMember.characterId == request.characterId) continue;
 
-				if (otherCharacterPlayer != null) {
+					// Stores the other character player value used in the current execution flow.
+					let otherCharacterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(groupMember.characterId, secretInfo.getGameId(), {
+						playerGroups: true,
+						owner: true,
+					});
 
-					otherCharacterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
-					otherCharacterPlayer.saveAsync();
+					if (otherCharacterPlayer != null) {
+						if (playerGroupCatalogSettingsItem.forceAcceptMember) {
+							otherCharacterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
+							await otherCharacterPlayer.saveAsync(session);
 
-					group.setMember(groupMember.characterId, GroupStatus.WaitingAccept);
+							group.setMember(groupMember.characterId, GroupStatus.Member);
+
+							if (otherCharacterPlayer.getOwner()?.id)
+								this.gnServer.joinRoom(otherCharacterPlayer.getOwner()?.id, groupId);
+						}
+						else {
+							otherCharacterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
+							await otherCharacterPlayer.saveAsync(session);
+
+							group.setMember(groupMember.characterId, GroupStatus.WaitingAccept);
+						}
+					}
 				}
+
+				await group.saveAsync(session);
 			}
 
-			group.saveAsync();
-		}
+			characterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
+			await characterPlayer.saveAsync(session);
 
-		characterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
-		characterPlayer.saveAsync();
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		// Stores the GearN player groups value used in the current execution flow.
 		let gnPlayerGroups = new GNArray();
@@ -297,8 +327,8 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		// Stores the GearN player group value used in the current execution flow.
 		let gnPlayerGroup = new GNHashtable();
 
-		gnPlayerGroup.add(ParameterCode.GroupId, group.getGroupId());
-		gnPlayerGroup.add(ParameterCode.CatalogId, group.getCatalogId());
+		gnPlayerGroup.add(ParameterCode.GroupId, groupId);
+		gnPlayerGroup.add(ParameterCode.CatalogId, request.catalogId);
 		gnPlayerGroup.add(ParameterCode.Status, GroupStatus.Member);
 		gnPlayerGroup.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
 
@@ -311,6 +341,8 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+		this.gnServer.joinRoom(characterPlayer.getOwner().id, groupId);
 
 		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_CreateGroup", request, role, secretInfo, operationRequest, operationResponse);
 

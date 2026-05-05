@@ -220,7 +220,7 @@ export class UnlinkGameCenterRequestHandler extends MasterPlayerBaseRequestHandl
 
 		external.gameCenter = null;
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

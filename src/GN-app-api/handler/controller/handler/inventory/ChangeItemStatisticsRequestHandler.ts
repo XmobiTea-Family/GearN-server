@@ -380,7 +380,7 @@ export class ChangeItemStatisticsRequestHandler extends ItemBaseRequestHandler {
 			gnItemStatistics.add(gnItemStatistic);
 		}
 
-		inventory.saveAsync();
+		await inventory.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.ItemStatistics, gnItemStatistics);
 

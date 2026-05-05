@@ -222,7 +222,7 @@ export class ResetAccountPasswordRequestHandler extends MasterPlayerBaseRequestH
 		external.account.password = await bcrypt.hash(request.password, 10);
 
 		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

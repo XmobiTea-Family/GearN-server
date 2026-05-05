@@ -229,7 +229,7 @@ export class SetDisplayNameRequestHandler extends MasterPlayerBaseRequestHandler
 		}
 
 		masterPlayer.setDisplayName(request.displayName);
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

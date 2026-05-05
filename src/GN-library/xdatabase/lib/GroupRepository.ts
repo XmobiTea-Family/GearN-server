@@ -12,11 +12,13 @@ export class GroupRepository extends AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createGroupAsync(result: any, gameId: string): Promise<Group> {
+	public async createGroupAsync(result: any, gameId: string, session?: mongodb.ClientSession): Promise<Group> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("Group", gameId);
 
-		await collection.insertOne(result);
+		await collection.insertOne(result, {
+			session: session
+		});
 		return new Group(result, collection);
 	}
 

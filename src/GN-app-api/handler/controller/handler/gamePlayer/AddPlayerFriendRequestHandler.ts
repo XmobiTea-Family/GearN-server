@@ -17,6 +17,7 @@ import { FriendStatus } from "./../../../../../GN-common/constant/enumType/Frien
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 import { EventCode } from "./../../../../../GN-common/constant/EventCode";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class AddPlayerFriendOperationRequest extends OperationRequest {
 
@@ -248,11 +249,29 @@ export class AddPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler 
 
 			if (!gamePlayer.hasPlayerFriend(request.friendId)) {
 				if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
-					gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
-					gamePlayer.saveAsync();
+					const session = this.gnServer.getDatabase().startSession();
 
-					friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
-					friendPlayer.saveAsync();
+					try {
+						session.startTransaction();
+
+						gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+						await gamePlayer.saveAsync(session);
+
+						friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+						await friendPlayer.saveAsync(session);
+
+						await session.commitTransaction();
+					}
+					catch (err) {
+						await session.abortTransaction();
+
+						Debug.logError(err);
+
+						throw err;
+					}
+					finally {
+						await session.endSession();
+					}
 
 					{
 						// Stores the GearN player friends value used in the current execution flow.
@@ -295,11 +314,29 @@ export class AddPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler 
 					}
 				}
 				else {
-					gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
-					gamePlayer.saveAsync();
+					const session = this.gnServer.getDatabase().startSession();
 
-					friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
-					friendPlayer.saveAsync();
+					try {
+						session.startTransaction();
+
+						gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+						await gamePlayer.saveAsync(session);
+
+						friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
+						await friendPlayer.saveAsync(session);
+
+						await session.commitTransaction();
+					}
+					catch (err) {
+						await session.abortTransaction();
+
+						Debug.logError(err);
+
+						throw err;
+					}
+					finally {
+						await session.endSession();
+					}
 
 					{
 						// Stores the GearN player friends value used in the current execution flow.
@@ -347,11 +384,29 @@ export class AddPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler 
 				let friendItem = gamePlayer.getPlayerFriend(request.friendId);
 
 				if (friendItem.status == FriendStatus.WaitingAccept) {
-					gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
-					gamePlayer.saveAsync();
+					const session = this.gnServer.getDatabase().startSession();
 
-					friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
-					friendPlayer.saveAsync();
+					try {
+						session.startTransaction();
+
+						gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+						await gamePlayer.saveAsync(session);
+
+						friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+						await friendPlayer.saveAsync(session);
+
+						await session.commitTransaction();
+					}
+					catch (err) {
+						await session.abortTransaction();
+
+						Debug.logError(err);
+
+						throw err;
+					}
+					finally {
+						await session.endSession();
+					}
 
 					{
 						// Stores the GearN player friends value used in the current execution flow.
@@ -396,11 +451,29 @@ export class AddPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler 
 				else {
 					if (friendItem.catalogId != request.catalogId) {
 						if (playerFriendCatalogSettingsItem.forceAcceptFriend) {
-							gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
-							gamePlayer.saveAsync();
+							const session = this.gnServer.getDatabase().startSession();
 
-							friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
-							friendPlayer.saveAsync();
+							try {
+								session.startTransaction();
+
+								gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+								await gamePlayer.saveAsync(session);
+
+								friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.Friend, currentMilliseconds);
+								await friendPlayer.saveAsync(session);
+
+								await session.commitTransaction();
+							}
+							catch (err) {
+								await session.abortTransaction();
+
+								Debug.logError(err);
+
+								throw err;
+							}
+							finally {
+								await session.endSession();
+							}
 
 							{
 								// Stores the GearN player friends value used in the current execution flow.
@@ -443,11 +516,29 @@ export class AddPlayerFriendRequestHandler extends GamePlayerBaseRequestHandler 
 							}
 						}
 						else {
-							gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
-							gamePlayer.saveAsync();
+							const session = this.gnServer.getDatabase().startSession();
 
-							friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
-							friendPlayer.saveAsync();
+							try {
+								session.startTransaction();
+
+								gamePlayer.setPlayerFriend(request.friendId, request.catalogId, FriendStatus.SentRequestAndWaitingAccept, currentMilliseconds);
+								await gamePlayer.saveAsync(session);
+
+								friendPlayer.setPlayerFriend(request.userId, request.catalogId, FriendStatus.WaitingAccept, currentMilliseconds);
+								await friendPlayer.saveAsync(session);
+
+								await session.commitTransaction();
+							}
+							catch (err) {
+								await session.abortTransaction();
+
+								Debug.logError(err);
+
+								throw err;
+							}
+							finally {
+								await session.endSession();
+							}
 
 							{
 								// Stores the GearN player friends value used in the current execution flow.

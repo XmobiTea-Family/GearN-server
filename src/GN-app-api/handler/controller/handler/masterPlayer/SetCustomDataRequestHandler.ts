@@ -289,7 +289,7 @@ export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler 
 			}
 		}
 
-		masterPlayer.saveAsync();
+		await masterPlayer.saveAsync();
 
 		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 

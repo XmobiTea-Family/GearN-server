@@ -15,6 +15,7 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
 
@@ -36,7 +37,7 @@ class SetRemoveStatusOperationRequest extends OperationRequest {
 	}
 }
 
-class ServerGetAvatarOperationRequest extends SetRemoveStatusOperationRequest {
+class ServerSetRemoveStatusOperationRequest extends SetRemoveStatusOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -48,7 +49,7 @@ class ServerGetAvatarOperationRequest extends SetRemoveStatusOperationRequest {
 	}
 }
 
-class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
+class AdminSetRemoveStatusOperationRequest extends ServerSetRemoveStatusOperationRequest {
 
 	/**
 	 * Checks whether valid request.
@@ -112,7 +113,7 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 	 */
 	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetRemoveStatusOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -136,7 +137,7 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 	 */
 	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
 		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
+		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetRemoveStatusOperationRequest);
 
 		if (!request.isValidRequest()) {
 			return this.newInvalidRequestParameters(request);
@@ -198,46 +199,64 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 		// Stores the remove status value used in the current execution flow.
 		let removeStatus = group.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {
-			group.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
+			const session = this.gnServer.getDatabase().startSession();
 
-			// Stores the group type value used in the current execution flow.
-			let groupType = group.getGroupType();
+			try {
+				session.startTransaction();
 
-			// Stores the members value used in the current execution flow.
-			let members = group.getAllMembers();
+				group.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
 
-			if (groupType == OwnerType.GamePlayer) {
-				for (let i = 0; i < members.length; i++) {
-					// Stores the member value used in the current execution flow.
-					let member = members[i];
+				// Stores the group type value used in the current execution flow.
+				let groupType = group.getGroupType();
 
-					// Stores the game player value used in the current execution flow.
-					let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
-					if (gamePlayer != null) {
-						if (gamePlayer.hasPlayerGroup(request.groupId)) {
-							gamePlayer.removePlayerGroup(request.groupId);
-							gamePlayer.saveAsync();
+				// Stores the members value used in the current execution flow.
+				let members = group.getAllMembers();
+
+				if (groupType == OwnerType.GamePlayer) {
+					for (let i = 0; i < members.length; i++) {
+						// Stores the member value used in the current execution flow.
+						let member = members[i];
+
+						// Stores the game player value used in the current execution flow.
+						let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
+						if (gamePlayer != null) {
+							if (gamePlayer.hasPlayerGroup(request.groupId)) {
+								gamePlayer.removePlayerGroup(request.groupId);
+								await gamePlayer.saveAsync(session);
+							}
 						}
 					}
 				}
-			}
-			else if (groupType == OwnerType.CharacterPlayer) {
-				for (let i = 0; i < members.length; i++) {
-					// Stores the member value used in the current execution flow.
-					let member = members[i];
+				else if (groupType == OwnerType.CharacterPlayer) {
+					for (let i = 0; i < members.length; i++) {
+						// Stores the member value used in the current execution flow.
+						let member = members[i];
 
-					// Stores the character player value used in the current execution flow.
-					let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
-					if (characterPlayer != null) {
-						if (characterPlayer.hasPlayerGroup(request.groupId)) {
-							characterPlayer.removePlayerGroup(request.groupId);
-							characterPlayer.saveAsync();
+						// Stores the character player value used in the current execution flow.
+						let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
+						if (characterPlayer != null) {
+							if (characterPlayer.hasPlayerGroup(request.groupId)) {
+								characterPlayer.removePlayerGroup(request.groupId);
+								await characterPlayer.saveAsync(session);
+							}
 						}
 					}
 				}
-			}
 
-			group.saveAsync();
+				await group.saveAsync(session);
+
+				await session.commitTransaction();
+			}
+			catch (err) {
+				await session.abortTransaction();
+
+				Debug.logError(err);
+
+				throw err;
+			}
+			finally {
+				await session.endSession();
+			}
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
