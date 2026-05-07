@@ -243,35 +243,14 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 
 			// Stores the current milliseconds value used in the current execution flow.
 			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-			// Stores the result value used in the current execution flow.
-			let result = {} as any;
 
-			result["userId"] = request.userId;
-			result["socketId"] = "";
-			result["playerCharacters"] = [];
-			result["playerInventories"] = [];
-			result["playerGroups"] = [];
-			result["playerFriends"] = [];
-			result["segments"] = [];
-			result["customDatas"] = {};
-			result["displayName"] = "";
-			result["displayNameNormalize"] = "";
-			result["avatar"] = { "type": 0, "value": "0" };
-			result["tsCreate"] = currentMilliseconds;
-			result["tags"] = {};
-			result["playerBan"] = { "tsExpire": 0, "reason": "" };
-			result["playerDatas"] = [];
-			result["playerCurrencies"] = {};
-			result["playerStatistics"] = {};
-			result["tsLastLogin"] = currentMilliseconds;
-			result["ipAddressCreate"] = request.ipAddress;
-			result["countryCode"] = "";
+			let countryCode = "";
 
 			// Stores the IP detail response value used in the current execution flow.
 			let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 			if (ipDetailResponse.statusCode == "Ok") {
 				if (ipDetailResponse.detail.countryCode) {
-					result["countryCode"] = ipDetailResponse.detail.countryCode;
+					countryCode = ipDetailResponse.detail.countryCode;
 				}
 			}
 
@@ -280,7 +259,29 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
 				return this.newOperationInternalServerError(operationRequest, "create game player but already exists, userId: " + request.userId);
 			}
 
-			gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.createGamePlayerAsync(result, secretInfo.getGameId());
+			gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.createGamePlayerAsync({
+				_id: undefined,
+				userId: request.userId,
+				socketId: "",
+				playerCharacters: [],
+				playerInventories: [],
+				playerGroups: [],
+				playerFriends: [],
+				segments: [],
+				customDatas: {},
+				displayName: "",
+				displayNameNormalize: "",
+				avatar: { type: 0, value: "0" },
+				tsCreate: currentMilliseconds,
+				tags: {},
+				playerBan: { tsExpire: 0, reason: "" },
+				playerDatas: {},
+				playerCurrencies: {},
+				playerStatistics: {},
+				tsLastLogin: currentMilliseconds,
+				ipAddressCreate: request.ipAddress,
+				countryCode: countryCode,
+			}, secretInfo.getGameId());
 		}
 
 		if (request.updateTsLastLogin) {

@@ -16,6 +16,7 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { Inventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
+import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 
 export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 	/**
@@ -56,27 +57,27 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 
 		// Stores the item ID value used in the current execution flow.
 		let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
-		// o day can tao 1 dong 
-		let result = {} as any;
-		result["itemId"] = itemId;
-		result["catalogId"] = catalogId;
-		result["classId"] = classId;
-		result["amount"] = amount;
-		result["itemType"] = itemType;
-		result["owner"] = { "id": id, "type": type };
-		result["itemDatas"] = [];
-		result["itemStatistics"] = {};
-		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-		result["segments"] = [];
-		result["customDatas"] = {};
-		result["tsCreate"] = currentMilliseconds;
-		result["displayName"] = "";
-		result["displayNameNormalize"] = "";
-		result["avatar"] = { "type": 0, "value": "0" };
-		result["tags"] = {};
 
 		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(result, gameId);
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync({
+			_id: undefined,
+			itemId: itemId,
+			catalogId: catalogId,
+			classId: classId,
+			amount: amount,
+			itemType: itemType,
+			owner: { id: id, type: type },
+			itemDatas: {},
+			itemStatistics: {},
+			removeStatus: { tsRemove: 0, reason: "" },
+			segments: [],
+			customDatas: {},
+			tsCreate: currentMilliseconds,
+			displayName: "",
+			displayNameNormalize: "",
+			avatar: { type: 0, value: "0" },
+			tags: {},
+		}, gameId);
 		return inventory;
 	}
 
@@ -361,18 +362,15 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
 		// Stores the complete store datas collection used in the current execution flow.
 		let allStoreDatas = storeInventory.getAllStoreDatas();
 
-		for (let i = 0; i < allStoreDatas.length; i++) {
-			// Stores the store data value used in the current execution flow.
-			let storeData = allStoreDatas[i];
-
+		allStoreDatas.forEach((value: DataValueType, key: string) => {
 			// Stores the GearN store data value used in the current execution flow.
 			let gnStoreData = new GNHashtable();
 
-			gnStoreData.add(ParameterCode.Key, storeData.key);
-			gnStoreData.add(ParameterCode.Value, storeData.value);
+			gnStoreData.add(ParameterCode.Key, key);
+			gnStoreData.add(ParameterCode.Value, value);
 
 			gnStoreDatas.add(gnStoreData);
-		}
+		});
 
 		return gnStoreDatas;
 	}

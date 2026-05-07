@@ -701,17 +701,15 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 
 			if (playerDataKeys == null || playerDataKeys.indexOf(playerDatasSettingsItem.key) != -1) {
 				// Stores the player data value used in the current execution flow.
-				let playerData = masterPlayer.getPlayerData(playerDatasSettingsItem.key);
+				let value = masterPlayer.getPlayerData(playerDatasSettingsItem.key);
 
-				if (playerData != null) {
-					// Stores the GearN player data value used in the current execution flow.
-					let gnPlayerData = new GNHashtable();
+				// Stores the GearN player data value used in the current execution flow.
+				let gnPlayerData = new GNHashtable();
 
-					gnPlayerData.add(ParameterCode.Key, playerData.key);
-					gnPlayerData.add(ParameterCode.Value, playerData.value);
+				gnPlayerData.add(ParameterCode.Key, playerDatasSettingsItem.key);
+				gnPlayerData.add(ParameterCode.Value, value);
 
-					gnPlayerDatas.add(gnPlayerData);
-				}
+				gnPlayerDatas.add(gnPlayerData);
 			}
 		}
 

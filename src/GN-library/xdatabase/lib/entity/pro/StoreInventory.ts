@@ -2,7 +2,6 @@ import * as mongodb from "mongodb";
 
 import { DataObjectBase } from "./DataObjectBase";
 import { RemoveStatusItem } from "./RemoveStatusItem";
-import { DataItem } from "./DataItem";
 import { DataValueType } from "./type/DataValueType";
 
 /**
@@ -85,7 +84,7 @@ export class StoreInventory extends DataObjectBase {
 	private inAppPurchase: InAppPurchase;
 
 	/** Store-scoped key-value custom data extensions (e.g. banner, promo note). */
-	private storeDatas: Array<DataItem>;
+	private storeDatas: Map<string, DataValueType>;
 
 	/** Soft-delete state; present when the store entry is disabled/withdrawn. */
 	private removeStatus: RemoveStatusItem;
@@ -114,7 +113,7 @@ export class StoreInventory extends DataObjectBase {
 		this.priceCurrencies = result[StoreInventory._priceCurrencies];
 		this.inAppPurchase = result[StoreInventory._inAppPurchase];
 
-		this.storeDatas = result[StoreInventory._storeDatas];
+		this.storeDatas = result[StoreInventory._storeDatas] != null ? new Map(Object.entries(result[StoreInventory._storeDatas])) : null;
 
 		this.removeStatus = result[StoreInventory._removeStatus];
 	}
@@ -391,7 +390,7 @@ export class StoreInventory extends DataObjectBase {
 	 * Returns all store datas.
 	 * @returns Returns all store datas.
 	 */
-	public getAllStoreDatas(): Array<DataItem> {
+	public getAllStoreDatas(): Map<string, DataValueType> {
 		return this.storeDatas;
 	}
 
@@ -399,7 +398,7 @@ export class StoreInventory extends DataObjectBase {
 	 * Executes the clear store datas workflow.
 	 */
 	public clearStoreDatas(): void {
-		this.storeDatas.length = 0;
+		this.storeDatas.clear();
 
 		this.set(StoreInventory._storeDatas, this.storeDatas);
 	}
@@ -418,8 +417,8 @@ export class StoreInventory extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 * @returns Returns the store data.
 	 */
-	public getStoreData(key: string): DataItem {
-		return this.storeDatas.find(x => x.key == key);
+	public getStoreData(key: string): DataValueType {
+		return this.storeDatas.get(key);
 	}
 
 	/**
@@ -428,19 +427,7 @@ export class StoreInventory extends DataObjectBase {
 	 * @param value Provides the value value used by this operation.
 	 */
 	public setStoreData(key: string, value: DataValueType): void {
-		// Stores the item data item value used in the current execution flow.
-		let itemDataItem = this.storeDatas.find(x => x.key == key);
-		if (itemDataItem == null) {
-			itemDataItem = {
-				key: key,
-				value: value,
-			}
-
-			this.storeDatas.push(itemDataItem);
-		}
-		else {
-			itemDataItem.value = value;
-		}
+		this.storeDatas.set(key, value);
 
 		this.set(StoreInventory._storeDatas, this.storeDatas);
 	}
@@ -450,37 +437,27 @@ export class StoreInventory extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 */
 	public removeStoreData(key: string): void {
-		// Stores the item data item value used in the current execution flow.
-		let itemDataItem = this.storeDatas.find(x => x.key == key);
-		if (itemDataItem != null) {
-			// Stores the index of value used in the current execution flow.
-			let indexOf = this.storeDatas.indexOf(itemDataItem);
-			if (indexOf != -1) {
-				this.storeDatas.splice(indexOf, 1);
-
-				return this.set(StoreInventory._storeDatas, this.storeDatas);
-			}
-		}
+		this.storeDatas.delete(key);
 
 		throw Error("can not found the key to remove");
 	}
 
-    /**
-     * Returns the store item type.
-     * @returns Returns the store item type.
-     */
-    public getStoreItemType(): number {
-        return this.storeItemType;
-    }
+	/**
+	 * Returns the store item type.
+	 * @returns Returns the store item type.
+	 */
+	public getStoreItemType(): number {
+		return this.storeItemType;
+	}
 
-    /**
-     * Sets the store item type.
-     * @param storeItemType Provides the store item type value used by this operation.
-     */
-    public setStoreItemType(storeItemType: number) {
-        this.storeItemType = storeItemType;
+	/**
+	 * Sets the store item type.
+	 * @param storeItemType Provides the store item type value used by this operation.
+	 */
+	public setStoreItemType(storeItemType: number) {
+		this.storeItemType = storeItemType;
 
-        this.set(StoreInventory._storeItemType, this.storeItemType);
-    }
+		this.set(StoreInventory._storeItemType, this.storeItemType);
+	}
 
 }

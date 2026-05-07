@@ -4,19 +4,47 @@ import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { MasterPlayer } from "./entity/pro/MasterPlayer";
 import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { MasterPlayerFindOptions } from "./entity/pro/findOptions/MasterPlayerFindOptions";
+import { ExternalItem } from "./entity/pro/ExternalItem";
+import { DataValueType } from "./entity/pro/type/DataValueType";
+import { CurrencyItem } from "./entity/pro/CurrencyItem";
+import { StatisticsItem } from "./entity/pro/StatisticsItem";
+import { IPDetailItem } from "./entity/pro/IPDetailItem";
+import { PushNotificationItem } from "./entity/pro/PushNotificationItem";
+import { BanItem } from "./entity/pro/BanItem";
+import { AvatarItem } from "./entity/pro/AvatarItem";
 
 export class MasterPlayerRepository extends AbstractBaseRepository {
 	/**
 	 * Creates the master player async.
-	 * @param result Provides the result value used by this operation.
+	 * @param rawMasterPlayer Provides the result value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createMasterPlayerAsync(result: any): Promise<MasterPlayer> {
+	public async createMasterPlayerAsync(rawMasterPlayer: mongodb.WithId<mongodb.BSON.Document> & {
+		userId: string;
+		external: ExternalItem;
+		segments: string[];
+		customDatas: Record<string, DataValueType>;
+		displayName: string;
+		displayNameNormalize: string;
+		avatar: AvatarItem;
+		tsCreate: number;
+		tags: Record<string, string>;
+		playerBan: BanItem;
+		playerDatas: Record<string, DataValueType>;
+		playerCurrencies: Record<string, CurrencyItem>;
+		playerStatistics: Record<string, StatisticsItem>;
+		tsLastLogin: number;
+		ipAddressCreate: string;
+		lastIPDetail: IPDetailItem;
+		countryCode: string;
+		email: string;
+		pushNotifications: PushNotificationItem[];
+	}): Promise<MasterPlayer> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemCollection("MasterPlayer");
 
-		await collection.insertOne(result);
-		return new MasterPlayer(result, collection);
+		await collection.insertOne(rawMasterPlayer);
+		return new MasterPlayer(rawMasterPlayer, collection);
 	}
 
 	/**

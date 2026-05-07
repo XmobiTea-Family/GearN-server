@@ -4,22 +4,56 @@ import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { CharacterPlayer } from "./entity/pro/CharacterPlayer";
 import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { CharacterPlayerFindOptions } from "./entity/pro/findOptions/CharacterPlayerFindOptions";
+import { OwnerItem } from "./entity/pro/OwnerItem";
+import { RemoveStatusItem } from "./entity/pro/RemoveStatusItem";
+import { InventoryItem } from "./entity/pro/InventoryItem";
+import { GroupItem } from "./entity/pro/GroupItem";
+import { FriendItem } from "./entity/pro/FriendItem";
+import { BanItem } from "./entity/pro/BanItem";
+import { CurrencyItem } from "./entity/pro/CurrencyItem";
+import { StatisticsItem } from "./entity/pro/StatisticsItem";
+import { DataValueType } from "./entity/pro/type/DataValueType";
+import { AvatarItem } from "./entity/pro/AvatarItem";
+import { CharacterItem } from "./entity/pro/CharacterItem";
 
 export class CharacterPlayerRepository extends AbstractBaseRepository {
 	/**
 	 * Creates the character player async.
-	 * @param result Provides the result value used by this operation.
+	 * @param rawCharacterPlayer Provides the result value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createCharacterPlayerAsync(result: any, gameId: string, session?: mongodb.ClientSession): Promise<CharacterPlayer> {
+	public async createCharacterPlayerAsync(rawCharacterPlayer: mongodb.WithId<mongodb.BSON.Document> & {
+		characterId: string;
+		catalogId: string;
+		owner: OwnerItem;
+		playerCharacters: CharacterItem[];
+		removeStatus: RemoveStatusItem;
+		playerInventories: InventoryItem[];
+		playerGroups: GroupItem[];
+		playerFriends: FriendItem[];
+		playerBan: BanItem;
+		playerCurrencies: Record<string, CurrencyItem>;
+		playerStatistics: Record<string, StatisticsItem>;
+		playerDatas: Record<string, DataValueType>;
+		ipAddressCreate: string;
+		countryCode: string;
+		tsLastLogin: number;
+		segments: string[];
+		customDatas: Record<string, DataValueType>;
+		tsCreate: number;
+		displayName: string;
+		displayNameNormalize: string;
+		avatar: AvatarItem;
+		tags: Record<string, string>;
+	}, gameId: string, session?: mongodb.ClientSession): Promise<CharacterPlayer> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("CharacterPlayer", gameId);
 
-		await collection.insertOne(result, {
+		await collection.insertOne(rawCharacterPlayer, {
 			session: session,
 		});
-		return new CharacterPlayer(result, collection);
+		return new CharacterPlayer(rawCharacterPlayer, collection);
 	}
 
 	/**

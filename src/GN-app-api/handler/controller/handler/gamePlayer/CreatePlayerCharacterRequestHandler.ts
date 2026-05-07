@@ -257,37 +257,14 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-		// Stores the result value used in the current execution flow.
-		let result = {} as any;
 
-		result["characterId"] = characterId;
-		result["catalogId"] = request.catalogId;
-		result["owner"] = { "id": request.userId, "type": OwnerType.GamePlayer };
-		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-		result["playerCharacters"] = [];
-		result["playerInventories"] = [];
-		result["playerGroups"] = [];
-		result["playerFriends"] = [];
-		result["playerBan"] = { "tsExpire": 0, "reason": "" };
-		result["playerCurrencies"] = {};
-		result["playerStatistics"] = {};
-		result["playerDatas"] = [];
-		result["ipAddressCreate"] = request.ipAddress;
-		result["countryCode"] = "";
-		result["tsLastLogin"] = currentMilliseconds;
-		result["segments"] = [];
-		result["customDatas"] = {};
-		result["tsCreate"] = currentMilliseconds;
-		result["displayName"] = request.displayName;
-		result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
-		result["avatar"] = { "type": 0, "value": "0" };
-		result["tags"] = {};
+		let countryCode = "";
 
 		// Stores the IP detail response value used in the current execution flow.
 		let ipDetailResponse = await this.gnServer.getCountryIPDetailService().getIPDetailResponse(request.ipAddress);
 		if (ipDetailResponse.statusCode == "Ok") {
 			if (ipDetailResponse.detail.countryCode) {
-				result["countryCode"] = ipDetailResponse.detail.countryCode;
+				countryCode = ipDetailResponse.detail.countryCode;
 			}
 		}
 
@@ -297,7 +274,31 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			session.startTransaction();
 
 			// Stores the character player value used in the current execution flow.
-			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.createCharacterPlayerAsync(result, secretInfo.getGameId(), session);
+			let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.createCharacterPlayerAsync({
+				_id: undefined,
+				characterId: characterId,
+				playerCharacters: [],
+				catalogId: request.catalogId,
+				owner: { id: request.userId, type: OwnerType.GamePlayer },
+				removeStatus: { tsRemove: 0 },
+				playerInventories: [],
+				playerGroups: [],
+				playerFriends: [],
+				playerBan: { tsExpire: 0, reason: "" },
+				playerCurrencies: {},
+				playerStatistics: {},
+				playerDatas: {},
+				ipAddressCreate: "",
+				countryCode: countryCode,
+				tsLastLogin: currentMilliseconds,
+				segments: [],
+				customDatas: {},
+				tsCreate: currentMilliseconds,
+				displayName: request.displayName,
+				displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
+				avatar: { type: 0, value: "0" },
+				tags: {},
+			}, secretInfo.getGameId(), session);
 
 			gamePlayer.setPlayerCharacter(characterId, request.catalogId);
 			await gamePlayer.saveAsync(session);

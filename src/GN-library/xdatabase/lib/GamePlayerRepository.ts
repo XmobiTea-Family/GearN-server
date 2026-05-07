@@ -4,20 +4,50 @@ import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { GamePlayer } from "./entity/pro/GamePlayer";
 import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { GamePlayerFindOptions } from "./entity/pro/findOptions/GamePlayerFindOptions";
+import { CharacterItem } from "./entity/pro/CharacterItem";
+import { InventoryItem } from "./entity/pro/InventoryItem";
+import { GroupItem } from "./entity/pro/GroupItem";
+import { FriendItem } from "./entity/pro/FriendItem";
+import { DataValueType } from "./entity/pro/type/DataValueType";
+import { AvatarItem } from "./entity/pro/AvatarItem";
+import { BanItem } from "./entity/pro/BanItem";
+import { CurrencyItem } from "./entity/pro/CurrencyItem";
+import { StatisticsItem } from "./entity/pro/StatisticsItem";
 
 export class GamePlayerRepository extends AbstractBaseRepository {
 	/**
 	 * Creates the game player async.
-	 * @param result Provides the result value used by this operation.
+	 * @param rawGamePlayer Provides the result value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createGamePlayerAsync(result: any, gameId: string): Promise<GamePlayer> {
+	public async createGamePlayerAsync(rawGamePlayer: mongodb.WithId<mongodb.BSON.Document> & {
+		userId: string;
+		socketId: string;
+		playerCharacters: CharacterItem[];
+		playerInventories: InventoryItem[];
+		playerGroups: GroupItem[];
+		playerFriends: FriendItem[];
+		segments: string[];
+		customDatas: Record<string, DataValueType>;
+		displayName: string;
+		displayNameNormalize: string;
+		avatar: AvatarItem;
+		tsCreate: number;
+		tags: Record<string, string>;
+		playerBan: BanItem;
+		playerDatas: Record<string, DataValueType>;
+		playerCurrencies: Record<string, CurrencyItem>;
+		playerStatistics: Record<string, StatisticsItem>;
+		tsLastLogin: number;
+		ipAddressCreate: string;
+		countryCode: string;
+	}, gameId: string): Promise<GamePlayer> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("GamePlayer", gameId);
 
-		await collection.insertOne(result);
-		return new GamePlayer(result, collection);
+		await collection.insertOne(rawGamePlayer);
+		return new GamePlayer(rawGamePlayer, collection);
 	}
 
 	/**

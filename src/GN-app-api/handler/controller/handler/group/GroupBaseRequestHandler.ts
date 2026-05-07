@@ -646,17 +646,15 @@ export abstract class GroupBaseRequestHandler extends RequestHandler {
 
 			if (groupDataKeys == null || groupDataKeys.indexOf(groupDatasSettingsItem.key) != -1) {
 				// Stores the group data value used in the current execution flow.
-				let groupData = group.getGroupData(groupDatasSettingsItem.key);
+				let value = group.getGroupData(groupDatasSettingsItem.key);
 
-				if (groupData != null) {
-					// Stores the GearN group data value used in the current execution flow.
-					let gnGroupData = new GNHashtable();
+				// Stores the GearN group data value used in the current execution flow.
+				let gnGroupData = new GNHashtable();
 
-					gnGroupData.add(ParameterCode.Key, groupData.key);
-					gnGroupData.add(ParameterCode.Value, groupData.value);
+				gnGroupData.add(ParameterCode.Key, groupDatasSettingsItem.key);
+				gnGroupData.add(ParameterCode.Value, value);
 
-					gnGroupDatas.add(gnGroupData);
-				}
+				gnGroupDatas.add(gnGroupData);
 			}
 		}
 

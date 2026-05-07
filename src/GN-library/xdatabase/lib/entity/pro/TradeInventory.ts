@@ -1,6 +1,5 @@
 import * as mongodb from "mongodb";
 
-import { DataItem } from "./DataItem";
 import { DataObjectBase } from "./DataObjectBase";
 import { OwnerItem } from "./OwnerItem";
 import { RemoveStatusItem } from "./RemoveStatusItem";
@@ -50,7 +49,7 @@ export class TradeInventory extends DataObjectBase {
 	private prices: Map<string, CurrencyItem>;
 
 	/** Trade-scoped key-value custom data (e.g. a note from the seller). */
-	private itemDatas: Array<DataItem>;
+	private itemDatas: Map<string, DataValueType>;
 	/** Statistics map related to this trade. */
 	private itemStatistics: Map<string, StatisticsItem>;
 
@@ -82,7 +81,7 @@ export class TradeInventory extends DataObjectBase {
 		this.tsBuy = result[TradeInventory._tsBuy];
 		this.prices = result[TradeInventory._prices] != null ? new Map(Object.entries(result[TradeInventory._prices])) : null;
 
-		this.itemDatas = result[TradeInventory._itemDatas];
+		this.itemDatas = result[TradeInventory._itemDatas] != null ? new Map(Object.entries(result[TradeInventory._itemDatas])) : null;
 		this.itemStatistics = result[TradeInventory._itemStatistics] != null ? new Map(Object.entries(result[TradeInventory._itemStatistics])) : null;
 
 		this.removeStatus = result[TradeInventory._removeStatus];
@@ -226,7 +225,7 @@ export class TradeInventory extends DataObjectBase {
 	 * Returns all item datas.
 	 * @returns Returns all item datas.
 	 */
-	public getAllItemDatas(): Array<DataItem> {
+	public getAllItemDatas(): Map<string, DataValueType> {
 		return this.itemDatas;
 	}
 
@@ -244,8 +243,8 @@ export class TradeInventory extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 * @returns Returns the item data.
 	 */
-	public getItemData(key: string): DataItem {
-		return this.itemDatas.find(x => x.key == key);
+	public getItemData(key: string): DataValueType {
+		return this.itemDatas.get(key);
 	}
 
 	/**
@@ -254,21 +253,9 @@ export class TradeInventory extends DataObjectBase {
 	 * @param value Provides the value value used by this operation.
 	 */
 	public setItemData(key: string, value: DataValueType): void {
-		// Stores the item data item value used in the current execution flow.
-		let itemDataItem = this.itemDatas.find(x => x.key == key);
-		if (itemDataItem == null) {
-			itemDataItem = {
-				key: key,
-				value: value,
-			}
+		this.itemDatas.set(key, value);
 
-			this.itemDatas.push(itemDataItem);
-		}
-		else {
-			itemDataItem.value = value;
-		}
-
-		this.set(TradeInventory._itemDatas, this.itemDatas);
+		this.set(TradeInventory._itemDatas + DataObjectBase.DOT + key, value);
 	}
 
 	/**
@@ -276,19 +263,9 @@ export class TradeInventory extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 */
 	public removeItemData(key: string): void {
-		// Stores the item data item value used in the current execution flow.
-		let itemDataItem = this.itemDatas.find(x => x.key == key);
-		if (itemDataItem != null) {
-			// Stores the index of value used in the current execution flow.
-			let indexOf = this.itemDatas.indexOf(itemDataItem);
-			if (indexOf != -1) {
-				this.itemDatas.splice(indexOf, 1);
+		this.itemDatas.delete(key);
 
-				return this.set(TradeInventory._itemDatas, this.itemDatas);
-			}
-		}
-
-		throw Error("can not found the key to remove");
+		this.unset(TradeInventory._itemDatas + DataObjectBase.DOT + key);
 	}
 
 	/**

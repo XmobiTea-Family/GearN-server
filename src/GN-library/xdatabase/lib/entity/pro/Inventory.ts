@@ -1,6 +1,5 @@
 import * as mongodb from "mongodb";
 
-import { DataItem } from "./DataItem";
 import { DataObjectBase } from "./DataObjectBase";
 import { OwnerItem } from "./OwnerItem";
 import { RemoveStatusItem } from "./RemoveStatusItem";
@@ -49,7 +48,7 @@ export class Inventory extends DataObjectBase {
 	private owner: OwnerItem;
 
 	/** Per-item custom data as key-value extensions (e.g. enchant level, durability...). */
-	private itemDatas: Array<DataItem>;
+	private itemDatas: Map<string, DataValueType>;
 	/** Map of per-item statistics (kills, uses...). */
 	private itemStatistics: Map<string, StatisticsItem>;
 
@@ -80,7 +79,7 @@ export class Inventory extends DataObjectBase {
 
 		this.amount = result[Inventory._amount];
 		this.owner = result[Inventory._owner];
-		this.itemDatas = result[Inventory._itemDatas];
+		this.itemDatas = result[Inventory._itemDatas] != null ? new Map(Object.entries(result[Inventory._itemDatas])) : null;
 		this.itemStatistics = result[Inventory._itemStatistics] != null ? new Map(Object.entries(result[Inventory._itemStatistics])) : null;
 		this.removeStatus = result[Inventory._removeStatus];
 	}
@@ -161,7 +160,7 @@ export class Inventory extends DataObjectBase {
 	 * Returns all item datas.
 	 * @returns Returns all item datas.
 	 */
-	public getAllItemDatas(): Array<DataItem> {
+	public getAllItemDatas(): Map<string, DataValueType> {
 		return this.itemDatas;
 	}
 
@@ -171,7 +170,7 @@ export class Inventory extends DataObjectBase {
 	 * @returns Returns the operation result.
 	 */
 	public hasItemData(key: string): boolean {
-		return this.getItemData(key) != null;
+		return this.itemDatas.has(key);
 	}
 
 	/**
@@ -179,8 +178,8 @@ export class Inventory extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 * @returns Returns the item data.
 	 */
-	public getItemData(key: string): DataItem {
-		return this.itemDatas.find(x => x.key == key);
+	public getItemData(key: string): DataValueType {
+		return this.itemDatas.get(key);
 	}
 
 	/**
@@ -189,21 +188,9 @@ export class Inventory extends DataObjectBase {
 	 * @param value Provides the value value used by this operation.
 	 */
 	public setItemData(key: string, value: DataValueType): void {
-		// Stores the item data item value used in the current execution flow.
-		let itemDataItem = this.itemDatas.find(x => x.key == key);
-		if (itemDataItem == null) {
-			itemDataItem = {
-				key: key,
-				value: value,
-			}
+		this.itemDatas.set(key, value);
 
-			this.itemDatas.push(itemDataItem);
-		}
-		else {
-			itemDataItem.value = value;
-		}
-
-		this.set(Inventory._itemDatas, this.itemDatas);
+		this.set(Inventory._itemDatas + DataObjectBase.DOT + key, value);
 	}
 
 	/**
@@ -211,19 +198,9 @@ export class Inventory extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 */
 	public removeItemData(key: string): void {
-		// Stores the item data item value used in the current execution flow.
-		let itemDataItem = this.itemDatas.find(x => x.key == key);
-		if (itemDataItem != null) {
-			// Stores the index of value used in the current execution flow.
-			let indexOf = this.itemDatas.indexOf(itemDataItem);
-			if (indexOf != -1) {
-				this.itemDatas.splice(indexOf, 1);
+		this.itemDatas.delete(key);
 
-				return this.set(Inventory._itemDatas, this.itemDatas);
-			}
-		}
-
-		throw Error("can not found the key to remove");
+		this.unset(Inventory._itemDatas + DataObjectBase.DOT + key);
 	}
 
 	/**

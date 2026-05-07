@@ -262,32 +262,31 @@ export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 		// Stores the item ID value used in the current execution flow.
 		let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
 
-		// Stores the result value used in the current execution flow.
-		let result = {} as any;
-		result["itemId"] = itemId;
-		result["catalogId"] = request.catalogId;
-		result["classId"] = request.classId;
-		result["amount"] = amount;
-		result["itemType"] = playerItemCatalogSettingsItem.itemType;
-		result["owner"] = { "id": request.characterId, "type": OwnerType.CharacterPlayer };
-		result["itemDatas"] = [];
-		result["itemStatistics"] = {};
-		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-		result["segments"] = [];
-		result["customDatas"] = {};
-		result["tsCreate"] = currentMilliseconds;
-		result["displayName"] = request.displayName;
-		result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
-		result["avatar"] = { "type": 0, "value": "0" };
-		result["tags"] = {};
-
 		const session = this.gnServer.getDatabase().startSession();
 
 		try {
 			session.startTransaction();
 
 			// Stores the inventory value used in the current execution flow.
-			let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(result, secretInfo.getGameId(), session);
+			let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync({
+				_id: undefined,
+				itemId: itemId,
+				catalogId: request.catalogId,
+				classId: request.classId,
+				amount: amount,
+				itemType: playerItemCatalogSettingsItem.itemType,
+				owner: { id: request.characterId, type: OwnerType.CharacterPlayer },
+				itemDatas: {},
+				itemStatistics: {},
+				removeStatus: { tsRemove: 0, reason: "" },
+				segments: [],
+				customDatas: {},
+				tsCreate: currentMilliseconds,
+				displayName: request.displayName,
+				displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
+				avatar: { type: 0, value: "0" },
+				tags: {},
+			}, secretInfo.getGameId(), session);
 
 			characterPlayer.setPlayerInventory(itemId, request.catalogId, request.classId);
 			await characterPlayer.saveAsync(session);

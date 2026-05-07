@@ -20,6 +20,7 @@ import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNam
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { MemberItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MemberItem";
 
 class CreateGroupOperationRequest extends OperationRequest {
 
@@ -243,32 +244,12 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 		// Stores the group ID value used in the current execution flow.
 		let groupId = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
 
-		// Stores the result value used in the current execution flow.
-		let result = {} as any;
-		result["groupId"] = groupId;
-		result["groupType"] = OwnerType.CharacterPlayer;
-		result["catalogId"] = request.catalogId;
-		result["members"] = [{ "memberId": request.characterId, "status": GroupStatus.Member }];
-		result["groupDatas"] = [];
-		result["groupCurrencies"] = {};
-		result["groupStatistics"] = {};
-		result["groupInventories"] = [];
-		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-		result["segments"] = [];
-		result["customDatas"] = {};
-		result["tsCreate"] = currentMilliseconds;
-		result["displayName"] = request.displayName;
-		result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
-		result["avatar"] = { "type": 0, "value": "0" };
-		result["tags"] = {};
-
 		const session = this.gnServer.getDatabase().startSession();
 
 		try {
 			session.startTransaction();
 
-			// Stores the group value used in the current execution flow.
-			let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId(), session);
+			const members: MemberItem[] = [{ memberId: request.characterId, status: GroupStatus.Member }];
 
 			if (request.groupMembers != null) {
 				for (let i = 0; i < request.groupMembers.length; i++) {
@@ -288,22 +269,45 @@ export class CreateGroupRequestHandler extends CharacterPlayerBaseRequestHandler
 							otherCharacterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
 							await otherCharacterPlayer.saveAsync(session);
 
-							group.setMember(groupMember.characterId, GroupStatus.Member);
+							members.push({
+								memberId: groupMember.characterId,
+								status: GroupStatus.Member
+							});
 
-							if (otherCharacterPlayer.getOwner()?.id)
-								this.gnServer.joinRoom(otherCharacterPlayer.getOwner()?.id, groupId);
+							this.gnServer.joinRoom(otherCharacterPlayer.getOwner().id, groupId);
 						}
 						else {
 							otherCharacterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
 							await otherCharacterPlayer.saveAsync(session);
 
-							group.setMember(groupMember.characterId, GroupStatus.WaitingAccept);
+							members.push({
+								memberId: groupMember.characterId,
+								status: GroupStatus.WaitingAccept
+							});
 						}
 					}
 				}
-
-				await group.saveAsync(session);
 			}
+
+			let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync({
+				_id: undefined,
+				groupId: groupId,
+				groupType: OwnerType.CharacterPlayer,
+				catalogId: request.catalogId,
+				members: members,
+				groupDatas: {},
+				groupCurrencies: {},
+				groupStatistics: {},
+				groupInventories: [],
+				removeStatus: { tsRemove: 0 },
+				segments: [],
+				customDatas: {},
+				tsCreate: currentMilliseconds,
+				displayName: request.displayName,
+				displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
+				avatar: { type: 0, value: "0" },
+				tags: {},
+			}, secretInfo.getGameId(), session)
 
 			characterPlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
 			await characterPlayer.saveAsync(session);

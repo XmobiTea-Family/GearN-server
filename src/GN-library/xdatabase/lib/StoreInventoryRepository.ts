@@ -4,20 +4,66 @@ import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { StoreInventory } from "./entity/pro/StoreInventory";
 import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { StoreInventoryFindOptions } from "./entity/pro/findOptions/StoreInventoryFindOptions";
+import { AvatarItem } from "./entity/pro/AvatarItem";
+import { DataValueType } from "./entity/pro/type/DataValueType";
+import { StoreItemType } from "./../../../GN-common/constant/enumType/StoreItemType";
+import { RemoveStatusItem } from "./entity/pro/RemoveStatusItem";
 
 export class StoreInventoryRepository extends AbstractBaseRepository {
 	/**
 	 * Creates the store inventory async.
-	 * @param result Provides the result value used by this operation.
+	 * @param rawStoreInventory Provides the result value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createStoreInventoryAsync(result: any, gameId: string): Promise<StoreInventory> {
+	public async createStoreInventoryAsync(rawStoreInventory: mongodb.WithId<mongodb.BSON.Document> & {
+		storeId: string;
+		storeItems: {
+			/** Catalog id of the item being sold (the item template). */
+			catalogId: string;
+			/** Class id of the item; used to load the right class configuration when granting it to the buyer. */
+			classId: string;
+			/** Amount of the item granted to the buyer for each successful purchase. */
+			amount: number;
+		}[];
+		storeItemType: StoreItemType;
+		storeCurrencies: {
+			/** Currency code (gold, gem, ticket...). */
+			key: string;
+			/** Currency amount (granted on purchase, or the price). */
+			value: number;
+		}[];
+		priceCurrencies: {
+			/** Currency code (gold, gem, ticket...). */
+			key: string;
+			/** Currency amount (granted on purchase, or the price). */
+			value: number;
+		}[];
+		storeDatas: Record<string, DataValueType>;
+		removeStatus: RemoveStatusItem;
+		segments: string[];
+		customDatas: Record<string, DataValueType>;
+		inAppPurchase: {
+			/** Product id registered on the Apple App Store; matches the SKU in App Store Connect. */
+			appleAppStoreId: string,
+			/** Product id registered on Google Play; matches the SKU in Play Console. */
+			googlePlayStoreId: string,
+			/** Product id on the Facebook store (when the game has a Facebook canvas build). */
+			facebookStoreId: string,
+			/** USD price used for analytics/revenue reporting, decoupled from the per-store actual prices. */
+			analyticsPrice: number,
+		};
+		tsCreate: number;
+		displayName: string;
+		displayNameNormalize: string;
+		avatar: AvatarItem;
+		tags: Record<string, string>;
+	}, gameId: string): Promise<StoreInventory> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("StoreInventory", gameId);
 
-		await collection.insertOne(result);
-		return new StoreInventory(result, collection);
+		await collection.insertOne(rawStoreInventory);
+		return new StoreInventory(rawStoreInventory, collection);
 	}
 
 	/**

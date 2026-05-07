@@ -4,22 +4,47 @@ import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { Group } from "./entity/pro/Group";
 import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { GroupFindOptions } from "./entity/pro/findOptions/GroupFindOptions";
+import { OwnerType } from "./../../../GN-common/constant/enumType/OwnerType";
+import { MemberItem } from "./entity/pro/MemberItem";
+import { DataValueType } from "./entity/pro/type/DataValueType";
+import { CurrencyItem } from "./entity/pro/CurrencyItem";
+import { StatisticsItem } from "./entity/pro/StatisticsItem";
+import { InventoryItem } from "./entity/pro/InventoryItem";
+import { RemoveStatusItem } from "./entity/pro/RemoveStatusItem";
+import { AvatarItem } from "./entity/pro/AvatarItem";
 
 export class GroupRepository extends AbstractBaseRepository {
 	/**
 	 * Creates the group async.
-	 * @param result Provides the result value used by this operation.
+	 * @param rawGroup Provides the result value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createGroupAsync(result: any, gameId: string, session?: mongodb.ClientSession): Promise<Group> {
+	public async createGroupAsync(rawGroup: mongodb.WithId<mongodb.BSON.Document> & {
+		groupId: string;
+		groupType: OwnerType;
+		catalogId: string;
+		members: MemberItem[];
+		groupDatas: Record<string, DataValueType>;
+		groupCurrencies: Record<string, CurrencyItem>;
+		groupStatistics: Record<string, StatisticsItem>;
+		groupInventories: InventoryItem[];
+		removeStatus: RemoveStatusItem;
+		segments: string[];
+		customDatas: Record<string, DataValueType>;
+		tsCreate: number;
+		displayName: string;
+		displayNameNormalize: string;
+		avatar: AvatarItem;
+		tags: Record<string, string>;
+	}, gameId: string, session?: mongodb.ClientSession): Promise<Group> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("Group", gameId);
 
-		await collection.insertOne(result, {
+		await collection.insertOne(rawGroup, {
 			session: session
 		});
-		return new Group(result, collection);
+		return new Group(rawGroup, collection);
 	}
 
 	/**

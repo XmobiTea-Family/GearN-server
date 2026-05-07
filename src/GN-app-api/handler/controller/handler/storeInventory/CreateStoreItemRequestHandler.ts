@@ -183,25 +183,29 @@ export class CreateStoreItemRequestHandler extends StoreItemBaseRequestHandler {
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		// Stores the result value used in the current execution flow.
-		let result = {} as any;
-		result["storeId"] = storeId;
-		result["storeItems"] = [];
-		result["storeItemType"] = StoreItemType.Consumable;
-		result["storeCurrencies"] = [];
-		result["priceCurrencies"] = [];
-		result["storeDatas"] = [];
-		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-		result["segments"] = [];
-		result["customDatas"] = {};
-		result["inAppPurchase"] = {};
-		result["tsCreate"] = currentMilliseconds;
-		result["displayName"] = request.displayName;
-		result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
-		result["avatar"] = { "type": 0, "value": "0" };
-		result["tags"] = {};
-
-		await this.gnServer.getDatabase().storeInventoryRepository.createStoreInventoryAsync(result, secretInfo.getGameId());
+		await this.gnServer.getDatabase().storeInventoryRepository.createStoreInventoryAsync({
+			_id: undefined,
+			storeId: storeId,
+			storeItems: [],
+			storeItemType: StoreItemType.Consumable,
+			storeCurrencies: [],
+			priceCurrencies: [],
+			storeDatas: {},
+			removeStatus: { tsRemove: 0 },
+			segments: [],
+			customDatas: {},
+			inAppPurchase: {
+				appleAppStoreId: null,
+				googlePlayStoreId: null,
+				facebookStoreId: null,
+				analyticsPrice: 0,
+			},
+			tsCreate: currentMilliseconds,
+			displayName: request.displayName,
+			displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
+			avatar: { type: 0, value: "0" },
+			tags: {}
+		}, secretInfo.getGameId());
 
 		operationResponse.setParameter(ParameterCode.StoreId, storeId);
 

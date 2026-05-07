@@ -2,7 +2,6 @@ import * as mongodb from "mongodb";
 
 import { DataObjectBase } from "./DataObjectBase";
 import { MemberItem } from "./MemberItem";
-import { DataItem } from "./DataItem";
 import { CurrencyItem } from "./CurrencyItem";
 import { StatisticsItem } from "./StatisticsItem";
 import { InventoryItem } from "./InventoryItem";
@@ -51,7 +50,7 @@ export class Group extends DataObjectBase {
 	/** Group-shared statistics map (total wins, group level...). */
 	private groupStatistics: Map<string, StatisticsItem>;
 	/** Group-scoped key-value custom data extensions. */
-	private groupDatas: Array<DataItem>;
+	private groupDatas: Map<string, DataValueType>;
 	/** Group-shared inventory items (the guild storage). */
 	private groupInventories: Array<InventoryItem>;
 
@@ -79,7 +78,7 @@ export class Group extends DataObjectBase {
 	 */
 	private setDocumentGroup(result: mongodb.WithId<mongodb.Document>) {
 		this.members = result[Group._members];
-		this.groupDatas = result[Group._groupDatas];
+		this.groupDatas = result[Group._groupDatas] != null ? new Map(Object.entries(result[Group._groupDatas])) : null;
 		this.groupCurrencies = result[Group._groupCurrencies] != null ? new Map(Object.entries(result[Group._groupCurrencies])) : null;
 		this.groupStatistics = result[Group._groupStatistics] != null ? new Map(Object.entries(result[Group._groupStatistics])) : null;
 		this.groupInventories = result[Group._groupInventories];
@@ -259,7 +258,7 @@ export class Group extends DataObjectBase {
 	 * Returns all group datas.
 	 * @returns Returns all group datas.
 	 */
-	public getAllGroupDatas(): Array<DataItem> {
+	public getAllGroupDatas(): Map<string, DataValueType> {
 		return this.groupDatas;
 	}
 
@@ -269,7 +268,7 @@ export class Group extends DataObjectBase {
 	 * @returns Returns the operation result.
 	 */
 	public hasGroupData(key: string): boolean {
-		return this.getGroupData(key) != null;
+		return this.groupDatas.has(key);
 	}
 
 	/**
@@ -277,8 +276,8 @@ export class Group extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 * @returns Returns the group data.
 	 */
-	public getGroupData(key: string): DataItem {
-		return this.groupDatas.find(x => x.key == key);
+	public getGroupData(key: string): DataValueType {
+		return this.groupDatas.get(key);
 	}
 
 	/**
@@ -287,21 +286,9 @@ export class Group extends DataObjectBase {
 	 * @param value Provides the value value used by this operation.
 	 */
 	public setGroupData(key: string, value: DataValueType): void {
-		// Stores the group data item value used in the current execution flow.
-		let groupDataItem = this.groupDatas.find(x => x.key == key);
-		if (groupDataItem == null) {
-			groupDataItem = {
-				key: key,
-				value: value,
-			}
+		this.groupDatas.set(key, value);
 
-			this.groupDatas.push(groupDataItem);
-		}
-		else {
-			groupDataItem.value = value;
-		}
-
-		this.set(Group._groupDatas, this.groupDatas);
+		this.set(Group._groupDatas + DataObjectBase.DOT + key, value);
 	}
 
 	/**
@@ -309,19 +296,9 @@ export class Group extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 */
 	public removeGroupData(key: string): void {
-		// Stores the group data item value used in the current execution flow.
-		let groupDataItem = this.groupDatas.find(x => x.key == key);
-		if (groupDataItem != null) {
-			// Stores the index of value used in the current execution flow.
-			let indexOf = this.groupDatas.indexOf(groupDataItem);
-			if (indexOf != -1) {
-				this.groupDatas.splice(indexOf, 1);
+		this.groupDatas.delete(key);
 
-				return this.set(Group._groupDatas, this.groupDatas);
-			}
-		}
-
-		throw Error("can not found the key to remove");
+		this.unset(Group._groupDatas + DataObjectBase.DOT + key);
 	}
 
 	/**

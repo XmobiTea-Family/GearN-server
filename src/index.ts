@@ -258,9 +258,6 @@ export { ChatMessage };
 import { CurrencyItem } from "./GN-library/xdatabase/lib/entity/pro/CurrencyItem";
 export { CurrencyItem };
 
-import { DataItem } from "./GN-library/xdatabase/lib/entity/pro/DataItem";
-export { DataItem };
-
 import { DataObjectBase } from "./GN-library/xdatabase/lib/entity/pro/DataObjectBase";
 export { DataObjectBase };
 

@@ -4,22 +4,45 @@ import { AbstractBaseRepository } from "./AbstractBaseRepository";
 import { Inventory } from "./entity/pro/Inventory";
 import { xDatetime } from "./../../xdatetime/lib/xDatetime";
 import { InventoryFindOptions } from "./entity/pro/findOptions/InventoryFindOptions";
+import { ItemType } from "./../../../GN-common/constant/enumType/ItemType";
+import { OwnerItem } from "./entity/pro/OwnerItem";
+import { DataValueType } from "./entity/pro/type/DataValueType";
+import { StatisticsItem } from "./entity/pro/StatisticsItem";
+import { RemoveStatusItem } from "./entity/pro/RemoveStatusItem";
+import { AvatarItem } from "./entity/pro/AvatarItem";
 
 export class InventoryRepository extends AbstractBaseRepository {
 	/**
 	 * Creates the inventory async.
-	 * @param result Provides the result value used by this operation.
+	 * @param rawInventory Provides the result value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createInventoryAsync(result: any, gameId: string, session?: mongodb.ClientSession): Promise<Inventory> {
+	public async createInventoryAsync(rawInventory: mongodb.WithId<mongodb.BSON.Document> & {
+		itemId: string;
+		catalogId: string;
+		classId: string;
+		amount: number;
+		itemType: ItemType;
+		owner: OwnerItem;
+		itemDatas: Record<string, DataValueType>;
+		itemStatistics: Record<string, StatisticsItem>;
+		removeStatus: RemoveStatusItem;
+		segments: string[];
+		customDatas: Record<string, DataValueType>;
+		tsCreate: number;
+		displayName: string;
+		displayNameNormalize: string;
+		avatar: AvatarItem;
+		tags: Record<string, string>;
+	}, gameId: string, session?: mongodb.ClientSession): Promise<Inventory> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.systemGameCollection("Inventory", gameId);
 
-		await collection.insertOne(result, {
+		await collection.insertOne(rawInventory, {
 			session: session,
 		});
-		return new Inventory(result, collection);
+		return new Inventory(rawInventory, collection);
 	}
 
 	/**

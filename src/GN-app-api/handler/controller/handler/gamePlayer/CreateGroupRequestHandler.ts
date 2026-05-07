@@ -1,3 +1,5 @@
+import * as mongodb from "mongodb";
+
 import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
 import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
 import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
@@ -20,6 +22,7 @@ import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNam
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { MemberItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/MemberItem";
 
 class CreateGroupOperationRequest extends OperationRequest {
 
@@ -247,32 +250,12 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 		// Stores the group ID value used in the current execution flow.
 		let groupId = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
 
-		// Stores the result value used in the current execution flow.
-		let result = {} as any;
-		result["groupId"] = groupId;
-		result["groupType"] = OwnerType.GamePlayer;
-		result["catalogId"] = request.catalogId;
-		result["members"] = [{ "memberId": request.userId, "status": GroupStatus.Member }];
-		result["groupDatas"] = [];
-		result["groupCurrencies"] = {};
-		result["groupStatistics"] = {};
-		result["groupInventories"] = [];
-		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-		result["segments"] = [];
-		result["customDatas"] = {};
-		result["tsCreate"] = currentMilliseconds;
-		result["displayName"] = request.displayName;
-		result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
-		result["avatar"] = { "type": 0, "value": "0" };
-		result["tags"] = {};
-
 		const session = this.gnServer.getDatabase().startSession();
 
 		try {
 			session.startTransaction();
 
-			// Stores the group value used in the current execution flow.
-			let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync(result, secretInfo.getGameId(), session);
+			const members: MemberItem[] = [{ memberId: request.userId, status: GroupStatus.Member }];
 
 			if (request.groupMembers != null) {
 				for (let i = 0; i < request.groupMembers.length; i++) {
@@ -291,7 +274,10 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 							otherGamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
 							await otherGamePlayer.saveAsync(session);
 
-							group.setMember(groupMember.userId, GroupStatus.Member);
+							members.push({
+								memberId: groupMember.userId,
+								status: GroupStatus.Member
+							});
 
 							this.gnServer.joinRoom(groupMember.userId, groupId);
 						}
@@ -299,13 +285,34 @@ export class CreateGroupRequestHandler extends GamePlayerBaseRequestHandler {
 							otherGamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.WaitingAccept, currentMilliseconds);
 							await otherGamePlayer.saveAsync(session);
 
-							group.setMember(groupMember.userId, GroupStatus.WaitingAccept);
+							members.push({
+								memberId: groupMember.userId,
+								status: GroupStatus.WaitingAccept
+							});
 						}
 					}
 				}
-
-				await group.saveAsync(session);
 			}
+
+			let group = await this.gnServer.getDatabase().groupRepository.createGroupAsync({
+				_id: undefined,
+				groupId: groupId,
+				groupType: OwnerType.GamePlayer,
+				catalogId: request.catalogId,
+				members: members,
+				groupDatas: {},
+				groupCurrencies: {},
+				groupStatistics: {},
+				groupInventories: [],
+				removeStatus: { tsRemove: 0 },
+				segments: [],
+				customDatas: {},
+				tsCreate: currentMilliseconds,
+				displayName: request.displayName,
+				displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
+				avatar: { type: 0, value: "0" },
+				tags: {},
+			}, secretInfo.getGameId(), session);
 
 			gamePlayer.setPlayerGroup(groupId, request.catalogId, GroupStatus.Member, currentMilliseconds);
 			await gamePlayer.saveAsync(session);

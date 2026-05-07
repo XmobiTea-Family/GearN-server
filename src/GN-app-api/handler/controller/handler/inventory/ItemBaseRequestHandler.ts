@@ -14,7 +14,6 @@ import { RequestHandler } from "./../base/RequestHandler";
 import { Inventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
-import { xItemCatalogSettings } from "./../../../../../GN-library/xsettings/lib/entity/xItemCatalogSettings";
 import { InventoryPermissionRules, SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 
@@ -662,17 +661,15 @@ export abstract class ItemBaseRequestHandler extends RequestHandler {
 
 			if (itemDataKeys == null || itemDataKeys.indexOf(itemDatasSettingsItem.key) != -1) {
 				// Stores the item data value used in the current execution flow.
-				let itemData = inventory.getItemData(itemDatasSettingsItem.key);
+				let value = inventory.getItemData(itemDatasSettingsItem.key);
 
-				if (itemData != null) {
-					// Stores the GearN item data value used in the current execution flow.
-					let gnItemData = new GNHashtable();
+				// Stores the GearN item data value used in the current execution flow.
+				let gnItemData = new GNHashtable();
 
-					gnItemData.add(ParameterCode.Key, itemData.key);
-					gnItemData.add(ParameterCode.Value, itemData.value);
+				gnItemData.add(ParameterCode.Key, itemDatasSettingsItem.key);
+				gnItemData.add(ParameterCode.Value, value);
 
-					gnItemDatas.add(gnItemData);
-				}
+				gnItemDatas.add(gnItemData);
 			}
 		}
 

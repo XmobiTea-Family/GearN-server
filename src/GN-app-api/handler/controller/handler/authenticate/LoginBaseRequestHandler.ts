@@ -1,3 +1,5 @@
+import * as mongodb from "mongodb";
+
 import { RequestHandler } from "./../base/RequestHandler";
 
 import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
@@ -14,6 +16,14 @@ import { InfoRequestParam } from "./model/InfoRequestParam";
 import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { ExternalItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/ExternalItem";
+import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import { CurrencyItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/CurrencyItem";
+import { StatisticsItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/StatisticsItem";
+import { IPDetailItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/IPDetailItem";
+import { PushNotificationItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/PushNotificationItem";
+import { AvatarItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/AvatarItem";
+import { BanItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/BanItem";
 
 class LoginBaseOperationRequest extends OperationRequest {
 	/**
@@ -376,15 +386,13 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 				// Stores the value value used in the current execution flow.
 				let value = masterPlayer.getCustomData(customDatasSettingsItem.key);
 
-				if (value != null) {
-					// Stores the GearN custom data value used in the current execution flow.
-					let gnCustomData = new GNHashtable();
+				// Stores the GearN custom data value used in the current execution flow.
+				let gnCustomData = new GNHashtable();
 
-					gnCustomData.add(ParameterCode.Key, customDatasSettingsItem.key);
-					gnCustomData.add(ParameterCode.Value, value);
+				gnCustomData.add(ParameterCode.Key, customDatasSettingsItem.key);
+				gnCustomData.add(ParameterCode.Value, value);
 
-					gnCustomDatas.add(gnCustomData);
-				}
+				gnCustomDatas.add(gnCustomData);
 			}
 		}
 
@@ -500,17 +508,15 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 
 			if (playerDataKeys == null || playerDataKeys.indexOf(playerDatasSettingsItem.key) != -1) {
 				// Stores the player data value used in the current execution flow.
-				let playerData = masterPlayer.getPlayerData(playerDatasSettingsItem.key);
+				let value = masterPlayer.getPlayerData(playerDatasSettingsItem.key);
 
-				if (playerData != null) {
-					// Stores the GearN player data value used in the current execution flow.
-					let gnPlayerData = new GNHashtable();
+				// Stores the GearN player data value used in the current execution flow.
+				let gnPlayerData = new GNHashtable();
 
-					gnPlayerData.add(ParameterCode.Key, playerData.key);
-					gnPlayerData.add(ParameterCode.Value, playerData.value);
+				gnPlayerData.add(ParameterCode.Key, playerDatasSettingsItem.key);
+				gnPlayerData.add(ParameterCode.Value, value);
 
-					gnPlayerDatas.add(gnPlayerData);
-				}
+				gnPlayerDatas.add(gnPlayerData);
 			}
 		}
 
@@ -697,31 +703,52 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		// Stores the answer value used in the current execution flow.
-		let answer: Record<string, any> = {};
-
-		answer["userId"] = StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase());
-		answer["external"] = {};
-		answer["segments"] = [];
-		answer["customDatas"] = {};
-		answer["displayName"] = "";
-		answer["displayNameNormalize"] = "";
-		answer["avatar"] = { "type": 0, "value": "0" };
-		answer["tsCreate"] = currentMilliseconds;
-		answer["tags"] = {};
-		answer["playerBan"] = { "tsExpire": 0, "reason": "" };
-		answer["playerDatas"] = [];
-		answer["playerCurrencies"] = {};
-		answer["playerStatistics"] = {};
-		answer["tsLastLogin"] = currentMilliseconds;
-		answer["ipAddressCreate"] = ipAddressCreate;
-		answer["lastIPDetail"] = {
-			"ipAddress": ipAddressCreate,
-			"countryCode": "Unknown",
-			"regionCode": "Unknown",
+		let answer: mongodb.WithId<mongodb.BSON.Document> & {
+			userId: string;
+			external: ExternalItem;
+			segments: string[];
+			customDatas: Record<string, DataValueType>;
+			displayName: string;
+			displayNameNormalize: string;
+			avatar: AvatarItem;
+			tsCreate: number;
+			tags: Record<string, string>;
+			playerBan: BanItem;
+			playerDatas: Record<string, DataValueType>;
+			playerCurrencies: Record<string, CurrencyItem>;
+			playerStatistics: Record<string, StatisticsItem>;
+			tsLastLogin: number;
+			ipAddressCreate: string;
+			lastIPDetail: IPDetailItem;
+			countryCode: string;
+			email: string;
+			pushNotifications: PushNotificationItem[];
+		} = {
+			_id: undefined,
+			userId: StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase()),
+			external: {},
+			segments: [],
+			customDatas: {},
+			displayName: "",
+			displayNameNormalize: "",
+			avatar: { type: 0, value: "0" },
+			tsCreate: currentMilliseconds,
+			tags: {},
+			playerBan: { tsExpire: 0, reason: "" },
+			playerDatas: {},
+			playerCurrencies: {},
+			playerStatistics: {},
+			tsLastLogin: currentMilliseconds,
+			ipAddressCreate: ipAddressCreate,
+			lastIPDetail: {
+				ipAddress: ipAddressCreate,
+				countryCode: "Unknown",
+				regionCode: "Unknown",
+			},
+			countryCode: "",
+			email: "",
+			pushNotifications: []
 		};
-		answer["countryCode"] = "";
-		answer["email"] = "";
-		answer["pushNotifications"] = [];
 
 		return answer;
 	}

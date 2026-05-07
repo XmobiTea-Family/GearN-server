@@ -1,7 +1,6 @@
 import * as mongodb from "mongodb";
 
 import { BanItem } from "./BanItem";
-import { DataItem } from "./DataItem";
 import { DataObjectBase } from "./DataObjectBase";
 import { CurrencyItem } from "./CurrencyItem";
 import { StatisticsItem } from "./StatisticsItem";
@@ -39,7 +38,7 @@ export class PlayerBase extends DataObjectBase {
 	private playerStatistics: Map<string, StatisticsItem>;
 
 	/** Player-scoped custom data list of key-value extensions (separate from DataObjectBase.customDatas). */
-	private playerDatas: Array<DataItem>;
+	private playerDatas: Map<string, DataValueType>;
 	/** IP captured when the account was first created; immutable, used for audit/anti-fraud. */
 	private ipAddressCreate: string;
 	/** ISO country code derived from the account-creation IP; used to apply region-specific policy. */
@@ -69,7 +68,7 @@ export class PlayerBase extends DataObjectBase {
 		this.playerCurrencies = result[PlayerBase._playerCurrencies] != null ? new Map(Object.entries(result[PlayerBase._playerCurrencies])) : null;
 		this.playerStatistics = result[PlayerBase._playerStatistics] != null ? new Map(Object.entries(result[PlayerBase._playerStatistics])) : null;
 
-		this.playerDatas = result[PlayerBase._playerDatas];
+		this.playerDatas = result[PlayerBase._playerDatas] != null ? new Map(Object.entries(result[PlayerBase._playerDatas])) : null;
 
 		this.ipAddressCreate = result[PlayerBase._ipAddressCreate];
 		this.countryCode = result[PlayerBase._countryCode];
@@ -103,7 +102,7 @@ export class PlayerBase extends DataObjectBase {
 	 * Returns all player datas.
 	 * @returns Returns all player datas.
 	 */
-	public getAllPlayerDatas(): Array<DataItem> {
+	public getAllPlayerDatas(): Map<string, DataValueType> {
 		return this.playerDatas;
 	}
 
@@ -113,7 +112,7 @@ export class PlayerBase extends DataObjectBase {
 	 * @returns Returns the operation result.
 	 */
 	public hasPlayerData(key: string): boolean {
-		return this.playerDatas.find(x => x.key == key) != null;
+		return this.playerDatas.has(key);
 	}
 
 	/**
@@ -121,8 +120,8 @@ export class PlayerBase extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 * @returns Returns the player data.
 	 */
-	public getPlayerData(key: string): DataItem {
-		return this.playerDatas.find(x => x.key == key);
+	public getPlayerData(key: string): DataValueType {
+		return this.playerDatas.get(key);
 	}
 
 	/**
@@ -131,21 +130,9 @@ export class PlayerBase extends DataObjectBase {
 	 * @param value Provides the value value used by this operation.
 	 */
 	public setPlayerData(key: string, value: DataValueType): void {
-		// Stores the player data item value used in the current execution flow.
-		let playerDataItem = this.playerDatas.find(x => x.key == key);
-		if (playerDataItem == null) {
-			playerDataItem = {
-				key: key,
-				value: value,
-			}
+		this.playerDatas.set(key, value);
 
-			this.playerDatas.push(playerDataItem);
-		}
-		else {
-			playerDataItem.value = value;
-		}
-
-		this.set(PlayerBase._playerDatas, this.playerDatas);
+		this.set(PlayerBase._playerDatas + DataObjectBase.DOT + key, value);
 	}
 
 	/**
@@ -153,19 +140,9 @@ export class PlayerBase extends DataObjectBase {
 	 * @param key Provides the key value used by this operation.
 	 */
 	public removePlayerData(key: string): void {
-		// Stores the player data item value used in the current execution flow.
-		let playerDataItem = this.playerDatas.find(x => x.key == key);
-		if (playerDataItem != null) {
-			// Stores the index of value used in the current execution flow.
-			let indexOf = this.playerDatas.indexOf(playerDataItem);
-			if (indexOf != -1) {
-				this.playerDatas.splice(indexOf, 1);
+		this.playerDatas.delete(key);
 
-				return this.set(PlayerBase._playerDatas, this.playerDatas);
-			}
-		}
-
-		throw Error("can not found the key to remove");
+		this.unset(PlayerBase._playerDatas + DataObjectBase.DOT + key);
 	}
 
 	/**
