@@ -14,6 +14,8 @@ import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabas
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 
 class RemovePlayerItemOperationRequest extends OperationRequest {
 
@@ -214,8 +216,47 @@ export class RemovePlayerItemRequestHandler extends CharacterPlayerBaseRequestHa
 			return operationResponse;
 		}
 
-		characterPlayer.removePlayerInventory(request.itemId);
-		await characterPlayer.saveAsync();
+		// Stores the inventory find options value used in the current execution flow.
+		let inventoryFindOptions: InventoryFindOptions = {
+			owner: true,
+			removeStatus: true,
+		}
+
+		// Stores the inventory value used in the current execution flow.
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
+
+		const session = this.gnServer.getDatabase().startSession();
+
+		try {
+			session.startTransaction();
+
+			if (inventory != null) {
+				// Stores the remove status value used in the current execution flow.
+				let removeStatus = inventory.getRemoveStatus();
+				if (removeStatus.tsRemove == 0) {
+					if (inventory.getOwner().id == request.characterId) {
+						inventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), "CharacterPlayer owned remove by RemovePlayerItem");
+
+						await inventory.saveAsync(session);
+					}
+				}
+			}
+
+			characterPlayer.removePlayerInventory(request.itemId);
+			await characterPlayer.saveAsync(session);
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

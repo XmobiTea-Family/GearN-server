@@ -16,6 +16,9 @@ import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { GamePlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/GamePlayer";
+import { CharacterPlayer } from "./../../../../../GN-library/xdatabase/lib/entity/pro/CharacterPlayer";
+import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
 
@@ -175,6 +178,7 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 			removeStatus: true,
 			members: true,
 			groupType: true,
+			groupInventories: true,
 		}
 
 		// Stores the group value used in the current execution flow.
@@ -184,6 +188,9 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
 			return operationResponse;
 		}
+
+		// Stores the current milliseconds value used in the current execution flow.
+		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
 		if (role == SecretRole.Client) {
 			// Stores the remove status value used in the current execution flow.
@@ -196,6 +203,15 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 			}
 		}
 
+		const members = group.getGroupType() == OwnerType.GamePlayer
+			? await Promise.all(group.getAllMembers().map((member) => this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(member.memberId, secretInfo.getGameId(), { userId: true, playerGroups: true })))
+			: await Promise.all(group.getAllMembers().map((member) => this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(member.memberId, secretInfo.getGameId(), { owner: true, playerGroups: true })));
+
+		let inventoryFindOptions: InventoryFindOptions = {
+			owner: true,
+		}
+		let inventories = await Promise.all(group.getAllGroupInventories().map((inventory) => this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(inventory.itemId, secretInfo.getGameId(), inventoryFindOptions)));
+
 		// Stores the remove status value used in the current execution flow.
 		let removeStatus = group.getRemoveStatus();
 		if (removeStatus.tsRemove == 0) {
@@ -204,41 +220,45 @@ export class SetRemoveStatusRequestHandler extends GroupBaseRequestHandler {
 			try {
 				session.startTransaction();
 
-				group.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
+				group.setRemoveStatus(currentMilliseconds, request.reason);
 
 				// Stores the group type value used in the current execution flow.
 				let groupType = group.getGroupType();
 
-				// Stores the members value used in the current execution flow.
-				let members = group.getAllMembers();
-
 				if (groupType == OwnerType.GamePlayer) {
 					for (let i = 0; i < members.length; i++) {
-						// Stores the member value used in the current execution flow.
-						let member = members[i];
+						let gamePlayer = members[i] as GamePlayer;
 
-						// Stores the game player value used in the current execution flow.
-						let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
 						if (gamePlayer != null) {
 							if (gamePlayer.hasPlayerGroup(request.groupId)) {
 								gamePlayer.removePlayerGroup(request.groupId);
 								await gamePlayer.saveAsync(session);
+
+								this.gnServer.leaveRoom(gamePlayer.getUserId(), request.groupId);
 							}
 						}
 					}
 				}
 				else if (groupType == OwnerType.CharacterPlayer) {
 					for (let i = 0; i < members.length; i++) {
-						// Stores the member value used in the current execution flow.
-						let member = members[i];
-
-						// Stores the character player value used in the current execution flow.
-						let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(member.memberId, secretInfo.getGameId(), { playerGroups: true });
+						let characterPlayer = members[i] as CharacterPlayer;
 						if (characterPlayer != null) {
 							if (characterPlayer.hasPlayerGroup(request.groupId)) {
 								characterPlayer.removePlayerGroup(request.groupId);
 								await characterPlayer.saveAsync(session);
+
+								this.gnServer.leaveRoom(characterPlayer.getOwner().id, request.groupId);
 							}
+						}
+					}
+				}
+
+				for (const inventory of inventories) {
+					if (inventory != null) {
+						if (inventory.getOwner().id == request.groupId) {
+							inventory.setRemoveStatus(currentMilliseconds, "Group owned remove by SetRemoveStatus, reason " + request.reason);
+
+							await inventory.saveAsync(session);
 						}
 					}
 				}

@@ -191,7 +191,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 								permissionAnyForLayer1Any.selfEnable = true;
 							}
 
-							// if (secretRole == SecretRole.Player) {
+							// if (secretRole == SecretRole.Client) {
 							// 	if (permissionAnyForLayer1Any.otherSelfEnable) {
 							// 		permissionAnyForLayer1Any.selfEnable = true;
 							// 	}

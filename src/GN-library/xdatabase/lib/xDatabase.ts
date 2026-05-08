@@ -175,7 +175,7 @@ export class xDatabase {
 	 * @param collectionName Provides the collection name value used by this operation.
 	 * @param options Provides the options value used by this operation.
 	 */
-	public createCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, options?: mongodb.CreateCollectionOptions) {
+	public createCollection<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, options?: mongodb.CreateCollectionOptions): Promise<mongodb.Collection<TSchema>> {
 		return this.db.createCollection<TSchema>(collectionName, options)
 	}
 
@@ -185,7 +185,7 @@ export class xDatabase {
 	 * @param index Provides the index value used by this operation.
 	 * @param options Provides the options value used by this operation.
 	 */
-	public createIndex<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): void {
+	public async createIndex<TSchema extends mongodb.Document = mongodb.Document>(collectionName: string, index: { [k: string]: any }, options?: { [k: string]: any }): Promise<void> {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.collection<TSchema>(collectionName);
 
@@ -200,7 +200,7 @@ export class xDatabase {
 			if (options.unique != null) createIndexesOptions.unique = options.unique;
 		}
 
-		collection.createIndex(index, createIndexesOptions);
+		await collection.createIndex(index, createIndexesOptions);
 	}
 
 	/**

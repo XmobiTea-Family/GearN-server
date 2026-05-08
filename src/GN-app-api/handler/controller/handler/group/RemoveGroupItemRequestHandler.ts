@@ -13,6 +13,9 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class RemoveGroupItemOperationRequest extends OperationRequest {
 
@@ -197,8 +200,47 @@ export class RemoveGroupItemRequestHandler extends GroupBaseRequestHandler {
 			return operationResponse;
 		}
 
-		group.removeGroupInventory(request.itemId);
-		await group.saveAsync();
+		// Stores the inventory find options value used in the current execution flow.
+		let inventoryFindOptions: InventoryFindOptions = {
+			owner: true,
+			removeStatus: true,
+		}
+
+		// Stores the inventory value used in the current execution flow.
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
+
+		const session = this.gnServer.getDatabase().startSession();
+
+		try {
+			session.startTransaction();
+
+			if (inventory != null) {
+				// Stores the remove status value used in the current execution flow.
+				let removeStatus = inventory.getRemoveStatus();
+				if (removeStatus.tsRemove == 0) {
+					if (inventory.getOwner().id == request.groupId) {
+						inventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), "Group owned remove by RemoveGroupItem");
+
+						await inventory.saveAsync(session);
+					}
+				}
+			}
+
+			group.removeGroupInventory(request.itemId);
+			await group.saveAsync(session);
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

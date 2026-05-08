@@ -15,6 +15,9 @@ import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/Secret
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
+import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
 
@@ -174,6 +177,8 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 			removeStatus: true,
 			playerBan: true,
 			owner: true,
+			playerGroups: true,
+			playerInventories: true,
 		}
 
 		// Stores the character player value used in the current execution flow.
@@ -218,6 +223,17 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 			// Stores the owner value used in the current execution flow.
 			let owner = characterPlayer.getOwner();
 
+			let groupFindOptions: GroupFindOptions = {
+				groupId: true,
+				members: true,
+			}
+			let groups = await Promise.all(characterPlayer.getAllPlayerGroups().map((group) => this.gnServer.getDatabase().groupRepository.loadGroupAsync(group.groupId, secretInfo.getGameId(), groupFindOptions)));
+
+			let inventoryFindOptions: InventoryFindOptions = {
+				owner: true,
+			}
+			let inventories = await Promise.all(characterPlayer.getAllPlayerInventories().map((inventory) => this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(inventory.itemId, secretInfo.getGameId(), inventoryFindOptions)));
+
 			const session = this.gnServer.getDatabase().startSession();
 
 			try {
@@ -230,6 +246,41 @@ export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHan
 						gamePlayer.removePlayerCharacter(request.characterId);
 
 						await gamePlayer.saveAsync(session);
+					}
+				}
+
+				for (const group of groups) {
+					if (group != null) {
+						if (group.hasMember(request.characterId)) {
+							group.removeMember(request.characterId);
+
+							await group.saveAsync(session);
+
+							if (gamePlayer != null) {
+								let hasCharacter = false;
+
+								for (let characterItem of gamePlayer.getAllPlayerCharacters()) {
+									if (group.hasMember(characterItem.characterId) && group.getMember(characterItem.characterId).status == GroupStatus.Member) {
+										hasCharacter = true;
+										break;
+									}
+								}
+
+								if (!hasCharacter) {
+									this.gnServer.leaveRoom(owner.id, group.getGroupId());
+								}
+							}
+						}
+					}
+				}
+
+				for (const inventory of inventories) {
+					if (inventory != null) {
+						if (inventory.getOwner().id == request.characterId) {
+							inventory.setRemoveStatus(currentMilliseconds, "CharacterPlayer owned remove by SetRemoveStatus, reason " + request.reason);
+
+							await inventory.saveAsync(session);
+						}
 					}
 				}
 

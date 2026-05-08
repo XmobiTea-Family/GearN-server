@@ -14,6 +14,8 @@ import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
 
 class RemovePlayerItemOperationRequest extends OperationRequest {
 
@@ -205,7 +207,7 @@ export class RemovePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
@@ -216,8 +218,47 @@ export class RemovePlayerItemRequestHandler extends GamePlayerBaseRequestHandler
 			return operationResponse;
 		}
 
-		gamePlayer.removePlayerInventory(request.itemId);
-		await gamePlayer.saveAsync();
+		// Stores the inventory find options value used in the current execution flow.
+		let inventoryFindOptions: InventoryFindOptions = {
+			owner: true,
+			removeStatus: true,
+		}
+
+		// Stores the inventory value used in the current execution flow.
+		let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
+
+		const session = this.gnServer.getDatabase().startSession();
+
+		try {
+			session.startTransaction();
+
+			if (inventory != null) {
+				// Stores the remove status value used in the current execution flow.
+				let removeStatus = inventory.getRemoveStatus();
+				if (removeStatus.tsRemove == 0) {
+					if (inventory.getOwner().id == request.userId) {
+						inventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), "GamePlayer owned remove by RemovePlayerItem");
+
+						await inventory.saveAsync(session);
+					}
+				}
+			}
+
+			gamePlayer.removePlayerInventory(request.itemId);
+			await gamePlayer.saveAsync(session);
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

@@ -254,6 +254,12 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 				newCharacterOwnerPlayer.setPlayerCharacter(request.characterId, characterPlayer.getCatalogId());
 				await newCharacterOwnerPlayer.saveAsync(session);
 
+				if (gamePlayer.hasPlayerCharacter(request.characterId)) {
+					gamePlayer.removePlayerCharacter(request.characterId);
+
+					await gamePlayer.saveAsync(session);
+				}
+
 				characterPlayer.setOwner(request.newOwnerId, owner.type);
 				await characterPlayer.saveAsync(session);
 
@@ -269,8 +275,6 @@ export class SetOwnerRequestHandler extends CharacterPlayerBaseRequestHandler {
 			finally {
 				await session.endSession();
 			}
-
-
 
 			let playerCharacters = gamePlayer.getAllPlayerCharacters().filter(x => x.characterId != request.characterId);
 

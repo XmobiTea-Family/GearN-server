@@ -14,6 +14,11 @@ import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
+import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
+import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 
 class RemovePlayerCharacterOperationRequest extends OperationRequest {
 
@@ -205,7 +210,7 @@ export class RemovePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
 					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
 					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
+
 					return operationResponse;
 				}
 			}
@@ -216,8 +221,103 @@ export class RemovePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
 			return operationResponse;
 		}
 
-		gamePlayer.removePlayerCharacter(request.characterId);
-		await gamePlayer.saveAsync();
+		// Stores the character player find options value used in the current execution flow.
+		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+			removeStatus: true,
+			owner: true,
+			playerGroups: true,
+			playerInventories: true,
+		}
+
+		// Stores the character player value used in the current execution flow.
+		let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+
+		const session = this.gnServer.getDatabase().startSession();
+
+		try {
+			session.startTransaction();
+
+			if (characterPlayer != null) {
+				// Stores the current milliseconds value used in the current execution flow.
+				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+				// Stores the remove status value used in the current execution flow.
+				let removeStatus = characterPlayer.getRemoveStatus();
+				if (removeStatus.tsRemove == 0) {
+					if (characterPlayer.getOwner().id == request.userId) {
+						characterPlayer.setRemoveStatus(currentMilliseconds, "GamePlayer owned remove by RemovePlayerCharacter");
+
+						// Stores the owner value used in the current execution flow.
+						let owner = characterPlayer.getOwner();
+
+						let groupFindOptions: GroupFindOptions = {
+							groupId: true,
+							members: true,
+						}
+						let groups = await Promise.all(characterPlayer.getAllPlayerGroups().map((group) => this.gnServer.getDatabase().groupRepository.loadGroupAsync(group.groupId, secretInfo.getGameId(), groupFindOptions)));
+
+						let inventoryFindOptions: InventoryFindOptions = {
+							owner: true,
+						}
+						let inventories = await Promise.all(characterPlayer.getAllPlayerInventories().map((inventory) => this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(inventory.itemId, secretInfo.getGameId(), inventoryFindOptions)));
+
+						for (const group of groups) {
+							if (group != null) {
+								if (group.hasMember(request.characterId)) {
+									group.removeMember(request.characterId);
+
+									await group.saveAsync(session);
+
+									if (gamePlayer != null) {
+										let hasCharacter = false;
+
+										for (let characterItem of gamePlayer.getAllPlayerCharacters()) {
+											if (group.hasMember(characterItem.characterId) && group.getMember(characterItem.characterId).status == GroupStatus.Member) {
+												hasCharacter = true;
+												break;
+											}
+										}
+
+										if (!hasCharacter) {
+											this.gnServer.leaveRoom(owner.id, group.getGroupId());
+										}
+									}
+								}
+							}
+						}
+
+						for (const inventory of inventories) {
+							if (inventory != null) {
+								if (inventory.getOwner().id == request.characterId) {
+									inventory.setRemoveStatus(currentMilliseconds, "GamePlayer owned remove by RemovePlayerCharacter, but the CharacterPlayer owned this item.");
+
+									await inventory.saveAsync(session);
+								}
+							}
+						}
+
+						await characterPlayer.saveAsync(session);
+					}
+				}
+			}
+
+			gamePlayer.removePlayerCharacter(request.characterId);
+			await gamePlayer.saveAsync(session);
+
+			await session.commitTransaction();
+		}
+		catch (err) {
+			await session.abortTransaction();
+
+			Debug.logError(err);
+
+			throw err;
+		}
+		finally {
+			await session.endSession();
+		}
+
+
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 

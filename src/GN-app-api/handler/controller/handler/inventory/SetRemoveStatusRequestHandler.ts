@@ -257,8 +257,6 @@ export class SetRemoveStatusRequestHandler extends ItemBaseRequestHandler {
 			finally {
 				await session.endSession();
 			}
-
-
 		}
 
 		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
