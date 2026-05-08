@@ -6,7 +6,7 @@ File này chỉ tập trung vào `socket` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](../CLOUDSCRIPT_USAGE.md)
+- [CLOUDSCRIPT_USAGE.md](/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `socket`
 
@@ -26,18 +26,20 @@ Không nên dùng `socket` khi:
 
 Đọc theo thứ tự này:
 
-1. [CloudScriptSocket.ts](../src/GN-startup/cloudScript/CloudScriptSocket.ts)
+1. [CloudScriptSocket.ts](/dist/GN-startup/cloudScript/CloudScriptSocket.ts)
 
 ## 4. `socket` có gì
 
 Wrapper `socket` đang expose:
 
-- `socket.sendEventTo(userId, operationEvent)`
-- `socket.sendEventToMoreUser(userIds, operationEvent)`
-- `socket.sendEventToAllPlayer(operationEvent)`
-- `socket.joinRoom(userId, roomId)`
-- `socket.leaveRoom(userId, roomId)`
-- `socket.sendEventToRoom(roomId, operationEvent)`
+| Hàm gốc | Code trong cloudScript như thế nào |
+| --- | --- |
+| `sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void>` | `socket.sendEventTo(userId, operationEvent)` |
+| `sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void>` | `socket.sendEventToMoreUser(userIds, operationEvent)` |
+| `sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void>` | `socket.sendEventToAllPlayer(operationEvent)` |
+| `joinRoom(userId: string, roomId: string): Promise<void>` | `socket.joinRoom(userId, roomId)` |
+| `leaveRoom(userId: string, roomId: string): Promise<void>` | `socket.leaveRoom(userId, roomId)` |
+| `sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void>` | `socket.sendEventToRoom(roomId, operationEvent)` |
 
 ## 5. Lưu ý thực tế
 
@@ -45,10 +47,6 @@ Wrapper `socket` đang expose:
 - `await` ở đây chỉ chờ event bridge phía server, không phải client ACK.
 - Payload event nên giữ gọn.
 - Dữ liệu event nên là JSON plain hoặc `GNHashtable`.
-- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
-- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
-- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
-- Chỉ log dữ liệu JSON-safe. Không dùng `functionLogs` để xác nhận client đã nhận event.
 
 ## 6. Ví dụ cơ bản
 

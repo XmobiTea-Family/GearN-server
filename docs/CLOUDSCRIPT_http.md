@@ -6,7 +6,7 @@ File này chỉ tập trung vào `http` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](../CLOUDSCRIPT_USAGE.md)
+- [CLOUDSCRIPT_USAGE.md](/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `http`
 
@@ -26,19 +26,21 @@ Không nên dùng `http` khi:
 
 Đọc theo thứ tự này:
 
-1. [CloudScriptHttp.ts](../src/GN-startup/cloudScript/CloudScriptHttp.ts)
+1. [CloudScriptHttp.ts](/dist/GN-startup/cloudScript/CloudScriptHttp.ts)
 
 ## 4. `http` có gì
 
 Wrapper `http` đang expose trực tiếp các method:
 
-- `http.get(url, config)`
-- `http.delete(url, config)`
-- `http.head(url, config)`
-- `http.options(url, config)`
-- `http.post(url, data, config)`
-- `http.put(url, data, config)`
-- `http.patch(url, data, config)`
+| Hàm gốc | Code trong cloudScript như thế nào |
+| --- | --- |
+| `get<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.get(url, config)` |
+| `delete<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.delete(url, config)` |
+| `head<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.head(url, config)` |
+| `options<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.options(url, config)` |
+| `post<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.post(url, data, config)` |
+| `put<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.put(url, data, config)` |
+| `patch<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.patch(url, data, config)` |
 
 Thực chất nó bọc Axios, nên:
 
@@ -52,10 +54,6 @@ Thực chất nó bọc Axios, nên:
 - Thường chỉ nên `return` các field cần thiết như `status`, `data`, `header`.
 - Nên set `timeout` rõ ràng.
 - Nếu request có auth, truyền token qua header, không hard-code bí mật vào script.
-- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
-- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
-- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
-- Chỉ log dữ liệu JSON-safe. Không log nguyên Axios response/error object vì có thể lớn hoặc không stringify an toàn.
 
 ## 6. Ví dụ cơ bản
 

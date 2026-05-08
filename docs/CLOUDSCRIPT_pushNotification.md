@@ -6,15 +6,16 @@ File này chỉ tập trung vào `pushNotification` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](../CLOUDSCRIPT_USAGE.md)
+- [CLOUDSCRIPT_USAGE.md](/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `pushNotification`
 
 Dùng `pushNotification` khi:
 
-- Bạn cần gửi thông báo tới thiết bị mobile.
+- Bạn cần gửi thông báo đẩy (push notification) tới thiết bị mobile.
 - Bạn cần gửi tới một token, nhiều token, hoặc một topic.
 - Bạn cần subscribe hoặc unsubscribe token vào topic.
+- GearN Server đã setup thành công pushNotificationSettings, setup tại GearN Dashboard => Settings/PushNotification/PushNotificationSettings.
 
 Không nên dùng `pushNotification` khi:
 
@@ -26,17 +27,19 @@ Không nên dùng `pushNotification` khi:
 
 Đọc theo thứ tự này:
 
-1. [CloudScriptPushNotification.ts](../src/GN-startup/cloudScript/CloudScriptPushNotification.ts)
+1. [CloudScriptPushNotification.ts](/dist/GN-startup/cloudScript/CloudScriptPushNotification.ts)
 
 ## 4. `pushNotification` có gì
 
 Wrapper `pushNotification` đang expose:
 
-- `pushNotification.send(token, title, body, badge?, sound?, icon?, data?)`
-- `pushNotification.sendToMore(tokens, title, body, badge?, sound?, icon?, data?)`
-- `pushNotification.sendToTopic(topic, title, body, badge?, sound?, icon?, data?)`
-- `pushNotification.subscribeToTopic(tokens, topic)`
-- `pushNotification.unsubscribeFromTopic(tokens, topic)`
+| Hàm gốc | Code trong cloudScript như thế nào |
+| --- | --- |
+| `send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.pushNotification.send(token, title, body, badge?, sound?, icon?, data?)` |
+| `sendToMore(tokens: string[], title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.sendToMore(tokens, title, body, badge?, sound?, icon?, data?)` |
+| `sendToTopic(topic: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.sendToTopic(topic, title, body, badge?, sound?, icon?, data?)` |
+| `subscribeToTopic(tokens: string[], topic: string): Promise<void>` | `pushNotification.subscribeToTopic(tokens, topic)` |
+| `unsubscribeFromTopic(tokens: string[], topic: string): Promise<void>` | `pushNotification.unsubscribeFromTopic(tokens, topic)` |
 
 ## 5. Lưu ý thực tế
 
@@ -44,10 +47,6 @@ Wrapper `pushNotification` đang expose:
 - Không nên return toàn bộ token ra ngoài nếu không cần.
 - Dữ liệu `data` nên là object JSON gọn.
 - Nếu cần trace business, tự ghi log vào DB.
-- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
-- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
-- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
-- Chỉ log dữ liệu JSON-safe. Không đưa token đầy đủ hoặc payload nhạy cảm vào `functionLogs`.
 
 ## 6. Ví dụ cơ bản
 

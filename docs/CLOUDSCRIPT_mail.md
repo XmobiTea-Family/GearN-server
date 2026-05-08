@@ -6,7 +6,7 @@ File này chỉ tập trung vào `mail` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](../CLOUDSCRIPT_USAGE.md)
+- [CLOUDSCRIPT_USAGE.md](/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `mail`
 
@@ -15,6 +15,7 @@ Dùng `mail` khi:
 - Bạn cần gửi email transactional.
 - Bạn cần gửi email HTML cho user hoặc admin.
 - Bạn cần gửi một email hoặc nhiều email cùng lúc.
+- GearN Server đã setup thành công emailSettings, setup tại GearN Dashboard => Settings/Email/EmailSettings.
 
 Không nên dùng `mail` khi:
 
@@ -25,14 +26,16 @@ Không nên dùng `mail` khi:
 
 Đọc theo thứ tự này:
 
-1. [CloudScriptMail.ts](../src/GN-startup/cloudScript/CloudScriptMail.ts)
+1. [CloudScriptMail.ts](/dist/GN-startup/cloudScript/CloudScriptMail.ts)
 
 ## 4. `mail` có gì
 
 Wrapper `mail` đang expose:
 
-- `mail.send(email, subject, contentHtml)`
-- `mail.sendToMore(emails, subject, contentHtml)`
+| Hàm gốc | Code trong cloudScript như thế nào |
+| --- | --- |
+| `send(email: string, subject: string, contentHtml: string): Promise<void>` | `mail.send(email, subject, contentHtml)` |
+| `sendToMore(emails: string[], subject: string, contentHtml: string): Promise<void>` | `mail.sendToMore(emails, subject, contentHtml)` |
 
 ## 5. Lưu ý thực tế
 
@@ -40,10 +43,6 @@ Wrapper `mail` đang expose:
 - Đây là server-side bridge, không phải SMTP client trực tiếp trong cloud script.
 - Không nên hard-code danh sách email nhạy cảm trong script.
 - Nếu cần audit, bạn nên tự ghi log business vào DB.
-- `log` là tham số thứ 3 của handler, không phải global logger hoặc `console.log`.
-- Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
-- Runtime lưu `log(value)` bằng `JSON.stringify(value)` và trả về caller qua `functionLogs` dưới dạng mảng string.
-- Chỉ log dữ liệu JSON-safe. Không đưa nội dung email nhạy cảm vào `functionLogs`.
 
 ## 6. Ví dụ cơ bản
 

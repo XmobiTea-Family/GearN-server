@@ -31,8 +31,9 @@ Kết luận: script hợp lệ không phải file TypeScript hoàn chỉnh. Nó
 
 - Luôn đăng ký function theo dạng `handlers["functionName"] = async (args, context, log) => { ... }` hoặc `handlers.functionName = (args, context, log) => { ... }`.
 - Top-level có thể khai báo helper bằng `function`, `class`, `type`, `interface`, hoặc `const`; `class` được phép dùng `extends` và `static`.
+- Event callback qua `setEventCallbackCloudScript` dùng registry theo `eventName`: request operation được phép đăng ký `preHandlers.eventName`, `postHandlers.eventName`, hoặc cả hai; system/event/socket callback chỉ đăng ký đúng một handler tương ứng.
 - Không dùng trực tiếp chuỗi `GNNetwork` trong submitted script.
-- `functionName` nên nằm trong giới hạn `3..30` ký tự.
+- `functionName` phải nằm trong giới hạn `3..30` ký tự.
 - Khi pin version để execute, `version` phải đúng 7 ký tự.
 - Nếu không truyền `version`, runtime hiện tại sẽ dùng version đang `isLive`.
 - `args` là `functionParameters` từ request execute.
@@ -82,13 +83,13 @@ Template inject sẵn các symbol này:
 
 Source cần đọc khi cần verify:
 
-- [templateCloudScript.ts](./src/GN-startup/cloudScript/templateCloudScript.ts)
-- [CloudScriptDatabase.ts](./src/GN-startup/cloudScript/CloudScriptDatabase.ts)
-- [CloudScriptHttp.ts](./src/GN-startup/cloudScript/CloudScriptHttp.ts)
-- [CloudScriptSocket.ts](./src/GN-startup/cloudScript/CloudScriptSocket.ts)
-- [CloudScriptMail.ts](./src/GN-startup/cloudScript/CloudScriptMail.ts)
-- [CloudScriptPushNotification.ts](./src/GN-startup/cloudScript/CloudScriptPushNotification.ts)
-- [CloudScriptAdmin.ts](./src/GN-startup/cloudScript/CloudScriptAdmin.ts)
+- [templateCloudScript.ts](/dist/GN-startup/cloudScript/templateCloudScript.ts)
+- [CloudScriptDatabase.ts](/dist/GN-startup/cloudScript/CloudScriptDatabase.ts)
+- [CloudScriptHttp.ts](/dist/GN-startup/cloudScript/CloudScriptHttp.ts)
+- [CloudScriptSocket.ts](/dist/GN-startup/cloudScript/CloudScriptSocket.ts)
+- [CloudScriptMail.ts](/dist/GN-startup/cloudScript/CloudScriptMail.ts)
+- [CloudScriptPushNotification.ts](/dist/GN-startup/cloudScript/CloudScriptPushNotification.ts)
+- [CloudScriptAdmin.ts](/dist/GN-startup/cloudScript/CloudScriptAdmin.ts)
 
 ## 5. Chọn helper nào
 
@@ -242,9 +243,9 @@ Case này sẽ chạy vào version đang `isLive`, không phải version mới n
 ## 9. Thứ tự đọc khuyến nghị
 
 1. [CLOUDSCRIPT_USAGE.md](./CLOUDSCRIPT_USAGE.md)
-2. [docs/CLOUDSCRIPT_database.md](./docs/CLOUDSCRIPT_database.md) nếu đụng dữ liệu nội bộ
+2. [docs/CLOUDSCRIPT_admin.md](./docs/CLOUDSCRIPT_admin.md) nếu cần official admin API
 3. [docs/CLOUDSCRIPT_http.md](./docs/CLOUDSCRIPT_http.md) nếu gọi API ngoài
 4. [docs/CLOUDSCRIPT_socket.md](./docs/CLOUDSCRIPT_socket.md) nếu cần realtime
 5. [docs/CLOUDSCRIPT_mail.md](./docs/CLOUDSCRIPT_mail.md) nếu gửi email
 6. [docs/CLOUDSCRIPT_pushNotification.md](./docs/CLOUDSCRIPT_pushNotification.md) nếu gửi push
-7. [docs/CLOUDSCRIPT_admin.md](./docs/CLOUDSCRIPT_admin.md) nếu cần official admin API
+7. [docs/CLOUDSCRIPT_database.md](./docs/CLOUDSCRIPT_database.md) nếu đụng dữ liệu nội bộ
