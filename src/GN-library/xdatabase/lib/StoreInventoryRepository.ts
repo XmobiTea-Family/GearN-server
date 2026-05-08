@@ -342,15 +342,15 @@ export class StoreInventoryRepository extends AbstractBaseRepository {
 
 	/**
 	 * Returns the store inventory log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async getStoreInventoryLogAsync($filter: {}, gameId: string, limit: number) {
+	public async getStoreInventoryLogAsync(filter: {}, gameId: string, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("StoreInventory.StoreLog", gameId);
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**

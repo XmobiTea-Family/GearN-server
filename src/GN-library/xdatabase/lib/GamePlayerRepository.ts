@@ -410,28 +410,28 @@ export class GamePlayerRepository extends AbstractBaseRepository {
 
 	/**
 	 * Loads the game player statistics log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadGamePlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
+	public async loadGamePlayerStatisticsLogAsync(filter: {}, gameId: string, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("GamePlayer.StatisticsLog", gameId);
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**
 	 * Loads the game player currency log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadGamePlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
+	public async loadGamePlayerCurrencyLogAsync(filter: {}, gameId: string, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("GamePlayer.CurrencyLog", gameId);
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**

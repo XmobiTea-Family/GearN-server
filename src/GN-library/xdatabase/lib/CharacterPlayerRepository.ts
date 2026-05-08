@@ -432,28 +432,28 @@ export class CharacterPlayerRepository extends AbstractBaseRepository {
 
 	/**
 	 * Loads the character player statistics log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadCharacterPlayerStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
+	public async loadCharacterPlayerStatisticsLogAsync(filter: {}, gameId: string, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("CharacterPlayer.StatisticsLog", gameId);
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**
 	 * Loads the character player currency log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadCharacterPlayerCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
+	public async loadCharacterPlayerCurrencyLogAsync(filter: {}, gameId: string, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("CharacterPlayer.CurrencyLog", gameId);
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**

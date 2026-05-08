@@ -388,28 +388,28 @@ export class GroupRepository extends AbstractBaseRepository {
 
 	/**
 	 * Loads the group statistics log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadGroupStatisticsLogAsync($filter: {}, gameId: string, limit: number) {
+	public async loadGroupStatisticsLogAsync(filter: {}, gameId: string, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("Group.StatisticsLog", gameId);
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**
 	 * Loads the group currency log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadGroupCurrencyLogAsync($filter: {}, gameId: string, limit: number) {
+	public async loadGroupCurrencyLogAsync(filter: {}, gameId: string, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeGameCollection("Group.CurrencyLog", gameId);
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**

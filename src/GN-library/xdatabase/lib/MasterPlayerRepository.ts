@@ -826,26 +826,26 @@ export class MasterPlayerRepository extends AbstractBaseRepository {
 
 	/**
 	 * Loads the master player statistics log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadMasterPlayerStatisticsLogAsync($filter: {}, limit: number) {
+	public async loadMasterPlayerStatisticsLogAsync(filter: {}, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeCollection("MasterPlayer.StatisticsLog");
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**
 	 * Loads the master player currency log async.
-	 * @param $filter Provides the filter value used by this operation.
+	 * @param filter Provides the filter value used by this operation.
 	 * @param limit Provides the limit value used by this operation.
 	 */
-	public async loadMasterPlayerCurrencyLogAsync($filter: {}, limit: number) {
+	public async loadMasterPlayerCurrencyLogAsync(filter: {}, limit: number) {
 		// Stores the collection value used in the current execution flow.
 		let collection = this.logRuntimeCollection("MasterPlayer.CurrencyLog");
 
-		return await collection.find($filter).sort({ "_id": -1 }).limit(limit);
+		return await collection.find(filter).sort({ "_id": -1 }).limit(limit);
 	}
 
 	/**

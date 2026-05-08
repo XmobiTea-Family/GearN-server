@@ -26,7 +26,10 @@ export class CloudScriptAdmin {
 	// Stores the multiplayer value used by this instance.
 	public readonly multiplayer = GNNetwork.multiplayer.admin;
 	// Stores the cloud script value used by this instance.
-	public readonly cloudScript = GNNetwork.cloudScript.admin;
+	public readonly cloudScript = {
+		executeFunction: GNNetwork.cloudScript.admin.executeFunction,
+		executeFunctionAsync: GNNetwork.cloudScript.admin.executeFunctionAsync,
+	};
 	// Stores the dashboard value used by this instance.
 	public readonly dashboard = {
 		getAdminAccountList: GNNetwork.dashboard.getAdminAccountList,
