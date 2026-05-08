@@ -19,7 +19,7 @@ export class MasterPlayerRepository extends AbstractBaseRepository {
 	 * @param rawMasterPlayer Provides the result value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createMasterPlayerAsync(rawMasterPlayer: mongodb.WithId<mongodb.BSON.Document> & {
+	public async createMasterPlayerAsync(rawMasterPlayer: mongodb.WithId<mongodb.Document> & {
 		userId: string;
 		external: ExternalItem;
 		segments: string[];

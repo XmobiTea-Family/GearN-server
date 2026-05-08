@@ -385,7 +385,7 @@ export class ApiMiddleware {
 								defaultPermissionAnyForLayer1Any.selfEnable = true;
 							}
 
-							// if (secretRole == SecretRole.Player) {
+							// if (secretRole == SecretRole.Client) {
 							// 	defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
 							// 	defaultPermissionAnyForLayer1Any.adminSelfEnable = false;
 

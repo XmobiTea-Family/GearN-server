@@ -23,7 +23,7 @@ export class CharacterPlayerRepository extends AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createCharacterPlayerAsync(rawCharacterPlayer: mongodb.WithId<mongodb.BSON.Document> & {
+	public async createCharacterPlayerAsync(rawCharacterPlayer: mongodb.WithId<mongodb.Document> & {
 		characterId: string;
 		catalogId: string;
 		owner: OwnerItem;

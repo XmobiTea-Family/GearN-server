@@ -20,7 +20,7 @@ export class GroupRepository extends AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createGroupAsync(rawGroup: mongodb.WithId<mongodb.BSON.Document> & {
+	public async createGroupAsync(rawGroup: mongodb.WithId<mongodb.Document> & {
 		groupId: string;
 		groupType: OwnerType;
 		catalogId: string;

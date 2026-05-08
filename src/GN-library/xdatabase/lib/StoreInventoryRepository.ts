@@ -16,7 +16,7 @@ export class StoreInventoryRepository extends AbstractBaseRepository {
 	 * @param gameId Provides the game ID value used by this operation.
 	 * @returns Resolves with the operation result.
 	 */
-	public async createStoreInventoryAsync(rawStoreInventory: mongodb.WithId<mongodb.BSON.Document> & {
+	public async createStoreInventoryAsync(rawStoreInventory: mongodb.WithId<mongodb.Document> & {
 		storeId: string;
 		storeItems: {
 			/** Catalog id of the item being sold (the item template). */

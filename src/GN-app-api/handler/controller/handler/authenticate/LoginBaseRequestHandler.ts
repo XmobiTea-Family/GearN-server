@@ -703,7 +703,7 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
 		// Stores the current milliseconds value used in the current execution flow.
 		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 		// Stores the answer value used in the current execution flow.
-		let answer: mongodb.WithId<mongodb.BSON.Document> & {
+		let answer: mongodb.WithId<mongodb.Document> & {
 			userId: string;
 			external: ExternalItem;
 			segments: string[];
