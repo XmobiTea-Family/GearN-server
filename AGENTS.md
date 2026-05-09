@@ -6,14 +6,14 @@ Use this repository as the source of truth for the GearN Server runtime and expo
 
 ## Read These Files First
 
-- `src/GN-startup/ServerApplicationStartup.ts`
-- `src/GN-startup/ServerApplication.ts`
-- `src/GNServer.ts`
-- `src/RequestControllerUtils.ts`
-- `src/GN-app-api/handler/controller/RequestController.ts`
-- `src/index.ts`
-- `DOMAIN_RELATIONSHIP.md`
-- `CLOUDSCRIPT_USAGE.md` when the task touches CloudScript
+- `/src/GN-startup/ServerApplicationStartup.ts`
+- `/src/GN-startup/ServerApplication.ts`
+- `/src/GNServer.ts`
+- `/src/RequestControllerUtils.ts`
+- `/src/GN-app-api/handler/controller/RequestController.ts`
+- `/src/index.ts`
+- `/docs/DOMAIN_RELATIONSHIP.md`
+- `/docs/cloudScript/CLOUDSCRIPT_USAGE.md` when the task touches CloudScript
 
 ## Source Of Truth
 

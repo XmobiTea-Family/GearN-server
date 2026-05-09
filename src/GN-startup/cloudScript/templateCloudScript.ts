@@ -67,6 +67,7 @@ import {
 	PushPlatformType,
 	StoreReceiveType,
 	GNUtils,
+	MatchStatus,
 } from "@xmobitea/gn-typescript-client";
 
 // dont remove this import 

@@ -6,7 +6,7 @@ File này chỉ tập trung vào `admin` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](/CLOUDSCRIPT_USAGE.md)
+- [docs/cloudScript/CLOUDSCRIPT_USAGE.md](/docs/cloudScript/CLOUDSCRIPT_USAGE.md)
 
 ## 2. `admin` thực chất là gì
 
@@ -17,6 +17,8 @@ Lý do tồn tại:
 - Submitted script không được chứa literal `GNNetwork`.
 - Nhưng runtime vẫn cần một cách gọi lại official GearN API.
 - `CloudScriptAdmin.ts` bọc lại các API cần dùng để script gọi được mà không đụng trực tiếp `GNNetwork`.
+- Không cần gọi `GNNetwork.init()` vì khi cloudScript đã chạy thì đã bootstrap hàm này rồi
+- Không cần truyền `secretKey` từ phía client vì `cloudScript` đã có đầy đủ quyền để gọi bất kỳ hàm nào phía `GearN Server`
 
 Mapping chính:
 
@@ -248,6 +250,9 @@ Rule thực tế:
 | `sendPushNotification(requestData: MasterPlayerModels.AdminSendPushNotificationRequestData, onResponse?: Action1<MasterPlayerResponseModels.SendPushNotificationOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.masterPlayer.sendPushNotification(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `sendPushNotificationAsync(requestData: MasterPlayerModels.AdminSendPushNotificationRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<MasterPlayerResponseModels.SendPushNotificationOperationResponse>` | `admin.masterPlayer.sendPushNotificationAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
+có thể tham khảo thêm
+[docs/guides/MASTER_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/MASTER_PLAYER.md) phần `GNNetwork.masterPlayer.admin`
+
 ### for GamePlayer
 
 | Hàm gốc | Code trong cloudScript như thế nào |
@@ -356,6 +361,9 @@ Rule thực tế:
 | `getStatisticsLogAsync(requestData: GamePlayerModels.AdminGetStatisticsLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<GamePlayerResponseModels.GetStatisticsLogOperationResponse>` | `admin.gamePlayer.getStatisticsLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `getCurrencyLog(requestData: GamePlayerModels.AdminGetCurrencyLogRequestData, onResponse?: Action1<GamePlayerResponseModels.GetCurrencyLogOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.gamePlayer.getCurrencyLog(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `getCurrencyLogAsync(requestData: GamePlayerModels.AdminGetCurrencyLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<GamePlayerResponseModels.GetCurrencyLogOperationResponse>` | `admin.gamePlayer.getCurrencyLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
+
+có thể tham khảo thêm
+[docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GAME_PLAYER.md) phần `GNNetwork.gamePlayer.admin`
 
 ### for CharacterPlayer
 
@@ -468,6 +476,9 @@ Rule thực tế:
 | `getCurrencyLog(requestData: CharacterPlayerModels.AdminGetCurrencyLogRequestData, onResponse?: Action1<CharacterPlayerResponseModels.GetCurrencyLogOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.characterPlayer.getCurrencyLog(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `getCurrencyLogAsync(requestData: CharacterPlayerModels.AdminGetCurrencyLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<CharacterPlayerResponseModels.GetCurrencyLogOperationResponse>` | `admin.characterPlayer.getCurrencyLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
+có thể tham khảo thêm
+[docs/guides/CHARACTER_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CHARACTER_PLAYER.md) phần `GNNetwork.characterPlayer.admin`
+
 ### for Inventory
 
 | Hàm gốc | Code trong cloudScript như thế nào |
@@ -540,6 +551,9 @@ Rule thực tế:
 | `getCreateLeaderboardAsync(requestData: InventoryModels.AdminGetCreateLeaderboardRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<InventoryResponseModels.GetCreateLeaderboardOperationResponse>` | `admin.inventory.getCreateLeaderboardAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `getStatisticsLog(requestData: InventoryModels.AdminGetStatisticsLogRequestData, onResponse?: Action1<InventoryResponseModels.GetStatisticsLogOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.inventory.getStatisticsLog(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `getStatisticsLogAsync(requestData: InventoryModels.AdminGetStatisticsLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<InventoryResponseModels.GetStatisticsLogOperationResponse>` | `admin.inventory.getStatisticsLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
+
+có thể tham khảo thêm
+[docs/guides/INVENTORY.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/INVENTORY.md) phần `GNNetwork.inventory.admin`
 
 ### for Group
 
@@ -626,6 +640,9 @@ Rule thực tế:
 | `getCurrencyLog(requestData: GroupModels.AdminGetCurrencyLogRequestData, onResponse?: Action1<GroupResponseModels.GetCurrencyLogOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.group.getCurrencyLog(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `getCurrencyLogAsync(requestData: GroupModels.AdminGetCurrencyLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<GroupResponseModels.GetCurrencyLogOperationResponse>` | `admin.group.getCurrencyLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
+có thể tham khảo thêm
+[docs/guides/GROUP.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GROUP.md) phần `GNNetwork.group.admin`
+
 ### for StoreInventory
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
@@ -658,6 +675,9 @@ Rule thực tế:
 | `removeStoreUsed(requestData: StoreInventoryModels.AdminRemoveStoreUsedRequestData, onResponse?: Action1<StoreInventoryResponseModels.RemoveStoreUsedOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.storeInventory.removeStoreUsed(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `removeStoreUsedAsync(requestData: StoreInventoryModels.AdminRemoveStoreUsedRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<StoreInventoryResponseModels.RemoveStoreUsedOperationResponse>` | `admin.storeInventory.removeStoreUsedAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
+có thể tham khảo thêm
+[docs/guides/STORE_INVENTORY.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/STORE_INVENTORY.md) phần `GNNetwork.storeInventory.admin`
+
 ### for Content
 
 | Hàm gốc | Code trong cloudScript như thế nào |
@@ -676,6 +696,9 @@ Rule thực tế:
 | `requestDownloadFileUploadInfoAsync(requestData: ContentModels.AdminRequestDownloadFileUploadInfoRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<ContentResponseModels.RequestDownloadFileUploadInfoOperationResponse>` | `admin.content.requestDownloadFileUploadInfoAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `setContentData(requestData: ContentModels.AdminSetContentDataRequestData, onResponse?: Action1<ContentResponseModels.SetContentDataOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.content.setContentData(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `setContentDataAsync(requestData: ContentModels.AdminSetContentDataRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<ContentResponseModels.SetContentDataOperationResponse>` | `admin.content.setContentDataAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
+
+có thể tham khảo thêm
+[docs/guides/CONTENT.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CONTENT.md) phần `GNNetwork.content.admin`
 
 ### for Multiplayer
 
@@ -702,12 +725,18 @@ Rule thực tế:
 | `getAllMatchmakingTicket(requestData: MultiplayerModels.AdminGetAllMatchmakingTicketRequestData, onResponse?: Action1<MultiplayerResponseModels.GetAllMatchmakingTicketOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.multiplayer.getAllMatchmakingTicket(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `getAllMatchmakingTicketAsync(requestData: MultiplayerModels.AdminGetAllMatchmakingTicketRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<MultiplayerResponseModels.GetAllMatchmakingTicketOperationResponse>` | `admin.multiplayer.getAllMatchmakingTicketAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
+có thể tham khảo thêm
+[docs/guides/MULTIPLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/MULTIPLAYER.md) phần `GNNetwork.multiplayer.admin`
+
 ### for CloudScript
 
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `executeFunction(requestData: CloudScriptModels.AdminExecuteFunctionRequestData, onResponse?: Action1<CloudScriptResponseModels.ExecuteFunctionOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.cloudScript.executeFunction(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `executeFunctionAsync(requestData: CloudScriptModels.AdminExecuteFunctionRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<CloudScriptResponseModels.ExecuteFunctionOperationResponse>` | `admin.cloudScript.executeFunctionAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
+
+có thể tham khảo thêm
+[docs/guides/CLOUDSCRIPT.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CLOUDSCRIPT.md) phần `GNNetwork.cloudScript.admin`
 
 ### for Dashboard
 
@@ -749,6 +778,9 @@ Rule thực tế:
 | `getServerGameDataAsync(requestData: DashboardModels.GetServerGameDataRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<DashboardResponseModels.GetServerGameDataOperationResponse>` | `admin.dashboard.getServerGameDataAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `deleteInDatabase(requestData: DashboardModels.DeleteInDatabaseRequestData, onResponse?: Action1<DashboardResponseModels.DeleteInDatabaseOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.dashboard.deleteInDatabase(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 | `deleteInDatabaseAsync(requestData: DashboardModels.DeleteInDatabaseRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<DashboardResponseModels.DeleteInDatabaseOperationResponse>` | `admin.dashboard.deleteInDatabaseAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
+
+có thể tham khảo thêm
+[docs/guides/DASHBOARD.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/DASHBOARD.md) phần `GNNetwork.dashboard.client`
 
 ## 6. Rule request model rất quan trọng
 
@@ -856,13 +888,7 @@ const assertResponseOk = (response: any, actionName: string): void => {
 
 ```ts
 handlers["adminGetGameInfo"] = async (args: any, context, log) => {
-    const secretKey = requireString(args?.secretKey, "secretKey");
-
-    const response = await admin.dashboard.getGameInformationAsync(
-        { gameId: gameId },
-        undefined,
-        secretKey
-    );
+    const response = await admin.dashboard.getGameInformationAsync({ gameId: gameId });
 
     assertResponseOk(response, "admin.dashboard.getGameInformationAsync");
 
@@ -1080,19 +1106,13 @@ handlers["adminExecuteAnotherCloudScript"] = async (args: any, context, log) => 
 
 ```ts
 handlers["adminGetLeanAnalytics"] = async (args: any, context, log) => {
-    const secretKey = requireString(args?.secretKey, "secretKey");
-
     const request = new DashboardModels.GetAnalyticsRequestData();
     request.timestamp = typeof args?.timestamp === "number" ? args.timestamp : undefined;
     request.country = true;
     request.requestComplete = true;
     request.monthlyCost = true;
 
-    const response = await admin.dashboard.getAnalyticsAsync(
-        request,
-        undefined,
-        secretKey
-    );
+    const response = await admin.dashboard.getAnalyticsAsync(request);
 
     assertResponseOk(response, "admin.dashboard.getAnalyticsAsync");
 
@@ -1109,7 +1129,6 @@ handlers["adminGetLeanAnalytics"] = async (args: any, context, log) => {
 
 ```ts
 handlers["adminDeleteInventoryRow"] = async (args: any, context, log) => {
-    const secretKey = requireString(args?.secretKey, "secretKey");
     const itemId = requireString(args?.itemId, "itemId");
 
     const request = new DashboardModels.DeleteInDatabaseRequestData();
@@ -1118,11 +1137,7 @@ handlers["adminDeleteInventoryRow"] = async (args: any, context, log) => {
     request.id = itemId;
     request.log = "manual cleanup from cloudscript, requestedBy=" + (context.userId ?? "system");
 
-    const response = await admin.dashboard.deleteInDatabaseAsync(
-        request,
-        undefined,
-        secretKey
-    );
+    const response = await admin.dashboard.deleteInDatabaseAsync(request);
 
     assertResponseOk(response, "admin.dashboard.deleteInDatabaseAsync");
 
@@ -1169,7 +1184,7 @@ Source từ client SDK repo:
 1. [README.MD](/node_modules/@xmobitea/gn-typescript-client/README.MD)
 2. [docs/guides/DASHBOARD.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/DASHBOARD.md)
 3. [docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GAME_PLAYER.md)
-4. [docs/guides/MASTER_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/MASTER_PLAYER.md)
+4. 
 5. [docs/guides/GROUP.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GROUP.md)
 6. [docs/reference/API_DASHBOARD.md](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_DASHBOARD.md)
 7. [docs/reference/API_GAME_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_GAME_PLAYER.md)

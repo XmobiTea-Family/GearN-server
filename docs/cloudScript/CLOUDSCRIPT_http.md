@@ -6,7 +6,7 @@ File này chỉ tập trung vào `http` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](/CLOUDSCRIPT_USAGE.md)
+- [docs/cloudScript/CLOUDSCRIPT_USAGE.md](/docs/cloudScript/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `http`
 

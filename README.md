@@ -51,11 +51,12 @@ This repository is both:
 
 ## Project Docs For AI
 
-- `AGENTS.md`: repo-specific rules for AI agents
-- `ARCHITECTURE.md`: startup flow, module boundaries, data flow, and extension points
-- `DEVELOPMENT.md`: build commands, config sections, workflow, and current caveats
-- `DOMAIN_RELATIONSHIP.md`: domain map and relationships between authenticate, player, group, inventory, store inventory, content, dashboard, matchmaking, and cloud script
-- `CLOUDSCRIPT_USAGE.md`: CloudScript overview, runtime rules, helper selection, and links to split helper docs
+- `/AGENTS.md`: repo-specific rules for AI agents
+- `/docs/ARCHITECTURE.md`: startup flow, module boundaries, data flow, and extension points
+- `/docs/DEVELOPMENT.md`: build commands, config sections, workflow, and current caveats
+- `/docs/DOMAIN_RELATIONSHIP.md`: domain map and relationships between authenticate, player, group, inventory, store inventory, content, dashboard, matchmaking, and cloud script
+- `/docs/cloudScript/CLOUDSCRIPT_USAGE.md`: CloudScript overview, runtime rules, helper selection, and links to split helper docs
+- `/docs/MATCHMAKING_TEST_PLAN.md`: direct unit-test plan for matchmaking candidate generation and every queue rule type
 
 ## Third-Party Dependencies
 

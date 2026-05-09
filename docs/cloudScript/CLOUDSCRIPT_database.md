@@ -6,7 +6,7 @@ File này chỉ tập trung vào `database` trong cloud script.
 
 Nếu bạn đang cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](/CLOUDSCRIPT_USAGE.md)
+- [docs/cloudScript/CLOUDSCRIPT_USAGE.md](/docs/cloudScript/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `database`
 

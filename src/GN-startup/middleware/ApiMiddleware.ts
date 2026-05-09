@@ -208,7 +208,7 @@ export class ApiMiddleware {
 		let tsExpire = this.expiredToken == -1 ? -1 : (currentMilliseconds + this.expiredToken);
 
 		let authToken = jwt.sign(payload, this.privateKeyToken, {
-			expiresIn: this.expiredToken == -1 ? "1y" : this.expiredToken,
+			expiresIn: this.expiredToken == -1 ? "1y" : this.expiredToken / 1000,
 			algorithm: "HS512"
 		});
 
@@ -243,7 +243,7 @@ export class ApiMiddleware {
 		let tsExpire = currentMilliseconds + xDatetime.ONE_DAY_MILLISECOND;
 
 		let authToken = jwt.sign(payload, this.privateKeyToken, {
-			expiresIn: "1d",
+			expiresIn: xDatetime.ONE_DAY_MILLISECOND / 1000,
 			algorithm: "HS512"
 		});
 
@@ -275,10 +275,10 @@ export class ApiMiddleware {
 
 		payload.gnToken = payload.gnToken ?? "gn.c_" + StringUtility.generateRandomString(10, 0);
 
-		let tsExpire = currentMilliseconds + expiredAfterMs;
+		let tsExpire = (currentMilliseconds + expiredAfterMs) / 1000;
 
 		let authToken = jwt.sign(payload, this.privateKeyToken, {
-			expiresIn: "1h",
+			expiresIn: expiredAfterMs / 1000,
 			algorithm: "HS512"
 		});
 
