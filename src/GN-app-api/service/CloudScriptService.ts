@@ -6,7 +6,7 @@ import path from "path";
 import { promisify } from "util";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
-import { GNServerSettingsOptions } from "@xmobitea/gn-typescript-client";
+import { GNServerSettingsOptions } from "@xmobitea/gearn-typescript-client-sdk";
 import { GNServer } from "./../../GNServer";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { CloudScriptEvent } from "./CloudScriptEventService";

@@ -68,7 +68,7 @@ import {
 	StoreReceiveType,
 	GNUtils,
 	MatchStatus,
-} from "@xmobitea/gn-typescript-client";
+} from "@xmobitea/gearn-typescript-client-sdk";
 
 // dont remove this import 
 

@@ -1,4 +1,4 @@
-import { OperationEvent } from "@xmobitea/gn-typescript-client";
+import { OperationEvent } from "@xmobitea/gearn-typescript-client-sdk";
 import { CloudScriptEventType, CloudScriptProcessBase } from "./CloudScriptEvent";
 
 export class CloudScriptSocket extends CloudScriptProcessBase {

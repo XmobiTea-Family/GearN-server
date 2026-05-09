@@ -251,7 +251,7 @@ Rule thực tế:
 | `sendPushNotificationAsync(requestData: MasterPlayerModels.AdminSendPushNotificationRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<MasterPlayerResponseModels.SendPushNotificationOperationResponse>` | `admin.masterPlayer.sendPushNotificationAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/MASTER_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/MASTER_PLAYER.md) phần `GNNetwork.masterPlayer.admin`
+[docs/guides/MASTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/MASTER_PLAYER.md) phần `GNNetwork.masterPlayer.admin`
 
 ### for GamePlayer
 
@@ -363,7 +363,7 @@ có thể tham khảo thêm
 | `getCurrencyLogAsync(requestData: GamePlayerModels.AdminGetCurrencyLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<GamePlayerResponseModels.GetCurrencyLogOperationResponse>` | `admin.gamePlayer.getCurrencyLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GAME_PLAYER.md) phần `GNNetwork.gamePlayer.admin`
+[docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GAME_PLAYER.md) phần `GNNetwork.gamePlayer.admin`
 
 ### for CharacterPlayer
 
@@ -477,7 +477,7 @@ có thể tham khảo thêm
 | `getCurrencyLogAsync(requestData: CharacterPlayerModels.AdminGetCurrencyLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<CharacterPlayerResponseModels.GetCurrencyLogOperationResponse>` | `admin.characterPlayer.getCurrencyLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/CHARACTER_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CHARACTER_PLAYER.md) phần `GNNetwork.characterPlayer.admin`
+[docs/guides/CHARACTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CHARACTER_PLAYER.md) phần `GNNetwork.characterPlayer.admin`
 
 ### for Inventory
 
@@ -553,7 +553,7 @@ có thể tham khảo thêm
 | `getStatisticsLogAsync(requestData: InventoryModels.AdminGetStatisticsLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<InventoryResponseModels.GetStatisticsLogOperationResponse>` | `admin.inventory.getStatisticsLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/INVENTORY.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/INVENTORY.md) phần `GNNetwork.inventory.admin`
+[docs/guides/INVENTORY.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/INVENTORY.md) phần `GNNetwork.inventory.admin`
 
 ### for Group
 
@@ -641,7 +641,7 @@ có thể tham khảo thêm
 | `getCurrencyLogAsync(requestData: GroupModels.AdminGetCurrencyLogRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<GroupResponseModels.GetCurrencyLogOperationResponse>` | `admin.group.getCurrencyLogAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/GROUP.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GROUP.md) phần `GNNetwork.group.admin`
+[docs/guides/GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GROUP.md) phần `GNNetwork.group.admin`
 
 ### for StoreInventory
 | Hàm gốc | Code trong cloudScript như thế nào |
@@ -676,7 +676,7 @@ có thể tham khảo thêm
 | `removeStoreUsedAsync(requestData: StoreInventoryModels.AdminRemoveStoreUsedRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<StoreInventoryResponseModels.RemoveStoreUsedOperationResponse>` | `admin.storeInventory.removeStoreUsedAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/STORE_INVENTORY.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/STORE_INVENTORY.md) phần `GNNetwork.storeInventory.admin`
+[docs/guides/STORE_INVENTORY.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/STORE_INVENTORY.md) phần `GNNetwork.storeInventory.admin`
 
 ### for Content
 
@@ -698,7 +698,7 @@ có thể tham khảo thêm
 | `setContentDataAsync(requestData: ContentModels.AdminSetContentDataRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<ContentResponseModels.SetContentDataOperationResponse>` | `admin.content.setContentDataAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/CONTENT.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CONTENT.md) phần `GNNetwork.content.admin`
+[docs/guides/CONTENT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CONTENT.md) phần `GNNetwork.content.admin`
 
 ### for Multiplayer
 
@@ -726,7 +726,7 @@ có thể tham khảo thêm
 | `getAllMatchmakingTicketAsync(requestData: MultiplayerModels.AdminGetAllMatchmakingTicketRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<MultiplayerResponseModels.GetAllMatchmakingTicketOperationResponse>` | `admin.multiplayer.getAllMatchmakingTicketAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/MULTIPLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/MULTIPLAYER.md) phần `GNNetwork.multiplayer.admin`
+[docs/guides/MULTIPLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/MULTIPLAYER.md) phần `GNNetwork.multiplayer.admin`
 
 ### for CloudScript
 
@@ -736,7 +736,7 @@ có thể tham khảo thêm
 | `executeFunctionAsync(requestData: CloudScriptModels.AdminExecuteFunctionRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<CloudScriptResponseModels.ExecuteFunctionOperationResponse>` | `admin.cloudScript.executeFunctionAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/CLOUDSCRIPT.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CLOUDSCRIPT.md) phần `GNNetwork.cloudScript.admin`
+[docs/guides/CLOUDSCRIPT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CLOUDSCRIPT.md) phần `GNNetwork.cloudScript.admin`
 
 ### for Dashboard
 
@@ -780,7 +780,7 @@ có thể tham khảo thêm
 | `deleteInDatabaseAsync(requestData: DashboardModels.DeleteInDatabaseRequestData, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): Promise<DashboardResponseModels.DeleteInDatabaseOperationResponse>` | `admin.dashboard.deleteInDatabaseAsync(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
 
 có thể tham khảo thêm
-[docs/guides/DASHBOARD.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/DASHBOARD.md) phần `GNNetwork.dashboard.client`
+[docs/guides/DASHBOARD.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/DASHBOARD.md) phần `GNNetwork.dashboard.client`
 
 ## 6. Rule request model rất quan trọng
 
@@ -818,9 +818,9 @@ Theo SDK README và source SDK:
 
 Khi dùng `admin.dashboard`, ưu tiên:
 
-- đọc lại [README.MD của SDK](/node_modules/@xmobitea/gn-typescript-client/README.MD)
-- đọc lại [DASHBOARD guide của SDK](/node_modules/@xmobitea/gn-typescript-client/docs/guides/DASHBOARD.md)
-- tra thêm [API_DASHBOARD.md của SDK](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_DASHBOARD.md)
+- đọc lại [README.MD của SDK](/node_modules/@xmobitea/gearn-typescript-client-sdk/README.MD)
+- đọc lại [DASHBOARD guide của SDK](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/DASHBOARD.md)
+- tra thêm [API_DASHBOARD.md của SDK](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_DASHBOARD.md)
 
 ## 8. `admin` hiện có những domain nào
 
@@ -837,15 +837,15 @@ Khi dùng `admin.dashboard`, ưu tiên:
 
 Nếu cần hiểu semantics sâu hơn từng domain, đọc doc tương ứng trong SDK repo:
 
-- [MASTER_PLAYER guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/MASTER_PLAYER.md)
-- [GAME_PLAYER guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GAME_PLAYER.md)
-- [CHARACTER_PLAYER guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CHARACTER_PLAYER.md)
-- [INVENTORY guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/INVENTORY.md)
-- [GROUP guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GROUP.md)
-- [STORE_INVENTORY guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/STORE_INVENTORY.md)
-- [MULTIPLAYER guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/MULTIPLAYER.md)
-- [CLOUDSCRIPT guide](/node_modules/@xmobitea/gn-typescript-client/docs/guides/CLOUDSCRIPT.md)
-- [API index](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_INDEX.md)
+- [MASTER_PLAYER guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/MASTER_PLAYER.md)
+- [GAME_PLAYER guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GAME_PLAYER.md)
+- [CHARACTER_PLAYER guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CHARACTER_PLAYER.md)
+- [INVENTORY guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/INVENTORY.md)
+- [GROUP guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GROUP.md)
+- [STORE_INVENTORY guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/STORE_INVENTORY.md)
+- [MULTIPLAYER guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/MULTIPLAYER.md)
+- [CLOUDSCRIPT guide](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CLOUDSCRIPT.md)
+- [API index](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_INDEX.md)
 
 ## 9. Pattern chung cho ví dụ
 
@@ -1181,19 +1181,19 @@ Source local trong repo này:
 
 Source từ client SDK repo:
 
-1. [README.MD](/node_modules/@xmobitea/gn-typescript-client/README.MD)
-2. [docs/guides/DASHBOARD.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/DASHBOARD.md)
-3. [docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GAME_PLAYER.md)
+1. [README.MD](/node_modules/@xmobitea/gearn-typescript-client-sdk/README.MD)
+2. [docs/guides/DASHBOARD.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/DASHBOARD.md)
+3. [docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GAME_PLAYER.md)
 4. 
-5. [docs/guides/GROUP.md](/node_modules/@xmobitea/gn-typescript-client/docs/guides/GROUP.md)
-6. [docs/reference/API_DASHBOARD.md](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_DASHBOARD.md)
-7. [docs/reference/API_GAME_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_GAME_PLAYER.md)
-8. [docs/reference/API_MASTER_PLAYER.md](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_MASTER_PLAYER.md)
-9. [docs/reference/API_GROUP.md](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_GROUP.md)
-10. [docs/reference/API_CLOUDSCRIPT.md](/node_modules/@xmobitea/gn-typescript-client/docs/reference/API_CLOUDSCRIPT.md)
-11. [GamePlayerModels.ts](/node_modules/@xmobitea/gn-typescript-client/dist/runtime/entity/models/GamePlayerModels.d.ts)
-12. [MasterPlayerModels.ts](/node_modules/@xmobitea/gn-typescript-client/dist/runtime/entity/models/MasterPlayerModels.d.ts)
-13. [DashboardModels.ts](/node_modules/@xmobitea/gn-typescript-client/dist/runtime/entity/models/DashboardModels.d.ts)
+5. [docs/guides/GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GROUP.md)
+6. [docs/reference/API_DASHBOARD.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_DASHBOARD.md)
+7. [docs/reference/API_GAME_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_GAME_PLAYER.md)
+8. [docs/reference/API_MASTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_MASTER_PLAYER.md)
+9. [docs/reference/API_GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_GROUP.md)
+10. [docs/reference/API_CLOUDSCRIPT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_CLOUDSCRIPT.md)
+11. [GamePlayerModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/GamePlayerModels.d.ts)
+12. [MasterPlayerModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/MasterPlayerModels.d.ts)
+13. [DashboardModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/DashboardModels.d.ts)
 
 ## 13. Kết luận ngắn
 

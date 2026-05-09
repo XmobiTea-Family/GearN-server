@@ -46,7 +46,7 @@ import { GameItem } from "./../GN-library/xdatabase/lib/entity/pro/masterAdmin/G
 import { CreateSecretInfoRequestHandler } from "./../GN-app-api/handler/controller/handler/dashboard/CreateSecretInfoRequestHandler";
 import { xDatetime } from "./../GN-library/xdatetime/lib/xDatetime";
 import { EventCallbackCloudScriptService, PostEventCallbackService, PreEventCallbackService } from "./../GN-app-api/service/EventCallbackService";
-import { GNServerSettingsOptions, LogType, MessageType } from "@xmobitea/gn-typescript-client";
+import { GNServerSettingsOptions, LogType, MessageType } from "@xmobitea/gearn-typescript-client-sdk";
 
 abstract class BuilderBase {
 	// Stores the application settings value used by this instance.

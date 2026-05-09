@@ -14,7 +14,7 @@ import { GNHashtableDataMember, StringDataMember } from "./../../../../../GN-com
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { CloudScriptService } from "./../../../../service/CloudScriptService";
 import { CacheService, ICacheServiceController, MemoryCacheServiceController, MongoDbCacheServiceController } from "./../../../../service/CacheService";
-import { GNServerSettingsOptions, LogType } from "@xmobitea/gn-typescript-client";
+import { GNServerSettingsOptions, LogType } from "@xmobitea/gearn-typescript-client-sdk";
 import { ConfigService } from "./../../../../service/ConfigService";
 
 class CreateGameOperationRequest extends OperationRequest {

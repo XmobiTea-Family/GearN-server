@@ -6,7 +6,7 @@ import {
 	RequestRole,
 	OperationRequest,
 	OperationResponse,
-} from "@xmobitea/gn-typescript-client";
+} from "@xmobitea/gearn-typescript-client-sdk";
 
 export class CloudScriptAdmin {
 	// Stores the character player value used by this instance.

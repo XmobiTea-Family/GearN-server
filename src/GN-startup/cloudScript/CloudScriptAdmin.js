@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CloudScriptAdmin = void 0;
-const gn_typescript_client_1 = require("@xmobitea/gn-typescript-client");
+const gn_typescript_client_1 = require("@xmobitea/gearn-typescript-client-sdk");
 class CloudScriptAdmin {
     characterPlayer = gn_typescript_client_1.GNNetwork.characterPlayer.admin;
     content = gn_typescript_client_1.GNNetwork.content.admin;

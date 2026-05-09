@@ -147,7 +147,7 @@ import {
 	PushPlatformType,
 	StoreReceiveType,
 	GNUtils,
-} from "@xmobitea/gn-typescript-client";
+} from "@xmobitea/gearn-typescript-client-sdk";
 
 import * as mongodb from "mongodb";
 import * as axios from "axios";

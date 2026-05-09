@@ -79,7 +79,7 @@ handlers["changeDisplayName"] = async (args: any, context, log) => {
 phía client dùng như sau:
 
 ```ts
-import { GNNetwork, ReturnCode, ErrorCode, CloudScriptModels, ExecuteResponseStatus } from "@xmobitea/gn-typescript-client";
+import { GNNetwork, ReturnCode, ErrorCode, CloudScriptModels, ExecuteResponseStatus } from "@xmobitea/gearn-typescript-client-sdk";
 
 async function changeDisplayName(newName: string) {
     const request = new CloudScriptModels.ExecuteFunctionRequestData();
@@ -184,7 +184,7 @@ Template inject sẵn các symbol này:
 - `GNHashtableBuilder`
 - `GNArrayBuilder`
 - `ExecuteResponseStatus`
-- các enum/constants từ package `@xmobitea/gn-typescript-client` như sau:
+- các enum/constants từ package `@xmobitea/gearn-typescript-client-sdk` như sau:
 ###
 - `Action0`
 - `Action1`
@@ -328,7 +328,7 @@ Nếu bạn cần ví dụ thật theo từng helper, xem file chi tiết trong 
 
 #### Cách 1: dùng Script.
 ```ts
-import { GNNetwork } from "@xmobitea/gn-typescript-client";
+import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
 
 const secretKey = process.env.GN_SECRET_KEY ?? "";
 const script = `handlers["pingCloudScript"] = async (args, context, log) => ({ ok: true, userId: context.userId });`;
@@ -356,7 +356,7 @@ vào tab CloudScript/Function, nhập script vào và bấm save
 ### Ví dụ execute đúng version vừa add:
 
 ```ts
-import { GNNetwork } from "@xmobitea/gn-typescript-client";
+import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
 
 const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync(
     {
@@ -377,7 +377,7 @@ if (executeResponse.hasReturnCodeError()) {
 Ví dụ execute không truyền `version`:
 
 ```ts
-import { GNNetwork } from "@xmobitea/gn-typescript-client";
+import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
 
 const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync(
     {

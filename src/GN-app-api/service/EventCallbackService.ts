@@ -12,7 +12,7 @@ import { promisify } from "util";
 import { ExecuteResponseStatus } from "./ICloudScriptService";
 import { ChildProcess, execFile, fork } from "child_process";
 import { GNServer } from "./../../GNServer";
-import { GNServerSettingsOptions } from "@xmobitea/gn-typescript-client";
+import { GNServerSettingsOptions } from "@xmobitea/gearn-typescript-client-sdk";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { OperationEvent } from "./../../GN-common/entity/operationEvent/OperationEvent";
 import { ParameterCode } from "./../../GN-common/constant/parameterCode/ParameterCode";
