@@ -5,7 +5,7 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
@@ -18,251 +18,258 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
+    // Stores the item ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
+    public itemId: string;
 
-	// Stores the item ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
-	public itemId: string;
+    // Stores the reason value used by this instance.
+    @StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
+    public reason?: string;
 
-	// Stores the reason value used by this instance.
-	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
-	public reason?: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerSetRemoveStatusOperationRequest extends SetRemoveStatusOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminSetRemoveStatusOperationRequest extends ServerSetRemoveStatusOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class SetRemoveStatusRequestHandler extends ItemBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.SetRemoveStatus;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.SetRemoveStatus;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return SetRemoveStatusOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return SetRemoveStatusOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        // Tracks whether method is allowed.
+        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setRemoveStatus);
 
-		// Tracks whether method is allowed.
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setRemoveStatus);
+        if (!allowMethod) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!allowMethod) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                itemId: request.itemId,
+                reason: request.reason,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			itemId: request.itemId,
-			reason: request.reason,
-		}, SecretRole.Client, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetRemoveStatusOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetRemoveStatusOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().inventory.setRemoveStatus.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().inventory.setRemoveStatus.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                itemId: request.itemId,
+                reason: request.reason,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			itemId: request.itemId,
-			reason: request.reason,
-		}, SecretRole.Server, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetRemoveStatusOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetRemoveStatusOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().inventory.setRemoveStatus.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().inventory.setRemoveStatus.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                itemId: request.itemId,
+                reason: request.reason,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			itemId: request.itemId,
-			reason: request.reason,
-		}, SecretRole.Admin, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { itemId: string; reason: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetRemoveStatus", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { itemId: string, reason: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetRemoveStatus", request, role, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        // Stores the inventory find options value used in the current execution flow.
+        let inventoryFindOptions: InventoryFindOptions = {
+            removeStatus: true,
+            owner: true,
+        };
 
-		// Stores the inventory find options value used in the current execution flow.
-		let inventoryFindOptions: InventoryFindOptions = {
-			removeStatus: true,
-			owner: true,
-		}
+        // Stores the inventory value used in the current execution flow.
+        let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
 
-		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(request.itemId, secretInfo.getGameId(), inventoryFindOptions);
+        if (inventory == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+            return operationResponse;
+        }
 
-		if (inventory == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
-			return operationResponse;
-		}
+        if (role == SecretRole.Client) {
+            // Stores the remove status value used in the current execution flow.
+            let removeStatus = inventory.getRemoveStatus();
+            if (removeStatus.tsRemove != 0) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
+                operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
 
-		if (role == SecretRole.Client) {
-			// Stores the remove status value used in the current execution flow.
-			let removeStatus = inventory.getRemoveStatus();
-			if (removeStatus.tsRemove != 0) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ItemNotFound);
-				operationResponse.setDebugMessage("Item is removed, reason " + removeStatus.reason);
+                return operationResponse;
+            }
+        }
 
-				return operationResponse;
-			}
-		}
+        // Stores the remove status value used in the current execution flow.
+        let removeStatus = inventory.getRemoveStatus();
+        if (removeStatus.tsRemove == 0) {
+            inventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
 
-		// Stores the remove status value used in the current execution flow.
-		let removeStatus = inventory.getRemoveStatus();
-		if (removeStatus.tsRemove == 0) {
-			inventory.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
+            const session = this.gnServer.getDatabase().startSession();
 
-			const session = this.gnServer.getDatabase().startSession();
+            try {
+                session.startTransaction();
 
-			try {
-				session.startTransaction();
+                // Stores the owner value used in the current execution flow.
+                let owner = inventory.getOwner();
+                // Stores the owner type value used in the current execution flow.
+                let ownerType = owner.type;
+                if (ownerType == OwnerType.Group) {
+                    // Stores the group value used in the current execution flow.
+                    let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });
+                    if (group != null) {
+                        if (group.hasGroupInventory(request.itemId)) {
+                            group.removeGroupInventory(request.itemId);
 
-				// Stores the owner value used in the current execution flow.
-				let owner = inventory.getOwner();
-				// Stores the owner type value used in the current execution flow.
-				let ownerType = owner.type;
-				if (ownerType == OwnerType.Group) {
-					// Stores the group value used in the current execution flow.
-					let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(owner.id, secretInfo.getGameId(), { groupInventories: true });
-					if (group != null) {
-						if (group.hasGroupInventory(request.itemId)) {
-							group.removeGroupInventory(request.itemId);
+                            await group.saveAsync(session);
+                        }
+                    }
+                } else if (ownerType == OwnerType.GamePlayer) {
+                    // Stores the game player value used in the current execution flow.
+                    let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
+                    if (gamePlayer != null) {
+                        if (gamePlayer.hasPlayerInventory(request.itemId)) {
+                            gamePlayer.removePlayerInventory(request.itemId);
 
-							await group.saveAsync(session);
-						}
-					}
-				}
-				else if (ownerType == OwnerType.GamePlayer) {
-					// Stores the game player value used in the current execution flow.
-					let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
-					if (gamePlayer != null) {
-						if (gamePlayer.hasPlayerInventory(request.itemId)) {
-							gamePlayer.removePlayerInventory(request.itemId);
+                            await gamePlayer.saveAsync(session);
+                        }
+                    }
+                } else if (ownerType == OwnerType.CharacterPlayer) {
+                    // Stores the character player value used in the current execution flow.
+                    let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
+                    if (characterPlayer != null) {
+                        if (characterPlayer.hasPlayerInventory(request.itemId)) {
+                            characterPlayer.removePlayerInventory(request.itemId);
 
-							await gamePlayer.saveAsync(session);
-						}
-					}
-				}
-				else if (ownerType == OwnerType.CharacterPlayer) {
-					// Stores the character player value used in the current execution flow.
-					let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(owner.id, secretInfo.getGameId(), { playerInventories: true });
-					if (characterPlayer != null) {
-						if (characterPlayer.hasPlayerInventory(request.itemId)) {
-							characterPlayer.removePlayerInventory(request.itemId);
+                            await characterPlayer.saveAsync(session);
+                        }
+                    }
+                }
 
-							await characterPlayer.saveAsync(session);
-						}
-					}
-				}
+                await inventory.saveAsync(session);
 
-				await inventory.saveAsync(session);
+                await session.commitTransaction();
+            } catch (err) {
+                await session.abortTransaction();
 
-				await session.commitTransaction();
-			}
-			catch (err) {
-				await session.abortTransaction();
+                Debug.logError(err);
 
-				Debug.logError(err);
+                throw err;
+            } finally {
+                await session.endSession();
+            }
+        }
 
-				throw err;
-			}
-			finally {
-				await session.endSession();
-			}
-		}
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetRemoveStatus", request, role, secretInfo, operationRequest, operationResponse);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetRemoveStatus", request, role, secretInfo, operationRequest, operationResponse);
-
-		return operationResponse;
-	}
+        return operationResponse;
+    }
 }

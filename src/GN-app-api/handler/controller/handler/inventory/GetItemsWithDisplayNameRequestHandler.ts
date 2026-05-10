@@ -5,7 +5,7 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
@@ -15,7 +15,6 @@ import { ItemBaseRequestHandler } from "./ItemBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetItemsWithDisplayNameOperationRequest extends OperationRequest {
-
     // Stores the keyword value used by this instance.
     @StringDataMember({ code: ParameterCode.Keyword, minLength: 2, maxLength: 32 })
     public keyword: string;
@@ -43,7 +42,6 @@ class GetItemsWithDisplayNameOperationRequest extends OperationRequest {
 }
 
 class ServerGetItemsWithDisplayNameOperationRequest extends GetItemsWithDisplayNameOperationRequest {
-
     /**
      * Checks whether valid request.
      */
@@ -55,7 +53,6 @@ class ServerGetItemsWithDisplayNameOperationRequest extends GetItemsWithDisplayN
 }
 
 class AdminGetItemsWithDisplayNameOperationRequest extends ServerGetItemsWithDisplayNameOperationRequest {
-
     /**
      * Checks whether valid request.
      */
@@ -67,7 +64,6 @@ class AdminGetItemsWithDisplayNameOperationRequest extends ServerGetItemsWithDis
 }
 
 export class GetItemsWithDisplayNameRequestHandler extends ItemBaseRequestHandler {
-
     /**
      * Returns the code.
      */
@@ -103,12 +99,17 @@ export class GetItemsWithDisplayNameRequestHandler extends ItemBaseRequestHandle
 
         this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, SecretRole.Client, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -131,12 +132,17 @@ export class GetItemsWithDisplayNameRequestHandler extends ItemBaseRequestHandle
 
         this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, SecretRole.Server, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -159,12 +165,17 @@ export class GetItemsWithDisplayNameRequestHandler extends ItemBaseRequestHandle
 
         this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, SecretRole.Admin, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -174,7 +185,7 @@ export class GetItemsWithDisplayNameRequestHandler extends ItemBaseRequestHandle
      * @param operationRequest Provides the operation request value used by this operation.
      * @returns Resolves with the operation result.
      */
-    private async execute(request: { keyword: string, infoRequestParam: InfoRequestParam, skip: number, limit: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { keyword: string; infoRequestParam: InfoRequestParam; skip: number; limit: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         // Stores the operation response value used in the current execution flow.
         let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_GetItemsWithDisplayName", request, role, secretInfo, operationRequest);
         if (operationResponse != null) {

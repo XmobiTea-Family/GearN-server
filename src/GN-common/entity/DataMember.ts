@@ -17,9 +17,7 @@ const getGNReflectedDataType = (prototype: any, propertyKey: string): FieldDataT
     // Stores the t value used in the current execution flow.
     let t = Reflect.getMetadata("design:type", prototype, propertyKey);
     if (!t) {
-        throw Error(
-            `Cannot get gn reflected data type for ${prototype.constructor.name}:${propertyKey}`
-        );
+        throw Error(`Cannot get gn reflected data type for ${prototype.constructor.name}:${propertyKey}`);
     }
 
     switch (t.name) {
@@ -43,41 +41,37 @@ const getGNReflectedDataType = (prototype: any, propertyKey: string): FieldDataT
  * @param propertyKey Provides the property key value used by this operation.
  * @returns Returns the GearN reflected metadata.
  */
-const getGNReflectedMetadata = (prototype: any, propertyKey: string): {
+const getGNReflectedMetadata = (
+    prototype: any,
+    propertyKey: string,
+): {
     // Stores the field data type value used by this contract.
-    fieldDataType: FieldDataType,
+    fieldDataType: FieldDataType;
     // Stores the prototype value used by this contract.
-    prototype: any
+    prototype: any;
 } => {
     // Stores the t value used in the current execution flow.
     let t = Reflect.getMetadata("design:type", prototype, propertyKey);
     if (!t) {
-        throw Error(
-            `Cannot get gn reflected data type for ${prototype.constructor.name}:${propertyKey}`
-        );
+        throw Error(`Cannot get gn reflected data type for ${prototype.constructor.name}:${propertyKey}`);
     }
 
     // Stores the answer value used in the current execution flow.
     let answer: {
         // Stores the field data type value used by this contract.
-        fieldDataType: FieldDataType,
+        fieldDataType: FieldDataType;
         // Stores the prototype value used by this contract.
-        prototype: any
+        prototype: any;
     } = {
         fieldDataType: null,
-        prototype: t.prototype
-    }
+        prototype: t.prototype,
+    };
 
-    if (t.name == "Boolean")
-        answer.fieldDataType = FieldDataType.Boolean;
-    else if (t.name == "Number")
-        answer.fieldDataType = FieldDataType.Number;
-    else if (t.name == "String")
-        answer.fieldDataType = FieldDataType.String;
-    else if (t.name == "Array")
-        answer.fieldDataType = FieldDataType.Array;
-    else
-        answer.fieldDataType = FieldDataType.Object;
+    if (t.name == "Boolean") answer.fieldDataType = FieldDataType.Boolean;
+    else if (t.name == "Number") answer.fieldDataType = FieldDataType.Number;
+    else if (t.name == "String") answer.fieldDataType = FieldDataType.String;
+    else if (t.name == "Array") answer.fieldDataType = FieldDataType.Array;
+    else answer.fieldDataType = FieldDataType.Object;
 
     return answer;
 };
@@ -124,7 +118,7 @@ export const initGNObjectFieldMetadata = <T extends GNObjectFieldMetadata>(proto
             name: propertyKey,
             // fieldType: getGNReflectedDataType(prototype, propertyKey),
             fieldType: gnReflectedMetadata.fieldDataType,
-            cls: gnReflectedMetadata.prototype.constructor
+            cls: gnReflectedMetadata.prototype.constructor,
         };
 
         meta.fields.push(field);
@@ -186,7 +180,7 @@ export interface GNEnhancedObjectFieldMetadata extends GNObjectFieldMetadata {
     maxValue?: number;
     // Indicates whether must int.
     mustInt?: boolean;
-};
+}
 
 export enum GNFieldDataType {
     Other = 0,
@@ -195,14 +189,12 @@ export enum GNFieldDataType {
     Boolean = 3,
     GNHashtable = 4,
     GNArray = 5,
-
-};
+}
 
 export interface GNEnhancedObjectMetadata extends GNObjectMetadata {
     // Stores the fields list used by this contract.
     fields: GNEnhancedObjectFieldMetadata[];
-
-};
+}
 
 interface DataMemberBaseArgs {
     // Stores the code value used by this contract.
@@ -211,18 +203,14 @@ interface DataMemberBaseArgs {
     isOptional?: boolean;
     // Stores the default value value used by this contract.
     defaultValue?: any;
-
-};
+}
 
 interface DataMemberArgs extends DataMemberBaseArgs {
     // Stores the GearN field type value used by this contract.
     gnFieldType?: GNFieldDataType;
+}
 
-};
-
-interface OtherDataMemberArgs extends DataMemberBaseArgs {
-
-};
+interface OtherDataMemberArgs extends DataMemberBaseArgs {}
 
 interface StringDataMemberArgs extends OtherDataMemberArgs {
     // Stores the default value value used by this contract.
@@ -233,14 +221,12 @@ interface StringDataMemberArgs extends OtherDataMemberArgs {
     minLength?: number;
     // Stores the max length value used by this contract.
     maxLength?: number;
-
-};
+}
 
 interface BooleanDataMemberArgs extends OtherDataMemberArgs {
     // Indicates whether default value.
     defaultValue?: boolean;
-
-};
+}
 
 interface NumberDataMemberArgs extends OtherDataMemberArgs {
     // Stores the default value value used by this contract.
@@ -251,8 +237,7 @@ interface NumberDataMemberArgs extends OtherDataMemberArgs {
     maxValue?: number;
     // Indicates whether must int.
     mustInt?: boolean;
-
-};
+}
 
 interface GNHashtableDataMemberArgs extends OtherDataMemberArgs {
     // Stores the default value value used by this contract.
@@ -263,7 +248,7 @@ interface GNHashtableDataMemberArgs extends OtherDataMemberArgs {
     minLength?: number;
     // Stores the max length value used by this contract.
     maxLength?: number;
-};
+}
 
 interface GNArrayDataMemberArgs extends OtherDataMemberArgs {
     // Stores the default value value used by this contract.
@@ -276,7 +261,7 @@ interface GNArrayDataMemberArgs extends OtherDataMemberArgs {
     maxLength?: number;
     // Stores the element cls value used by this contract.
     elementCls?: new (...args: any[]) => any;
-};
+}
 
 /**
  * Executes the data member workflow.
@@ -291,7 +276,6 @@ export const DataMember = (args: DataMemberArgs) => (prototype: any, propertyKey
     field.gnFieldType = args.gnFieldType == null ? GNFieldDataType.Other : args.gnFieldType;
 
     field.activeConditionValid = false;
-
 };
 
 /**
@@ -325,7 +309,6 @@ export const StringDataMember = (args: StringDataMemberArgs) => (prototype: any,
     field.mustNonNull = args.mustNonNull;
     field.minLength = args.minLength;
     field.maxLength = args.maxLength;
-
 };
 
 /**
@@ -341,7 +324,6 @@ export const BooleanDataMember = (args: BooleanDataMemberArgs) => (prototype: an
     field.gnFieldType = GNFieldDataType.Boolean;
 
     field.activeConditionValid = false;
-
 };
 
 /**
@@ -376,7 +358,6 @@ export const GNHashtableDataMember = (args: GNHashtableDataMemberArgs) => (proto
     field.mustNonNull = args.mustNonNull;
     field.minLength = args.minLength;
     field.maxLength = args.maxLength;
-
 };
 
 /**
@@ -412,7 +393,6 @@ export const GNArrayDataMember = (args: GNArrayDataMemberArgs) => (prototype: an
     field.mustNonNull = args.mustNonNull;
     field.minLength = args.minLength;
     field.maxLength = args.maxLength;
-
 };
 
 /**
@@ -446,5 +426,4 @@ export const NumberDataMember = (args: NumberDataMemberArgs) => (prototype: any,
     field.minValue = args.minValue;
     field.maxValue = args.maxValue;
     field.mustInt = args.mustInt;
-
 };

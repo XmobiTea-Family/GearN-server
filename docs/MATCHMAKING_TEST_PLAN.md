@@ -40,9 +40,9 @@ Mỗi test cần assert output thật của candidate:
 
 ## Attribute Fixture Requirements
 
-Neu test co dung attribute, attribute khong duoc qua don gian. Test data phai co nested object, array, missing field, default fallback, party nhieu member, va field nhieu khong lien quan de chac chan matcher doc dung rule key.
+Nếu test có dùng attribute, attribute không được quá đơn giản. Test data phải có nested object, array, missing field, default fallback, party nhiều member, và nhiều field không liên quan để chắc chắn matcher đọc đúng rule key.
 
-Matcher hien tai so rule bang `member.attributeForQueue[rules.name]`. Vi vay moi rule test phai tao `attributeForQueue` ro rang theo rule name, dong thoi tao them raw `attribute` va noise data de bat loi doc nham field.
+Matcher hiện tại so rule bằng `member.attributeForQueue[rules.name]`. Vì vậy mỗi rule test phải tạo `attributeForQueue` rõ ràng theo rule name, đồng thời tạo thêm raw `attribute` và noise data để bắt lỗi đọc nhầm field.
 
 Recommended raw attribute shape:
 
@@ -107,12 +107,12 @@ Recommended `attributeForQueue` shape:
 
 Mandatory attribute expectations:
 
-- Moi rule doc attribute phai co it nhat mot case chung minh matcher khong doc nham `noise` hoac `unrelated*`.
-- Moi rule doc attribute phai co it nhat mot case missing rule key de kiem tra `defaultValue` hoac behavior missing hien tai.
-- Party ticket phai co it nhat mot case nhieu member co attribute khac nhau de xac nhan rule nao chi doc `members[0]`, rule nao cong tat ca member.
-- Array attribute phai co duplicate value, empty array, va value khong lien quan.
-- Region attribute phai co field phu nhu `jitter`/`packetLoss`; matcher chi duoc dung `region` va `ping`.
-- Numeric attribute phai co noise value rat lon de bat loi doc sai key.
+- Mỗi rule đọc attribute phải có ít nhất một case chứng minh matcher không đọc nhầm `noise` hoặc `unrelated*`.
+- Mỗi rule đọc attribute phải có ít nhất một case missing rule key để kiểm tra `defaultValue` hoặc behavior missing hiện tại.
+- Party ticket phải có ít nhất một case nhiều member có attribute khác nhau để xác nhận rule nào chỉ đọc `members[0]`, rule nào cộng tất cả member.
+- Array attribute phải có duplicate value, empty array, và value không liên quan.
+- Region attribute phải có field phụ như `jitter`/`packetLoss`; matcher chỉ được dùng `region` và `ping`.
+- Numeric attribute phải có noise value rất lớn để bắt lỗi đọc sai key.
 
 Per-rule attribute complexity:
 

@@ -13,468 +13,466 @@ import { DataValueType } from "./type/DataValueType";
  * The full entity; the player-side lightweight reference lives in GroupItem.
  */
 export class Group extends DataObjectBase {
-	/** MongoDB field name for groupId — the group's unique business key. */
-	private static readonly _groupId: string = "groupId";
-	/** MongoDB field name for groupType (group kind: guild, clan, party — per the business enum). */
-	private static readonly _groupType: string = "groupType";
+    /** MongoDB field name for groupId — the group's unique business key. */
+    private static readonly _groupId: string = "groupId";
+    /** MongoDB field name for groupType (group kind: guild, clan, party — per the business enum). */
+    private static readonly _groupType: string = "groupType";
 
-	/** MongoDB field name for catalogId (the group template/preset). */
-	private static readonly _catalogId: string = "catalogId";
-	/** MongoDB field name for the group's member list. */
-	private static readonly _members: string = "members";
+    /** MongoDB field name for catalogId (the group template/preset). */
+    private static readonly _catalogId: string = "catalogId";
+    /** MongoDB field name for the group's member list. */
+    private static readonly _members: string = "members";
 
-	/** MongoDB field name for the group-scoped custom data list. */
-	private static readonly _groupDatas: string = "groupDatas";
-	/** MongoDB field name for the group's shared currency map. */
-	private static readonly _groupCurrencies: string = "groupCurrencies";
-	/** MongoDB field name for the group's shared statistics map. */
-	private static readonly _groupStatistics: string = "groupStatistics";
-	/** MongoDB field name for the group's shared inventory list. */
-	private static readonly _groupInventories: string = "groupInventories";
+    /** MongoDB field name for the group-scoped custom data list. */
+    private static readonly _groupDatas: string = "groupDatas";
+    /** MongoDB field name for the group's shared currency map. */
+    private static readonly _groupCurrencies: string = "groupCurrencies";
+    /** MongoDB field name for the group's shared statistics map. */
+    private static readonly _groupStatistics: string = "groupStatistics";
+    /** MongoDB field name for the group's shared inventory list. */
+    private static readonly _groupInventories: string = "groupInventories";
 
-	/** MongoDB field name for the soft-delete state. */
-	private static readonly _removeStatus: string = "removeStatus";
+    /** MongoDB field name for the soft-delete state. */
+    private static readonly _removeStatus: string = "removeStatus";
 
-	/** Group id; the unique business key; immutable after creation. */
-	private readonly groupId: string;
-	/** Group kind per the enum (guild, clan, party...); immutable because each kind has different business rules. */
-	private readonly groupType: number;
-	/** Catalog/template id of the group; immutable. */
-	private readonly catalogId: string;
+    /** Group id; the unique business key; immutable after creation. */
+    private readonly groupId: string;
+    /** Group kind per the enum (guild, clan, party...); immutable because each kind has different business rules. */
+    private readonly groupType: number;
+    /** Catalog/template id of the group; immutable. */
+    private readonly catalogId: string;
 
-	/** Group members, each carrying their membership state (leader, officer, member...). */
-	private members: Array<MemberItem>;
+    /** Group members, each carrying their membership state (leader, officer, member...). */
+    private members: Array<MemberItem>;
 
-	/** Group-shared currency map (guild gold, contribution points...). */
-	private groupCurrencies: Map<string, CurrencyItem>;
-	/** Group-shared statistics map (total wins, group level...). */
-	private groupStatistics: Map<string, StatisticsItem>;
-	/** Group-scoped key-value custom data extensions. */
-	private groupDatas: Map<string, DataValueType>;
-	/** Group-shared inventory items (the guild storage). */
-	private groupInventories: Array<InventoryItem>;
+    /** Group-shared currency map (guild gold, contribution points...). */
+    private groupCurrencies: Map<string, CurrencyItem>;
+    /** Group-shared statistics map (total wins, group level...). */
+    private groupStatistics: Map<string, StatisticsItem>;
+    /** Group-scoped key-value custom data extensions. */
+    private groupDatas: Map<string, DataValueType>;
+    /** Group-shared inventory items (the guild storage). */
+    private groupInventories: Array<InventoryItem>;
 
-	/** Soft-delete state; null means the group is still active. */
-	private removeStatus: RemoveStatusItem;
+    /** Soft-delete state; null means the group is still active. */
+    private removeStatus: RemoveStatusItem;
 
-	/**
-	 * Initializes a new group instance.
-	 * @param result Provides the result value used by this operation.
-	 * @param collection Provides the collection value used by this operation.
-	 */
-	constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
-		super(result, collection);
+    /**
+     * Initializes a new group instance.
+     * @param result Provides the result value used by this operation.
+     * @param collection Provides the collection value used by this operation.
+     */
+    constructor(result: mongodb.WithId<mongodb.Document>, collection: mongodb.Collection<mongodb.Document>) {
+        super(result, collection);
 
-		this.groupId = result[Group._groupId];
-		this.groupType = result[Group._groupType];
-		this.catalogId = result[Group._catalogId];
+        this.groupId = result[Group._groupId];
+        this.groupType = result[Group._groupType];
+        this.catalogId = result[Group._catalogId];
 
-		this.setDocumentGroup(result);
-	}
+        this.setDocumentGroup(result);
+    }
 
-	/**
-	 * Sets the document group.
-	 * @param result Provides the result value used by this operation.
-	 */
-	private setDocumentGroup(result: mongodb.WithId<mongodb.Document>) {
-		this.members = result[Group._members];
-		this.groupDatas = result[Group._groupDatas] != null ? new Map(Object.entries(result[Group._groupDatas])) : null;
-		this.groupCurrencies = result[Group._groupCurrencies] != null ? new Map(Object.entries(result[Group._groupCurrencies])) : null;
-		this.groupStatistics = result[Group._groupStatistics] != null ? new Map(Object.entries(result[Group._groupStatistics])) : null;
-		this.groupInventories = result[Group._groupInventories];
-		this.removeStatus = result[Group._removeStatus];
-	}
+    /**
+     * Sets the document group.
+     * @param result Provides the result value used by this operation.
+     */
+    private setDocumentGroup(result: mongodb.WithId<mongodb.Document>) {
+        this.members = result[Group._members];
+        this.groupDatas = result[Group._groupDatas] != null ? new Map(Object.entries(result[Group._groupDatas])) : null;
+        this.groupCurrencies = result[Group._groupCurrencies] != null ? new Map(Object.entries(result[Group._groupCurrencies])) : null;
+        this.groupStatistics = result[Group._groupStatistics] != null ? new Map(Object.entries(result[Group._groupStatistics])) : null;
+        this.groupInventories = result[Group._groupInventories];
+        this.removeStatus = result[Group._removeStatus];
+    }
 
-	/**
-	 * Returns the group ID.
-	 * @returns Returns the group ID.
-	 */
-	public getGroupId(): string {
-		return this.groupId;
-	}
+    /**
+     * Returns the group ID.
+     * @returns Returns the group ID.
+     */
+    public getGroupId(): string {
+        return this.groupId;
+    }
 
-	/**
-	 * Returns the group type.
-	 * @returns Returns the group type.
-	 */
-	public getGroupType(): number {
-		return this.groupType;
-	}
+    /**
+     * Returns the group type.
+     * @returns Returns the group type.
+     */
+    public getGroupType(): number {
+        return this.groupType;
+    }
 
-	/**
-	 * Returns the catalog ID.
-	 * @returns Returns the catalog ID.
-	 */
-	public getCatalogId(): string {
-		return this.catalogId;
-	}
+    /**
+     * Returns the catalog ID.
+     * @returns Returns the catalog ID.
+     */
+    public getCatalogId(): string {
+        return this.catalogId;
+    }
 
-	/**
-	 * Returns all members.
-	 * @returns Returns all members.
-	 */
-	public getAllMembers(): Array<MemberItem> {
-		return this.members;
-	}
+    /**
+     * Returns all members.
+     * @returns Returns all members.
+     */
+    public getAllMembers(): Array<MemberItem> {
+        return this.members;
+    }
 
-	/**
-	 * Checks whether member exists.
-	 * @param memberId Provides the member ID value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public hasMember(memberId: string): boolean {
-		return this.getMember(memberId) != null;
-	}
+    /**
+     * Checks whether member exists.
+     * @param memberId Provides the member ID value used by this operation.
+     * @returns Returns the operation result.
+     */
+    public hasMember(memberId: string): boolean {
+        return this.getMember(memberId) != null;
+    }
 
-	/**
-	 * Returns the member.
-	 * @param memberId Provides the member ID value used by this operation.
-	 * @returns Returns the member.
-	 */
-	public getMember(memberId: string): MemberItem {
-		return this.members.find(x => x.memberId == memberId);
-	}
+    /**
+     * Returns the member.
+     * @param memberId Provides the member ID value used by this operation.
+     * @returns Returns the member.
+     */
+    public getMember(memberId: string): MemberItem {
+        return this.members.find((x) => x.memberId == memberId);
+    }
 
-	/**
-	 * Sets the member.
-	 * @param memberId Provides the member ID value used by this operation.
-	 * @param status Provides the status value used by this operation.
-	 */
-	public setMember(memberId: string, status: number): void {
-		// Stores the member item value used in the current execution flow.
-		let memberItem = this.members.find(x => x.memberId == memberId);
-		if (memberItem == null) {
-			memberItem = {
-				memberId: memberId,
-				status: status,
-			}
+    /**
+     * Sets the member.
+     * @param memberId Provides the member ID value used by this operation.
+     * @param status Provides the status value used by this operation.
+     */
+    public setMember(memberId: string, status: number): void {
+        // Stores the member item value used in the current execution flow.
+        let memberItem = this.members.find((x) => x.memberId == memberId);
+        if (memberItem == null) {
+            memberItem = {
+                memberId: memberId,
+                status: status,
+            };
 
-			this.members.push(memberItem);
-		}
-		else {
-			memberItem.status = status;
-		}
+            this.members.push(memberItem);
+        } else {
+            memberItem.status = status;
+        }
 
-		this.set(Group._members, this.members);
-	}
+        this.set(Group._members, this.members);
+    }
 
-	/**
-	 * Removes the member.
-	 * @param memberId Provides the member ID value used by this operation.
-	 */
-	public removeMember(memberId: string): void {
-		// Stores the member item value used in the current execution flow.
-		let memberItem = this.members.find(x => x.memberId == memberId);
-		if (memberItem != null) {
-			// Stores the index of value used in the current execution flow.
-			let indexOf = this.members.indexOf(memberItem);
-			if (indexOf != -1) {
-				this.members.splice(indexOf, 1);
+    /**
+     * Removes the member.
+     * @param memberId Provides the member ID value used by this operation.
+     */
+    public removeMember(memberId: string): void {
+        // Stores the member item value used in the current execution flow.
+        let memberItem = this.members.find((x) => x.memberId == memberId);
+        if (memberItem != null) {
+            // Stores the index of value used in the current execution flow.
+            let indexOf = this.members.indexOf(memberItem);
+            if (indexOf != -1) {
+                this.members.splice(indexOf, 1);
 
-				return this.set(Group._members, this.members);
-			}
-		}
+                return this.set(Group._members, this.members);
+            }
+        }
 
-		throw Error("can not found the member id to remove");
-	}
+        throw Error("can not found the member id to remove");
+    }
 
-	/**
-	 * Returns all group currencies.
-	 * @returns Returns all group currencies.
-	 */
-	public getAllGroupCurrencies(): Map<string, CurrencyItem> {
-		return this.groupCurrencies;
-	}
+    /**
+     * Returns all group currencies.
+     * @returns Returns all group currencies.
+     */
+    public getAllGroupCurrencies(): Map<string, CurrencyItem> {
+        return this.groupCurrencies;
+    }
 
-	/**
-	 * Checks whether group currency exists.
-	 * @param key Provides the key value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public hasGroupCurrency(key: string): boolean {
-		return this.groupCurrencies.has(key);
-	}
+    /**
+     * Checks whether group currency exists.
+     * @param key Provides the key value used by this operation.
+     * @returns Returns the operation result.
+     */
+    public hasGroupCurrency(key: string): boolean {
+        return this.groupCurrencies.has(key);
+    }
 
-	/**
-	 * Returns the group currency.
-	 * @param key Provides the key value used by this operation.
-	 * @returns Returns the group currency.
-	 */
-	public getGroupCurrency(key: string): CurrencyItem {
-		return this.groupCurrencies.get(key);
-	}
+    /**
+     * Returns the group currency.
+     * @param key Provides the key value used by this operation.
+     * @returns Returns the group currency.
+     */
+    public getGroupCurrency(key: string): CurrencyItem {
+        return this.groupCurrencies.get(key);
+    }
 
-	/**
-	 * Changes the group currency.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 */
-	public changeGroupCurrency(key: string, amount: number): void {
-		// Stores the this group currency value used in the current execution flow.
-		const thisGroupCurrency = this.groupCurrencies.get(key);
-		this.groupCurrencies.set(key, {
-			value: thisGroupCurrency != null ? (thisGroupCurrency.value + amount) : amount
-		});
+    /**
+     * Changes the group currency.
+     * @param key Provides the key value used by this operation.
+     * @param amount Provides the amount value used by this operation.
+     */
+    public changeGroupCurrency(key: string, amount: number): void {
+        // Stores the this group currency value used in the current execution flow.
+        const thisGroupCurrency = this.groupCurrencies.get(key);
+        this.groupCurrencies.set(key, {
+            value: thisGroupCurrency != null ? thisGroupCurrency.value + amount : amount,
+        });
 
-		// Stores the field value used in the current execution flow.
-		const field = Group._groupCurrencies + DataObjectBase.DOT + key;
-		this.removeSet(field);
-		this.inc(field + DataObjectBase.DOT + "value", amount);
-	}
+        // Stores the field value used in the current execution flow.
+        const field = Group._groupCurrencies + DataObjectBase.DOT + key;
+        this.removeSet(field);
+        this.inc(field + DataObjectBase.DOT + "value", amount);
+    }
 
-	/**
-	 * Sets the group currency.
-	 * @param key Provides the key value used by this operation.
-	 * @param value Provides the value value used by this operation.
-	 */
-	public setGroupCurrency(key: string, value: number): void {
-		this.groupCurrencies.set(key, {
-			value: value
-		});
+    /**
+     * Sets the group currency.
+     * @param key Provides the key value used by this operation.
+     * @param value Provides the value value used by this operation.
+     */
+    public setGroupCurrency(key: string, value: number): void {
+        this.groupCurrencies.set(key, {
+            value: value,
+        });
 
-		// Stores the field value used in the current execution flow.
-		const field = Group._groupCurrencies + DataObjectBase.DOT + key;
-		this.removeInc(field + DataObjectBase.DOT + "value");
-		this.set(field, {
-			value: value
-		});
-	}
+        // Stores the field value used in the current execution flow.
+        const field = Group._groupCurrencies + DataObjectBase.DOT + key;
+        this.removeInc(field + DataObjectBase.DOT + "value");
+        this.set(field, {
+            value: value,
+        });
+    }
 
-	/**
-	 * Removes the group currency.
-	 * @param key Provides the key value used by this operation.
-	 */
-	public removeGroupCurrency(key: string): void {
-		if (this.groupCurrencies.has(key)) {
-			this.groupCurrencies.delete(key);
+    /**
+     * Removes the group currency.
+     * @param key Provides the key value used by this operation.
+     */
+    public removeGroupCurrency(key: string): void {
+        if (this.groupCurrencies.has(key)) {
+            this.groupCurrencies.delete(key);
 
-			return this.unset(Group._groupCurrencies + DataObjectBase.DOT + key);
-		}
+            return this.unset(Group._groupCurrencies + DataObjectBase.DOT + key);
+        }
 
-		throw Error("can not found the key to remove");
-	}
+        throw Error("can not found the key to remove");
+    }
 
-	/**
-	 * Returns all group datas.
-	 * @returns Returns all group datas.
-	 */
-	public getAllGroupDatas(): Map<string, DataValueType> {
-		return this.groupDatas;
-	}
+    /**
+     * Returns all group datas.
+     * @returns Returns all group datas.
+     */
+    public getAllGroupDatas(): Map<string, DataValueType> {
+        return this.groupDatas;
+    }
 
-	/**
-	 * Checks whether group data exists.
-	 * @param key Provides the key value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public hasGroupData(key: string): boolean {
-		return this.groupDatas.has(key);
-	}
+    /**
+     * Checks whether group data exists.
+     * @param key Provides the key value used by this operation.
+     * @returns Returns the operation result.
+     */
+    public hasGroupData(key: string): boolean {
+        return this.groupDatas.has(key);
+    }
 
-	/**
-	 * Returns the group data.
-	 * @param key Provides the key value used by this operation.
-	 * @returns Returns the group data.
-	 */
-	public getGroupData(key: string): DataValueType {
-		return this.groupDatas.get(key);
-	}
+    /**
+     * Returns the group data.
+     * @param key Provides the key value used by this operation.
+     * @returns Returns the group data.
+     */
+    public getGroupData(key: string): DataValueType {
+        return this.groupDatas.get(key);
+    }
 
-	/**
-	 * Sets the group data.
-	 * @param key Provides the key value used by this operation.
-	 * @param value Provides the value value used by this operation.
-	 */
-	public setGroupData(key: string, value: DataValueType): void {
-		this.groupDatas.set(key, value);
+    /**
+     * Sets the group data.
+     * @param key Provides the key value used by this operation.
+     * @param value Provides the value value used by this operation.
+     */
+    public setGroupData(key: string, value: DataValueType): void {
+        this.groupDatas.set(key, value);
 
-		this.set(Group._groupDatas + DataObjectBase.DOT + key, value);
-	}
+        this.set(Group._groupDatas + DataObjectBase.DOT + key, value);
+    }
 
-	/**
-	 * Removes the group data.
-	 * @param key Provides the key value used by this operation.
-	 */
-	public removeGroupData(key: string): void {
-		this.groupDatas.delete(key);
+    /**
+     * Removes the group data.
+     * @param key Provides the key value used by this operation.
+     */
+    public removeGroupData(key: string): void {
+        this.groupDatas.delete(key);
 
-		this.unset(Group._groupDatas + DataObjectBase.DOT + key);
-	}
+        this.unset(Group._groupDatas + DataObjectBase.DOT + key);
+    }
 
-	/**
-	 * Returns all group statistics.
-	 * @returns Returns all group statistics.
-	 */
-	public getAllGroupStatistics(): Map<string, StatisticsItem> {
-		return this.groupStatistics;
-	}
+    /**
+     * Returns all group statistics.
+     * @returns Returns all group statistics.
+     */
+    public getAllGroupStatistics(): Map<string, StatisticsItem> {
+        return this.groupStatistics;
+    }
 
-	/**
-	 * Checks whether group statistics exists.
-	 * @param key Provides the key value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public hasGroupStatistics(key: string): boolean {
-		return this.groupStatistics.has(key);
-	}
+    /**
+     * Checks whether group statistics exists.
+     * @param key Provides the key value used by this operation.
+     * @returns Returns the operation result.
+     */
+    public hasGroupStatistics(key: string): boolean {
+        return this.groupStatistics.has(key);
+    }
 
-	/**
-	 * Returns the group statistics.
-	 * @param key Provides the key value used by this operation.
-	 * @returns Returns the group statistics.
-	 */
-	public getGroupStatistics(key: string): StatisticsItem {
-		return this.groupStatistics.get(key);
-	}
+    /**
+     * Returns the group statistics.
+     * @param key Provides the key value used by this operation.
+     * @returns Returns the group statistics.
+     */
+    public getGroupStatistics(key: string): StatisticsItem {
+        return this.groupStatistics.get(key);
+    }
 
-	/**
-	 * Changes the group statistics.
-	 * @param key Provides the key value used by this operation.
-	 * @param amount Provides the amount value used by this operation.
-	 * @param tsLastUpdate Provides the timestamp last update value used by this operation.
-	 */
-	public changeGroupStatistics(key: string, amount: number, tsLastUpdate: number): void {
-		// Stores the this group statistics value used in the current execution flow.
-		const thisGroupStatistics = this.groupStatistics.get(key);
-		this.groupStatistics.set(key, {
-			value: thisGroupStatistics != null ? (thisGroupStatistics.value + amount) : amount,
-			tsLastUpdate: tsLastUpdate,
-		});
+    /**
+     * Changes the group statistics.
+     * @param key Provides the key value used by this operation.
+     * @param amount Provides the amount value used by this operation.
+     * @param tsLastUpdate Provides the timestamp last update value used by this operation.
+     */
+    public changeGroupStatistics(key: string, amount: number, tsLastUpdate: number): void {
+        // Stores the this group statistics value used in the current execution flow.
+        const thisGroupStatistics = this.groupStatistics.get(key);
+        this.groupStatistics.set(key, {
+            value: thisGroupStatistics != null ? thisGroupStatistics.value + amount : amount,
+            tsLastUpdate: tsLastUpdate,
+        });
 
-		// Stores the field value used in the current execution flow.
-		const field = Group._groupStatistics + DataObjectBase.DOT + key;
-		this.removeSet(field);
-		this.inc(field + DataObjectBase.DOT + "value", amount);
-		this.set(field + DataObjectBase.DOT + "tsLastUpdate", tsLastUpdate);
-	}
+        // Stores the field value used in the current execution flow.
+        const field = Group._groupStatistics + DataObjectBase.DOT + key;
+        this.removeSet(field);
+        this.inc(field + DataObjectBase.DOT + "value", amount);
+        this.set(field + DataObjectBase.DOT + "tsLastUpdate", tsLastUpdate);
+    }
 
-	/**
-	 * Sets the group statistics.
-	 * @param key Provides the key value used by this operation.
-	 * @param value Provides the value value used by this operation.
-	 * @param tsLastUpdate Provides the timestamp last update value used by this operation.
-	 */
-	public setGroupStatistics(key: string, value: number, tsLastUpdate: number): void {
-		this.groupStatistics.set(key, {
-			value: value,
-			tsLastUpdate: tsLastUpdate,
-		});
+    /**
+     * Sets the group statistics.
+     * @param key Provides the key value used by this operation.
+     * @param value Provides the value value used by this operation.
+     * @param tsLastUpdate Provides the timestamp last update value used by this operation.
+     */
+    public setGroupStatistics(key: string, value: number, tsLastUpdate: number): void {
+        this.groupStatistics.set(key, {
+            value: value,
+            tsLastUpdate: tsLastUpdate,
+        });
 
-		// Stores the field value used in the current execution flow.
-		const field = Group._groupStatistics + DataObjectBase.DOT + key;
-		this.removeInc(field + DataObjectBase.DOT + "value");
-		this.removeSet(field + DataObjectBase.DOT + "tsLastUpdate");
-		this.set(field, {
-			value: value,
-			tsLastUpdate: tsLastUpdate,
-		});
-	}
+        // Stores the field value used in the current execution flow.
+        const field = Group._groupStatistics + DataObjectBase.DOT + key;
+        this.removeInc(field + DataObjectBase.DOT + "value");
+        this.removeSet(field + DataObjectBase.DOT + "tsLastUpdate");
+        this.set(field, {
+            value: value,
+            tsLastUpdate: tsLastUpdate,
+        });
+    }
 
-	/**
-	 * Removes the group statistics.
-	 * @param key Provides the key value used by this operation.
-	 */
-	public removeGroupStatistics(key: string): void {
-		if (this.groupStatistics.has(key)) {
-			this.groupStatistics.delete(key);
+    /**
+     * Removes the group statistics.
+     * @param key Provides the key value used by this operation.
+     */
+    public removeGroupStatistics(key: string): void {
+        if (this.groupStatistics.has(key)) {
+            this.groupStatistics.delete(key);
 
-			return this.unset(Group._groupStatistics + DataObjectBase.DOT + key);
-		}
+            return this.unset(Group._groupStatistics + DataObjectBase.DOT + key);
+        }
 
-		throw Error("can not found the key to remove");
-	}
+        throw Error("can not found the key to remove");
+    }
 
-	/**
-	 * Returns all group inventories.
-	 * @returns Returns all group inventories.
-	 */
-	public getAllGroupInventories(): Array<InventoryItem> {
-		return this.groupInventories;
-	}
+    /**
+     * Returns all group inventories.
+     * @returns Returns all group inventories.
+     */
+    public getAllGroupInventories(): Array<InventoryItem> {
+        return this.groupInventories;
+    }
 
-	/**
-	 * Checks whether group inventory exists.
-	 * @param itemId Provides the item ID value used by this operation.
-	 * @returns Returns the operation result.
-	 */
-	public hasGroupInventory(itemId: string): boolean {
-		return this.groupInventories.find(x => x.itemId == itemId) != null;
-	}
+    /**
+     * Checks whether group inventory exists.
+     * @param itemId Provides the item ID value used by this operation.
+     * @returns Returns the operation result.
+     */
+    public hasGroupInventory(itemId: string): boolean {
+        return this.groupInventories.find((x) => x.itemId == itemId) != null;
+    }
 
-	/**
-	 * Returns the group inventory.
-	 * @param itemId Provides the item ID value used by this operation.
-	 * @returns Returns the group inventory.
-	 */
-	public getGroupInventory(itemId: string): InventoryItem {
-		return this.groupInventories.find(x => x.itemId == itemId);
-	}
+    /**
+     * Returns the group inventory.
+     * @param itemId Provides the item ID value used by this operation.
+     * @returns Returns the group inventory.
+     */
+    public getGroupInventory(itemId: string): InventoryItem {
+        return this.groupInventories.find((x) => x.itemId == itemId);
+    }
 
-	/**
-	 * Sets the group inventory.
-	 * @param itemId Provides the item ID value used by this operation.
-	 * @param catalogId Provides the catalog ID value used by this operation.
-	 * @param classId Provides the class ID value used by this operation.
-	 */
-	public setGroupInventory(itemId: string, catalogId: string, classId: string): void {
-		// Stores the group inventory item value used in the current execution flow.
-		let groupInventoryItem = this.groupInventories.find(x => x.itemId == itemId);
-		if (groupInventoryItem == null) {
-			groupInventoryItem = {
-				itemId: itemId,
-				catalogId: catalogId,
-				classId: classId,
-			}
+    /**
+     * Sets the group inventory.
+     * @param itemId Provides the item ID value used by this operation.
+     * @param catalogId Provides the catalog ID value used by this operation.
+     * @param classId Provides the class ID value used by this operation.
+     */
+    public setGroupInventory(itemId: string, catalogId: string, classId: string): void {
+        // Stores the group inventory item value used in the current execution flow.
+        let groupInventoryItem = this.groupInventories.find((x) => x.itemId == itemId);
+        if (groupInventoryItem == null) {
+            groupInventoryItem = {
+                itemId: itemId,
+                catalogId: catalogId,
+                classId: classId,
+            };
 
-			this.groupInventories.push(groupInventoryItem);
-		}
-		else {
-			groupInventoryItem.catalogId = catalogId;
-			groupInventoryItem.classId = classId;
-		}
+            this.groupInventories.push(groupInventoryItem);
+        } else {
+            groupInventoryItem.catalogId = catalogId;
+            groupInventoryItem.classId = classId;
+        }
 
-		this.set(Group._groupInventories, this.groupInventories);
-	}
+        this.set(Group._groupInventories, this.groupInventories);
+    }
 
-	/**
-	 * Removes the group inventory.
-	 * @param itemId Provides the item ID value used by this operation.
-	 */
-	public removeGroupInventory(itemId: string): void {
-		// Stores the group inventory item value used in the current execution flow.
-		let groupInventoryItem = this.groupInventories.find(x => x.itemId == itemId);
-		if (groupInventoryItem != null) {
-			// Stores the index of value used in the current execution flow.
-			let indexOf = this.groupInventories.indexOf(groupInventoryItem);
-			if (indexOf != -1) {
-				this.groupInventories.splice(indexOf, 1);
+    /**
+     * Removes the group inventory.
+     * @param itemId Provides the item ID value used by this operation.
+     */
+    public removeGroupInventory(itemId: string): void {
+        // Stores the group inventory item value used in the current execution flow.
+        let groupInventoryItem = this.groupInventories.find((x) => x.itemId == itemId);
+        if (groupInventoryItem != null) {
+            // Stores the index of value used in the current execution flow.
+            let indexOf = this.groupInventories.indexOf(groupInventoryItem);
+            if (indexOf != -1) {
+                this.groupInventories.splice(indexOf, 1);
 
-				return this.set(Group._groupInventories, this.groupInventories);
-			}
-		}
+                return this.set(Group._groupInventories, this.groupInventories);
+            }
+        }
 
-		throw Error("can not found the itemId to remove");
-	}
+        throw Error("can not found the itemId to remove");
+    }
 
-	/**
-	 * Returns the remove status.
-	 * @returns Returns the remove status.
-	 */
-	public getRemoveStatus(): RemoveStatusItem {
-		return this.removeStatus;
-	}
+    /**
+     * Returns the remove status.
+     * @returns Returns the remove status.
+     */
+    public getRemoveStatus(): RemoveStatusItem {
+        return this.removeStatus;
+    }
 
-	/**
-	 * Sets the remove status.
-	 * @param tsRemove Provides the timestamp remove value used by this operation.
-	 * @param reason Provides the reason value used by this operation.
-	 */
-	public setRemoveStatus(tsRemove: number, reason?: string): void {
-		this.removeStatus = {
-			tsRemove: tsRemove,
-			reason: reason,
-		};
+    /**
+     * Sets the remove status.
+     * @param tsRemove Provides the timestamp remove value used by this operation.
+     * @param reason Provides the reason value used by this operation.
+     */
+    public setRemoveStatus(tsRemove: number, reason?: string): void {
+        this.removeStatus = {
+            tsRemove: tsRemove,
+            reason: reason,
+        };
 
-		this.set(Group._removeStatus, this.removeStatus);
-	}
+        this.set(Group._removeStatus, this.removeStatus);
+    }
 }

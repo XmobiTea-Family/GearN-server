@@ -5,7 +5,7 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
@@ -18,387 +18,394 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { xStatisticsAggregationMethod } from "./../../../../../GN-library/xsettings/lib/entity/xStatisticsAggregationMethod";
 
 class GetStatisticsLeaderboardOperationRequest extends OperationRequest {
+    // Stores the key value used by this instance.
+    @StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
+    public key: string;
 
-	// Stores the key value used by this instance.
-	@StringDataMember({ code: ParameterCode.Key, minLength: 2, maxLength: 32, mustNonNull: true })
-	public key: string;
+    // Stores the info request parameter value used by this instance.
+    @GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
+    public infoRequestParam: InfoRequestParam;
 
-	// Stores the info request parameter value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.InfoRequestParam, mustNonNull: true })
-	public infoRequestParam: InfoRequestParam;
+    // Stores the skip value used by this instance.
+    @NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
+    public skip?: number;
 
-	// Stores the skip value used by this instance.
-	@NumberDataMember({ code: ParameterCode.Skip, defaultValue: 0, minValue: 0, mustInt: true, isOptional: true })
-	public skip?: number;
+    // Stores the limit value used by this instance.
+    @NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
+    public limit?: number;
 
-	// Stores the limit value used by this instance.
-	@NumberDataMember({ code: ParameterCode.Limit, defaultValue: 10, minValue: 1, maxValue: 100, mustInt: true, isOptional: true })
-	public limit?: number;
+    // Indicates whether load from cache.
+    @BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
+    public loadFromCache?: boolean;
 
-	// Indicates whether load from cache.
-	@BooleanDataMember({ code: ParameterCode.LoadFromCache, defaultValue: true, isOptional: true })
-	public loadFromCache?: boolean;
+    // Stores the version value used by this instance.
+    @StringDataMember({ code: ParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
+    public version?: string;
 
-	// Stores the version value used by this instance.
-	@StringDataMember({ code: ParameterCode.Version, minLength: 2, maxLength: 32, mustNonNull: true, isOptional: true })
-	public version?: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerGetStatisticsLeaderboardOperationRequest extends GetStatisticsLeaderboardOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminGetStatisticsLeaderboardOperationRequest extends ServerGetStatisticsLeaderboardOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class GetStatisticsLeaderboardRequestHandler extends MasterPlayerBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.GetStatisticsLeaderboard;
+    }
+
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return GetStatisticsLeaderboardOperationRequest;
+    }
+
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getStatisticsLeaderboard.otherSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
+
+        this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
+
+        return this.execute(
+            {
+                key: request.key,
+                skip: request.skip,
+                limit: request.limit,
+                infoRequestParam: request.infoRequestParam,
+                loadFromCache: request.loadFromCache,
+                version: request.version,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
+
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStatisticsLeaderboardOperationRequest);
+
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getStatisticsLeaderboard.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
+
+        this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
+
+        return this.execute(
+            {
+                key: request.key,
+                skip: request.skip,
+                limit: request.limit,
+                infoRequestParam: request.infoRequestParam,
+                loadFromCache: request.loadFromCache,
+                version: request.version,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
+
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStatisticsLeaderboardOperationRequest);
+
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getStatisticsLeaderboard.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
+
+        this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
+
+        return this.execute(
+            {
+                key: request.key,
+                skip: request.skip,
+                limit: request.limit,
+                infoRequestParam: request.infoRequestParam,
+                loadFromCache: request.loadFromCache,
+                version: request.version,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
+
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { key: string; skip: number; limit: number; infoRequestParam: InfoRequestParam; loadFromCache: boolean; version: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetStatisticsLeaderboard", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.GetStatisticsLeaderboard;
-	}
-
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return GetStatisticsLeaderboardOperationRequest;
-	}
-
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
-
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
-
-		if (!secretInfo.getPermission().masterPlayer.getStatisticsLeaderboard.otherSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
-
-		this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
-
-		return this.execute({
-			key: request.key,
-			skip: request.skip,
-			limit: request.limit,
-			infoRequestParam: request.infoRequestParam,
-			loadFromCache: request.loadFromCache,
-			version: request.version,
-		}, SecretRole.Client, secretInfo, operationRequest);
-	}
-
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetStatisticsLeaderboardOperationRequest);
-
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
-
-		if (!secretInfo.getPermission().masterPlayer.getStatisticsLeaderboard.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
-
-		this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
-
-		return this.execute({
-			key: request.key,
-			skip: request.skip,
-			limit: request.limit,
-			infoRequestParam: request.infoRequestParam,
-			loadFromCache: request.loadFromCache,
-			version: request.version,
-		}, SecretRole.Server, secretInfo, operationRequest);
-	}
-
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetStatisticsLeaderboardOperationRequest);
-
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
-
-		if (!secretInfo.getPermission().masterPlayer.getStatisticsLeaderboard.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
-
-		this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
-
-		return this.execute({
-			key: request.key,
-			skip: request.skip,
-			limit: request.limit,
-			infoRequestParam: request.infoRequestParam,
-			loadFromCache: request.loadFromCache,
-			version: request.version,
-		}, SecretRole.Admin, secretInfo, operationRequest);
-	}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { key: string, skip: number, limit: number, infoRequestParam: InfoRequestParam, loadFromCache: boolean, version: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetStatisticsLeaderboard", request, role, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        // Stores the resolved master player settings instance for the current execution flow.
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
+        // Stores the player statistics settings item value used in the current execution flow.
+        let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find((x) => x.key == request.key);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        if (playerStatisticsSettingsItem == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
 
-		// Stores the resolved master player settings instance for the current execution flow.
-		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
-		// Stores the player statistics settings item value used in the current execution flow.
-		let playerStatisticsSettingsItem = masterPlayerSettings.playerStatisticsSettings.find(x => x.key == request.key);
+            return operationResponse;
+        }
 
-		if (playerStatisticsSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+        // Stores the cache data value used in the current execution flow.
+        let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
 
-			return operationResponse;
-		}
+        if (!request.version) {
+            // Stores the cache key value used in the current execution flow.
+            let cacheKey = "masterPlayerStatisticsLeaderboard_" + request.key;
 
-		// Stores the cache data value used in the current execution flow.
-		let cacheData = this.gnServer.getCacheService(secretInfo.getGameId());
+            if (request.loadFromCache) {
+                if (request.skip + request.limit > 100) {
+                    request.loadFromCache = false;
+                }
+            }
 
-		if (!request.version) {
-			// Stores the cache key value used in the current execution flow.
-			let cacheKey = "masterPlayerStatisticsLeaderboard_" + request.key;
+            if (request.loadFromCache) {
+                if (!(await cacheData.isValid(cacheKey))) {
+                    request.loadFromCache = false;
+                }
+            }
 
-			if (request.loadFromCache) {
-				if (request.skip + request.limit > 100) {
-					request.loadFromCache = false;
-				}
-			}
+            // Stores the GearN results value used in the current execution flow.
+            let gnResults = new GNArray();
 
-			if (request.loadFromCache) {
-				if (!(await cacheData.isValid(cacheKey))) {
-					request.loadFromCache = false;
-				}
-			}
+            // Stores the master players value used in the current execution flow.
+            let masterPlayers: MasterPlayer[];
 
-			// Stores the GearN results value used in the current execution flow.
-			let gnResults = new GNArray();
+            if (request.loadFromCache) {
+                masterPlayers = await cacheData.getData(cacheKey);
 
-			// Stores the master players value used in the current execution flow.
-			let masterPlayers: MasterPlayer[];
+                for (let i = request.skip; i < request.skip + request.limit; i++) {
+                    if (i >= masterPlayers.length) break;
 
-			if (request.loadFromCache) {
-				masterPlayers = await cacheData.getData(cacheKey);
+                    // Stores the master player value used in the current execution flow.
+                    let masterPlayer = masterPlayers[i];
+
+                    // Stores the GearN result value used in the current execution flow.
+                    let gnResult = new GNHashtable();
+
+                    gnResult.add(ParameterCode.Position, i);
+
+                    gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+
+                    gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+
+                    gnResults.add(gnResult);
+                }
+            } else {
+                // Stores the master player find options value used in the current execution flow.
+                let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+
+                // Stores the statistics aggregation method value used in the current execution flow.
+                let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
+                // Stores the direction value used in the current execution flow.
+                let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
+
+                if (request.skip + request.limit <= 100) {
+                    masterPlayerFindOptions = null;
+
+                    masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, direction, masterPlayerFindOptions);
+
+                    for (let i = request.skip; i < request.skip + request.limit; i++) {
+                        if (i >= masterPlayers.length) break;
+
+                        // Stores the master player value used in the current execution flow.
+                        let masterPlayer = masterPlayers[i];
+
+                        // Stores the GearN result value used in the current execution flow.
+                        let gnResult = new GNHashtable();
+
+                        gnResult.add(ParameterCode.Position, i);
+
+                        gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+
+                        gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+
+                        gnResults.add(gnResult);
+                    }
 
-				for (let i = request.skip; i < request.skip + request.limit; i++) {
-					if (i >= masterPlayers.length) break;
+                    await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+                } else {
+                    masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, direction, masterPlayerFindOptions);
 
-					// Stores the master player value used in the current execution flow.
-					let masterPlayer = masterPlayers[i];
+                    for (let i = 0; i < masterPlayers.length; i++) {
+                        // Stores the master player value used in the current execution flow.
+                        let masterPlayer = masterPlayers[i];
 
-					// Stores the GearN result value used in the current execution flow.
-					let gnResult = new GNHashtable();
+                        // Stores the GearN result value used in the current execution flow.
+                        let gnResult = new GNHashtable();
 
-					gnResult.add(ParameterCode.Position, i);
+                        gnResult.add(ParameterCode.Position, i + request.skip);
 
-					gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+                        gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
 
-					gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+                        gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
-					gnResults.add(gnResult);
-				}
-			}
-			else {
-				// Stores the master player find options value used in the current execution flow.
-				let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
-
-				// Stores the statistics aggregation method value used in the current execution flow.
-				let statisticsAggregationMethod = <xStatisticsAggregationMethod>playerStatisticsSettingsItem.statisticsAggregationMethod;
-				// Stores the direction value used in the current execution flow.
-				let direction: -1 | 1 = statisticsAggregationMethod == xStatisticsAggregationMethod.Minimum ? 1 : -1;
-
-				if (request.skip + request.limit <= 100) {
-					masterPlayerFindOptions = null;
-
-					masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, 0, 100, direction, masterPlayerFindOptions);
-
-					for (let i = request.skip; i < request.skip + request.limit; i++) {
-						if (i >= masterPlayers.length) break;
-
-						// Stores the master player value used in the current execution flow.
-						let masterPlayer = masterPlayers[i];
-
-						// Stores the GearN result value used in the current execution flow.
-						let gnResult = new GNHashtable();
-
-						gnResult.add(ParameterCode.Position, i);
+                        gnResults.add(gnResult);
+                    }
+                }
+            }
 
-						gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+            operationResponse.setParameter(ParameterCode.Results, gnResults);
+        } else {
+            // Stores the backup statistics leaderboard collection value used in the current execution flow.
+            let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
 
-						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+            // Stores the key value used in the current execution flow.
+            let key = request.key;
+            // Stores the version value used in the current execution flow.
+            let version = request.version;
 
-						gnResults.add(gnResult);
-					}
+            // Stores the cache key value used in the current execution flow.
+            let cacheKey = "masterPlayerStatisticsLeaderboard_" + key + "_" + version;
 
-					await cacheData.setData(cacheKey, masterPlayers, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-				}
-				else {
-					masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersLeaderboardWithStatisticsAsync(request.key, request.skip, request.limit, direction, masterPlayerFindOptions);
+            if (!(await cacheData.isValid(cacheKey))) {
+                // Stores the result value used in the current execution flow.
+                let result = await backupStatisticsLeaderboardCollection.findOne({ key: key, version: version });
 
-					for (let i = 0; i < masterPlayers.length; i++) {
+                if (result == null) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VersionInvalid);
+                    return operationResponse;
+                }
 
-						// Stores the master player value used in the current execution flow.
-						let masterPlayer = masterPlayers[i];
+                await cacheData.setData(cacheKey, result, xDatetime.ONE_MINUTE_MILLISECOND * 5);
+            }
 
-						// Stores the GearN result value used in the current execution flow.
-						let gnResult = new GNHashtable();
+            // Stores the backup data value used in the current execution flow.
+            let backupData: {
+                // Stores the key value used by this contract.
+                key: string;
+                // Stores the version value used by this contract.
+                version: string;
+                // Stores the log value used by this contract.
+                log: string;
+                // Stores the timestamp create value used by this contract.
+                tsCreate: number;
+                // Stores the results list used by this contract.
+                results: {
+                    // Stores the position value used by this contract.
+                    position: number;
+                    // Indicates whether r ID should be used.
+                    userId: string;
+                    // Stores the value value used by this contract.
+                    value: number;
+                    // Stores the timestamp last update value used by this contract.
+                    tsLastUpdate: number;
+                }[];
+            } = await cacheData.getData(cacheKey);
 
-						gnResult.add(ParameterCode.Position, i + request.skip);
+            // Stores the GearN results value used in the current execution flow.
+            let gnResults = new GNArray();
 
-						gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+            // Stores the master player find options value used in the current execution flow.
+            let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
 
-						gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+            for (let i = request.skip; i < request.skip + request.limit; i++) {
+                if (i >= backupData.results.length) break;
 
-						gnResults.add(gnResult);
-					}
-				}
-			}
+                // Stores the result value used in the current execution flow.
+                let result = backupData.results[i];
 
-			operationResponse.setParameter(ParameterCode.Results, gnResults);
-		}
-		else {
-			// Stores the backup statistics leaderboard collection value used in the current execution flow.
-			let backupStatisticsLeaderboardCollection = this.gnServer.getDatabase().runtimeCollection("MasterPlayer.StatisticsBackup");
+                // Stores the GearN result value used in the current execution flow.
+                let gnResult = new GNHashtable();
 
-			// Stores the key value used in the current execution flow.
-			let key = request.key;
-			// Stores the version value used in the current execution flow.
-			let version = request.version;
+                gnResult.add(ParameterCode.Position, result.position);
+                gnResult.add(ParameterCode.BackupValue, result.value);
 
-			// Stores the cache key value used in the current execution flow.
-			let cacheKey = "masterPlayerStatisticsLeaderboard_" + key + "_" + version;
+                gnResult.add(ParameterCode.UserId, result.userId);
 
-			if (!(await cacheData.isValid(cacheKey))) {
-				// Stores the result value used in the current execution flow.
-				let result = await backupStatisticsLeaderboardCollection.findOne({ key: key, version: version });
+                // Stores the master player value used in the current execution flow.
+                let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(result.userId, masterPlayerFindOptions);
 
-				if (result == null) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.VersionInvalid);
-					return operationResponse;
-				}
+                if (masterPlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
 
-				await cacheData.setData(cacheKey, result, xDatetime.ONE_MINUTE_MILLISECOND * 5);
-			}
+                gnResults.add(gnResult);
+            }
 
-			// Stores the backup data value used in the current execution flow.
-			let backupData: {
-				// Stores the key value used by this contract.
-				key: string,
-				// Stores the version value used by this contract.
-				version: string,
-				// Stores the log value used by this contract.
-				log: string,
-				// Stores the timestamp create value used by this contract.
-				tsCreate: number,
-				// Stores the results list used by this contract.
-				results: {
-					// Stores the position value used by this contract.
-					position: number,
-					// Indicates whether r ID should be used.
-					userId: string,
-					// Stores the value value used by this contract.
-					value: number,
-					// Stores the timestamp last update value used by this contract.
-					tsLastUpdate: number,
-				}[]
-			} = await cacheData.getData(cacheKey);
+            operationResponse.setParameter(ParameterCode.Results, gnResults);
+            operationResponse.setParameter(ParameterCode.TsCreate, backupData.tsCreate);
+        }
 
-			// Stores the GearN results value used in the current execution flow.
-			let gnResults = new GNArray();
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-			// Stores the master player find options value used in the current execution flow.
-			let masterPlayerFindOptions = this.convertToMasterPlayerFindOptions(request.infoRequestParam);
+        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetStatisticsLeaderboard", request, role, secretInfo, operationRequest, operationResponse);
 
-			for (let i = request.skip; i < request.skip + request.limit; i++) {
-				if (i >= backupData.results.length) break;
-
-				// Stores the result value used in the current execution flow.
-				let result = backupData.results[i];
-
-				// Stores the GearN result value used in the current execution flow.
-				let gnResult = new GNHashtable();
-
-				gnResult.add(ParameterCode.Position, result.position);
-				gnResult.add(ParameterCode.BackupValue, result.value);
-
-				gnResult.add(ParameterCode.UserId, result.userId);
-
-				// Stores the master player value used in the current execution flow.
-				let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(result.userId, masterPlayerFindOptions);
-
-				if (masterPlayer != null) gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
-
-				gnResults.add(gnResult);
-			}
-
-			operationResponse.setParameter(ParameterCode.Results, gnResults);
-			operationResponse.setParameter(ParameterCode.TsCreate, backupData.tsCreate);
-		}
-
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetStatisticsLeaderboard", request, role, secretInfo, operationRequest, operationResponse);
-
-		return operationResponse;
-	}
+        return operationResponse;
+    }
 }

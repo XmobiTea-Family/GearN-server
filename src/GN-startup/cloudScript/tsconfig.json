@@ -18,33 +18,11 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "forceConsistentCasingInFileNames": true,
-        "lib": [
-            "ES2022"
-        ],
+        "lib": ["ES2022"],
         "allowSyntheticDefaultImports": true,
         "stripInternal": true,
         "skipLibCheck": true,
-        "outDir": "./dist",
+        "outDir": "./dist"
     },
-    "exclude": [
-        "./../../../../test/",
-        "./../../../../node_modules/",
-        "./../../../../dist/",
-        "./../../../../syncCode.js",
-        "./../../../../syncCodeVer2.js",
-        "./../../../../index.js",
-        "./../../../../src/GN-app-api/",
-        "./../../../../src/GN-common/",
-        "./../../../../src/GN-library/",
-        "./../../../../src/GN-startup/middleware/",
-        "./../../../../src/GN-startup/routes/",
-        "./../../../../src/GN-startup/settings/",
-        "./../../../../src/GN-startup/DefaultApplicationStartup.ts",
-        "./../../../../src/GN-startup/HttpApp.ts",
-        "./../../../../src/GN-startup/ServerApplication.ts",
-        "./../../../../src/GN-startup/ServerApplicationStartup.ts",
-        "./../../../../src/GN-startup/SocketApp.ts",
-        "./../../../../webpack.config.mjs",
-        "./dist/",
-    ]
+    "exclude": ["./../../../../test/", "./../../../../node_modules/", "./../../../../dist/", "./../../../../syncCode.js", "./../../../../syncCodeVer2.js", "./../../../../index.js", "./../../../../src/GN-app-api/", "./../../../../src/GN-common/", "./../../../../src/GN-library/", "./../../../../src/GN-startup/middleware/", "./../../../../src/GN-startup/routes/", "./../../../../src/GN-startup/settings/", "./../../../../src/GN-startup/DefaultApplicationStartup.ts", "./../../../../src/GN-startup/HttpApp.ts", "./../../../../src/GN-startup/ServerApplication.ts", "./../../../../src/GN-startup/ServerApplicationStartup.ts", "./../../../../src/GN-startup/SocketApp.ts", "./../../../../webpack.config.mjs", "./dist/"]
 }

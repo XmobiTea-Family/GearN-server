@@ -23,12 +23,11 @@ export class GoogleService implements IGoogleService {
      * Executes the init workflow.
      * @param request Provides the request value used by this operation.
      */
-    public init(request: { googleClientId: string, packageId: string, publicRSAKey: string }): void {
+    public init(request: { googleClientId: string; packageId: string; publicRSAKey: string }): void {
         this.googleClientId = request.googleClientId;
         this.packageId = request.packageId;
 
-        if (request.publicRSAKey)
-            this.publicKeyString = this.generateFormattedPublickey(request.publicRSAKey);
+        if (request.publicRSAKey) this.publicKeyString = this.generateFormattedPublickey(request.publicRSAKey);
         else this.publicKeyString = "";
     }
 
@@ -49,11 +48,9 @@ export class GoogleService implements IGoogleService {
 
             if (data.error_description != null) {
                 answer["error"] = data.error_description;
-            }
-            else if (data.aud !== this.googleClientId) {
+            } else if (data.aud !== this.googleClientId) {
                 answer["error"] = "unexpected audience (aud claim): " + data.aud;
-            }
-            else {
+            } else {
                 // Tracks whether r info result should be used.
                 let userInfoResult = await axios.get(GoogleService.googleAPIUrl + GoogleService.googleAPIUserInfoAccessTokenURL + accessToken);
                 answer = data;
@@ -67,8 +64,7 @@ export class GoogleService implements IGoogleService {
                     answer[key] = userInfoResult.data[key];
                 }
             }
-        }
-        catch (err) {
+        } catch (err) {
             answer["error"] = "Invalid Value";
         }
 
@@ -92,15 +88,12 @@ export class GoogleService implements IGoogleService {
 
             if (data.error_description != null) {
                 answer["error"] = data.error_description;
-            }
-            else if (data.aud !== this.googleClientId) {
+            } else if (data.aud !== this.googleClientId) {
                 answer["error"] = "unexpected audience (aud claim): " + data.aud;
-            }
-            else {
+            } else {
                 answer = data;
             }
-        }
-        catch (err) {
+        } catch (err) {
             answer["error"] = "Invalid Value";
         }
 
@@ -114,9 +107,9 @@ export class GoogleService implements IGoogleService {
      */
     public async validateReceipt(payload: string): Promise<{
         // Indicates whether success.
-        success: boolean,
+        success: boolean;
         // Stores the product ID value used by this contract.
-        productId?: string,
+        productId?: string;
     }> {
         // Stores the payload JSON value used in the current execution flow.
         let payloadJson = JSON.parse(payload);
@@ -138,7 +131,7 @@ export class GoogleService implements IGoogleService {
 
                 return {
                     success: true,
-                    productId: product_id
+                    productId: product_id,
                 };
             }
         }
@@ -161,7 +154,7 @@ export class GoogleService implements IGoogleService {
         let verifier = crypto.createVerify("RSA-SHA1");
         verifier.update(signedData);
         return verifier.verify(this.publicKeyString, signature, "base64");
-    };
+    }
 
     // gotta give credit to nothing2lose for this function
     private generateFormattedPublickey(publicKeyStr: string): string {
@@ -184,5 +177,5 @@ export class GoogleService implements IGoogleService {
         str = chunks.join("\n");
         str = KEY_PREFIX + str + KEY_SUFFIX;
         return str;
-    };
+    }
 }

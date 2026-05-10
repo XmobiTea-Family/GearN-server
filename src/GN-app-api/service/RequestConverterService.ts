@@ -72,16 +72,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -91,14 +90,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -107,18 +105,16 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getObject();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         if (value instanceof GNArray) {
                             let lastValue = value as GNArray;
 
@@ -126,16 +122,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -145,14 +140,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -161,34 +155,30 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getArray();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         if (typeof value === "boolean") {
                             let lastValue: boolean = value as boolean;
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         if (typeof value === "number") {
                             let lastValue: number = value as number;
 
@@ -197,7 +187,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (!this.isInteger(lastValue)) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.NumberMustInt
+                                            invalidMemberType: InvalidMemberType.NumberMustInt,
                                         });
 
                                         isValidRequest = false;
@@ -208,16 +198,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minValue != null && lastValue < field.minValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMinValue
+                                        invalidMemberType: InvalidMemberType.NumberMinValue,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxValue != null && lastValue > field.maxValue) {
+                                } else if (field.maxValue != null && lastValue > field.maxValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMaxValue
+                                        invalidMemberType: InvalidMemberType.NumberMaxValue,
                                     });
 
                                     isValidRequest = false;
@@ -226,18 +215,16 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         if (typeof value === "string") {
                             let lastValue: string = value as string;
 
@@ -245,16 +232,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.length < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMinLength
+                                        invalidMemberType: InvalidMemberType.StringMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.length > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.length > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMaxLength
+                                        invalidMemberType: InvalidMemberType.StringMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -263,45 +249,40 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = value;
 
                         answerAny[field.name] = lastValue;
                     }
-                }
-                else {
+                } else {
                     if (gnFieldType == GNFieldDataType.GNHashtable) {
                         let lastValue: GNHashtable = field.defaultValue;
 
                         if (lastValue == null) {
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             if (field.activeConditionValid) {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -311,14 +292,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -328,28 +308,25 @@ export class RequestConverterService implements IRequestConverterService {
                                 answerAny[field.name] = operationObject.getObject();
                             }
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         let lastValue: GNArray = field.defaultValue;
 
                         if (lastValue == null) {
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             if (field.activeConditionValid) {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -359,14 +336,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -376,8 +352,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 answerAny[field.name] = operationObject.getArray();
                             }
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         let lastValue: boolean = field.defaultValue;
 
                         if (lastValue == null) {
@@ -385,8 +360,7 @@ export class RequestConverterService implements IRequestConverterService {
                         }
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         let lastValue: number = field.defaultValue;
 
                         if (lastValue == null) {
@@ -394,24 +368,21 @@ export class RequestConverterService implements IRequestConverterService {
                         }
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         let lastValue: string = field.defaultValue;
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = field.defaultValue;
 
                         answerAny[field.name] = lastValue;
                     }
                 }
-            }
-            else {
+            } else {
                 if (!containsKey) {
                     commonAnswer.addInvalidMember({
                         code: field.code,
-                        invalidMemberType: InvalidMemberType.DataRequired
+                        invalidMemberType: InvalidMemberType.DataRequired,
                     });
 
                     isValidRequest = false;
@@ -427,16 +398,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -446,14 +416,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -462,18 +431,16 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getObject();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         if (value instanceof GNArray) {
                             let lastValue = value as GNArray;
 
@@ -481,16 +448,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -500,14 +466,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -516,34 +481,30 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getArray();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         if (typeof value === "boolean") {
                             let lastValue: boolean = value as any as boolean;
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         if (typeof value === "number") {
                             let lastValue: number = value as any as number;
 
@@ -552,7 +513,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (!this.isInteger(lastValue)) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.NumberMustInt
+                                            invalidMemberType: InvalidMemberType.NumberMustInt,
                                         });
 
                                         isValidRequest = false;
@@ -563,16 +524,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minValue != null && lastValue < field.minValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMinValue
+                                        invalidMemberType: InvalidMemberType.NumberMinValue,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxValue != null && lastValue > field.maxValue) {
+                                } else if (field.maxValue != null && lastValue > field.maxValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMaxValue
+                                        invalidMemberType: InvalidMemberType.NumberMaxValue,
                                     });
 
                                     isValidRequest = false;
@@ -581,18 +541,16 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         if (typeof value === "string") {
                             let lastValue: string = value as any as string;
 
@@ -601,7 +559,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (lastValue == null) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.StringNull
+                                            invalidMemberType: InvalidMemberType.StringNull,
                                         });
 
                                         isValidRequest = false;
@@ -613,16 +571,15 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (field.minLength != null && lastValue.length < field.minLength) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.StringMinLength
+                                            invalidMemberType: InvalidMemberType.StringMinLength,
                                         });
 
                                         isValidRequest = false;
                                         break;
-                                    }
-                                    else if (field.maxLength != null && lastValue.length > field.maxLength) {
+                                    } else if (field.maxLength != null && lastValue.length > field.maxLength) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.StringMaxLength
+                                            invalidMemberType: InvalidMemberType.StringMaxLength,
                                         });
 
                                         isValidRequest = false;
@@ -632,24 +589,21 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = value;
 
                         answerAny[field.name] = lastValue;
                     }
-                }
-                else {
+                } else {
                     if (gnFieldType == GNFieldDataType.GNHashtable) {
                         let lastValue: GNHashtable = field.defaultValue;
 
@@ -658,7 +612,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (lastValue == null) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableNull
+                                        invalidMemberType: InvalidMemberType.GNHashtableNull,
                                     });
 
                                     isValidRequest = false;
@@ -670,16 +624,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -691,14 +644,13 @@ export class RequestConverterService implements IRequestConverterService {
                         if (lastValue != null) {
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -707,10 +659,8 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getObject();
                             }
-                        }
-                        else answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                        } else answerAny[field.name] = lastValue;
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         let lastValue: GNArray = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
@@ -719,7 +669,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (lastValue == null) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayNull
+                                        invalidMemberType: InvalidMemberType.GNArrayNull,
                                     });
 
                                     isValidRequest = false;
@@ -731,16 +681,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -752,14 +701,13 @@ export class RequestConverterService implements IRequestConverterService {
                         if (lastValue != null) {
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -768,28 +716,24 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getArray();
                             }
-                        }
-                        else answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                        } else answerAny[field.name] = lastValue;
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         commonAnswer.addInvalidMember({
                             code: field.code,
-                            invalidMemberType: InvalidMemberType.TypeInvalid
+                            invalidMemberType: InvalidMemberType.TypeInvalid,
                         });
 
                         isValidRequest = false;
                         break;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         commonAnswer.addInvalidMember({
                             code: field.code,
-                            invalidMemberType: InvalidMemberType.TypeInvalid
+                            invalidMemberType: InvalidMemberType.TypeInvalid,
                         });
 
                         isValidRequest = false;
                         break;
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         let lastValue: string = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
@@ -798,7 +742,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (lastValue == null) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringNull
+                                        invalidMemberType: InvalidMemberType.StringNull,
                                     });
 
                                     isValidRequest = false;
@@ -810,16 +754,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.length < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMinLength
+                                        invalidMemberType: InvalidMemberType.StringMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.length > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.length > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMaxLength
+                                        invalidMemberType: InvalidMemberType.StringMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -829,8 +772,7 @@ export class RequestConverterService implements IRequestConverterService {
                         }
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
@@ -884,16 +826,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -903,14 +844,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -919,18 +859,16 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getObject();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         if (value instanceof GNArray) {
                             let lastValue = value as GNArray;
 
@@ -938,16 +876,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -957,14 +894,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -973,34 +909,30 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getArray();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         if (typeof value === "boolean") {
                             let lastValue: boolean = value as boolean;
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         if (typeof value === "number") {
                             let lastValue: number = value as number;
 
@@ -1009,7 +941,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (!this.isInteger(lastValue)) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.NumberMustInt
+                                            invalidMemberType: InvalidMemberType.NumberMustInt,
                                         });
 
                                         isValidRequest = false;
@@ -1020,16 +952,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minValue != null && lastValue < field.minValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMinValue
+                                        invalidMemberType: InvalidMemberType.NumberMinValue,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxValue != null && lastValue > field.maxValue) {
+                                } else if (field.maxValue != null && lastValue > field.maxValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMaxValue
+                                        invalidMemberType: InvalidMemberType.NumberMaxValue,
                                     });
 
                                     isValidRequest = false;
@@ -1038,18 +969,16 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         if (typeof value === "string") {
                             let lastValue: string = value as string;
 
@@ -1057,16 +986,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.length < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMinLength
+                                        invalidMemberType: InvalidMemberType.StringMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.length > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.length > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMaxLength
+                                        invalidMemberType: InvalidMemberType.StringMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1075,45 +1003,40 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = value;
 
                         answerAny[field.name] = lastValue;
                     }
-                }
-                else {
+                } else {
                     if (gnFieldType == GNFieldDataType.GNHashtable) {
                         let lastValue: GNHashtable = field.defaultValue;
 
                         if (lastValue == null) {
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             if (field.activeConditionValid) {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1123,14 +1046,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -1140,28 +1062,25 @@ export class RequestConverterService implements IRequestConverterService {
                                 answerAny[field.name] = operationObject.getObject();
                             }
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         let lastValue: GNArray = field.defaultValue;
 
                         if (lastValue == null) {
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             if (field.activeConditionValid) {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1171,14 +1090,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -1188,8 +1106,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 answerAny[field.name] = operationObject.getArray();
                             }
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         let lastValue: boolean = field.defaultValue;
 
                         if (lastValue == null) {
@@ -1197,8 +1114,7 @@ export class RequestConverterService implements IRequestConverterService {
                         }
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         let lastValue: number = field.defaultValue;
 
                         if (lastValue == null) {
@@ -1206,24 +1122,21 @@ export class RequestConverterService implements IRequestConverterService {
                         }
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         let lastValue: string = field.defaultValue;
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = field.defaultValue;
 
                         answerAny[field.name] = lastValue;
                     }
                 }
-            }
-            else {
+            } else {
                 if (!containsKey) {
                     commonAnswer.addInvalidMember({
                         code: field.code,
-                        invalidMemberType: InvalidMemberType.DataRequired
+                        invalidMemberType: InvalidMemberType.DataRequired,
                     });
 
                     isValidRequest = false;
@@ -1239,16 +1152,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1258,14 +1170,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -1274,18 +1185,16 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getObject();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         if (value instanceof GNArray) {
                             let lastValue = value as GNArray;
 
@@ -1293,16 +1202,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1312,14 +1220,13 @@ export class RequestConverterService implements IRequestConverterService {
 
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -1328,34 +1235,30 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getArray();
                             }
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         if (typeof value === "boolean") {
                             let lastValue: boolean = value as any as boolean;
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         if (typeof value === "number") {
                             let lastValue: number = value as any as number;
 
@@ -1364,7 +1267,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (!this.isInteger(lastValue)) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.NumberMustInt
+                                            invalidMemberType: InvalidMemberType.NumberMustInt,
                                         });
 
                                         isValidRequest = false;
@@ -1375,16 +1278,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minValue != null && lastValue < field.minValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMinValue
+                                        invalidMemberType: InvalidMemberType.NumberMinValue,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxValue != null && lastValue > field.maxValue) {
+                                } else if (field.maxValue != null && lastValue > field.maxValue) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.NumberMaxValue
+                                        invalidMemberType: InvalidMemberType.NumberMaxValue,
                                     });
 
                                     isValidRequest = false;
@@ -1393,18 +1295,16 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         if (typeof value === "string") {
                             let lastValue: string = value as any as string;
 
@@ -1413,7 +1313,7 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (lastValue == null) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.StringNull
+                                            invalidMemberType: InvalidMemberType.StringNull,
                                         });
 
                                         isValidRequest = false;
@@ -1425,16 +1325,15 @@ export class RequestConverterService implements IRequestConverterService {
                                     if (field.minLength != null && lastValue.length < field.minLength) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.StringMinLength
+                                            invalidMemberType: InvalidMemberType.StringMinLength,
                                         });
 
                                         isValidRequest = false;
                                         break;
-                                    }
-                                    else if (field.maxLength != null && lastValue.length > field.maxLength) {
+                                    } else if (field.maxLength != null && lastValue.length > field.maxLength) {
                                         commonAnswer.addInvalidMember({
                                             code: field.code,
-                                            invalidMemberType: InvalidMemberType.StringMaxLength
+                                            invalidMemberType: InvalidMemberType.StringMaxLength,
                                         });
 
                                         isValidRequest = false;
@@ -1444,24 +1343,21 @@ export class RequestConverterService implements IRequestConverterService {
                             }
 
                             answerAny[field.name] = lastValue;
-                        }
-                        else {
+                        } else {
                             commonAnswer.addInvalidMember({
                                 code: field.code,
-                                invalidMemberType: InvalidMemberType.TypeInvalid
+                                invalidMemberType: InvalidMemberType.TypeInvalid,
                             });
 
                             isValidRequest = false;
                             break;
                         }
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = value;
 
                         answerAny[field.name] = lastValue;
                     }
-                }
-                else {
+                } else {
                     if (gnFieldType == GNFieldDataType.GNHashtable) {
                         let lastValue: GNHashtable = field.defaultValue;
 
@@ -1470,7 +1366,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (lastValue == null) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableNull
+                                        invalidMemberType: InvalidMemberType.GNHashtableNull,
                                     });
 
                                     isValidRequest = false;
@@ -1482,16 +1378,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength
+                                        invalidMemberType: InvalidMemberType.GNHashtableMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1503,14 +1398,13 @@ export class RequestConverterService implements IRequestConverterService {
                         if (lastValue != null) {
                             if (field.cls == GNHashtable) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTObject(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -1519,10 +1413,8 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getObject();
                             }
-                        }
-                        else answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.GNArray) {
+                        } else answerAny[field.name] = lastValue;
+                    } else if (gnFieldType == GNFieldDataType.GNArray) {
                         let lastValue: GNArray = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
@@ -1531,7 +1423,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (lastValue == null) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayNull
+                                        invalidMemberType: InvalidMemberType.GNArrayNull,
                                     });
 
                                     isValidRequest = false;
@@ -1543,16 +1435,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.count() < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMinLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.count() > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.count() > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength
+                                        invalidMemberType: InvalidMemberType.GNArrayMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1564,14 +1455,13 @@ export class RequestConverterService implements IRequestConverterService {
                         if (lastValue != null) {
                             if (field.cls == GNArray) {
                                 answerAny[field.name] = lastValue;
-                            }
-                            else {
+                            } else {
                                 let operationObject = this.createTArray(lastValue, field.cls);
 
                                 if (!operationObject.isValidObject()) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.TypeInvalid
+                                        invalidMemberType: InvalidMemberType.TypeInvalid,
                                     });
 
                                     isValidRequest = false;
@@ -1580,28 +1470,24 @@ export class RequestConverterService implements IRequestConverterService {
 
                                 answerAny[field.name] = operationObject.getArray();
                             }
-                        }
-                        else answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Boolean) {
+                        } else answerAny[field.name] = lastValue;
+                    } else if (gnFieldType == GNFieldDataType.Boolean) {
                         commonAnswer.addInvalidMember({
                             code: field.code,
-                            invalidMemberType: InvalidMemberType.TypeInvalid
+                            invalidMemberType: InvalidMemberType.TypeInvalid,
                         });
 
                         isValidRequest = false;
                         break;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Number) {
+                    } else if (gnFieldType == GNFieldDataType.Number) {
                         commonAnswer.addInvalidMember({
                             code: field.code,
-                            invalidMemberType: InvalidMemberType.TypeInvalid
+                            invalidMemberType: InvalidMemberType.TypeInvalid,
                         });
 
                         isValidRequest = false;
                         break;
-                    }
-                    else if (gnFieldType == GNFieldDataType.String) {
+                    } else if (gnFieldType == GNFieldDataType.String) {
                         let lastValue: string = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
@@ -1610,7 +1496,7 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (lastValue == null) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringNull
+                                        invalidMemberType: InvalidMemberType.StringNull,
                                     });
 
                                     isValidRequest = false;
@@ -1622,16 +1508,15 @@ export class RequestConverterService implements IRequestConverterService {
                                 if (field.minLength != null && lastValue.length < field.minLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMinLength
+                                        invalidMemberType: InvalidMemberType.StringMinLength,
                                     });
 
                                     isValidRequest = false;
                                     break;
-                                }
-                                else if (field.maxLength != null && lastValue.length > field.maxLength) {
+                                } else if (field.maxLength != null && lastValue.length > field.maxLength) {
                                     commonAnswer.addInvalidMember({
                                         code: field.code,
-                                        invalidMemberType: InvalidMemberType.StringMaxLength
+                                        invalidMemberType: InvalidMemberType.StringMaxLength,
                                     });
 
                                     isValidRequest = false;
@@ -1641,8 +1526,7 @@ export class RequestConverterService implements IRequestConverterService {
                         }
 
                         answerAny[field.name] = lastValue;
-                    }
-                    else if (gnFieldType == GNFieldDataType.Other) {
+                    } else if (gnFieldType == GNFieldDataType.Other) {
                         let lastValue = null;
                         if (field.defaultValue != null) lastValue = field.defaultValue;
 
@@ -1683,25 +1567,21 @@ export class RequestConverterService implements IRequestConverterService {
                     isValidRequest = false;
                     break;
                 }
-            }
-            else if (clsAny == Boolean) {
+            } else if (clsAny == Boolean) {
                 answerAny = gnArray.getBoolean(i);
 
                 if (answerAny == null) {
                     isValidRequest = false;
                     break;
                 }
-            }
-            else if (clsAny == String) {
+            } else if (clsAny == String) {
                 answerAny = gnArray.getString(i);
-            }
-            else {
+            } else {
                 let lastValue = gnArray.getGNHashtable(i);
 
                 if (clsAny == GNHashtable) {
                     answerAny = lastValue;
-                }
-                else {
+                } else {
                     let operationObject = this.createTObject(lastValue, cls);
 
                     if (!operationObject.isValidObject()) {
@@ -1760,7 +1640,6 @@ export class RequestConverterService implements IRequestConverterService {
      * Creates the metadata cache used by request and DTO conversion.
      */
     constructor() {
-        this.declaredFieldsMap = new Map<any, GNEnhancedObjectFieldMetadata[]>;
+        this.declaredFieldsMap = new Map<any, GNEnhancedObjectFieldMetadata[]>();
     }
-
 }

@@ -5,7 +5,7 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
@@ -16,211 +16,220 @@ import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class AddSegmentOperationRequest extends OperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    public userId?: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	public userId?: string;
+    // Stores the value value used by this instance.
+    @StringDataMember({ code: ParameterCode.Value, minLength: 6, maxLength: 32, mustNonNull: true })
+    public value: string;
 
-	// Stores the value value used by this instance.
-	@StringDataMember({ code: ParameterCode.Value, minLength: 6, maxLength: 32, mustNonNull: true })
-	public value: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerAddSegmentOperationRequest extends AddSegmentOperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    declare public userId: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	public declare userId: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminAddSegmentOperationRequest extends ServerAddSegmentOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class AddSegmentRequestHandler extends GamePlayerBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.AddSegment;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.AddSegment;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return AddSegmentOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return AddSegmentOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!request.userId) {
+            if (!secretInfo.getPermission().gamePlayer.addSegment.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
 
-		if (!request.userId) {
-			if (!secretInfo.getPermission().gamePlayer.addSegment.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
+            request.userId = authInfo.getUserId();
+        } else if (request.userId != authInfo.getUserId()) {
+            if (!secretInfo.getPermission().gamePlayer.addSegment.otherSelfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        } else {
+            if (!secretInfo.getPermission().gamePlayer.addSegment.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
 
-			request.userId = authInfo.getUserId();
-		}
-		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().gamePlayer.addSegment.otherSelfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
-		else {
-			if (!secretInfo.getPermission().gamePlayer.addSegment.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                segment: request.value,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			segment: request.value,
-		}, SecretRole.Client, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerAddSegmentOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerAddSegmentOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().gamePlayer.addSegment.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().gamePlayer.addSegment.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                segment: request.value,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			segment: request.value,
-		}, SecretRole.Server, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminAddSegmentOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminAddSegmentOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().gamePlayer.addSegment.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().gamePlayer.addSegment.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                segment: request.value,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			segment: request.value,
-		}, SecretRole.Admin, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { userId: string; segment: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_AddSegment", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { userId: string, segment: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_AddSegment", request, role, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        // Stores the game player find options value used in the current execution flow.
+        let gamePlayerFindOptions: GamePlayerFindOptions = {
+            segments: true,
+            playerBan: true,
+        };
 
-		// Stores the game player find options value used in the current execution flow.
-		let gamePlayerFindOptions: GamePlayerFindOptions = {
-			segments: true,
-			playerBan: true,
-		}
+        // Stores the game player value used in the current execution flow.
+        let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
 
-		// Stores the game player value used in the current execution flow.
-		let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+        if (gamePlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
+            return operationResponse;
+        }
+        if (role == SecretRole.Client) {
+            // Stores the player ban value used in the current execution flow.
+            let playerBan = gamePlayer.getPlayerBan();
 
-		if (gamePlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
-			return operationResponse;
-		}
-		if (role == SecretRole.Client) {
-			// Stores the player ban value used in the current execution flow.
-			let playerBan = gamePlayer.getPlayerBan();
+            if (playerBan.tsExpire != 0) {
+                let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+                if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+                    operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
 
-			if (playerBan.tsExpire != 0) {
-				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
-					operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
-					
-					return operationResponse;
-				}
-			}
-		}
+                    return operationResponse;
+                }
+            }
+        }
 
-		if (!gamePlayer.hasSegment(request.segment)) {
-			gamePlayer.addSegment(request.segment);
+        if (!gamePlayer.hasSegment(request.segment)) {
+            gamePlayer.addSegment(request.segment);
 
-			await gamePlayer.saveAsync();
-		}
+            await gamePlayer.saveAsync();
+        }
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_AddSegment", request, role, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_AddSegment", request, role, secretInfo, operationRequest, operationResponse);
 
-		return operationResponse;
-	}
+        return operationResponse;
+    }
 }

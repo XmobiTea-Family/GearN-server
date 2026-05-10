@@ -51,31 +51,32 @@ Validator phải parse TypeScript AST và reject ngay nếu gặp bất kỳ syn
 
 ### 4.3 Runtime escape và host access
 
+Lưu ý: các pattern dưới đây là Node.js built-in module và global runtime của Node, không liên quan đến CloudScript wrapper `http` được inject sẵn. CloudScript wrapper `http` vẫn được phép dùng theo section 6.4.
+
 - Bất kỳ call hoặc member access nào chạm tới:
-  - `process.binding(...)`
-  - `process.dlopen(...)`
-  - `child_process.*`
-  - `worker_threads.*`
-  - `vm.*`
-  - `inspector.*`
-  - `v8.*`
-  - `fs.*`
-  - `fs/promises.*`
-  - `net.*`
-  - `tls.*`
-  - `dns.*`
-  - `os.*`
-  - `path.*`
-  - `http.*`
-  - `https.*`
-  - `undici.*`
+    - `process.binding(...)`
+    - `process.dlopen(...)`
+    - `child_process.*`
+    - `worker_threads.*`
+    - `vm.*`
+    - `inspector.*`
+    - `v8.*`
+    - `fs.*`
+    - `fs/promises.*`
+    - `net.*`
+    - `tls.*`
+    - `dns.*`
+    - `os.*`
+    - `path.*`
+    - `https.*` — Node.js built-in `https` module, không phải CloudScript wrapper `http`
+    - `undici.*`
 
 ### 4.4 Prototype, reflection và constructor escape
 
 - Member chain chứa một trong các pattern:
-  - `.constructor.constructor`
-  - `.__proto__`
-  - `.prototype`
+    - `.constructor.constructor`
+    - `.__proto__`
+    - `.prototype`
 - `Object.defineProperty(...)` khi target là global object hoặc capability object
 - `Object.setPrototypeOf(...)`
 - `Reflect.construct(...)`
@@ -118,7 +119,9 @@ Lý do: worker process tồn tại lâu, top-level side effect có thể biến 
 
 ## 5. Danh sách identifier bị cấm
 
-Các tên sau đây bị cấm khi xuất hiện như free identifier, callee, base object, hoặc tên biến top-level:
+Các tên sau đây bị cấm khi xuất hiện như free identifier, callee, base object, hoặc tên biến top-level.
+
+Lưu ý: `https` trong danh sách này là Node.js built-in `https` module — khác hoàn toàn với CloudScript wrapper `http` được inject sẵn. Identifier `http` không bị cấm; nó vẫn được phép dùng theo section 6.4.
 
 - `require`
 - `module`
@@ -126,6 +129,9 @@ Các tên sau đây bị cấm khi xuất hiện như free identifier, callee, b
 - `process`
 - `global`
 - `globalThis`
+- `Function`
+- `AsyncFunction`
+- `GeneratorFunction`
 - `Buffer`
 - `__dirname`
 - `__filename`
@@ -147,7 +153,7 @@ Các tên sau đây bị cấm khi xuất hiện như free identifier, callee, b
 - `net`
 - `tls`
 - `dns`
-- `https`
+- `https` — Node.js built-in `https` module, không phải CloudScript wrapper `http`
 - `os`
 - `path`
 - `inspector`
@@ -214,7 +220,7 @@ Rule:
 
 #### `socket`
 
-Cho phép dùng các method ở [CloudScriptSocket.ts](/src/GN-startup/cloudScript/CloudScriptSocket.ts):
+Cho phép dùng các method ở [CloudScriptSocket.ts](/dist/GN-startup/cloudScript/CloudScriptSocket.ts):
 
 - `sendEventTo`
 - `sendEventToMoreUser`
@@ -225,14 +231,14 @@ Cho phép dùng các method ở [CloudScriptSocket.ts](/src/GN-startup/cloudScri
 
 #### `mail`
 
-Cho phép dùng các method ở [CloudScriptMail.ts](/src/GN-startup/cloudScript/CloudScriptMail.ts):
+Cho phép dùng các method ở [CloudScriptMail.ts](/dist/GN-startup/cloudScript/CloudScriptMail.ts):
 
 - `send`
 - `sendToMore`
 
 #### `pushNotification`
 
-Cho phép dùng các method ở [CloudScriptPushNotification.ts](/src/GN-startup/cloudScript/CloudScriptPushNotification.ts):
+Cho phép dùng các method ở [CloudScriptPushNotification.ts](/dist/GN-startup/cloudScript/CloudScriptPushNotification.ts):
 
 - `send`
 - `sendToMore`
@@ -242,7 +248,7 @@ Cho phép dùng các method ở [CloudScriptPushNotification.ts](/src/GN-startup
 
 #### `http`
 
-Chỉ cho phép qua wrapper [CloudScriptHttp.ts](/src/GN-startup/cloudScript/CloudScriptHttp.ts):
+Chỉ cho phép qua wrapper [CloudScriptHttp.ts](/dist/GN-startup/cloudScript/CloudScriptHttp.ts):
 
 - `get`
 - `delete`
@@ -299,35 +305,37 @@ Không được chỉ validate ở request handler, vì service layer mới là 
 1. Nhận `script` từ request.
 2. Normalize line ending sang `\n`.
 3. Reject nếu:
-   - script rỗng
-   - size vượt `64 KiB`
-   - chứa byte null
+    - script rỗng
+    - size vượt `64 KiB`
+    - chứa byte null
 4. Chạy lexical denylist fail-fast với token rõ ràng:
-   - `GNNetwork`
-   - `require`
-   - `import`
-   - `process`
-   - `globalThis`
-   - `fetch`
+    - `GNNetwork`
+    - `require`
+    - `import`
+    - `process`
+    - `globalThis`
+    - `fetch`
 5. Parse AST bằng TypeScript compiler API.
 6. Nếu parse error thì reject.
 7. Walk AST với scope tracking:
-   - reject syntax bị cấm
-   - reject identifier bị cấm
-   - reject top-level executable statement
-   - collect handler registration
+    - reject syntax bị cấm
+    - reject identifier bị cấm
+    - reject top-level executable statement
+    - collect handler registration
 8. Validate handler rule:
-   - ít nhất 1 handler
-   - name hợp lệ
-   - không trùng
+    - ít nhất 1 handler
+    - name hợp lệ
+    - không trùng
 9. Chỉ nếu pass toàn bộ bước trên mới gọi `compileCloudScript(script, version)`.
 10. Transpile riêng submitted script bằng TypeScript compiler API và scan lại emitted JS:
-   - `require(`
-   - `process.`
-   - `module.exports`
-   - `exports.`
-   - `import(`
-   - `fetch(`
+
+- `require(`
+- `process.`
+- `module.exports`
+- `exports.`
+- `import(`
+- `fetch(`
+
 11. Nếu emitted JS chứa token cấm thì reject.
 12. Chỉ sau đó mới lưu version và spawn worker.
 
@@ -336,20 +344,20 @@ Không được chỉ validate ở request handler, vì service layer mới là 
 1. Nhận `eventName` và `script`.
 2. Normalize line ending sang `\n`.
 3. Reject nếu:
-   - `eventName` không đúng prefix được hỗ trợ
-   - script rỗng
-   - size vượt `40 KiB`
-   - chứa byte null
+    - `eventName` không đúng prefix được hỗ trợ
+    - script rỗng
+    - size vượt `40 KiB`
+    - chứa byte null
 4. Chạy lexical denylist fail-fast như function mode.
 5. Parse AST.
 6. Walk AST:
-   - reject syntax bị cấm
-   - reject identifier bị cấm
-   - collect registration target
+    - reject syntax bị cấm
+    - reject identifier bị cấm
+    - collect registration target
 7. Validate callback rule:
-   - đúng `1` registration
-   - đúng registry map theo prefix
-   - key phải đúng `eventName`
+    - đúng `1` registration
+    - đúng registry map theo prefix
+    - key phải đúng `eventName`
 8. Rebuild source cuối cùng sẽ compile.
 9. Chạy validator thêm một lần trên chính source cuối cùng đó.
 10. Chỉ nếu pass mới gọi `compileCloudScript(finalScript, version)`.
@@ -372,9 +380,9 @@ Policy bắt buộc:
 - Không lưu DB
 - Không broadcast cluster event
 - Trả về message kỹ thuật ngắn, ví dụ:
-  - `CloudScript security policy violation: forbidden identifier "process"`
-  - `CloudScript security policy violation: top-level call expression is not allowed`
-  - `CloudScript security policy violation: event handler key must equal eventName`
+    - `CloudScript security policy violation: forbidden identifier "process"`
+    - `CloudScript security policy violation: top-level call expression is not allowed`
+    - `CloudScript security policy violation: event handler key must equal eventName`
 
 Không trả stack trace nội bộ.
 

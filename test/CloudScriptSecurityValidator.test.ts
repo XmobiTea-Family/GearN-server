@@ -3,27 +3,27 @@ import { test } from "node:test";
 import { CloudScriptSecurityValidator } from "./../src/GN-app-api/service/CloudScriptSecurityValidator";
 
 test("CloudScript function policy accepts element-access handler registration", () => {
-	const result = CloudScriptSecurityValidator.validateFunctionScript(`
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers["hello"] = (args, context, log) => {
 	return "hello world";
 }
 `);
 
-	assert.equal(result.success, true, result.errorMessage);
+    assert.equal(result.success, true, result.errorMessage);
 });
 
 test("CloudScript function policy accepts property-access handler registration", () => {
-	const result = CloudScriptSecurityValidator.validateFunctionScript(`
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers.hello = (args, context, log) => {
 	return "hello world";
 }
 `);
 
-	assert.equal(result.success, true, result.errorMessage);
+    assert.equal(result.success, true, result.errorMessage);
 });
 
 test("CloudScript function policy accepts top-level class declarations", () => {
-	const result = CloudScriptSecurityValidator.validateFunctionScript(`
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
 class BaseGreeting {
 	static prefix = "hello";
 
@@ -51,11 +51,13 @@ handlers.hello = (args, context, log) => {
 }
 `);
 
-	assert.equal(result.success, true, result.errorMessage);
+    assert.equal(result.success, true, result.errorMessage);
 });
 
 test("CloudScript event callback policy accepts pre and post registrations for request events", () => {
-	const result = CloudScriptSecurityValidator.validateEventCallbackScript("authenticate_LoginByAccount", `
+    const result = CloudScriptSecurityValidator.validateEventCallbackScript(
+        "authenticate_LoginByAccount",
+        `
 preHandlers.authenticate_LoginByAccount = async (request, role, customTags, operationRequest, log) => {
 	return null;
 }
@@ -63,55 +65,62 @@ preHandlers.authenticate_LoginByAccount = async (request, role, customTags, oper
 postHandlers.authenticate_LoginByAccount = async (request, role, customTags, operationRequest, operationResponse, log) => {
 	return operationResponse;
 }
-`);
+`,
+    );
 
-	assert.equal(result.success, true, result.errorMessage);
+    assert.equal(result.success, true, result.errorMessage);
 });
 
 test("CloudScript event callback policy accepts one pre registration for request events", () => {
-	const result = CloudScriptSecurityValidator.validateEventCallbackScript("authenticate_LoginByAccount", `
+    const result = CloudScriptSecurityValidator.validateEventCallbackScript(
+        "authenticate_LoginByAccount",
+        `
 preHandlers.authenticate_LoginByAccount = async (request, role, customTags, operationRequest, log) => {
 	return null;
 }
-`);
+`,
+    );
 
-	assert.equal(result.success, true, result.errorMessage);
+    assert.equal(result.success, true, result.errorMessage);
 });
 
 test("CloudScript event callback policy keeps system events to one matching registry", () => {
-	const result = CloudScriptSecurityValidator.validateEventCallbackScript("system_OnEveryMinute", `
+    const result = CloudScriptSecurityValidator.validateEventCallbackScript(
+        "system_OnEveryMinute",
+        `
 systemHandlers.system_OnEveryMinute = async (log) => {
 }
 
 systemHandlers.system_OnEveryHour = async (log) => {
 }
-`);
+`,
+    );
 
-	assert.equal(result.success, false);
-	assert.match(result.errorMessage ?? "", /must register 1 handler\(s\); found 2/);
+    assert.equal(result.success, false);
+    assert.match(result.errorMessage ?? "", /must register 1 handler\(s\); found 2/);
 });
 
 test("CloudScript function policy reports top-level violation location and source", () => {
-	const result = CloudScriptSecurityValidator.validateFunctionScript(`
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers["hello"] = (args, context, log) => {
 	return "hello world";
 }
 console.log("bad");
 `);
 
-	assert.equal(result.success, false);
-	assert.match(result.errorMessage ?? "", /line 5, column 1/);
-	assert.match(result.errorMessage ?? "", /Source: console\.log\("bad"\);/);
+    assert.equal(result.success, false);
+    assert.match(result.errorMessage ?? "", /line 5, column 1/);
+    assert.match(result.errorMessage ?? "", /Source: console\.log\("bad"\);/);
 });
 
 test("CloudScript function policy reports lexical violation location and source", () => {
-	const result = CloudScriptSecurityValidator.validateFunctionScript(`
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers["hello"] = (args, context, log) => {
 	return GNNetwork;
 }
 `);
 
-	assert.equal(result.success, false);
-	assert.match(result.errorMessage ?? "", /line 3, column 9/);
-	assert.match(result.errorMessage ?? "", /Source: return GNNetwork;/);
+    assert.equal(result.success, false);
+    assert.match(result.errorMessage ?? "", /line 3, column 9/);
+    assert.match(result.errorMessage ?? "", /Source: return GNNetwork;/);
 });

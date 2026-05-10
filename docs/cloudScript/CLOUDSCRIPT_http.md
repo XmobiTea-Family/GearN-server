@@ -32,6 +32,7 @@ Không nên dùng `http` khi:
 
 Wrapper `http` đang expose trực tiếp các method:
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `get<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.get(url, config)` |
@@ -72,13 +73,13 @@ handlers["httpGetTodo"] = async (args: any, context, log) => {
     const response = await http.get("https://jsonplaceholder.typicode.com/todos/" + todoId, {
         timeout: 5000,
         headers: {
-            "x-cloud-script-user-id": context.userId
-        }
+            "x-cloud-script-user-id": context.userId,
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 ```
@@ -102,19 +103,19 @@ handlers["httpPostWebhook"] = async (args: any, context, log) => {
         userId: context.userId,
         gameId: gameId,
         payload: args?.payload ?? null,
-        ts: Date.now()
+        ts: Date.now(),
     };
 
     const response = await http.post(url, payload, {
         timeout: 8000,
         headers: {
-            "content-type": "application/json"
-        }
+            "content-type": "application/json",
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 
@@ -126,13 +127,13 @@ handlers["httpPatchExternalProfile"] = async (args: any, context, log) => {
         timeout: 8000,
         headers: {
             Authorization: "Bearer " + bearerToken,
-            "x-user-id": context.userId
-        }
+            "x-user-id": context.userId,
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 
@@ -142,13 +143,13 @@ handlers["httpDeleteResource"] = async (args: any, context, log) => {
     const response = await http.delete(url, {
         timeout: 8000,
         headers: {
-            "x-cloud-script-user-id": context.userId
-        }
+            "x-cloud-script-user-id": context.userId,
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 
@@ -157,20 +158,20 @@ handlers["httpSafeRequest"] = async (args: any, context, log) => {
 
     try {
         const response = await http.get(url, {
-            timeout: 5000
+            timeout: 5000,
         });
 
         return {
             success: true,
             status: response.status,
-            data: response.data
+            data: response.data,
         };
     } catch (error: any) {
         return {
             success: false,
             errorMessage: error?.message ?? "unknown error",
             status: error?.response?.status ?? null,
-            data: error?.response?.data ?? null
+            data: error?.response?.data ?? null,
         };
     }
 };

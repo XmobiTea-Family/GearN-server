@@ -5,18 +5,8 @@
         "declaration": false,
         "rootDir": ".",
         "outDir": ".test-dist",
-        "types": [
-            "node"
-        ]
+        "types": ["node"]
     },
-    "include": [
-        "src/**/*.ts",
-        "test/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        ".test-dist",
-        "src/GN-startup/cloudScript"
-    ]
+    "include": ["src/**/*.ts", "test/**/*.ts"],
+    "exclude": ["node_modules", "dist", ".test-dist", "src/GN-startup/cloudScript"]
 }

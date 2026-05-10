@@ -5,7 +5,7 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
@@ -21,297 +21,310 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CreateGroupItemOperationRequest extends OperationRequest {
+    // Stores the group ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
+    public groupId: string;
 
-	// Stores the group ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.GroupId, minLength: 10, maxLength: 10, mustNonNull: true })
-	public groupId: string;
+    // Stores the catalog ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
+    public catalogId: string;
 
-	// Stores the catalog ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	public catalogId: string;
+    // Stores the class ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
+    public classId: string;
 
-	// Stores the class ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
-	public classId: string;
+    // Stores the display name value used by this instance.
+    @StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
+    public displayName?: string;
 
-	// Stores the display name value used by this instance.
-	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-	public displayName?: string;
+    // Stores the amount value used by this instance.
+    @NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, minValue: 1, maxValue: 256, isOptional: true })
+    public amount?: number;
 
-	// Stores the amount value used by this instance.
-	@NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, minValue: 1, maxValue: 256, isOptional: true })
-	public amount?: number;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerCreateGroupItemOperationRequest extends CreateGroupItemOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminCreateGroupItemOperationRequest extends ServerCreateGroupItemOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class CreateGroupItemRequestHandler extends GroupBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.CreateGroupItem;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.CreateGroupItem;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return CreateGroupItemOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return CreateGroupItemOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        // Tracks whether method is allowed.
+        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.createGroupItem);
 
-		// Tracks whether method is allowed.
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.groupId, secretInfo.getGameId(), secretInfo.getPermission().group.createGroupItem);
+        if (!allowMethod) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!allowMethod) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                groupId: request.groupId,
+                catalogId: request.catalogId,
+                classId: request.classId,
+                displayName: request.displayName,
+                amount: request.amount,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			groupId: request.groupId,
-			catalogId: request.catalogId,
-			classId: request.classId,
-			displayName: request.displayName,
-			amount: request.amount,
-		}, SecretRole.Client, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreateGroupItemOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreateGroupItemOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().group.createGroupItem.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().group.createGroupItem.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                groupId: request.groupId,
+                catalogId: request.catalogId,
+                classId: request.classId,
+                displayName: request.displayName,
+                amount: request.amount,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			groupId: request.groupId,
-			catalogId: request.catalogId,
-			classId: request.classId,
-			displayName: request.displayName,
-			amount: request.amount,
-		}, SecretRole.Server, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreateGroupItemOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreateGroupItemOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().group.createGroupItem.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().group.createGroupItem.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                groupId: request.groupId,
+                catalogId: request.catalogId,
+                classId: request.classId,
+                displayName: request.displayName,
+                amount: request.amount,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			groupId: request.groupId,
-			catalogId: request.catalogId,
-			classId: request.classId,
-			displayName: request.displayName,
-			amount: request.amount,
-		}, SecretRole.Admin, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { groupId: string; catalogId: string; classId: string; displayName: string; amount: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_CreateGroupItem", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { groupId: string, catalogId: string, classId: string, displayName: string, amount: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_CreateGroupItem", request, role, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        // Stores the group find options value used in the current execution flow.
+        let groupFindOptions: GroupFindOptions = {
+            groupInventories: true,
+            removeStatus: true,
+        };
 
-		// Stores the group find options value used in the current execution flow.
-		let groupFindOptions: GroupFindOptions = {
-			groupInventories: true,
-			removeStatus: true,
-		}
+        // Stores the resolved group settings instance for the current execution flow.
+        let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+        // Stores the group item catalog settings item value used in the current execution flow.
+        let groupItemCatalogSettingsItem = groupSettings.groupItemCatalogSettings.find((x) => x.catalogId == request.catalogId);
 
-		// Stores the resolved group settings instance for the current execution flow.
-		let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
-		// Stores the group item catalog settings item value used in the current execution flow.
-		let groupItemCatalogSettingsItem = groupSettings.groupItemCatalogSettings.find(x => x.catalogId == request.catalogId);
+        if (groupItemCatalogSettingsItem == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
+            return operationResponse;
+        }
 
-		if (groupItemCatalogSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
-			return operationResponse;
-		}
+        // Stores the item class settings item value used in the current execution flow.
+        let itemClassSettingsItem = groupItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == request.classId);
+        if (itemClassSettingsItem == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ClassIdNotFound);
+            return operationResponse;
+        }
 
-		// Stores the item class settings item value used in the current execution flow.
-		let itemClassSettingsItem = groupItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == request.classId);
-		if (itemClassSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ClassIdNotFound);
-			return operationResponse;
-		}
+        // Stores the group value used in the current execution flow.
+        let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
 
-		// Stores the group value used in the current execution flow.
-		let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.groupId, secretInfo.getGameId(), groupFindOptions);
+        if (group == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+            return operationResponse;
+        }
 
-		if (group == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
-			return operationResponse;
-		}
+        if (role == SecretRole.Client) {
+            // Stores the remove status value used in the current execution flow.
+            let removeStatus = group.getRemoveStatus();
+            if (removeStatus.tsRemove != 0) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
+                operationResponse.setDebugMessage("Group is removed, reason " + removeStatus.reason);
 
-		if (role == SecretRole.Client) {
-			// Stores the remove status value used in the current execution flow.
-			let removeStatus = group.getRemoveStatus();
-			if (removeStatus.tsRemove != 0) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GroupNotFound);
-				operationResponse.setDebugMessage("Group is removed, reason " + removeStatus.reason);
+                return operationResponse;
+            }
+        }
 
-				return operationResponse;
-			}
-		}
+        // Stores the amount value used in the current execution flow.
+        let amount = request.amount;
 
-		// Stores the amount value used in the current execution flow.
-		let amount = request.amount;
+        if (groupItemCatalogSettingsItem.itemType == ItemType.NonStackable) {
+            amount = 1;
+        }
 
-		if (groupItemCatalogSettingsItem.itemType == ItemType.NonStackable) {
-			amount = 1;
-		}
+        // Stores the item ID value used in the current execution flow.
+        let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
+        // Stores the current milliseconds value used in the current execution flow.
+        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		// Stores the item ID value used in the current execution flow.
-		let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
-		// Stores the current milliseconds value used in the current execution flow.
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+        const session = this.gnServer.getDatabase().startSession();
 
-		const session = this.gnServer.getDatabase().startSession();
+        try {
+            session.startTransaction();
 
-		try {
-			session.startTransaction();
+            // Stores the inventory value used in the current execution flow.
+            let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(
+                {
+                    _id: undefined,
+                    itemId: itemId,
+                    catalogId: request.catalogId,
+                    classId: request.classId,
+                    amount: amount,
+                    itemType: groupItemCatalogSettingsItem.itemType,
+                    owner: { id: request.groupId, type: OwnerType.Group },
+                    itemDatas: {},
+                    itemStatistics: {},
+                    removeStatus: { tsRemove: 0, reason: "" },
+                    segments: [],
+                    customDatas: {},
+                    tsCreate: currentMilliseconds,
+                    displayName: request.displayName,
+                    displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
+                    avatar: { type: 0, value: "0" },
+                    tags: {},
+                },
+                secretInfo.getGameId(),
+                session,
+            );
 
-			// Stores the inventory value used in the current execution flow.
-			let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync({
-				_id: undefined,
-				itemId: itemId,
-				catalogId: request.catalogId,
-				classId: request.classId,
-				amount: amount,
-				itemType: groupItemCatalogSettingsItem.itemType,
-				owner: { id: request.groupId, type: OwnerType.Group },
-				itemDatas: {},
-				itemStatistics: {},
-				removeStatus: { tsRemove: 0, reason: "" },
-				segments: [],
-				customDatas: {},
-				tsCreate: currentMilliseconds,
-				displayName: request.displayName,
-				displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
-				avatar: { type: 0, value: "0" },
-				tags: {},
-			}, secretInfo.getGameId(), session);
+            group.setGroupInventory(itemId, request.catalogId, request.classId);
+            await group.saveAsync(session);
 
-			group.setGroupInventory(itemId, request.catalogId, request.classId);
-			await group.saveAsync(session);
+            await session.commitTransaction();
+        } catch (err) {
+            await session.abortTransaction();
 
-			await session.commitTransaction();
-		}
-		catch (err) {
-			await session.abortTransaction();
+            Debug.logError(err);
 
-			Debug.logError(err);
+            throw err;
+        } finally {
+            await session.endSession();
+        }
 
-			throw err;
-		}
-		finally {
-			await session.endSession();
-		}
+        // Stores the GearN group inventories value used in the current execution flow.
+        let gnGroupInventories = new GNArray();
 
-		// Stores the GearN group inventories value used in the current execution flow.
-		let gnGroupInventories = new GNArray();
+        // Stores the GearN group inventory value used in the current execution flow.
+        let gnGroupInventory = new GNHashtable();
 
-		// Stores the GearN group inventory value used in the current execution flow.
-		let gnGroupInventory = new GNHashtable();
+        gnGroupInventory.add(ParameterCode.ItemId, itemId);
+        gnGroupInventory.add(ParameterCode.CatalogId, request.catalogId);
+        gnGroupInventory.add(ParameterCode.ClassId, request.classId);
 
-		gnGroupInventory.add(ParameterCode.ItemId, itemId);
-		gnGroupInventory.add(ParameterCode.CatalogId, request.catalogId);
-		gnGroupInventory.add(ParameterCode.ClassId, request.classId);
+        gnGroupInventories.add(gnGroupInventory);
 
-		gnGroupInventories.add(gnGroupInventory);
+        // Stores the GearN info response parameters value used in the current execution flow.
+        let gnInfoResponseParameters = new GNHashtable();
+        gnInfoResponseParameters.add(ParameterCode.GroupInventories, gnGroupInventories);
 
-		// Stores the GearN info response parameters value used in the current execution flow.
-		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(ParameterCode.GroupInventories, gnGroupInventories);
+        operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
-		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        await this.gnServer.getPostEventCallbackService().onEvent("group_CreateGroupItem", request, role, secretInfo, operationRequest, operationResponse);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("group_CreateGroupItem", request, role, secretInfo, operationRequest, operationResponse);
-
-		return operationResponse;
-	}
+        return operationResponse;
+    }
 }

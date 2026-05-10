@@ -4,17 +4,17 @@
  */
 export interface FileUploadInfoFindOptions {
     /** Whether to include the fileId. */
-    fileId?: boolean,
+    fileId?: boolean;
     /** Whether to include the fileName (user-supplied). */
-    fileName?: boolean,
+    fileName?: boolean;
     /** Whether to include the upload-record creation timestamp. */
-    tsCreate?: boolean,
+    tsCreate?: boolean;
     /** Whether to include the upload deadline (`tsUploadExpire`). */
-    tsUploadExpire?: boolean,
+    tsUploadExpire?: boolean;
     /** Whether to include the soft-delete state (`removeStatus`). */
-    removeStatus?: boolean,
+    removeStatus?: boolean;
     /** Whether to include the `gameId` (which game the file belongs to). */
-    gameId?: boolean,
+    gameId?: boolean;
     /** Whether to include the actual uploaded-file information (`fileUpload`). */
-    fileUpload?: boolean,
+    fileUpload?: boolean;
 }

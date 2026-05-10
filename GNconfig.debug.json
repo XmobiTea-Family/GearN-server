@@ -1,89 +1,79 @@
 {
-	"name": "debug",
-	"options": {
-		"applicationSettings": {
-			"port": 2202,
-			"socketPort": 2901,
-			"useSsl": false,
-			"keyFilePath": "",
-			"certFilePath": "",
-			"expiredTokenInMs": 172800000,
-			"privateKeyToken": "privateKeyDefault",
-			"initRootUsername": "admin",
-			"initRootPassword": "password",
-			"restoreRootPassword": ""
-		},
-		"httpAppSettings": {
-			"enable": true,
-			"allowOrigin": "*",
-			"credentials": true,
-			"allowMethods": ["GET", "POST"],
-			"allowHeaders": [
-				"Auth-Token",
-				"Secret-Key",
-				"Game-Id",
-				"Content-Type",
-				"Content-Length",
-				"User-Agent",
-				"X-Real-IP"
-			],
-			"enableSendAndReceiveDebug": false,
-			"enablePostViaMsgPack": true,
-			"enablePostViaJson": true,
-			"trustProxy": true
-		},
-		"socketAppSettings": {
-			"enable": true,
-			"useEmitter": false,
-			"allowOrigin": "*",
-			"credentials": true,
-			"allowMethods": ["GET"],
-			"allowHeaders": [],
-			"enableSendAndReceiveDebug": false,
-			"enablePostViaMsgPack": true,
-			"enablePostViaJson": true,
-			"pingInterval": 50000,
-			"pingTimeout": 5000
-		},
-		"uploadFileSettings": {
-			"enable": true,
-			"uploadPath": "./file-upload",
-			"maxSizeUpload": 52428800,
-			"mimeTypeAccepts": [
-				"image/png"
-			]
-		},
-		"databaseSettings": {
-			"connectionString": "mongodb://127.0.0.1:27017/gearn",
-			"databaseName": "gearn",
-			"logConnectionString": "mongodb://127.0.0.1:27017/gearn_log",
-			"logDatabaseName": "gearn_log",
-			"options": {}
-		},
-		"otherSettings": {
-			"headerIP": "X-Real-IP",
-			"idTypeCase": 0,
-			"ipApiUrl": "https://ipdetail.gearn.net/json",
+    "name": "debug",
+    "options": {
+        "applicationSettings": {
+            "port": 2202,
+            "socketPort": 2901,
+            "useSsl": false,
+            "keyFilePath": "",
+            "certFilePath": "",
+            "expiredTokenInMs": 172800000,
+            "privateKeyToken": "privateKeyDefault",
+            "initRootUsername": "admin",
+            "initRootPassword": "password",
+            "restoreRootPassword": ""
+        },
+        "httpAppSettings": {
+            "enable": true,
+            "allowOrigin": "*",
+            "credentials": true,
+            "allowMethods": ["GET", "POST"],
+            "allowHeaders": ["Auth-Token", "Secret-Key", "Game-Id", "Content-Type", "Content-Length", "User-Agent", "X-Real-IP"],
+            "enableSendAndReceiveDebug": false,
+            "enablePostViaMsgPack": true,
+            "enablePostViaJson": true,
+            "trustProxy": true
+        },
+        "socketAppSettings": {
+            "enable": true,
+            "useEmitter": false,
+            "allowOrigin": "*",
+            "credentials": true,
+            "allowMethods": ["GET"],
+            "allowHeaders": [],
+            "enableSendAndReceiveDebug": false,
+            "enablePostViaMsgPack": true,
+            "enablePostViaJson": true,
+            "pingInterval": 50000,
+            "pingTimeout": 5000
+        },
+        "uploadFileSettings": {
+            "enable": true,
+            "uploadPath": "./file-upload",
+            "maxSizeUpload": 52428800,
+            "mimeTypeAccepts": ["image/png"]
+        },
+        "databaseSettings": {
+            "connectionString": "mongodb://GearN-DB_user:your_password_here@hcmc.ip.changx.dev:38017/GearN-DB?authSource=GearN-DB&replicaSet=rs0",
+            "databaseName": "GearN-DB",
+            "logConnectionString": null,
+            "logDatabaseName": null,
+            "options": {}
+        },
+        "otherSettings": {
+            "headerIP": "X-Real-IP",
+            "idTypeCase": 0,
+            "ipApiUrl": "https://ipdetail.hcmc.xmobitea.com/json",
             "cloudScriptExecuteTimeoutInMs": 15000
-		},
-		"logSettings": {
-			"logToConsoleEnable": true,
-			"logToFileEnable": true,
-			"logPath": "./log/debug/Server.log"
-		},
-		"ddosSettings": {
-			"socketMaxRequestPerSecondPerIp": 50,
-			"socketMaxRequestPerSecondPerPeer": 20,
-			"socketMaxPendingRequest": 1000,
-			"socketMaxRequestSize": 4096,
-			"httpMaxRequestPerSecondPerIp": 50,
-			"httpMaxRequestPerSecondPerPeer": 20,
-			"httpMaxPendingRequest": 1000,
-			"httpMaxRequestSize": 4096,
-			"maxUploadPendingRequest": 200,
-			"maxDownloadPendingRequest": 200,
-			"ipWhiteList": ["127.0.0.1"]
-		},
+        },
+        "logSettings": {
+            "logToConsoleEnable": true,
+            "logToFileEnable": true,
+            "logPath": "./log/debug/Server.log"
+        },
+        "ddosSettings": {
+            "socketMaxRequestPerSecondPerIp": 50,
+            "socketMaxRequestPerSecondPerPeer": 20,
+            "socketMaxPendingRequest": 1000,
+            "socketMaxRequestSize": 4096,
+            "httpMaxRequestPerSecondPerIp": 50,
+            "httpMaxRequestPerSecondPerPeer": 20,
+            "httpMaxPendingRequest": 1000,
+            "httpMaxRequestSize": 4096,
+            "maxUploadPendingRequest": 200,
+            "maxDownloadPendingRequest": 200,
+            "ipWhiteList": ["127.0.0.1"]
+        },
         "clusterSettings": {
             "instanceId": "node_0",
             "isPrimary": true,
@@ -95,5 +85,5 @@
                 }
             ]
         }
-	}
+    }
 }

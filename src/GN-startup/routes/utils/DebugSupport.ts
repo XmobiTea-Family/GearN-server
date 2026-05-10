@@ -1,4 +1,3 @@
-
 import { Request } from "./../../../GN-common/entity/operationRequest/base/Request";
 import { CodeHelper } from "./../../../GN-common/helper/CodeHelper";
 
@@ -24,8 +23,7 @@ export class DebugSupport {
                 secretKey: this.securitySecretKey(authInfo.getSecretKey()),
                 otherDatas: authInfo.getOtherDatas(),
             };
-        }
-        else {
+        } else {
             answer.authInfo = null;
         }
 
@@ -40,29 +38,21 @@ export class DebugSupport {
                 // isDefault: secretInfo.getIsDefault(),
                 // onlyMasterAdmin: secretInfo.getIsOnlyMasterAdmin(),
             };
-        }
-        else {
+        } else {
             answer.secretInfo = null;
         }
 
         const parameters = request.getParameters();
         if (parameters) {
             answer.parameters = this.securityParameters(parameters);
-        }
-        else {
+        } else {
             answer.parameters = null;
         }
 
         return answer;
     }
 
-    public static flatAndSecurityFinalData(finalData: {
-        returnCode: number,
-        responseId?: number,
-        parameters?: Record<string, unknown>,
-        invalidRequestParameters?: (string | number)[][],
-        debugMessage?: string,
-    }): Record<string, unknown> {
+    public static flatAndSecurityFinalData(finalData: { returnCode: number; responseId?: number; parameters?: Record<string, unknown>; invalidRequestParameters?: (string | number)[][]; debugMessage?: string }): Record<string, unknown> {
         const answer: Record<string, unknown> = {};
 
         answer.returnCode = CodeHelper.getReturnCodeName(finalData.returnCode);
@@ -71,8 +61,7 @@ export class DebugSupport {
         const parameters = finalData.parameters;
         if (parameters) {
             answer.parameters = this.securityParameters(parameters);
-        }
-        else {
+        } else {
             answer.parameters = null;
         }
 
@@ -82,7 +71,7 @@ export class DebugSupport {
             // Stores the invalid str value used in the current execution flow.
             let invalidStr = "";
 
-            invalidRequestParameters.forEach(invalidMember => {
+            invalidRequestParameters.forEach((invalidMember) => {
                 invalidStr += invalidMember[0] + "(" + CodeHelper.getInvalidMemberName(invalidMember[1] as number) + "): " + invalidMember[1] + ", ";
             });
 
@@ -108,44 +97,37 @@ export class DebugSupport {
             const typeOfValue = typeof value;
             if (typeOfValue === "function" || typeOfValue == "undefined" || typeOfValue === "symbol") {
                 continue;
-            }
-            else if (typeOfValue === 'string') {
+            } else if (typeOfValue === "string") {
                 const normalizedKey = key.toLowerCase();
 
                 if (normalizedKey.includes("password") || normalizedKey.includes("secret") || normalizedKey.includes("publicrsakey") || normalizedKey.includes("token") || normalizedKey.includes("privatekey") || normalizedKey.includes("p8content")) {
                     answer[key] = "**********";
                 }
-            }
-            else if (typeOfValue === 'object') {
+            } else if (typeOfValue === "object") {
                 if (Array.isArray(value)) {
                     const arrayAnswer = [];
 
                     for (const item of value) {
-                        if (typeof item === 'object') {
+                        if (typeof item === "object") {
                             if (Array.isArray(item)) {
                                 arrayAnswer.push(item);
-                            }
-                            else {
+                            } else {
                                 arrayAnswer.push(this.securityParameters(item));
                             }
-                        }
-                        else {
+                        } else {
                             arrayAnswer.push(item);
                         }
                     }
 
                     answer[key] = arrayAnswer;
-                }
-                else {
+                } else {
                     answer[key] = this.securityParameters(value as Record<string, unknown>);
                 }
-            }
-            else {
+            } else {
                 answer[key] = value;
             }
         }
 
         return answer;
     }
-
 }

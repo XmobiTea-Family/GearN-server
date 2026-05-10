@@ -4,41 +4,41 @@
  */
 export interface GamePlayerFindOptions {
     /** Whether to include the userId (player id within the game). */
-    userId?: boolean,
+    userId?: boolean;
     /** Whether to include the socketId (current real-time connection). */
-    socketId?: boolean,
+    socketId?: boolean;
     /** Whether to include the segments array. */
-    segments?: boolean,
+    segments?: boolean;
     /** Whether to include the custom datas (DataObjectBase-level). */
-    customDatas?: boolean,
+    customDatas?: boolean;
     /** Whether to include the display name. */
-    displayName?: boolean,
+    displayName?: boolean;
     /** Whether to include the avatar. */
-    avatar?: boolean,
+    avatar?: boolean;
     /** Whether to include the in-game player creation timestamp. */
-    tsCreate?: boolean,
+    tsCreate?: boolean;
     /** Whether to include the tags map. */
-    tags?: boolean,
+    tags?: boolean;
     /** Whether to include the active ban (`playerBan`). */
-    playerBan?: boolean,
+    playerBan?: boolean;
     /** Whether to include the player-scoped custom data list (`playerDatas`). */
-    playerDatas?: boolean,
+    playerDatas?: boolean;
     /** Whether to include the player currency map. */
-    playerCurrencies?: boolean,
+    playerCurrencies?: boolean;
     /** Whether to include the player statistics map. */
-    playerStatistics?: boolean,
+    playerStatistics?: boolean;
     /** Whether to include the player's owned-character list. */
-    playerCharacters?: boolean,
+    playerCharacters?: boolean;
     /** Whether to include the player's inventory item list. */
-    playerInventories?: boolean,
+    playerInventories?: boolean;
     /** Whether to include the player's group memberships. */
-    playerGroups?: boolean,
+    playerGroups?: boolean;
     /** Whether to include the player's friend list. */
-    playerFriends?: boolean,
+    playerFriends?: boolean;
     /** Whether to include the most-recent login timestamp. */
-    tsLastLogin?: boolean,
+    tsLastLogin?: boolean;
     /** Whether to include the IP captured at account creation. */
-    ipAddressCreate?: boolean,
+    ipAddressCreate?: boolean;
     /** Whether to include the country code derived from the account-creation IP. */
-    countryCode?: boolean,
+    countryCode?: boolean;
 }

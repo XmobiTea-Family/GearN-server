@@ -32,6 +32,7 @@ Không nên dùng `socket` khi:
 
 Wrapper `socket` đang expose:
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void>` | `socket.sendEventTo(userId, operationEvent)` |
@@ -60,14 +61,7 @@ const requireString = (value: unknown, fieldName: string): string => {
 };
 
 const createDemoOperationEvent = (message: string, userId: string) => {
-    return new OperationEvent(
-        "cloudScriptDemo",
-        GNHashtable.builder()
-            .add("message", message)
-            .add("sourceUserId", userId)
-            .add("ts", Date.now())
-            .build()
-    );
+    return new OperationEvent("cloudScriptDemo", GNHashtable.builder().add("message", message).add("sourceUserId", userId).add("ts", Date.now()).build());
 };
 
 handlers["socketNotifyUser"] = async (args: any, context, log) => {
@@ -78,7 +72,7 @@ handlers["socketNotifyUser"] = async (args: any, context, log) => {
 
     return {
         sent: true,
-        targetUserId: targetUserId
+        targetUserId: targetUserId,
     };
 };
 ```
@@ -95,10 +89,7 @@ const requireString = (value: unknown, fieldName: string): string => {
 };
 
 const createDemoOperationEvent = (eventCode: string, payload: { [k: string]: any }) => {
-    return new OperationEvent(
-        eventCode,
-        GNHashtable.builder().addAll(payload).build()
-    );
+    return new OperationEvent(eventCode, GNHashtable.builder().addAll(payload).build());
 };
 
 handlers["socketNotifyManyUsers"] = async (args: any, context, log) => {
@@ -108,14 +99,14 @@ handlers["socketNotifyManyUsers"] = async (args: any, context, log) => {
 
     const operationEvent = createDemoOperationEvent("cloudScriptMultiCast", {
         sourceUserId: context.userId,
-        ts: Date.now()
+        ts: Date.now(),
     });
 
     await socket.sendEventToMoreUser(args.userIds, operationEvent);
 
     return {
         sent: true,
-        count: args.userIds.length
+        count: args.userIds.length,
     };
 };
 
@@ -123,13 +114,13 @@ handlers["socketBroadcastAll"] = async (args: any, context, log) => {
     const operationEvent = createDemoOperationEvent("cloudScriptBroadcast", {
         message: typeof args?.message === "string" ? args.message : "Broadcast from cloud script",
         sourceUserId: context.userId,
-        ts: Date.now()
+        ts: Date.now(),
     });
 
     await socket.sendEventToAllPlayer(operationEvent);
 
     return {
-        broadcasted: true
+        broadcasted: true,
     };
 };
 
@@ -144,7 +135,7 @@ handlers["socketRoomWorkflow"] = async (args: any, context, log) => {
         return {
             left: true,
             userId: userId,
-            roomId: roomId
+            roomId: roomId,
         };
     }
 
@@ -153,7 +144,7 @@ handlers["socketRoomWorkflow"] = async (args: any, context, log) => {
     const operationEvent = createDemoOperationEvent("cloudScriptRoomMessage", {
         roomId: roomId,
         sourceUserId: context.userId,
-        ts: Date.now()
+        ts: Date.now(),
     });
 
     await socket.sendEventToRoom(roomId, operationEvent);
@@ -161,7 +152,7 @@ handlers["socketRoomWorkflow"] = async (args: any, context, log) => {
     return {
         joined: true,
         roomId: roomId,
-        userId: userId
+        userId: userId,
     };
 };
 ```

@@ -6,12 +6,5 @@
         "rootDir": "./src",
         "outDir": "./dist"
     },
-    "exclude": [
-        "./test/",
-        "./node_modules/",
-        "./syncCode.js",
-        "./syncCodeVer2.js",
-        "./src/GN-startup/cloudScript/",
-        "./index.js"
-    ]
+    "exclude": ["./test/", "./node_modules/", "./syncCode.js", "./syncCodeVer2.js", "./src/GN-startup/cloudScript/", "./index.js"]
 }

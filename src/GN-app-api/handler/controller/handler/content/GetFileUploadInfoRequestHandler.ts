@@ -15,201 +15,211 @@ import { GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { UploadFileInfo } from "./../../../../../GN-library/xdatabase/lib/entity/pro/UploadFileInfo";
 
 class GetFileUploadInfoOperationRequest extends OperationRequest {
+    // Stores the file ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
+    public fileId: string;
 
-	// Stores the file ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.FileId, mustNonNull: true, minLength: 15, maxLength: 15 })
-	public fileId: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
-
+        return true;
+    }
 }
 
 class ServerGetFileUploadInfoOperationRequest extends GetFileUploadInfoOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminGetFileUploadInfoOperationRequest extends ServerGetFileUploadInfoOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class GetFileUploadInfoRequestHandler extends RequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.GetFileUploadInfo;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.GetFileUploadInfo;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return GetFileUploadInfoOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return GetFileUploadInfoOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().content.getFileUploadInfo.otherSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().content.getFileUploadInfo.otherSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                fileId: request.fileId,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			fileId: request.fileId,
-		}, SecretRole.Client, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetFileUploadInfoOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetFileUploadInfoOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().content.getFileUploadInfo.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().content.getFileUploadInfo.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                fileId: request.fileId,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			fileId: request.fileId,
-		}, SecretRole.Server, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetFileUploadInfoOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetFileUploadInfoOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().content.getFileUploadInfo.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().content.getFileUploadInfo.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                fileId: request.fileId,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			fileId: request.fileId,
-		}, SecretRole.Admin, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { fileId: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_GetFileUploadInfo", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { fileId: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("content_GetFileUploadInfo", request, role, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
 
-		let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
+        // Stores the upload file info value used in the current execution flow.
+        let uploadFileInfoResult = await uploadFileInfoCollection.findOne({
+            fileId: request.fileId,
+        });
 
-		// Stores the upload file info value used in the current execution flow.
-		let uploadFileInfoResult = await uploadFileInfoCollection.findOne({
-			fileId: request.fileId
-		});
+        if (uploadFileInfoResult == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+            return operationResponse;
+        }
 
-		if (uploadFileInfoResult == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
-			return operationResponse;
-		}
+        let uploadFileInfo = new UploadFileInfo(uploadFileInfoResult, uploadFileInfoCollection);
 
-		let uploadFileInfo = new UploadFileInfo(uploadFileInfoResult, uploadFileInfoCollection);
+        if (uploadFileInfo.getGameId() != secretInfo.getGameId()) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+            operationResponse.setDebugMessage("gameId not correct to get file");
+            return operationResponse;
+        }
 
-		if (uploadFileInfo.getGameId() != secretInfo.getGameId()) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
-			operationResponse.setDebugMessage("gameId not correct to get file");
-			return operationResponse;
-		}
+        operationResponse.setParameter(ParameterCode.FileId, uploadFileInfo.getFileId());
+        operationResponse.setParameter(ParameterCode.FileName, uploadFileInfo.getFileName());
+        operationResponse.setParameter(ParameterCode.TsCreate, uploadFileInfo.getTsCreate());
 
-		operationResponse.setParameter(ParameterCode.FileId, uploadFileInfo.getFileId());
-		operationResponse.setParameter(ParameterCode.FileName, uploadFileInfo.getFileName());
-		operationResponse.setParameter(ParameterCode.TsCreate, uploadFileInfo.getTsCreate());
+        // Stores the GearN remove status value used in the current execution flow.
+        let gnRemoveStatus = new GNHashtable();
+        // Stores the remove status value used in the current execution flow.
+        let removeStatus = uploadFileInfo.getRemoveStatus();
+        gnRemoveStatus.add(ParameterCode.TsRemove, removeStatus.tsRemove);
+        gnRemoveStatus.add(ParameterCode.Reason, removeStatus.reason);
+        operationResponse.setParameter(ParameterCode.RemoveStatus, gnRemoveStatus);
 
-		// Stores the GearN remove status value used in the current execution flow.
-		let gnRemoveStatus = new GNHashtable();
-		// Stores the remove status value used in the current execution flow.
-		let removeStatus = uploadFileInfo.getRemoveStatus();
-		gnRemoveStatus.add(ParameterCode.TsRemove, removeStatus.tsRemove);
-		gnRemoveStatus.add(ParameterCode.Reason, removeStatus.reason);
-		operationResponse.setParameter(ParameterCode.RemoveStatus, gnRemoveStatus);
+        // Stores the file upload value used in the current execution flow.
+        let fileUpload = uploadFileInfo.getFileUpload();
 
-		// Stores the file upload value used in the current execution flow.
-		let fileUpload = uploadFileInfo.getFileUpload();
+        if (fileUpload != null) {
+            // Stores the GearN file upload value used in the current execution flow.
+            let gnFileUpload = new GNHashtable();
 
-		if (fileUpload != null) {
-			// Stores the GearN file upload value used in the current execution flow.
-			let gnFileUpload = new GNHashtable();
+            gnFileUpload.add(ParameterCode.MimeType, fileUpload.mimeType);
+            gnFileUpload.add(ParameterCode.Size, fileUpload.size);
+            gnFileUpload.add(ParameterCode.FolderFileName, fileUpload.folderFileName);
 
-			gnFileUpload.add(ParameterCode.MimeType, fileUpload.mimeType);
-			gnFileUpload.add(ParameterCode.Size, fileUpload.size);
-			gnFileUpload.add(ParameterCode.FolderFileName, fileUpload.folderFileName);
+            operationResponse.setParameter(ParameterCode.FileUpload, gnFileUpload);
+        } else {
+            operationResponse.setParameter(ParameterCode.TsUploadExpire, uploadFileInfo.getTsUploadExpire());
+        }
 
-			operationResponse.setParameter(ParameterCode.FileUpload, gnFileUpload);
-		} else {
-			operationResponse.setParameter(ParameterCode.TsUploadExpire, uploadFileInfo.getTsUploadExpire());
-		}
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        await this.gnServer.getPostEventCallbackService().onEvent("content_GetFileUploadInfo", request, role, secretInfo, operationRequest, operationResponse);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("content_GetFileUploadInfo", request, role, secretInfo, operationRequest, operationResponse);
-
-		return operationResponse;
-	}
+        return operationResponse;
+    }
 }

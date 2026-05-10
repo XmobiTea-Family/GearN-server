@@ -43,8 +43,8 @@ This repository is both:
 
 ## Transport Contracts
 
-- HTTP JSON route: `POST /api/json/:requestType/:role/:operationCode`
-- HTTP MsgPack route: `POST /api/msgpack/:requestType/:role/:operationCode`
+- HTTP JSON route: `POST /api/rJson/:requestType/:role/:operationCode`
+- HTTP MsgPack route: `POST /api/rMsgPack/:requestType/:role/:operationCode`
 - Health endpoints: `GET /ping`, `POST /ping`, `GET /healthcheck`
 - Socket auth event: `Commands.RequestAuthTokenCmd`
 - Socket request events: `Commands.RequestCmd_Json` and `Commands.RequestCmd_MsgPack`

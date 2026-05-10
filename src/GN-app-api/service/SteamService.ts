@@ -12,7 +12,7 @@ export class SteamService implements ISteamService {
      * Executes the init workflow.
      * @param request Provides the request value used by this operation.
      */
-    public init(request: { steamApiKey: string, steamAppId: string, }) {
+    public init(request: { steamApiKey: string; steamAppId: string }) {
         this.steamApiKey = request.steamApiKey;
         this.steamAppId = request.steamAppId;
     }
@@ -35,7 +35,7 @@ export class SteamService implements ISteamService {
                     appid: this.steamAppId,
                     ticket: ticket,
                     identity: identity,
-                }
+                },
             });
 
             // Stores the result value used in the current execution flow.
@@ -53,9 +53,8 @@ export class SteamService implements ISteamService {
             };
         } catch (error) {
             return {
-                "error": error
+                error: error,
             };
         }
     }
-
 }

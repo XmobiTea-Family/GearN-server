@@ -1,4 +1,3 @@
 export interface OnRunSuccess {
-	(): void;
-
+    (): void;
 }

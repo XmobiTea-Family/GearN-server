@@ -2,9 +2,7 @@ import { ParameterCode } from "./../../../../../../GN-common/constant/parameterC
 import { BooleanDataMember, DataMember, GNArrayDataMember, NumberDataMember, StringDataMember } from "./../../../../../../GN-common/entity/DataMember";
 
 export class GroupMemberParam {
-
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	public characterId: string;
-
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+    public characterId: string;
 }

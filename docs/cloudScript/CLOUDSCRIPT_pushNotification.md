@@ -33,6 +33,7 @@ Không nên dùng `pushNotification` khi:
 
 Wrapper `pushNotification` đang expose:
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.pushNotification.send(token, title, body, badge?, sound?, icon?, data?)` |
@@ -64,23 +65,15 @@ handlers["pushSendDemo"] = async (args: any, context, log) => {
     const title = typeof args?.title === "string" && args.title.length > 0 ? args.title : "CloudScript Demo";
     const body = typeof args?.body === "string" && args.body.length > 0 ? args.body : "Hello from cloud script";
 
-    await pushNotification.send(
-        token,
-        title,
-        body,
-        1,
-        "default",
-        "ic_notification",
-        {
-            source: "cloudScript",
-            gameId: gameId,
-            userId: context.userId
-        }
-    );
+    await pushNotification.send(token, title, body, 1, "default", "ic_notification", {
+        source: "cloudScript",
+        gameId: gameId,
+        userId: context.userId,
+    });
 
     return {
         queued: true,
-        title: title
+        title: title,
     };
 };
 ```
@@ -104,22 +97,14 @@ handlers["pushSendManyDemo"] = async (args: any, context, log) => {
     const title = typeof args?.title === "string" && args.title.length > 0 ? args.title : "CloudScript Batch Push";
     const body = typeof args?.body === "string" && args.body.length > 0 ? args.body : "Hello from cloud script";
 
-    await pushNotification.sendToMore(
-        args.tokens,
-        title,
-        body,
-        1,
-        "default",
-        "ic_notification",
-        {
-            source: "cloudScript",
-            userId: context.userId
-        }
-    );
+    await pushNotification.sendToMore(args.tokens, title, body, 1, "default", "ic_notification", {
+        source: "cloudScript",
+        userId: context.userId,
+    });
 
     return {
         queued: true,
-        count: args.tokens.length
+        count: args.tokens.length,
     };
 };
 
@@ -128,22 +113,14 @@ handlers["pushTopicSendDemo"] = async (args: any, context, log) => {
     const title = typeof args?.title === "string" && args.title.length > 0 ? args.title : "Topic Notification";
     const body = typeof args?.body === "string" && args.body.length > 0 ? args.body : "CloudScript topic message";
 
-    await pushNotification.sendToTopic(
-        topic,
-        title,
-        body,
-        1,
-        "default",
-        "ic_notification",
-        {
-            topic: topic,
-            sourceUserId: context.userId
-        }
-    );
+    await pushNotification.sendToTopic(topic, title, body, 1, "default", "ic_notification", {
+        topic: topic,
+        sourceUserId: context.userId,
+    });
 
     return {
         queued: true,
-        topic: topic
+        topic: topic,
     };
 };
 
@@ -158,7 +135,7 @@ handlers["pushTopicSubscribeDemo"] = async (args: any, context, log) => {
     return {
         subscribed: true,
         topic: topic,
-        count: args.tokens.length
+        count: args.tokens.length,
     };
 };
 
@@ -173,7 +150,7 @@ handlers["pushTopicUnsubscribeDemo"] = async (args: any, context, log) => {
     return {
         unsubscribed: true,
         topic: topic,
-        count: args.tokens.length
+        count: args.tokens.length,
     };
 };
 ```

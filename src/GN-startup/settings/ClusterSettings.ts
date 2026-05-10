@@ -52,8 +52,7 @@ abstract class BuilderBase {
     /**
      * Initializes a new builder base instance.
      */
-    constructor() { }
-
+    constructor() {}
 }
 
 class Builder extends BuilderBase implements IBuilder<ClusterSettings> {
@@ -116,7 +115,6 @@ class Builder extends BuilderBase implements IBuilder<ClusterSettings> {
     public build() {
         return new ClusterSettings(this);
     }
-
 }
 
 export class ClusterSettings extends BuilderBase {
@@ -141,5 +139,4 @@ export class ClusterSettings extends BuilderBase {
     public static Builder(): Builder {
         return new Builder();
     }
-
 }

@@ -5,7 +5,7 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNData, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
@@ -19,285 +19,288 @@ import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/
 import { PermissionDataItem } from "./../../../../../GN-common/constant/enumType/PermissionDataItem";
 
 class SetCustomDataOperationRequest extends OperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    public userId?: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	public userId?: string;
+    // Stores the custom datas value used by this instance.
+    @GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
+    public customDatas: Array<CustomDataParam>;
 
-	// Stores the custom datas value used by this instance.
-	@GNArrayDataMember({ code: ParameterCode.CustomDatas, minLength: 1, maxLength: 32, mustNonNull: true, elementCls: CustomDataParam })
-	public customDatas: Array<CustomDataParam>;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerSetCustomDataOperationRequest extends SetCustomDataOperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    declare public userId: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	public declare userId: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminSetCustomDataOperationRequest extends ServerSetCustomDataOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class SetCustomDataRequestHandler extends MasterPlayerBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.SetCustomData;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.SetCustomData;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return SetCustomDataOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return SetCustomDataOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!request.userId) {
+            if (!secretInfo.getPermission().masterPlayer.setCustomData.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
 
-		if (!request.userId) {
-			if (!secretInfo.getPermission().masterPlayer.setCustomData.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
+            request.userId = authInfo.getUserId();
+        } else if (request.userId != authInfo.getUserId()) {
+            if (!secretInfo.getPermission().masterPlayer.setCustomData.otherSelfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        } else {
+            if (!secretInfo.getPermission().masterPlayer.setCustomData.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
 
-			request.userId = authInfo.getUserId();
-		}
-		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().masterPlayer.setCustomData.otherSelfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
-		else {
-			if (!secretInfo.getPermission().masterPlayer.setCustomData.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                customDatas: request.customDatas,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			customDatas: request.customDatas
-		}, SecretRole.Client, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetCustomDataOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetCustomDataOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().masterPlayer.setCustomData.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().masterPlayer.setCustomData.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                customDatas: request.customDatas,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetCustomDataOperationRequest);
 
-		return this.execute({
-			userId: request.userId,
-			customDatas: request.customDatas
-		}, SecretRole.Server, secretInfo, operationRequest);
-	}
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetCustomDataOperationRequest);
+        if (!secretInfo.getPermission().masterPlayer.setCustomData.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                customDatas: request.customDatas,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		if (!secretInfo.getPermission().masterPlayer.setCustomData.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { userId: string; customDatas: Array<CustomDataParam> }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SetCustomData", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-		return this.execute({
-			userId: request.userId,
-			customDatas: request.customDatas
-		}, SecretRole.Admin, secretInfo, operationRequest);
-	}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { userId: string, customDatas: Array<CustomDataParam> }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_SetCustomData", request, role, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        // Stores the resolved master player settings instance for the current execution flow.
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        for (let i = 0; i < request.customDatas.length; i++) {
+            // Stores the custom data parameter value used in the current execution flow.
+            let customDataParameter = request.customDatas[i];
 
-		// Stores the resolved master player settings instance for the current execution flow.
-		let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
+            // Stores the key value used in the current execution flow.
+            let key = customDataParameter.key;
 
-		for (let i = 0; i < request.customDatas.length; i++) {
+            // Stores the custom datas settings item value used in the current execution flow.
+            let customDatasSettingsItem = masterPlayerSettings.customDatasSettings.find((x) => x.key == key);
+            if (customDatasSettingsItem == null) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+                operationResponse.setDebugMessage("CustomKey not found " + key);
+                return operationResponse;
+            }
 
-			// Stores the custom data parameter value used in the current execution flow.
-			let customDataParameter = request.customDatas[i];
+            if (customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
+                operationResponse.setDebugMessage("CustomKey is readOnly " + key + ", change it by server or admin role");
+                return operationResponse;
+            }
+        }
 
-			// Stores the key value used in the current execution flow.
-			let key = customDataParameter.key;
+        // Stores the master player find options value used in the current execution flow.
+        let masterPlayerFindOptions: MasterPlayerFindOptions = {
+            customDatas: true,
+            playerBan: true,
+        };
 
-			// Stores the custom datas settings item value used in the current execution flow.
-			let customDatasSettingsItem = masterPlayerSettings.customDatasSettings.find(x => x.key == key);
-			if (customDatasSettingsItem == null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
-				operationResponse.setDebugMessage("CustomKey not found " + key);
-				return operationResponse;
-			}
+        // Stores the master player value used in the current execution flow.
+        let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
-			if (customDatasSettingsItem.permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.KeyNotFound);
-				operationResponse.setDebugMessage("CustomKey is readOnly " + key + ", change it by server or admin role");
-				return operationResponse;
-			}
-		}
+        if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
+            return operationResponse;
+        }
+        if (role == SecretRole.Client) {
+            // Stores the player ban value used in the current execution flow.
+            let playerBan = masterPlayer.getPlayerBan();
 
-		// Stores the master player find options value used in the current execution flow.
-		let masterPlayerFindOptions: MasterPlayerFindOptions = {
-			customDatas: true,
-			playerBan: true,
-		}
+            if (playerBan.tsExpire != 0) {
+                let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+                if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+                    operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
 
-		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+                    return operationResponse;
+                }
+            }
+        }
 
-		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
-			return operationResponse;
-		}
-		if (role == SecretRole.Client) {
-			// Stores the player ban value used in the current execution flow.
-			let playerBan = masterPlayer.getPlayerBan();
+        // Stores the GearN info response parameters value used in the current execution flow.
+        let gnInfoResponseParameters = new GNHashtable();
+        // Stores the GearN custom datas value used in the current execution flow.
+        let gnCustomDatas = new GNArray();
 
-			if (playerBan.tsExpire != 0) {
-				let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-				if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
-					operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
-					operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
-					
-					return operationResponse;
-				}
-			}
-		}
+        for (let i = 0; i < request.customDatas.length; i++) {
+            // Stores the custom data parameter value used in the current execution flow.
+            let customDataParameter = request.customDatas[i];
 
-		// Stores the GearN info response parameters value used in the current execution flow.
-		let gnInfoResponseParameters = new GNHashtable();
-		// Stores the GearN custom datas value used in the current execution flow.
-		let gnCustomDatas = new GNArray();
+            // Stores the key value used in the current execution flow.
+            let key = customDataParameter.key;
 
-		for (let i = 0; i < request.customDatas.length; i++) {
+            // Stores the custom datas settings item value used in the current execution flow.
+            let customDatasSettingsItem = masterPlayerSettings.customDatasSettings.find((x) => x.key == key);
+            if (customDatasSettingsItem == null) continue;
 
-			// Stores the custom data parameter value used in the current execution flow.
-			let customDataParameter = request.customDatas[i];
+            // Stores the value value used in the current execution flow.
+            let value = customDataParameter.value;
 
-			// Stores the key value used in the current execution flow.
-			let key = customDataParameter.key;
+            let permission = customDatasSettingsItem.permission;
 
-			// Stores the custom datas settings item value used in the current execution flow.
-			let customDatasSettingsItem = masterPlayerSettings.customDatasSettings.find(x => x.key == key);
-			if (customDatasSettingsItem == null) continue;
+            if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
+            } else {
+                if (value == null) {
+                    if (masterPlayer.hasCustomData(key)) {
+                        masterPlayer.removeCustomData(key);
+                    }
+                } else {
+                    if (value instanceof GNData) {
+                        value = (value as GNData).toData();
+                    }
 
-			// Stores the value value used in the current execution flow.
-			let value = customDataParameter.value;
+                    masterPlayer.setCustomData(key, value as DataValueType);
+                }
 
-			let permission = customDatasSettingsItem.permission;
+                // Stores the GearN item data value used in the current execution flow.
+                let gnCustomData = new GNHashtable();
+                gnCustomData.add(ParameterCode.Key, key);
+                gnCustomData.add(ParameterCode.Value, customDataParameter.value);
 
-			if (permission == PermissionDataItem.ReadOnly && role == SecretRole.Client) {
+                gnCustomDatas.add(gnCustomData);
+            }
+        }
 
-			}
-			else {
-				if (value == null) {
-					if (masterPlayer.hasCustomData(key)) {
-						masterPlayer.removeCustomData(key);
-					}
-				}
-				else {
-					if (value instanceof GNData) {
-						value = (value as GNData).toData();
-					}
+        await masterPlayer.saveAsync();
 
-					masterPlayer.setCustomData(key, value as DataValueType);
-				}
+        gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
 
-				// Stores the GearN item data value used in the current execution flow.
-				let gnCustomData = new GNHashtable();
-				gnCustomData.add(ParameterCode.Key, key);
-				gnCustomData.add(ParameterCode.Value, customDataParameter.value);
+        operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-				gnCustomDatas.add(gnCustomData);
-			}
-		}
+        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SetCustomData", request, role, secretInfo, operationRequest, operationResponse);
 
-		await masterPlayer.saveAsync();
-
-		gnInfoResponseParameters.add(ParameterCode.CustomDatas, gnCustomDatas);
-
-		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_SetCustomData", request, role, secretInfo, operationRequest, operationResponse);
-
-		return operationResponse;
-	}
+        return operationResponse;
+    }
 }

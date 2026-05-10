@@ -25,27 +25,30 @@ function createQueueSettings(overrides: Partial<xMatchmakingQueueSettings> = {})
         ticketSize: overrides.ticketSize ?? { min: 1, max: 4 },
         serverAllocation: overrides.serverAllocation ?? { enable: false },
         teams: overrides.teams,
-        rules: overrides.rules
+        rules: overrides.rules,
     };
 }
 
 function createTicket(ticketId: string, members: TicketMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return new MatchmakingTicket({
-        _id: new mongodb.ObjectId(),
-        ticketId: ticketId,
-        queueName: queueName,
-        creatorId: members[0].userId,
-        giveUpAfterSeconds: 60,
-        userIds: members.map(member => member.userId),
-        members: members.map(member => ({
-            userId: member.userId,
-            status: MatchmakingMemberStatus.Joined,
-            attribute: member.attribute ?? {},
-            attributeForQueue: member.attributeForQueue ?? {}
-        })),
-        status: MatchmakingTicketStatus.WaitingForMatch,
-        tsCreate: tsCreate
-    }, collectionStub);
+    return new MatchmakingTicket(
+        {
+            _id: new mongodb.ObjectId(),
+            ticketId: ticketId,
+            queueName: queueName,
+            creatorId: members[0].userId,
+            giveUpAfterSeconds: 60,
+            userIds: members.map((member) => member.userId),
+            members: members.map((member) => ({
+                userId: member.userId,
+                status: MatchmakingMemberStatus.Joined,
+                attribute: member.attribute ?? {},
+                attributeForQueue: member.attributeForQueue ?? {},
+            })),
+            status: MatchmakingTicketStatus.WaitingForMatch,
+            tsCreate: tsCreate,
+        },
+        collectionStub,
+    );
 }
 
 function singleMemberTicket(ticketId: string, userId: string, attributeForQueue: { [k: string]: DataValueType } = {}, tsCreate = Date.now()): MatchmakingTicket {
@@ -62,7 +65,7 @@ function runMatchmaking(matchmakingQueueSetting: xMatchmakingQueueSettings, matc
 }
 
 function findCandidateWithTickets(candidates: MatchmakingTicketCanMatch[], expectedTicketIds: string[]): MatchmakingTicketCanMatch {
-    return candidates.find(candidate => expectedTicketIds.every(ticketId => candidate.ticketIds.includes(ticketId)) && candidate.ticketIds.length == expectedTicketIds.length);
+    return candidates.find((candidate) => expectedTicketIds.every((ticketId) => candidate.ticketIds.includes(ticketId)) && candidate.ticketIds.length == expectedTicketIds.length);
 }
 
 function assertCandidateWithTickets(candidates: MatchmakingTicketCanMatch[], expectedTicketIds: string[]): MatchmakingTicketCanMatch {
@@ -72,11 +75,19 @@ function assertCandidateWithTickets(candidates: MatchmakingTicketCanMatch[], exp
 }
 
 function assertNoCandidateWithTicket(candidates: MatchmakingTicketCanMatch[], ticketId: string): void {
-    assert.equal(candidates.some(candidate => candidate.ticketIds.includes(ticketId)), false, "Expected no candidate containing ticket ID: " + ticketId);
+    assert.equal(
+        candidates.some((candidate) => candidate.ticketIds.includes(ticketId)),
+        false,
+        "Expected no candidate containing ticket ID: " + ticketId,
+    );
 }
 
 function assertNoCandidateContainingAll(candidates: MatchmakingTicketCanMatch[], ticketIds: string[]): void {
-    assert.equal(candidates.some(candidate => ticketIds.every(ticketId => candidate.ticketIds.includes(ticketId))), false, "Expected no candidate containing ticket IDs together: " + ticketIds.join(", "));
+    assert.equal(
+        candidates.some((candidate) => ticketIds.every((ticketId) => candidate.ticketIds.includes(ticketId))),
+        false,
+        "Expected no candidate containing ticket IDs together: " + ticketIds.join(", "),
+    );
 }
 
 function assertCandidateMembers(candidate: MatchmakingTicketCanMatch, expectedMemberIds: string[]): void {
@@ -108,7 +119,7 @@ function stringRule(name: string, compairType = RuleStringCompairType.Equals): S
         attributeSource: RuleAttributeSource.UserInput,
         attributePath: name,
         defaultValue: "",
-        compairType: compairType
+        compairType: compairType,
     };
 }
 
@@ -119,7 +130,7 @@ function differenceRule(name: string, allowedDifference: number): DifferenceRule
         attributeSource: RuleAttributeSource.UserInput,
         attributePath: name,
         defaultValue: 0,
-        allowedDifference: allowedDifference
+        allowedDifference: allowedDifference,
     };
 }
 
@@ -128,7 +139,7 @@ function regionRule(maxLatency: number): RegionSelectionRule {
         name: "region",
         type: RuleType.RegionSelection,
         attributePath: "region",
-        max: maxLatency
+        max: maxLatency,
     };
 }
 
@@ -139,7 +150,7 @@ function setIntersectionRule(name: string, min: number): SetIntersectionRule {
         attributeSource: RuleAttributeSource.UserInput,
         attributePath: name,
         min: min,
-        defaultValue: []
+        defaultValue: [],
     };
 }
 
@@ -150,7 +161,7 @@ function matchTotalRule(name: string, min: number, max: number): MatchTotalRule 
         attributeSource: RuleAttributeSource.UserInput,
         attributePath: name,
         min: min,
-        max: max
+        max: max,
     };
 }
 
@@ -158,7 +169,7 @@ function teamSizeBalanceRule(allowedDifference: number): TeamSizeBalanceRule {
     return {
         name: "teamSizeBalance",
         type: RuleType.TeamSizeBalance,
-        allowedDifference: allowedDifference
+        allowedDifference: allowedDifference,
     };
 }
 
@@ -169,14 +180,14 @@ function teamDifferenceRule(name: string, allowedDifference: number): TeamDiffer
         attributeSource: RuleAttributeSource.UserInput,
         attributePath: name,
         allowedDifference: allowedDifference,
-        defaultValue: 0
+        defaultValue: 0,
     };
 }
 
 function teamTicketSizeSimilarityRule(): TeamTicketSizeSimilarityRule {
     return {
         name: "teamTicketSizeSimilarity",
-        type: RuleType.TeamTicketSizeSimilarity
+        type: RuleType.TeamTicketSizeSimilarity,
     };
 }
 
@@ -184,14 +195,23 @@ test("01 no rules builds a mixed-size four-member candidate", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 } });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { mode: "ranked" }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { mode: "ranked" } }, { userId: "userB2", attributeForQueue: { mode: "ranked" } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { mode: "ranked" } },
+            { userId: "userB2", attributeForQueue: { mode: "ranked" } },
+        ]),
         singleMemberTicket("ticketC", "userC", { mode: "ranked" }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { mode: "ranked" } }, { userId: "userD2", attributeForQueue: { mode: "ranked" } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { mode: "ranked" } },
+            { userId: "userD2", attributeForQueue: { mode: "ranked" } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB", "ticketC"], ["userA", "userB1", "userB2", "userC"]);
-    assert.deepEqual(candidate.matchmakingTicketTeams[0].tickets.map(ticket => ticket.ticketId), ["ticketA", "ticketB", "ticketC"]);
+    assert.deepEqual(
+        candidate.matchmakingTicketTeams[0].tickets.map((ticket) => ticket.ticketId),
+        ["ticketA", "ticketB", "ticketC"],
+    );
     assertEveryCandidateWithinMatchSize(candidates, 4);
 });
 
@@ -200,20 +220,15 @@ test("02 no rules assigns mixed tickets across configured teams", () => {
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
-        ]
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
+        ],
     });
-    let candidates = runMatchmaking(settings, [
-        multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }]),
-        singleMemberTicket("ticketB", "userB"),
-        singleMemberTicket("ticketC", "userC"),
-        multiMemberTicket("ticketD", [{ userId: "userD1" }, { userId: "userD2" }])
-    ]);
+    let candidates = runMatchmaking(settings, [multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }]), singleMemberTicket("ticketB", "userB"), singleMemberTicket("ticketC", "userC"), multiMemberTicket("ticketD", [{ userId: "userD1" }, { userId: "userD2" }])]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, ticketIds: team.tickets.map(ticket => ticket.ticketId) }))), [
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, ticketIds: team.tickets.map((ticket) => ticket.ticketId) }))), [
         { teamId: "blue", ticketIds: ["ticketB", "ticketC"] },
-        { teamId: "red", ticketIds: ["ticketA"] }
+        { teamId: "red", ticketIds: ["ticketA"] },
     ]);
 });
 
@@ -221,9 +236,15 @@ test("03 StringRule Equals accepts same attribute across mixed tickets", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [stringRule("mode")] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { mode: "ranked" }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { mode: "ranked" } }, { userId: "userB2", attributeForQueue: { mode: "ranked" } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { mode: "ranked" } },
+            { userId: "userB2", attributeForQueue: { mode: "ranked" } },
+        ]),
         singleMemberTicket("ticketC", "userC", { mode: "ranked" }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { mode: "casual" } }, { userId: "userD2", attributeForQueue: { mode: "casual" } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { mode: "casual" } },
+            { userId: "userD2", attributeForQueue: { mode: "casual" } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -235,9 +256,15 @@ test("04 StringRule Equals skips ticket with different attribute", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [stringRule("mode")] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { mode: "ranked" }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { mode: "casual" } }, { userId: "userB2", attributeForQueue: { mode: "casual" } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { mode: "casual" } },
+            { userId: "userB2", attributeForQueue: { mode: "casual" } },
+        ]),
         singleMemberTicket("ticketC", "userC", { mode: "ranked" }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { mode: "ranked" } }, { userId: "userD2", attributeForQueue: { mode: "ranked" } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { mode: "ranked" } },
+            { userId: "userD2", attributeForQueue: { mode: "ranked" } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketC", "ticketD"]);
@@ -249,9 +276,15 @@ test("05 StringRule NotEquals accepts tickets with different attribute from seed
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [stringRule("partyType", RuleStringCompairType.NotEquals)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { partyType: "solo" }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { partyType: "duo" } }, { userId: "userB2", attributeForQueue: { partyType: "duo" } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { partyType: "duo" } },
+            { userId: "userB2", attributeForQueue: { partyType: "duo" } },
+        ]),
         singleMemberTicket("ticketC", "userC", { partyType: "squad" }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { partyType: "solo" } }, { userId: "userD2", attributeForQueue: { partyType: "solo" } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { partyType: "solo" } },
+            { userId: "userD2", attributeForQueue: { partyType: "solo" } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -263,9 +296,15 @@ test("06 DifferenceRule accepts mixed tickets inside allowed delta", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [differenceRule("skill", 50)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { skill: 100 }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { skill: 130 } }, { userId: "userB2", attributeForQueue: { skill: 128 } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { skill: 130 } },
+            { userId: "userB2", attributeForQueue: { skill: 128 } },
+        ]),
         singleMemberTicket("ticketC", "userC", { skill: 145 }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { skill: 190 } }, { userId: "userD2", attributeForQueue: { skill: 190 } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { skill: 190 } },
+            { userId: "userD2", attributeForQueue: { skill: 190 } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -277,9 +316,15 @@ test("07 DifferenceRule skips mixed ticket outside allowed delta", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [differenceRule("skill", 25)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { skill: 100 }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { skill: 160 } }, { userId: "userB2", attributeForQueue: { skill: 158 } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { skill: 160 } },
+            { userId: "userB2", attributeForQueue: { skill: 158 } },
+        ]),
         singleMemberTicket("ticketC", "userC", { skill: 110 }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { skill: 120 } }, { userId: "userD2", attributeForQueue: { skill: 122 } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { skill: 120 } },
+            { userId: "userD2", attributeForQueue: { skill: 122 } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketC", "ticketD"]);
@@ -296,15 +341,29 @@ test("08 DifferenceRule linear expansion accepts wider skill gap", () => {
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 15,
-            limit: 55
-        }
+            limit: 55,
+        },
     };
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [rule] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { skill: 100 }, oldTimestamp),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { skill: 145 } }, { userId: "userB2", attributeForQueue: { skill: 145 } }], oldTimestamp),
+        multiMemberTicket(
+            "ticketB",
+            [
+                { userId: "userB1", attributeForQueue: { skill: 145 } },
+                { userId: "userB2", attributeForQueue: { skill: 145 } },
+            ],
+            oldTimestamp,
+        ),
         singleMemberTicket("ticketC", "userC", { skill: 150 }, oldTimestamp),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { skill: 190 } }, { userId: "userD2", attributeForQueue: { skill: 190 } }], oldTimestamp)
+        multiMemberTicket(
+            "ticketD",
+            [
+                { userId: "userD1", attributeForQueue: { skill: 190 } },
+                { userId: "userD2", attributeForQueue: { skill: 190 } },
+            ],
+            oldTimestamp,
+        ),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -315,9 +374,15 @@ test("09 RegionSelectionRule accepts same region under latency cap", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [regionRule(80)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { region: { region: "us-east", ping: 20 } }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { region: { region: "us-east", ping: 70 } } }, { userId: "userB2", attributeForQueue: { region: { region: "us-east", ping: 60 } } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { region: { region: "us-east", ping: 70 } } },
+            { userId: "userB2", attributeForQueue: { region: { region: "us-east", ping: 60 } } },
+        ]),
         singleMemberTicket("ticketC", "userC", { region: { region: "us-east", ping: 80 } }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { region: { region: "eu-west", ping: 40 } } }, { userId: "userD2", attributeForQueue: { region: { region: "eu-west", ping: 40 } } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { region: { region: "eu-west", ping: 40 } } },
+            { userId: "userD2", attributeForQueue: { region: { region: "eu-west", ping: 40 } } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -329,9 +394,15 @@ test("10 RegionSelectionRule skips region mismatch in mixed ticket set", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [regionRule(90)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { region: { region: "us-east", ping: 20 } }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { region: { region: "eu-west", ping: 50 } } }, { userId: "userB2", attributeForQueue: { region: { region: "eu-west", ping: 40 } } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { region: { region: "eu-west", ping: 50 } } },
+            { userId: "userB2", attributeForQueue: { region: { region: "eu-west", ping: 40 } } },
+        ]),
         singleMemberTicket("ticketC", "userC", { region: { region: "us-east", ping: 50 } }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { region: { region: "us-east", ping: 60 } } }, { userId: "userD2", attributeForQueue: { region: { region: "us-east", ping: 70 } } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { region: { region: "us-east", ping: 60 } } },
+            { userId: "userD2", attributeForQueue: { region: { region: "us-east", ping: 70 } } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketC", "ticketD"]);
@@ -344,14 +415,28 @@ test("11 RegionSelectionRule optional timeout accepts different regions", () => 
     let rule = regionRule(50);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [rule] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { region: { region: "us-east", ping: 200 } }, oldTimestamp),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { region: { region: "eu-west", ping: 200 } } }, { userId: "userB2", attributeForQueue: { region: { region: "eu-west", ping: 200 } } }], oldTimestamp),
+        multiMemberTicket(
+            "ticketB",
+            [
+                { userId: "userB1", attributeForQueue: { region: { region: "eu-west", ping: 200 } } },
+                { userId: "userB2", attributeForQueue: { region: { region: "eu-west", ping: 200 } } },
+            ],
+            oldTimestamp,
+        ),
         singleMemberTicket("ticketC", "userC", { region: { region: "asia", ping: 200 } }, oldTimestamp),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { region: { region: "sa", ping: 200 } } }, { userId: "userD2", attributeForQueue: { region: { region: "sa", ping: 200 } } }], oldTimestamp)
+        multiMemberTicket(
+            "ticketD",
+            [
+                { userId: "userD1", attributeForQueue: { region: { region: "sa", ping: 200 } } },
+                { userId: "userD2", attributeForQueue: { region: { region: "sa", ping: 200 } } },
+            ],
+            oldTimestamp,
+        ),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -362,9 +447,15 @@ test("12 SetIntersectionRule accepts enough shared values", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [setIntersectionRule("maps", 2)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { maps: ["a", "b", "c"] }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { maps: ["b", "c", "d"] } }, { userId: "userB2", attributeForQueue: { maps: ["b", "c"] } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { maps: ["b", "c", "d"] } },
+            { userId: "userB2", attributeForQueue: { maps: ["b", "c"] } },
+        ]),
         singleMemberTicket("ticketC", "userC", { maps: ["a", "c", "e"] }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { maps: ["x", "y"] } }, { userId: "userD2", attributeForQueue: { maps: ["x", "z"] } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { maps: ["x", "y"] } },
+            { userId: "userD2", attributeForQueue: { maps: ["x", "z"] } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -376,9 +467,15 @@ test("13 SetIntersectionRule skips ticket without enough overlap", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [setIntersectionRule("maps", 2)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { maps: ["a", "b", "c"] }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { maps: ["x", "y", "z"] } }, { userId: "userB2", attributeForQueue: { maps: ["x", "z"] } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { maps: ["x", "y", "z"] } },
+            { userId: "userB2", attributeForQueue: { maps: ["x", "z"] } },
+        ]),
         singleMemberTicket("ticketC", "userC", { maps: ["a", "b", "d"] }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { maps: ["b", "c", "e"] } }, { userId: "userD2", attributeForQueue: { maps: ["b", "c"] } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { maps: ["b", "c", "e"] } },
+            { userId: "userD2", attributeForQueue: { maps: ["b", "c"] } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketC", "ticketD"]);
@@ -394,15 +491,29 @@ test("14 SetIntersectionRule linear expansion relaxes minimum overlap", () => {
         expansionType: RuleExpansionType.Linear,
         linearExpansions: {
             secondsBetweenExpansions: 10,
-            delta: 1
-        }
+            delta: 1,
+        },
     };
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [rule] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { maps: ["a", "b", "c"] }, oldTimestamp),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { maps: ["c", "d"] } }, { userId: "userB2", attributeForQueue: { maps: ["c"] } }], oldTimestamp),
+        multiMemberTicket(
+            "ticketB",
+            [
+                { userId: "userB1", attributeForQueue: { maps: ["c", "d"] } },
+                { userId: "userB2", attributeForQueue: { maps: ["c"] } },
+            ],
+            oldTimestamp,
+        ),
         singleMemberTicket("ticketC", "userC", { maps: ["b", "e"] }, oldTimestamp),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { maps: ["x", "y"] } }, { userId: "userD2", attributeForQueue: { maps: ["x"] } }], oldTimestamp)
+        multiMemberTicket(
+            "ticketD",
+            [
+                { userId: "userD1", attributeForQueue: { maps: ["x", "y"] } },
+                { userId: "userD2", attributeForQueue: { maps: ["x"] } },
+            ],
+            oldTimestamp,
+        ),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -413,9 +524,15 @@ test("15 MatchTotalRule accepts aggregate score inside bounds", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [matchTotalRule("score", 90, 100)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { score: 20 }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { score: 30 } }, { userId: "userB2", attributeForQueue: { score: 30 } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { score: 30 } },
+            { userId: "userB2", attributeForQueue: { score: 30 } },
+        ]),
         singleMemberTicket("ticketC", "userC", { score: 20 }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { score: 5 } }, { userId: "userD2", attributeForQueue: { score: 5 } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { score: 5 } },
+            { userId: "userD2", attributeForQueue: { score: 5 } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -426,9 +543,15 @@ test("16 MatchTotalRule rejects aggregate score outside bounds", () => {
     let settings = createQueueSettings({ matchSize: { min: 4, max: 4 }, rules: [matchTotalRule("score", 90, 100)] });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { score: 20 }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { score: 40 } }, { userId: "userB2", attributeForQueue: { score: 40 } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { score: 40 } },
+            { userId: "userB2", attributeForQueue: { score: 40 } },
+        ]),
         singleMemberTicket("ticketC", "userC", { score: 30 }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { score: 10 } }, { userId: "userD2", attributeForQueue: { score: 10 } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { score: 10 } },
+            { userId: "userD2", attributeForQueue: { score: 10 } },
+        ]),
     ]);
 
     assert.equal(candidates.length, 0);
@@ -439,24 +562,19 @@ test("17 TeamSizeBalanceRule accepts and rejects team spread", () => {
         matchSize: { min: 5, max: 5 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 3 } },
-            { teamId: "blue", teamSize: { min: 2, max: 3 } }
+            { teamId: "blue", teamSize: { min: 2, max: 3 } },
         ],
-        rules: [teamSizeBalanceRule(1)]
+        rules: [teamSizeBalanceRule(1)],
     });
     let rejectedSettings = createQueueSettings({ ...acceptedSettings, rules: [teamSizeBalanceRule(0)] });
-    let tickets = [
-        multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }, { userId: "userA3" }]),
-        singleMemberTicket("ticketB", "userB"),
-        singleMemberTicket("ticketC", "userC"),
-        multiMemberTicket("ticketD", [{ userId: "userD1" }, { userId: "userD2" }])
-    ];
+    let tickets = [multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }, { userId: "userA3" }]), singleMemberTicket("ticketB", "userB"), singleMemberTicket("ticketC", "userC"), multiMemberTicket("ticketD", [{ userId: "userD1" }, { userId: "userD2" }])];
 
     let acceptedCandidates = runMatchmaking(acceptedSettings, tickets);
     let rejectedCandidates = runMatchmaking(rejectedSettings, tickets);
     let candidate = assertCandidateWithTickets(acceptedCandidates, ["ticketA", "ticketB", "ticketC"]);
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, memberCount: team.members.length }))), [
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, memberCount: team.members.length }))), [
         { teamId: "blue", memberCount: 2 },
-        { teamId: "red", memberCount: 3 }
+        { teamId: "red", memberCount: 3 },
     ]);
     assertNoCandidateContainingAll(rejectedCandidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(rejectedCandidates, ["ticketA", "ticketC"]);
@@ -467,30 +585,42 @@ test("18 TeamDifferenceRule accepts and rejects team score spread", () => {
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamDifferenceRule("skill", 0)]
+        rules: [teamDifferenceRule("skill", 0)],
     });
     let rejectedSettings = createQueueSettings({ ...acceptedSettings, rules: [teamDifferenceRule("skill", 10)] });
     let acceptedTickets = [
-        multiMemberTicket("ticketA", [{ userId: "userA1", attributeForQueue: { skill: 50 } }, { userId: "userA2", attributeForQueue: { skill: 50 } }]),
+        multiMemberTicket("ticketA", [
+            { userId: "userA1", attributeForQueue: { skill: 50 } },
+            { userId: "userA2", attributeForQueue: { skill: 50 } },
+        ]),
         singleMemberTicket("ticketB", "userB", { skill: 60 }),
         singleMemberTicket("ticketC", "userC", { skill: 40 }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { skill: 90 } }, { userId: "userD2", attributeForQueue: { skill: 90 } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { skill: 90 } },
+            { userId: "userD2", attributeForQueue: { skill: 90 } },
+        ]),
     ];
     let rejectedTickets = [
-        multiMemberTicket("ticketA", [{ userId: "userA1", attributeForQueue: { skill: 50 } }, { userId: "userA2", attributeForQueue: { skill: 50 } }]),
+        multiMemberTicket("ticketA", [
+            { userId: "userA1", attributeForQueue: { skill: 50 } },
+            { userId: "userA2", attributeForQueue: { skill: 50 } },
+        ]),
         singleMemberTicket("ticketB", "userB", { skill: 80 }),
         singleMemberTicket("ticketC", "userC", { skill: 40 }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { skill: 90 } }, { userId: "userD2", attributeForQueue: { skill: 90 } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { skill: 90 } },
+            { userId: "userD2", attributeForQueue: { skill: 90 } },
+        ]),
     ];
 
     let acceptedCandidates = runMatchmaking(acceptedSettings, acceptedTickets);
     let rejectedCandidates = runMatchmaking(rejectedSettings, rejectedTickets);
     let candidate = assertCandidateWithTickets(acceptedCandidates, ["ticketA", "ticketB", "ticketC"]);
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, score: team.members.reduce((sum, member) => sum + (member.attributeForQueue.skill as number), 0) }))), [
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, score: team.members.reduce((sum, member) => sum + (member.attributeForQueue.skill as number), 0) }))), [
         { teamId: "blue", score: 100 },
-        { teamId: "red", score: 100 }
+        { teamId: "red", score: 100 },
     ]);
     assert.equal(rejectedCandidates.length, 0);
 });
@@ -500,27 +630,17 @@ test("19 TeamTicketSizeSimilarityRule accepts equal party sizes and rejects uneq
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let acceptedCandidates = runMatchmaking(settings, [
-        multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }]),
-        multiMemberTicket("ticketB", [{ userId: "userB1" }, { userId: "userB2" }]),
-        singleMemberTicket("ticketC", "userC"),
-        singleMemberTicket("ticketD", "userD")
-    ]);
-    let rejectedCandidates = runMatchmaking(settings, [
-        multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }]),
-        singleMemberTicket("ticketB", "userB"),
-        singleMemberTicket("ticketC", "userC"),
-        multiMemberTicket("ticketD", [{ userId: "userD1" }, { userId: "userD2" }])
-    ]);
+    let acceptedCandidates = runMatchmaking(settings, [multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }]), multiMemberTicket("ticketB", [{ userId: "userB1" }, { userId: "userB2" }]), singleMemberTicket("ticketC", "userC"), singleMemberTicket("ticketD", "userD")]);
+    let rejectedCandidates = runMatchmaking(settings, [multiMemberTicket("ticketA", [{ userId: "userA1" }, { userId: "userA2" }]), singleMemberTicket("ticketB", "userB"), singleMemberTicket("ticketC", "userC"), multiMemberTicket("ticketD", [{ userId: "userD1" }, { userId: "userD2" }])]);
 
     let candidate = assertCandidateWithTickets(acceptedCandidates, ["ticketA", "ticketB"]);
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, ticketIds: team.tickets.map(ticket => ticket.ticketId) }))), [
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, ticketIds: team.tickets.map((ticket) => ticket.ticketId) }))), [
         { teamId: "blue", ticketIds: ["ticketB"] },
-        { teamId: "red", ticketIds: ["ticketA"] }
+        { teamId: "red", ticketIds: ["ticketA"] },
     ]);
     assertNoCandidateContainingAll(rejectedCandidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(rejectedCandidates, ["ticketA", "ticketC"]);
@@ -529,17 +649,19 @@ test("19 TeamTicketSizeSimilarityRule accepts equal party sizes and rejects uneq
 test("20 combined String Difference and SetIntersection rules produce expected mixed match", () => {
     let settings = createQueueSettings({
         matchSize: { min: 4, max: 4 },
-        rules: [
-            stringRule("mode"),
-            differenceRule("skill", 20),
-            setIntersectionRule("maps", 1)
-        ]
+        rules: [stringRule("mode"), differenceRule("skill", 20), setIntersectionRule("maps", 1)],
     });
     let candidates = runMatchmaking(settings, [
         singleMemberTicket("ticketA", "userA", { mode: "ranked", skill: 100, maps: ["a", "b"] }),
-        multiMemberTicket("ticketB", [{ userId: "userB1", attributeForQueue: { mode: "ranked", skill: 110, maps: ["b", "c"] } }, { userId: "userB2", attributeForQueue: { mode: "ranked", skill: 112, maps: ["b"] } }]),
+        multiMemberTicket("ticketB", [
+            { userId: "userB1", attributeForQueue: { mode: "ranked", skill: 110, maps: ["b", "c"] } },
+            { userId: "userB2", attributeForQueue: { mode: "ranked", skill: 112, maps: ["b"] } },
+        ]),
         singleMemberTicket("ticketC", "userC", { mode: "ranked", skill: 115, maps: ["a", "d"] }),
-        multiMemberTicket("ticketD", [{ userId: "userD1", attributeForQueue: { mode: "casual", skill: 108, maps: ["b"] } }, { userId: "userD2", attributeForQueue: { mode: "casual", skill: 108, maps: ["b"] } }])
+        multiMemberTicket("ticketD", [
+            { userId: "userD1", attributeForQueue: { mode: "casual", skill: 108, maps: ["b"] } },
+            { userId: "userD2", attributeForQueue: { mode: "casual", skill: 108, maps: ["b"] } },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -566,14 +688,14 @@ function complexStringMember(userId: string, modeRuleValue: string, options: Com
         regionRule: {
             region: "sg",
             ping: 42,
-            jitter: 5
+            jitter: 5,
         },
         mapRule: ["temple", "harbor", "metro", "temple"],
         teamSkillRule: 1540,
         matchScoreRule: 6,
         unrelatedMode: options.noiseModeRule ?? "noise:casual",
         unrelatedSkill: 9999,
-        unrelatedMaps: ["wrong-map"]
+        unrelatedMaps: ["wrong-map"],
     };
 
     if (!options.omitModeRule) {
@@ -591,12 +713,12 @@ function complexStringMember(userId: string, modeRuleValue: string, options: Com
                 rank: {
                     tier: "gold",
                     division: 2,
-                    mmr: 1540
+                    mmr: 1540,
                 },
                 region: {
                     primary: "sg",
-                    fallback: "hk"
-                }
+                    fallback: "hk",
+                },
             },
             matchmaking: {
                 mode: options.rawMode ?? modeRuleValue,
@@ -605,11 +727,11 @@ function complexStringMember(userId: string, modeRuleValue: string, options: Com
                     region: "sg",
                     ping: 42,
                     jitter: 5,
-                    packetLoss: 0.01
+                    packetLoss: 0.01,
                 },
                 maps: ["temple", "harbor", "metro"],
                 roles: ["tank", "support"],
-                score: 6
+                score: 6,
             },
             noise: {
                 modeRule: options.noiseModeRule ?? "noise:casual",
@@ -617,12 +739,12 @@ function complexStringMember(userId: string, modeRuleValue: string, options: Com
                 mapRule: ["wrong-map"],
                 regionRule: {
                     region: "wrong",
-                    ping: 999
+                    ping: 999,
                 },
-                matchScoreRule: 9999
-            }
+                matchScoreRule: 9999,
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
@@ -631,15 +753,16 @@ function complexStringSoloTicket(ticketId: string, userId: string, modeRuleValue
 }
 
 function complexStringPartyTicket(ticketId: string, members: ComplexStringPartyMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, members.map(member => complexStringMember(member.userId, member.modeRuleValue, member.options)), tsCreate);
+    return createTicket(
+        ticketId,
+        members.map((member) => complexStringMember(member.userId, member.modeRuleValue, member.options)),
+        tsCreate,
+    );
 }
 
 test("21 StringRule Equals full match uses modeRule instead of complex noise fields", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule")] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { noiseModeRule: "casual:na" }),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { noiseModeRule: "casual:eu" })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { noiseModeRule: "casual:na" }), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { noiseModeRule: "casual:eu" })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA", "userB"]);
@@ -648,21 +771,14 @@ test("21 StringRule Equals full match uses modeRule instead of complex noise fie
 
 test("22 StringRule Equals no match ignores same noise mode when rule key differs", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule")] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { noiseModeRule: "same-noise" }),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:hk", { noiseModeRule: "same-noise" })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { noiseModeRule: "same-noise" }), complexStringSoloTicket("ticketB", "userB", "ranked-duo:hk", { noiseModeRule: "same-noise" })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("23 StringRule Equals partial match keeps matching subset and excludes different mode from seed candidate", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule")] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketC", "userC", "ranked-solo:sg")
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"), complexStringSoloTicket("ticketC", "userC", "ranked-solo:sg")]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketC"]);
@@ -670,10 +786,7 @@ test("23 StringRule Equals partial match keeps matching subset and excludes diff
 
 test("24 StringRule NotEquals full match accepts different complex mode values", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule", RuleStringCompairType.NotEquals)] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketB", "userB", "ranked-solo:sg")
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"), complexStringSoloTicket("ticketB", "userB", "ranked-solo:sg")]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA", "userB"]);
@@ -681,21 +794,14 @@ test("24 StringRule NotEquals full match accepts different complex mode values",
 
 test("25 StringRule NotEquals no match rejects same complex mode even when raw noise differs", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule", RuleStringCompairType.NotEquals)] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { noiseModeRule: "noise-a" }),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { noiseModeRule: "noise-b" })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { noiseModeRule: "noise-a" }), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { noiseModeRule: "noise-b" })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("26 StringRule NotEquals partial match rejects same-mode seed pair but accepts different-mode pair", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule", RuleStringCompairType.NotEquals)] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketB", "userB", "ranked-solo:sg"),
-        complexStringSoloTicket("ticketC", "userC", "ranked-duo:sg")
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"), complexStringSoloTicket("ticketB", "userB", "ranked-solo:sg"), complexStringSoloTicket("ticketC", "userC", "ranked-duo:sg")]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketC"]);
@@ -705,10 +811,7 @@ test("27 StringRule Equals full match uses defaultValue when both tickets omit m
     let rule = stringRule("modeRule");
     rule.defaultValue = "default-ranked:sg";
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ignored-a", { omitModeRule: true, noiseModeRule: "wrong-a" }),
-        complexStringSoloTicket("ticketB", "userB", "ignored-b", { omitModeRule: true, noiseModeRule: "wrong-b" })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ignored-a", { omitModeRule: true, noiseModeRule: "wrong-a" }), complexStringSoloTicket("ticketB", "userB", "ignored-b", { omitModeRule: true, noiseModeRule: "wrong-b" })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA", "userB"]);
@@ -718,10 +821,7 @@ test("28 StringRule Equals full match compares missing modeRule default with exp
     let rule = stringRule("modeRule");
     rule.defaultValue = "default-ranked:sg";
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ignored-a", { omitModeRule: true, noiseModeRule: "wrong-a" }),
-        complexStringSoloTicket("ticketB", "userB", "default-ranked:sg", { noiseModeRule: "wrong-b" })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ignored-a", { omitModeRule: true, noiseModeRule: "wrong-a" }), complexStringSoloTicket("ticketB", "userB", "default-ranked:sg", { noiseModeRule: "wrong-b" })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -730,10 +830,7 @@ test("29 StringRule Equals no match compares missing modeRule default against ex
     let rule = stringRule("modeRule");
     rule.defaultValue = "default-ranked:sg";
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ignored-a", { omitModeRule: true, noiseModeRule: "ranked-duo:sg" }),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { noiseModeRule: "default-ranked:sg" })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ignored-a", { omitModeRule: true, noiseModeRule: "ranked-duo:sg" }), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { noiseModeRule: "default-ranked:sg" })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -743,9 +840,9 @@ test("30 StringRule Equals party match uses first member modeRule and ignores se
     let candidates = runMatchmaking(settings, [
         complexStringPartyTicket("ticketA", [
             { userId: "userA1", modeRuleValue: "ranked-duo:sg" },
-            { userId: "userA2", modeRuleValue: "casual-duo:sg" }
+            { userId: "userA2", modeRuleValue: "casual-duo:sg" },
         ]),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg")
+        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
@@ -757,9 +854,9 @@ test("31 StringRule Equals no match rejects party when first member modeRule dif
     let candidates = runMatchmaking(settings, [
         complexStringPartyTicket("ticketA", [
             { userId: "userA1", modeRuleValue: "casual-duo:sg" },
-            { userId: "userA2", modeRuleValue: "ranked-duo:sg" }
+            { userId: "userA2", modeRuleValue: "ranked-duo:sg" },
         ]),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg")
+        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"),
     ]);
 
     assert.equal(candidates.length, 0);
@@ -773,14 +870,11 @@ test("32 StringRule custom expansion full match overrides seed comparison value"
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: ["phase-zero", "expanded-ranked:sg"]
-        }
+            overrideValue: ["phase-zero", "expanded-ranked:sg"],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "strict-ranked:sg", { noiseModeRule: "wrong-noise" }, oldTimestamp),
-        complexStringSoloTicket("ticketB", "userB", "expanded-ranked:sg", { noiseModeRule: "wrong-noise" }, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "strict-ranked:sg", { noiseModeRule: "wrong-noise" }, oldTimestamp), complexStringSoloTicket("ticketB", "userB", "expanded-ranked:sg", { noiseModeRule: "wrong-noise" }, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -793,14 +887,11 @@ test("33 StringRule custom expansion no match before override reaches compatible
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: ["phase-zero", "expanded-ranked:sg"]
-        }
+            overrideValue: ["phase-zero", "expanded-ranked:sg"],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "strict-ranked:sg", {}, currentTimestamp),
-        complexStringSoloTicket("ticketB", "userB", "expanded-ranked:sg", {}, currentTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "strict-ranked:sg", {}, currentTimestamp), complexStringSoloTicket("ticketB", "userB", "expanded-ranked:sg", {}, currentTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -813,14 +904,11 @@ test("34 StringRule custom expansion full match uses last override value after i
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: ["phase-zero", "late-ranked:sg"]
-        }
+            overrideValue: ["phase-zero", "late-ranked:sg"],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "strict-ranked:sg", {}, oldTimestamp),
-        complexStringSoloTicket("ticketB", "userB", "late-ranked:sg", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "strict-ranked:sg", {}, oldTimestamp), complexStringSoloTicket("ticketB", "userB", "late-ranked:sg", {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -830,13 +918,10 @@ test("35 StringRule optional timeout full match ignores incompatible mode values
     let rule = stringRule("modeRule");
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", {}, oldTimestamp),
-        complexStringSoloTicket("ticketB", "userB", "casual-solo:eu", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", {}, oldTimestamp), complexStringSoloTicket("ticketB", "userB", "casual-solo:eu", {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -846,25 +931,17 @@ test("36 StringRule optional timeout no match before rule becomes optional", () 
     let rule = stringRule("modeRule");
     rule.advancedSettings = {
         secondsUntilOptional: 120,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", {}, currentTimestamp),
-        complexStringSoloTicket("ticketB", "userB", "casual-solo:eu", {}, currentTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", {}, currentTimestamp), complexStringSoloTicket("ticketB", "userB", "casual-solo:eu", {}, currentTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("37 StringRule partial match enforces matchSize max with several compatible tickets", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [stringRule("modeRule")] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketC", "userC", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketD", "userD", "ranked-duo:sg")
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"), complexStringSoloTicket("ticketC", "userC", "ranked-duo:sg"), complexStringSoloTicket("ticketD", "userD", "ranked-duo:sg")]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertEveryCandidateWithinMatchSize(candidates, 2);
@@ -875,39 +952,29 @@ test("38 StringRule partial match enforces teamSize max while preserving valid t
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [stringRule("modeRule")]
+        rules: [stringRule("modeRule")],
     });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"),
-        complexStringSoloTicket("ticketC", "userC", "ranked-duo:sg")
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg"), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg"), complexStringSoloTicket("ticketC", "userC", "ranked-duo:sg")]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, memberIds: team.members.map(member => member.userId) }))), [
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, memberIds: team.members.map((member) => member.userId) }))), [
         { teamId: "blue", memberIds: ["userB"] },
-        { teamId: "red", memberIds: ["userA"] }
+        { teamId: "red", memberIds: ["userA"] },
     ]);
 });
 
 test("39 StringRule full match requires multiple complex string rules to pass", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule"), stringRule("platformRule")] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "pc:steam", unrelatedPlatform: "mobile:ios" } }),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "pc:steam", unrelatedPlatform: "mobile:android" } })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "pc:steam", unrelatedPlatform: "mobile:ios" } }), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "pc:steam", unrelatedPlatform: "mobile:android" } })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("40 StringRule no match rejects when secondary string rule fails despite matching noise", () => {
     let settings = createQueueSettings({ rules: [stringRule("modeRule"), stringRule("platformRule")] });
-    let candidates = runMatchmaking(settings, [
-        complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "pc:steam", unrelatedPlatform: "same-noise-platform" } }),
-        complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "console:ps", unrelatedPlatform: "same-noise-platform" } })
-    ]);
+    let candidates = runMatchmaking(settings, [complexStringSoloTicket("ticketA", "userA", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "pc:steam", unrelatedPlatform: "same-noise-platform" } }), complexStringSoloTicket("ticketB", "userB", "ranked-duo:sg", { extraAttributeForQueue: { platformRule: "console:ps", unrelatedPlatform: "same-noise-platform" } })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -931,14 +998,14 @@ function complexDifferenceMember(userId: string, skillRuleValue: number, options
         regionRule: {
             region: "sg",
             ping: 42,
-            jitter: 5
+            jitter: 5,
         },
         mapRule: ["temple", "harbor", "metro", "temple"],
         teamSkillRule: skillRuleValue,
         matchScoreRule: 6,
         unrelatedMode: "casual",
         unrelatedSkill: options.noiseSkillRule ?? 9999,
-        unrelatedMaps: ["wrong-map"]
+        unrelatedMaps: ["wrong-map"],
     };
 
     if (!options.omitSkillRule) {
@@ -956,12 +1023,12 @@ function complexDifferenceMember(userId: string, skillRuleValue: number, options
                 rank: {
                     tier: "gold",
                     division: 2,
-                    mmr: options.rawSkill ?? skillRuleValue
+                    mmr: options.rawSkill ?? skillRuleValue,
                 },
                 region: {
                     primary: "sg",
-                    fallback: "hk"
-                }
+                    fallback: "hk",
+                },
             },
             matchmaking: {
                 mode: "ranked-duo",
@@ -970,11 +1037,11 @@ function complexDifferenceMember(userId: string, skillRuleValue: number, options
                     region: "sg",
                     ping: 42,
                     jitter: 5,
-                    packetLoss: 0.01
+                    packetLoss: 0.01,
                 },
                 maps: ["temple", "harbor", "metro"],
                 roles: ["tank", "support"],
-                score: 6
+                score: 6,
             },
             noise: {
                 modeRule: "casual",
@@ -982,12 +1049,12 @@ function complexDifferenceMember(userId: string, skillRuleValue: number, options
                 mapRule: ["wrong-map"],
                 regionRule: {
                     region: "wrong",
-                    ping: 999
+                    ping: 999,
                 },
-                matchScoreRule: 9999
-            }
+                matchScoreRule: 9999,
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
@@ -996,15 +1063,16 @@ function complexDifferenceSoloTicket(ticketId: string, userId: string, skillRule
 }
 
 function complexDifferencePartyTicket(ticketId: string, members: ComplexDifferencePartyMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, members.map(member => complexDifferenceMember(member.userId, member.skillRuleValue, member.options)), tsCreate);
+    return createTicket(
+        ticketId,
+        members.map((member) => complexDifferenceMember(member.userId, member.skillRuleValue, member.options)),
+        tsCreate,
+    );
 }
 
 test("41 DifferenceRule full match uses skillRule instead of large noise skill", () => {
     let settings = createQueueSettings({ rules: [differenceRule("skillRule", 25)] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1540, { noiseSkillRule: 9999 }),
-        complexDifferenceSoloTicket("ticketB", "userB", 1560, { noiseSkillRule: 1 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1540, { noiseSkillRule: 9999 }), complexDifferenceSoloTicket("ticketB", "userB", 1560, { noiseSkillRule: 1 })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA", "userB"]);
@@ -1013,21 +1081,14 @@ test("41 DifferenceRule full match uses skillRule instead of large noise skill",
 
 test("42 DifferenceRule no match ignores close noise skill when real skillRule differs", () => {
     let settings = createQueueSettings({ rules: [differenceRule("skillRule", 25)] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, { noiseSkillRule: 1500 }),
-        complexDifferenceSoloTicket("ticketB", "userB", 1200, { noiseSkillRule: 1500 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, { noiseSkillRule: 1500 }), complexDifferenceSoloTicket("ticketB", "userB", 1200, { noiseSkillRule: 1500 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("43 DifferenceRule partial match keeps in-delta subset and excludes outside ticket", () => {
     let settings = createQueueSettings({ rules: [differenceRule("skillRule", 20)] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000),
-        complexDifferenceSoloTicket("ticketB", "userB", 1010),
-        complexDifferenceSoloTicket("ticketC", "userC", 1100)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000), complexDifferenceSoloTicket("ticketB", "userB", 1010), complexDifferenceSoloTicket("ticketC", "userC", 1100)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketC"]);
@@ -1035,20 +1096,14 @@ test("43 DifferenceRule partial match keeps in-delta subset and excludes outside
 
 test("44 DifferenceRule full match accepts difference exactly at allowed delta", () => {
     let settings = createQueueSettings({ rules: [differenceRule("skillRule", 20)] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000),
-        complexDifferenceSoloTicket("ticketB", "userB", 1020)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000), complexDifferenceSoloTicket("ticketB", "userB", 1020)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("45 DifferenceRule no match rejects difference one point above allowed delta", () => {
     let settings = createQueueSettings({ rules: [differenceRule("skillRule", 20)] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000),
-        complexDifferenceSoloTicket("ticketB", "userB", 1021)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000), complexDifferenceSoloTicket("ticketB", "userB", 1021)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1057,10 +1112,7 @@ test("46 DifferenceRule full match uses defaultValue when both tickets omit skil
     let rule = differenceRule("skillRule", 0);
     rule.defaultValue = 1500;
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1, { omitSkillRule: true, noiseSkillRule: 9999 }),
-        complexDifferenceSoloTicket("ticketB", "userB", 2, { omitSkillRule: true, noiseSkillRule: 1 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1, { omitSkillRule: true, noiseSkillRule: 9999 }), complexDifferenceSoloTicket("ticketB", "userB", 2, { omitSkillRule: true, noiseSkillRule: 1 })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1069,10 +1121,7 @@ test("47 DifferenceRule full match compares missing skillRule default with expli
     let rule = differenceRule("skillRule", 0);
     rule.defaultValue = 1500;
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1, { omitSkillRule: true }),
-        complexDifferenceSoloTicket("ticketB", "userB", 1500)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1, { omitSkillRule: true }), complexDifferenceSoloTicket("ticketB", "userB", 1500)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1081,10 +1130,7 @@ test("48 DifferenceRule no match compares missing skillRule default against outs
     let rule = differenceRule("skillRule", 10);
     rule.defaultValue = 1500;
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1, { omitSkillRule: true, noiseSkillRule: 1520 }),
-        complexDifferenceSoloTicket("ticketB", "userB", 1520, { noiseSkillRule: 1500 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1, { omitSkillRule: true, noiseSkillRule: 1520 }), complexDifferenceSoloTicket("ticketB", "userB", 1520, { noiseSkillRule: 1500 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1094,9 +1140,9 @@ test("49 DifferenceRule party match uses first member skillRule and ignores seco
     let candidates = runMatchmaking(settings, [
         complexDifferencePartyTicket("ticketA", [
             { userId: "userA1", skillRuleValue: 1000 },
-            { userId: "userA2", skillRuleValue: 9999 }
+            { userId: "userA2", skillRuleValue: 9999 },
         ]),
-        complexDifferenceSoloTicket("ticketB", "userB", 1010)
+        complexDifferenceSoloTicket("ticketB", "userB", 1010),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
@@ -1108,9 +1154,9 @@ test("50 DifferenceRule no match rejects party when first member skillRule is ou
     let candidates = runMatchmaking(settings, [
         complexDifferencePartyTicket("ticketA", [
             { userId: "userA1", skillRuleValue: 1200 },
-            { userId: "userA2", skillRuleValue: 1000 }
+            { userId: "userA2", skillRuleValue: 1000 },
         ]),
-        complexDifferenceSoloTicket("ticketB", "userB", 1005)
+        complexDifferenceSoloTicket("ticketB", "userB", 1005),
     ]);
 
     assert.equal(candidates.length, 0);
@@ -1125,14 +1171,11 @@ test("51 DifferenceRule linear expansion full match accepts widened skill gap", 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 10,
-            limit: 50
-        }
+            limit: 50,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 1040, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 1040, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1146,14 +1189,11 @@ test("52 DifferenceRule linear expansion no match when elapsed time is not enoug
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 10,
-            limit: 50
-        }
+            limit: 50,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, currentTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 1035, {}, currentTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, currentTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 1035, {}, currentTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1167,14 +1207,11 @@ test("53 DifferenceRule linear expansion no match when capped limit remains too 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 20,
-            limit: 30
-        }
+            limit: 30,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 1035, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 1035, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1187,14 +1224,11 @@ test("54 DifferenceRule custom expansion full match accepts override delta", () 
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [10, 20, 40]
-        }
+            overrideValue: [10, 20, 40],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 1040, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 1040, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1207,14 +1241,11 @@ test("55 DifferenceRule custom expansion no match when override delta remains to
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [10, 20, 30]
-        }
+            overrideValue: [10, 20, 30],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 1040, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 1040, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1227,14 +1258,11 @@ test("56 DifferenceRule custom expansion full match uses last override after ind
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [10, 50]
-        }
+            overrideValue: [10, 50],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 1050, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 1050, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1244,13 +1272,10 @@ test("57 DifferenceRule optional timeout full match ignores incompatible skillRu
     let rule = differenceRule("skillRule", 0);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 2000, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, oldTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 2000, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1260,25 +1285,17 @@ test("58 DifferenceRule optional timeout no match before rule becomes optional",
     let rule = differenceRule("skillRule", 0);
     rule.advancedSettings = {
         secondsUntilOptional: 120,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, currentTimestamp),
-        complexDifferenceSoloTicket("ticketB", "userB", 2000, {}, currentTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, {}, currentTimestamp), complexDifferenceSoloTicket("ticketB", "userB", 2000, {}, currentTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("59 DifferenceRule partial match enforces matchSize max with several compatible tickets", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [differenceRule("skillRule", 20)] });
-    let candidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000),
-        complexDifferenceSoloTicket("ticketB", "userB", 1010),
-        complexDifferenceSoloTicket("ticketC", "userC", 1015),
-        complexDifferenceSoloTicket("ticketD", "userD", 1018)
-    ]);
+    let candidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000), complexDifferenceSoloTicket("ticketB", "userB", 1010), complexDifferenceSoloTicket("ticketC", "userC", 1015), complexDifferenceSoloTicket("ticketD", "userD", 1018)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertEveryCandidateWithinMatchSize(candidates, 2);
@@ -1286,14 +1303,8 @@ test("59 DifferenceRule partial match enforces matchSize max with several compat
 
 test("60 DifferenceRule requires multiple numeric rules and rejects secondary failure despite noise", () => {
     let settings = createQueueSettings({ rules: [differenceRule("skillRule", 20), differenceRule("latencyScoreRule", 5)] });
-    let acceptedCandidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, { extraAttributeForQueue: { latencyScoreRule: 40, unrelatedLatencyScore: 9999 } }),
-        complexDifferenceSoloTicket("ticketB", "userB", 1015, { extraAttributeForQueue: { latencyScoreRule: 45, unrelatedLatencyScore: 9999 } })
-    ]);
-    let rejectedCandidates = runMatchmaking(settings, [
-        complexDifferenceSoloTicket("ticketA", "userA", 1000, { extraAttributeForQueue: { latencyScoreRule: 40, unrelatedLatencyScore: 10 } }),
-        complexDifferenceSoloTicket("ticketB", "userB", 1015, { extraAttributeForQueue: { latencyScoreRule: 55, unrelatedLatencyScore: 10 } })
-    ]);
+    let acceptedCandidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, { extraAttributeForQueue: { latencyScoreRule: 40, unrelatedLatencyScore: 9999 } }), complexDifferenceSoloTicket("ticketB", "userB", 1015, { extraAttributeForQueue: { latencyScoreRule: 45, unrelatedLatencyScore: 9999 } })]);
+    let rejectedCandidates = runMatchmaking(settings, [complexDifferenceSoloTicket("ticketA", "userA", 1000, { extraAttributeForQueue: { latencyScoreRule: 40, unrelatedLatencyScore: 10 } }), complexDifferenceSoloTicket("ticketB", "userB", 1015, { extraAttributeForQueue: { latencyScoreRule: 55, unrelatedLatencyScore: 10 } })]);
 
     assertCandidateWithTickets(acceptedCandidates, ["ticketA", "ticketB"]);
     assert.equal(rejectedCandidates.length, 0);
@@ -1320,7 +1331,7 @@ function complexRegionRule(maxLatency: number): RegionSelectionRule {
         name: "regionRule",
         type: RuleType.RegionSelection,
         attributePath: "matchmaking.latency",
-        max: maxLatency
+        max: maxLatency,
     };
 }
 
@@ -1336,8 +1347,8 @@ function complexRegionMember(userId: string, regionValue: string, pingValue: num
         unrelatedMaps: ["wrong-map"],
         unrelatedRegionRule: {
             region: options.noiseRegion ?? "wrong",
-            ping: options.noisePing ?? 999
-        }
+            ping: options.noisePing ?? 999,
+        },
     };
 
     if (!options.omitRegionRule) {
@@ -1345,7 +1356,7 @@ function complexRegionMember(userId: string, regionValue: string, pingValue: num
             region: regionValue,
             ping: pingValue,
             jitter: 5,
-            packetLoss: 0.01
+            packetLoss: 0.01,
         };
     }
 
@@ -1360,12 +1371,12 @@ function complexRegionMember(userId: string, regionValue: string, pingValue: num
                 rank: {
                     tier: "gold",
                     division: 2,
-                    mmr: 1540
+                    mmr: 1540,
                 },
                 region: {
                     primary: options.rawRegion ?? regionValue,
-                    fallback: "hk"
-                }
+                    fallback: "hk",
+                },
             },
             matchmaking: {
                 mode: "ranked-duo",
@@ -1374,11 +1385,11 @@ function complexRegionMember(userId: string, regionValue: string, pingValue: num
                     region: options.rawRegion ?? regionValue,
                     ping: options.rawPing ?? pingValue,
                     jitter: 5,
-                    packetLoss: 0.01
+                    packetLoss: 0.01,
                 },
                 maps: ["temple", "harbor", "metro"],
                 roles: ["tank", "support"],
-                score: 6
+                score: 6,
             },
             noise: {
                 modeRule: "casual",
@@ -1386,12 +1397,12 @@ function complexRegionMember(userId: string, regionValue: string, pingValue: num
                 mapRule: ["wrong-map"],
                 regionRule: {
                     region: options.noiseRegion ?? "wrong",
-                    ping: options.noisePing ?? 999
+                    ping: options.noisePing ?? 999,
                 },
-                matchScoreRule: 9999
-            }
+                matchScoreRule: 9999,
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
@@ -1400,15 +1411,16 @@ function complexRegionSoloTicket(ticketId: string, userId: string, regionValue: 
 }
 
 function complexRegionPartyTicket(ticketId: string, members: ComplexRegionPartyMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, members.map(member => complexRegionMember(member.userId, member.regionValue, member.pingValue, member.options)), tsCreate);
+    return createTicket(
+        ticketId,
+        members.map((member) => complexRegionMember(member.userId, member.regionValue, member.pingValue, member.options)),
+        tsCreate,
+    );
 }
 
 test("61 RegionSelectionRule full match uses regionRule instead of noisy region fields", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 42, { noiseRegion: "same-noise", noisePing: 999 }),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 80, { noiseRegion: "same-noise", noisePing: 999 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 42, { noiseRegion: "same-noise", noisePing: 999 }), complexRegionSoloTicket("ticketB", "userB", "sg", 80, { noiseRegion: "same-noise", noisePing: 999 })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA", "userB"]);
@@ -1417,61 +1429,42 @@ test("61 RegionSelectionRule full match uses regionRule instead of noisy region 
 
 test("62 RegionSelectionRule no match ignores same noisy region when real regionRule differs", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40, { noiseRegion: "same-noise", noisePing: 20 }),
-        complexRegionSoloTicket("ticketB", "userB", "hk", 40, { noiseRegion: "same-noise", noisePing: 20 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40, { noiseRegion: "same-noise", noisePing: 20 }), complexRegionSoloTicket("ticketB", "userB", "hk", 40, { noiseRegion: "same-noise", noisePing: 20 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("63 RegionSelectionRule no match rejects seed ping above maximum latency", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 81),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 40)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 81), complexRegionSoloTicket("ticketB", "userB", "sg", 40)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("64 RegionSelectionRule no match rejects next ticket ping above maximum latency", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 81)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40), complexRegionSoloTicket("ticketB", "userB", "sg", 81)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("65 RegionSelectionRule no match rejects missing seed regionRule data", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40, { omitRegionRule: true, noiseRegion: "sg", noisePing: 40 }),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 40)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40, { omitRegionRule: true, noiseRegion: "sg", noisePing: 40 }), complexRegionSoloTicket("ticketB", "userB", "sg", 40)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("66 RegionSelectionRule no match rejects missing next regionRule data", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 40, { omitRegionRule: true, noiseRegion: "sg", noisePing: 40 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40), complexRegionSoloTicket("ticketB", "userB", "sg", 40, { omitRegionRule: true, noiseRegion: "sg", noisePing: 40 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("67 RegionSelectionRule partial match keeps same-region subset and excludes different region", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 50),
-        complexRegionSoloTicket("ticketC", "userC", "hk", 40)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40), complexRegionSoloTicket("ticketB", "userB", "sg", 50), complexRegionSoloTicket("ticketC", "userC", "hk", 40)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketC"]);
@@ -1479,11 +1472,7 @@ test("67 RegionSelectionRule partial match keeps same-region subset and excludes
 
 test("68 RegionSelectionRule partial match keeps valid ping subset and excludes high-ping ticket", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 50),
-        complexRegionSoloTicket("ticketC", "userC", "sg", 81)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40), complexRegionSoloTicket("ticketB", "userB", "sg", 50), complexRegionSoloTicket("ticketC", "userC", "sg", 81)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketC"]);
@@ -1491,10 +1480,7 @@ test("68 RegionSelectionRule partial match keeps valid ping subset and excludes 
 
 test("69 RegionSelectionRule full match accepts ping exactly equal to maximum latency", () => {
     let settings = createQueueSettings({ rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 80),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 80)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 80), complexRegionSoloTicket("ticketB", "userB", "sg", 80)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1508,14 +1494,11 @@ test("70 RegionSelectionRule linear expansion full match accepts expanded latenc
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 15,
-            limit: 95
-        }
+            limit: 95,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 90, {}, oldTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 90, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 90, {}, oldTimestamp), complexRegionSoloTicket("ticketB", "userB", "sg", 90, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1529,14 +1512,11 @@ test("71 RegionSelectionRule linear expansion no match when elapsed time is not 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 15,
-            limit: 95
-        }
+            limit: 95,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 60, {}, currentTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 60, {}, currentTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 60, {}, currentTimestamp), complexRegionSoloTicket("ticketB", "userB", "sg", 60, {}, currentTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1550,14 +1530,11 @@ test("72 RegionSelectionRule linear expansion no match when capped limit remains
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 20,
-            limit: 70
-        }
+            limit: 70,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 75, {}, oldTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 75, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 75, {}, oldTimestamp), complexRegionSoloTicket("ticketB", "userB", "sg", 75, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1570,14 +1547,11 @@ test("73 RegionSelectionRule custom expansion full match accepts override latenc
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [60, 80, 100]
-        }
+            overrideValue: [60, 80, 100],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 95, {}, oldTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 95, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 95, {}, oldTimestamp), complexRegionSoloTicket("ticketB", "userB", "sg", 95, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1590,14 +1564,11 @@ test("74 RegionSelectionRule custom expansion no match when override latency rem
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [60, 70, 80]
-        }
+            overrideValue: [60, 70, 80],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 90, {}, oldTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 90, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 90, {}, oldTimestamp), complexRegionSoloTicket("ticketB", "userB", "sg", 90, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1610,14 +1581,11 @@ test("75 RegionSelectionRule custom expansion full match uses last override afte
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [60, 95]
-        }
+            overrideValue: [60, 95],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 95, {}, oldTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 95, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 95, {}, oldTimestamp), complexRegionSoloTicket("ticketB", "userB", "sg", 95, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1627,13 +1595,10 @@ test("76 RegionSelectionRule optional timeout full match ignores different regio
     let rule = complexRegionRule(50);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40, {}, oldTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "hk", 40, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40, {}, oldTimestamp), complexRegionSoloTicket("ticketB", "userB", "hk", 40, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1643,13 +1608,10 @@ test("77 RegionSelectionRule optional timeout full match ignores very high ping"
     let rule = complexRegionRule(50);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 999, {}, oldTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 999, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 999, {}, oldTimestamp), complexRegionSoloTicket("ticketB", "userB", "sg", 999, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1659,25 +1621,17 @@ test("78 RegionSelectionRule optional timeout no match before rule becomes optio
     let rule = complexRegionRule(50);
     rule.advancedSettings = {
         secondsUntilOptional: 120,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40, {}, currentTimestamp),
-        complexRegionSoloTicket("ticketB", "userB", "hk", 40, {}, currentTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40, {}, currentTimestamp), complexRegionSoloTicket("ticketB", "userB", "hk", 40, {}, currentTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("79 RegionSelectionRule partial match enforces matchSize max with several compatible tickets", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [complexRegionRule(80)] });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 50),
-        complexRegionSoloTicket("ticketC", "userC", "sg", 60),
-        complexRegionSoloTicket("ticketD", "userD", "sg", 70)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40), complexRegionSoloTicket("ticketB", "userB", "sg", 50), complexRegionSoloTicket("ticketC", "userC", "sg", 60), complexRegionSoloTicket("ticketD", "userD", "sg", 70)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertEveryCandidateWithinMatchSize(candidates, 2);
@@ -1688,20 +1642,16 @@ test("80 RegionSelectionRule partial match enforces teamSize max while preservin
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [complexRegionRule(80)]
+        rules: [complexRegionRule(80)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexRegionSoloTicket("ticketA", "userA", "sg", 40),
-        complexRegionSoloTicket("ticketB", "userB", "sg", 50),
-        complexRegionSoloTicket("ticketC", "userC", "sg", 60)
-    ]);
+    let candidates = runMatchmaking(settings, [complexRegionSoloTicket("ticketA", "userA", "sg", 40), complexRegionSoloTicket("ticketB", "userB", "sg", 50), complexRegionSoloTicket("ticketC", "userC", "sg", 60)]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, memberIds: team.members.map(member => member.userId) }))), [
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, memberIds: team.members.map((member) => member.userId) }))), [
         { teamId: "blue", memberIds: ["userB"] },
-        { teamId: "red", memberIds: ["userA"] }
+        { teamId: "red", memberIds: ["userA"] },
     ]);
 });
 
@@ -1725,13 +1675,13 @@ function complexSetIntersectionMember(userId: string, mapRuleValues: string[], o
         regionRule: {
             region: "sg",
             ping: 42,
-            jitter: 5
+            jitter: 5,
         },
         teamSkillRule: 1540,
         matchScoreRule: 6,
         unrelatedMode: "casual",
         unrelatedSkill: 9999,
-        unrelatedMaps: options.noiseMaps ?? ["wrong-map", "decoy-map"]
+        unrelatedMaps: options.noiseMaps ?? ["wrong-map", "decoy-map"],
     };
 
     if (!options.omitMapRule) {
@@ -1749,12 +1699,12 @@ function complexSetIntersectionMember(userId: string, mapRuleValues: string[], o
                 rank: {
                     tier: "gold",
                     division: 2,
-                    mmr: 1540
+                    mmr: 1540,
                 },
                 region: {
                     primary: "sg",
-                    fallback: "hk"
-                }
+                    fallback: "hk",
+                },
             },
             matchmaking: {
                 mode: "ranked-duo",
@@ -1763,11 +1713,11 @@ function complexSetIntersectionMember(userId: string, mapRuleValues: string[], o
                     region: "sg",
                     ping: 42,
                     jitter: 5,
-                    packetLoss: 0.01
+                    packetLoss: 0.01,
                 },
                 maps: options.rawMaps ?? mapRuleValues,
                 roles: ["tank", "support"],
-                score: 6
+                score: 6,
             },
             noise: {
                 modeRule: "casual",
@@ -1775,12 +1725,12 @@ function complexSetIntersectionMember(userId: string, mapRuleValues: string[], o
                 mapRule: options.noiseMaps ?? ["wrong-map", "decoy-map"],
                 regionRule: {
                     region: "wrong",
-                    ping: 999
+                    ping: 999,
                 },
-                matchScoreRule: 9999
-            }
+                matchScoreRule: 9999,
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
@@ -1789,15 +1739,16 @@ function complexSetIntersectionSoloTicket(ticketId: string, userId: string, mapR
 }
 
 function complexSetIntersectionPartyTicket(ticketId: string, members: ComplexSetIntersectionPartyMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, members.map(member => complexSetIntersectionMember(member.userId, member.mapRuleValues, member.options)), tsCreate);
+    return createTicket(
+        ticketId,
+        members.map((member) => complexSetIntersectionMember(member.userId, member.mapRuleValues, member.options)),
+        tsCreate,
+    );
 }
 
 test("81 SetIntersectionRule full match uses mapRule instead of noisy map arrays", () => {
     let settings = createQueueSettings({ rules: [setIntersectionRule("mapRule", 2)] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro", "temple"], { noiseMaps: ["wrong-a", "wrong-b"] }),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro", "forest"], { noiseMaps: ["wrong-a", "wrong-b"] })
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro", "temple"], { noiseMaps: ["wrong-a", "wrong-b"] }), complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro", "forest"], { noiseMaps: ["wrong-a", "wrong-b"] })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA", "userB"]);
@@ -1806,41 +1757,28 @@ test("81 SetIntersectionRule full match uses mapRule instead of noisy map arrays
 
 test("82 SetIntersectionRule full match accepts overlap exactly at minimum", () => {
     let settings = createQueueSettings({ rules: [setIntersectionRule("mapRule", 2)] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"]),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro", "forest"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"]), complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro", "forest"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("83 SetIntersectionRule no match ignores overlapping noise arrays when mapRule overlap is too small", () => {
     let settings = createQueueSettings({ rules: [setIntersectionRule("mapRule", 2)] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], { noiseMaps: ["same-noise-a", "same-noise-b"] }),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro"], { noiseMaps: ["same-noise-a", "same-noise-b"] })
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], { noiseMaps: ["same-noise-a", "same-noise-b"] }), complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro"], { noiseMaps: ["same-noise-a", "same-noise-b"] })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("84 SetIntersectionRule no match rejects tickets with no shared mapRule values", () => {
     let settings = createQueueSettings({ rules: [setIntersectionRule("mapRule", 1)] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"]),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"]), complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"])]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("85 SetIntersectionRule partial match keeps enough-overlap subset and excludes weak overlap", () => {
     let settings = createQueueSettings({ rules: [setIntersectionRule("mapRule", 2)] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"]),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro", "forest"]),
-        complexSetIntersectionSoloTicket("ticketC", "userC", ["metro", "desert"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"]), complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "metro", "forest"]), complexSetIntersectionSoloTicket("ticketC", "userC", ["metro", "desert"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketC"]);
@@ -1850,10 +1788,7 @@ test("86 SetIntersectionRule full match uses defaultValue when both tickets omit
     let rule = setIntersectionRule("mapRule", 2);
     rule.defaultValue = ["temple", "harbor"];
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["wrong-a"], { omitMapRule: true, noiseMaps: ["wrong-a"] }),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["wrong-b"], { omitMapRule: true, noiseMaps: ["wrong-b"] })
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["wrong-a"], { omitMapRule: true, noiseMaps: ["wrong-a"] }), complexSetIntersectionSoloTicket("ticketB", "userB", ["wrong-b"], { omitMapRule: true, noiseMaps: ["wrong-b"] })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1862,10 +1797,7 @@ test("87 SetIntersectionRule full match compares missing mapRule default with ex
     let rule = setIntersectionRule("mapRule", 2);
     rule.defaultValue = ["temple", "harbor"];
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["wrong-a"], { omitMapRule: true }),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["wrong-a"], { omitMapRule: true }), complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1874,22 +1806,14 @@ test("88 SetIntersectionRule no match compares missing mapRule default against n
     let rule = setIntersectionRule("mapRule", 2);
     rule.defaultValue = ["temple", "harbor"];
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["wrong-a"], { omitMapRule: true, noiseMaps: ["metro", "forest"] }),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"], { noiseMaps: ["temple", "harbor"] })
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["wrong-a"], { omitMapRule: true, noiseMaps: ["metro", "forest"] }), complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"], { noiseMaps: ["temple", "harbor"] })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("89 SetIntersectionRule partial match builds separate candidates for separate map clusters", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [setIntersectionRule("mapRule", 2)] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"]),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"]),
-        complexSetIntersectionSoloTicket("ticketC", "userC", ["desert", "forest"]),
-        complexSetIntersectionSoloTicket("ticketD", "userD", ["desert", "forest", "ice"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"]), complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"]), complexSetIntersectionSoloTicket("ticketC", "userC", ["desert", "forest"]), complexSetIntersectionSoloTicket("ticketD", "userD", ["desert", "forest", "ice"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateWithTickets(candidates, ["ticketC", "ticketD"]);
@@ -1900,9 +1824,9 @@ test("90 SetIntersectionRule party match uses first member mapRule and ignores s
     let candidates = runMatchmaking(settings, [
         complexSetIntersectionPartyTicket("ticketA", [
             { userId: "userA1", mapRuleValues: ["temple", "harbor"] },
-            { userId: "userA2", mapRuleValues: ["wrong-a", "wrong-b"] }
+            { userId: "userA2", mapRuleValues: ["wrong-a", "wrong-b"] },
         ]),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"])
+        complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
@@ -1914,9 +1838,9 @@ test("91 SetIntersectionRule no match rejects party when first member mapRule la
     let candidates = runMatchmaking(settings, [
         complexSetIntersectionPartyTicket("ticketA", [
             { userId: "userA1", mapRuleValues: ["wrong-a", "wrong-b"] },
-            { userId: "userA2", mapRuleValues: ["temple", "harbor"] }
+            { userId: "userA2", mapRuleValues: ["temple", "harbor"] },
         ]),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"])
+        complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"]),
     ]);
 
     assert.equal(candidates.length, 0);
@@ -1927,10 +1851,10 @@ test("92 SetIntersectionRule partial match keeps party-solo overlap and excludes
     let candidates = runMatchmaking(settings, [
         complexSetIntersectionPartyTicket("ticketA", [
             { userId: "userA1", mapRuleValues: ["temple", "harbor"] },
-            { userId: "userA2", mapRuleValues: ["temple"] }
+            { userId: "userA2", mapRuleValues: ["temple"] },
         ]),
         complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "harbor", "metro"]),
-        complexSetIntersectionSoloTicket("ticketC", "userC", ["temple", "desert"])
+        complexSetIntersectionSoloTicket("ticketC", "userC", ["temple", "desert"]),
     ]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
@@ -1945,14 +1869,11 @@ test("93 SetIntersectionRule linear expansion full match reduces minimum enough"
         expansionType: RuleExpansionType.Linear,
         linearExpansions: {
             secondsBetweenExpansions: 10,
-            delta: 1
-        }
+            delta: 1,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"], {}, oldTimestamp),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"], {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"], {}, oldTimestamp), complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"], {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -1965,14 +1886,11 @@ test("94 SetIntersectionRule linear expansion no match when minimum is still too
         expansionType: RuleExpansionType.Linear,
         linearExpansions: {
             secondsBetweenExpansions: 10,
-            delta: 1
-        }
+            delta: 1,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"], {}, oldTimestamp),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"], {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor", "metro"], {}, oldTimestamp), complexSetIntersectionSoloTicket("ticketB", "userB", ["metro", "forest"], {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -1985,14 +1903,11 @@ test("95 SetIntersectionRule linear expansion full match allows zero required ov
         expansionType: RuleExpansionType.Linear,
         linearExpansions: {
             secondsBetweenExpansions: 10,
-            delta: 1
-        }
+            delta: 1,
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple"], {}, oldTimestamp),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["desert"], {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple"], {}, oldTimestamp), complexSetIntersectionSoloTicket("ticketB", "userB", ["desert"], {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2005,14 +1920,11 @@ test("96 SetIntersectionRule custom expansion full match accepts override minimu
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [3, 2, 1]
-        }
+            overrideValue: [3, 2, 1],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], {}, oldTimestamp),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "forest"], {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], {}, oldTimestamp), complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "forest"], {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2025,14 +1937,11 @@ test("97 SetIntersectionRule custom expansion no match when override minimum rem
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [4, 3, 2]
-        }
+            overrideValue: [4, 3, 2],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], {}, oldTimestamp),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "forest"], {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], {}, oldTimestamp), complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "forest"], {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2045,14 +1954,11 @@ test("98 SetIntersectionRule custom expansion full match uses last override afte
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [3, 1]
-        }
+            overrideValue: [3, 1],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], {}, oldTimestamp),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "forest"], {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"], {}, oldTimestamp), complexSetIntersectionSoloTicket("ticketB", "userB", ["harbor", "forest"], {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2062,25 +1968,17 @@ test("99 SetIntersectionRule optional timeout full match ignores missing overlap
     let rule = setIntersectionRule("mapRule", 2);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple"], {}, oldTimestamp),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["desert"], {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple"], {}, oldTimestamp), complexSetIntersectionSoloTicket("ticketB", "userB", ["desert"], {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("100 SetIntersectionRule partial match enforces matchSize max with several compatible tickets", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [setIntersectionRule("mapRule", 1)] });
-    let candidates = runMatchmaking(settings, [
-        complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"]),
-        complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "metro"]),
-        complexSetIntersectionSoloTicket("ticketC", "userC", ["temple", "forest"]),
-        complexSetIntersectionSoloTicket("ticketD", "userD", ["temple", "desert"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexSetIntersectionSoloTicket("ticketA", "userA", ["temple", "harbor"]), complexSetIntersectionSoloTicket("ticketB", "userB", ["temple", "metro"]), complexSetIntersectionSoloTicket("ticketC", "userC", ["temple", "forest"]), complexSetIntersectionSoloTicket("ticketD", "userD", ["temple", "desert"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertEveryCandidateWithinMatchSize(candidates, 2);
@@ -2106,12 +2004,12 @@ function complexMatchTotalMember(userId: string, matchScoreRuleValue: number, op
         regionRule: {
             region: "sg",
             ping: 42,
-            jitter: 5
+            jitter: 5,
         },
         mapRule: ["temple", "harbor", "metro"],
         teamSkillRule: 1540,
         unrelatedMatchScore: options.noiseScore ?? 9999,
-        score: options.noiseScore ?? 8888
+        score: options.noiseScore ?? 8888,
     };
 
     if (!options.omitMatchScoreRule) {
@@ -2129,12 +2027,12 @@ function complexMatchTotalMember(userId: string, matchScoreRuleValue: number, op
                 rank: {
                     tier: "platinum",
                     division: 1,
-                    mmr: 1540
+                    mmr: 1540,
                 },
                 economy: {
                     spendTier: "mid",
-                    winStreak: 3
-                }
+                    winStreak: 3,
+                },
             },
             matchmaking: {
                 mode: "ranked-duo",
@@ -2143,19 +2041,19 @@ function complexMatchTotalMember(userId: string, matchScoreRuleValue: number, op
                 scoreBreakdown: {
                     combat: matchScoreRuleValue,
                     objective: 2,
-                    noiseScore: options.noiseScore ?? 9999
+                    noiseScore: options.noiseScore ?? 9999,
                 },
-                maps: ["temple", "harbor", "metro"]
+                maps: ["temple", "harbor", "metro"],
             },
             noise: {
                 matchScoreRule: options.noiseScore ?? 9999,
                 score: options.noiseScore ?? 8888,
                 nestedScore: {
-                    value: options.noiseScore ?? 7777
-                }
-            }
+                    value: options.noiseScore ?? 7777,
+                },
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
@@ -2164,15 +2062,16 @@ function complexMatchTotalSoloTicket(ticketId: string, userId: string, matchScor
 }
 
 function complexMatchTotalPartyTicket(ticketId: string, members: ComplexMatchTotalPartyMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, members.map(member => complexMatchTotalMember(member.userId, member.matchScoreRule, member.options)), tsCreate);
+    return createTicket(
+        ticketId,
+        members.map((member) => complexMatchTotalMember(member.userId, member.matchScoreRule, member.options)),
+        tsCreate,
+    );
 }
 
 test("101 MatchTotalRule full match uses matchScoreRule instead of noisy score fields", () => {
     let settings = createQueueSettings({ rules: [matchTotalRule("matchScoreRule", 10, 12)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5, { noiseScore: 1000, rawScore: 500 }),
-        complexMatchTotalSoloTicket("ticketB", "userB", 6, { noiseScore: 2000, rawScore: 600 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5, { noiseScore: 1000, rawScore: 500 }), complexMatchTotalSoloTicket("ticketB", "userB", 6, { noiseScore: 2000, rawScore: 600 })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA", "userB"]);
@@ -2181,51 +2080,35 @@ test("101 MatchTotalRule full match uses matchScoreRule instead of noisy score f
 
 test("102 MatchTotalRule full match accepts total exactly at min", () => {
     let settings = createQueueSettings({ rules: [matchTotalRule("matchScoreRule", 11, 20)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 6)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 6)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("103 MatchTotalRule full match accepts total exactly at max", () => {
     let settings = createQueueSettings({ rules: [matchTotalRule("matchScoreRule", 0, 11)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 6)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 6)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("104 MatchTotalRule no match rejects total below min despite matching noisy score fields", () => {
     let settings = createQueueSettings({ rules: [matchTotalRule("matchScoreRule", 10, 12)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 2, { noiseScore: 5, rawScore: 5 }),
-        complexMatchTotalSoloTicket("ticketB", "userB", 3, { noiseScore: 6, rawScore: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 2, { noiseScore: 5, rawScore: 5 }), complexMatchTotalSoloTicket("ticketB", "userB", 3, { noiseScore: 6, rawScore: 6 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("105 MatchTotalRule no match rejects total above max", () => {
     let settings = createQueueSettings({ rules: [matchTotalRule("matchScoreRule", 0, 12)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 8),
-        complexMatchTotalSoloTicket("ticketB", "userB", 7)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 8), complexMatchTotalSoloTicket("ticketB", "userB", 7)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("106 MatchTotalRule partial match keeps valid score subset and excludes high-score ticket", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [matchTotalRule("matchScoreRule", 10, 12)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 6),
-        complexMatchTotalSoloTicket("ticketC", "userC", 8)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 6), complexMatchTotalSoloTicket("ticketC", "userC", 8)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketC"]);
@@ -2234,12 +2117,7 @@ test("106 MatchTotalRule partial match keeps valid score subset and excludes hig
 
 test("107 MatchTotalRule partial match enforces matchSize max with several compatible tickets", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [matchTotalRule("matchScoreRule", 10, 10)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 5),
-        complexMatchTotalSoloTicket("ticketC", "userC", 5),
-        complexMatchTotalSoloTicket("ticketD", "userD", 5)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 5), complexMatchTotalSoloTicket("ticketC", "userC", 5), complexMatchTotalSoloTicket("ticketD", "userD", 5)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertEveryCandidateWithinMatchSize(candidates, 2);
@@ -2247,11 +2125,7 @@ test("107 MatchTotalRule partial match enforces matchSize max with several compa
 
 test("108 MatchTotalRule no match rejects when every possible pair is below min", () => {
     let settings = createQueueSettings({ matchSize: { min: 2, max: 2 }, rules: [matchTotalRule("matchScoreRule", 12, 20)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 5),
-        complexMatchTotalSoloTicket("ticketC", "userC", 5)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 5), complexMatchTotalSoloTicket("ticketC", "userC", 5)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2261,9 +2135,9 @@ test("109 MatchTotalRule full match sums every member in a party ticket", () => 
     let candidates = runMatchmaking(settings, [
         complexMatchTotalPartyTicket("ticketA", [
             { userId: "userA1", matchScoreRule: 5 },
-            { userId: "userA2", matchScoreRule: 6 }
+            { userId: "userA2", matchScoreRule: 6 },
         ]),
-        complexMatchTotalSoloTicket("ticketB", "userB", 6)
+        complexMatchTotalSoloTicket("ticketB", "userB", 6),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
@@ -2275,9 +2149,9 @@ test("110 MatchTotalRule no match rejects party aggregate above max", () => {
     let candidates = runMatchmaking(settings, [
         complexMatchTotalPartyTicket("ticketA", [
             { userId: "userA1", matchScoreRule: 5 },
-            { userId: "userA2", matchScoreRule: 6 }
+            { userId: "userA2", matchScoreRule: 6 },
         ]),
-        complexMatchTotalSoloTicket("ticketB", "userB", 10)
+        complexMatchTotalSoloTicket("ticketB", "userB", 10),
     ]);
 
     assert.equal(candidates.length, 0);
@@ -2285,20 +2159,14 @@ test("110 MatchTotalRule no match rejects party aggregate above max", () => {
 
 test("111 MatchTotalRule full match treats missing matchScoreRule as zero contribution", () => {
     let settings = createQueueSettings({ rules: [matchTotalRule("matchScoreRule", 5, 5)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 999, { omitMatchScoreRule: true, noiseScore: 9999 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 999, { omitMatchScoreRule: true, noiseScore: 9999 })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("112 MatchTotalRule no match rejects when missing matchScoreRule drops total below min", () => {
     let settings = createQueueSettings({ rules: [matchTotalRule("matchScoreRule", 6, 6)] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 999, { omitMatchScoreRule: true, noiseScore: 9999 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 999, { omitMatchScoreRule: true, noiseScore: 9999 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2307,19 +2175,16 @@ test("113 MatchTotalRule full match sums members across explicit teams", () => {
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [matchTotalRule("matchScoreRule", 11, 11)]
+        rules: [matchTotalRule("matchScoreRule", 11, 11)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 5),
-        complexMatchTotalSoloTicket("ticketB", "userB", 6)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 5), complexMatchTotalSoloTicket("ticketB", "userB", 6)]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, memberIds: team.members.map(member => member.userId) }))), [
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, memberIds: team.members.map((member) => member.userId) }))), [
         { teamId: "blue", memberIds: ["userB"] },
-        { teamId: "red", memberIds: ["userA"] }
+        { teamId: "red", memberIds: ["userA"] },
     ]);
 });
 
@@ -2331,14 +2196,11 @@ test("114 MatchTotalRule custom overrideMin full match lowers minimum enough", (
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideMin: [12, 10, 8]
-        }
+            overrideMin: [12, 10, 8],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 4, {}, oldTimestamp),
-        complexMatchTotalSoloTicket("ticketB", "userB", 5, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 4, {}, oldTimestamp), complexMatchTotalSoloTicket("ticketB", "userB", 5, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2351,14 +2213,11 @@ test("115 MatchTotalRule custom overrideMin no match when minimum remains too hi
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideMin: [12, 10, 8]
-        }
+            overrideMin: [12, 10, 8],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 4, {}, oldTimestamp),
-        complexMatchTotalSoloTicket("ticketB", "userB", 5, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 4, {}, oldTimestamp), complexMatchTotalSoloTicket("ticketB", "userB", 5, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2371,14 +2230,11 @@ test("116 MatchTotalRule custom overrideMax full match raises maximum enough", (
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideMax: [10, 12, 15]
-        }
+            overrideMax: [10, 12, 15],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 7, {}, oldTimestamp),
-        complexMatchTotalSoloTicket("ticketB", "userB", 7, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 7, {}, oldTimestamp), complexMatchTotalSoloTicket("ticketB", "userB", 7, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2391,14 +2247,11 @@ test("117 MatchTotalRule custom overrideMax no match when maximum remains too lo
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideMax: [10, 12, 15]
-        }
+            overrideMax: [10, 12, 15],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 7, {}, oldTimestamp),
-        complexMatchTotalSoloTicket("ticketB", "userB", 7, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 7, {}, oldTimestamp), complexMatchTotalSoloTicket("ticketB", "userB", 7, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2412,14 +2265,11 @@ test("118 MatchTotalRule custom expansion full match uses last min and max overr
         customExpansions: {
             secondsBetweenExpansions: 10,
             overrideMin: [25, 12],
-            overrideMax: [26, 14]
-        }
+            overrideMax: [26, 14],
+        },
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 6, {}, oldTimestamp),
-        complexMatchTotalSoloTicket("ticketB", "userB", 7, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 6, {}, oldTimestamp), complexMatchTotalSoloTicket("ticketB", "userB", 7, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2429,13 +2279,10 @@ test("119 MatchTotalRule optional timeout full match ignores out-of-range total"
     let rule = matchTotalRule("matchScoreRule", 10, 12);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexMatchTotalSoloTicket("ticketB", "userB", 100, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexMatchTotalSoloTicket("ticketB", "userB", 100, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2445,13 +2292,10 @@ test("120 MatchTotalRule optional timeout no match before rule becomes optional"
     let rule = matchTotalRule("matchScoreRule", 10, 12);
     rule.advancedSettings = {
         secondsUntilOptional: 120,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({ rules: [rule] });
-    let candidates = runMatchmaking(settings, [
-        complexMatchTotalSoloTicket("ticketA", "userA", 100, {}, recentTimestamp),
-        complexMatchTotalSoloTicket("ticketB", "userB", 100, {}, recentTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexMatchTotalSoloTicket("ticketA", "userA", 100, {}, recentTimestamp), complexMatchTotalSoloTicket("ticketB", "userB", 100, {}, recentTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2469,13 +2313,13 @@ function complexTeamSizeBalanceMember(userId: string, options: ComplexTeamSizeBa
         regionRule: {
             region: "sg",
             ping: 38,
-            jitter: 4
+            jitter: 4,
         },
         mapRule: ["temple", "harbor", "metro"],
         teamSkillRule: 1600,
         matchScoreRule: 6,
         unrelatedTeamSize: options.noiseScore ?? 9999,
-        preferredRole: options.role ?? "flex"
+        preferredRole: options.role ?? "flex",
     };
 
     if (options.extraAttributeForQueue != null) {
@@ -2489,27 +2333,27 @@ function complexTeamSizeBalanceMember(userId: string, options: ComplexTeamSizeBa
                 rank: {
                     tier: "diamond",
                     division: 3,
-                    mmr: 1600
+                    mmr: 1600,
                 },
                 party: {
                     preferredRole: options.role ?? "flex",
-                    declaredSizeNoise: options.noiseScore ?? 9999
-                }
+                    declaredSizeNoise: options.noiseScore ?? 9999,
+                },
             },
             matchmaking: {
                 mode: "ranked-team",
                 region: "sg",
                 teamContext: {
                     requestedRole: options.role ?? "flex",
-                    unrelatedTeamSize: options.noiseScore ?? 9999
-                }
+                    unrelatedTeamSize: options.noiseScore ?? 9999,
+                },
             },
             noise: {
                 teamSizeBalance: options.noiseScore ?? 9999,
-                members: [options.noiseScore ?? 9999, 1, 2]
-            }
+                members: [options.noiseScore ?? 9999, 1, 2],
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
@@ -2518,30 +2362,31 @@ function complexTeamSizeBalanceSoloTicket(ticketId: string, userId: string, opti
 }
 
 function complexTeamSizeBalancePartyTicket(ticketId: string, userIds: string[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, userIds.map((userId, index) => complexTeamSizeBalanceMember(userId, { role: index % 2 == 0 ? "anchor" : "support" })), tsCreate);
+    return createTicket(
+        ticketId,
+        userIds.map((userId, index) => complexTeamSizeBalanceMember(userId, { role: index % 2 == 0 ? "anchor" : "support" })),
+        tsCreate,
+    );
 }
 
 function assertTeamMemberCounts(candidate: MatchmakingTicketCanMatch, expectedCounts: { teamId: string; memberCount: number }[]): void {
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, memberCount: team.members.length }))), expectedCounts);
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, memberCount: team.members.length }))), expectedCounts);
 }
 
 test("121 TeamSizeBalanceRule full match accepts two teams with equal member counts", () => {
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalanceSoloTicket("ticketA", "userA", { noiseScore: 1000 }),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB", { noiseScore: 2000 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalanceSoloTicket("ticketA", "userA", { noiseScore: 1000 }), complexTeamSizeBalanceSoloTicket("ticketB", "userB", { noiseScore: 2000 })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertTeamMemberCounts(candidate, [
         { teamId: "blue", memberCount: 1 },
-        { teamId: "red", memberCount: 1 }
+        { teamId: "red", memberCount: 1 },
     ]);
 });
 
@@ -2550,19 +2395,16 @@ test("122 TeamSizeBalanceRule full match accepts two-team spread exactly at allo
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(1)]
+        rules: [teamSizeBalanceRule(1)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalanceSoloTicket("ticketB", "userB")]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertTeamMemberCounts(candidate, [
         { teamId: "blue", memberCount: 1 },
-        { teamId: "red", memberCount: 2 }
+        { teamId: "red", memberCount: 2 },
     ]);
 });
 
@@ -2571,14 +2413,11 @@ test("123 TeamSizeBalanceRule no match rejects two-team spread above allowed dif
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalanceSoloTicket("ticketB", "userB")]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2588,21 +2427,17 @@ test("124 TeamSizeBalanceRule partial match keeps balanced subset when matchSize
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalancePartyTicket("ticketB", ["userB1", "userB2"]),
-        complexTeamSizeBalanceSoloTicket("ticketC", "userC")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalancePartyTicket("ticketB", ["userB1", "userB2"]), complexTeamSizeBalanceSoloTicket("ticketC", "userC")]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertTeamMemberCounts(candidate, [
         { teamId: "blue", memberCount: 2 },
-        { teamId: "red", memberCount: 2 }
+        { teamId: "red", memberCount: 2 },
     ]);
 });
 
@@ -2612,21 +2447,17 @@ test("125 TeamSizeBalanceRule full match accepts three teams with equal member c
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalanceSoloTicket("ticketA", "userA"),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB"),
-        complexTeamSizeBalanceSoloTicket("ticketC", "userC")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalanceSoloTicket("ticketA", "userA"), complexTeamSizeBalanceSoloTicket("ticketB", "userB"), complexTeamSizeBalanceSoloTicket("ticketC", "userC")]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertTeamMemberCounts(candidate, [
         { teamId: "blue", memberCount: 1 },
         { teamId: "green", memberCount: 1 },
-        { teamId: "red", memberCount: 1 }
+        { teamId: "red", memberCount: 1 },
     ]);
 });
 
@@ -2636,21 +2467,17 @@ test("126 TeamSizeBalanceRule full match accepts three-team spread exactly at al
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(1)]
+        rules: [teamSizeBalanceRule(1)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB"),
-        complexTeamSizeBalanceSoloTicket("ticketC", "userC")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalanceSoloTicket("ticketB", "userB"), complexTeamSizeBalanceSoloTicket("ticketC", "userC")]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertTeamMemberCounts(candidate, [
         { teamId: "blue", memberCount: 1 },
         { teamId: "green", memberCount: 1 },
-        { teamId: "red", memberCount: 2 }
+        { teamId: "red", memberCount: 2 },
     ]);
 });
 
@@ -2660,15 +2487,11 @@ test("127 TeamSizeBalanceRule no match rejects three-team spread above allowed d
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB"),
-        complexTeamSizeBalanceSoloTicket("ticketC", "userC")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalanceSoloTicket("ticketB", "userB"), complexTeamSizeBalanceSoloTicket("ticketC", "userC")]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2679,16 +2502,11 @@ test("128 TeamSizeBalanceRule partial match fills three balanced teams and exclu
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalanceSoloTicket("ticketA", "userA"),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB"),
-        complexTeamSizeBalanceSoloTicket("ticketC", "userC"),
-        complexTeamSizeBalanceSoloTicket("ticketD", "userD")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalanceSoloTicket("ticketA", "userA"), complexTeamSizeBalanceSoloTicket("ticketB", "userB"), complexTeamSizeBalanceSoloTicket("ticketC", "userC"), complexTeamSizeBalanceSoloTicket("ticketD", "userD")]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketB", "ticketC", "ticketD"]);
@@ -2700,14 +2518,11 @@ test("129 TeamSizeBalanceRule full match accepts equal party sizes across two te
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalancePartyTicket("ticketB", ["userB1", "userB2"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalancePartyTicket("ticketB", ["userB1", "userB2"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2717,14 +2532,11 @@ test("130 TeamSizeBalanceRule no match rejects party size two against solo when 
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalanceSoloTicket("ticketB", "userB")]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2734,14 +2546,11 @@ test("131 TeamSizeBalanceRule full match accepts party size two against solo whe
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(1)]
+        rules: [teamSizeBalanceRule(1)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalanceSoloTicket("ticketB", "userB")]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2751,16 +2560,11 @@ test("132 TeamSizeBalanceRule partial match limits many solos to balanced two-te
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalanceSoloTicket("ticketA", "userA"),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB"),
-        complexTeamSizeBalanceSoloTicket("ticketC", "userC"),
-        complexTeamSizeBalanceSoloTicket("ticketD", "userD")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalanceSoloTicket("ticketA", "userA"), complexTeamSizeBalanceSoloTicket("ticketB", "userB"), complexTeamSizeBalanceSoloTicket("ticketC", "userC"), complexTeamSizeBalanceSoloTicket("ticketD", "userD")]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertEveryCandidateWithinMatchSize(candidates, 2);
@@ -2771,14 +2575,11 @@ test("133 TeamSizeBalanceRule no match rejects when one team is below teamSize m
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamSizeBalanceRule(1)]
+        rules: [teamSizeBalanceRule(1)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalanceSoloTicket("ticketA", "userA"),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalanceSoloTicket("ticketA", "userA"), complexTeamSizeBalanceSoloTicket("ticketB", "userB")]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2788,14 +2589,11 @@ test("134 TeamSizeBalanceRule no match rejects ticket larger than every team max
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamSizeBalanceRule(0)]
+        rules: [teamSizeBalanceRule(0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB")
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"]), complexTeamSizeBalanceSoloTicket("ticketB", "userB")]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2809,21 +2607,18 @@ test("135 TeamSizeBalanceRule linear expansion full match raises allowed differe
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 1,
-            limit: 1
-        }
+            limit: 1,
+        },
     };
     let settings = createQueueSettings({
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"], oldTimestamp),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"], oldTimestamp), complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2837,21 +2632,18 @@ test("136 TeamSizeBalanceRule linear expansion no match when elapsed time is not
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 1,
-            limit: 1
-        }
+            limit: 1,
+        },
     };
     let settings = createQueueSettings({
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"], oldTimestamp),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2"], oldTimestamp), complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2865,21 +2657,18 @@ test("137 TeamSizeBalanceRule linear expansion no match when limit is still too 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 1,
-            limit: 1
-        }
+            limit: 1,
+        },
     };
     let settings = createQueueSettings({
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 3 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp), complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2892,21 +2681,18 @@ test("138 TeamSizeBalanceRule custom expansion full match accepts override diffe
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [0, 1, 2]
-        }
+            overrideValue: [0, 1, 2],
+        },
     };
     let settings = createQueueSettings({
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 3 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp), complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2919,21 +2705,18 @@ test("139 TeamSizeBalanceRule custom expansion no match when override difference
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [0, 1, 2]
-        }
+            overrideValue: [0, 1, 2],
+        },
     };
     let settings = createQueueSettings({
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 3 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp), complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -2943,20 +2726,17 @@ test("140 TeamSizeBalanceRule optional timeout full match ignores unbalanced tea
     let rule = teamSizeBalanceRule(0);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 3 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp),
-        complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamSizeBalancePartyTicket("ticketA", ["userA1", "userA2", "userA3"], oldTimestamp), complexTeamSizeBalanceSoloTicket("ticketB", "userB", {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -2981,12 +2761,12 @@ function complexTeamDifferenceMember(userId: string, teamSkillRuleValue: number,
         regionRule: {
             region: "sg",
             ping: 36,
-            jitter: 3
+            jitter: 3,
         },
         mapRule: ["temple", "harbor", "metro"],
         matchScoreRule: 6,
         unrelatedTeamSkill: options.noiseSkill ?? 9999,
-        skill: options.noiseSkill ?? 8888
+        skill: options.noiseSkill ?? 8888,
     };
 
     if (!options.omitTeamSkillRule) {
@@ -3004,29 +2784,29 @@ function complexTeamDifferenceMember(userId: string, teamSkillRuleValue: number,
                 rank: {
                     tier: "master",
                     division: 2,
-                    mmr: options.rawSkill ?? teamSkillRuleValue
+                    mmr: options.rawSkill ?? teamSkillRuleValue,
                 },
                 performance: {
                     recentSkill: options.rawSkill ?? teamSkillRuleValue,
-                    noisyTeamSkill: options.noiseSkill ?? 9999
-                }
+                    noisyTeamSkill: options.noiseSkill ?? 9999,
+                },
             },
             matchmaking: {
                 team: {
                     score: options.rawSkill ?? teamSkillRuleValue,
                     contribution: teamSkillRuleValue,
-                    noisyTeamSkill: options.noiseSkill ?? 9999
+                    noisyTeamSkill: options.noiseSkill ?? 9999,
                 },
                 mode: "ranked-team",
-                maps: ["temple", "harbor", "metro"]
+                maps: ["temple", "harbor", "metro"],
             },
             noise: {
                 teamSkillRule: options.noiseSkill ?? 9999,
                 skill: options.noiseSkill ?? 8888,
-                scoreBuckets: [options.noiseSkill ?? 9999, teamSkillRuleValue]
-            }
+                scoreBuckets: [options.noiseSkill ?? 9999, teamSkillRuleValue],
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
@@ -3035,30 +2815,31 @@ function complexTeamDifferenceSoloTicket(ticketId: string, userId: string, teamS
 }
 
 function complexTeamDifferencePartyTicket(ticketId: string, members: ComplexTeamDifferencePartyMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, members.map(member => complexTeamDifferenceMember(member.userId, member.teamSkillRule, member.options)), tsCreate);
+    return createTicket(
+        ticketId,
+        members.map((member) => complexTeamDifferenceMember(member.userId, member.teamSkillRule, member.options)),
+        tsCreate,
+    );
 }
 
 function assertTeamScores(candidate: MatchmakingTicketCanMatch, ruleName: string, expectedScores: { teamId: string; score: number }[], defaultValue = 0): void {
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, score: team.members.reduce((total, member) => total + ((member.attributeForQueue[ruleName] as number) ?? defaultValue), 0) }))), expectedScores);
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, score: team.members.reduce((total, member) => total + ((member.attributeForQueue[ruleName] as number) ?? defaultValue), 0) }))), expectedScores);
 }
 
 test("141 TeamDifferenceRule full match accepts equal scores across two teams", () => {
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 0)]
+        rules: [teamDifferenceRule("teamSkillRule", 0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, { noiseSkill: 1000, rawSkill: 500 }),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 100, { noiseSkill: 2000, rawSkill: 600 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, { noiseSkill: 1000, rawSkill: 500 }), complexTeamDifferenceSoloTicket("ticketB", "userB", 100, { noiseSkill: 2000, rawSkill: 600 })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertTeamScores(candidate, "teamSkillRule", [
         { teamId: "blue", score: 100 },
-        { teamId: "red", score: 100 }
+        { teamId: "red", score: 100 },
     ]);
 });
 
@@ -3066,14 +2847,11 @@ test("142 TeamDifferenceRule full match accepts score spread exactly at allowed 
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 5)]
+        rules: [teamDifferenceRule("teamSkillRule", 5)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100), complexTeamDifferenceSoloTicket("ticketB", "userB", 105)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3082,14 +2860,11 @@ test("143 TeamDifferenceRule no match rejects score spread above allowed differe
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 4)]
+        rules: [teamDifferenceRule("teamSkillRule", 4)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100), complexTeamDifferenceSoloTicket("ticketB", "userB", 105)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3099,15 +2874,11 @@ test("144 TeamDifferenceRule partial match keeps valid pair and excludes high-sc
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 5)]
+        rules: [teamDifferenceRule("teamSkillRule", 5)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 104),
-        complexTeamDifferenceSoloTicket("ticketC", "userC", 120)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100), complexTeamDifferenceSoloTicket("ticketB", "userB", 104), complexTeamDifferenceSoloTicket("ticketC", "userC", 120)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateWithTicket(candidates, "ticketC");
@@ -3119,21 +2890,17 @@ test("145 TeamDifferenceRule full match accepts equal scores across three teams"
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 0)]
+        rules: [teamDifferenceRule("teamSkillRule", 0)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 100),
-        complexTeamDifferenceSoloTicket("ticketC", "userC", 100)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100), complexTeamDifferenceSoloTicket("ticketB", "userB", 100), complexTeamDifferenceSoloTicket("ticketC", "userC", 100)]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertTeamScores(candidate, "teamSkillRule", [
         { teamId: "blue", score: 100 },
         { teamId: "green", score: 100 },
-        { teamId: "red", score: 100 }
+        { teamId: "red", score: 100 },
     ]);
 });
 
@@ -3143,15 +2910,11 @@ test("146 TeamDifferenceRule full match accepts three-team max-min spread exactl
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 5)]
+        rules: [teamDifferenceRule("teamSkillRule", 5)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 104),
-        complexTeamDifferenceSoloTicket("ticketC", "userC", 105)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100), complexTeamDifferenceSoloTicket("ticketB", "userB", 104), complexTeamDifferenceSoloTicket("ticketC", "userC", 105)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
 });
@@ -3162,15 +2925,11 @@ test("147 TeamDifferenceRule no match rejects three-team max-min spread above al
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 5)]
+        rules: [teamDifferenceRule("teamSkillRule", 5)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 104),
-        complexTeamDifferenceSoloTicket("ticketC", "userC", 106)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100), complexTeamDifferenceSoloTicket("ticketB", "userB", 104), complexTeamDifferenceSoloTicket("ticketC", "userC", 106)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3181,16 +2940,11 @@ test("148 TeamDifferenceRule partial match keeps valid three-team subset and exc
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
             { teamId: "blue", teamSize: { min: 1, max: 1 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 4)]
+        rules: [teamDifferenceRule("teamSkillRule", 4)],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 102),
-        complexTeamDifferenceSoloTicket("ticketC", "userC", 104),
-        complexTeamDifferenceSoloTicket("ticketD", "userD", 130)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100), complexTeamDifferenceSoloTicket("ticketB", "userB", 102), complexTeamDifferenceSoloTicket("ticketC", "userC", 104), complexTeamDifferenceSoloTicket("ticketD", "userD", 130)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertNoCandidateWithTicket(candidates, "ticketD");
@@ -3201,25 +2955,25 @@ test("149 TeamDifferenceRule full match sums every party member for team score",
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 0)]
+        rules: [teamDifferenceRule("teamSkillRule", 0)],
     });
     let candidates = runMatchmaking(settings, [
         complexTeamDifferencePartyTicket("ticketA", [
             { userId: "userA1", teamSkillRule: 50 },
-            { userId: "userA2", teamSkillRule: 55 }
+            { userId: "userA2", teamSkillRule: 55 },
         ]),
         complexTeamDifferencePartyTicket("ticketB", [
             { userId: "userB1", teamSkillRule: 52 },
-            { userId: "userB2", teamSkillRule: 53 }
-        ])
+            { userId: "userB2", teamSkillRule: 53 },
+        ]),
     ]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertTeamScores(candidate, "teamSkillRule", [
         { teamId: "blue", score: 105 },
-        { teamId: "red", score: 105 }
+        { teamId: "red", score: 105 },
     ]);
 });
 
@@ -3228,19 +2982,19 @@ test("150 TeamDifferenceRule no match rejects party aggregate above allowed spre
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamDifferenceRule("teamSkillRule", 10)]
+        rules: [teamDifferenceRule("teamSkillRule", 10)],
     });
     let candidates = runMatchmaking(settings, [
         complexTeamDifferencePartyTicket("ticketA", [
             { userId: "userA1", teamSkillRule: 50 },
-            { userId: "userA2", teamSkillRule: 55 }
+            { userId: "userA2", teamSkillRule: 55 },
         ]),
         complexTeamDifferencePartyTicket("ticketB", [
             { userId: "userB1", teamSkillRule: 60 },
-            { userId: "userB2", teamSkillRule: 65 }
-        ])
+            { userId: "userB2", teamSkillRule: 65 },
+        ]),
     ]);
 
     assert.equal(candidates.length, 0);
@@ -3252,20 +3006,22 @@ test("151 TeamDifferenceRule full match uses defaultValue for missing teamSkillR
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 999, { omitTeamSkillRule: true, noiseSkill: 9999 }),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 10)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 999, { omitTeamSkillRule: true, noiseSkill: 9999 }), complexTeamDifferenceSoloTicket("ticketB", "userB", 10)]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
-    assertTeamScores(candidate, "teamSkillRule", [
-        { teamId: "blue", score: 10 },
-        { teamId: "red", score: 10 }
-    ], 10);
+    assertTeamScores(
+        candidate,
+        "teamSkillRule",
+        [
+            { teamId: "blue", score: 10 },
+            { teamId: "red", score: 10 },
+        ],
+        10,
+    );
 });
 
 test("152 TeamDifferenceRule no match rejects when missing teamSkillRule default makes spread too large", () => {
@@ -3274,14 +3030,11 @@ test("152 TeamDifferenceRule no match rejects when missing teamSkillRule default
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 999, { omitTeamSkillRule: true, noiseSkill: 9999 }),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 10)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 999, { omitTeamSkillRule: true, noiseSkill: 9999 }), complexTeamDifferenceSoloTicket("ticketB", "userB", 10)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3293,15 +3046,11 @@ test("153 TeamDifferenceRule partial match keeps defaulted ticket pair and exclu
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 999, { omitTeamSkillRule: true }),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 10),
-        complexTeamDifferenceSoloTicket("ticketC", "userC", 30)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 999, { omitTeamSkillRule: true }), complexTeamDifferenceSoloTicket("ticketB", "userB", 10), complexTeamDifferenceSoloTicket("ticketC", "userC", 30)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateWithTicket(candidates, "ticketC");
@@ -3316,20 +3065,17 @@ test("154 TeamDifferenceRule linear expansion full match raises allowed spread e
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 3,
-            limit: 6
-        }
+            limit: 6,
+        },
     };
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3343,20 +3089,17 @@ test("155 TeamDifferenceRule linear expansion no match when elapsed time is not 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 3,
-            limit: 6
-        }
+            limit: 6,
+        },
     };
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3370,20 +3113,17 @@ test("156 TeamDifferenceRule linear expansion no match when limit remains too lo
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 3,
-            limit: 4
-        }
+            limit: 4,
+        },
     };
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3396,20 +3136,17 @@ test("157 TeamDifferenceRule custom expansion full match accepts override spread
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [0, 3, 5]
-        }
+            overrideValue: [0, 3, 5],
+        },
     };
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3422,20 +3159,17 @@ test("158 TeamDifferenceRule custom expansion no match when override spread rema
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [0, 3, 5]
-        }
+            overrideValue: [0, 3, 5],
+        },
     };
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3448,20 +3182,17 @@ test("159 TeamDifferenceRule custom expansion full match uses last override afte
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: [1, 5]
-        }
+            overrideValue: [1, 5],
+        },
     };
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexTeamDifferenceSoloTicket("ticketB", "userB", 105, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3471,19 +3202,16 @@ test("160 TeamDifferenceRule optional timeout full match ignores unbalanced team
     let rule = teamDifferenceRule("teamSkillRule", 0);
     rule.advancedSettings = {
         secondsUntilOptional: 1,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp),
-        complexTeamDifferenceSoloTicket("ticketB", "userB", 200, {}, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamDifferenceSoloTicket("ticketA", "userA", 100, {}, oldTimestamp), complexTeamDifferenceSoloTicket("ticketB", "userB", 200, {}, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3501,13 +3229,13 @@ function complexTeamTicketSizeSimilarityMember(userId: string, memberIndex: numb
         regionRule: {
             region: "sg",
             ping: 35 + memberIndex,
-            jitter: 3
+            jitter: 3,
         },
         mapRule: ["temple", "harbor", "metro"],
         teamSkillRule: 1600 + memberIndex,
         matchScoreRule: 6 + memberIndex,
         preferredRole: options.role ?? "flex",
-        unrelatedTicketSize: options.noiseTicketSize ?? 9999
+        unrelatedTicketSize: options.noiseTicketSize ?? 9999,
     };
 
     if (options.extraAttributeForQueue != null) {
@@ -3521,57 +3249,58 @@ function complexTeamTicketSizeSimilarityMember(userId: string, memberIndex: numb
                 rank: {
                     tier: "diamond",
                     division: memberIndex + 1,
-                    mmr: 1600 + memberIndex
+                    mmr: 1600 + memberIndex,
                 },
                 party: {
                     role: options.role ?? "flex",
-                    declaredTicketSizeNoise: options.noiseTicketSize ?? 9999
-                }
+                    declaredTicketSizeNoise: options.noiseTicketSize ?? 9999,
+                },
             },
             matchmaking: {
                 party: {
                     memberIndex: memberIndex,
-                    unrelatedTicketSize: options.noiseTicketSize ?? 9999
+                    unrelatedTicketSize: options.noiseTicketSize ?? 9999,
                 },
                 preferences: {
                     maps: ["temple", "harbor", "metro"],
-                    roles: [options.role ?? "flex", "backup"]
-                }
+                    roles: [options.role ?? "flex", "backup"],
+                },
             },
             noise: {
                 teamTicketSizeSimilarity: options.noiseTicketSize ?? 9999,
-                ticketSize: options.noiseTicketSize ?? 8888
-            }
+                ticketSize: options.noiseTicketSize ?? 8888,
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
 function complexTeamTicketSizeSimilarityTicket(ticketId: string, userIds: string[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, userIds.map((userId, index) => complexTeamTicketSizeSimilarityMember(userId, index, { role: index % 2 == 0 ? "anchor" : "support", noiseTicketSize: 9000 + index })), tsCreate);
+    return createTicket(
+        ticketId,
+        userIds.map((userId, index) => complexTeamTicketSizeSimilarityMember(userId, index, { role: index % 2 == 0 ? "anchor" : "support", noiseTicketSize: 9000 + index })),
+        tsCreate,
+    );
 }
 
 function assertTeamTicketLayout(candidate: MatchmakingTicketCanMatch, expectedTeams: { teamId: string; ticketIds: string[] }[]): void {
-    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map(team => ({ teamId: team.teamId, ticketIds: team.tickets.map(ticket => ticket.ticketId) }))), expectedTeams);
+    assert.deepEqual(sortTeamsById(candidate.matchmakingTicketTeams.map((team) => ({ teamId: team.teamId, ticketIds: team.tickets.map((ticket) => ticket.ticketId) }))), expectedTeams);
 }
 
 test("161 TeamTicketSizeSimilarityRule full match accepts solo versus solo", () => {
     let settings = createQueueSettings({
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertTeamTicketLayout(candidate, [
         { teamId: "blue", ticketIds: ["ticketB"] },
-        { teamId: "red", ticketIds: ["ticketA"] }
+        { teamId: "red", ticketIds: ["ticketA"] },
     ]);
 });
 
@@ -3580,14 +3309,11 @@ test("162 TeamTicketSizeSimilarityRule full match accepts party size two versus 
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3597,14 +3323,11 @@ test("163 TeamTicketSizeSimilarityRule full match accepts party size three versu
         matchSize: { min: 6, max: 6 },
         teams: [
             { teamId: "red", teamSize: { min: 3, max: 3 } },
-            { teamId: "blue", teamSize: { min: 3, max: 3 } }
+            { teamId: "blue", teamSize: { min: 3, max: 3 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2", "userA3"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2", "userB3"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2", "userA3"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2", "userB3"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3614,14 +3337,11 @@ test("164 TeamTicketSizeSimilarityRule no match rejects party size two versus so
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3631,14 +3351,11 @@ test("165 TeamTicketSizeSimilarityRule no match rejects party size three versus 
         matchSize: { min: 5, max: 5 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 3 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2", "userA3"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2", "userA3"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3648,15 +3365,11 @@ test("166 TeamTicketSizeSimilarityRule partial match keeps party size two pair a
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateWithTicket(candidates, "ticketC");
@@ -3667,15 +3380,11 @@ test("167 TeamTicketSizeSimilarityRule partial match keeps solo pair and exclude
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC1", "userC2"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC1", "userC2"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateWithTicket(candidates, "ticketC");
@@ -3686,21 +3395,16 @@ test("168 TeamTicketSizeSimilarityRule full match accepts multiple same-size tic
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]),
-        complexTeamTicketSizeSimilarityTicket("ticketD", ["userD"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]), complexTeamTicketSizeSimilarityTicket("ticketD", ["userD"])]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC", "ticketD"]);
     assertTeamTicketLayout(candidate, [
         { teamId: "blue", ticketIds: ["ticketB", "ticketC"] },
-        { teamId: "red", ticketIds: ["ticketA", "ticketD"] }
+        { teamId: "red", ticketIds: ["ticketA", "ticketD"] },
     ]);
 });
 
@@ -3709,15 +3413,11 @@ test("169 TeamTicketSizeSimilarityRule no match rejects equal total members with
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3727,16 +3427,11 @@ test("170 TeamTicketSizeSimilarityRule partial match enforces matchSize max with
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]),
-        complexTeamTicketSizeSimilarityTicket("ticketD", ["userD"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]), complexTeamTicketSizeSimilarityTicket("ticketD", ["userD"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertEveryCandidateWithinMatchSize(candidates, 2);
@@ -3747,14 +3442,11 @@ test("171 TeamTicketSizeSimilarityRule no match rejects valid ticket sizes when 
         matchSize: { min: 2, max: 2 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3764,14 +3456,11 @@ test("172 TeamTicketSizeSimilarityRule no match rejects valid ticket sizes when 
         matchSize: { min: 4, max: 4 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 1 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3782,15 +3471,11 @@ test("173 TeamTicketSizeSimilarityRule full match accepts three teams with same 
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
             { teamId: "blue", teamSize: { min: 2, max: 2 } },
-            { teamId: "green", teamSize: { min: 2, max: 2 } }
+            { teamId: "green", teamSize: { min: 2, max: 2 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC1", "userC2"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC1", "userC2"])]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
 });
@@ -3801,15 +3486,11 @@ test("174 TeamTicketSizeSimilarityRule no match rejects three teams when one par
         teams: [
             { teamId: "red", teamSize: { min: 2, max: 3 } },
             { teamId: "blue", teamSize: { min: 2, max: 3 } },
-            { teamId: "green", teamSize: { min: 2, max: 3 } }
+            { teamId: "green", teamSize: { min: 2, max: 3 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC1", "userC2", "userC3"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC1", "userC2", "userC3"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3820,15 +3501,11 @@ test("175 TeamTicketSizeSimilarityRule no match rejects when third team cannot b
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
             { teamId: "blue", teamSize: { min: 1, max: 2 } },
-            { teamId: "green", teamSize: { min: 1, max: 1 } }
+            { teamId: "green", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB1", "userB2"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3838,22 +3515,16 @@ test("176 TeamTicketSizeSimilarityRule full match compares cross-team ticket aga
         matchSize: { min: 7, max: 7 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 3 } },
-            { teamId: "blue", teamSize: { min: 1, max: 4 } }
+            { teamId: "blue", teamSize: { min: 1, max: 4 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]),
-        complexTeamTicketSizeSimilarityTicket("ticketD", ["userD1", "userD2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketE", ["userE1", "userE2"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]), complexTeamTicketSizeSimilarityTicket("ticketD", ["userD1", "userD2"]), complexTeamTicketSizeSimilarityTicket("ticketE", ["userE1", "userE2"])]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC", "ticketD", "ticketE"]);
     assertTeamTicketLayout(candidate, [
         { teamId: "blue", ticketIds: ["ticketB", "ticketC", "ticketE"] },
-        { teamId: "red", ticketIds: ["ticketA", "ticketD"] }
+        { teamId: "red", ticketIds: ["ticketA", "ticketD"] },
     ]);
 });
 
@@ -3862,17 +3533,11 @@ test("177 TeamTicketSizeSimilarityRule no match rejects cross-team ticket that d
         matchSize: { min: 6, max: 6 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 3 } },
-            { teamId: "blue", teamSize: { min: 1, max: 4 } }
+            { teamId: "blue", teamSize: { min: 1, max: 4 } },
         ],
-        rules: [teamTicketSizeSimilarityRule()]
+        rules: [teamTicketSizeSimilarityRule()],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]),
-        complexTeamTicketSizeSimilarityTicket("ticketD", ["userD1", "userD2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketE", ["userE"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"]), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"]), complexTeamTicketSizeSimilarityTicket("ticketD", ["userD1", "userD2"]), complexTeamTicketSizeSimilarityTicket("ticketE", ["userE"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3881,20 +3546,17 @@ test("178 TeamTicketSizeSimilarityRule optional timeout full match ignores diffe
     let oldTimestamp = Date.now() - 2_000;
     let rule = teamTicketSizeSimilarityRule();
     rule.advancedSettings = {
-        secondsUntilOptional: 1
+        secondsUntilOptional: 1,
     };
     let settings = createQueueSettings({
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"], oldTimestamp),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"], oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"], oldTimestamp), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"], oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -3902,20 +3564,17 @@ test("178 TeamTicketSizeSimilarityRule optional timeout full match ignores diffe
 test("179 TeamTicketSizeSimilarityRule optional timeout no match before rule becomes optional", () => {
     let rule = teamTicketSizeSimilarityRule();
     rule.advancedSettings = {
-        secondsUntilOptional: 120
+        secondsUntilOptional: 120,
     };
     let settings = createQueueSettings({
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"]), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"])]);
 
     assert.equal(candidates.length, 0);
 });
@@ -3924,21 +3583,17 @@ test("180 TeamTicketSizeSimilarityRule optional timeout partial match enforces m
     let oldTimestamp = Date.now() - 2_000;
     let rule = teamTicketSizeSimilarityRule();
     rule.advancedSettings = {
-        secondsUntilOptional: 1
+        secondsUntilOptional: 1,
     };
     let settings = createQueueSettings({
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: [rule]
+        rules: [rule],
     });
-    let candidates = runMatchmaking(settings, [
-        complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"], oldTimestamp),
-        complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"], oldTimestamp),
-        complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"], oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexTeamTicketSizeSimilarityTicket("ticketA", ["userA1", "userA2"], oldTimestamp), complexTeamTicketSizeSimilarityTicket("ticketB", ["userB"], oldTimestamp), complexTeamTicketSizeSimilarityTicket("ticketC", ["userC"], oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -3985,7 +3640,7 @@ function fullRegionRule(maxLatency: number): RegionSelectionRule {
         name: "regionRule",
         type: RuleType.RegionSelection,
         attributePath: "regionRule",
-        max: maxLatency
+        max: maxLatency,
     };
 }
 
@@ -3993,16 +3648,7 @@ function fullRuleSet(overrides: FullRuleSetOverrides = {}): NonNullable<xMatchma
     let defaultTeamDifferenceRule = teamDifferenceRule("teamSkillRule", 10);
     defaultTeamDifferenceRule.defaultValue = 50;
 
-    return [
-        overrides.modeRule ?? stringRule("modeRule"),
-        overrides.skillRule ?? differenceRule("skillRule", 30),
-        overrides.regionRule ?? fullRegionRule(80),
-        overrides.mapRule ?? setIntersectionRule("mapRule", 2),
-        overrides.matchTotalRule ?? matchTotalRule("matchScoreRule", 20, 30),
-        overrides.teamSizeBalanceRule ?? teamSizeBalanceRule(0),
-        overrides.teamDifferenceRule ?? defaultTeamDifferenceRule,
-        overrides.teamTicketSizeSimilarityRule ?? teamTicketSizeSimilarityRule()
-    ];
+    return [overrides.modeRule ?? stringRule("modeRule"), overrides.skillRule ?? differenceRule("skillRule", 30), overrides.regionRule ?? fullRegionRule(80), overrides.mapRule ?? setIntersectionRule("mapRule", 2), overrides.matchTotalRule ?? matchTotalRule("matchScoreRule", 20, 30), overrides.teamSizeBalanceRule ?? teamSizeBalanceRule(0), overrides.teamDifferenceRule ?? defaultTeamDifferenceRule, overrides.teamTicketSizeSimilarityRule ?? teamTicketSizeSimilarityRule()];
 }
 
 function complexFullRulesMember(userId: string, memberIndex: number, options: ComplexFullRulesMemberOptions = {}): TicketMemberInput {
@@ -4020,14 +3666,14 @@ function complexFullRulesMember(userId: string, memberIndex: number, options: Co
             region: regionValue,
             ping: pingValue,
             jitter: 4 + memberIndex,
-            packetLoss: 0.01
+            packetLoss: 0.01,
         },
         unrelatedMode: "noise-" + modeRuleValue,
         unrelatedSkill: noiseValue,
         unrelatedMaps: ["wrong-map-" + memberIndex, "decoy-map"],
         unrelatedTeamSkill: noiseValue,
         unrelatedMatchScore: noiseValue,
-        preferredRole: memberIndex % 2 == 0 ? "anchor" : "support"
+        preferredRole: memberIndex % 2 == 0 ? "anchor" : "support",
     };
 
     if (!options.omitModeRule) {
@@ -4059,13 +3705,13 @@ function complexFullRulesMember(userId: string, memberIndex: number, options: Co
                 rank: {
                     tier: "grandmaster",
                     division: memberIndex + 1,
-                    mmr: options.rawSkill ?? skillRuleValue
+                    mmr: options.rawSkill ?? skillRuleValue,
                 },
                 region: {
                     primary: regionValue,
                     fallback: "hk",
-                    ping: pingValue
-                }
+                    ping: pingValue,
+                },
             },
             matchmaking: {
                 mode: options.rawMode ?? modeRuleValue,
@@ -4075,40 +3721,48 @@ function complexFullRulesMember(userId: string, memberIndex: number, options: Co
                     teamSkillRule: noiseValue,
                     matchScoreRule: noiseValue,
                     actualTeamSkill: teamSkillRuleValue,
-                    actualMatchScore: matchScoreRuleValue
+                    actualMatchScore: matchScoreRuleValue,
                 },
                 latency: {
                     region: regionValue,
                     ping: pingValue,
                     jitter: 4 + memberIndex,
-                    packetLoss: 0.01
-                }
+                    packetLoss: 0.01,
+                },
             },
             noise: {
                 modeRule: "noise-" + modeRuleValue,
                 skillRule: noiseValue,
                 regionRule: {
                     region: "wrong",
-                    ping: noiseValue
+                    ping: noiseValue,
                 },
                 mapRule: ["wrong-map-" + memberIndex],
                 teamSkillRule: noiseValue,
-                matchScoreRule: noiseValue
-            }
+                matchScoreRule: noiseValue,
+            },
         },
-        attributeForQueue: attributeForQueue
+        attributeForQueue: attributeForQueue,
     };
 }
 
 function complexFullRulesTicket(ticketId: string, members: ComplexFullRulesMemberInput[], tsCreate = Date.now()): MatchmakingTicket {
-    return createTicket(ticketId, members.map((member, index) => complexFullRulesMember(member.userId, index, member.options)), tsCreate);
+    return createTicket(
+        ticketId,
+        members.map((member, index) => complexFullRulesMember(member.userId, index, member.options)),
+        tsCreate,
+    );
 }
 
 function complexFullRulesPartyTicket(ticketId: string, userIds: string[], firstMemberOptions: ComplexFullRulesMemberOptions = {}, secondMemberOptions: ComplexFullRulesMemberOptions = {}, tsCreate = Date.now()): MatchmakingTicket {
-    return complexFullRulesTicket(ticketId, [
-        { userId: userIds[0], options: firstMemberOptions },
-        { userId: userIds[1], options: secondMemberOptions }
-    ], tsCreate);
+    return complexFullRulesTicket(
+        ticketId,
+        [
+            { userId: userIds[0], options: firstMemberOptions },
+            { userId: userIds[1], options: secondMemberOptions },
+        ],
+        tsCreate,
+    );
 }
 
 function complexFullRulesSoloTicket(ticketId: string, userId: string, options: ComplexFullRulesMemberOptions = {}, tsCreate = Date.now()): MatchmakingTicket {
@@ -4120,9 +3774,9 @@ function createFullRulesTwoTeamSettings(overrides: Partial<xMatchmakingQueueSett
         matchSize: overrides.matchSize ?? { min: 4, max: 4 },
         teams: overrides.teams ?? [
             { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } }
+            { teamId: "blue", teamSize: { min: 2, max: 2 } },
         ],
-        rules: fullRuleSet(ruleOverrides)
+        rules: fullRuleSet(ruleOverrides),
     });
 }
 
@@ -4130,48 +3784,48 @@ function createOptionalFullRuleSet(secondsUntilOptional: number): NonNullable<xM
     let mode = stringRule("modeRule");
     mode.advancedSettings = {
         secondsUntilOptional: secondsUntilOptional,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
 
     let skill = differenceRule("skillRule", 30);
     skill.advancedSettings = {
         secondsUntilOptional: secondsUntilOptional,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
 
     let region = fullRegionRule(80);
     region.advancedSettings = {
         secondsUntilOptional: secondsUntilOptional,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
 
     let map = setIntersectionRule("mapRule", 2);
     map.advancedSettings = {
         secondsUntilOptional: secondsUntilOptional,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
 
     let matchTotal = matchTotalRule("matchScoreRule", 20, 30);
     matchTotal.advancedSettings = {
         secondsUntilOptional: secondsUntilOptional,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
 
     let teamBalance = teamSizeBalanceRule(0);
     teamBalance.advancedSettings = {
         secondsUntilOptional: secondsUntilOptional,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
 
     let teamDifference = teamDifferenceRule("teamSkillRule", 10);
     teamDifference.advancedSettings = {
         secondsUntilOptional: secondsUntilOptional,
-        expansionType: RuleExpansionType.None
+        expansionType: RuleExpansionType.None,
     };
 
     let ticketSizeSimilarity = teamTicketSizeSimilarityRule();
     ticketSizeSimilarity.advancedSettings = {
-        secondsUntilOptional: secondsUntilOptional
+        secondsUntilOptional: secondsUntilOptional,
     };
 
     return [mode, skill, region, map, matchTotal, teamBalance, teamDifference, ticketSizeSimilarity];
@@ -4179,55 +3833,40 @@ function createOptionalFullRuleSet(secondsUntilOptional: number): NonNullable<xM
 
 test("181 FullRuleSet full match accepts two complex parties when every rule passes", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { skillRule: 1500, teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, teamSkillRule: 50, matchScoreRule: 6 }, { teamSkillRule: 50, matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { skillRule: 1500, teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, teamSkillRule: 50, matchScoreRule: 6 }, { teamSkillRule: 50, matchScoreRule: 6 })]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateBasics(candidate, ["ticketA", "ticketB"], ["userA1", "userA2", "userB1", "userB2"]);
     assertTeamTicketLayout(candidate, [
         { teamId: "blue", ticketIds: ["ticketB"] },
-        { teamId: "red", ticketIds: ["ticketA"] }
+        { teamId: "red", ticketIds: ["ticketA"] },
     ]);
 });
 
 test("182 FullRuleSet no match rejects when StringRule fails", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "casual-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "casual-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("183 FullRuleSet no match rejects when DifferenceRule fails", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1600, matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1600, matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("184 FullRuleSet no match rejects when RegionSelectionRule fails", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, region: "hk", matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, region: "hk", matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("185 FullRuleSet no match rejects when SetIntersectionRule fails", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, mapRule: ["forest", "desert"], matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, mapRule: ["forest", "desert"], matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -4235,10 +3874,7 @@ test("185 FullRuleSet no match rejects when SetIntersectionRule fails", () => {
 test("186 FullRuleSet no match rejects when MatchTotalRule total is below min", () => {
     let matchTotal = matchTotalRule("matchScoreRule", 25, 30);
     let settings = createFullRulesTwoTeamSettings({}, { matchTotalRule: matchTotal });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { matchScoreRule: 5 }, { matchScoreRule: 5 }),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 5 }, { matchScoreRule: 5 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { matchScoreRule: 5 }, { matchScoreRule: 5 }), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 5 }, { matchScoreRule: 5 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -4246,10 +3882,7 @@ test("186 FullRuleSet no match rejects when MatchTotalRule total is below min", 
 test("187 FullRuleSet no match rejects when MatchTotalRule total is above max", () => {
     let matchTotal = matchTotalRule("matchScoreRule", 0, 18);
     let settings = createFullRulesTwoTeamSettings({}, { matchTotalRule: matchTotal });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { matchScoreRule: 5 }, { matchScoreRule: 5 }),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { matchScoreRule: 5 }, { matchScoreRule: 5 }), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -4258,62 +3891,55 @@ test("188 FullRuleSet no match rejects when TeamSizeBalanceRule fails after tick
     let oldTimestamp = Date.now() - 2_000;
     let ticketSizeSimilarity = teamTicketSizeSimilarityRule();
     ticketSizeSimilarity.advancedSettings = {
-        secondsUntilOptional: 1
+        secondsUntilOptional: 1,
     };
-    let settings = createFullRulesTwoTeamSettings({
-        matchSize: { min: 3, max: 3 },
-        teams: [
-            { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
-        ]
-    }, {
-        teamSizeBalanceRule: teamSizeBalanceRule(0),
-        teamTicketSizeSimilarityRule: ticketSizeSimilarity
-    });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }, oldTimestamp),
-        complexFullRulesSoloTicket("ticketB", "userB", { skillRule: 1510, teamSkillRule: 100, matchScoreRule: 10 }, oldTimestamp)
-    ]);
+    let settings = createFullRulesTwoTeamSettings(
+        {
+            matchSize: { min: 3, max: 3 },
+            teams: [
+                { teamId: "red", teamSize: { min: 1, max: 2 } },
+                { teamId: "blue", teamSize: { min: 1, max: 1 } },
+            ],
+        },
+        {
+            teamSizeBalanceRule: teamSizeBalanceRule(0),
+            teamTicketSizeSimilarityRule: ticketSizeSimilarity,
+        },
+    );
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }, oldTimestamp), complexFullRulesSoloTicket("ticketB", "userB", { skillRule: 1510, teamSkillRule: 100, matchScoreRule: 10 }, oldTimestamp)]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("189 FullRuleSet no match rejects when TeamDifferenceRule fails", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, teamSkillRule: 80, matchScoreRule: 5 }, { teamSkillRule: 80, matchScoreRule: 5 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, teamSkillRule: 80, matchScoreRule: 5 }, { teamSkillRule: 80, matchScoreRule: 5 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("190 FullRuleSet no match rejects when TeamTicketSizeSimilarityRule fails", () => {
-    let settings = createFullRulesTwoTeamSettings({
-        matchSize: { min: 3, max: 3 },
-        teams: [
-            { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
-        ]
-    }, {
-        teamSizeBalanceRule: teamSizeBalanceRule(1),
-        teamDifferenceRule: teamDifferenceRule("teamSkillRule", 0)
-    });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }),
-        complexFullRulesSoloTicket("ticketB", "userB", { skillRule: 1510, teamSkillRule: 100, matchScoreRule: 10 })
-    ]);
+    let settings = createFullRulesTwoTeamSettings(
+        {
+            matchSize: { min: 3, max: 3 },
+            teams: [
+                { teamId: "red", teamSize: { min: 1, max: 2 } },
+                { teamId: "blue", teamSize: { min: 1, max: 1 } },
+            ],
+        },
+        {
+            teamSizeBalanceRule: teamSizeBalanceRule(1),
+            teamDifferenceRule: teamDifferenceRule("teamSkillRule", 0),
+        },
+    );
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }), complexFullRulesSoloTicket("ticketB", "userB", { skillRule: 1510, teamSkillRule: 100, matchScoreRule: 10 })]);
 
     assert.equal(candidates.length, 0);
 });
 
 test("191 FullRuleSet partial match keeps valid pair and excludes ticket failing string rule", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 }),
-        complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { modeRule: "arcade-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 }), complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { modeRule: "arcade-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateWithTicket(candidates, "ticketC");
@@ -4321,11 +3947,7 @@ test("191 FullRuleSet partial match keeps valid pair and excludes ticket failing
 
 test("192 FullRuleSet partial match enforces matchSize max across several valid parties", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 }),
-        complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { skillRule: 1515, matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 }), complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { skillRule: 1515, matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertNoCandidateContainingAll(candidates, ["ticketA", "ticketB", "ticketC"]);
@@ -4334,47 +3956,45 @@ test("192 FullRuleSet partial match enforces matchSize max across several valid 
 
 test("193 FullRuleSet full match accepts three balanced teams with all rules enabled", () => {
     let matchTotal = matchTotalRule("matchScoreRule", 30, 40);
-    let settings = createFullRulesTwoTeamSettings({
-        matchSize: { min: 6, max: 6 },
-        teams: [
-            { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } },
-            { teamId: "green", teamSize: { min: 2, max: 2 } }
-        ]
-    }, {
-        matchTotalRule: matchTotal
-    });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510 }, {}),
-        complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { skillRule: 1515 }, {})
-    ]);
+    let settings = createFullRulesTwoTeamSettings(
+        {
+            matchSize: { min: 6, max: 6 },
+            teams: [
+                { teamId: "red", teamSize: { min: 2, max: 2 } },
+                { teamId: "blue", teamSize: { min: 2, max: 2 } },
+                { teamId: "green", teamSize: { min: 2, max: 2 } },
+            ],
+        },
+        {
+            matchTotalRule: matchTotal,
+        },
+    );
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510 }, {}), complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { skillRule: 1515 }, {})]);
 
     let candidate = assertCandidateWithTickets(candidates, ["ticketA", "ticketB", "ticketC"]);
     assertTeamMemberCounts(candidate, [
         { teamId: "blue", memberCount: 2 },
         { teamId: "green", memberCount: 2 },
-        { teamId: "red", memberCount: 2 }
+        { teamId: "red", memberCount: 2 },
     ]);
 });
 
 test("194 FullRuleSet no match rejects three teams when team score spread fails", () => {
     let matchTotal = matchTotalRule("matchScoreRule", 30, 40);
-    let settings = createFullRulesTwoTeamSettings({
-        matchSize: { min: 6, max: 6 },
-        teams: [
-            { teamId: "red", teamSize: { min: 2, max: 2 } },
-            { teamId: "blue", teamSize: { min: 2, max: 2 } },
-            { teamId: "green", teamSize: { min: 2, max: 2 } }
-        ]
-    }, {
-        matchTotalRule: matchTotal
-    });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510 }, {}),
-        complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { skillRule: 1515, teamSkillRule: 80 }, { teamSkillRule: 80 })
-    ]);
+    let settings = createFullRulesTwoTeamSettings(
+        {
+            matchSize: { min: 6, max: 6 },
+            teams: [
+                { teamId: "red", teamSize: { min: 2, max: 2 } },
+                { teamId: "blue", teamSize: { min: 2, max: 2 } },
+                { teamId: "green", teamSize: { min: 2, max: 2 } },
+            ],
+        },
+        {
+            matchTotalRule: matchTotal,
+        },
+    );
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"]), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { skillRule: 1510 }, {}), complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { skillRule: 1515, teamSkillRule: 80 }, { teamSkillRule: 80 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -4387,8 +4007,8 @@ test("195 FullRuleSet full match accepts multiple rule expansions together", () 
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: ["strict-full", "strict-full", "expanded-full"]
-        }
+            overrideValue: ["strict-full", "strict-full", "expanded-full"],
+        },
     };
     let skill = differenceRule("skillRule", 10);
     skill.advancedSettings = {
@@ -4397,8 +4017,8 @@ test("195 FullRuleSet full match accepts multiple rule expansions together", () 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 25,
-            limit: 60
-        }
+            limit: 60,
+        },
     };
     let region = fullRegionRule(40);
     region.advancedSettings = {
@@ -4407,8 +4027,8 @@ test("195 FullRuleSet full match accepts multiple rule expansions together", () 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 20,
-            limit: 80
-        }
+            limit: 80,
+        },
     };
     let map = setIntersectionRule("mapRule", 3);
     map.advancedSettings = {
@@ -4416,8 +4036,8 @@ test("195 FullRuleSet full match accepts multiple rule expansions together", () 
         expansionType: RuleExpansionType.Linear,
         linearExpansions: {
             secondsBetweenExpansions: 10,
-            delta: 1
-        }
+            delta: 1,
+        },
     };
     let matchTotal = matchTotalRule("matchScoreRule", 40, 50);
     matchTotal.advancedSettings = {
@@ -4425,8 +4045,8 @@ test("195 FullRuleSet full match accepts multiple rule expansions together", () 
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideMin: [40, 30, 20]
-        }
+            overrideMin: [40, 30, 20],
+        },
     };
     let teamDifference = teamDifferenceRule("teamSkillRule", 5);
     teamDifference.advancedSettings = {
@@ -4435,21 +4055,21 @@ test("195 FullRuleSet full match accepts multiple rule expansions together", () 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 10,
-            limit: 20
-        }
+            limit: 20,
+        },
     };
-    let settings = createFullRulesTwoTeamSettings({}, {
-        modeRule: mode,
-        skillRule: skill,
-        regionRule: region,
-        mapRule: map,
-        matchTotalRule: matchTotal,
-        teamDifferenceRule: teamDifference
-    });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1500, ping: 50, mapRule: ["temple", "harbor", "metro"], teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }, oldTimestamp),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "expanded-full", skillRule: 1560, ping: 60, mapRule: ["metro", "forest"], teamSkillRule: 60, matchScoreRule: 6 }, { teamSkillRule: 60, matchScoreRule: 6 }, oldTimestamp)
-    ]);
+    let settings = createFullRulesTwoTeamSettings(
+        {},
+        {
+            modeRule: mode,
+            skillRule: skill,
+            regionRule: region,
+            mapRule: map,
+            matchTotalRule: matchTotal,
+            teamDifferenceRule: teamDifference,
+        },
+    );
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1500, ping: 50, mapRule: ["temple", "harbor", "metro"], teamSkillRule: 50, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }, oldTimestamp), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "expanded-full", skillRule: 1560, ping: 60, mapRule: ["metro", "forest"], teamSkillRule: 60, matchScoreRule: 6 }, { teamSkillRule: 60, matchScoreRule: 6 }, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -4461,8 +4081,8 @@ test("196 FullRuleSet no match rejects before combined expansions are reached", 
         expansionType: RuleExpansionType.Custom,
         customExpansions: {
             secondsBetweenExpansions: 10,
-            overrideValue: ["strict-full", "strict-full", "expanded-full"]
-        }
+            overrideValue: ["strict-full", "strict-full", "expanded-full"],
+        },
     };
     let skill = differenceRule("skillRule", 10);
     skill.advancedSettings = {
@@ -4471,8 +4091,8 @@ test("196 FullRuleSet no match rejects before combined expansions are reached", 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 25,
-            limit: 60
-        }
+            limit: 60,
+        },
     };
     let region = fullRegionRule(40);
     region.advancedSettings = {
@@ -4481,8 +4101,8 @@ test("196 FullRuleSet no match rejects before combined expansions are reached", 
         linearExpansions: {
             secondsBetweenExpansions: 10,
             delta: 20,
-            limit: 80
-        }
+            limit: 80,
+        },
     };
     let map = setIntersectionRule("mapRule", 3);
     map.advancedSettings = {
@@ -4490,19 +4110,19 @@ test("196 FullRuleSet no match rejects before combined expansions are reached", 
         expansionType: RuleExpansionType.Linear,
         linearExpansions: {
             secondsBetweenExpansions: 10,
-            delta: 1
-        }
+            delta: 1,
+        },
     };
-    let settings = createFullRulesTwoTeamSettings({}, {
-        modeRule: mode,
-        skillRule: skill,
-        regionRule: region,
-        mapRule: map
-    });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1500, ping: 50, mapRule: ["temple", "harbor", "metro"] }),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "expanded-full", skillRule: 1560, ping: 60, mapRule: ["metro", "forest"], matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let settings = createFullRulesTwoTeamSettings(
+        {},
+        {
+            modeRule: mode,
+            skillRule: skill,
+            regionRule: region,
+            mapRule: map,
+        },
+    );
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1500, ping: 50, mapRule: ["temple", "harbor", "metro"] }), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "expanded-full", skillRule: 1560, ping: 60, mapRule: ["metro", "forest"], matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -4513,14 +4133,11 @@ test("197 FullRuleSet optional timeout full match ignores several incompatible r
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: createOptionalFullRuleSet(1)
+        rules: createOptionalFullRuleSet(1),
     });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1000, region: "sg", ping: 300, mapRule: ["temple"], teamSkillRule: 50, matchScoreRule: 100 }, { teamSkillRule: 50, matchScoreRule: 100 }, oldTimestamp),
-        complexFullRulesSoloTicket("ticketB", "userB", { modeRule: "arcade-full", skillRule: 2000, region: "hk", ping: 350, mapRule: ["forest"], teamSkillRule: 300, matchScoreRule: 100 }, oldTimestamp)
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1000, region: "sg", ping: 300, mapRule: ["temple"], teamSkillRule: 50, matchScoreRule: 100 }, { teamSkillRule: 50, matchScoreRule: 100 }, oldTimestamp), complexFullRulesSoloTicket("ticketB", "userB", { modeRule: "arcade-full", skillRule: 2000, region: "hk", ping: 350, mapRule: ["forest"], teamSkillRule: 300, matchScoreRule: 100 }, oldTimestamp)]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
@@ -4530,14 +4147,11 @@ test("198 FullRuleSet optional timeout no match before rules become optional", (
         matchSize: { min: 3, max: 3 },
         teams: [
             { teamId: "red", teamSize: { min: 1, max: 2 } },
-            { teamId: "blue", teamSize: { min: 1, max: 1 } }
+            { teamId: "blue", teamSize: { min: 1, max: 1 } },
         ],
-        rules: createOptionalFullRuleSet(120)
+        rules: createOptionalFullRuleSet(120),
     });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1000, region: "sg", ping: 300, mapRule: ["temple"], teamSkillRule: 50, matchScoreRule: 100 }, { teamSkillRule: 50, matchScoreRule: 100 }),
-        complexFullRulesSoloTicket("ticketB", "userB", { modeRule: "arcade-full", skillRule: 2000, region: "hk", ping: 350, mapRule: ["forest"], teamSkillRule: 300, matchScoreRule: 100 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "strict-full", skillRule: 1000, region: "sg", ping: 300, mapRule: ["temple"], teamSkillRule: 50, matchScoreRule: 100 }, { teamSkillRule: 50, matchScoreRule: 100 }), complexFullRulesSoloTicket("ticketB", "userB", { modeRule: "arcade-full", skillRule: 2000, region: "hk", ping: 350, mapRule: ["forest"], teamSkillRule: 300, matchScoreRule: 100 })]);
 
     assert.equal(candidates.length, 0);
 });
@@ -4551,28 +4165,23 @@ test("199 FullRuleSet full match uses defaults while all other rules remain acti
     map.defaultValue = ["temple", "harbor"];
     let teamDifference = teamDifferenceRule("teamSkillRule", 0);
     teamDifference.defaultValue = 50;
-    let settings = createFullRulesTwoTeamSettings({}, {
-        modeRule: mode,
-        skillRule: skill,
-        mapRule: map,
-        teamDifferenceRule: teamDifference
-    });
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { omitModeRule: true, omitSkillRule: true, omitMapRule: true, omitTeamSkillRule: true, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "default-full", skillRule: 1500, mapRule: ["temple", "harbor", "metro"], teamSkillRule: 50, matchScoreRule: 6 }, { teamSkillRule: 50, matchScoreRule: 6 })
-    ]);
+    let settings = createFullRulesTwoTeamSettings(
+        {},
+        {
+            modeRule: mode,
+            skillRule: skill,
+            mapRule: map,
+            teamDifferenceRule: teamDifference,
+        },
+    );
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { omitModeRule: true, omitSkillRule: true, omitMapRule: true, omitTeamSkillRule: true, matchScoreRule: 5 }, { teamSkillRule: 50, matchScoreRule: 5 }), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "default-full", skillRule: 1500, mapRule: ["temple", "harbor", "metro"], teamSkillRule: 50, matchScoreRule: 6 }, { teamSkillRule: 50, matchScoreRule: 6 })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
 });
 
 test("200 FullRuleSet partial match builds separate candidates for two valid rule clusters", () => {
     let settings = createFullRulesTwoTeamSettings();
-    let candidates = runMatchmaking(settings, [
-        complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "ranked-full:sg", skillRule: 1500 }, {}),
-        complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "ranked-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 }),
-        complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { modeRule: "arcade-full:sg", skillRule: 1500 }, {}),
-        complexFullRulesPartyTicket("ticketD", ["userD1", "userD2"], { modeRule: "arcade-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })
-    ]);
+    let candidates = runMatchmaking(settings, [complexFullRulesPartyTicket("ticketA", ["userA1", "userA2"], { modeRule: "ranked-full:sg", skillRule: 1500 }, {}), complexFullRulesPartyTicket("ticketB", ["userB1", "userB2"], { modeRule: "ranked-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 }), complexFullRulesPartyTicket("ticketC", ["userC1", "userC2"], { modeRule: "arcade-full:sg", skillRule: 1500 }, {}), complexFullRulesPartyTicket("ticketD", ["userD1", "userD2"], { modeRule: "arcade-full:sg", skillRule: 1510, matchScoreRule: 6 }, { matchScoreRule: 6 })]);
 
     assertCandidateWithTickets(candidates, ["ticketA", "ticketB"]);
     assertCandidateWithTickets(candidates, ["ticketC", "ticketD"]);

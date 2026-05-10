@@ -1,7 +1,8 @@
 # CLOUDSCRIPT USAGE
 
 Sử dụng CloudScript để viết các đoạn cần server authorize
-+ chẳng hạn tính năng đổi tên cho một gamePlayer cần tốn 50 gem, nhưng hàm gốc của đổi tên không trừ 50 gem, chúng ta có thể sử dụng cloudScript như sau:
+
+- chẳng hạn tính năng đổi tên cho một gamePlayer cần tốn 50 gem, nhưng hàm gốc của đổi tên không trừ 50 gem, chúng ta có thể sử dụng cloudScript như sau:
 
 ```ts
 const GEM_COST_CHANGE_NAME = 50;
@@ -71,7 +72,7 @@ handlers["changeDisplayName"] = async (args: any, context, log) => {
 
     return {
         displayName: displayName,
-        gemRemaining: currentGem - GEM_COST_CHANGE_NAME
+        gemRemaining: currentGem - GEM_COST_CHANGE_NAME,
     };
 };
 ```
@@ -124,7 +125,7 @@ Từ [AddFunctionRequestHandler.ts](/src/GN-app-api/handler/controller/handler/c
 1. Client gọi `addFunction`.
 2. Server nhận `script`, `canExecute`, `isLive`.
 3. Script bị từ chối ngay nếu chứa chuỗi `GNNetwork`.
-4. Script được nhúng vào [templateCloudScript.ts](/src/GN-startup/cloudScript/templateCloudScript.ts).
+4. Script được nhúng vào [templateCloudScript.ts](/dist/GN-startup/cloudScript/templateCloudScript.ts).
 5. Server compile TypeScript.
 6. Nếu compile pass, server lưu thành version mới.
 7. Khi execute, server gọi `handlers[functionName]`.
@@ -185,7 +186,9 @@ Template inject sẵn các symbol này:
 - `GNArrayBuilder`
 - `ExecuteResponseStatus`
 - các enum/constants từ package `@xmobitea/gearn-typescript-client-sdk` như sau:
-###
+
+### Các enum/constant từ package `@xmobitea/gearn-typescript-client-sdk`:
+
 - `Action0`
 - `Action1`
 - `Action2`
@@ -289,7 +292,7 @@ handlers["pingCloudScript"] = async (args: any, context, log) => {
     return {
         gameId: gameId,
         userId: context.userId,
-        message: message
+        message: message,
     };
 };
 ```
@@ -303,11 +306,11 @@ handlers["pingCloudScriptDebug"] = async (args: any, context, log) => {
     // Use this only for temporary debug data or execution tracing.
     log("pingCloudScriptDebug", {
         userId: context.userId,
-        message: message
+        message: message,
     });
 
     return {
-        message: message
+        message: message,
     };
 };
 ```
@@ -315,9 +318,7 @@ handlers["pingCloudScriptDebug"] = async (args: any, context, log) => {
 Khi có gọi `log`, `functionLogs` nhận về sẽ là mảng string, ví dụ:
 
 ```ts
-[
-    "{\"action\":\"pingCloudScriptDebug\",\"userId\":\"0123456789\",\"message\":\"hello\"}"
-]
+['{"action":"pingCloudScriptDebug","userId":"0123456789","message":"hello"}'];
 ```
 
 Nếu bạn cần ví dụ thật theo từng helper, xem file chi tiết trong `docs/`.
@@ -327,6 +328,7 @@ Nếu bạn cần ví dụ thật theo từng helper, xem file chi tiết trong 
 ### Ví dụ add script:
 
 #### Cách 1: dùng Script.
+
 ```ts
 import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
 
@@ -337,10 +339,10 @@ const addResponse = await GNNetwork.cloudScript.admin.addFunctionAsync(
     {
         script: script,
         canExecute: true,
-        isLive: false
+        isLive: false,
     },
     undefined,
-    secretKey
+    secretKey,
 );
 
 if (addResponse.hasReturnCodeError()) {
@@ -351,6 +353,7 @@ const version = addResponse.responseData.version;
 ```
 
 #### Cách 2: dùng GearN Dashboard
+
 vào tab CloudScript/Function, nhập script vào và bấm save
 
 ### Ví dụ execute đúng version vừa add:
@@ -358,16 +361,14 @@ vào tab CloudScript/Function, nhập script vào và bấm save
 ```ts
 import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
 
-const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync(
-    {
-        userId: "0123456789",
-        functionName: "pingCloudScript",
-        version: version,
-        functionParameters: {
-            message: "hello"
-        }
-    }
-);
+const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync({
+    userId: "0123456789",
+    functionName: "pingCloudScript",
+    version: version,
+    functionParameters: {
+        message: "hello",
+    },
+});
 
 if (executeResponse.hasReturnCodeError()) {
     throw new Error(executeResponse.toString());
@@ -379,15 +380,13 @@ Ví dụ execute không truyền `version`:
 ```ts
 import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
 
-const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync(
-    {
-        userId: "0123456789",
-        functionName: "pingCloudScript",
-        functionParameters: {
-            message: "hello"
-        }
-    }
-);
+const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync({
+    userId: "0123456789",
+    functionName: "pingCloudScript",
+    functionParameters: {
+        message: "hello",
+    },
+});
 
 if (executeResponse.hasReturnCodeError()) {
     throw new Error(executeResponse.toString());

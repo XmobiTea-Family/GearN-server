@@ -10,7 +10,7 @@ class CloudScriptMail extends CloudScriptEvent_1.CloudScriptProcessBase {
             mailData: {
                 subject: subject,
                 contentHtml: contentHtml,
-            }
+            },
         });
     }
     async sendToMore(emails, subject, contentHtml) {
@@ -20,7 +20,7 @@ class CloudScriptMail extends CloudScriptEvent_1.CloudScriptProcessBase {
             mailData: {
                 subject: subject,
                 contentHtml: contentHtml,
-            }
+            },
         });
     }
 }

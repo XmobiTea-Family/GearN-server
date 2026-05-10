@@ -38,10 +38,11 @@ Ngoài ra còn có:
 - `admin.send(...)`
 - `admin.sendAsync(...)`
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
-| `send(requestType: RequestType, role: RequestRole, request: OperationRequest, onResponse: Action1<OperationResponse>, overrideAuthToken: string, overrideSecretKey: string, customTags: GNHashtable): void` | `admin.send(requestType, role, request, onResponse, overrideSecretKey, customTags)` |
-| `sendAsync(requestType: RequestType, role: RequestRole, request: OperationRequest, overrideAuthToken: string, overrideSecretKey: string, customTags: GNHashtable): Promise<OperationResponse>` | `admin.sendAsync(requestType, role, request, overrideSecretKey, customTags)` |
+| `send(requestType: RequestType, role: RequestRole, request: OperationRequest, onResponse: Action1<OperationResponse>, overrideAuthToken: string, overrideSecretKey: string, customTags: GNHashtable): void` | `admin.send(requestType, role, request, onResponse, overrideAuthToken, overrideSecretKey, customTags)` |
+| `sendAsync(requestType: RequestType, role: RequestRole, request: OperationRequest, overrideAuthToken: string, overrideSecretKey: string, customTags: GNHashtable): Promise<OperationResponse>` | `admin.sendAsync(requestType, role, request, overrideAuthToken, overrideSecretKey, customTags)` |
 
 ## 3. Khi nào dùng `admin`
 
@@ -77,6 +78,7 @@ Rule thực tế:
 
 ### for MasterPlayer
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `addSegment(requestData: MasterPlayerModels.AdminAddSegmentRequestData, onResponse?: Action1<MasterPlayerResponseModels.AddSegmentOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.masterPlayer.addSegment(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -255,6 +257,7 @@ có thể tham khảo thêm
 
 ### for GamePlayer
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `addPlayerFriend(requestData: GamePlayerModels.AdminAddPlayerFriendRequestData, onResponse?: Action1<GamePlayerResponseModels.AddPlayerFriendOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.gamePlayer.addPlayerFriend(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -367,6 +370,7 @@ có thể tham khảo thêm
 
 ### for CharacterPlayer
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `addPlayerFriend(requestData: CharacterPlayerModels.AdminAddPlayerFriendRequestData, onResponse?: Action1<CharacterPlayerResponseModels.AddPlayerFriendOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.characterPlayer.addPlayerFriend(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -481,6 +485,7 @@ có thể tham khảo thêm
 
 ### for Inventory
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `addSegment(requestData: InventoryModels.AdminAddSegmentRequestData, onResponse?: Action1<InventoryResponseModels.AddSegmentOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.inventory.addSegment(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -557,6 +562,7 @@ có thể tham khảo thêm
 
 ### for Group
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `addMember(requestData: GroupModels.AdminAddMemberRequestData, onResponse?: Action1<GroupResponseModels.AddMemberOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.group.addMember(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -644,6 +650,8 @@ có thể tham khảo thêm
 [docs/guides/GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GROUP.md) phần `GNNetwork.group.admin`
 
 ### for StoreInventory
+
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `buyStoreItem(requestData: StoreInventoryModels.AdminBuyStoreItemRequestData, onResponse?: Action1<StoreInventoryResponseModels.BuyStoreItemOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.storeInventory.buyStoreItem(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -680,6 +688,7 @@ có thể tham khảo thêm
 
 ### for Content
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `createNewFileUploadInfo(requestData: ContentModels.AdminCreateNewFileUploadInfoRequestData, onResponse?: Action1<ContentResponseModels.CreateNewFileUploadInfoOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.content.createNewFileUploadInfo(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -702,6 +711,7 @@ có thể tham khảo thêm
 
 ### for Multiplayer
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `cancelAllMatchmakingTicket(requestData: MultiplayerModels.AdminCancelAllMatchmakingTicketRequestData, onResponse?: Action1<MultiplayerResponseModels.CancelAllMatchmakingTicketOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.multiplayer.cancelAllMatchmakingTicket(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -730,6 +740,7 @@ có thể tham khảo thêm
 
 ### for CloudScript
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `executeFunction(requestData: CloudScriptModels.AdminExecuteFunctionRequestData, onResponse?: Action1<CloudScriptResponseModels.ExecuteFunctionOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.cloudScript.executeFunction(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -740,6 +751,7 @@ có thể tham khảo thêm
 
 ### for Dashboard
 
+<!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
 | `getAdminAccountList(requestData: DashboardModels.GetAdminAccountListRequestData, onResponse?: Action1<DashboardResponseModels.GetAdminAccountListOperationResponse>, overrideAuthToken?: string, overrideSecretKey?: string, customTags?: GNHashtable, timeout?: number): void` | `admin.dashboard.getAdminAccountList(requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?)` |
@@ -989,7 +1001,7 @@ handlers["adminGrantStarterSword"] = async (args: any, context, log) => {
 
     return {
         createResponseData: createResponse.responseData,
-        playerInventories: inventoryResponse.responseData.infoResponseParameters.playerInventories
+        playerInventories: inventoryResponse.responseData.infoResponseParameters.playerInventories,
     };
 };
 ```
@@ -1047,8 +1059,8 @@ handlers["adminMarkGroupQueue"] = async (args: any, context, log) => {
         groupId: groupId,
         tag: {
             key: request.key,
-            value: request.value
-        }
+            value: request.value,
+        },
     };
 };
 ```
@@ -1071,7 +1083,7 @@ handlers["adminExecuteAnotherCloudScript"] = async (args: any, context, log) => 
     request.version = typeof args?.version === "string" ? args.version : undefined;
     request.functionParameters = args?.functionParameters ?? {
         source: "adminExecuteAnotherCloudScript",
-        requestedBy: context.userId
+        requestedBy: context.userId,
     };
 
     const customTags = GNHashtable.builder()
@@ -1079,12 +1091,7 @@ handlers["adminExecuteAnotherCloudScript"] = async (args: any, context, log) => 
         .add("source", "admin.cloudScript.executeFunctionAsync")
         .build();
 
-    const response = await admin.cloudScript.executeFunctionAsync(
-        request,
-        undefined,
-        undefined,
-        customTags
-    );
+    const response = await admin.cloudScript.executeFunctionAsync(request, undefined, undefined, customTags);
 
     assertResponseOk(response, "admin.cloudScript.executeFunctionAsync");
 
@@ -1092,7 +1099,7 @@ handlers["adminExecuteAnotherCloudScript"] = async (args: any, context, log) => 
         status: response.responseData.status,
         functionResult: response.responseData.functionResult,
         functionLogs: response.responseData.functionLogs,
-        errorMessage: response.responseData.errorMessage
+        errorMessage: response.responseData.errorMessage,
     };
 };
 ```
@@ -1144,7 +1151,7 @@ handlers["adminDeleteInventoryRow"] = async (args: any, context, log) => {
     return {
         deleted: true,
         type: request.type,
-        id: request.id
+        id: request.id,
     };
 };
 ```
@@ -1183,17 +1190,37 @@ Source từ client SDK repo:
 
 1. [README.MD](/node_modules/@xmobitea/gearn-typescript-client-sdk/README.MD)
 2. [docs/guides/DASHBOARD.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/DASHBOARD.md)
-3. [docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GAME_PLAYER.md)
-4. 
-5. [docs/guides/GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GROUP.md)
-6. [docs/reference/API_DASHBOARD.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_DASHBOARD.md)
-7. [docs/reference/API_GAME_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_GAME_PLAYER.md)
-8. [docs/reference/API_MASTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_MASTER_PLAYER.md)
-9. [docs/reference/API_GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_GROUP.md)
-10. [docs/reference/API_CLOUDSCRIPT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_CLOUDSCRIPT.md)
-11. [GamePlayerModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/GamePlayerModels.d.ts)
-12. [MasterPlayerModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/MasterPlayerModels.d.ts)
-13. [DashboardModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/DashboardModels.d.ts)
+3. [docs/guides/MASTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/MASTER_PLAYER.md)
+4. [docs/guides/GAME_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GAME_PLAYER.md)
+5. [docs/guides/CHARACTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CHARACTER_PLAYER.md)
+6. [docs/guides/GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/GROUP.md)
+7. [docs/guides/INVENTORY.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/INVENTORY.md)
+8. [docs/guides/STORE_INVENTORY.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/STORE_INVENTORY.md)
+9. [docs/guides/CONTENT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CONTENT.md)
+10. [docs/guides/CLOUDSCRIPT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/CLOUDSCRIPT.md)
+11. [docs/guides/MULTIPLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/guides/MULTIPLAYER.md)
+12. [docs/reference/API_DASHBOARD.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_DASHBOARD.md)
+13. [docs/reference/API_MASTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_MASTER_PLAYER.md)
+14. [docs/reference/API_GAME_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_GAME_PLAYER.md)
+15. [docs/reference/CHARACTER_PLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_CHARACTER_PLAYER.md)
+16. [docs/reference/API_GROUP.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_GROUP.md)
+17. [docs/reference/API_INVENTORY.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_INVENTORY.md)
+18. [docs/reference/API_STORE_INVENTORY.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_STORE_INVENTORY.md)
+19. [docs/reference/API_CONTENT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_CONTENT.md)
+20. [docs/reference/API_CLOUDSCRIPT.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_CLOUDSCRIPT.md)
+21. [docs/reference/API_MULTIPLAYER.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/API_MULTIPLAYER.md)
+22. [docs/reference/DTO_INDEX.md](/node_modules/@xmobitea/gearn-typescript-client-sdk/docs/reference/DTO_INDEX.md)
+23. [GenericModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/GenericModels.d.ts)
+24. [DashboardModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/DashboardModels.d.ts)
+25. [MasterPlayerModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/MasterPlayerModels.d.ts)
+26. [GamePlayerModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/GamePlayerModels.d.ts)
+27. [CharacterModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/CharacterModels.d.ts)
+28. [GroupModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/GroupModels.d.ts)
+29. [InventoryModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/InventoryModels.d.ts)
+30. [StoreInventoryModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/StoreInventoryModels.d.ts)
+31. [ContentModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/ContentModels.d.ts)
+32. [CloudScriptModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/CloudScriptModels.d.ts)
+33. [MultiplayerModels.ts](/node_modules/@xmobitea/gearn-typescript-client-sdk/dist/runtime/entity/models/MultiplayerModels.d.ts)
 
 ## 13. Kết luận ngắn
 
