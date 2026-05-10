@@ -568,7 +568,7 @@ export class ServerApplication extends BuilderBase {
      * Creates indexes, default secrets, root admin, and baseline game documents for a brand-new installation.
      */
     private async setupNewGNDatabase() {
-        Debug.log("The GN Server is installing some new information on Database...");
+        Debug.log("The GearN Server is installing some new information on Database...");
 
         let masterAdminCollection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 

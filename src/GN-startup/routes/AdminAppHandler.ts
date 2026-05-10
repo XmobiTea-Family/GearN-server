@@ -189,7 +189,7 @@
 // 			else {
 // 				res.locals.data = {
 // 					description: "gn description",
-// 					name: "GN Server",
+// 					name: "GearN Server",
 // 					version: "2.0",
 // 				}
 // 			}
