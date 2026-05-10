@@ -135,12 +135,12 @@ export class FacebookService implements IFacebookService {
             // let gsJson = JSON.parse(json);
 
             // if (appId == this.facebookAppId) {
-            // 	let product_id = gsJson["product_id"];
+            //     let product_id = gsJson["product_id"];
 
-            // 	return {
-            // 		success: true,
-            // 		productId: product_id,
-            // 	};
+            //     return {
+            //         success: true,
+            //         productId: product_id,
+            //     };
             // }
 
             const base64Payload = signedRequest.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");

@@ -360,22 +360,22 @@ export class ApiMiddleware {
                             }
 
                             // if (secretRole == SecretRole.Client) {
-                            // 	defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
-                            // 	defaultPermissionAnyForLayer1Any.adminSelfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.adminSelfEnable = false;
 
-                            // 	if (defaultPermissionAnyForLayer1Any.otherSelfEnable) {
-                            // 		defaultPermissionAnyForLayer1Any.selfEnable = true;
-                            // 	}
+                            //     if (defaultPermissionAnyForLayer1Any.otherSelfEnable) {
+                            //         defaultPermissionAnyForLayer1Any.selfEnable = true;
+                            //     }
                             // }
                             // else if (secretRole == SecretRole.Server) {
-                            // 	defaultPermissionAnyForLayer1Any.selfEnable = false;
-                            // 	defaultPermissionAnyForLayer1Any.otherSelfEnable = false;
-                            // 	defaultPermissionAnyForLayer1Any.adminSelfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.selfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.otherSelfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.adminSelfEnable = false;
                             // }
                             // else if (secretRole == SecretRole.Admin) {
-                            // 	defaultPermissionAnyForLayer1Any.selfEnable = false;
-                            // 	defaultPermissionAnyForLayer1Any.otherSelfEnable = false;
-                            // 	defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.selfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.otherSelfEnable = false;
+                            //     defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
                             // }
                         }
                     }

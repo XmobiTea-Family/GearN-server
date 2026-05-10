@@ -164,28 +164,28 @@ export class MongoObject {
     }
 
     // protected addToSet($addToSet: mongodb.SetFields<mongodb.Document>) {
-    // 	if (this.updateFilter == null) this.updateFilter = {};
-    // 	this.updateFilter.$addToSet = $addToSet;
+    //     if (this.updateFilter == null) this.updateFilter = {};
+    //     this.updateFilter.$addToSet = $addToSet;
     // }
 
     // protected pop($pop: mongodb.OnlyFieldsOfType<mongodb.Document, ReadonlyArray<any>, 1 | -1>) {
-    // 	if (this.updateFilter == null) this.updateFilter = {};
-    // 	this.updateFilter.$pop = $pop;
+    //     if (this.updateFilter == null) this.updateFilter = {};
+    //     this.updateFilter.$pop = $pop;
     // }
 
     // protected pull($pull: mongodb.PullOperator<mongodb.Document>) {
-    // 	if (this.updateFilter == null) this.updateFilter = {};
-    // 	this.updateFilter.$pull = $pull;
+    //     if (this.updateFilter == null) this.updateFilter = {};
+    //     this.updateFilter.$pull = $pull;
     // }
 
     // protected push($push: mongodb.PushOperator<mongodb.Document>) {
-    // 	if (this.updateFilter == null) this.updateFilter = {};
-    // 	this.updateFilter.$push = $push;
+    //     if (this.updateFilter == null) this.updateFilter = {};
+    //     this.updateFilter.$push = $push;
     // }
 
     // protected pullAll($pullAll: mongodb.PullAllOperator<mongodb.Document>) {
-    // 	if (this.updateFilter == null) this.updateFilter = {};
-    // 	this.updateFilter.$pullAll = $pullAll;
+    //     if (this.updateFilter == null) this.updateFilter = {};
+    //     this.updateFilter.$pullAll = $pullAll;
     // }
 
     public getObjectId(): mongodb.ObjectId {

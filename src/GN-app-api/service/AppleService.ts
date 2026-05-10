@@ -174,9 +174,9 @@ export class AppleService implements IAppleService {
         // let result = await this.validateReceiptLive(payload);
 
         // if (result["error"] != null) {
-        // 	return {
-        // 		success: false,
-        // 	};
+        //     return {
+        //         success: false,
+        //     };
         // }
 
         // let statusCode: number = result["status"];
@@ -185,13 +185,13 @@ export class AppleService implements IAppleService {
 
         // }
         // else if (statusCode == 21007 && this.sandboxEnable) {
-        // 	result = await this.validateReceiptSandbox(payload);
+        //     result = await this.validateReceiptSandbox(payload);
 
-        // 	if (result["error"] != null) {
-        // 		return {
-        // 			success: false,
-        // 		};
-        // 	}
+        //     if (result["error"] != null) {
+        //         return {
+        //             success: false,
+        //         };
+        //     }
         // }
 
         // let receiptJson = result["receipt"];
@@ -199,61 +199,61 @@ export class AppleService implements IAppleService {
         // let bundle_id = receiptJson["bundle_id"];
 
         // if (bundle_id == this.appleClientId) {
-        // 	let gsIn_apps = receiptJson["in_app"];
+        //     let gsIn_apps = receiptJson["in_app"];
 
-        // 	for (let i = 0; i < gsIn_apps.length; i++) {
-        // 		let gsIn_app = gsIn_apps[i];
+        //     for (let i = 0; i < gsIn_apps.length; i++) {
+        //         let gsIn_app = gsIn_apps[i];
 
-        // 		let transaction_id = gsIn_app["transaction_id"];
+        //         let transaction_id = gsIn_app["transaction_id"];
 
-        // 		if (transactionId == transaction_id) {
-        // 			let product_id = gsIn_app["product_id"];
+        //         if (transactionId == transaction_id) {
+        //             let product_id = gsIn_app["product_id"];
 
-        // 			return {
-        // 				success: true,
-        // 				productId: product_id
-        // 			};
-        // 		}
-        // 	}
+        //             return {
+        //                 success: true,
+        //                 productId: product_id
+        //             };
+        //         }
+        //     }
         // }
 
         // return {
-        // 	success: false,
+        //     success: false,
         // };
     }
 
     // private async validateReceiptLive(payload: string): Promise<{ [k: string]: any }> {
-    // 	let answer: { [k: string]: any } = {};
+    //     let answer: { [k: string]: any } = {};
 
-    // 	try {
-    // 		let result = await axios.post(AppleService.MAIN_verifyAppleAppStoreAPIUrl, { "receipt-data": payload }, {
-    // 			headers: {
-    // 				"Content-Type": "application/x-www-form-urlencoded"
-    // 			},
-    // 		});
-    // 		answer = result.data;
-    // 	} catch (error) {
-    // 		answer["error"] = error;
-    // 	}
+    //     try {
+    //         let result = await axios.post(AppleService.MAIN_verifyAppleAppStoreAPIUrl, { "receipt-data": payload }, {
+    //             headers: {
+    //                 "Content-Type": "application/x-www-form-urlencoded"
+    //             },
+    //         });
+    //         answer = result.data;
+    //     } catch (error) {
+    //         answer["error"] = error;
+    //     }
 
-    // 	return answer;
+    //     return answer;
     // }
 
     // private async validateReceiptSandbox(payload: string): Promise<{ [k: string]: any }> {
-    // 	let answer: { [k: string]: any } = {};
+    //     let answer: { [k: string]: any } = {};
 
-    // 	try {
-    // 		let result = await axios.post(AppleService.MAIN_verifySandboxAppleAppStoreAPIUrl, { "receipt-data": payload }, {
-    // 			headers: {
-    // 				"Content-Type": "application/x-www-form-urlencoded"
-    // 			},
-    // 		});
-    // 		answer = result.data;
-    // 	} catch (error) {
-    // 		answer["error"] = error;
-    // 	}
+    //     try {
+    //         let result = await axios.post(AppleService.MAIN_verifySandboxAppleAppStoreAPIUrl, { "receipt-data": payload }, {
+    //             headers: {
+    //                 "Content-Type": "application/x-www-form-urlencoded"
+    //             },
+    //         });
+    //         answer = result.data;
+    //     } catch (error) {
+    //         answer["error"] = error;
+    //     }
 
-    // 	return answer;
+    //     return answer;
     // }
 
     public async getTransactionInfoAsync(transactionId: string, isSandbox: boolean) {

@@ -90,86 +90,86 @@ init_create_GNConfigDebugJson() {
     "name": "debug",
     "options": {
         "applicationSettings": {
-			"port": 2202,
-			"socketPort": 2901,
-			"useSsl": false,
-			"keyFilePath": "",
-			"certFilePath": "",
-			"expiredTokenInMs": 172800000,
+            "port": 2202,
+            "socketPort": 2901,
+            "useSsl": false,
+            "keyFilePath": "",
+            "certFilePath": "",
+            "expiredTokenInMs": 172800000,
             "privateKeyToken": "privateKeyDefault",
             "initRootUsername": "gearnadmin",
-			"initRootPassword": "gearnpassword",
-			"restoreRootPassword": ""
-		},
+            "initRootPassword": "gearnpassword",
+            "restoreRootPassword": ""
+        },
 
-		"httpAppSettings": {
-			"enable": true,
-			"allowOrigin": "*",
-			"credentials": true,
-			"allowMethods": ["GET", "POST"],
-			"allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"],
-			"enableSendAndReceiveDebug": true,
-			"enablePostViaMsgPack": true,
-			"enablePostViaJson": true,
+        "httpAppSettings": {
+            "enable": true,
+            "allowOrigin": "*",
+            "credentials": true,
+            "allowMethods": ["GET", "POST"],
+            "allowHeaders": ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"],
+            "enableSendAndReceiveDebug": true,
+            "enablePostViaMsgPack": true,
+            "enablePostViaJson": true,
             "trustProxy": true
-		},
+        },
 
-		"socketAppSettings": {
-			"enable": true,
-			"useEmitter": false,
-			"allowOrigin": "*",
-			"credentials": true,
-			"allowMethods": ["GET"],
-			"allowHeaders": [],
-			"enableSendAndReceiveDebug": false,
-			"enablePostViaMsgPack": true,
-			"enablePostViaJson": true,
-			"pingInterval": 50000,
-			"pingTimeout": 5000
-		},
+        "socketAppSettings": {
+            "enable": true,
+            "useEmitter": false,
+            "allowOrigin": "*",
+            "credentials": true,
+            "allowMethods": ["GET"],
+            "allowHeaders": [],
+            "enableSendAndReceiveDebug": false,
+            "enablePostViaMsgPack": true,
+            "enablePostViaJson": true,
+            "pingInterval": 50000,
+            "pingTimeout": 5000
+        },
 
-		"uploadFileSettings": {
-			"enable": true,
-			"uploadPath": "./file-upload",
-			"maxSizeUpload": 52428800,
-			"mimeTypeAccepts": ["image/png"]
-		},
+        "uploadFileSettings": {
+            "enable": true,
+            "uploadPath": "./file-upload",
+            "maxSizeUpload": 52428800,
+            "mimeTypeAccepts": ["image/png"]
+        },
 
-		"databaseSettings": {
-			"connectionString": "mongodb://127.0.0.1:27017/",
-			"databaseName": "XmobiTea",
+        "databaseSettings": {
+            "connectionString": "mongodb://127.0.0.1:27017/",
+            "databaseName": "XmobiTea",
             "logConnectionString": null,
-			"logDatabaseName": "XmobiTea",
-			"options": {
-			}
-		},
+            "logDatabaseName": "XmobiTea",
+            "options": {
+            }
+        },
 
-		"otherSettings": {
-			"headerIP": "X-Real-IP",
-			"idTypeCase": 0,
-			"ipApiUrl": "https://ipdetail.gearn.net/json",
+        "otherSettings": {
+            "headerIP": "X-Real-IP",
+            "idTypeCase": 0,
+            "ipApiUrl": "https://ipdetail.gearn.net/json",
             "cloudScriptExecuteTimeoutInMs": 15000
-		},
+        },
 
-		"logSettings": {
-			"logToConsoleEnable": true,
-			"logToFileEnable": true,
-			"logPath": "./log/debug/Server.log"
-		},
+        "logSettings": {
+            "logToConsoleEnable": true,
+            "logToFileEnable": true,
+            "logPath": "./log/debug/Server.log"
+        },
 
-		"ddosSettings": {
-			"socketMaxRequestPerSecondPerIp": 50,
-			"socketMaxRequestPerSecondPerPeer": 20,
-			"socketMaxPendingRequest": 1000,
-			"socketMaxRequestSize": 1024,
-			"httpMaxRequestPerSecondPerIp": 50,
-			"httpMaxRequestPerSecondPerPeer": 20,
-			"httpMaxPendingRequest": 1000,
-			"httpMaxRequestSize": 1024,
-			"maxUploadPendingRequest": 200,
-			"maxDownloadPendingRequest": 200,
-			"ipWhiteList": ["127.0.0.1"]
-		},
+        "ddosSettings": {
+            "socketMaxRequestPerSecondPerIp": 50,
+            "socketMaxRequestPerSecondPerPeer": 20,
+            "socketMaxPendingRequest": 1000,
+            "socketMaxRequestSize": 1024,
+            "httpMaxRequestPerSecondPerIp": 50,
+            "httpMaxRequestPerSecondPerPeer": 20,
+            "httpMaxPendingRequest": 1000,
+            "httpMaxRequestSize": 1024,
+            "maxUploadPendingRequest": 200,
+            "maxDownloadPendingRequest": 200,
+            "ipWhiteList": ["127.0.0.1"]
+        },
 
         "clusterSettings": {
             "instanceId": "node_0",
@@ -293,7 +293,7 @@ init_create_srcAppApiHandlerDir() {
     ReturnCode,
     GNHashtable,
     GNArray,
-	DataMember,
+    DataMember,
     BooleanDataMember,
     NumberDataMember,
     StringDataMember,
@@ -310,16 +310,16 @@ class TestOperationRequest extends OperationRequest {
 
     @BooleanDataMember({ code: TestParameterCode.Boolean, isOptional: true })
     public booleanValue?: boolean;
-	
+    
     @NumberDataMember({ code: TestParameterCode.Number, isOptional: true })
     public numberValue?: number;
-	
+    
     @StringDataMember({ code: TestParameterCode.String, isOptional: true })
     public stringValue?: string;
-	
+    
     @GNHashtableDataMember({ code: TestParameterCode.GNHashtable, isOptional: true })
     public gnHashtableValue?: GNHashtable;
-	
+    
     @GNArrayDataMember({ code: TestParameterCode.GNArray, isOptional: true })
     public gnArrayValue?: GNArray;
 
@@ -359,7 +359,7 @@ export class TestRequestHandler extends RequestHandler {
     }
 
     private async execute(request: { booleanValue: boolean, numberValue: number, stringValue: string, gnHashtableValue: GNHashtable, gnArrayValue: GNArray }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
         operationResponse.setParameter(
             ParameterCode.ErrorCode,
@@ -388,7 +388,7 @@ export class TestRequestHandler extends RequestHandler {
         );
 
         return operationResponse;
-	}
+    }
 }' > TestRequestHandler.ts
     echo 'create TestRequestHandler.ts file success'
 
@@ -459,9 +459,9 @@ init_create_releasePM2Sh() {
     echo 'export PM2_ID_THIS_APP=$(pm2 id '$PROJECT_NAME'.index)
 
     if [ "$PM2_ID_THIS_APP" == "[]" ]; then
-    	pm2 start '$PROJECT_NAME'.index.js
+        pm2 start '$PROJECT_NAME'.index.js
     else
-    	pm2 restart '$PROJECT_NAME'.index
+        pm2 restart '$PROJECT_NAME'.index
     fi
 
     echo "Run release success"' > releasePM2.sh
@@ -521,7 +521,7 @@ init_create_tsconfigJson() {
         "allowSyntheticDefaultImports": true,
         "stripInternal": true,
         "skipLibCheck": true,
-		"resolveJsonModule": true,
+        "resolveJsonModule": true,
         "outDir": "./dist",
     },
     "exclude": ["node_modules"]

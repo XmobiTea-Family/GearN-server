@@ -205,19 +205,19 @@ export class CancelAllMatchmakingTicketRequestHandler extends MultiplayerBaseReq
         // const session = this.gnServer.getDatabase().startSession();
 
         // try {
-        // 	session.startTransaction();
+        //     session.startTransaction();
 
-        // 	await session.commitTransaction();
+        //     await session.commitTransaction();
         // }
         // catch (err) {
-        // 	await session.abortTransaction();
+        //     await session.abortTransaction();
 
-        // 	Debug.logError(err);
+        //     Debug.logError(err);
 
-        // 	throw err;
+        //     throw err;
         // }
         // finally {
-        // 	await session.endSession();
+        //     await session.endSession();
         // }
 
         const session = this.gnServer.getDatabase().startSession();

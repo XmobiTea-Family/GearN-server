@@ -860,7 +860,7 @@ export class GNServer {
     }
 
     // public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {
-    // 	return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
+    //     return await this.socketApp.getSocketAppHandler().sendEventToNamespace(namespace, operationEvent);
     // }
 
     /**

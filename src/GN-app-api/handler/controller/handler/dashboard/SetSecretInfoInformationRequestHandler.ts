@@ -194,19 +194,19 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
                             }
 
                             // if (secretRole == SecretRole.Client) {
-                            // 	if (permissionAnyForLayer1Any.otherSelfEnable) {
-                            // 		permissionAnyForLayer1Any.selfEnable = true;
-                            // 	}
+                            //     if (permissionAnyForLayer1Any.otherSelfEnable) {
+                            //         permissionAnyForLayer1Any.selfEnable = true;
+                            //     }
                             // }
                             // else if (secretRole == SecretRole.Server) {
-                            // 	permissionAnyForLayer1Any.selfEnable = false;
-                            // 	permissionAnyForLayer1Any.otherSelfEnable = false;
-                            // 	permissionAnyForLayer1Any.adminSelfEnable = false;
+                            //     permissionAnyForLayer1Any.selfEnable = false;
+                            //     permissionAnyForLayer1Any.otherSelfEnable = false;
+                            //     permissionAnyForLayer1Any.adminSelfEnable = false;
                             // }
                             // else if (secretRole == SecretRole.Admin) {
-                            // 	permissionAnyForLayer1Any.selfEnable = false;
-                            // 	permissionAnyForLayer1Any.otherSelfEnable = false;
-                            // 	permissionAnyForLayer1Any.serverSelfEnable = false;
+                            //     permissionAnyForLayer1Any.selfEnable = false;
+                            //     permissionAnyForLayer1Any.otherSelfEnable = false;
+                            //     permissionAnyForLayer1Any.serverSelfEnable = false;
                             // }
                         }
                     }

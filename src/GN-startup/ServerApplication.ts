@@ -419,9 +419,9 @@ export class ServerApplication extends BuilderBase {
         this.socketApp.setEmitter(adapterEventCollection);
 
         // if (this.mailSettings.getEnable()) {
-        // 	this.gnServer.getMail().run(() => {
-        // 		Debug.log("[GearN] Send Grid Mail run success");
-        // 	});
+        //     this.gnServer.getMail().run(() => {
+        //         Debug.log("[GearN] Send Grid Mail run success");
+        //     });
         // }
 
         let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
@@ -1751,8 +1751,8 @@ export class ServerApplication extends BuilderBase {
             // let adapterEventCollection = this.gnServer.getDatabase().systemCollection("AdapterEvent");
 
             // await adapterEventCollection.createIndex(
-            // 	{ "createdAt": 1 },
-            // 	{ expireAfterSeconds: 60, background: true, name: "createdAt_1" }
+            //     { "createdAt": 1 },
+            //     { expireAfterSeconds: 60, background: true, name: "createdAt_1" }
             // );
 
             Debug.log("create some indexes for System.AdapterEvent success.");

@@ -114,16 +114,16 @@ export class HttpAppHandler {
      */
     public run(): void {
         // this.router.get("/getConfig/:configName", (req: express.Request, res: express.Response) => {
-        // 	res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
+        //     res.setHeader(Commands.CONTENT_TYPE, Commands.APPLICATION_JSON);
 
-        // 	let configName = req.params.configName;
-        // 	if (configName != null) {
-        // 		let configItem = this.gnServer.getConfigGame().getConfig(configName);
+        //     let configName = req.params.configName;
+        //     if (configName != null) {
+        //         let configItem = this.gnServer.getConfigGame().getConfig(configName);
 
-        // 		if (configItem != null) return res.json([ReturnCode.Ok, { "1": configItem.toJson() }]);
-        // 	}
+        //         if (configItem != null) return res.json([ReturnCode.Ok, { "1": configItem.toJson() }]);
+        //     }
 
-        // 	return res.json([ReturnCode.OperationInvalid]);
+        //     return res.json([ReturnCode.OperationInvalid]);
         // });
 
         this.router.post("/ts", (req: express.Request, res: express.Response): express.Response => {

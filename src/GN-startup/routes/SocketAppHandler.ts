@@ -331,19 +331,19 @@ export class SocketAppHandler {
                 socket.data.secretInfo = secretInfo;
 
                 // if (socket.data.isAuthenticated === true) {
-                // 	let gamePlayer = await this.xDatabase.gamePlayerRepository.loadGamePlayerAsync(socket.data.authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
+                //     let gamePlayer = await this.xDatabase.gamePlayerRepository.loadGamePlayerAsync(socket.data.authInfo.getUserId(), secretInfo.getGameId(), { playerGroups: true });
 
-                // 	if (gamePlayer != null && socket != null) {
-                // 		let playerGroups = gamePlayer.getAllPlayerGroups();
+                //     if (gamePlayer != null && socket != null) {
+                //         let playerGroups = gamePlayer.getAllPlayerGroups();
 
-                // 		for (let i = 0; i < playerGroups.length; i++) {
-                // 			let playerGroup = playerGroups[i];
+                //         for (let i = 0; i < playerGroups.length; i++) {
+                //             let playerGroup = playerGroups[i];
 
-                // 			if (playerGroup.status == 0) {	// 0 is member
-                // 				socket.join(playerGroup.groupId);
-                // 			}
-                // 		}
-                // 	}
+                //             if (playerGroup.status == 0) {    // 0 is member
+                //                 socket.join(playerGroup.groupId);
+                //             }
+                //         }
+                //     }
                 // }
             } else {
                 socket.data.isSecreted = false;
@@ -528,19 +528,19 @@ export class SocketAppHandler {
     }
 
     // private sendEventForSocket(socket: Socket, operationEvent: OperationEvent, useMsgPack: boolean = true) {
-    // 	let socketData = OperationHelper.toEventSocketData(operationEvent);
-    // 	if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
+    //     let socketData = OperationHelper.toEventSocketData(operationEvent);
+    //     if (this.enableSendAndReceiveDebug) Debug.log("[EVENT SEND] %O", JSON.stringify(socketData));
 
-    // 	if (useMsgPack)
-    // 	{
-    // 		let socketDataMsgPack = encode(socketData);
+    //     if (useMsgPack)
+    //     {
+    //         let socketDataMsgPack = encode(socketData);
 
-    // 		socket.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-    // 	}
-    // 	else
-    // 	{
-    // 		socket.emit(Commands.EventCmd_Json, socketData);
-    // 	}
+    //         socket.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+    //     }
+    //     else
+    //     {
+    //         socket.emit(Commands.EventCmd_Json, socketData);
+    //     }
     // }
 
     /**

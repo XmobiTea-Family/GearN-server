@@ -329,10 +329,10 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends CharacterPlaye
 
         // let pivotPlayerStatistic = pivot.getPlayerStatistics(key);
         // if (pivotPlayerStatistic == null) {
-        // 	pivotPlayerStatistic = {
-        // 		tsLastUpdate: currentMilliseconds,
-        // 		value: initialValue
-        // 	}
+        //     pivotPlayerStatistic = {
+        //         tsLastUpdate: currentMilliseconds,
+        //         value: initialValue
+        //     }
         // }
 
         // let left = [];
@@ -340,30 +340,30 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends CharacterPlaye
 
         // let currentItem;
         // for (let i = 0; i < pivotIndex; i++) {
-        // 	currentItem = characterPlayers[i];
+        //     currentItem = characterPlayers[i];
 
-        // 	let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
-        // 	if (currentPlayerStatistic == null) {
-        // 		currentPlayerStatistic = {
-        // 			tsLastUpdate: currentMilliseconds,
-        // 			value: initialValue
-        // 		}
-        // 	}
+        //     let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
+        //     if (currentPlayerStatistic == null) {
+        //         currentPlayerStatistic = {
+        //             tsLastUpdate: currentMilliseconds,
+        //             value: initialValue
+        //         }
+        //     }
 
-        // 	if (currentPlayerStatistic.value < pivotPlayerStatistic.value) {
-        // 		right.push(currentItem);
-        // 	}
-        // 	else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
-        // 		if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
-        // 			right.push(currentItem);
-        // 		}
-        // 		else {
-        // 			left.push(currentItem);
-        // 		}
-        // 	}
-        // 	else {
-        // 		left.push(currentItem);
-        // 	}
+        //     if (currentPlayerStatistic.value < pivotPlayerStatistic.value) {
+        //         right.push(currentItem);
+        //     }
+        //     else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
+        //         if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
+        //             right.push(currentItem);
+        //         }
+        //         else {
+        //             left.push(currentItem);
+        //         }
+        //     }
+        //     else {
+        //         left.push(currentItem);
+        //     }
         // }
 
         // return [...this.quickSort(key, right, initialValue), pivot, ...this.quickSort(key, left, initialValue)];
@@ -406,10 +406,10 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends CharacterPlaye
 
         // let pivotPlayerStatistic = pivot.getPlayerStatistics(key);
         // if (pivotPlayerStatistic == null) {
-        // 	pivotPlayerStatistic = {
-        // 		tsLastUpdate: currentMilliseconds,
-        // 		value: initialValue
-        // 	}
+        //     pivotPlayerStatistic = {
+        //         tsLastUpdate: currentMilliseconds,
+        //         value: initialValue
+        //     }
         // }
 
         // let left = [];
@@ -417,30 +417,30 @@ export class GetFriendStatisticsLeaderboardRequestHandler extends CharacterPlaye
 
         // let currentItem;
         // for (let i = 0; i < pivotIndex; i++) {
-        // 	currentItem = characterPlayers[i];
+        //     currentItem = characterPlayers[i];
 
-        // 	let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
-        // 	if (currentPlayerStatistic == null) {
-        // 		currentPlayerStatistic = {
-        // 			tsLastUpdate: currentMilliseconds,
-        // 			value: initialValue
-        // 		}
-        // 	}
+        //     let currentPlayerStatistic = currentItem.getPlayerStatistics(key);
+        //     if (currentPlayerStatistic == null) {
+        //         currentPlayerStatistic = {
+        //             tsLastUpdate: currentMilliseconds,
+        //             value: initialValue
+        //         }
+        //     }
 
-        // 	if (currentPlayerStatistic.value > pivotPlayerStatistic.value) {
-        // 		right.push(currentItem);
-        // 	}
-        // 	else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
-        // 		if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
-        // 			right.push(currentItem);
-        // 		}
-        // 		else {
-        // 			left.push(currentItem);
-        // 		}
-        // 	}
-        // 	else {
-        // 		left.push(currentItem);
-        // 	}
+        //     if (currentPlayerStatistic.value > pivotPlayerStatistic.value) {
+        //         right.push(currentItem);
+        //     }
+        //     else if (currentPlayerStatistic.value == pivotPlayerStatistic.value) {
+        //         if (currentPlayerStatistic.tsLastUpdate > pivotPlayerStatistic.tsLastUpdate) {
+        //             right.push(currentItem);
+        //         }
+        //         else {
+        //             left.push(currentItem);
+        //         }
+        //     }
+        //     else {
+        //         left.push(currentItem);
+        //     }
         // }
 
         // return [...this.quickSort(key, right, initialValue), pivot, ...this.quickSort(key, left, initialValue)];

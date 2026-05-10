@@ -125,7 +125,7 @@ export class UploadFileHandler {
         downloadRouter.get(
             "/:downloadToken",
             // wrap((req, res, next) => {
-            // 	return this.antiDdosMiddleware.addPendingDownloadRequest(req, res, next);
+            //     return this.antiDdosMiddleware.addPendingDownloadRequest(req, res, next);
             // }),
 
             async (req: express.Request, res: express.Response) => {
@@ -161,18 +161,18 @@ export class UploadFileHandler {
 
                 // fs.readFile(fullPath, (err, data) => {
 
-                // 	if (err) {
-                // 		return res.status(404).send(err.message);
-                // 	}
+                //     if (err) {
+                //         return res.status(404).send(err.message);
+                //     }
 
-                // 	// res.writeHead(200, { "Content-Type": fileUpload["mimeType"], "Cache-Control": "public, max-age=86400" });
+                //     // res.writeHead(200, { "Content-Type": fileUpload["mimeType"], "Cache-Control": "public, max-age=86400" });
 
-                // 	this.downloadFileSessionCollection.updateOne({ downloadToken: downloadToken }, {
-                // 		$set: {
-                // 			isValid: false
-                // 		}
-                // 	});
-                // 	return res.end(data);
+                //     this.downloadFileSessionCollection.updateOne({ downloadToken: downloadToken }, {
+                //         $set: {
+                //             isValid: false
+                //         }
+                //     });
+                //     return res.end(data);
                 // });
             },
         );

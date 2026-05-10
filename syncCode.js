@@ -1177,9 +1177,9 @@ function syncApiCodeTypescript(dirName, ignoreFileLst, requestType) {
 
             // let str = "";
             // for (let j = 0; j < allLines.length; j++) {
-            // 	str += allLines[j];
+            //     str += allLines[j];
 
-            // 	if (j < allLines.length - 1) str += "\n";
+            //     if (j < allLines.length - 1) str += "\n";
             // }
 
             // console.log(str);
@@ -1321,9 +1321,9 @@ function syncApiCodeTypescript(dirName, ignoreFileLst, requestType) {
 
                 // let str = "";
                 // for (let j = 0; j < allLines.length; j++) {
-                // 	str += allLines[j];
+                //     str += allLines[j];
 
-                // 	if (j < allLines.length - 1) str += "\n";
+                //     if (j < allLines.length - 1) str += "\n";
                 // }
 
                 // console.log(str);

@@ -5,7 +5,7 @@ import { CloudScriptSecurityValidator } from "./../src/GN-app-api/service/CloudS
 test("CloudScript function policy accepts element-access handler registration", () => {
     const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers["hello"] = (args, context, log) => {
-	return "hello world";
+    return "hello world";
 }
 `);
 
@@ -15,7 +15,7 @@ handlers["hello"] = (args, context, log) => {
 test("CloudScript function policy accepts property-access handler registration", () => {
     const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers.hello = (args, context, log) => {
-	return "hello world";
+    return "hello world";
 }
 `);
 
@@ -25,29 +25,29 @@ handlers.hello = (args, context, log) => {
 test("CloudScript function policy accepts top-level class declarations", () => {
     const result = CloudScriptSecurityValidator.validateFunctionScript(`
 class BaseGreeting {
-	static prefix = "hello";
+    static prefix = "hello";
 
-	static createName(name: string) {
-		return name;
-	}
+    static createName(name: string) {
+        return name;
+    }
 }
 
 class Greeting extends BaseGreeting {
-	static suffix = "world";
-	static ready = false;
+    static suffix = "world";
+    static ready = false;
 
-	static {
-		Greeting.ready = true;
-	}
+    static {
+        Greeting.ready = true;
+    }
 
-	message() {
-		return Greeting.prefix + " " + Greeting.suffix;
-	}
+    message() {
+        return Greeting.prefix + " " + Greeting.suffix;
+    }
 }
 
 handlers.hello = (args, context, log) => {
-	const greeting = new Greeting();
-	return greeting.message();
+    const greeting = new Greeting();
+    return greeting.message();
 }
 `);
 
@@ -59,11 +59,11 @@ test("CloudScript event callback policy accepts pre and post registrations for r
         "authenticate_LoginByAccount",
         `
 preHandlers.authenticate_LoginByAccount = async (request, role, customTags, operationRequest, log) => {
-	return null;
+    return null;
 }
 
 postHandlers.authenticate_LoginByAccount = async (request, role, customTags, operationRequest, operationResponse, log) => {
-	return operationResponse;
+    return operationResponse;
 }
 `,
     );
@@ -76,7 +76,7 @@ test("CloudScript event callback policy accepts one pre registration for request
         "authenticate_LoginByAccount",
         `
 preHandlers.authenticate_LoginByAccount = async (request, role, customTags, operationRequest, log) => {
-	return null;
+    return null;
 }
 `,
     );
@@ -103,7 +103,7 @@ systemHandlers.system_OnEveryHour = async (log) => {
 test("CloudScript function policy reports top-level violation location and source", () => {
     const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers["hello"] = (args, context, log) => {
-	return "hello world";
+    return "hello world";
 }
 console.log("bad");
 `);
@@ -116,7 +116,7 @@ console.log("bad");
 test("CloudScript function policy reports lexical violation location and source", () => {
     const result = CloudScriptSecurityValidator.validateFunctionScript(`
 handlers["hello"] = (args, context, log) => {
-	return GNNetwork;
+    return GNNetwork;
 }
 `);
 
