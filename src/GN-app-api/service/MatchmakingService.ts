@@ -1,4 +1,6 @@
+import { DataValueType } from "./../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
 import { MatchmakingTicketStatus } from "./../../GN-common/constant/enumType/MatchmakingTicketStatus";
+import { MatchStatus } from "./../../GN-common/constant/enumType/MatchStatus";
 import { StringUtility } from "./../../GN-common/helper/StringUtility";
 import { MatchmakingTicket } from "./../../GN-library/xdatabase/lib/entity/pro/MatchmakingTicket";
 import { xDatetime } from "./../../GN-library/xdatetime/lib/xDatetime";
@@ -31,39 +33,43 @@ export class MatchmakingService implements IMatchmakingService {
         try {
             let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
-            // Only tickets still waiting for a match are considered in this evaluation pass.
-            let results = await matchmakingTicketCollection.find({ status: <number>MatchmakingTicketStatus.WaitingForMatch }, {
-                projection: {
-                    status: true,
-                    members: true,
-                }
-            });
+            // Load active tickets so expiration is applied even when no valid match candidate exists.
+            let results = await matchmakingTicketCollection.find({ status: { $in: [MatchmakingTicketStatus.WaitingForMatch, MatchmakingTicketStatus.WaitingForMembers] } });
 
-            let matchmakingTickets: MatchmakingTicket[] = [];
+            let pendingMatchmakingTickets: MatchmakingTicket[] = [];
 
             while (await results.hasNext()) {
                 let result = await results.next();
 
-                matchmakingTickets.push(new MatchmakingTicket(result, matchmakingTicketCollection));
+                pendingMatchmakingTickets.push(new MatchmakingTicket(result, matchmakingTicketCollection));
             }
 
-            // Candidate matches are built entirely in memory before any ticket state is persisted.
-            let matchmakingTicketCanMatchs = this.getMatchmakingTicketCanMatchs(gameId, matchmakingTickets);
+            await this.removeGiveUpTickets(pendingMatchmakingTickets);
 
-            if (matchmakingTicketCanMatchs.length != 0) {
-                this.removeMatchmakingTicketNotCorrect(matchmakingTicketCanMatchs);
+            let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
 
-                this.createMatch(gameId, matchmakingTicketCanMatchs, matchmakingTickets);
+            const answer: MatchmakingTicketCanMatch[] = [];
 
-                this.removeGiveUpTickets(matchmakingTickets);
+            for (const matchmakingQueueSetting of matchmakingQueueSettings) {
+                let waitingForMatchTickets = pendingMatchmakingTickets.filter((x) => x.getQueueName() == matchmakingQueueSetting.queueName && x.getStatus() == MatchmakingTicketStatus.WaitingForMatch);
 
-                Debug.log("Matchmaking handler " + matchmakingTicketCanMatchs.length + " matched success!");
+                // Candidate matches are built entirely in memory before any ticket state is persisted.
+                let matchmakingTicketCanMatchs = this.getMatchmakingTicketCanMatchs(matchmakingQueueSetting, waitingForMatchTickets);
+
+                if (matchmakingTicketCanMatchs.length != 0) {
+                    this.removeMatchmakingTicketNotCorrect(matchmakingTicketCanMatchs);
+
+                    await this.createMatch(gameId, matchmakingTicketCanMatchs, waitingForMatchTickets);
+
+                    Debug.log("Matchmaking handler " + matchmakingTicketCanMatchs.length + " matched success!");
+
+                    answer.push(...matchmakingTicketCanMatchs);
+                }
             }
 
-            return matchmakingTicketCanMatchs;
-        }
-        catch (err) {
-            console.error(err);
+            return answer;
+        } catch (err) {
+            Debug.logException(err);
         }
 
         return null;
@@ -71,24 +77,16 @@ export class MatchmakingService implements IMatchmakingService {
 
     /**
      * Tries to assemble candidate matches from the waiting tickets of one game.
-     * @param gameId Provides the game ID value used by this operation.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      * @returns Returns the matchmaking ticket can matchs.
      */
-    private getMatchmakingTicketCanMatchs(gameId: string, matchmakingTickets: MatchmakingTicket[]): MatchmakingTicketCanMatch[] {
-        let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
-
+    public getMatchmakingTicketCanMatchs(matchmakingQueueSetting: xMatchmakingQueueSettings, matchmakingTickets: MatchmakingTicket[]): MatchmakingTicketCanMatch[] {
         let matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[] = [];
 
         // Build one candidate around each ticket, then let later filters remove overlapping or invalid results.
         for (let i = 0; i < matchmakingTickets.length; i++) {
             try {
                 let matchmakingTicket = matchmakingTickets[i];
-
-                // Queue settings decide match size, team layout, and advanced matchmaking rules.
-                let matchmakingQueueSetting = matchmakingQueueSettings.find(x => x.queueName == matchmakingTicket.getQueueName());
-
-                if (matchmakingQueueSetting == null) continue;
 
                 let matchmakingTicketCanMatch: MatchmakingTicketCanMatch = {
                     matchId: StringUtility.generateRandomString(15, 0),
@@ -100,7 +98,7 @@ export class MatchmakingService implements IMatchmakingService {
                     tempTicketIds: [],
                     tsCreate: matchmakingTicket.getTsCreate(),
                     matchSize: matchmakingQueueSetting.matchSize,
-                    status: <number>MatchmakingTicketStatus.Matched,
+                    status: MatchmakingTicketStatus.Matched,
                 };
 
                 if (matchmakingQueueSetting.teams == null || matchmakingQueueSetting.teams.length == 0) {
@@ -110,10 +108,9 @@ export class MatchmakingService implements IMatchmakingService {
                         members: [],
                         tempTickets: [],
                         tempMembers: [],
-                        teamSize: matchmakingTicketCanMatch.matchSize
+                        teamSize: matchmakingTicketCanMatch.matchSize,
                     });
-                }
-                else {
+                } else {
                     for (let j = 0; j < matchmakingQueueSetting.teams.length; j++) {
                         let team = matchmakingQueueSetting.teams[j];
                         matchmakingTicketCanMatch.matchmakingTicketTeams.push({
@@ -122,26 +119,26 @@ export class MatchmakingService implements IMatchmakingService {
                             members: [],
                             tempTickets: [],
                             tempMembers: [],
-                            teamSize: team.teamSize
+                            teamSize: team.teamSize,
                         });
                     }
                 }
 
                 // Seed the first team with the current ticket, then try to fill the remaining capacity.
-                let myTeamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.find(x => x.teamSize.max >= matchmakingTicket.getMembers().length);
+                let myTeamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.find((x) => x.teamSize.max >= matchmakingTicket.getMembers().length);
                 if (myTeamMatchmakingTicketCanMatch == null) continue;
 
                 if (matchmakingQueueSetting.rules == null || matchmakingQueueSetting.rules.length == 0) {
                     matchmakingTicketCanMatch.ticketIds.push(matchmakingTicket.getTicketId());
                     myTeamMatchmakingTicketCanMatch.tickets.push({
                         ticketId: matchmakingTicket.getTicketId(),
-                        memberCount: matchmakingTicket.getMembers().length
+                        memberCount: matchmakingTicket.getMembers().length,
                     });
 
-                    matchmakingTicket.getMembers().forEach(member => {
+                    matchmakingTicket.getMembers().forEach((member) => {
                         myTeamMatchmakingTicketCanMatch.members.push({
                             userId: member.userId,
-                            attributeForQueue: member.attributeForQueue
+                            attributeForQueue: member.attributeForQueue,
                         });
 
                         matchmakingTicketCanMatch.memberIds.push(member.userId);
@@ -158,37 +155,36 @@ export class MatchmakingService implements IMatchmakingService {
                         let teamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.members.length - b.members.length)[0];
 
                         if (matchmakingTicketCanMatch.memberIds.length + nextMatchmakingTicket.getMembers().length <= matchmakingQueueSetting.matchSize.max && teamMatchmakingTicketCanMatch.members.length + nextMatchmakingTicket.getMembers().length <= teamMatchmakingTicketCanMatch.teamSize.max) {
-                            nextMatchmakingTicket.getMembers().forEach(member => {
+                            nextMatchmakingTicket.getMembers().forEach((member) => {
                                 teamMatchmakingTicketCanMatch.members.push({
                                     userId: member.userId,
-                                    attributeForQueue: member.attributeForQueue
+                                    attributeForQueue: member.attributeForQueue,
                                 });
 
                                 matchmakingTicketCanMatch.memberIds.push(member.userId);
                             });
 
-                            matchmakingTicketCanMatch.ticketIds.push(matchmakingTicket.getTicketId());
+                            matchmakingTicketCanMatch.ticketIds.push(nextMatchmakingTicket.getTicketId());
                             teamMatchmakingTicketCanMatch.tickets.push({
                                 ticketId: nextMatchmakingTicket.getTicketId(),
-                                memberCount: nextMatchmakingTicket.getMembers().length
+                                memberCount: nextMatchmakingTicket.getMembers().length,
                             });
                         }
                     }
-                }
-                else {
+                } else {
                     // Track the last ticket size to support similarity rules when teams are filled progressively.
                     let lastMemberCount = matchmakingTicket.getMembers().length;
 
                     matchmakingTicketCanMatch.tempTicketIds.push(matchmakingTicket.getTicketId());
                     myTeamMatchmakingTicketCanMatch.tempTickets.push({
                         ticketId: matchmakingTicket.getTicketId(),
-                        memberCount: matchmakingTicket.getMembers().length
+                        memberCount: matchmakingTicket.getMembers().length,
                     });
 
-                    matchmakingTicket.getMembers().forEach(member => {
+                    matchmakingTicket.getMembers().forEach((member) => {
                         myTeamMatchmakingTicketCanMatch.tempMembers.push({
                             userId: member.userId,
-                            attributeForQueue: member.attributeForQueue
+                            attributeForQueue: member.attributeForQueue,
                         });
 
                         matchmakingTicketCanMatch.tempMemberIds.push(member.userId);
@@ -196,8 +192,6 @@ export class MatchmakingService implements IMatchmakingService {
 
                     for (let j = 0; j < matchmakingTickets.length; j++) {
                         let nextMatchmakingTicket = matchmakingTickets[j];
-
-                        if (nextMatchmakingTicket.getQueueName() != matchmakingTicket.getQueueName()) continue;
 
                         if (matchmakingTicketCanMatch.ticketIds.includes(nextMatchmakingTicket.getTicketId())) continue;
                         if (matchmakingTicketCanMatch.tempTicketIds.includes(nextMatchmakingTicket.getTicketId())) continue;
@@ -210,44 +204,43 @@ export class MatchmakingService implements IMatchmakingService {
 
                         if (!this.isSetIntersectionValid(matchmakingTicket, nextMatchmakingTicket, matchmakingQueueSetting)) continue;
 
-                        // Rule-based queues still prefer filling the smallest temporary team first.
-                        let teamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.tempMembers.length - b.tempMembers.length)[0];
+                        // Rule-based queues must consider both committed and temporary members while filling teams.
+                        let teamMatchmakingTicketCanMatch = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.members.length + a.tempMembers.length - (b.members.length + b.tempMembers.length))[0];
 
-                        if (matchmakingTicketCanMatch.tempMemberIds.length + nextMatchmakingTicket.getMembers().length <= matchmakingQueueSetting.matchSize.max && teamMatchmakingTicketCanMatch.tempMembers.length + nextMatchmakingTicket.getMembers().length <= teamMatchmakingTicketCanMatch.teamSize.max) {
+                        if (matchmakingTicketCanMatch.memberIds.length + matchmakingTicketCanMatch.tempMemberIds.length + nextMatchmakingTicket.getMembers().length <= matchmakingQueueSetting.matchSize.max && teamMatchmakingTicketCanMatch.members.length + teamMatchmakingTicketCanMatch.tempMembers.length + nextMatchmakingTicket.getMembers().length <= teamMatchmakingTicketCanMatch.teamSize.max) {
                             if (teamMatchmakingTicketCanMatch != myTeamMatchmakingTicketCanMatch) {
                                 if (!this.isTeamTicketSizeSimilarityValid(matchmakingTicket, lastMemberCount, nextMatchmakingTicket, matchmakingQueueSetting)) continue;
-                            }
-                            else {
+                            } else {
                                 lastMemberCount = nextMatchmakingTicket.getMembers().length;
                             }
 
-                            nextMatchmakingTicket.getMembers().forEach(member => {
+                            nextMatchmakingTicket.getMembers().forEach((member) => {
                                 teamMatchmakingTicketCanMatch.tempMembers.push({
                                     userId: member.userId,
-                                    attributeForQueue: member.attributeForQueue
+                                    attributeForQueue: member.attributeForQueue,
                                 });
 
                                 matchmakingTicketCanMatch.tempMemberIds.push(member.userId);
                             });
 
-                            matchmakingTicketCanMatch.tempTicketIds.push(matchmakingTicket.getTicketId());
+                            matchmakingTicketCanMatch.tempTicketIds.push(nextMatchmakingTicket.getTicketId());
                             teamMatchmakingTicketCanMatch.tempTickets.push({
                                 ticketId: nextMatchmakingTicket.getTicketId(),
-                                memberCount: nextMatchmakingTicket.getMembers().length
+                                memberCount: nextMatchmakingTicket.getMembers().length,
                             });
 
                             // Promote temporary teams into the final candidate only when the rule set still holds.
-                            let canAddToMain = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.tempMembers.length - b.tempMembers.length)[0] == myTeamMatchmakingTicketCanMatch;
+                            let canAddToMain = matchmakingTicketCanMatch.matchmakingTicketTeams.sort((a, b) => a.members.length + a.tempMembers.length - (b.members.length + b.tempMembers.length))[0] == myTeamMatchmakingTicketCanMatch;
                             if (canAddToMain) {
                                 for (let l = 0; l < matchmakingTicketCanMatch.matchmakingTicketTeams.length; l++) {
                                     // Stores the matchmaking ticket team value used in the current execution flow.
                                     let matchmakingTicketTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[l];
 
-                                    matchmakingTicketTeam.tempMembers.forEach(member => {
+                                    matchmakingTicketTeam.tempMembers.forEach((member) => {
                                         matchmakingTicketTeam.members.push(member);
                                     });
 
-                                    matchmakingTicketTeam.tempTickets.forEach(ticket => {
+                                    matchmakingTicketTeam.tempTickets.forEach((ticket) => {
                                         matchmakingTicketTeam.tickets.push(ticket);
                                     });
 
@@ -255,11 +248,11 @@ export class MatchmakingService implements IMatchmakingService {
                                     matchmakingTicketTeam.tempTickets.length = 0;
                                 }
 
-                                matchmakingTicketCanMatch.tempMemberIds.forEach(memberId => {
+                                matchmakingTicketCanMatch.tempMemberIds.forEach((memberId) => {
                                     matchmakingTicketCanMatch.memberIds.push(memberId);
                                 });
 
-                                matchmakingTicketCanMatch.tempTicketIds.forEach(ticketId => {
+                                matchmakingTicketCanMatch.tempTicketIds.forEach((ticketId) => {
                                     matchmakingTicketCanMatch.ticketIds.push(ticketId);
                                 });
 
@@ -274,11 +267,11 @@ export class MatchmakingService implements IMatchmakingService {
                             // Stores the matchmaking ticket team value used in the current execution flow.
                             let matchmakingTicketTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[l];
 
-                            matchmakingTicketTeam.tempMembers.forEach(member => {
+                            matchmakingTicketTeam.tempMembers.forEach((member) => {
                                 matchmakingTicketTeam.members.push(member);
                             });
 
-                            matchmakingTicketTeam.tempTickets.forEach(ticket => {
+                            matchmakingTicketTeam.tempTickets.forEach((ticket) => {
                                 matchmakingTicketTeam.tickets.push(ticket);
                             });
 
@@ -286,11 +279,11 @@ export class MatchmakingService implements IMatchmakingService {
                             matchmakingTicketTeam.tempTickets.length = 0;
                         }
 
-                        matchmakingTicketCanMatch.tempMemberIds.forEach(memberId => {
+                        matchmakingTicketCanMatch.tempMemberIds.forEach((memberId) => {
                             matchmakingTicketCanMatch.memberIds.push(memberId);
                         });
 
-                        matchmakingTicketCanMatch.tempTicketIds.forEach(ticketId => {
+                        matchmakingTicketCanMatch.tempTicketIds.forEach((ticketId) => {
                             matchmakingTicketCanMatch.ticketIds.push(ticketId);
                         });
 
@@ -309,10 +302,11 @@ export class MatchmakingService implements IMatchmakingService {
 
                 if (!this.isMatchTotalValid(matchmakingTicketCanMatch, matchmakingQueueSetting)) continue;
 
+                matchmakingTicket.setStatus(MatchmakingTicketStatus.Matched);
+
                 matchmakingTicketCanMatchs.push(matchmakingTicketCanMatch);
-            }
-            catch (err) {
-                console.error(err);
+            } catch (err) {
+                Debug.logException(err);
             }
         }
 
@@ -333,10 +327,9 @@ export class MatchmakingService implements IMatchmakingService {
         if (matchmakingQueueSetting.teams != null && matchmakingQueueSetting.teams.length != 0) {
             for (let k = 0; k < matchmakingTicketCanMatch.matchmakingTicketTeams.length; k++) {
                 let matchmakingTicketTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[k];
-                let matchmakingQueueSettingTeam = matchmakingQueueSetting.teams.find(x => x.teamId == matchmakingTicketTeam.teamId);
+                let matchmakingQueueSettingTeam = matchmakingQueueSetting.teams.find((x) => x.teamId == matchmakingTicketTeam.teamId);
 
-                if (matchmakingTicketTeam.members.length < matchmakingQueueSettingTeam.teamSize.min
-                    || matchmakingTicketTeam.members.length > matchmakingQueueSettingTeam.teamSize.max) {
+                if (matchmakingTicketTeam.members.length < matchmakingQueueSettingTeam.teamSize.min || matchmakingTicketTeam.members.length > matchmakingQueueSettingTeam.teamSize.max) {
                     return false;
                 }
             }
@@ -350,9 +343,8 @@ export class MatchmakingService implements IMatchmakingService {
      */
     private isTeamTicketSizeBalanceValid(matchmakingTicketCanMatch: MatchmakingTicketCanMatch, matchmakingQueueSetting: xMatchmakingQueueSettings): boolean {
         if (matchmakingQueueSetting.rules != null) {
-            let teamSizeBalanceRules = matchmakingQueueSetting.rules.find(x => x.type == RuleType.TeamSizeBalance) as TeamSizeBalanceRule;
+            let teamSizeBalanceRules = matchmakingQueueSetting.rules.find((x) => x.type == RuleType.TeamSizeBalance) as TeamSizeBalanceRule;
             if (teamSizeBalanceRules != null) {
-                let scoreToCompare = matchmakingTicketCanMatch.matchmakingTicketTeams[0].members.length;
                 let delta = teamSizeBalanceRules.allowedDifference;
 
                 if (teamSizeBalanceRules.advancedSettings != null) {
@@ -368,25 +360,36 @@ export class MatchmakingService implements IMatchmakingService {
                         delta += count * teamSizeBalanceRules.advancedSettings.linearExpansions.delta;
 
                         if (delta > teamSizeBalanceRules.advancedSettings.linearExpansions.limit) delta = teamSizeBalanceRules.advancedSettings.linearExpansions.limit;
-                    }
-                    else if (teamSizeBalanceRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
+                    } else if (teamSizeBalanceRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
                         let secondsFromStart = (currentMilliseconds - matchmakingTicketCanMatch.tsCreate) / 1000;
 
                         let count = Math.floor(secondsFromStart / teamSizeBalanceRules.advancedSettings.customExpansions.secondsBetweenExpansions);
 
                         if (count < teamSizeBalanceRules.advancedSettings.customExpansions.overrideValue.length) {
                             delta = teamSizeBalanceRules.advancedSettings.customExpansions.overrideValue[count];
-                        }
-                        else if (teamSizeBalanceRules.advancedSettings.customExpansions.overrideValue.length != 0) {
+                        } else if (teamSizeBalanceRules.advancedSettings.customExpansions.overrideValue.length != 0) {
                             delta = teamSizeBalanceRules.advancedSettings.customExpansions.overrideValue[teamSizeBalanceRules.advancedSettings.customExpansions.overrideValue.length - 1];
                         }
                     }
                 }
 
-                for (let i = 1; i < matchmakingTicketCanMatch.matchmakingTicketTeams.length; i++) {
-                    let nextScoreToCompare = matchmakingTicketCanMatch.matchmakingTicketTeams[i].members.length;
-                    if (Math.abs(nextScoreToCompare - scoreToCompare) > delta) return false;
+                let minTeamMemberCount = 0;
+                let maxTeamMemberCount = 0;
+
+                for (let i = 0; i < matchmakingTicketCanMatch.matchmakingTicketTeams.length; i++) {
+                    let teamMemberCount = matchmakingTicketCanMatch.matchmakingTicketTeams[i].members.length;
+
+                    if (i == 0) {
+                        minTeamMemberCount = teamMemberCount;
+                        maxTeamMemberCount = teamMemberCount;
+                    } else {
+                        if (teamMemberCount < minTeamMemberCount) minTeamMemberCount = teamMemberCount;
+                        if (teamMemberCount > maxTeamMemberCount) maxTeamMemberCount = teamMemberCount;
+                    }
                 }
+
+                // Validate the full team-size spread instead of comparing every team to the first team only.
+                if (maxTeamMemberCount - minTeamMemberCount > delta) return false;
             }
         }
 
@@ -406,22 +409,6 @@ export class MatchmakingService implements IMatchmakingService {
                     // Stores the team difference rules value used in the current execution flow.
                     let teamDifferenceRules = rules as TeamDifferenceRule;
 
-                    // Stores the my team value used in the current execution flow.
-                    let myTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[0];
-                    // Stores the score to compare value used in the current execution flow.
-                    let scoreToCompare = 0;
-
-                    for (let j = 0; j < myTeam.members.length; j++) {
-                        // Stores the member value used in the current execution flow.
-                        let member = myTeam.members[j];
-
-                        // Stores the value value used in the current execution flow.
-                        let value = member.attributeForQueue[rules.name];
-                        if (value == null) value = teamDifferenceRules.defaultValue;
-
-                        scoreToCompare += value as number;
-                    }
-
                     // Stores the delta value used in the current execution flow.
                     let delta = teamDifferenceRules.allowedDifference;
 
@@ -440,8 +427,7 @@ export class MatchmakingService implements IMatchmakingService {
                             delta += count * teamDifferenceRules.advancedSettings.linearExpansions.delta;
 
                             if (delta > teamDifferenceRules.advancedSettings.linearExpansions.limit) delta = teamDifferenceRules.advancedSettings.linearExpansions.limit;
-                        }
-                        else if (teamDifferenceRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
+                        } else if (teamDifferenceRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
                             // Stores the seconds from start value used in the current execution flow.
                             let secondsFromStart = (currentMilliseconds - matchmakingTicketCanMatch.tsCreate) / 1000;
 
@@ -450,14 +436,16 @@ export class MatchmakingService implements IMatchmakingService {
 
                             if (count < teamDifferenceRules.advancedSettings.customExpansions.overrideValue.length) {
                                 delta = teamDifferenceRules.advancedSettings.customExpansions.overrideValue[count];
-                            }
-                            else if (teamDifferenceRules.advancedSettings.customExpansions.overrideValue.length != 0) {
+                            } else if (teamDifferenceRules.advancedSettings.customExpansions.overrideValue.length != 0) {
                                 delta = teamDifferenceRules.advancedSettings.customExpansions.overrideValue[teamDifferenceRules.advancedSettings.customExpansions.overrideValue.length - 1];
                             }
                         }
                     }
 
-                    for (let i = 1; i < matchmakingTicketCanMatch.matchmakingTicketTeams.length; i++) {
+                    let minTeamScore = 0;
+                    let maxTeamScore = 0;
+
+                    for (let i = 0; i < matchmakingTicketCanMatch.matchmakingTicketTeams.length; i++) {
                         // Stores the next team value used in the current execution flow.
                         let nextTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[i];
 
@@ -474,8 +462,17 @@ export class MatchmakingService implements IMatchmakingService {
                             nextScoreToCompare += value as number;
                         }
 
-                        if (Math.abs(nextScoreToCompare - scoreToCompare) > delta) return false;
+                        if (i == 0) {
+                            minTeamScore = nextScoreToCompare;
+                            maxTeamScore = nextScoreToCompare;
+                        } else {
+                            if (nextScoreToCompare < minTeamScore) minTeamScore = nextScoreToCompare;
+                            if (nextScoreToCompare > maxTeamScore) maxTeamScore = nextScoreToCompare;
+                        }
                     }
+
+                    // Validate the full team-score spread instead of comparing every team to the first team only.
+                    if (maxTeamScore - minTeamScore > delta) return false;
                 }
             }
         }
@@ -519,8 +516,7 @@ export class MatchmakingService implements IMatchmakingService {
                             if (matchTotalRules.advancedSettings.customExpansions.overrideMin != null) {
                                 if (count < matchTotalRules.advancedSettings.customExpansions.overrideMin.length) {
                                     min = matchTotalRules.advancedSettings.customExpansions.overrideMin[count];
-                                }
-                                else if (matchTotalRules.advancedSettings.customExpansions.overrideMin.length != 0) {
+                                } else if (matchTotalRules.advancedSettings.customExpansions.overrideMin.length != 0) {
                                     min = matchTotalRules.advancedSettings.customExpansions.overrideMin[matchTotalRules.advancedSettings.customExpansions.overrideMin.length - 1];
                                 }
                             }
@@ -528,8 +524,7 @@ export class MatchmakingService implements IMatchmakingService {
                             if (matchTotalRules.advancedSettings.customExpansions.overrideMax != null) {
                                 if (count < matchTotalRules.advancedSettings.customExpansions.overrideMax.length) {
                                     max = matchTotalRules.advancedSettings.customExpansions.overrideMax[count];
-                                }
-                                else if (matchTotalRules.advancedSettings.customExpansions.overrideMax.length != 0) {
+                                } else if (matchTotalRules.advancedSettings.customExpansions.overrideMax.length != 0) {
                                     max = matchTotalRules.advancedSettings.customExpansions.overrideMax[matchTotalRules.advancedSettings.customExpansions.overrideMax.length - 1];
                                 }
                             }
@@ -596,8 +591,7 @@ export class MatchmakingService implements IMatchmakingService {
 
                             if (count < stringRules.advancedSettings.customExpansions.overrideValue.length) {
                                 stringToCompair = stringRules.advancedSettings.customExpansions.overrideValue[count];
-                            }
-                            else if (stringRules.advancedSettings.customExpansions.overrideValue.length != 0) {
+                            } else if (stringRules.advancedSettings.customExpansions.overrideValue.length != 0) {
                                 stringToCompair = stringRules.advancedSettings.customExpansions.overrideValue[stringRules.advancedSettings.customExpansions.overrideValue.length - 1];
                             }
                         }
@@ -609,8 +603,7 @@ export class MatchmakingService implements IMatchmakingService {
 
                     if (stringRules.compairType == RuleStringCompairType.Equals) {
                         if (stringToCompair != nextStringToCompair) return false;
-                    }
-                    else if (stringRules.compairType == RuleStringCompairType.NotEquals) {
+                    } else if (stringRules.compairType == RuleStringCompairType.NotEquals) {
                         if (stringToCompair == nextStringToCompair) return false;
                     }
                 }
@@ -659,8 +652,7 @@ export class MatchmakingService implements IMatchmakingService {
                             delta += count * differenceRules.advancedSettings.linearExpansions.delta;
 
                             if (delta > differenceRules.advancedSettings.linearExpansions.limit) delta = differenceRules.advancedSettings.linearExpansions.limit;
-                        }
-                        else if (differenceRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
+                        } else if (differenceRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
                             // Stores the seconds from start value used in the current execution flow.
                             let secondsFromStart = (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
 
@@ -669,8 +661,7 @@ export class MatchmakingService implements IMatchmakingService {
 
                             if (count < differenceRules.advancedSettings.customExpansions.overrideValue.length) {
                                 delta = differenceRules.advancedSettings.customExpansions.overrideValue[count];
-                            }
-                            else if (differenceRules.advancedSettings.customExpansions.overrideValue.length != 0) {
+                            } else if (differenceRules.advancedSettings.customExpansions.overrideValue.length != 0) {
                                 delta = differenceRules.advancedSettings.customExpansions.overrideValue[differenceRules.advancedSettings.customExpansions.overrideValue.length - 1];
                             }
                         }
@@ -698,14 +689,21 @@ export class MatchmakingService implements IMatchmakingService {
     private isRegionSelectionValid(matchmakingTicket: MatchmakingTicket, nextMatchmakingTicket: MatchmakingTicket, matchmakingQueueSetting: xMatchmakingQueueSettings): boolean {
         if (matchmakingQueueSetting.rules != null) {
             // Stores the region selection rules value used in the current execution flow.
-            let regionSelectionRules = matchmakingQueueSetting.rules.find(x => x.type == RuleType.RegionSelection) as RegionSelectionRule;
+            let regionSelectionRules = matchmakingQueueSetting.rules.find((x) => x.type == RuleType.RegionSelection) as RegionSelectionRule;
             if (regionSelectionRules != null) {
+                if (regionSelectionRules.advancedSettings != null) {
+                    let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
+                    // Once the rule becomes optional, region and latency should no longer block matchmaking.
+                    if (regionSelectionRules.advancedSettings.secondsUntilOptional * 1000 + matchmakingTicket.getTsCreate() < currentMilliseconds) return true;
+                }
+
                 // Stores the value to compair value used in the current execution flow.
                 let valueToCompair: {
                     // Stores the region value used by this contract.
-                    region: string,
+                    region: string;
                     // Stores the ping value used by this contract.
-                    ping: number
+                    ping: number;
                 } = matchmakingTicket.getMembers()[0].attributeForQueue[regionSelectionRules.name] as any;
 
                 if (valueToCompair == null) return false;
@@ -713,9 +711,9 @@ export class MatchmakingService implements IMatchmakingService {
                 // Stores the next value to compair value used in the current execution flow.
                 let nextValueToCompair: {
                     // Stores the region value used by this contract.
-                    region: string,
+                    region: string;
                     // Stores the ping value used by this contract.
-                    ping: number
+                    ping: number;
                 } = nextMatchmakingTicket.getMembers()[0].attributeForQueue[regionSelectionRules.name] as any;
 
                 if (nextValueToCompair == null) return false;
@@ -728,36 +726,32 @@ export class MatchmakingService implements IMatchmakingService {
                 if (regionSelectionRules.advancedSettings != null) {
                     // Stores the current milliseconds value used in the current execution flow.
                     let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-                    if (regionSelectionRules.advancedSettings.secondsUntilOptional * 1000 + matchmakingTicket.getTsCreate() > currentMilliseconds) {
-                        if (regionSelectionRules.advancedSettings.expansionType == RuleExpansionType.Linear) {
-                            // Moi bao nhieu giay se tang
-                            let secondsFromStart = (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
+                    if (regionSelectionRules.advancedSettings.expansionType == RuleExpansionType.Linear) {
+                        // Moi bao nhieu giay se tang
+                        let secondsFromStart = (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
 
-                            // Stores the count value used in the current execution flow.
-                            let count = Math.floor(secondsFromStart / regionSelectionRules.advancedSettings.linearExpansions.secondsBetweenExpansions);
+                        // Stores the count value used in the current execution flow.
+                        let count = Math.floor(secondsFromStart / regionSelectionRules.advancedSettings.linearExpansions.secondsBetweenExpansions);
 
-                            maximumLatency += count * regionSelectionRules.advancedSettings.linearExpansions.delta;
+                        maximumLatency += count * regionSelectionRules.advancedSettings.linearExpansions.delta;
 
-                            if (maximumLatency > regionSelectionRules.advancedSettings.linearExpansions.limit) maximumLatency = regionSelectionRules.advancedSettings.linearExpansions.limit;
-                        }
-                        else if (regionSelectionRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
-                            // Stores the seconds from start value used in the current execution flow.
-                            let secondsFromStart = (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
+                        if (maximumLatency > regionSelectionRules.advancedSettings.linearExpansions.limit) maximumLatency = regionSelectionRules.advancedSettings.linearExpansions.limit;
+                    } else if (regionSelectionRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
+                        // Stores the seconds from start value used in the current execution flow.
+                        let secondsFromStart = (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
 
-                            // Stores the count value used in the current execution flow.
-                            let count = Math.floor(secondsFromStart / regionSelectionRules.advancedSettings.customExpansions.secondsBetweenExpansions);
+                        // Stores the count value used in the current execution flow.
+                        let count = Math.floor(secondsFromStart / regionSelectionRules.advancedSettings.customExpansions.secondsBetweenExpansions);
 
-                            if (count < regionSelectionRules.advancedSettings.customExpansions.overrideValue.length) {
-                                maximumLatency = regionSelectionRules.advancedSettings.customExpansions.overrideValue[count];
-                            }
-                            else if (regionSelectionRules.advancedSettings.customExpansions.overrideValue.length != 0) {
-                                maximumLatency = regionSelectionRules.advancedSettings.customExpansions.overrideValue[regionSelectionRules.advancedSettings.customExpansions.overrideValue.length - 1];
-                            }
+                        if (count < regionSelectionRules.advancedSettings.customExpansions.overrideValue.length) {
+                            maximumLatency = regionSelectionRules.advancedSettings.customExpansions.overrideValue[count];
+                        } else if (regionSelectionRules.advancedSettings.customExpansions.overrideValue.length != 0) {
+                            maximumLatency = regionSelectionRules.advancedSettings.customExpansions.overrideValue[regionSelectionRules.advancedSettings.customExpansions.overrideValue.length - 1];
                         }
                     }
                 }
 
-                if (valueToCompair.ping > maximumLatency) return false;
+                if (valueToCompair.ping > maximumLatency || nextValueToCompair.ping > maximumLatency) return false;
             }
         }
 
@@ -800,9 +794,10 @@ export class MatchmakingService implements IMatchmakingService {
                             // Stores the count value used in the current execution flow.
                             let count = Math.floor(secondsFromStart / setIntersectionRules.advancedSettings.linearExpansions.secondsBetweenExpansions);
 
-                            min += count * setIntersectionRules.advancedSettings.linearExpansions.delta;
-                        }
-                        else if (setIntersectionRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
+                            // Relax the rule over time by requiring fewer shared values.
+                            min -= count * setIntersectionRules.advancedSettings.linearExpansions.delta;
+                            if (min < 0) min = 0;
+                        } else if (setIntersectionRules.advancedSettings.expansionType == RuleExpansionType.Custom) {
                             // Stores the seconds from start value used in the current execution flow.
                             let secondsFromStart = (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
 
@@ -811,8 +806,7 @@ export class MatchmakingService implements IMatchmakingService {
 
                             if (count < setIntersectionRules.advancedSettings.customExpansions.overrideValue.length) {
                                 min = setIntersectionRules.advancedSettings.customExpansions.overrideValue[count];
-                            }
-                            else if (setIntersectionRules.advancedSettings.customExpansions.overrideValue.length != 0) {
+                            } else if (setIntersectionRules.advancedSettings.customExpansions.overrideValue.length != 0) {
                                 min = setIntersectionRules.advancedSettings.customExpansions.overrideValue[setIntersectionRules.advancedSettings.customExpansions.overrideValue.length - 1];
                             }
                         }
@@ -848,7 +842,7 @@ export class MatchmakingService implements IMatchmakingService {
     private isTeamTicketSizeSimilarityValid(matchmakingTicket: MatchmakingTicket, ticketSize: number, nextMatchmakingTicket: MatchmakingTicket, matchmakingQueueSetting: xMatchmakingQueueSettings): boolean {
         if (matchmakingQueueSetting.rules != null) {
             // Stores the team ticket size similarity rules value used in the current execution flow.
-            let teamTicketSizeSimilarityRules = matchmakingQueueSetting.rules.find(x => x.type == RuleType.TeamTicketSizeSimilarity) as TeamTicketSizeSimilarityRule;
+            let teamTicketSizeSimilarityRules = matchmakingQueueSetting.rules.find((x) => x.type == RuleType.TeamTicketSizeSimilarity) as TeamTicketSizeSimilarityRule;
 
             if (teamTicketSizeSimilarityRules != null) {
                 if (teamTicketSizeSimilarityRules.advancedSettings != null) {
@@ -856,9 +850,9 @@ export class MatchmakingService implements IMatchmakingService {
                     let currentMilliseconds = xDatetime.getCurrentMilliseconds();
                     if (teamTicketSizeSimilarityRules.advancedSettings.secondsUntilOptional * 1000 + matchmakingTicket.getTsCreate() < currentMilliseconds) return true;
                 }
-            }
 
-            if (ticketSize != nextMatchmakingTicket.getMembers().length) return false;
+                if (ticketSize != nextMatchmakingTicket.getMembers().length) return false;
+            }
         }
 
         return true;
@@ -905,7 +899,7 @@ export class MatchmakingService implements IMatchmakingService {
      * @param matchmakingTicketCanMatchs Provides the matchmaking ticket can matchs value used by this operation.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      */
-    private createMatch(gameId: string, matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[], matchmakingTickets: MatchmakingTicket[]): void {
+    private async createMatch(gameId: string, matchmakingTicketCanMatchs: MatchmakingTicketCanMatch[], matchmakingTickets: MatchmakingTicket[]): Promise<void> {
         let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", gameId);
 
         let matchmakingQueueSettings = this.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
@@ -915,11 +909,34 @@ export class MatchmakingService implements IMatchmakingService {
             let matchmakingTicketCanMatch = matchmakingTicketCanMatchs[i];
 
             // `serverDetail` starts empty and may be filled later by server-allocation callbacks.
-            let matchResult = {
+            let matchResult: {
+                matchId: string;
+                queueName: string;
+                members: {
+                    teamId: string;
+                    userId: string;
+                    attribute: {
+                        [k: string]: DataValueType;
+                    };
+                }[];
+                serverDetail: {
+                    ipV4Address: "127.0.0.1";
+                    ports: {
+                        name: string;
+                        publicPort: number;
+                        privatePort: number;
+                        protocol: 1 | 2; // 1 for UDP, 2 for TCP
+                    }[];
+                };
+                tsCreate: number;
+                timeToMatchInSeconds: number;
+                ticketIds: string[];
+                status: MatchStatus;
+            } = {
                 matchId: matchmakingTicketCanMatch.matchId,
                 queueName: matchmakingTicketCanMatch.queueName,
-                members: [] as any,
-                serverDetail: null as any,
+                members: [],
+                serverDetail: null,
                 // serverDetail: {
                 //     ipV4Address: "127.0.0.1",
                 //     ports: [{
@@ -934,16 +951,18 @@ export class MatchmakingService implements IMatchmakingService {
                 //         protocol: 1,
                 //     }]
                 // },
-                tsCreate: xDatetime.getCurrentDate(),
+                tsCreate: xDatetime.getCurrentMilliseconds(),
                 timeToMatchInSeconds: -1,
-                ticketIds: [] as any,
+                ticketIds: [],
+                status: MatchStatus.Matched,
             };
 
-            let matchmakingQueueSetting = matchmakingQueueSettings.find(x => x.queueName == matchmakingTicketCanMatch.queueName);
+            let matchmakingQueueSetting = matchmakingQueueSettings.find((x) => x.queueName == matchmakingTicketCanMatch.queueName);
             if (matchmakingQueueSetting == null) continue;
 
             if (matchmakingQueueSetting.serverAllocation.enable) {
-                matchmakingTicketCanMatch.status = <number>MatchmakingTicketStatus.WaitingForServer;
+                matchResult.status = MatchStatus.WaitingForServer;
+                matchmakingTicketCanMatch.status = MatchmakingTicketStatus.WaitingForServer;
             }
 
             // if (matchmakingQueueSetting.serverAllocation.enable) {
@@ -974,16 +993,15 @@ export class MatchmakingService implements IMatchmakingService {
 
                 for (let k = 0; k < matchmakingTicketTeam.tickets.length; k++) {
                     let ticketId = matchmakingTicketTeam.tickets[k].ticketId;
-                    let matchmakingTicket = matchmakingTickets.find(x => x.getTicketId() == ticketId);
+                    let matchmakingTicket = matchmakingTickets.find((x) => x.getTicketId() == ticketId);
 
-                    if (!matchmakingTicketCanMatch.ticketIds.includes(ticketId))
-                        matchmakingTicketCanMatch.ticketIds.push(ticketId);
+                    if (!matchmakingTicketCanMatch.ticketIds.includes(ticketId)) matchmakingTicketCanMatch.ticketIds.push(ticketId);
 
                     matchmakingTicket.setMatchId(matchmakingTicketCanMatch.matchId);
 
                     matchmakingTicket.setStatus(matchmakingTicketCanMatch.status);
 
-                    matchmakingTicket.saveAsync();
+                    await matchmakingTicket.saveAsync();
 
                     let members = matchmakingTicket.getMembers();
 
@@ -998,14 +1016,15 @@ export class MatchmakingService implements IMatchmakingService {
                     }
 
                     totalMatchSuccess += 1;
-                    totalMatchSuccessTimeInSeconds += currentMilliseconds - matchmakingTicket.getTsCreate();
+                    totalMatchSuccessTimeInSeconds += (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
                 }
             }
 
-            if (totalMatchSuccess != 0)
-                matchResult.timeToMatchInSeconds = totalMatchSuccessTimeInSeconds / totalMatchSuccess;
+            if (totalMatchSuccess != 0) matchResult.timeToMatchInSeconds = totalMatchSuccessTimeInSeconds / totalMatchSuccess;
 
-            matchCollection.insertOne(matchResult);
+            matchResult.ticketIds = matchmakingTicketCanMatch.ticketIds;
+
+            await matchCollection.insertOne(matchResult);
         }
     }
 
@@ -1013,17 +1032,17 @@ export class MatchmakingService implements IMatchmakingService {
      * Cancels tickets that have waited longer than their configured give-up timeout.
      * @param matchmakingTickets Provides the matchmaking tickets value used by this operation.
      */
-    private removeGiveUpTickets(matchmakingTickets: MatchmakingTicket[]): void {
+    private async removeGiveUpTickets(matchmakingTickets: MatchmakingTicket[]): Promise<void> {
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
         for (let i = 0; i < matchmakingTickets.length; i++) {
             let matchmakingTicket = matchmakingTickets[i];
 
-            if (matchmakingTicket.getStatus() == <number>MatchmakingTicketStatus.WaitingForMatch) {
+            if (matchmakingTicket.getStatus() == MatchmakingTicketStatus.WaitingForMatch || matchmakingTicket.getStatus() == MatchmakingTicketStatus.WaitingForMembers) {
                 if (matchmakingTicket.getTsCreate() + matchmakingTicket.getGiveUpAfterSeconds() * 1000 < currentMilliseconds) {
-                    matchmakingTicket.setStatus(<number>MatchmakingTicketStatus.Canceled);
+                    matchmakingTicket.setStatus(MatchmakingTicketStatus.Canceled);
 
-                    matchmakingTicket.saveAsync();
+                    await matchmakingTicket.saveAsync();
                 }
             }
         }

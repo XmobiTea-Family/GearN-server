@@ -50,5 +50,4 @@ export class CommonOperationRequest extends OperationRequest {
     public getInvalidMembers(): InvalidMember[] {
         return this.invalidMembers;
     }
-
 }

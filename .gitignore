@@ -1,10 +1,10 @@
 node_modules/
 dist/
+.test-dist/
+apiReferences/
 .idea/
-.vscode/
 .DS_Store
 package-lock.json
 scratch/
 log/
 file-upload/
-apiReferences/

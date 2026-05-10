@@ -18,8 +18,8 @@ export interface IGoogleService {
      */
     validateReceipt(payload: string): Promise<{
         // Indicates whether success.
-        success: boolean,
+        success: boolean;
         // Stores the product ID value used by this contract.
-        productId?: string,
+        productId?: string;
     }>;
 }

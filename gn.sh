@@ -97,8 +97,8 @@ init_create_GNConfigDebugJson() {
 			"certFilePath": "",
 			"expiredTokenInMs": 172800000,
             "privateKeyToken": "privateKeyDefault",
-            "initRootUsername": "admin",
-			"initRootPassword": "password",
+            "initRootUsername": "gearnadmin",
+			"initRootPassword": "gearnpassword",
 			"restoreRootPassword": ""
 		},
 
@@ -192,7 +192,7 @@ init_create_GNConfigDebugJson() {
 init_create_indexTs() {
     echo 'import fs from "fs";
 
-import { ServerApplicationStartup, Debug } from "@xmobitea/gn-server";
+import { ServerApplicationStartup, Debug } from "@xmobitea/gearn-server";
 import { TestRequestHandler } from "./src/app-api/handler/TestRequestHandler";
 import { PostIndex } from "./PostIndex";
 
@@ -248,7 +248,7 @@ process.on("unhandledRejection", (reason: Error) => {
 }
 
 init_create_postIndexTs() {
-    echo 'import { GNServer, Debug } from "@xmobitea/gn-server";
+    echo 'import { GNServer, Debug } from "@xmobitea/gearn-server";
 
 export class PostIndex {
     private gnServer: GNServer;
@@ -301,7 +301,7 @@ init_create_srcAppApiHandlerDir() {
     GNArrayDataMember,
     SecretInfo,
 
-} from "@xmobitea/gn-server";
+} from "@xmobitea/gearn-server";
 import { TestErrorCode } from "./../../common/constant/errorCode/TestErrorCode";
 import { OperationCodeExtensions } from "./../../common/constant/OperationCode.ext";
 import { TestParameterCode } from "./../../common/constant/parameterCode/TestParameterCode";
@@ -413,14 +413,14 @@ init_create_srcCommonConstantDir() {
     echo 'create dir '"$DIR_ERROR_CODE"
 
     cd "$DIR_CONTANST"
-    echo 'import { EventCode } from "@xmobitea/gn-server";
+    echo 'import { EventCode } from "@xmobitea/gearn-server";
 
 export class EventCodeExtensions extends EventCode {
     
 }' > EventCode.ext.ts
     echo 'create EventCode.ext.ts file success'
 
-    echo 'import { OperationCode } from "@xmobitea/gn-server";
+    echo 'import { OperationCode } from "@xmobitea/gearn-server";
 
 export class OperationCodeExtensions extends OperationCode {
     public static readonly Test: number = 500;
@@ -482,12 +482,12 @@ init_create_packageJson() {
         "build": "tsc",
         "releasePM2": "npm run build && ./releasePM2.sh"
     },
-    "author": "GN-Server-author",
+    "author": "GearN-Server-author",
     "license": "ISC",
     "devDependencies": {
     },
     "dependencies": {
-        "@xmobitea/gn-server": "*",
+        "@xmobitea/gearn-server": "*",
         "typescript": "^5.8.3"
     }
 }' > package.json
@@ -637,7 +637,7 @@ createRequestHandler() {
     GNHashtableDataMember,
     GNArrayDataMember,
     
-} from "@xmobitea/gn-server";
+} from "@xmobitea/gearn-server";
 import { OperationCodeExtensions } from "./../../common/constant/OperationCode.ext";
 import { '$REQUEST_NAME'ErrorCode } from "./../../common/constant/errorCode/'$REQUEST_NAME'ErrorCode";
 import { '$REQUEST_NAME'ParameterCode } from "./../../common/constant/parameterCode/'$REQUEST_NAME'ParameterCode";

@@ -1,6 +1,8 @@
 .vscode/
+node_modules/
 src/
 test/
+.test-dist/
 apiReferences/
 .editorconfig
 .gitignore
@@ -8,9 +10,9 @@ tsconfig.json
 tsconfig-build.json
 webpack.config.mjs
 index.js
-node_modules/
 log/
 file-upload/
 GNconfig.debug.json
 syncCode.js
 syncCodeVer2.js
+.gitattributes

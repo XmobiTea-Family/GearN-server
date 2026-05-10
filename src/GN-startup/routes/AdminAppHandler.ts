@@ -15,7 +15,7 @@
 // import { ReturnCode } from "./../../GN-common/constant/ReturnCode";
 // import { InvalidMemberType } from "./../../GN-common/constant/enumType/InvalidMemberType";
 // import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
-// import { DashboardModels, GNNetwork, GNServerSettings, GNServerSettingsOptions, LogType } from "@xmobitea/gn-typescript-client";
+// import { DashboardModels, GNNetwork, GNServerSettings, GNServerSettingsOptions, LogType } from "@xmobitea/gearn-typescript-client-sdk";
 // import { ErrorCode } from "./../../GN-common/constant/errorCode/ErrorCode";
 
 // export class AdminAppHandler {

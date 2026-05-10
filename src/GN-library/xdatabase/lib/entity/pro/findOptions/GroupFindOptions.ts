@@ -1,34 +1,38 @@
+/**
+ * Projection options for querying Group from MongoDB.
+ * Lets callers pick the fields they actually need; especially useful when listing groups (no need for inventory/statistics).
+ */
 export interface GroupFindOptions {
-	// Indicates whether group ID.
-	groupId?: boolean,
-	// Indicates whether group type.
-	groupType?: boolean,
-	// Indicates whether catalog ID.
-	catalogId?: boolean,
-	// Indicates whether members.
-	members?: boolean,
-	// Indicates whether remove status.
-	removeStatus?: boolean,
+    /** Whether to include the groupId. */
+    groupId?: boolean;
+    /** Whether to include the group kind (`groupType`). */
+    groupType?: boolean;
+    /** Whether to include the catalogId (group template). */
+    catalogId?: boolean;
+    /** Whether to include the group member list. */
+    members?: boolean;
+    /** Whether to include the soft-delete state. */
+    removeStatus?: boolean;
 
-	// Indicates whether segments.
-	segments?: boolean,
-	// Indicates whether custom datas.
-	customDatas?: boolean,
-	// Indicates whether display name.
-	displayName?: boolean,
-	// Indicates whether avatar.
-	avatar?: boolean,
-	// Indicates whether timestamp create.
-	tsCreate?: boolean,
-	// Indicates whether tags.
-	tags?: boolean,
+    /** Whether to include the segments array (cohort labels). */
+    segments?: boolean;
+    /** Whether to include the custom datas (DataObjectBase-level). */
+    customDatas?: boolean;
+    /** Whether to include the group display name. */
+    displayName?: boolean;
+    /** Whether to include the group avatar. */
+    avatar?: boolean;
+    /** Whether to include the group creation timestamp. */
+    tsCreate?: boolean;
+    /** Whether to include the tags map. */
+    tags?: boolean;
 
-	// Indicates whether group datas.
-	groupDatas?: boolean,
-	// Indicates whether group currencies.
-	groupCurrencies?: boolean,
-	// Indicates whether group statistics.
-	groupStatistics?: boolean,
-	// Indicates whether group inventories.
-	groupInventories?: boolean,
+    /** Whether to include the group-scoped custom data list (`groupDatas`). */
+    groupDatas?: boolean;
+    /** Whether to include the group currency map. */
+    groupCurrencies?: boolean;
+    /** Whether to include the group statistics map. */
+    groupStatistics?: boolean;
+    /** Whether to include the group-shared inventory list. */
+    groupInventories?: boolean;
 }

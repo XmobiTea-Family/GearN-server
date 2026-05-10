@@ -6,7 +6,7 @@ File này chỉ tập trung vào `socket` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](../CLOUDSCRIPT_USAGE.md)
+- [docs/cloudScript/CLOUDSCRIPT_USAGE.md](/docs/cloudScript/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `socket`
 
@@ -26,18 +26,21 @@ Không nên dùng `socket` khi:
 
 Đọc theo thứ tự này:
 
-1. [CloudScriptSocket.ts](../src/GN-startup/cloudScript/CloudScriptSocket.ts)
+1. [CloudScriptSocket.ts](/dist/GN-startup/cloudScript/CloudScriptSocket.ts)
 
 ## 4. `socket` có gì
 
 Wrapper `socket` đang expose:
 
-- `socket.sendEventTo(userId, operationEvent)`
-- `socket.sendEventToMoreUser(userIds, operationEvent)`
-- `socket.sendEventToAllPlayer(operationEvent)`
-- `socket.joinRoom(userId, roomId)`
-- `socket.leaveRoom(userId, roomId)`
-- `socket.sendEventToRoom(roomId, operationEvent)`
+<!-- prettier-ignore -->
+| Hàm gốc | Code trong cloudScript như thế nào |
+| --- | --- |
+| `sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void>` | `socket.sendEventTo(userId, operationEvent)` |
+| `sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void>` | `socket.sendEventToMoreUser(userIds, operationEvent)` |
+| `sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void>` | `socket.sendEventToAllPlayer(operationEvent)` |
+| `joinRoom(userId: string, roomId: string): Promise<void>` | `socket.joinRoom(userId, roomId)` |
+| `leaveRoom(userId: string, roomId: string): Promise<void>` | `socket.leaveRoom(userId, roomId)` |
+| `sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void>` | `socket.sendEventToRoom(roomId, operationEvent)` |
 
 ## 5. Lưu ý thực tế
 
@@ -58,14 +61,7 @@ const requireString = (value: unknown, fieldName: string): string => {
 };
 
 const createDemoOperationEvent = (message: string, userId: string) => {
-    return new OperationEvent(
-        "cloudScriptDemo",
-        GNHashtable.builder()
-            .add("message", message)
-            .add("sourceUserId", userId)
-            .add("ts", Date.now())
-            .build()
-    );
+    return new OperationEvent("cloudScriptDemo", GNHashtable.builder().add("message", message).add("sourceUserId", userId).add("ts", Date.now()).build());
 };
 
 handlers["socketNotifyUser"] = async (args: any, context, log) => {
@@ -74,14 +70,9 @@ handlers["socketNotifyUser"] = async (args: any, context, log) => {
 
     await socket.sendEventTo(targetUserId, operationEvent);
 
-    log({
-        action: "socketNotifyUser",
-        targetUserId: targetUserId
-    });
-
     return {
         sent: true,
-        targetUserId: targetUserId
+        targetUserId: targetUserId,
     };
 };
 ```
@@ -98,10 +89,7 @@ const requireString = (value: unknown, fieldName: string): string => {
 };
 
 const createDemoOperationEvent = (eventCode: string, payload: { [k: string]: any }) => {
-    return new OperationEvent(
-        eventCode,
-        GNHashtable.builder().addAll(payload).build()
-    );
+    return new OperationEvent(eventCode, GNHashtable.builder().addAll(payload).build());
 };
 
 handlers["socketNotifyManyUsers"] = async (args: any, context, log) => {
@@ -111,19 +99,14 @@ handlers["socketNotifyManyUsers"] = async (args: any, context, log) => {
 
     const operationEvent = createDemoOperationEvent("cloudScriptMultiCast", {
         sourceUserId: context.userId,
-        ts: Date.now()
+        ts: Date.now(),
     });
 
     await socket.sendEventToMoreUser(args.userIds, operationEvent);
 
-    log({
-        action: "socketNotifyManyUsers",
-        count: args.userIds.length
-    });
-
     return {
         sent: true,
-        count: args.userIds.length
+        count: args.userIds.length,
     };
 };
 
@@ -131,17 +114,13 @@ handlers["socketBroadcastAll"] = async (args: any, context, log) => {
     const operationEvent = createDemoOperationEvent("cloudScriptBroadcast", {
         message: typeof args?.message === "string" ? args.message : "Broadcast from cloud script",
         sourceUserId: context.userId,
-        ts: Date.now()
+        ts: Date.now(),
     });
 
     await socket.sendEventToAllPlayer(operationEvent);
 
-    log({
-        action: "socketBroadcastAll"
-    });
-
     return {
-        broadcasted: true
+        broadcasted: true,
     };
 };
 
@@ -156,7 +135,7 @@ handlers["socketRoomWorkflow"] = async (args: any, context, log) => {
         return {
             left: true,
             userId: userId,
-            roomId: roomId
+            roomId: roomId,
         };
     }
 
@@ -165,21 +144,15 @@ handlers["socketRoomWorkflow"] = async (args: any, context, log) => {
     const operationEvent = createDemoOperationEvent("cloudScriptRoomMessage", {
         roomId: roomId,
         sourceUserId: context.userId,
-        ts: Date.now()
+        ts: Date.now(),
     });
 
     await socket.sendEventToRoom(roomId, operationEvent);
 
-    log({
-        action: "socketRoomWorkflow",
-        userId: userId,
-        roomId: roomId
-    });
-
     return {
         joined: true,
         roomId: roomId,
-        userId: userId
+        userId: userId,
     };
 };
 ```

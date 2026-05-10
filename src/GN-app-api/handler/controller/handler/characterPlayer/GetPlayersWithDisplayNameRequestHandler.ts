@@ -5,17 +5,16 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetPlayersWithDisplayNameOperationRequest extends OperationRequest {
-
     // Stores the keyword value used by this instance.
     @StringDataMember({ code: ParameterCode.Keyword, minLength: 2, maxLength: 32 })
     public keyword: string;
@@ -43,7 +42,6 @@ class GetPlayersWithDisplayNameOperationRequest extends OperationRequest {
 }
 
 class ServerGetPlayersWithDisplayNameOperationRequest extends GetPlayersWithDisplayNameOperationRequest {
-
     /**
      * Checks whether valid request.
      */
@@ -55,7 +53,6 @@ class ServerGetPlayersWithDisplayNameOperationRequest extends GetPlayersWithDisp
 }
 
 class AdminGetPlayersWithDisplayNameOperationRequest extends ServerGetPlayersWithDisplayNameOperationRequest {
-
     /**
      * Checks whether valid request.
      */
@@ -67,7 +64,6 @@ class AdminGetPlayersWithDisplayNameOperationRequest extends ServerGetPlayersWit
 }
 
 export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBaseRequestHandler {
-
     /**
      * Returns the code.
      */
@@ -103,12 +99,17 @@ export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBase
 
         this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -131,12 +132,17 @@ export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBase
 
         this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -159,12 +165,17 @@ export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBase
 
         this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -174,9 +185,9 @@ export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBase
      * @param operationRequest Provides the operation request value used by this operation.
      * @returns Resolves with the operation result.
      */
-    private async execute(request: { keyword: string, infoRequestParam: InfoRequestParam, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { keyword: string; infoRequestParam: InfoRequestParam; skip: number; limit: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         // Stores the operation response value used in the current execution flow.
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetPlayersWithDisplayName", request, secretInfo, operationRequest);
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_GetPlayersWithDisplayName", request, role, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
         }
@@ -191,7 +202,7 @@ export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBase
         let gnResults = new GNArray();
 
         // Stores the character players value used in the current execution flow.
-        let characterPlayers = await this.gnServer.getDatabase().loadCharacterPlayersWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), characterPlayerFindOptions);
+        let characterPlayers = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayersWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), characterPlayerFindOptions);
 
         for (let i = 0; i < characterPlayers.length; i++) {
             // Stores the character player value used in the current execution flow.
@@ -210,7 +221,7 @@ export class GetPlayersWithDisplayNameRequestHandler extends CharacterPlayerBase
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetPlayersWithDisplayName", request, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_GetPlayersWithDisplayName", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
     }

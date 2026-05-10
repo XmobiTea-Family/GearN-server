@@ -5,241 +5,281 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { MasterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { MasterPlayerBaseRequestHandler } from "./MasterPlayerBaseRequestHandler";
+import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 
 class LinkCustomIdOperationRequest extends OperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    public userId?: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	public userId?: string;
+    // Stores the custom ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.CustomId, minLength: 6, maxLength: 64, mustNonNull: true })
+    public customId: string;
 
-	// Stores the custom ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.CustomId, minLength: 6, maxLength: 64, mustNonNull: true })
-	public customId: string;
+    // Indicates whether force link.
+    @BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
+    public forceLink?: boolean;
 
-	// Indicates whether force link.
-	@BooleanDataMember({ code: ParameterCode.ForceLink, isOptional: true, defaultValue: false })
-	public forceLink?: boolean;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerLinkCustomIdOperationRequest extends LinkCustomIdOperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    declare public userId: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	public declare userId: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminLinkCustomIdOperationRequest extends ServerLinkCustomIdOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class LinkCustomIdRequestHandler extends MasterPlayerBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.LinkCustomId;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.LinkCustomId;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return LinkCustomIdOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return LinkCustomIdOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!request.userId) {
+            if (!secretInfo.getPermission().masterPlayer.linkCustomId.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
 
-		if (!request.userId) {
-			if (!secretInfo.getPermission().masterPlayer.linkCustomId.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
+            request.userId = authInfo.getUserId();
+        } else if (request.userId != authInfo.getUserId()) {
+            if (!secretInfo.getPermission().masterPlayer.linkCustomId.otherSelfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        } else {
+            if (!secretInfo.getPermission().masterPlayer.linkCustomId.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
 
-			request.userId = authInfo.getUserId();
-		}
-		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().masterPlayer.linkCustomId.otherSelfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
-		else {
-			if (!secretInfo.getPermission().masterPlayer.linkCustomId.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                customId: request.customId,
+                forceLink: request.forceLink,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			customId: request.customId,
-			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLinkCustomIdOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerLinkCustomIdOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().masterPlayer.linkCustomId.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().masterPlayer.linkCustomId.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                customId: request.customId,
+                forceLink: request.forceLink,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			customId: request.customId,
-			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLinkCustomIdOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminLinkCustomIdOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().masterPlayer.linkCustomId.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().masterPlayer.linkCustomId.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                customId: request.customId,
+                forceLink: request.forceLink,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			customId: request.customId,
-			forceLink: request.forceLink
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { userId: string; customId: string; forceLink: boolean }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkCustomId", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { userId: string, customId: string, forceLink: boolean }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_LinkCustomId", request, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        // Stores the master player find options value used in the current execution flow.
+        let masterPlayerFindOptions: MasterPlayerFindOptions = {
+            external: true,
+            userId: true,
+            playerBan: true,
+        };
 
-		// Stores the master player find options value used in the current execution flow.
-		let masterPlayerFindOptions: MasterPlayerFindOptions = {
-			external: true,
-		}
+        // Stores the master player value used in the current execution flow.
+        let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
-		// Stores the master player value used in the current execution flow.
-		let masterPlayer = await this.gnServer.getDatabase().loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
+        if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
+            return operationResponse;
+        }
+        if (role == SecretRole.Client) {
+            // Stores the player ban value used in the current execution flow.
+            let playerBan = masterPlayer.getPlayerBan();
 
-		if (masterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
-			return operationResponse;
-		}
+            if (playerBan.tsExpire != 0) {
+                let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+                if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+                    operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
 
-		// Stores the external value used in the current execution flow.
-		let external = masterPlayer.getExternal();
-		if (external.custom != null && external.custom.customId != null && !request.forceLink) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherValue);
-			return operationResponse;
-		}
+                    return operationResponse;
+                }
+            }
+        }
 
-		// Stores the other master player value used in the current execution flow.
-		let otherMasterPlayer = await this.gnServer.getDatabase().loadMasterPlayerByCustomIdAsync(request.customId, masterPlayerFindOptions);
-		if (otherMasterPlayer != null && otherMasterPlayer.getUserId() != masterPlayer.getUserId()) {
-			if (!request.forceLink) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherAccount);
-				return operationResponse;
-			}
+        // Stores the external value used in the current execution flow.
+        let external = masterPlayer.getExternal();
+        if (external.custom != null && external.custom.customId != null && !request.forceLink) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherValue);
+            return operationResponse;
+        }
 
-			// Stores the other external value used in the current execution flow.
-			let otherExternal = otherMasterPlayer.getExternal();
-			otherExternal.custom = null;
+        // Stores the other master player value used in the current execution flow.
+        let otherMasterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerByCustomIdAsync(request.customId, masterPlayerFindOptions);
+        if (otherMasterPlayer != null && otherMasterPlayer.getUserId() != masterPlayer.getUserId()) {
+            if (!request.forceLink) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ExternalLinkedOtherAccount);
+                return operationResponse;
+            }
 
-			otherMasterPlayer.setExternal(otherExternal);
-			otherMasterPlayer.saveAsync();
-		}
+            // Stores the other external value used in the current execution flow.
+            let otherExternal = otherMasterPlayer.getExternal();
+            otherExternal.custom = null;
 
-		external.custom = {
-			customId: request.customId
-		};
-		masterPlayer.setExternal(external);
-		masterPlayer.saveAsync();
+            otherMasterPlayer.setExternal(otherExternal);
+            await otherMasterPlayer.saveAsync();
+        }
 
-		// Stores the GearN info response parameters value used in the current execution flow.
-		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
-		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+        external.custom = {
+            customId: request.customId,
+        };
+        masterPlayer.setExternal(external);
+        await masterPlayer.saveAsync();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        // Stores the GearN info response parameters value used in the current execution flow.
+        let gnInfoResponseParameters = new GNHashtable();
 
-		await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkCustomId", request, secretInfo, operationRequest, operationResponse);
+        if (role == SecretRole.Client) {
+            if (secretInfo.getPermission().masterPlayer.getExternal.selfEnable) {
+                gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+            }
+        } else if (role == SecretRole.Server) {
+            if (secretInfo.getPermission().masterPlayer.getExternal.serverSelfEnable) {
+                gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+            }
+        } else if (role == SecretRole.Admin) {
+            if (secretInfo.getPermission().masterPlayer.getExternal.adminSelfEnable) {
+                gnInfoResponseParameters.add(ParameterCode.External, this.generateExternal(masterPlayer));
+            }
+        }
 
-		return operationResponse;
-	}
+        operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_LinkCustomId", request, role, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
+    }
 }

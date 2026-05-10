@@ -6,7 +6,7 @@ File này chỉ tập trung vào `mail` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](../CLOUDSCRIPT_USAGE.md)
+- [docs/cloudScript/CLOUDSCRIPT_USAGE.md](/docs/cloudScript/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `mail`
 
@@ -15,6 +15,7 @@ Dùng `mail` khi:
 - Bạn cần gửi email transactional.
 - Bạn cần gửi email HTML cho user hoặc admin.
 - Bạn cần gửi một email hoặc nhiều email cùng lúc.
+- GearN Server đã setup thành công emailSettings, setup tại GearN Dashboard => Settings/Email/EmailSettings.
 
 Không nên dùng `mail` khi:
 
@@ -25,14 +26,17 @@ Không nên dùng `mail` khi:
 
 Đọc theo thứ tự này:
 
-1. [CloudScriptMail.ts](../src/GN-startup/cloudScript/CloudScriptMail.ts)
+1. [CloudScriptMail.ts](/dist/GN-startup/cloudScript/CloudScriptMail.ts)
 
 ## 4. `mail` có gì
 
 Wrapper `mail` đang expose:
 
-- `mail.send(email, subject, contentHtml)`
-- `mail.sendToMore(emails, subject, contentHtml)`
+<!-- prettier-ignore -->
+| Hàm gốc | Code trong cloudScript như thế nào |
+| --- | --- |
+| `send(email: string, subject: string, contentHtml: string): Promise<void>` | `mail.send(email, subject, contentHtml)` |
+| `sendToMore(emails: string[], subject: string, contentHtml: string): Promise<void>` | `mail.sendToMore(emails, subject, contentHtml)` |
 
 ## 5. Lưu ý thực tế
 
@@ -56,20 +60,11 @@ handlers["mailSendDemo"] = async (args: any, context, log) => {
     const email = requireString(args?.email, "email");
     const subject = typeof args?.subject === "string" && args.subject.length > 0 ? args.subject : "CloudScript Demo Mail";
 
-    await mail.send(
-        email,
-        subject,
-        "<h1>CloudScript Demo</h1><p>UserId: " + context.userId + "</p><p>GameId: " + gameId + "</p>"
-    );
-
-    log({
-        action: "mailSendDemo",
-        email: email
-    });
+    await mail.send(email, subject, "<h1>CloudScript Demo</h1><p>UserId: " + context.userId + "</p><p>GameId: " + gameId + "</p>");
 
     return {
         queued: true,
-        email: email
+        email: email,
     };
 };
 ```
@@ -91,20 +86,13 @@ handlers["mailSendBatch"] = async (args: any, context, log) => {
     }
 
     const subject = typeof args?.subject === "string" && args.subject.length > 0 ? args.subject : "CloudScript Batch Mail";
-    const contentHtml = typeof args?.contentHtml === "string" && args.contentHtml.length > 0
-        ? args.contentHtml
-        : "<p>Batch mail from cloud script</p><p>GameId: " + gameId + "</p>";
+    const contentHtml = typeof args?.contentHtml === "string" && args.contentHtml.length > 0 ? args.contentHtml : "<p>Batch mail from cloud script</p><p>GameId: " + gameId + "</p>";
 
     await mail.sendToMore(args.emails, subject, contentHtml);
 
-    log({
-        action: "mailSendBatch",
-        count: args.emails.length
-    });
-
     return {
         queued: true,
-        count: args.emails.length
+        count: args.emails.length,
     };
 };
 
@@ -113,30 +101,20 @@ handlers["mailSendReport"] = async (args: any, context, log) => {
     const title = typeof args?.title === "string" && args.title.length > 0 ? args.title : "CloudScript Report";
 
     const rows = Array.isArray(args?.rows) ? args.rows : [];
-    const rowHtml = rows.map((row: any) => {
-        return "<tr><td>" + String(row?.label ?? "") + "</td><td>" + String(row?.value ?? "") + "</td></tr>";
-    }).join("");
+    const rowHtml = rows
+        .map((row: any) => {
+            return "<tr><td>" + String(row?.label ?? "") + "</td><td>" + String(row?.value ?? "") + "</td></tr>";
+        })
+        .join("");
 
-    const contentHtml =
-        "<h2>" + title + "</h2>" +
-        "<p>UserId: " + context.userId + "</p>" +
-        "<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\">" +
-        "<tr><th>Label</th><th>Value</th></tr>" +
-        rowHtml +
-        "</table>";
+    const contentHtml = "<h2>" + title + "</h2>" + "<p>UserId: " + context.userId + "</p>" + '<table border="1" cellpadding="6" cellspacing="0">' + "<tr><th>Label</th><th>Value</th></tr>" + rowHtml + "</table>";
 
     await mail.send(email, title, contentHtml);
-
-    log({
-        action: "mailSendReport",
-        email: email,
-        rowCount: rows.length
-    });
 
     return {
         queued: true,
         email: email,
-        rowCount: rows.length
+        rowCount: rows.length,
     };
 };
 ```

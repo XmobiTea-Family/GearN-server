@@ -47,7 +47,7 @@ export interface BigAnalyticsItem {
             latidute: number;
             // Stores the longitude value used by this contract.
             longitude: number;
-        }[]
+        }[];
     }[];
 
     // Stores the operation system value used by this contract.
@@ -109,13 +109,12 @@ export interface BigAnalyticsItem {
         // Stores the event name value used by this contract.
         eventName: string;
         // Stores the results list used by this contract.
-        results: 
-        {
+        results: {
             // Stores the error code value used by this contract.
             errorCode: number;
             // Stores the count value used by this contract.
             count: number;
-        }[]
+        }[];
     }[];
 
     // Stores the cost value used by this contract.

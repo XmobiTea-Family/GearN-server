@@ -7,25 +7,23 @@ import { ThirtPartyGooglePlayGameSettingsParam } from "./ThirtPartyGooglePlayGam
 import { ThirtPartyGoogleSettingsParam } from "./ThirtPartyGoogleSettingsParam";
 
 export class ThirtPartyParam {
+    // Stores the google settings value used by this instance.
+    @GNHashtableDataMember({ code: ParameterCode.GoogleSettings, isOptional: true })
+    public googleSettings?: ThirtPartyGoogleSettingsParam;
 
-	// Stores the google settings value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.GoogleSettings, isOptional: true })
-	public googleSettings?: ThirtPartyGoogleSettingsParam;
+    // Stores the facebook settings value used by this instance.
+    @GNHashtableDataMember({ code: ParameterCode.FacebookSettings, isOptional: true })
+    public facebookSettings?: ThirtPartyFacebookSettingsParam;
 
-	// Stores the facebook settings value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.FacebookSettings, isOptional: true })
-	public facebookSettings?: ThirtPartyFacebookSettingsParam;
+    // Stores the apple settings value used by this instance.
+    @GNHashtableDataMember({ code: ParameterCode.AppleSettings, isOptional: true })
+    public appleSettings?: ThirtPartyAppleSettingsParam;
 
-	// Stores the apple settings value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.AppleSettings, isOptional: true })
-	public appleSettings?: ThirtPartyAppleSettingsParam;
+    // Stores the google play game settings value used by this instance.
+    @GNHashtableDataMember({ code: ParameterCode.GooglePlayGameSettings, isOptional: true })
+    public googlePlayGameSettings?: ThirtPartyGooglePlayGameSettingsParam;
 
-	// Stores the google play game settings value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.GooglePlayGameSettings, isOptional: true })
-	public googlePlayGameSettings?: ThirtPartyGooglePlayGameSettingsParam;
-
-	// Stores the game center settings value used by this instance.
-	@GNHashtableDataMember({ code: ParameterCode.GameCenterSettings, isOptional: true })
-	public gameCenterSettings?: ThirtPartyGameCenterSettingsParam;
-
+    // Stores the game center settings value used by this instance.
+    @GNHashtableDataMember({ code: ParameterCode.GameCenterSettings, isOptional: true })
+    public gameCenterSettings?: ThirtPartyGameCenterSettingsParam;
 }

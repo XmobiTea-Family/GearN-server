@@ -5,207 +5,314 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
+import { GroupFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GroupFindOptions";
+import { InventoryFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/InventoryFindOptions";
+import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupStatus";
 
 class SetRemoveStatusOperationRequest extends OperationRequest {
+    // Stores the character ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+    public characterId: string;
 
-	// Stores the character ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	public characterId: string;
+    // Stores the reason value used by this instance.
+    @StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
+    public reason?: string;
 
-	// Stores the reason value used by this instance.
-	@StringDataMember({ code: ParameterCode.Reason, isOptional: true, defaultValue: "" })
-	public reason?: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
-class ServerGetAvatarOperationRequest extends SetRemoveStatusOperationRequest {
+class ServerSetRemoveStatusOperationRequest extends SetRemoveStatusOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
-class AdminGetAvatarOperationRequest extends ServerGetAvatarOperationRequest {
+class AdminSetRemoveStatusOperationRequest extends ServerSetRemoveStatusOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class SetRemoveStatusRequestHandler extends CharacterPlayerBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.SetRemoveStatus;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.SetRemoveStatus;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return SetRemoveStatusOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return SetRemoveStatusOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        // Tracks whether method is allowed.
+        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setRemoveStatus);
 
-		// Tracks whether method is allowed.
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.setRemoveStatus);
+        if (!allowMethod) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!allowMethod) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                characterId: request.characterId,
+                reason: request.reason,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			characterId: request.characterId,
-			reason: request.reason,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetRemoveStatusOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerGetAvatarOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().characterPlayer.setRemoveStatus.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().characterPlayer.setRemoveStatus.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                characterId: request.characterId,
+                reason: request.reason,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			characterId: request.characterId,
-			reason: request.reason,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetRemoveStatusOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminGetAvatarOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().characterPlayer.setRemoveStatus.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().characterPlayer.setRemoveStatus.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                characterId: request.characterId,
+                reason: request.reason,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			characterId: request.characterId,
-			reason: request.reason,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { characterId: string; reason: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetRemoveStatus", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { characterId: string, reason: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_SetRemoveStatus", request, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        // Stores the character player find options value used in the current execution flow.
+        let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+            removeStatus: true,
+            playerBan: true,
+            owner: true,
+            playerGroups: true,
+            playerInventories: true,
+        };
 
-		// Stores the character player find options value used in the current execution flow.
-		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-			removeStatus: true,
-			owner: true,
-		}
+        // Stores the character player value used in the current execution flow.
+        let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
-		// Stores the character player value used in the current execution flow.
-		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+        if (characterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+            return operationResponse;
+        }
 
-		if (characterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
-			return operationResponse;
-		}
+        // Stores the current milliseconds value used in the current execution flow.
+        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		// Stores the remove status value used in the current execution flow.
-		let removeStatus = characterPlayer.getRemoveStatus();
-		if (removeStatus.tsRemove == 0) {
-			characterPlayer.setRemoveStatus(xDatetime.getCurrentMilliseconds(), request.reason);
+        if (role == SecretRole.Client) {
+            // Stores the character ban value used in the current execution flow.
+            let playerBan = characterPlayer.getPlayerBan();
 
-			// Stores the owner value used in the current execution flow.
-			let owner = characterPlayer.getOwner();
-			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
-			if (gamePlayer != null) {
-				if (gamePlayer.hasPlayerCharacter(request.characterId)) {
-					gamePlayer.removePlayerCharacter(request.characterId);
+            if (playerBan.tsExpire != 0) {
+                if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+                    operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
 
-					gamePlayer.saveAsync();
-				}
-			}
+                    return operationResponse;
+                }
+            }
 
-			characterPlayer.saveAsync();
-		}
+            let removeStatus = characterPlayer.getRemoveStatus();
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+            if (removeStatus.tsRemove != 0) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+                operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_SetRemoveStatus", request, secretInfo, operationRequest, operationResponse);
+                return operationResponse;
+            }
+        }
 
-		return operationResponse;
-	}
+        // Stores the remove status value used in the current execution flow.
+        let removeStatus = characterPlayer.getRemoveStatus();
+        if (removeStatus.tsRemove == 0) {
+            characterPlayer.setRemoveStatus(currentMilliseconds, request.reason);
+
+            // Stores the owner value used in the current execution flow.
+            let owner = characterPlayer.getOwner();
+
+            let groupFindOptions: GroupFindOptions = {
+                groupId: true,
+                members: true,
+            };
+            let groups = await Promise.all(characterPlayer.getAllPlayerGroups().map((group) => this.gnServer.getDatabase().groupRepository.loadGroupAsync(group.groupId, secretInfo.getGameId(), groupFindOptions)));
+
+            let inventoryFindOptions: InventoryFindOptions = {
+                owner: true,
+            };
+            let inventories = await Promise.all(characterPlayer.getAllPlayerInventories().map((inventory) => this.gnServer.getDatabase().inventoryRepository.loadInventoryAsync(inventory.itemId, secretInfo.getGameId(), inventoryFindOptions)));
+
+            const session = this.gnServer.getDatabase().startSession();
+
+            try {
+                session.startTransaction();
+
+                // Stores the game player value used in the current execution flow.
+                let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(owner.id, secretInfo.getGameId(), { playerCharacters: true });
+                if (gamePlayer != null) {
+                    if (gamePlayer.hasPlayerCharacter(request.characterId)) {
+                        gamePlayer.removePlayerCharacter(request.characterId);
+
+                        await gamePlayer.saveAsync(session);
+                    }
+                }
+
+                for (const group of groups) {
+                    if (group != null) {
+                        if (group.hasMember(request.characterId)) {
+                            group.removeMember(request.characterId);
+
+                            await group.saveAsync(session);
+
+                            if (gamePlayer != null) {
+                                let hasCharacter = false;
+
+                                for (let characterItem of gamePlayer.getAllPlayerCharacters()) {
+                                    if (group.hasMember(characterItem.characterId) && group.getMember(characterItem.characterId).status == GroupStatus.Member) {
+                                        hasCharacter = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!hasCharacter) {
+                                    this.gnServer.leaveRoom(owner.id, group.getGroupId());
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for (const inventory of inventories) {
+                    if (inventory != null) {
+                        if (inventory.getOwner().id == request.characterId) {
+                            inventory.setRemoveStatus(currentMilliseconds, "CharacterPlayer owned remove by SetRemoveStatus, reason " + request.reason);
+
+                            await inventory.saveAsync(session);
+                        }
+                    }
+                }
+
+                await characterPlayer.saveAsync(session);
+
+                await session.commitTransaction();
+            } catch (err) {
+                await session.abortTransaction();
+
+                Debug.logError(err);
+
+                throw err;
+            } finally {
+                await session.endSession();
+            }
+        }
+
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_SetRemoveStatus", request, role, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
+    }
 }

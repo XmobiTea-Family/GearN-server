@@ -1,5 +1,3 @@
-
-
 import { RequestType } from "./GN-common/constant/enumType/RequestType";
 import { GNServer } from "./GNServer";
 
@@ -64,7 +62,7 @@ import { GetDisplayNameRequestHandler as MasterPlayer_GetDisplayNameRequestHandl
 import { SetDisplayNameRequestHandler as MasterPlayer_SetDisplayNameRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SetDisplayNameRequestHandler";
 import { GetTsCreateRequestHandler as MasterPlayer_GetTsCreateRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetTsCreateRequestHandler";
 import { GetIpAddressCreateRequestHandler as MasterPlayer_GetIpAddressCreateRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetIpAddressCreateRequestHandler";
-import { SetTsLastLoginRequestHandler as MasterPlayer_SetTsLastLoginRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SetTsLastLoginRequestHandler";
+import { UpdateTsLastLoginRequestHandler as MasterPlayer_UpdateTsLastLoginRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/UpdateTsLastLoginRequestHandler";
 import { GetTsLastLoginRequestHandler as MasterPlayer_GetTsLastLoginRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetTsLastLoginRequestHandler";
 import { SetPlayerBanRequestHandler as MasterPlayer_SetPlayerBanRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/SetPlayerBanRequestHandler";
 import { GetPlayerBanRequestHandler as MasterPlayer_GetPlayerBanRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetPlayerBanRequestHandler";
@@ -263,6 +261,7 @@ import { GetGroupsWithDisplayNameRequestHandler as Group_GetGroupsWithDisplayNam
 import { GetCreateLeaderboardRequestHandler as Group_GetCreateLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetCreateLeaderboardRequestHandler";
 import { GetStatisticsLogRequestHandler as Group_GetStatisticsLogRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetStatisticsLogRequestHandler";
 import { GetCurrencyLogRequestHandler as Group_GetCurrencyLogRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetCurrencyLogRequestHandler";
+import { GetCurrencyLeaderboardRequestHandler as Group_GetCurrencyLeaderboardRequestHandler } from "./GN-app-api/handler/controller/handler/group/GetCurrencyLeaderboardRequestHandler";
 
 import { AddSegmentRequestHandler as Inventory_AddSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/AddSegmentRequestHandler";
 import { RemoveSegmentRequestHandler as Inventory_RemoveSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/RemoveSegmentRequestHandler";
@@ -359,422 +358,423 @@ import { GetFunctionRequestHandler as CloudScript_GetFunctionRequestHandler } fr
 import { GetFunctionsRequestHandler as CloudScript_GetFunctionsRequestHandler } from "./GN-app-api/handler/controller/handler/cloudScript/GetFunctionsRequestHandler";
 
 export class RequestControllerUtils {
-	/**
-	 * Registers every built-in request handler family into the server request controller.
-	 * @param gnServer Provides the GearN server value used by this operation.
-	 */
-	public static addAllHandler(gnServer: GNServer): void {
-		let requestController = gnServer.getRequestController();
+    /**
+     * Registers every built-in request handler family into the server request controller.
+     * @param gnServer Provides the GearN server value used by this operation.
+     */
+    public static addAllHandler(gnServer: GNServer): void {
+        let requestController = gnServer.getRequestController();
 
-		{
-			// Authentication endpoints: login/register are public, token refresh requires an authenticated session.
-			let requestTypeValue = RequestType.Authenticate;
+        {
+            // Authentication endpoints: login/register are public, token refresh requires an authenticated session.
+            let requestTypeValue = RequestType.Authenticate;
 
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByAccountRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByAndroidDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByAppleRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByCustomDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByCustomIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByFacebookRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByGenericServiceRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByGoogleRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByGooglePlayGameServiceRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByGameCenterRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByiOSDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByWindowsPhoneDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_RegisterAccountRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByEditorDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByLinuxDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByMacOSDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_LoginByWindowsDeviceIdRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Authenticate_RefreshAuthTokenRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByAccountRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByAndroidDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByAppleRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByCustomDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByCustomIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByFacebookRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByGenericServiceRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByGoogleRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByGooglePlayGameServiceRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByGameCenterRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByiOSDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByWindowsPhoneDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_RegisterAccountRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByEditorDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByLinuxDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByMacOSDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_LoginByWindowsDeviceIdRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Authenticate_RefreshAuthTokenRequestHandler(gnServer), true);
+        }
 
-		{
-			// Master-player endpoints operate on the global account plane shared across games.
-			let requestTypeValue = RequestType.MasterPlayer;
+        {
+            // Master-player endpoints operate on the global account plane shared across games.
+            let requestTypeValue = RequestType.MasterPlayer;
 
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAndroidDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAppleRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkCustomDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkCustomIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkEditorDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkFacebookRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGenericServiceRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGoogleRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGooglePlayGameServiceRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGameCenterRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkiOSDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkLinuxDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkMacOSDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkWindowsDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_LinkWindowsPhoneDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkAndroidDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkAppleRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkCustomDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkCustomIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkEditorDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkFacebookRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGenericServiceRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGoogleRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGooglePlayGameServiceRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGameCenterRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkiOSDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkLinuxDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkMacOSDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkWindowsDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkWindowsPhoneDeviceIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_AddSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_RemoveSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_RemoveTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetTsCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetIpAddressCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetTsLastLoginRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetTsLastLoginRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetPlayerBanRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerBanRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetCountryCodeRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetCountryCodeRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_ChangeAccountPasswordRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_ResetAccountPasswordRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_ChangePlayerCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_ChangePlayerStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetPlayerDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithAppleRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithFacebookRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGoogleRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGooglePlayGameServiceRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGameCenterRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGenericServiceRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetExternalRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetEmailRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SetEmailRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetCurrencyLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetCreateLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetLastLoginLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetStatisticsLogRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetCurrencyLogRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SendSocketOperationEventRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SendEmailRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_SendPushNotificationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_AddPushNotificationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_RemovePushNotificationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new MasterPlayer_GetPushNotificationRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAndroidDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkAppleRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkCustomDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkCustomIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkEditorDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkFacebookRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGenericServiceRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGoogleRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGooglePlayGameServiceRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkGameCenterRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkiOSDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkLinuxDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkMacOSDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkWindowsDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_LinkWindowsPhoneDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkAndroidDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkAppleRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkCustomDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkCustomIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkEditorDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkFacebookRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGenericServiceRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGoogleRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGooglePlayGameServiceRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkGameCenterRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkiOSDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkLinuxDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkMacOSDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkWindowsDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UnlinkWindowsPhoneDeviceIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_AddSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_RemoveSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_RemoveTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetTsCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetIpAddressCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_UpdateTsLastLoginRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetTsLastLoginRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetPlayerBanRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerBanRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetCountryCodeRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetCountryCodeRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_ChangeAccountPasswordRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_ResetAccountPasswordRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_ChangePlayerCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_ChangePlayerStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetPlayerDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayerInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithAppleRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithFacebookRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGoogleRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGooglePlayGameServiceRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGameCenterRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithGenericServiceRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetExternalRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPlayersWithDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetEmailRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SetEmailRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetCurrencyLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetCreateLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetLastLoginLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetStatisticsLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetCurrencyLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SendSocketOperationEventRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SendEmailRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_SendPushNotificationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_AddPushNotificationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_RemovePushNotificationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetPushNotificationRequestHandler(gnServer), true);
+        }
 
-		{
-			// Character-player endpoints manage character-scoped gameplay state inside a game.
-			let requestTypeValue = RequestType.CharacterPlayer;
+        {
+            // Character-player endpoints manage character-scoped gameplay state inside a game.
+            let requestTypeValue = RequestType.CharacterPlayer;
 
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_AddSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_RemoveSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_RemoveTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetTsCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetIpAddressCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetTsLastLoginRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetPlayerBanRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerBanRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetCountryCodeRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCountryCodeRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_ChangePlayerCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_ChangePlayerStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetPlayerDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayersWithSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayersWithTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCatalogIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetOwnerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetRemoveStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerFriendRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerInventoryRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_RemovePlayerItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_CreatePlayerItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_CreateGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_JoinGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_LeaveGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetOwnerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_AddPlayerFriendRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_RemovePlayerFriendRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayersWithDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_SetRemoveStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetFriendStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetFriendStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCurrencyLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCreateLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetLastLoginLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetStatisticsLogRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCurrencyLogRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_AddSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_RemoveSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_RemoveTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetTsCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetIpAddressCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetTsLastLoginRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetPlayerBanRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerBanRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetCountryCodeRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCountryCodeRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_ChangePlayerCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_ChangePlayerStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetPlayerDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayersWithSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayersWithTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCatalogIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetOwnerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetRemoveStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerFriendRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayerInventoryRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_RemovePlayerItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_CreatePlayerItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_CreateGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_JoinGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_LeaveGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetOwnerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_AddPlayerFriendRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_RemovePlayerFriendRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetPlayersWithDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_SetRemoveStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetFriendStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetFriendStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCurrencyLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCreateLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetLastLoginLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetStatisticsLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CharacterPlayer_GetCurrencyLogRequestHandler(gnServer), true);
+        }
 
-		{
-			// Game-player endpoints manage the main per-game player profile and related relationships.
-			let requestTypeValue = RequestType.GamePlayer;
+        {
+            // Game-player endpoints manage the main per-game player profile and related relationships.
+            let requestTypeValue = RequestType.GamePlayer;
 
-			requestController.addHandler(requestTypeValue, new GamePlayer_AddSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_RemoveSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_SetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_RemoveTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_SetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetTsCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetIpAddressCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetTsLastLoginRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_SetPlayerBanRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerBanRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_SetCountryCodeRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetCountryCodeRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_SetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_ChangePlayerCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_ChangePlayerStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_SetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_SetPlayerDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayersWithSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayersWithTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerCharacterRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerInventoryRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerFriendRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetOnlineStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_CreateGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerCharacterRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_AddPlayerFriendRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerFriendRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerCharacterRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_JoinGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_LeaveGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayersWithDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetFriendStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetFriendStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetCurrencyLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetLastLoginLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetCreateLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetStatisticsLogRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new GamePlayer_GetCurrencyLogRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new GamePlayer_AddSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_RemoveSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_SetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_RemoveTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_SetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetTsCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetIpAddressCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetTsLastLoginRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_SetPlayerBanRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerBanRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_SetCountryCodeRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetCountryCodeRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_SetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_ChangePlayerCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_ChangePlayerStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_SetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_SetPlayerDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayersWithSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayersWithTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerCharacterRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerInventoryRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerFriendRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetOnlineStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_CreateGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerCharacterRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_AddPlayerFriendRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerFriendRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerCharacterRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_JoinGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_LeaveGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayersWithDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetFriendStatisticsLeaderboardAroundPlayerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetFriendStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetCurrencyLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetLastLoginLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetCreateLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetStatisticsLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new GamePlayer_GetCurrencyLogRequestHandler(gnServer), true);
+        }
 
-		{
-			// Content endpoints expose content data plus file upload/download metadata.
-			let requestTypeValue = RequestType.Content;
+        {
+            // Content endpoints expose content data plus file upload/download metadata.
+            let requestTypeValue = RequestType.Content;
 
-			requestController.addHandler(requestTypeValue, new Content_GetContentDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Content_SetContentDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Content_GetContentDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Content_SetContentDataRequestHandler(gnServer), true);
 
-			requestController.addHandler(requestTypeValue, new Content_CreateNewFileUploadInfoRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Content_GetFileUploadInfoListRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Content_GetFileUploadInfoRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Content_RemoveFileUploadInfoRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Content_RequestDownloadFileUploadInfoRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new Content_CreateNewFileUploadInfoRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Content_GetFileUploadInfoListRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Content_GetFileUploadInfoRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Content_RemoveFileUploadInfoRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Content_RequestDownloadFileUploadInfoRequestHandler(gnServer), true);
+        }
 
-		{
-			// Group endpoints manage shared entities, members, and group chat state.
-			let requestTypeValue = RequestType.Group;
+        {
+            // Group endpoints manage shared entities, members, and group chat state.
+            let requestTypeValue = RequestType.Group;
 
-			requestController.addHandler(requestTypeValue, new Group_AddSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_RemoveSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_SetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_RemoveTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_SetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetTsCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_SetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_ChangeGroupCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupCurrencyRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_ChangeGroupStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetStatisticsLeaderboardAroundGroupRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_SetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_SetGroupDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupsWithSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupsWithTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetCatalogIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetRemoveStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupInventoryRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_RemoveGroupItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_CreateGroupItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetMembersRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_AddMemberRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_RemoveMemberRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_SendGroupMessageRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupMessageRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_SetRemoveStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetGroupsWithDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetCreateLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetStatisticsLogRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Group_GetCurrencyLogRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new Group_AddSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_RemoveSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_SetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_RemoveTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_SetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetTsCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_SetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_ChangeGroupCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupCurrencyRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_ChangeGroupStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetStatisticsLeaderboardAroundGroupRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_SetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_SetGroupDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupsWithSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupsWithTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetCatalogIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetRemoveStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupInventoryRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_RemoveGroupItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_CreateGroupItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetMembersRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_AddMemberRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_RemoveMemberRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_SendGroupMessageRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupMessageRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_SetRemoveStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetGroupsWithDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetCreateLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetStatisticsLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetCurrencyLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Group_GetCurrencyLeaderboardRequestHandler(gnServer), true);
+        }
 
-		{
-			// Inventory endpoints manage concrete item records regardless of who owns them.
-			let requestTypeValue = RequestType.Inventory;
+        {
+            // Inventory endpoints manage concrete item records regardless of who owns them.
+            let requestTypeValue = RequestType.Inventory;
 
-			requestController.addHandler(requestTypeValue, new Inventory_AddSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_RemoveSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_RemoveTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetTsCreateRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetAvatarRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_ChangeItemStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetItemStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetStatisticsLeaderboardAroundItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetCustomDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetItemDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetItemDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetItemInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetItemsWithSegmentRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetItemsWithTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetCatalogIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetClassIdRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetItemTypeRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetAmountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetOwnerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetRemoveStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetAmountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetOwnerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_SetRemoveStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetItemsWithDisplayNameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetCreateLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Inventory_GetStatisticsLogRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new Inventory_AddSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_RemoveSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_RemoveTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetTsCreateRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetAvatarRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_ChangeItemStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetItemStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetStatisticsLeaderboardAroundItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetCustomDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetItemDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetItemDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetItemInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetItemsWithSegmentRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetItemsWithTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetCatalogIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetClassIdRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetItemTypeRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetAmountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetOwnerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetRemoveStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetAmountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetOwnerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_SetRemoveStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetItemsWithDisplayNameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetCreateLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_GetStatisticsLogRequestHandler(gnServer), true);
+        }
 
-		{
-			// Store endpoints cover offers, purchase flows, and receipt validation.
-			let requestTypeValue = RequestType.StoreInventory;
+        {
+            // Store endpoints cover offers, purchase flows, and receipt validation.
+            let requestTypeValue = RequestType.StoreInventory;
 
-			requestController.addHandler(requestTypeValue, new StoreInventory_BuyStoreItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreItemInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreItemsWithTagRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_CreateStoreItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_SetRemoveStatusRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_SetStoreItemInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_ValidateAppleAppStoreReceiptRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_ValidateGooglePlayStoreReceiptRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_ValidateFacebookStoreReceiptRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_GetCreateLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_PresentStoreItemRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreLogRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreUsedRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new StoreInventory_RemoveStoreUsedRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new StoreInventory_BuyStoreItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreItemInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreItemsWithTagRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_CreateStoreItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_SetRemoveStatusRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_SetStoreItemInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_ValidateAppleAppStoreReceiptRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_ValidateGooglePlayStoreReceiptRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_ValidateFacebookStoreReceiptRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_GetCreateLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_PresentStoreItemRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_GetStoreUsedRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new StoreInventory_RemoveStoreUsedRequestHandler(gnServer), true);
+        }
 
-		{
-			// Dashboard endpoints are the control plane for admin, secrets, settings, and maintenance.
-			let requestTypeValue = RequestType.Dashboard;
+        {
+            // Dashboard endpoints are the control plane for admin, secrets, settings, and maintenance.
+            let requestTypeValue = RequestType.Dashboard;
 
-			requestController.addHandler(requestTypeValue, new Dashboard_LoginByAdminAccountRequestHandler(gnServer), false);
-			requestController.addHandler(requestTypeValue, new Dashboard_SetMasterGameSettingsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_CreateAdminAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_RemoveAdminAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_SetPasswordAdminAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_SetSecretKeyAdminAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_SetGameInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_CreateGameRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_ChangePasswordAdminAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetAdminAccountListRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetGameInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetGameListRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetMasterGameSettingsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetServerLogRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetSecretInfoInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetSecretInfoListRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_CreateSecretInfoRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_SetSecretInfoInformationRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetUsernameAdminAccountRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetAnalyticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetEventCallbackCloudScriptRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_SetEventCallbackCloudScriptRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_ResetStatisticsLeaderboardRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetBackupStatisticsLeaderboardVersionRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_GetServerGameDataRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Dashboard_DeleteInDatabaseRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new Dashboard_LoginByAdminAccountRequestHandler(gnServer), false);
+            requestController.addHandler(requestTypeValue, new Dashboard_SetMasterGameSettingsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_CreateAdminAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_RemoveAdminAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_SetPasswordAdminAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_SetSecretKeyAdminAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_SetGameInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_CreateGameRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_ChangePasswordAdminAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetAdminAccountListRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetGameInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetGameListRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetMasterGameSettingsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetServerLogRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetSecretInfoInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetSecretInfoListRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_CreateSecretInfoRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_SetSecretInfoInformationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetUsernameAdminAccountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetAnalyticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetEventCallbackCloudScriptRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_SetEventCallbackCloudScriptRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_ResetStatisticsLeaderboardRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetBackupStatisticsLeaderboardVersionRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_GetServerGameDataRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Dashboard_DeleteInDatabaseRequestHandler(gnServer), true);
+        }
 
-		{
-			// Multiplayer endpoints cover matchmaking tickets, queue stats, and match retrieval.
-			let requestTypeValue = RequestType.Multiplayer;
+        {
+            // Multiplayer endpoints cover matchmaking tickets, queue stats, and match retrieval.
+            let requestTypeValue = RequestType.Multiplayer;
 
-			requestController.addHandler(requestTypeValue, new Multiplayer_CancelAllMatchmakingTicketRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_CancelMatchmakingTicketRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_CreateMatchmakingTicketRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_GetMatchmakingTicketRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_GetMatchRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_JoinMatchmakingTicketRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_ListMatchmakingTicketsForPlayerRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_GetQueueStatisticsRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_GetAllMatchRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new Multiplayer_GetAllMatchmakingTicketRequestHandler(gnServer), true);
-		}
+            requestController.addHandler(requestTypeValue, new Multiplayer_CancelAllMatchmakingTicketRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_CancelMatchmakingTicketRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_CreateMatchmakingTicketRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_GetMatchmakingTicketRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_GetMatchRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_JoinMatchmakingTicketRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_ListMatchmakingTicketsForPlayerRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_GetQueueStatisticsRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_GetAllMatchRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Multiplayer_GetAllMatchmakingTicketRequestHandler(gnServer), true);
+        }
 
-		{
-			// CloudScript endpoints manage stored functions and runtime execution.
-			let requestTypeValue = RequestType.CloudScript;
+        {
+            // CloudScript endpoints manage stored functions and runtime execution.
+            let requestTypeValue = RequestType.CloudScript;
 
-			requestController.addHandler(requestTypeValue, new CloudScript_AddFunctionRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CloudScript_EditFunctionRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CloudScript_ExecuteFunctionRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CloudScript_GetFunctionRequestHandler(gnServer), true);
-			requestController.addHandler(requestTypeValue, new CloudScript_GetFunctionsRequestHandler(gnServer), true);
-		}
-	}
+            requestController.addHandler(requestTypeValue, new CloudScript_AddFunctionRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CloudScript_EditFunctionRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CloudScript_ExecuteFunctionRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CloudScript_GetFunctionRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new CloudScript_GetFunctionsRequestHandler(gnServer), true);
+        }
+    }
 }

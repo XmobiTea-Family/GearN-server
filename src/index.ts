@@ -97,6 +97,9 @@ export { MatchmakingMemberStatus };
 import { MatchmakingTicketStatus } from "./GN-common/constant/enumType/MatchmakingTicketStatus";
 export { MatchmakingTicketStatus };
 
+import { MatchStatus } from "./GN-common/constant/enumType/MatchStatus";
+export { MatchStatus };
+
 import { OwnerType } from "./GN-common/constant/enumType/OwnerType";
 export { OwnerType };
 
@@ -157,15 +160,7 @@ export { OperationResponse };
 import { AuthInfo } from "./GN-common/entity/AuthInfo";
 export { AuthInfo };
 
-import {
-	DataMember,
-	StringDataMember,
-	GNHashtableDataMember,
-	GNArrayDataMember,
-	BooleanDataMember,
-	NumberDataMember,
-	GNFieldDataType,
-} from "./GN-common/entity/DataMember";
+import { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, GNFieldDataType } from "./GN-common/entity/DataMember";
 export { DataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, BooleanDataMember, NumberDataMember, GNFieldDataType };
 
 import { AbstractConstructor, FieldDataType, GNObjectFieldMetadata, GNObjectMetadata } from "./GN-common/entity/GNMetadata";
@@ -174,8 +169,8 @@ export { AbstractConstructor, FieldDataType, GNObjectFieldMetadata, GNObjectMeta
 import { InvalidMember } from "./GN-common/entity/InvalidMember";
 export { InvalidMember };
 
-import { SecretInfo, SecretPermissionItem } from "./GN-common/entity/SecretInfo";
-export { SecretInfo, SecretPermissionItem };
+import { SecretInfo, SecretPermissionItem, SecretRole } from "./GN-common/entity/SecretInfo";
+export { SecretInfo, SecretPermissionItem, SecretRole };
 
 import { TokenPayload } from "./GN-common/entity/TokenPayload";
 export { TokenPayload };
@@ -254,9 +249,6 @@ export { ChatMessage };
 
 import { CurrencyItem } from "./GN-library/xdatabase/lib/entity/pro/CurrencyItem";
 export { CurrencyItem };
-
-import { DataItem } from "./GN-library/xdatabase/lib/entity/pro/DataItem";
-export { DataItem };
 
 import { DataObjectBase } from "./GN-library/xdatabase/lib/entity/pro/DataObjectBase";
 export { DataObjectBase };
@@ -646,10 +638,10 @@ export { EmailSettingsParam };
 import { PushNotificationSettingsParam } from "./GN-app-api/handler/controller/handler/dashboard/model/PushNotificationSettingsParam";
 export { PushNotificationSettingsParam };
 
-import { ServerGameDataRequestParams } from "./GN-app-api/handler/controller/handler/dashboard/GetServerGameDataRequestHandler"
+import { ServerGameDataRequestParams } from "./GN-app-api/handler/controller/handler/dashboard/GetServerGameDataRequestHandler";
 export { ServerGameDataRequestParams };
 
-import { AnalyticsRequestParams } from "./GN-app-api/handler/controller/handler/dashboard/GetAnalyticsRequestHandler"
+import { AnalyticsRequestParams } from "./GN-app-api/handler/controller/handler/dashboard/GetAnalyticsRequestHandler";
 export { AnalyticsRequestParams };
 
 import { MatchmakingTicketCanMatch } from "./GN-app-api/service/IMatchmakingService";

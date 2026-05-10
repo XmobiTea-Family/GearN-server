@@ -43,19 +43,20 @@ This repository is both:
 
 ## Transport Contracts
 
-- HTTP JSON route: `POST /api/json/:requestType/:role/:operationCode`
-- HTTP MsgPack route: `POST /api/msgpack/:requestType/:role/:operationCode`
+- HTTP JSON route: `POST /api/rJson/:requestType/:role/:operationCode`
+- HTTP MsgPack route: `POST /api/rMsgPack/:requestType/:role/:operationCode`
 - Health endpoints: `GET /ping`, `POST /ping`, `GET /healthcheck`
 - Socket auth event: `Commands.RequestAuthTokenCmd`
 - Socket request events: `Commands.RequestCmd_Json` and `Commands.RequestCmd_MsgPack`
 
 ## Project Docs For AI
 
-- `AGENTS.md`: repo-specific rules for AI agents
-- `ARCHITECTURE.md`: startup flow, module boundaries, data flow, and extension points
-- `DEVELOPMENT.md`: build commands, config sections, workflow, and current caveats
-- `DOMAIN_RELATIONSHIP.md`: domain map and relationships between authenticate, player, group, inventory, store inventory, content, dashboard, matchmaking, and cloud script
-- `CLOUDSCRIPT_USAGE.md`: CloudScript overview, runtime rules, helper selection, and links to split helper docs
+- `/AGENTS.md`: repo-specific rules for AI agents
+- `/docs/ARCHITECTURE.md`: startup flow, module boundaries, data flow, and extension points
+- `/docs/DEVELOPMENT.md`: build commands, config sections, workflow, and current caveats
+- `/docs/DOMAIN_RELATIONSHIP.md`: domain map and relationships between authenticate, player, group, inventory, store inventory, content, dashboard, matchmaking, and cloud script
+- `/docs/cloudScript/CLOUDSCRIPT_USAGE.md`: CloudScript overview, runtime rules, helper selection, and links to split helper docs
+- `/docs/MATCHMAKING_TEST_PLAN.md`: direct unit-test plan for matchmaking candidate generation and every queue rule type
 
 ## Third-Party Dependencies
 

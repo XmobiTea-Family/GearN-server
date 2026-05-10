@@ -17,13 +17,13 @@ let gnServer = applicationStartup.getGNServer();
 
 // Mirror fatal process-level failures to GearN logging so local bootstrap issues are visible.
 process.on("uncaughtException", (uncaughtException) => {
-	Debug.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
+    Debug.log("Uncaught Exception at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
 });
 
 process.on("uncaughtError", (uncaughtException) => {
-	Debug.log("Uncaught Error at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
+    Debug.log("Uncaught Error at: %s - message: %s", uncaughtException.stack, uncaughtException.message);
 });
 
 process.on("unhandledRejection", (reason) => {
-	Debug.log("Unhandled Rejection at: %s - message: %s", reason.stack, reason.message);
+    Debug.log("Unhandled Rejection at: %s - message: %s", reason.stack, reason.message);
 });

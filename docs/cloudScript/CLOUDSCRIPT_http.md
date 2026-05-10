@@ -6,7 +6,7 @@ File này chỉ tập trung vào `http` trong cloud script.
 
 Nếu bạn cần tài liệu tổng quan cloud script, xem:
 
-- [CLOUDSCRIPT_USAGE.md](../CLOUDSCRIPT_USAGE.md)
+- [docs/cloudScript/CLOUDSCRIPT_USAGE.md](/docs/cloudScript/CLOUDSCRIPT_USAGE.md)
 
 ## 2. Khi nào dùng `http`
 
@@ -26,19 +26,22 @@ Không nên dùng `http` khi:
 
 Đọc theo thứ tự này:
 
-1. [CloudScriptHttp.ts](../src/GN-startup/cloudScript/CloudScriptHttp.ts)
+1. [CloudScriptHttp.ts](/dist/GN-startup/cloudScript/CloudScriptHttp.ts)
 
 ## 4. `http` có gì
 
 Wrapper `http` đang expose trực tiếp các method:
 
-- `http.get(url, config)`
-- `http.delete(url, config)`
-- `http.head(url, config)`
-- `http.options(url, config)`
-- `http.post(url, data, config)`
-- `http.put(url, data, config)`
-- `http.patch(url, data, config)`
+<!-- prettier-ignore -->
+| Hàm gốc | Code trong cloudScript như thế nào |
+| --- | --- |
+| `get<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.get(url, config)` |
+| `delete<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.delete(url, config)` |
+| `head<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.head(url, config)` |
+| `options<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.options(url, config)` |
+| `post<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.post(url, data, config)` |
+| `put<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.put(url, data, config)` |
+| `patch<T = any, R = axios.AxiosResponse<T>, D = any>(url: string, data?: any, config?: axios.AxiosRequestConfig<D>): Promise<R>` | `http.patch(url, data, config)` |
 
 Thực chất nó bọc Axios, nên:
 
@@ -70,18 +73,13 @@ handlers["httpGetTodo"] = async (args: any, context, log) => {
     const response = await http.get("https://jsonplaceholder.typicode.com/todos/" + todoId, {
         timeout: 5000,
         headers: {
-            "x-cloud-script-user-id": context.userId
-        }
-    });
-
-    log({
-        action: "httpGetTodo",
-        status: response.status
+            "x-cloud-script-user-id": context.userId,
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 ```
@@ -105,25 +103,19 @@ handlers["httpPostWebhook"] = async (args: any, context, log) => {
         userId: context.userId,
         gameId: gameId,
         payload: args?.payload ?? null,
-        ts: Date.now()
+        ts: Date.now(),
     };
 
     const response = await http.post(url, payload, {
         timeout: 8000,
         headers: {
-            "content-type": "application/json"
-        }
-    });
-
-    log({
-        action: "httpPostWebhook",
-        status: response.status,
-        url: url
+            "content-type": "application/json",
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 
@@ -135,18 +127,13 @@ handlers["httpPatchExternalProfile"] = async (args: any, context, log) => {
         timeout: 8000,
         headers: {
             Authorization: "Bearer " + bearerToken,
-            "x-user-id": context.userId
-        }
-    });
-
-    log({
-        action: "httpPatchExternalProfile",
-        status: response.status
+            "x-user-id": context.userId,
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 
@@ -156,18 +143,13 @@ handlers["httpDeleteResource"] = async (args: any, context, log) => {
     const response = await http.delete(url, {
         timeout: 8000,
         headers: {
-            "x-cloud-script-user-id": context.userId
-        }
-    });
-
-    log({
-        action: "httpDeleteResource",
-        status: response.status
+            "x-cloud-script-user-id": context.userId,
+        },
     });
 
     return {
         status: response.status,
-        data: response.data
+        data: response.data,
     };
 };
 
@@ -176,25 +158,20 @@ handlers["httpSafeRequest"] = async (args: any, context, log) => {
 
     try {
         const response = await http.get(url, {
-            timeout: 5000
+            timeout: 5000,
         });
 
         return {
             success: true,
             status: response.status,
-            data: response.data
+            data: response.data,
         };
     } catch (error: any) {
-        log({
-            action: "httpSafeRequest",
-            message: error?.message ?? "unknown error"
-        });
-
         return {
             success: false,
             errorMessage: error?.message ?? "unknown error",
             status: error?.response?.status ?? null,
-            data: error?.response?.data ?? null
+            data: error?.response?.data ?? null,
         };
     }
 };

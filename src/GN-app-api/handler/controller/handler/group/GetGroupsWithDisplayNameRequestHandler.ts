@@ -5,17 +5,16 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GroupBaseRequestHandler } from "./GroupBaseRequestHandler";
 import { InfoRequestParam } from "./model/InfoRequestParam";
 
 class GetGroupsWithDisplayNameOperationRequest extends OperationRequest {
-
     // Stores the keyword value used by this instance.
     @StringDataMember({ code: ParameterCode.Keyword, minLength: 2, maxLength: 32 })
     public keyword: string;
@@ -43,7 +42,6 @@ class GetGroupsWithDisplayNameOperationRequest extends OperationRequest {
 }
 
 class ServerGetGroupsWithDisplayNameOperationRequest extends GetGroupsWithDisplayNameOperationRequest {
-
     /**
      * Checks whether valid request.
      */
@@ -55,7 +53,6 @@ class ServerGetGroupsWithDisplayNameOperationRequest extends GetGroupsWithDispla
 }
 
 class AdminGetGroupsWithDisplayNameOperationRequest extends ServerGetGroupsWithDisplayNameOperationRequest {
-
     /**
      * Checks whether valid request.
      */
@@ -67,7 +64,6 @@ class AdminGetGroupsWithDisplayNameOperationRequest extends ServerGetGroupsWithD
 }
 
 export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHandler {
-
     /**
      * Returns the code.
      */
@@ -103,12 +99,17 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
 
         this.generateInfoRequestParamForOther(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -131,12 +132,17 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
 
         this.generateInfoRequestParamForServer(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -159,12 +165,17 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
 
         this.generateInfoRequestParamForAdmin(secretInfo, request.infoRequestParam);
 
-        return this.execute({
-            keyword: request.keyword,
-            infoRequestParam: request.infoRequestParam,
-            skip: request.skip,
-            limit: request.limit,
-        }, secretInfo, operationRequest);
+        return this.execute(
+            {
+                keyword: request.keyword,
+                infoRequestParam: request.infoRequestParam,
+                skip: request.skip,
+                limit: request.limit,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
     }
 
     /**
@@ -174,9 +185,9 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
      * @param operationRequest Provides the operation request value used by this operation.
      * @returns Resolves with the operation result.
      */
-    private async execute(request: { keyword: string, infoRequestParam: InfoRequestParam, skip: number, limit: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { keyword: string; infoRequestParam: InfoRequestParam; skip: number; limit: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         // Stores the operation response value used in the current execution flow.
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetGroupsWithDisplayName", request, secretInfo, operationRequest);
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("group_GetGroupsWithDisplayName", request, role, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
         }
@@ -191,7 +202,7 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
         let gnResults = new GNArray();
 
         // Stores the groups value used in the current execution flow.
-        let groups = await this.gnServer.getDatabase().loadGroupsWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
+        let groups = await this.gnServer.getDatabase().groupRepository.loadGroupsWithDisplayNameNormalizeRegexAsync(request.keyword, request.skip, request.limit, secretInfo.getGameId(), groupFindOptions);
 
         for (let i = 0; i < groups.length; i++) {
             // Stores the group value used in the current execution flow.
@@ -210,7 +221,7 @@ export class GetGroupsWithDisplayNameRequestHandler extends GroupBaseRequestHand
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupWithDisplayName", request, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("group_GetGroupsWithDisplayName", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
     }

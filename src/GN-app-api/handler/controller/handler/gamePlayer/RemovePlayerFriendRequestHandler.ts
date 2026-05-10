@@ -5,13 +5,13 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
 import { FriendStatus } from "./../../../../../GN-common/constant/enumType/FriendStatus";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
@@ -19,258 +19,283 @@ import { EventCode } from "./../../../../../GN-common/constant/EventCode";
 import { OperationEvent } from "./../../../../../GN-common/entity/operationEvent/OperationEvent";
 
 class RemovePlayerFriendOperationRequest extends OperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
+    public userId?: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, isOptional: true })
-	public userId?: string;
+    // Stores the friend ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.FriendId, minLength: 10, maxLength: 10, mustNonNull: true })
+    public friendId: string;
 
-	// Stores the friend ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.FriendId, minLength: 10, maxLength: 10, mustNonNull: true })
-	public friendId: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerRemovePlayerFriendOperationRequest extends RemovePlayerFriendOperationRequest {
+    // Indicates whether r ID should be used.
+    @StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
+    declare public userId: string;
 
-	// Indicates whether r ID should be used.
-	@StringDataMember({ code: ParameterCode.UserId, minLength: 10, maxLength: 10, mustNonNull: true })
-	public declare userId: string;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminRemovePlayerFriendOperationRequest extends ServerRemovePlayerFriendOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class RemovePlayerFriendRequestHandler extends GamePlayerBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.RemovePlayerFriend;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.RemovePlayerFriend;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return RemovePlayerFriendOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return RemovePlayerFriendOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!request.userId) {
+            if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
 
-		if (!request.userId) {
-			if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
+            request.userId = authInfo.getUserId();
+        } else if (request.userId != authInfo.getUserId()) {
+            if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.otherSelfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        } else {
+            if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.selfEnable) {
+                return this.newOperationNotAllowError(request);
+            }
+        }
 
-			request.userId = authInfo.getUserId();
-		}
-		else if (request.userId != authInfo.getUserId()) {
-			if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.otherSelfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
-		else {
-			if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.selfEnable) {
-				return this.newOperationNotAllowError(request);
-			}
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                friendId: request.friendId,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			friendId: request.friendId,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerRemovePlayerFriendOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerRemovePlayerFriendOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                friendId: request.friendId,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			friendId: request.friendId,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminRemovePlayerFriendOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminRemovePlayerFriendOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().gamePlayer.removePlayerFriend.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                userId: request.userId,
+                friendId: request.friendId,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			userId: request.userId,
-			friendId: request.friendId,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { userId: string; friendId: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_RemovePlayerFriend", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { userId: string, friendId: string }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_RemovePlayerFriend", request, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        if (request.userId != request.friendId) {
+            // Stores the game player find options value used in the current execution flow.
+            let gamePlayerFindOptions: GamePlayerFindOptions = {
+                playerFriends: true,
+                playerBan: true,
+            };
 
-		if (request.userId != request.friendId) {
-			// Stores the game player find options value used in the current execution flow.
-			let gamePlayerFindOptions: GamePlayerFindOptions = {
-				playerFriends: true
-			}
+            // Stores the game player value used in the current execution flow.
+            let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+            // Stores the friend player value used in the current execution flow.
+            let friendPlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
 
-			// Stores the game player value used in the current execution flow.
-			let gamePlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
-			// Stores the friend player value used in the current execution flow.
-			let friendPlayer = await this.gnServer.getDatabase().loadGamePlayerAsync(request.friendId, secretInfo.getGameId(), gamePlayerFindOptions);
+            if (gamePlayer == null) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
+                return operationResponse;
+            }
 
-			if (gamePlayer == null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
-				return operationResponse;
-			}
+            if (role == SecretRole.Client) {
+                // Stores the player ban value used in the current execution flow.
+                let playerBan = gamePlayer.getPlayerBan();
 
-			if (friendPlayer == null) {
-				operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
-				return operationResponse;
-			}
+                if (playerBan.tsExpire != 0) {
+                    let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+                    if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+                        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+                        operationResponse.setDebugMessage("GamePlayer is banned, reason " + playerBan.reason);
 
-			// Stores the current milliseconds value used in the current execution flow.
-			let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+                        return operationResponse;
+                    }
+                }
+            }
 
-			if (gamePlayer.hasPlayerFriend(request.friendId)) {
-				// Stores the player friend item value used in the current execution flow.
-				let playerFriendItem = gamePlayer.getPlayerFriend(request.friendId);
+            if (friendPlayer == null) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
+                return operationResponse;
+            }
 
-				gamePlayer.removePlayerFriend(request.friendId);
-				gamePlayer.saveAsync();
+            // Stores the current milliseconds value used in the current execution flow.
+            let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-				{
-					// Stores the GearN player friends value used in the current execution flow.
-					let gnPlayerFriends = new GNArray();
+            if (gamePlayer.hasPlayerFriend(request.friendId)) {
+                // Stores the player friend item value used in the current execution flow.
+                let playerFriendItem = gamePlayer.getPlayerFriend(request.friendId);
 
-					// Stores the GearN player friend value used in the current execution flow.
-					let gnPlayerFriend = new GNHashtable();
-					gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
-					gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
-					gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.NotFriend);
-					gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-					gnPlayerFriends.add(gnPlayerFriend);
+                gamePlayer.removePlayerFriend(request.friendId);
+                await gamePlayer.saveAsync();
 
-					// Stores the game player friend update operation event value used in the current execution flow.
-					let gamePlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
+                {
+                    // Stores the GearN player friends value used in the current execution flow.
+                    let gnPlayerFriends = new GNArray();
 
-					gamePlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+                    // Stores the GearN player friend value used in the current execution flow.
+                    let gnPlayerFriend = new GNHashtable();
+                    gnPlayerFriend.add(ParameterCode.FriendId, request.friendId);
+                    gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
+                    gnPlayerFriend.add(ParameterCode.Status, FriendStatus.NotFriend);
+                    gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+                    gnPlayerFriends.add(gnPlayerFriend);
 
-					this.gnServer.sendEventTo(request.userId, gamePlayerFriendUpdateOperationEvent);
-				}
-			}
+                    // Stores the game player friend update operation event value used in the current execution flow.
+                    let gamePlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
 
-			if (friendPlayer.hasPlayerFriend(request.userId)) {
-				// Stores the player friend item value used in the current execution flow.
-				let playerFriendItem = friendPlayer.getPlayerFriend(request.userId);
+                    gamePlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
 
-				friendPlayer.removePlayerFriend(request.userId);
-				friendPlayer.saveAsync();
+                    this.gnServer.sendEventTo(request.userId, gamePlayerFriendUpdateOperationEvent);
+                }
+            }
 
-				{
-					// Stores the GearN player friends value used in the current execution flow.
-					let gnPlayerFriends = new GNArray();
+            if (friendPlayer.hasPlayerFriend(request.userId)) {
+                // Stores the player friend item value used in the current execution flow.
+                let playerFriendItem = friendPlayer.getPlayerFriend(request.userId);
 
-					// Stores the GearN player friend value used in the current execution flow.
-					let gnPlayerFriend = new GNHashtable();
-					gnPlayerFriend.add(ParameterCode.FriendId, request.userId);
-					gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
-					gnPlayerFriend.add(ParameterCode.Status, <number>FriendStatus.NotFriend);
-					gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
-					gnPlayerFriends.add(gnPlayerFriend);
+                friendPlayer.removePlayerFriend(request.userId);
+                await friendPlayer.saveAsync();
 
-					// Stores the game player friend update operation event value used in the current execution flow.
-					let gamePlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
+                {
+                    // Stores the GearN player friends value used in the current execution flow.
+                    let gnPlayerFriends = new GNArray();
 
-					gamePlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
+                    // Stores the GearN player friend value used in the current execution flow.
+                    let gnPlayerFriend = new GNHashtable();
+                    gnPlayerFriend.add(ParameterCode.FriendId, request.userId);
+                    gnPlayerFriend.add(ParameterCode.CatalogId, playerFriendItem.catalogId);
+                    gnPlayerFriend.add(ParameterCode.Status, FriendStatus.NotFriend);
+                    gnPlayerFriend.add(ParameterCode.TsLastStatusUpdate, currentMilliseconds);
+                    gnPlayerFriends.add(gnPlayerFriend);
 
-					this.gnServer.sendEventTo(request.friendId, gamePlayerFriendUpdateOperationEvent);
-				}
-			}
-		}
+                    // Stores the game player friend update operation event value used in the current execution flow.
+                    let gamePlayerFriendUpdateOperationEvent = new OperationEvent(EventCode.OnGamePlayerFriendUpdate, null);
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+                    gamePlayerFriendUpdateOperationEvent.setParameter(ParameterCode.PlayerFriends, gnPlayerFriends);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_RemovePlayerFriend", request, secretInfo, operationRequest, operationResponse);
+                    this.gnServer.sendEventTo(request.friendId, gamePlayerFriendUpdateOperationEvent);
+                }
+            }
+        }
 
-		return operationResponse;
-	}
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_RemovePlayerFriend", request, role, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
+    }
 }

@@ -5,283 +5,340 @@ import { OperationCode } from "./../../../../../GN-common/constant/OperationCode
 import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
 import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
 import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember, } from "./../../../../../GN-common/entity/DataMember";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
 
 import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
 import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
 
 import { CharacterPlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/CharacterPlayerFindOptions";
-import { SecretInfo } from "./../../../../../GN-common/entity/SecretInfo";
+import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { CharacterPlayerBaseRequestHandler } from "./CharacterPlayerBaseRequestHandler";
-import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
+import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType";
 import { DisplayNameUtility } from "./../../../../../GN-common/helper/DisplayNameUtility";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerType";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class CreatePlayerItemOperationRequest extends OperationRequest {
+    // Stores the character ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
+    public characterId: string;
 
-	// Stores the character ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.CharacterId, minLength: 11, maxLength: 11, mustNonNull: true })
-	public characterId: string;
+    // Stores the catalog ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
+    public catalogId: string;
 
-	// Stores the catalog ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.CatalogId, minLength: 2, maxLength: 32, mustNonNull: true })
-	public catalogId: string;
+    // Stores the class ID value used by this instance.
+    @StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
+    public classId: string;
 
-	// Stores the class ID value used by this instance.
-	@StringDataMember({ code: ParameterCode.ClassId, minLength: 2, maxLength: 32, mustNonNull: true })
-	public classId: string;
+    // Stores the display name value used by this instance.
+    @StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
+    public displayName?: string;
 
-	// Stores the display name value used by this instance.
-	@StringDataMember({ code: ParameterCode.DisplayName, defaultValue: "", isOptional: true })
-	public displayName?: string;
+    // Stores the amount value used by this instance.
+    @NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, minValue: 1, maxValue: 256, isOptional: true })
+    public amount?: number;
 
-	// Stores the amount value used by this instance.
-	@NumberDataMember({ code: ParameterCode.Amount, defaultValue: 1, mustInt: true, isOptional: true })
-	public amount?: number;
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class ServerCreatePlayerItemOperationRequest extends CreatePlayerItemOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 class AdminCreatePlayerItemOperationRequest extends ServerCreatePlayerItemOperationRequest {
+    /**
+     * Checks whether valid request.
+     */
+    public override isValidRequest() {
+        if (!super.isValidRequest()) return false;
 
-	/**
-	 * Checks whether valid request.
-	 */
-	public override isValidRequest() {
-		if (!super.isValidRequest()) return false;
-
-		return true;
-	}
+        return true;
+    }
 }
 
 export class CreatePlayerItemRequestHandler extends CharacterPlayerBaseRequestHandler {
+    /**
+     * Returns the code.
+     */
+    public override getCode() {
+        return OperationCode.CreatePlayerItem;
+    }
 
-	/**
-	 * Returns the code.
-	 */
-	public override getCode() {
-		return OperationCode.CreatePlayerItem;
-	}
+    /**
+     * Returns the common operation request.
+     */
+    public override getCommonOperationRequest() {
+        return CreatePlayerItemOperationRequest;
+    }
 
-	/**
-	 * Returns the common operation request.
-	 */
-	public override getCommonOperationRequest() {
-		return CreatePlayerItemOperationRequest;
-	}
+    /**
+     * Executes the handle workflow asynchronously.
+     * @param authInfo Provides the auth info value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
-	/**
-	 * Executes the handle workflow asynchronously.
-	 * @param authInfo Provides the auth info value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        // Tracks whether method is allowed.
+        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.createPlayerItem);
 
-		// Tracks whether method is allowed.
-		let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.characterId, secretInfo.getGameId(), secretInfo.getPermission().characterPlayer.createPlayerItem);
+        if (!allowMethod) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!allowMethod) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                characterId: request.characterId,
+                catalogId: request.catalogId,
+                classId: request.classId,
+                displayName: request.displayName,
+                amount: request.amount,
+            },
+            SecretRole.Client,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			characterId: request.characterId,
-			catalogId: request.catalogId,
-			classId: request.classId,
-			displayName: request.displayName,
-			amount: request.amount,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the server handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreatePlayerItemOperationRequest);
 
-	/**
-	 * Executes the server handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerCreatePlayerItemOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().characterPlayer.createPlayerItem.serverSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().characterPlayer.createPlayerItem.serverSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                characterId: request.characterId,
+                catalogId: request.catalogId,
+                classId: request.classId,
+                displayName: request.displayName,
+                amount: request.amount,
+            },
+            SecretRole.Server,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			characterId: request.characterId,
-			catalogId: request.catalogId,
-			classId: request.classId,
-			displayName: request.displayName,
-			amount: request.amount,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the admin handle workflow asynchronously.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the request value used in the current execution flow.
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreatePlayerItemOperationRequest);
 
-	/**
-	 * Executes the admin handle workflow asynchronously.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the request value used in the current execution flow.
-		let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminCreatePlayerItemOperationRequest);
+        if (!request.isValidRequest()) {
+            return this.newInvalidRequestParameters(request);
+        }
 
-		if (!request.isValidRequest()) {
-			return this.newInvalidRequestParameters(request);
-		}
+        if (!secretInfo.getPermission().characterPlayer.createPlayerItem.adminSelfEnable) {
+            return this.newOperationNotAllowError(request);
+        }
 
-		if (!secretInfo.getPermission().characterPlayer.createPlayerItem.adminSelfEnable) {
-			return this.newOperationNotAllowError(request);
-		}
+        return this.execute(
+            {
+                characterId: request.characterId,
+                catalogId: request.catalogId,
+                classId: request.classId,
+                displayName: request.displayName,
+                amount: request.amount,
+            },
+            SecretRole.Admin,
+            secretInfo,
+            operationRequest,
+        );
+    }
 
-		return this.execute({
-			characterId: request.characterId,
-			catalogId: request.catalogId,
-			classId: request.classId,
-			displayName: request.displayName,
-			amount: request.amount,
-		}, secretInfo, operationRequest);
-	}
+    /**
+     * Executes the execute workflow asynchronously.
+     * @param request Provides the request value used by this operation.
+     * @param secretInfo Provides the secret info value used by this operation.
+     * @param operationRequest Provides the operation request value used by this operation.
+     * @returns Resolves with the operation result.
+     */
+    private async execute(request: { characterId: string; catalogId: string; classId: string; displayName: string; amount: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        // Stores the operation response value used in the current execution flow.
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, role, secretInfo, operationRequest);
+        if (operationResponse != null) {
+            return operationResponse;
+        }
 
-	/**
-	 * Executes the execute workflow asynchronously.
-	 * @param request Provides the request value used by this operation.
-	 * @param secretInfo Provides the secret info value used by this operation.
-	 * @param operationRequest Provides the operation request value used by this operation.
-	 * @returns Resolves with the operation result.
-	 */
-	private async execute(request: { characterId: string, catalogId: string, classId: string, displayName: string, amount: number }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
-		// Stores the operation response value used in the current execution flow.
-		let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, secretInfo, operationRequest);
-		if (operationResponse != null) {
-			return operationResponse;
-		}
+        operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
+        operationResponse.setReturnCode(ReturnCode.Ok);
 
-		operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
-		operationResponse.setReturnCode(ReturnCode.Ok);
+        // Stores the character player find options value used in the current execution flow.
+        let characterPlayerFindOptions: CharacterPlayerFindOptions = {
+            playerInventories: true,
+            playerBan: true,
+            removeStatus: true,
+        };
 
-		// Stores the character player find options value used in the current execution flow.
-		let characterPlayerFindOptions: CharacterPlayerFindOptions = {
-			playerInventories: true,
-		}
+        // Stores the resolved character player settings instance for the current execution flow.
+        let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
+        // Stores the player item catalog settings item value used in the current execution flow.
+        let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find((x) => x.catalogId == request.catalogId);
 
-		// Stores the resolved character player settings instance for the current execution flow.
-		let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
-		// Stores the player item catalog settings item value used in the current execution flow.
-		let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find(x => x.catalogId == request.catalogId);
+        if (playerItemCatalogSettingsItem == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
+            return operationResponse;
+        }
 
-		if (playerItemCatalogSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CatalogIdNotFound);
-			return operationResponse;
-		}
+        // Stores the item class settings item value used in the current execution flow.
+        let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == request.classId);
+        if (itemClassSettingsItem == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ClassIdNotFound);
+            return operationResponse;
+        }
 
-		// Stores the item class settings item value used in the current execution flow.
-		let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find(x => x.classId == request.classId);
-		if (itemClassSettingsItem == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.ClassIdNotFound);
-			return operationResponse;
-		}
+        // Stores the character player value used in the current execution flow.
+        let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
 
-		// Stores the character player value used in the current execution flow.
-		let characterPlayer = await this.gnServer.getDatabase().loadCharacterPlayerAsync(request.characterId, secretInfo.getGameId(), characterPlayerFindOptions);
+        if (characterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+            return operationResponse;
+        }
 
-		if (characterPlayer == null) {
-			operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
-			return operationResponse;
-		}
+        // Stores the current milliseconds value used in the current execution flow.
+        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-		// Stores the amount value used in the current execution flow.
-		let amount = request.amount;
+        if (role == SecretRole.Client) {
+            // Stores the character ban value used in the current execution flow.
+            let playerBan = characterPlayer.getPlayerBan();
 
-		if (playerItemCatalogSettingsItem.itemType == <number>ItemType.NonStackable) {
-			amount = 1;
-		}
+            if (playerBan.tsExpire != 0) {
+                if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
+                    operationResponse.setDebugMessage("CharacterPlayer is banned, reason " + playerBan.reason);
 
-		// Stores the item ID value used in the current execution flow.
-		let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
-		// Stores the current milliseconds value used in the current execution flow.
-		let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+                    return operationResponse;
+                }
+            }
 
-		// Stores the result value used in the current execution flow.
-		let result = {} as any;
-		result["itemId"] = itemId;
-		result["catalogId"] = request.catalogId;
-		result["classId"] = request.classId;
-		result["amount"] = amount;
-		result["itemType"] = playerItemCatalogSettingsItem.itemType;
-		result["owner"] = { "id": request.characterId, "type": <number>OwnerType.CharacterPlayer };
-		result["itemDatas"] = [];
-		result["itemStatistics"] = {};
-		result["removeStatus"] = { "tsRemove": 0, "reason": "" };
-		result["segments"] = [];
-		result["customDatas"] = {};
-		result["tsCreate"] = currentMilliseconds;
-		result["displayName"] = request.displayName;
-		result["displayNameNormalize"] = DisplayNameUtility.normalizeString(request.displayName);
-		result["avatar"] = { "type": 0, "value": "0" };
-		result["tags"] = {};
+            let removeStatus = characterPlayer.getRemoveStatus();
 
-		// Stores the inventory value used in the current execution flow.
-		let inventory = await this.gnServer.getDatabase().createInventoryAsync(result, secretInfo.getGameId());
+            if (removeStatus.tsRemove != 0) {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.CharacterPlayerNotFound);
+                operationResponse.setDebugMessage("CharacterPlayer is removed, reason " + removeStatus.reason);
 
-		characterPlayer.setPlayerInventory(itemId, request.catalogId, request.classId);
-		characterPlayer.saveAsync();
+                return operationResponse;
+            }
+        }
 
-		// Stores the GearN player inventories value used in the current execution flow.
-		let gnPlayerInventories = new GNArray();
+        // Stores the amount value used in the current execution flow.
+        let amount = request.amount;
 
-		// Stores the GearN player inventory value used in the current execution flow.
-		let gnPlayerInventory = new GNHashtable();
+        if (playerItemCatalogSettingsItem.itemType == ItemType.NonStackable) {
+            amount = 1;
+        }
 
-		gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
-		gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
-		gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
+        // Stores the item ID value used in the current execution flow.
+        let itemId = StringUtility.generateRandomString(12, this.gnServer.getIdTypeCase());
 
-		gnPlayerInventories.add(gnPlayerInventory);
+        const session = this.gnServer.getDatabase().startSession();
 
-		// Stores the GearN info response parameters value used in the current execution flow.
-		let gnInfoResponseParameters = new GNHashtable();
-		gnInfoResponseParameters.add(ParameterCode.PlayerInventories, gnPlayerInventories);
+        try {
+            session.startTransaction();
 
-		operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+            // Stores the inventory value used in the current execution flow.
+            let inventory = await this.gnServer.getDatabase().inventoryRepository.createInventoryAsync(
+                {
+                    _id: undefined,
+                    itemId: itemId,
+                    catalogId: request.catalogId,
+                    classId: request.classId,
+                    amount: amount,
+                    itemType: playerItemCatalogSettingsItem.itemType,
+                    owner: { id: request.characterId, type: OwnerType.CharacterPlayer },
+                    itemDatas: {},
+                    itemStatistics: {},
+                    removeStatus: { tsRemove: 0, reason: "" },
+                    segments: [],
+                    customDatas: {},
+                    tsCreate: currentMilliseconds,
+                    displayName: request.displayName,
+                    displayNameNormalize: DisplayNameUtility.normalizeString(request.displayName),
+                    avatar: { type: 0, value: "0" },
+                    tags: {},
+                },
+                secretInfo.getGameId(),
+                session,
+            );
 
-		operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+            characterPlayer.setPlayerInventory(itemId, request.catalogId, request.classId);
+            await characterPlayer.saveAsync(session);
 
-		await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, secretInfo, operationRequest, operationResponse);
+            await session.commitTransaction();
+        } catch (err) {
+            await session.abortTransaction();
 
-		return operationResponse;
-	}
+            Debug.logError(err);
+
+            throw err;
+        } finally {
+            await session.endSession();
+        }
+
+        // Stores the GearN player inventories value used in the current execution flow.
+        let gnPlayerInventories = new GNArray();
+
+        // Stores the GearN player inventory value used in the current execution flow.
+        let gnPlayerInventory = new GNHashtable();
+
+        gnPlayerInventory.add(ParameterCode.ItemId, itemId);
+        gnPlayerInventory.add(ParameterCode.CatalogId, request.catalogId);
+        gnPlayerInventory.add(ParameterCode.ClassId, request.classId);
+
+        gnPlayerInventories.add(gnPlayerInventory);
+
+        // Stores the GearN info response parameters value used in the current execution flow.
+        let gnInfoResponseParameters = new GNHashtable();
+        gnInfoResponseParameters.add(ParameterCode.PlayerInventories, gnPlayerInventories);
+
+        operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("characterPlayer_CreatePlayerItem", request, role, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
+    }
 }

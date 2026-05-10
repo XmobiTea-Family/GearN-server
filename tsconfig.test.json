@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "module": "CommonJS",
+        "declaration": false,
+        "rootDir": ".",
+        "outDir": ".test-dist",
+        "types": ["node"]
+    },
+    "include": ["src/**/*.ts", "test/**/*.ts"],
+    "exclude": ["node_modules", "dist", ".test-dist", "src/GN-startup/cloudScript"]
+}

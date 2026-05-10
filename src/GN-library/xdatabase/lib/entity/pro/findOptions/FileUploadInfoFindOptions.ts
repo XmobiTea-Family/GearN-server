@@ -1,16 +1,20 @@
+/**
+ * Projection options for querying UploadFileInfo from MongoDB.
+ * Set a flag to `true` to include the corresponding field; useful to avoid loading the whole document when only a few fields are required.
+ */
 export interface FileUploadInfoFindOptions {
-    // Indicates whether file ID.
-    fileId?: boolean,
-    // Indicates whether file name.
-    fileName?: boolean,
-    // Indicates whether timestamp create.
-    tsCreate?: boolean,
-    // Indicates whether timestamp upload expire.
-    tsUploadExpire?: boolean,
-    // Indicates whether remove status.
-    removeStatus?: boolean,
-    // Indicates whether game ID.
-    gameId?: boolean,
-    // Indicates whether file upload.
-    fileUpload?: boolean,
+    /** Whether to include the fileId. */
+    fileId?: boolean;
+    /** Whether to include the fileName (user-supplied). */
+    fileName?: boolean;
+    /** Whether to include the upload-record creation timestamp. */
+    tsCreate?: boolean;
+    /** Whether to include the upload deadline (`tsUploadExpire`). */
+    tsUploadExpire?: boolean;
+    /** Whether to include the soft-delete state (`removeStatus`). */
+    removeStatus?: boolean;
+    /** Whether to include the `gameId` (which game the file belongs to). */
+    gameId?: boolean;
+    /** Whether to include the actual uploaded-file information (`fileUpload`). */
+    fileUpload?: boolean;
 }

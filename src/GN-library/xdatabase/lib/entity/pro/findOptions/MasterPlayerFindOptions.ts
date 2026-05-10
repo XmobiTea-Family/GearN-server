@@ -1,38 +1,42 @@
+/**
+ * Projection options for querying MasterPlayer (the system-wide player) from MongoDB.
+ * Lets callers load only the basic profile, or the full external/email/push surface as needed.
+ */
 export interface MasterPlayerFindOptions {
-	// Indicates whether r ID should be used.
-	userId?: boolean,
-	// Indicates whether last IP detail.
-	lastIPDetail?: boolean,
-	// Indicates whether external.
-	external?: boolean,
-	// Indicates whether segments.
-	segments?: boolean,
-	// Indicates whether custom datas.
-	customDatas?: boolean,
-	// Indicates whether display name.
-	displayName?: boolean,
-	// Indicates whether avatar.
-	avatar?: boolean,
-	// Indicates whether timestamp create.
-	tsCreate?: boolean,
-	// Indicates whether tags.
-	tags?: boolean,
-	// Indicates whether player ban.
-	playerBan?: boolean,
-	// Indicates whether player currencies.
-	playerCurrencies?: boolean,
-	// Indicates whether player statistics.
-	playerStatistics?: boolean,
-	// Indicates whether player datas.
-	playerDatas?: boolean,
-	// Indicates whether IP address create.
-	ipAddressCreate?: boolean,
-	// Indicates whether country code.
-	countryCode?: boolean,
-	// Indicates whether timestamp last login.
-	tsLastLogin?: boolean,
-	// Indicates whether email.
-	email?: boolean,
-	// Indicates whether push notifications.
-	pushNotifications?: boolean,
+    /** Whether to include the master userId. */
+    userId?: boolean;
+    /** Whether to include the most-recent login IP/region (`lastIPDetail`). */
+    lastIPDetail?: boolean;
+    /** Whether to include the external identity sources (device, social, account). */
+    external?: boolean;
+    /** Whether to include the segments array (cohort labels). */
+    segments?: boolean;
+    /** Whether to include the custom datas. */
+    customDatas?: boolean;
+    /** Whether to include the display name. */
+    displayName?: boolean;
+    /** Whether to include the avatar. */
+    avatar?: boolean;
+    /** Whether to include the account creation timestamp. */
+    tsCreate?: boolean;
+    /** Whether to include the tags map. */
+    tags?: boolean;
+    /** Whether to include the active ban (`playerBan`). */
+    playerBan?: boolean;
+    /** Whether to include the player currency map. */
+    playerCurrencies?: boolean;
+    /** Whether to include the player statistics map. */
+    playerStatistics?: boolean;
+    /** Whether to include the player-scoped custom data list (`playerDatas`). */
+    playerDatas?: boolean;
+    /** Whether to include the IP captured at account creation. */
+    ipAddressCreate?: boolean;
+    /** Whether to include the country code derived from the account-creation IP. */
+    countryCode?: boolean;
+    /** Whether to include the most-recent login timestamp. */
+    tsLastLogin?: boolean;
+    /** Whether to include the contact email. */
+    email?: boolean;
+    /** Whether to include the push-notification device list. */
+    pushNotifications?: boolean;
 }

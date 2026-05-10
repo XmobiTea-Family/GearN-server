@@ -62,7 +62,7 @@ Contains internal infrastructure primitives:
 
 ### HTTP
 
-1. `HttpAppHandler` exposes `/api/json/...` and `/api/msgpack/...`.
+1. `HttpAppHandler` exposes `/api/rJson/...` and `/api/rMsgPack/...`.
 2. `ApiMiddleware` resolves IP, verifies auth token, and attaches custom request data.
 3. `AntiDdosMiddleware` applies rate limiting, payload checks, and pending-request tracking.
 4. The route builds a `Request` object with request type, role, operation code, IP, parameters, auth info, and secret info.

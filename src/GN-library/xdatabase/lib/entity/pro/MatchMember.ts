@@ -1,10 +1,14 @@
 import { DataValueType } from "./type/DataValueType";
 
+/**
+ * Member assigned to a specific Match after matchmaking has resolved.
+ * Distinct from MatchmakingTicketMember (still queueing) — this member's team is final and the match has started.
+ */
 export interface MatchMember {
-    // Stores the team ID value used by this contract.
+    /** Team id assigned to the member by the matchmaking server's balancing algorithm. */
     teamId: string;
-    // Indicates whether r ID should be used.
+    /** Player id participating in the match; used to authenticate the client connection to the match. */
     userId: string;
-    // Stores the attribute collection used by this contract.
+    /** Extra member attributes (rank, role, skill...) consumed by gameplay/match-server logic. */
     attribute: Map<string, DataValueType>;
 }
