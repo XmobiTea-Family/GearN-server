@@ -1,8 +1,9 @@
 # CLOUDSCRIPT USAGE
 
-Sử dụng CloudScript để viết các đoạn cần server authorize
+Sử dụng script trong CloudScript để viết các đoạn cần server authorize
+- script chỉ sử dụng ngôn ngữ `typescript`, không thể sử dụng bất kỳ ngôn ngữ nào khác
 
-- chẳng hạn tính năng đổi tên cho một gamePlayer cần tốn 50 gem, nhưng hàm gốc của đổi tên không trừ 50 gem, chúng ta có thể sử dụng cloudScript như sau:
+- ví dụ về tính năng đổi tên cho một gamePlayer cần tốn 50 gem, nhưng hàm gốc của đổi tên không trừ 50 gem, chúng ta có thể sử dụng cloudScript như sau:
 
 ```ts
 const GEM_COST_CHANGE_NAME = 50;
@@ -142,7 +143,7 @@ Kết luận: script hợp lệ không phải file TypeScript hoàn chỉnh. Nó
 - Khi pin version để execute, `version` phải đúng 7 ký tự.
 - Nếu không truyền `version`, runtime hiện tại sẽ dùng version đang `isLive`.
 - `args` là `functionParameters` từ request execute.
-- `context` có `userId` và `customTags`.
+- `context.userId` là `string` đã authenticate, luôn tồn tại — KHÔNG cần check `typeof` hay `length`. `context.customTags` là optional (`Record<string, any> | undefined`), tuỳ client có gắn hay không.
 - `log` là tham số thứ 3 của handler, không phải global logger và không phải `console.log`.
 - Không bắt buộc gọi `log` trong mỗi function. Chỉ dùng khi cần debug số liệu, trace luồng đi, hoặc kiểm tra payload tạm thời.
 - Gọi `log(value)` chỉ để append debug log cho lần execute hiện tại. Runtime sẽ lưu `JSON.stringify(value)` vào `logs` và trả về client qua `functionLogs`.
@@ -270,12 +271,12 @@ Source cần đọc khi cần verify:
 
 ## 5. Chọn helper nào
 
-- `http`: dùng khi cần gọi REST API hoặc webhook bên ngoài. Docs: [docs/cloudScript/CLOUDSCRIPT_http.md](/docs/cloudScript/CLOUDSCRIPT_http.md)
-- `socket`: dùng khi cần realtime event cho user online hoặc room. Docs: [docs/cloudScript/CLOUDSCRIPT_socket.md](/docs/cloudScript/CLOUDSCRIPT_socket.md)
-- `mail`: dùng khi cần gửi email qua mail service của server. Docs: [docs/cloudScript/CLOUDSCRIPT_mail.md](/docs/cloudScript/CLOUDSCRIPT_mail.md)
-- `pushNotification`: dùng khi cần gửi push tới token hoặc topic. Docs: [docs/cloudScript/CLOUDSCRIPT_pushNotification.md](/docs/cloudScript/CLOUDSCRIPT_pushNotification.md)
-- `admin`: dùng khi behavior đã tồn tại trong official GearN admin API. Ưu tiên `admin` trước `database` nếu business rule đã có sẵn. Docs: [docs/cloudScript/CLOUDSCRIPT_admin.md](/docs/cloudScript/CLOUDSCRIPT_admin.md)
-- `database`: dùng khi cần đọc hoặc ghi MongoDB nội bộ của GearN, hoặc cần helper domain của `xDatabase`. Docs: [docs/cloudScript/CLOUDSCRIPT_database.md](/docs/cloudScript/CLOUDSCRIPT_database.md)
+- `http`: dùng khi cần gọi REST API hoặc webhook bên ngoài. Docs: [CLOUDSCRIPT_http.md](/docs/cloudScript/CLOUDSCRIPT_http.md)
+- `socket`: dùng khi cần realtime event cho user online hoặc room. Docs: [CLOUDSCRIPT_socket.md](/docs/cloudScript/CLOUDSCRIPT_socket.md)
+- `mail`: dùng khi cần gửi email qua mail service của server. Docs: [CLOUDSCRIPT_mail.md](/docs/cloudScript/CLOUDSCRIPT_mail.md)
+- `pushNotification`: dùng khi cần gửi push tới token hoặc topic. Docs: [CLOUDSCRIPT_pushNotification.md](/docs/cloudScript/CLOUDSCRIPT_pushNotification.md)
+- `admin`: dùng khi behavior đã tồn tại trong official GearN admin API. Ưu tiên `admin` trước `database` nếu business rule đã có sẵn. Docs: [CLOUDSCRIPT_admin.md](/docs/cloudScript/CLOUDSCRIPT_admin.md)
+- `database`: dùng khi cần đọc hoặc ghi MongoDB nội bộ của GearN, hoặc cần helper domain của `xDatabase`. Docs: [CLOUDSCRIPT_database.md](/docs/cloudScript/CLOUDSCRIPT_database.md)
 
 Rule chọn nhanh:
 
@@ -418,3 +419,4 @@ Case này sẽ chạy vào version đang `isLive`, không phải version mới n
 5. [docs/cloudScript/CLOUDSCRIPT_mail.md](/docs/cloudScript/CLOUDSCRIPT_mail.md) nếu gửi email
 6. [docs/cloudScript/CLOUDSCRIPT_pushNotification.md](/docs/cloudScript/CLOUDSCRIPT_pushNotification.md) nếu gửi push
 7. [docs/cloudScript/CLOUDSCRIPT_database.md](/docs/cloudScript/CLOUDSCRIPT_database.md) nếu đụng dữ liệu nội bộ
+8. [docs/cloudScript/CLOUDSCRIPT_security_policy.md](/docs/cloudScript/CLOUDSCRIPT_security_policy.md) khi script bị reject (xem error line/column để debug)

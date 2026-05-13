@@ -36,7 +36,7 @@ Wrapper `pushNotification` đang expose:
 <!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
-| `send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.pushNotification.send(token, title, body, badge?, sound?, icon?, data?)` |
+| `send(token: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.send(token, title, body, badge?, sound?, icon?, data?)` |
 | `sendToMore(tokens: string[], title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.sendToMore(tokens, title, body, badge?, sound?, icon?, data?)` |
 | `sendToTopic(topic: string, title: string, body: string, badge?: number, sound?: string, icon?: string, data?: { [k: string]: any }): Promise<void>` | `pushNotification.sendToTopic(topic, title, body, badge?, sound?, icon?, data?)` |
 | `subscribeToTopic(tokens: string[], topic: string): Promise<void>` | `pushNotification.subscribeToTopic(tokens, topic)` |
@@ -44,10 +44,8 @@ Wrapper `pushNotification` đang expose:
 
 ## 5. Lưu ý thực tế
 
-- Đây là server-side bridge, không phải SDK push chạy trực tiếp trong cloud script.
-- Không nên return toàn bộ token ra ngoài nếu không cần.
-- Dữ liệu `data` nên là object JSON gọn.
-- Nếu cần trace business, tự ghi log vào DB.
+- Đây là server-side bridge — cần setup `pushNotificationSettings` trong GearN Dashboard trước.
+- `data` nên là object JSON gọn. Không return toàn bộ token ra ngoài nếu không cần.
 
 ## 6. Ví dụ cơ bản
 
