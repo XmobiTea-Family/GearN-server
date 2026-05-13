@@ -70,10 +70,6 @@ export class InfoRequestParam {
     @BooleanDataMember({ code: ParameterCode.PlayerFriends, isOptional: true, defaultValue: false })
     public playerFriends?: boolean;
 
-    // Indicates whether player online status.
-    @BooleanDataMember({ code: ParameterCode.OnlineStatus, isOptional: true, defaultValue: false })
-    public onlineStatus?: boolean;
-
     // Stores the player data keys value used by this instance.
     @GNArrayDataMember({ code: ParameterCode.PlayerDataKeys, isOptional: true, elementCls: String })
     public playerDataKeys?: Array<string>;

@@ -271,7 +271,6 @@ export class GetPlayerInformationRequestHandler extends GamePlayerBaseRequestHan
                 {
                     _id: undefined,
                     userId: request.userId,
-                    socketId: "",
                     playerCharacters: [],
                     playerInventories: [],
                     playerGroups: [],

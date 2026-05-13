@@ -22,7 +22,7 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
      * @returns Returns the operation result.
      */
     private isGetAll(infoRequestParam: InfoRequestParam): boolean {
-        return infoRequestParam.external && infoRequestParam.segments && infoRequestParam.customDatas && infoRequestParam.displayName && infoRequestParam.avatar && infoRequestParam.tsCreate && infoRequestParam.tags && infoRequestParam.playerBan && infoRequestParam.playerDatas && infoRequestParam.playerCurrencies && infoRequestParam.playerStatistics && infoRequestParam.tsLastLogin && infoRequestParam.ipAddressCreate && infoRequestParam.countryCode && infoRequestParam.email && infoRequestParam.pushNotifications;
+        return infoRequestParam.external && infoRequestParam.segments && infoRequestParam.customDatas && infoRequestParam.displayName && infoRequestParam.avatar && infoRequestParam.tsCreate && infoRequestParam.tags && infoRequestParam.playerBan && infoRequestParam.playerDatas && infoRequestParam.playerCurrencies && infoRequestParam.playerStatistics && (infoRequestParam.tsLastLogin || infoRequestParam.onlineStatus) && infoRequestParam.ipAddressCreate && infoRequestParam.countryCode && infoRequestParam.email && infoRequestParam.pushNotifications;
     }
 
     /**
@@ -53,6 +53,10 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (infoRequestParam.countryCode) answer.countryCode = infoRequestParam.countryCode;
         if (infoRequestParam.email) answer.email = infoRequestParam.email;
         if (infoRequestParam.pushNotifications) answer.pushNotifications = infoRequestParam.pushNotifications;
+        if (infoRequestParam.onlineStatus) {
+            answer.tsLastLogin = infoRequestParam.onlineStatus;
+            answer.socketId = infoRequestParam.onlineStatus;
+        }
 
         return answer;
     }
@@ -126,6 +130,10 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (!secretInfo.getPermission().masterPlayer.getPushNotification.selfEnable) {
             infoRequestParam.pushNotifications = false;
         }
+
+        if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.selfEnable) {
+            infoRequestParam.onlineStatus = false;
+        }
     }
 
     /**
@@ -196,6 +204,10 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
 
         if (!secretInfo.getPermission().masterPlayer.getPushNotification.otherSelfEnable) {
             infoRequestParam.pushNotifications = false;
+        }
+
+        if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.otherSelfEnable) {
+            infoRequestParam.onlineStatus = false;
         }
     }
 
@@ -268,6 +280,10 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (!secretInfo.getPermission().masterPlayer.getPushNotification.serverSelfEnable) {
             infoRequestParam.pushNotifications = false;
         }
+
+        if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.serverSelfEnable) {
+            infoRequestParam.onlineStatus = false;
+        }
     }
 
     /**
@@ -339,6 +355,10 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (!secretInfo.getPermission().masterPlayer.getPushNotification.adminSelfEnable) {
             infoRequestParam.pushNotifications = false;
         }
+
+        if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.adminSelfEnable) {
+            infoRequestParam.onlineStatus = false;
+        }
     }
 
     /**
@@ -382,6 +402,8 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         if (infoRequestParam.email) answer.add(ParameterCode.Email, this.generateEmail(masterPlayer));
 
         if (infoRequestParam.pushNotifications) answer.add(ParameterCode.PushNotifications, this.generatePushNotifications(masterPlayer));
+
+        if (infoRequestParam.onlineStatus) answer.add(ParameterCode.OnlineStatus, this.generateOnlineStatus(masterPlayer));
 
         return answer;
     }
@@ -808,5 +830,18 @@ export abstract class MasterPlayerBaseRequestHandler extends RequestHandler {
         }
 
         return gnPushNotifications;
+    }
+
+    /**
+     * Executes the generate online status workflow.
+     * @param masterPlayer Provides the master player value used by this operation.
+     * @returns Returns the operation result.
+     */
+    protected generateOnlineStatus(masterPlayer: MasterPlayer): GNHashtable {
+        let gnOnlineStatus = new GNHashtable();
+        gnOnlineStatus.add(ParameterCode.TsLastLogin, masterPlayer.getTsLastLogin());
+        gnOnlineStatus.add(ParameterCode.SocketId, masterPlayer.getSocketId());
+
+        return gnOnlineStatus;
     }
 }

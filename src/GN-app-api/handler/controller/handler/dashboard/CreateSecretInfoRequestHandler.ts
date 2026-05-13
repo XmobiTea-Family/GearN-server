@@ -269,6 +269,8 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getPushNotification: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
                 addPushNotification: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
                 removePushNotification: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
+
+                getOnlineStatus: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
             },
             gamePlayer: {
                 addSegment: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
@@ -322,7 +324,6 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 
                 removePlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
 
-                getOnlineStatus: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
                 createGroup: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
                 createPlayerItem: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
                 createPlayerCharacter: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
@@ -759,6 +760,8 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getPushNotification: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
                 addPushNotification: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
                 removePushNotification: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
+
+                getOnlineStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
             },
             gamePlayer: {
                 addSegment: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
@@ -812,7 +815,6 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 
                 removePlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
 
-                getOnlineStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
                 createGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
                 createPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
                 createPlayerCharacter: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
@@ -1249,6 +1251,8 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getPushNotification: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
                 addPushNotification: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
                 removePushNotification: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
+
+                getOnlineStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
             },
             gamePlayer: {
                 addSegment: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
@@ -1302,7 +1306,6 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 
                 removePlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
 
-                getOnlineStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
                 createGroup: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
                 createPlayerItem: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
                 createPlayerCharacter: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
@@ -1740,6 +1743,8 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getPushNotification: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
                 addPushNotification: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
                 removePushNotification: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
+
+                getOnlineStatus: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false },
             },
             gamePlayer: {
                 addSegment: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
@@ -1793,7 +1798,6 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
 
                 removePlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
 
-                getOnlineStatus: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false },
                 createGroup: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
                 createPlayerItem: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
                 createPlayerCharacter: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },

@@ -1,18 +1,18 @@
-import { OperationRequest } from "./../../../../../GN-common/entity/operationRequest/OperationRequest";
-import { OperationResponse } from "./../../../../../GN-common/entity/operationResponse/OperationResponse";
-import { OperationCode } from "./../../../../../GN-common/constant/OperationCode";
+import { OperationRequest } from "../../../../../GN-common/entity/operationRequest/OperationRequest";
+import { OperationResponse } from "../../../../../GN-common/entity/operationResponse/OperationResponse";
+import { OperationCode } from "../../../../../GN-common/constant/OperationCode";
 
-import { AuthInfo } from "./../../../../../GN-common/entity/AuthInfo";
-import { ParameterCode } from "./../../../../../GN-common/constant/parameterCode/ParameterCode";
-import { ReturnCode } from "./../../../../../GN-common/constant/ReturnCode";
-import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "./../../../../../GN-common/entity/DataMember";
+import { AuthInfo } from "../../../../../GN-common/entity/AuthInfo";
+import { ParameterCode } from "../../../../../GN-common/constant/parameterCode/ParameterCode";
+import { ReturnCode } from "../../../../../GN-common/constant/ReturnCode";
+import { DataMember, BooleanDataMember, NumberDataMember, StringDataMember, GNHashtableDataMember, GNArrayDataMember } from "../../../../../GN-common/entity/DataMember";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
-import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCode";
+import { GNArray, GNHashtable } from "../../../../../GN-common/common/GNData";
+import { ErrorCode } from "../../../../../GN-common/constant/errorCode/ErrorCode";
 
-import { GamePlayerFindOptions } from "./../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/GamePlayerFindOptions";
-import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
-import { GamePlayerBaseRequestHandler } from "./GamePlayerBaseRequestHandler";
+import { MasterPlayerFindOptions } from "../../../../../GN-library/xdatabase/lib/entity/pro/findOptions/MasterPlayerFindOptions";
+import { SecretInfo, SecretRole } from "../../../../../GN-common/entity/SecretInfo";
+import { MasterPlayerBaseRequestHandler } from "../masterPlayer/MasterPlayerBaseRequestHandler";
 
 class GetOnlineStatusOperationRequest extends OperationRequest {
     // Indicates whether r ID should be used.
@@ -55,7 +55,7 @@ class AdminGetOnlineStatusOperationRequest extends ServerGetOnlineStatusOperatio
     }
 }
 
-export class GetOnlineStatusRequestHandler extends GamePlayerBaseRequestHandler {
+export class GetOnlineStatusRequestHandler extends MasterPlayerBaseRequestHandler {
     /**
      * Returns the code.
      */
@@ -86,17 +86,17 @@ export class GetOnlineStatusRequestHandler extends GamePlayerBaseRequestHandler 
         }
 
         if (!request.userId) {
-            if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.selfEnable) {
+            if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.selfEnable) {
                 return this.newOperationNotAllowError(request);
             }
 
             request.userId = authInfo.getUserId();
         } else if (request.userId != authInfo.getUserId()) {
-            if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.otherSelfEnable) {
+            if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.otherSelfEnable) {
                 return this.newOperationNotAllowError(request);
             }
         } else {
-            if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.selfEnable) {
+            if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.selfEnable) {
                 return this.newOperationNotAllowError(request);
             }
         }
@@ -125,7 +125,7 @@ export class GetOnlineStatusRequestHandler extends GamePlayerBaseRequestHandler 
             return this.newInvalidRequestParameters(request);
         }
 
-        if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.serverSelfEnable) {
+        if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.serverSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
@@ -153,7 +153,7 @@ export class GetOnlineStatusRequestHandler extends GamePlayerBaseRequestHandler 
             return this.newInvalidRequestParameters(request);
         }
 
-        if (!secretInfo.getPermission().gamePlayer.getOnlineStatus.adminSelfEnable) {
+        if (!secretInfo.getPermission().masterPlayer.getOnlineStatus.adminSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
@@ -176,7 +176,7 @@ export class GetOnlineStatusRequestHandler extends GamePlayerBaseRequestHandler 
      */
     private async execute(request: { userId: string }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         // Stores the operation response value used in the current execution flow.
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("gamePlayer_GetOnlineStatus", request, role, secretInfo, operationRequest);
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("masterPlayer_GetOnlineStatus", request, role, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
         }
@@ -185,28 +185,28 @@ export class GetOnlineStatusRequestHandler extends GamePlayerBaseRequestHandler 
         operationResponse.setReturnCode(ReturnCode.Ok);
 
         // Stores the game player find options value used in the current execution flow.
-        let gamePlayerFindOptions: GamePlayerFindOptions = {
+        let masterPlayerFindOptions: MasterPlayerFindOptions = {
             socketId: true,
             tsLastLogin: true,
         };
 
         // Stores the game player value used in the current execution flow.
-        let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.userId, secretInfo.getGameId(), gamePlayerFindOptions);
+        let masterPlayer = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayerAsync(request.userId, masterPlayerFindOptions);
 
-        if (gamePlayer == null) {
-            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.GamePlayerNotFound);
+        if (masterPlayer == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.MasterPlayerNotFound);
             return operationResponse;
         }
 
         // Stores the GearN info response parameters value used in the current execution flow.
         let gnInfoResponseParameters = new GNHashtable();
-        gnInfoResponseParameters.add(ParameterCode.OnlineStatus, this.generateOnlineStatus(gamePlayer));
+        gnInfoResponseParameters.add(ParameterCode.OnlineStatus, this.generateOnlineStatus(masterPlayer));
 
         operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("gamePlayer_GetOnlineStatus", request, role, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("masterPlayer_GetOnlineStatus", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
     }

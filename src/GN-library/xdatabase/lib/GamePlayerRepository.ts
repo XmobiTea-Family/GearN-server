@@ -24,7 +24,6 @@ export class GamePlayerRepository extends AbstractBaseRepository {
     public async createGamePlayerAsync(
         rawGamePlayer: mongodb.WithId<mongodb.Document> & {
             userId: string;
-            socketId: string;
             playerCharacters: CharacterItem[];
             playerInventories: InventoryItem[];
             playerGroups: GroupItem[];
@@ -433,13 +432,6 @@ export class GamePlayerRepository extends AbstractBaseRepository {
         return await collection.countDocuments($filter);
     }
 
-    public async removeGamePlayerSocketId(userId: string, gameId: string): Promise<void> {
-        // Stores the collection value used in the current execution flow.
-        let collection = this.systemGameCollection("GamePlayer", gameId);
-
-        await collection.updateOne({ userId: userId }, { $set: { socketId: "" } });
-    }
-
     /**
      * Executes the insert game player statistics logs async workflow asynchronously.
      * @param requests Provides the requests value used by this operation.
@@ -519,7 +511,6 @@ export class GamePlayerRepository extends AbstractBaseRepository {
         let answer: { [k: string]: boolean } = {};
 
         if (findOptions.userId) answer["userId"] = true;
-        if (findOptions.socketId) answer["socketId"] = true;
         if (findOptions.segments) answer["segments"] = true;
         if (findOptions.customDatas) answer["customDatas"] = true;
         if (findOptions.displayName) answer["displayName"] = true;

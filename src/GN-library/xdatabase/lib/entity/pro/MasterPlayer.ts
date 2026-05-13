@@ -14,6 +14,8 @@ export class MasterPlayer extends PlayerBase {
     private static readonly _external: string = "external";
     /** MongoDB field name for the master userId — the system-wide player identifier. */
     private static readonly _userId: string = "userId";
+    /** MongoDB field name for socketId — the player's current socket connection identifier. */
+    private static readonly _socketId: string = "socketId";
     /** MongoDB field name for the primary contact email. */
     private static readonly _email: string = "email";
     /** MongoDB field name for the IP/region details of the most recent login. */
@@ -23,6 +25,10 @@ export class MasterPlayer extends PlayerBase {
 
     /** Master id of the player; used as the foreign key by every GamePlayer that belongs to the same user. */
     private readonly userId: string;
+
+    /** Player's current socket connection id; empty when offline; changes on each reconnect. */
+    private socketId: string;
+
     /** Set of authentication methods the player has linked (device id, account, Google, Facebook, Apple...). */
     private external: ExternalItem;
     /** Player's contact email; used for password recovery and notifications. */
@@ -49,6 +55,7 @@ export class MasterPlayer extends PlayerBase {
      * @param result Provides the result value used by this operation.
      */
     private setDocumentMasterPlayer(result: mongodb.WithId<mongodb.Document>) {
+        this.socketId = result[MasterPlayer._socketId];
         this.external = result[MasterPlayer._external];
 
         if (result[MasterPlayer._external] != null) {
@@ -197,5 +204,23 @@ export class MasterPlayer extends PlayerBase {
         }
 
         throw Error("can not found the push id to remove");
+    }
+
+    /**
+     * Returns the socket ID.
+     * @returns Returns the socket ID.
+     */
+    public getSocketId(): string {
+        return this.socketId;
+    }
+
+    /**
+     * Sets the socket ID.
+     * @param socketId Provides the socket ID value used by this operation.
+     */
+    public setSocketId(socketId: string): void {
+        this.socketId = socketId;
+
+        this.set(MasterPlayer._socketId, this.socketId);
     }
 }

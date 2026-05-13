@@ -106,6 +106,7 @@ import { SendPushNotificationRequestHandler as MasterPlayer_SendPushNotification
 import { AddPushNotificationRequestHandler as MasterPlayer_AddPushNotificationRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/AddPushNotificationRequestHandler";
 import { RemovePushNotificationRequestHandler as MasterPlayer_RemovePushNotificationRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/RemovePushNotificationRequestHandler";
 import { GetPushNotificationRequestHandler as MasterPlayer_GetPushNotificationRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetPushNotificationRequestHandler";
+import { GetOnlineStatusRequestHandler as MasterPlayer_GetOnlineStatusRequestHandler } from "./GN-app-api/handler/controller/handler/masterPlayer/GetOnlineStatusRequestHandler";
 
 import { AddSegmentRequestHandler as CharacterPlayer_AddSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/AddSegmentRequestHandler";
 import { RemoveSegmentRequestHandler as CharacterPlayer_RemoveSegmentRequestHandler } from "./GN-app-api/handler/controller/handler/characterPlayer/RemoveSegmentRequestHandler";
@@ -196,7 +197,6 @@ import { GetPlayerInventoryRequestHandler as GamePlayer_GetPlayerInventoryReques
 import { GetPlayerGroupRequestHandler as GamePlayer_GetPlayerGroupRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetPlayerGroupRequestHandler";
 import { GetPlayerFriendRequestHandler as GamePlayer_GetPlayerFriendRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetPlayerFriendRequestHandler";
 import { RemovePlayerItemRequestHandler as GamePlayer_RemovePlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/RemovePlayerItemRequestHandler";
-import { GetOnlineStatusRequestHandler as GamePlayer_GetOnlineStatusRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/GetOnlineStatusRequestHandler";
 import { CreateGroupRequestHandler as GamePlayer_CreateGroupRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/CreateGroupRequestHandler";
 import { CreatePlayerItemRequestHandler as GamePlayer_CreatePlayerItemRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/CreatePlayerItemRequestHandler";
 import { CreatePlayerCharacterRequestHandler as GamePlayer_CreatePlayerCharacterRequestHandler } from "./GN-app-api/handler/controller/handler/gamePlayer/CreatePlayerCharacterRequestHandler";
@@ -479,6 +479,7 @@ export class RequestControllerUtils {
             requestController.addHandler(requestTypeValue, new MasterPlayer_AddPushNotificationRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new MasterPlayer_RemovePushNotificationRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new MasterPlayer_GetPushNotificationRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new MasterPlayer_GetOnlineStatusRequestHandler(gnServer), true);
         }
 
         {
@@ -579,7 +580,6 @@ export class RequestControllerUtils {
             requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerGroupRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new GamePlayer_GetPlayerFriendRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new GamePlayer_RemovePlayerItemRequestHandler(gnServer), true);
-            requestController.addHandler(requestTypeValue, new GamePlayer_GetOnlineStatusRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new GamePlayer_CreateGroupRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerItemRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new GamePlayer_CreatePlayerCharacterRequestHandler(gnServer), true);

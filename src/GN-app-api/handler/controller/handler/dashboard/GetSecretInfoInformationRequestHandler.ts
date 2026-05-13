@@ -1596,6 +1596,20 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
                 gnMasterPlayer.add(ParameterCode.GetPushNotification, gnPermissionRules);
             }
 
+            {
+                // Stores the permission rules value used in the current execution flow.
+                let permissionRules = masterPlayer.getOnlineStatus;
+                // Stores the GearN permission rules value used in the current execution flow.
+                let gnPermissionRules = new GNHashtable();
+
+                gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
+                gnPermissionRules.add(ParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
+                gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
+                gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
+
+                gnMasterPlayer.add(ParameterCode.GetOnlineStatus, gnPermissionRules);
+            }
+
             gnPermission.add(ParameterCode.MasterPlayer, gnMasterPlayer);
         }
 
@@ -2093,20 +2107,6 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
                 gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
                 gnGamePlayer.add(ParameterCode.RemovePlayerItem, gnPermissionRules);
-            }
-
-            {
-                // Stores the permission rules value used in the current execution flow.
-                let permissionRules = gamePlayer.getOnlineStatus;
-                // Stores the GearN permission rules value used in the current execution flow.
-                let gnPermissionRules = new GNHashtable();
-
-                gnPermissionRules.add(ParameterCode.SelfEnable, permissionRules.selfEnable);
-                gnPermissionRules.add(ParameterCode.OtherSelfEnable, permissionRules.otherSelfEnable);
-                gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
-                gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
-
-                gnGamePlayer.add(ParameterCode.GetOnlineStatus, gnPermissionRules);
             }
 
             {

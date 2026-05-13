@@ -143,10 +143,6 @@ export class GamePlayerPermissionRulesParam {
     @GNHashtableDataMember({ code: ParameterCode.RemovePlayerItem, isOptional: true })
     public removePlayerItem?: PermissionRulesParam;
 
-    // Stores the get online status value used by this instance.
-    @GNHashtableDataMember({ code: ParameterCode.GetOnlineStatus, isOptional: true })
-    public getOnlineStatus?: PermissionRulesParam;
-
     // Stores the create group value used by this instance.
     @GNHashtableDataMember({ code: ParameterCode.CreateGroup, isOptional: true })
     public createGroup?: PermissionRulesParam;

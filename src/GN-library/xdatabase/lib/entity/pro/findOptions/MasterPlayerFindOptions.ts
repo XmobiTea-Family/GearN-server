@@ -5,6 +5,8 @@
 export interface MasterPlayerFindOptions {
     /** Whether to include the master userId. */
     userId?: boolean;
+    /** Whether to include the socketId (current real-time connection). */
+    socketId?: boolean;
     /** Whether to include the most-recent login IP/region (`lastIPDetail`). */
     lastIPDetail?: boolean;
     /** Whether to include the external identity sources (device, social, account). */

@@ -781,11 +781,6 @@
                 "hasEdit": false
             },
             {
-                "eventName": "gamePlayer_GetOnlineStatus",
-                "script": "\npreHandlers.gamePlayer_GetOnlineStatus = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetOnlineStatus = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
                 "eventName": "gamePlayer_GetPlayerBan",
                 "script": "\npreHandlers.gamePlayer_GetPlayerBan = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.gamePlayer_GetPlayerBan = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -1422,6 +1417,11 @@
             {
                 "eventName": "masterPlayer_GetLastLoginLeaderboard",
                 "script": "\npreHandlers.masterPlayer_GetLastLoginLeaderboard = async (request: { skip: number; limit: number; infoRequestParam: masterPlayer_InfoRequestParam; loadFromCache: boolean }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_GetLastLoginLeaderboard = async (request: { skip: number; limit: number; infoRequestParam: masterPlayer_InfoRequestParam; loadFromCache: boolean }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
+                "eventName": "masterPlayer_GetOnlineStatus",
+                "script": "\npreHandlers.masterPlayer_GetOnlineStatus = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers.masterPlayer_GetOnlineStatus = async (request: { userId: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

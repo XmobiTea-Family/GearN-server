@@ -906,10 +906,7 @@ export class GNServer {
                     userId: authInfo.getUserId(),
                 });
 
-                let secretInfo: SecretInfo = socket.data.secretInfo;
-                if (secretInfo) {
-                    this.getDatabase().gamePlayerRepository.removeGamePlayerSocketId(authInfo.getUserId(), secretInfo.getGameId());
-                }
+                this.getDatabase().masterPlayerRepository.removeMasterPlayerSocketId(authInfo.getUserId());
             }
         }
 
@@ -931,6 +928,8 @@ export class GNServer {
                 socketId: socket.id,
                 userId: userId,
             });
+
+            this.getDatabase().masterPlayerRepository.setMasterPlayerSocketId(userId, socket.id);
 
             let secretInfo: SecretInfo = socket.data.secretInfo;
             if (secretInfo) {
@@ -965,12 +964,6 @@ export class GNServer {
                                         break;
                                     }
                                 }
-                            }
-
-                            if (socket != null && socket.connected) {
-                                gamePlayer.setSocketId(socket.id);
-
-                                await gamePlayer.saveAsync();
                             }
                         }
                     });

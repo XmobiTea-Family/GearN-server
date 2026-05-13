@@ -9,14 +9,9 @@ import { GamePlayerBase } from "./GamePlayerBase";
 export class GamePlayer extends GamePlayerBase {
     /** MongoDB field name for userId — the link to the system-wide MasterPlayer. */
     private static readonly _userId: string = "userId";
-    /** MongoDB field name for socketId — the player's current socket connection identifier. */
-    private static readonly _socketId: string = "socketId";
 
     /** Player id inside this game; equal to MasterPlayer's `userId`; immutable after creation. */
     private readonly userId: string;
-
-    /** Player's current socket connection id; empty when offline; changes on each reconnect. */
-    private socketId: string;
 
     /**
      * Initializes a new game player instance.
@@ -35,7 +30,6 @@ export class GamePlayer extends GamePlayerBase {
      * @param result Provides the result value used by this operation.
      */
     private setDocumentGamePlayer(result: mongodb.WithId<mongodb.Document>) {
-        this.socketId = result[GamePlayer._socketId];
         // this.playerPushs = result[GamePlayer._playerPushs];
     }
 
@@ -45,23 +39,5 @@ export class GamePlayer extends GamePlayerBase {
      */
     public getUserId(): string {
         return this.userId;
-    }
-
-    /**
-     * Returns the socket ID.
-     * @returns Returns the socket ID.
-     */
-    public getSocketId(): string {
-        return this.socketId;
-    }
-
-    /**
-     * Sets the socket ID.
-     * @param socketId Provides the socket ID value used by this operation.
-     */
-    public setSocketId(socketId: string): void {
-        this.socketId = socketId;
-
-        this.set(GamePlayer._socketId, this.socketId);
     }
 }

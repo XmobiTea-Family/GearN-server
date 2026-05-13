@@ -5,8 +5,6 @@
 export interface GamePlayerFindOptions {
     /** Whether to include the userId (player id within the game). */
     userId?: boolean;
-    /** Whether to include the socketId (current real-time connection). */
-    socketId?: boolean;
     /** Whether to include the segments array. */
     segments?: boolean;
     /** Whether to include the custom datas (DataObjectBase-level). */

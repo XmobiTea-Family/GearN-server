@@ -375,6 +375,8 @@ export interface SecretPermissionItem {
         addPushNotification: MasterPlayerPermissionRules;
         // Stores the remove push notification value used by this contract.
         removePushNotification: MasterPlayerPermissionRules;
+        // Stores the get online status value used by this contract.
+        getOnlineStatus: MasterPlayerPermissionRules;
     };
     // Stores the game player value used by this contract.
     gamePlayer: {
@@ -464,8 +466,6 @@ export interface SecretPermissionItem {
         // Stores the remove player item value used by this contract.
         removePlayerItem: GamePlayerPermissionRules;
 
-        // Stores the get online status value used by this contract.
-        getOnlineStatus: GamePlayerPermissionRules;
         // Stores the create group value used by this contract.
         createGroup: GamePlayerPermissionRules;
         // Stores the create player item value used by this contract.

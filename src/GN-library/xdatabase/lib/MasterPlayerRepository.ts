@@ -22,6 +22,7 @@ export class MasterPlayerRepository extends AbstractBaseRepository {
     public async createMasterPlayerAsync(
         rawMasterPlayer: mongodb.WithId<mongodb.Document> & {
             userId: string;
+            socketId: string,
             external: ExternalItem;
             segments: string[];
             customDatas: Record<string, DataValueType>;
@@ -989,6 +990,7 @@ export class MasterPlayerRepository extends AbstractBaseRepository {
         let answer: { [k: string]: boolean } = {};
 
         if (findOptions.userId) answer["userId"] = true;
+        if (findOptions.socketId) answer["socketId"] = true;
         if (findOptions.lastIPDetail) answer["lastIPDetail"] = true;
         if (findOptions.external) answer["external"] = true;
         if (findOptions.segments) answer["segments"] = true;
@@ -1009,4 +1011,19 @@ export class MasterPlayerRepository extends AbstractBaseRepository {
 
         return answer;
     }
+
+    public async setMasterPlayerSocketId(userId: string, socketId: string): Promise<void> {
+        // Stores the collection value used in the current execution flow.
+        let collection = this.systemCollection("MasterPlayer");
+
+        await collection.updateOne({ userId: userId }, { $set: { socketId: socketId } });
+    }
+
+    public async removeMasterPlayerSocketId(userId: string): Promise<void> {
+        // Stores the collection value used in the current execution flow.
+        let collection = this.systemCollection("MasterPlayer");
+
+        await collection.updateOne({ userId: userId }, { $set: { socketId: "" } });
+    }
+
 }

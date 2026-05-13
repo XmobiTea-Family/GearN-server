@@ -346,4 +346,8 @@ export class MasterPlayerPermissionRulesParam {
     // Stores the get push notification value used by this instance.
     @GNHashtableDataMember({ code: ParameterCode.GetPushNotification, isOptional: true })
     public getPushNotification?: PermissionRulesParam;
+
+    // Stores the get online status value used by this instance.
+    @GNHashtableDataMember({ code: ParameterCode.GetOnlineStatus, isOptional: true })
+    public getOnlineStatus?: PermissionRulesParam;
 }

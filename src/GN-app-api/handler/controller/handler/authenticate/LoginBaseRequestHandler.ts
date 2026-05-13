@@ -669,6 +669,7 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
         // Stores the answer value used in the current execution flow.
         let answer: mongodb.WithId<mongodb.Document> & {
             userId: string;
+            socketId: string,
             external: ExternalItem;
             segments: string[];
             customDatas: Record<string, DataValueType>;
@@ -690,6 +691,7 @@ export abstract class LoginBaseRequestHandler extends RequestHandler {
         } = {
             _id: undefined,
             userId: StringUtility.generateRandomString(10, this.gnServer.getIdTypeCase()),
+            socketId: "",
             external: {},
             segments: [],
             customDatas: {},
