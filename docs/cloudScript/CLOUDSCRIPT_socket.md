@@ -48,6 +48,9 @@ Wrapper `socket` đang expose:
 - `await` ở đây chỉ chờ event bridge phía server, không phải client ACK.
 - Payload event nên giữ gọn.
 - Dữ liệu event nên là JSON plain hoặc `GNHashtable`.
+- Client phải tự subscribe socket event tương ứng. Xem thêm [docs/reference/EVENTS.md](/docs/reference/EVENTS.md#custom-operationevent).
+- Nếu client parse payload bằng DTO decorator, xem [docs/reference/DATAMEMBER.md](/docs/reference/DATAMEMBER.md).
+- Nếu CloudScript runtime/wrapper của project expose helper dạng `event.send(operationEvent)` hoặc tên tương tự, cách viết event code/payload và cách client lắng nghe vẫn giống `socket.sendEventTo*`: client filter bằng `operationEvent.getEventCode()`.
 
 ## 6. Ví dụ cơ bản
 
@@ -77,7 +80,231 @@ handlers["socketNotifyUser"] = async (args: any, context, log) => {
 };
 ```
 
-## 7. Ví dụ nâng cao
+<a id="socket-operationevent-end-to-end"></a>
+
+### 6.1. Ví dụ end-to-end: server gửi `OperationEvent`, client nhận typed
+
+**Server / CloudScript gửi event**
+
+Ví dụ này tạo event code `cloudScriptRewardGranted` và payload có 4 field: `rewardId`, `amount`, `reason`, `ts`.
+
+```ts
+const EVENT_CLOUDSCRIPT_REWARD_GRANTED = "cloudScriptRewardGranted";
+
+const createRewardGrantedEvent = (rewardId: string, amount: number, reason: string) => {
+    return new OperationEvent(
+        EVENT_CLOUDSCRIPT_REWARD_GRANTED,
+        GNHashtable.builder()
+            .add("rewardId", rewardId)
+            .add("amount", amount)
+            .add("reason", reason)
+            .add("ts", Date.now())
+            .build()
+    );
+};
+
+handlers["grantDailyRewardAndNotify"] = async (args: any, context, log) => {
+    const targetUserId = typeof args?.userId === "string" && args.userId.length > 0 ? args.userId : context.userId;
+
+    // TODO: xử lý business grant reward / ghi DB trước khi notify.
+    const operationEvent = createRewardGrantedEvent("daily-login", 100, "dailyLogin");
+
+    await socket.sendEventTo(targetUserId, operationEvent);
+
+    return {
+        sent: true,
+        targetUserId: targetUserId,
+        eventCode: EVENT_CLOUDSCRIPT_REWARD_GRANTED,
+    };
+};
+```
+
+**Client nhận event bằng `IServerEventHandler`**
+
+Client tạo DTO decorator khớp với key server gửi, rồi parse `OperationEvent.getParameters()` bằng `ConverterService.deserializeObject(...)`. Chi tiết decorator và ví dụ đủ 6 dạng DataMember: [DATAMEMBER.md](/docs/reference/DATAMEMBER.md); rule event custom: [EVENTS.md](/docs/reference/EVENTS.md#custom-operationevent).
+
+```ts
+import {
+    Action1,
+    ConverterService,
+    GNNetwork,
+    IServerEventHandler,
+    NumberDataMember,
+    OperationEvent,
+    ParameterCode,
+    StringDataMember,
+} from "@xmobitea/gearn-typescript-client-sdk";
+
+const EVENT_CLOUDSCRIPT_REWARD_GRANTED = "cloudScriptRewardGranted";
+
+export class CloudScriptRewardGrantedEvent {
+    @StringDataMember({ code: "rewardId" })
+    public rewardId: string;
+
+    @NumberDataMember({ code: ParameterCode.Amount })
+    public amount: number;
+
+    @StringDataMember({ code: ParameterCode.Reason })
+    public reason: string;
+
+    @NumberDataMember({ code: ParameterCode.Ts })
+    public ts: number;
+}
+
+export class CloudScriptRewardGrantedEventHandler implements IServerEventHandler {
+    public static onUpdate: Action1<CloudScriptRewardGrantedEvent>;
+
+    public getEventCode(): string {
+        return EVENT_CLOUDSCRIPT_REWARD_GRANTED;
+    }
+
+    public handle(operationEvent: OperationEvent): void {
+        if (CloudScriptRewardGrantedEventHandler.onUpdate != null) {
+            CloudScriptRewardGrantedEventHandler.onUpdate(
+                ConverterService.deserializeObject(operationEvent.getParameters(), CloudScriptRewardGrantedEvent)
+            );
+        }
+    }
+}
+
+GNNetwork.subscriberServerEventHandler(new CloudScriptRewardGrantedEventHandler());
+
+CloudScriptRewardGrantedEventHandler.onUpdate = (payload) => {
+    console.log("reward granted", payload.rewardId, payload.amount, payload.reason, payload.ts);
+};
+
+// Sau khi login HTTP thành công và đã setup handler:
+GNNetwork.connectSocket();
+```
+
+Điểm bắt buộc phải khớp:
+
+- Server gửi `new OperationEvent("cloudScriptRewardGranted", ...)` thì client `getEventCode()` cũng phải trả `"cloudScriptRewardGranted"`.
+- Server `.add("rewardId", ...)` thì client DTO phải dùng `@StringDataMember({ code: "rewardId" })`.
+- Server `.add("amount", ...)`, `.add("reason", ...)`, `.add("ts", ...)` có thể map bằng `ParameterCode.Amount`, `ParameterCode.Reason`, `ParameterCode.Ts`.
+
+## 7. Client lắng nghe event custom từ CloudScript
+
+CloudScript gửi `OperationEvent("cloudScriptDemo", parameters)` thì client lắng nghe bằng `GNNetwork.setOnEventHandler(...)` và filter đúng `eventCode`.
+
+```ts
+import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
+
+GNNetwork.setOnEventHandler((operationEvent) => {
+    if (operationEvent.getEventCode() !== "cloudScriptDemo") return;
+
+    const p = operationEvent.getParameters();
+    if (p == null) return;
+
+    const message = p.getString("message", "");
+    const sourceUserId = p.getString("sourceUserId", "");
+    const ts = p.getNumber("ts", 0);
+
+    // Update UI/cache. Không block socket loop bằng xử lý nặng ở đây.
+    console.log("cloudScriptDemo", message, sourceUserId, ts);
+});
+
+// Cleanup type-safe khi teardown scene/session
+GNNetwork.setOnEventHandler(() => {});
+```
+
+Nếu app có nhiều module cùng nghe custom event, đừng gọi `setOnEventHandler` ở nhiều nơi vì đây là single-slot callback. Tạo dispatcher riêng hoặc dùng custom `IServerEventHandler` theo hướng dẫn trong [EVENTS.md](/docs/reference/EVENTS.md#custom-operationevent).
+
+### 7.1. Client handler typed giống built-in `On*EventHandler`
+
+Nếu muốn viết chuẩn như `OnCharacterPlayerGroupUpdateEventHandler`, hãy tạo payload DTO có decorator và một handler implement `IServerEventHandler`. `handle()` sẽ parse `OperationEvent.getParameters()` bằng `ConverterService.deserializeObject(...)`; xem [DATAMEMBER.md](/docs/reference/DATAMEMBER.md) để chọn đúng decorator cho từng field.
+
+```ts
+import {
+    Action1,
+    ConverterService,
+    GNNetwork,
+    IServerEventHandler,
+    NumberDataMember,
+    OperationEvent,
+    ParameterCode,
+    StringDataMember,
+} from "@xmobitea/gearn-typescript-client-sdk";
+
+const EVENT_CLOUDSCRIPT_DEMO = "cloudScriptDemo";
+
+export class CloudScriptDemoEvent {
+    @StringDataMember({ code: ParameterCode.Message })
+    public message: string;
+
+    @StringDataMember({ code: "sourceUserId" })
+    public sourceUserId: string;
+
+    @NumberDataMember({ code: ParameterCode.Ts })
+    public ts: number;
+}
+
+export class CloudScriptDemoEventHandler implements IServerEventHandler {
+    public static onUpdate: Action1<CloudScriptDemoEvent>;
+
+    public getEventCode(): string {
+        return EVENT_CLOUDSCRIPT_DEMO;
+    }
+
+    public handle(operationEvent: OperationEvent): void {
+        if (CloudScriptDemoEventHandler.onUpdate != null) {
+            CloudScriptDemoEventHandler.onUpdate(
+                ConverterService.deserializeObject(operationEvent.getParameters(), CloudScriptDemoEvent)
+            );
+        }
+    }
+}
+
+GNNetwork.subscriberServerEventHandler(new CloudScriptDemoEventHandler());
+
+CloudScriptDemoEventHandler.onUpdate = (payload) => {
+    console.log(payload.message, payload.sourceUserId, payload.ts);
+};
+```
+
+Điểm cần khớp:
+
+- `getEventCode()` phải bằng event code CloudScript gửi: `new OperationEvent("cloudScriptDemo", ...)`.
+- Decorator `code` phải bằng key trong payload: `message`, `sourceUserId`, `ts`.
+- Key đã có sẵn trong SDK thì dùng `ParameterCode.*`; key custom như `sourceUserId` dùng string literal.
+- Subscribe handler trước `GNNetwork.connectSocket()`.
+
+## 8. Gửi cùng loại event từ SDK qua `masterPlayer.sendSocketOperationEvent`
+
+Không phải event nào cũng cần CloudScript. Trusted backend hoặc admin tool cũng có thể bắn cùng `eventCode` qua API `masterPlayer.sendSocketOperationEvent`. Client vẫn nghe bằng cùng code ở mục 7.
+
+```ts
+import {
+    ErrorCode,
+    GNHashtable,
+    GNNetwork,
+    MasterPlayerModels,
+    ReturnCode,
+} from "@xmobitea/gearn-typescript-client-sdk";
+
+const request = new MasterPlayerModels.ServerSendSocketOperationEventRequestData();
+request.userId = targetUserId;
+request.eventCode = "cloudScriptDemo";
+request.eventParameters = GNHashtable.builder()
+    .add("message", "Hello from trusted backend")
+    .add("sourceUserId", "server")
+    .add("ts", Date.now())
+    .build();
+
+const res = await GNNetwork.masterPlayer.server.sendSocketOperationEventAsync(request);
+if (res.returnCode !== ReturnCode.Ok) return;
+if (res.errorCode !== ErrorCode.Ok) return;
+```
+
+Route chọn theo nơi code chạy:
+
+- App/player client: `GNNetwork.masterPlayer.sendSocketOperationEventAsync(...)` với `SendSocketOperationEventRequestData`.
+- Trusted backend: `GNNetwork.masterPlayer.server.sendSocketOperationEventAsync(...)` với `ServerSendSocketOperationEventRequestData`.
+- Admin/GM tool: `GNNetwork.masterPlayer.admin.sendSocketOperationEventAsync(...)` với `AdminSendSocketOperationEventRequestData`.
+
+Nếu bị `OperationNotAllow`, check permission `masterPlayer.sendSocketOperationEvent.*Enable` theo route đang dùng.
+
+## 9. Ví dụ nâng cao
 
 ```ts
 const requireString = (value: unknown, fieldName: string): string => {
@@ -157,7 +384,7 @@ handlers["socketRoomWorkflow"] = async (args: any, context, log) => {
 };
 ```
 
-## 8. Kết luận ngắn
+## 10. Kết luận ngắn
 
 Nếu bạn cần realtime cho client đang online, dùng `socket`.
 

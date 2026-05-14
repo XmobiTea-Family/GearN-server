@@ -81,7 +81,7 @@ handlers["changeDisplayName"] = async (args: any, context, log) => {
 phía client dùng như sau:
 
 ```ts
-import { GNNetwork, ReturnCode, ErrorCode, CloudScriptModels, ExecuteResponseStatus } from "@xmobitea/gearn-typescript-client-sdk";
+import { GNNetwork, ErrorCode, CloudScriptModels, ExecuteResponseStatus } from "@xmobitea/gearn-typescript-client-sdk";
 
 async function changeDisplayName(newName: string) {
     const request = new CloudScriptModels.ExecuteFunctionRequestData();
@@ -90,12 +90,18 @@ async function changeDisplayName(newName: string) {
 
     const res = await GNNetwork.cloudScript.executeFunctionAsync(request);
 
-    if (res.returnCode !== ReturnCode.Ok || res.errorCode !== ErrorCode.Ok) {
-        throw new Error("request failed: " + res.errorCode);
+    // Transport-level failure (network, decode, return code).
+    if (res.hasReturnCodeError()) {
+        throw new Error("request failed: " + (res.debugMessage ?? res.toString()));
+    }
+    // Business-level failure on the request envelope.
+    if (res.errorCode !== ErrorCode.Ok) {
+        throw new Error("request failed: errorCode=" + res.errorCode);
     }
 
-    const exec = res.responseData;
+    const exec = res.responseData; // CloudScriptModels.ExecuteFunctionResponseData
 
+    // `exec.status` là `number` trên DTO; so sánh với enum `ExecuteResponseStatus` vẫn hợp lệ vì enum này là numeric.
     if (exec.status !== ExecuteResponseStatus.Ok) {
         // exec.errorMessage chứa message từ throw new Error(...) trong CloudScript
         throw new Error("execute failed: " + exec.errorMessage);
@@ -105,6 +111,14 @@ async function changeDisplayName(newName: string) {
     return exec.functionResult;
 }
 ```
+
+SDK reference cho path phía client:
+
+- Source: [`../../src/runtime/GNNetworkCloudScriptApi.ts`](../../src/runtime/GNNetworkCloudScriptApi.ts) — class `CloudScriptApi` (route client) và `AdminCloudScriptApi`.
+- Guide: [`guides/CLOUDSCRIPT.md`](/docs/guides/CLOUDSCRIPT.md)
+- API reference: [`reference/API_CLOUDSCRIPT.md`](/docs/reference/API_CLOUDSCRIPT.md)
+- DTO reference: [`reference/dto/CLOUDSCRIPT.md`](/docs/reference/dto/CLOUDSCRIPT.md)
+- Error handling: [`reference/ERROR_HANDLING.md`](/docs/reference/ERROR_HANDLING.md)
 
 ## 1. Mục đích
 
@@ -121,12 +135,12 @@ Nếu bạn cần chi tiết theo từng helper, đọc các file trong `docs/` 
 
 ## 2. Flow runtime
 
-Từ [AddFunctionRequestHandler.ts](/src/GN-app-api/handler/controller/handler/cloudScript/AddFunctionRequestHandler.ts), flow thực tế là:
+Flow thực tế (xem `AddFunctionRequestHandler.ts` trong GearN Server repo):
 
 1. Client gọi `addFunction`.
 2. Server nhận `script`, `canExecute`, `isLive`.
 3. Script bị từ chối ngay nếu chứa chuỗi `GNNetwork`.
-4. Script được nhúng vào [templateCloudScript.ts](/dist/GN-startup/cloudScript/templateCloudScript.ts).
+4. Script được nhúng vào `templateCloudScript.ts` (GearN Server repo).
 5. Server compile TypeScript.
 6. Nếu compile pass, server lưu thành version mới.
 7. Khi execute, server gọi `handlers[functionName]`.
@@ -259,17 +273,133 @@ Template inject sẵn các symbol này:
 - `GNUtils`
 - `MatchStatus`
 
-Source cần đọc khi cần verify:
+Source cần đọc khi cần verify (trong GearN Server repo, không public trong package này):
 
-- [templateCloudScript.ts](/dist/GN-startup/cloudScript/templateCloudScript.ts)
-- [CloudScriptDatabase.ts](/dist/GN-startup/cloudScript/CloudScriptDatabase.ts)
-- [CloudScriptHttp.ts](/dist/GN-startup/cloudScript/CloudScriptHttp.ts)
-- [CloudScriptSocket.ts](/dist/GN-startup/cloudScript/CloudScriptSocket.ts)
-- [CloudScriptMail.ts](/dist/GN-startup/cloudScript/CloudScriptMail.ts)
-- [CloudScriptPushNotification.ts](/dist/GN-startup/cloudScript/CloudScriptPushNotification.ts)
-- [CloudScriptAdmin.ts](/dist/GN-startup/cloudScript/CloudScriptAdmin.ts)
+- `dist/GN-startup/cloudScript/templateCloudScript.ts`
+- `dist/GN-startup/cloudScript/CloudScriptDatabase.ts`
+- `dist/GN-startup/cloudScript/CloudScriptHttp.ts`
+- `dist/GN-startup/cloudScript/CloudScriptSocket.ts`
+- `dist/GN-startup/cloudScript/CloudScriptMail.ts`
+- `dist/GN-startup/cloudScript/CloudScriptPushNotification.ts`
+- `dist/GN-startup/cloudScript/CloudScriptAdmin.ts`
 
-## 5. Chọn helper nào
+## 5. Typing — KHÔNG dùng `any` vô tội vạ
+
+Script là TypeScript thật, có toàn bộ class trong [§4](#4-runtime-object-có-sẵn) inject sẵn. AI Agent hay rơi vào `response: any` / `items: any[]` / `args: any` vì không biết type nào có sẵn. Bảng dưới đây là pattern bắt buộc.
+
+### 5.1 Helper `ensureOk` / log / retry → `CustomOperationResponse`
+
+Mọi typed response trả về từ `admin.<group>.<method>Async(...)` đều extend `CustomOperationResponse`. Helper generic nhận đúng base này, KHÔNG dùng `any`:
+
+```ts
+const ensureOk = (operationName: string, response: CustomOperationResponse) => {
+    if (response.hasReturnCodeError()) {
+        throw new Error(operationName + " return-code error: " + (response.debugMessage ?? response.toString()));
+    }
+    if (response.errorCode !== ErrorCode.Ok) {
+        throw new Error(operationName + " business error: " + response.errorCode + (response.debugMessage ? " - " + response.debugMessage : ""));
+    }
+};
+```
+
+- KHÔNG dùng `OperationResponse` (raw, không có `hasReturnCodeError()` / `errorCode` field — chỉ có getter `getReturnCode()`).
+- KHÔNG dùng `CustomOperationResponseAbstract<T>` cho helper generic — chỉ dùng khi cần `responseData` typed cụ thể.
+
+### 5.2 Array `key/value` (currency, statistics, data, tag, friend, …) → `GenericModels.*`
+
+Mọi item array trên response đều có class chuẩn trong `GenericModels` (đã inject). Map field → item type:
+
+<!-- prettier-ignore -->
+| Field trên response | Item type | Shape |
+| --- | --- | --- |
+| `playerCurrencies` / `groupCurrencies` / `itemCurrencies` | `GenericModels.CurrencyItem` | `key: string`, `value: number` |
+| `playerStatistics` / `groupStatistics` / `itemStatistics` | `GenericModels.StatisticsItem` | `key: string`, `value: number` |
+| `playerDatas` / `groupDatas` / `customDatas` / `itemDatas` / `storeDatas` | `GenericModels.DataItem` | `key: string`, `value: any` (primitive / GNHashtable / GNArray / object) |
+| `playerTags` / `groupTags` | `GenericModels.TagItem` | `key: string`, `value: string` |
+| `playerBan` / `bans` | `GenericModels.BanItem` | `tsExpire: number`, `reason: string` |
+| `friends` | `GenericModels.FriendItem` | `userId`, `status`, … |
+| `members` | `GenericModels.MemberItem` | `userId`, `role`, … |
+| `inventoryItems` (relation) | `GenericModels.InventoryItem` | `itemId`, `catalogId`, `classId` |
+| `groups` (relation) | `GenericModels.GroupItem` | `groupId`, … |
+| `characters` (relation) | `GenericModels.CharacterItem` | `characterId`, `catalogId` |
+| `owner` (inventory) | `GenericModels.OwnerItem` | `type: number` (map với `OwnerType`), `id: string` |
+| `avatars` | `GenericModels.AvatarItem` | `type: number`, `value: string` |
+
+Generic finder pattern — dùng đúng item type, callback `(c) => ...` sẽ auto-infer, KHÔNG cần `(c: any)`:
+
+```ts
+const findCurrency = (items: GenericModels.CurrencyItem[] | undefined, key: string): number => {
+    return (items ?? []).find((c) => c.key === key)?.value ?? 0;
+};
+
+const findStatistic = (items: GenericModels.StatisticsItem[] | undefined, key: string): number => {
+    return (items ?? []).find((s) => s.key === key)?.value ?? 0;
+};
+
+// DataItem.value là `any` (backend trả primitive | GNHashtable | GNArray) — narrow ở call-site
+const findData = (items: GenericModels.DataItem[] | undefined, key: string): unknown => {
+    return (items ?? []).find((d) => d.key === key)?.value;
+};
+
+const findBool = (items: GenericModels.DataItem[] | undefined, key: string): boolean => {
+    const raw = findData(items, key);
+    return raw === true || raw === "true";
+};
+```
+
+### 5.3 Build request DTO → class `<Group>Models.*Param` / `*RequestData`
+
+Set field trên instance, KHÔNG cast object literal (sẽ skip constructor + decorator metadata, payload serialize thiếu shape):
+
+```ts
+// ĐÚNG
+const currency = new GamePlayerModels.PlayerCurrencyParam();
+currency.key = "gem";
+currency.value = -50;
+
+const request = new GamePlayerModels.AdminChangePlayerCurrencyRequestData();
+request.userId = userId;
+request.playerCurrencies = [currency];
+
+// SAI
+const request = { userId, playerCurrencies: [{ key: "gem", value: -50 }] } as GamePlayerModels.AdminChangePlayerCurrencyRequestData;
+```
+
+Field name cần `value` hay `amount` tùy DTO — tra [reference/dto/GAME_PLAYER.md](/docs/reference/dto/GAME_PLAYER.md) (hoặc domain tương ứng), không suy diễn.
+
+### 5.4 Handler signature
+
+```ts
+handlers["fnName"] = async (args: any, context, log) => {
+    /* ... */
+};
+```
+
+- **`context.userId: string`** — **luôn tồn tại và luôn là string** trong handler context (runtime đã authenticate trước khi gọi handler). KHÔNG cần `typeof context.userId !== "string"` check, KHÔNG cần `userId.length === 0` check, KHÔNG cần throw `"missing_authenticated_user"`. Dùng thẳng:
+    ```ts
+    handlers["fnName"] = async (args: any, context, log) => {
+        const userId = context.userId; // string, sẵn sàng dùng
+        /* ... */
+    };
+    ```
+- **`context.customTags: Record<string, any> | undefined`** — optional, tuỳ client có truyền `customTags` vào request execute hay không. Dùng `?.` hoặc null-check khi đọc.
+- Không annotate type cho `context` / `log` — runtime không export shape, chỉ cần dùng đúng field.
+- **`log`**: `(value: unknown) => void`. Không annotate, không gọi `console.log`.
+
+### 5.5 Anti-pattern tóm tắt
+
+<!-- prettier-ignore -->
+| Code AI hay sinh | Vấn đề | Fix |
+| --- | --- | --- |
+| `response: any` | Mất check `hasReturnCodeError()` ở compile, typo `errorrCode` không bị catch | `response: CustomOperationResponse` |
+| `items: any[]` | Mất shape `.key` / `.value` / `.userId`, dễ truy field không tồn tại | `GenericModels.<Item>Type[]` đúng theo bảng § 5.2 |
+| `(c: any) => c.key === key` | Annotation đè type inference đã đúng | Bỏ annotation, để TS infer từ array type |
+| `args: any` rồi `args.displayName.trim()` | Không validate user input — crash khi missing/wrong type | `args: any` + narrow / `requireString(args?.displayName, ...)` |
+| `if (typeof context.userId !== "string") throw ...` | Defensive check vô nghĩa — `context.userId` đã guaranteed `string` ở runtime | Dùng thẳng `const userId = context.userId;` |
+| Object literal cast sang `*RequestData` | Skip constructor/decorator, MsgPack/JSON serialize sai shape | `new <Group>Models.<Method>RequestData()` rồi set field |
+| `response: OperationResponse` cho helper | `hasReturnCodeError()` / `errorCode` không tồn tại trên base raw | `CustomOperationResponse` (typed wrapper) |
+
+## 6. Chọn helper nào
 
 - `http`: dùng khi cần gọi REST API hoặc webhook bên ngoài. Docs: [CLOUDSCRIPT_http.md](/docs/cloudScript/CLOUDSCRIPT_http.md)
 - `socket`: dùng khi cần realtime event cho user online hoặc room. Docs: [CLOUDSCRIPT_socket.md](/docs/cloudScript/CLOUDSCRIPT_socket.md)
@@ -278,17 +408,26 @@ Source cần đọc khi cần verify:
 - `admin`: dùng khi behavior đã tồn tại trong official GearN admin API. Ưu tiên `admin` trước `database` nếu business rule đã có sẵn. Docs: [CLOUDSCRIPT_admin.md](/docs/cloudScript/CLOUDSCRIPT_admin.md)
 - `database`: dùng khi cần đọc hoặc ghi MongoDB nội bộ của GearN, hoặc cần helper domain của `xDatabase`. Docs: [CLOUDSCRIPT_database.md](/docs/cloudScript/CLOUDSCRIPT_database.md)
 
+CloudScript không bị giới hạn 1 helper cho 1 handler. Có thể kết hợp nhiều runtime object trong cùng function, ví dụ:
+
+- Dùng `admin` để thực hiện operation chính, rồi dùng `socket` để notify user online.
+- Dùng `database` để đọc state nội bộ, rồi dùng `admin` để gọi official API ghi log/currency/inventory.
+- Dùng `http` gọi webhook bên ngoài, sau đó dùng `mail` hoặc `pushNotification` để gửi side effect.
+
+Khi kết hợp nhiều helper, vẫn ưu tiên rule chọn nhanh bên dưới: official API thì dùng `admin`, raw data thì dùng `database`, delivery bên ngoài thì dùng helper delivery tương ứng. Không trộn helper chỉ vì tiện; trộn khi workflow thật sự cần nhiều bước khác loại.
+
 Rule chọn nhanh:
 
 - Có official API rồi thì ưu tiên `admin`.
 - Chỉ đụng raw DB khi official API không cover hoặc bạn cố ý thao tác trực tiếp collection.
 - Side effect ra ngoài hệ thống thì chọn `http`, `mail`, `socket`, `pushNotification` đúng theo mục tiêu delivery.
 
-## 6. Script tối thiểu hợp lệ
+## 7. Script tối thiểu hợp lệ
 
 ```ts
 handlers["pingCloudScript"] = async (args: any, context, log) => {
-    const message = typeof args?.message === "string" && args.message.length > 0 ? args.message : "pong";
+    const input = (args ?? {}) as { message?: string };
+    const message = typeof input.message === "string" && input.message.length > 0 ? input.message : "pong";
 
     return {
         gameId: gameId,
@@ -302,10 +441,13 @@ Nếu cần debug luồng đi hoặc số liệu runtime, có thể gọi `log(v
 
 ```ts
 handlers["pingCloudScriptDebug"] = async (args: any, context, log) => {
-    const message = typeof args?.message === "string" && args.message.length > 0 ? args.message : "pong";
+    const input = (args ?? {}) as { message?: string };
+    const message = typeof input.message === "string" && input.message.length > 0 ? input.message : "pong";
 
     // Use this only for temporary debug data or execution tracing.
-    log("pingCloudScriptDebug", {
+    // `log` chỉ nhận đúng 1 tham số (`value: unknown`). Để gắn nhãn, đưa nhãn vào chính object payload.
+    log({
+        action: "pingCloudScriptDebug",
         userId: context.userId,
         message: message,
     });
@@ -324,26 +466,27 @@ Khi có gọi `log`, `functionLogs` nhận về sẽ là mảng string, ví dụ
 
 Nếu bạn cần ví dụ thật theo từng helper, xem file chi tiết trong `docs/`.
 
-## 7. Add và execute nhanh
+## 8. Add và execute nhanh
 
 ### Ví dụ add script:
 
 #### Cách 1: dùng Script.
 
 ```ts
-import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
+import { GNNetwork, CloudScriptModels } from "@xmobitea/gearn-typescript-client-sdk";
 
 const secretKey = process.env.GN_SECRET_KEY ?? "";
 const script = `handlers["pingCloudScript"] = async (args, context, log) => ({ ok: true, userId: context.userId });`;
 
+const addRequest = new CloudScriptModels.AdminAddFunctionRequestData();
+addRequest.script = script;
+addRequest.canExecute = true;
+addRequest.isLive = false;
+
 const addResponse = await GNNetwork.cloudScript.admin.addFunctionAsync(
-    {
-        script: script,
-        canExecute: true,
-        isLive: false,
-    },
-    undefined,
-    secretKey,
+    addRequest,
+    undefined, // overrideAuthToken
+    secretKey, // overrideSecretKey
 );
 
 if (addResponse.hasReturnCodeError()) {
@@ -353,6 +496,8 @@ if (addResponse.hasReturnCodeError()) {
 const version = addResponse.responseData.version;
 ```
 
+> Lưu ý: build instance bằng `new <Group>Models.<Method>RequestData()` rồi set field. Truyền object literal `as ...RequestData` sẽ bỏ qua decorator metadata, payload serialize sai shape (xem § 5.3).
+
 #### Cách 2: dùng GearN Dashboard
 
 vào tab CloudScript/Function, nhập script vào và bấm save
@@ -360,16 +505,15 @@ vào tab CloudScript/Function, nhập script vào và bấm save
 ### Ví dụ execute đúng version vừa add:
 
 ```ts
-import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
+import { GNNetwork, CloudScriptModels } from "@xmobitea/gearn-typescript-client-sdk";
 
-const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync({
-    userId: "0123456789",
-    functionName: "pingCloudScript",
-    version: version,
-    functionParameters: {
-        message: "hello",
-    },
-});
+const executeRequest = new CloudScriptModels.AdminExecuteFunctionRequestData();
+executeRequest.userId = "0123456789";
+executeRequest.functionName = "pingCloudScript";
+executeRequest.version = version;
+executeRequest.functionParameters = { message: "hello" };
+
+const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync(executeRequest);
 
 if (executeResponse.hasReturnCodeError()) {
     throw new Error(executeResponse.toString());
@@ -379,15 +523,14 @@ if (executeResponse.hasReturnCodeError()) {
 Ví dụ execute không truyền `version`:
 
 ```ts
-import { GNNetwork } from "@xmobitea/gearn-typescript-client-sdk";
+import { GNNetwork, CloudScriptModels } from "@xmobitea/gearn-typescript-client-sdk";
 
-const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync({
-    userId: "0123456789",
-    functionName: "pingCloudScript",
-    functionParameters: {
-        message: "hello",
-    },
-});
+const executeRequest = new CloudScriptModels.AdminExecuteFunctionRequestData();
+executeRequest.userId = "0123456789";
+executeRequest.functionName = "pingCloudScript";
+executeRequest.functionParameters = { message: "hello" };
+
+const executeResponse = await GNNetwork.cloudScript.admin.executeFunctionAsync(executeRequest);
 
 if (executeResponse.hasReturnCodeError()) {
     throw new Error(executeResponse.toString());
@@ -396,8 +539,10 @@ if (executeResponse.hasReturnCodeError()) {
 
 Case này sẽ chạy vào version đang `isLive`, không phải version mới nhất vừa add nếu version đó chưa được promote live.
 
-## 8. Những lỗi hay dính
+## 9. Những lỗi hay dính
 
+- Dùng `any` cho `response` / `items` / `args` thay vì type chuẩn ở [§5](#5-typing--không-dùng-any-vô-tội-vạ).
+- Defensive-check `context.userId` (`typeof !== "string"`, `length === 0`, throw `"missing_authenticated_user"`) — không cần, runtime đảm bảo `userId` là string đã authenticate.
 - Quên đăng ký function vào `handlers`.
 - Viết code như một file TypeScript hoàn chỉnh thay vì chỉ viết phần body được inject.
 - Để literal `GNNetwork` trong script.
@@ -410,7 +555,7 @@ Case này sẽ chạy vào version đang `isLive`, không phải version mới n
 - Dùng `database` để làm việc mà `admin` đã có official API sẵn.
 - Tưởng `socket`, `mail`, `pushNotification` sẽ trả ACK delivery chi tiết. Không có.
 
-## 9. Thứ tự đọc khuyến nghị
+## 10. Thứ tự đọc khuyến nghị
 
 1. [docs/cloudScript/CLOUDSCRIPT_USAGE.md](/docs/cloudScript/CLOUDSCRIPT_USAGE.md)
 2. [docs/cloudScript/CLOUDSCRIPT_admin.md](/docs/cloudScript/CLOUDSCRIPT_admin.md) nếu cần official admin API
@@ -420,3 +565,11 @@ Case này sẽ chạy vào version đang `isLive`, không phải version mới n
 6. [docs/cloudScript/CLOUDSCRIPT_pushNotification.md](/docs/cloudScript/CLOUDSCRIPT_pushNotification.md) nếu gửi push
 7. [docs/cloudScript/CLOUDSCRIPT_database.md](/docs/cloudScript/CLOUDSCRIPT_database.md) nếu đụng dữ liệu nội bộ
 8. [docs/cloudScript/CLOUDSCRIPT_security_policy.md](/docs/cloudScript/CLOUDSCRIPT_security_policy.md) khi script bị reject (xem error line/column để debug)
+
+Reference SDK phía client (call-site dùng `executeFunction*`):
+
+- [docs/guides/CLOUDSCRIPT.md](/docs/guides/CLOUDSCRIPT.md)
+- [docs/reference/API_CLOUDSCRIPT.md](/docs/reference/API_CLOUDSCRIPT.md)
+- [docs/reference/dto/CLOUDSCRIPT.md](/docs/reference/dto/CLOUDSCRIPT.md)
+- [docs/reference/ERROR_HANDLING.md](/docs/reference/ERROR_HANDLING.md)
+- Source: [`dist/runtime/GNNetworkCloudScriptApi.d.ts`](/dist/runtime/GNNetworkCloudScriptApi.d.ts)
