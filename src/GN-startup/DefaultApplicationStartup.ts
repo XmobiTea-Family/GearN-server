@@ -12,15 +12,15 @@ import { DdosSettings } from "./settings/DDosSettings";
 import { ClusterSettings } from "./settings/ClusterSettings";
 
 export class DefaultApplicationStartup {
-    // Stores the server application value used by this instance.
+    // Concrete startup object built from the default fallback configuration.
     protected serverApplication: ServerApplication;
 
     /**
-     * Runs the current workflow.
+     * Boots the server with hard-coded fallback settings that are useful for local startup.
      * @param onRunSuccess Provides the callback executed after a successful startup.
      */
     public run(onRunSuccess?: OnRunSuccess): void {
-        // Stores the resolved application settings instance for the current execution flow.
+        // Default application ports, token settings, and root-account bootstrap values.
         let applicationSettings = ApplicationSettings.Builder()
             .setUseSSL(false)
             .setCertFilePath("")
@@ -34,16 +34,16 @@ export class DefaultApplicationStartup {
             .setRestoreRootPassword("")
             .build();
 
-        // Stores the resolved HTTP app settings instance for the current execution flow.
+        // Default HTTP transport behavior for a permissive local environment.
         let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigins("*").addMethods(["GET", "POST"]).setCredentials(true).addAllowedHeaders(["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"]).setEnableSendAndReceiveDebug(true).setEnablePostViaJson(true).setEnablePostViaMsgPack(true).setTrustProxy(true).build();
 
-        // Stores the resolved socket app settings instance for the current execution flow.
+        // Default Socket.IO transport behavior.
         let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setUseEmitter(false).setOrigins("*").addMethods([]).setCredentials(true).addAllowedHeaders([]).setEnableSendAndReceiveDebug(true).setEnablePostViaJson(true).setEnablePostViaMsgPack(true).setPingInterval(50000).setPingTimeout(5000).build();
 
-        // Stores the resolved other settings instance for the current execution flow.
+        // Misc runtime settings that are shared outside a single transport.
         let otherSettings = OtherSettings.Builder().setHeaderIP("X-Real-IP").setIdTypeCase(0).setIPApiUrl("http://127.0.0.1:2555/json").build();
 
-        // Stores the resolved database settings instance for the current execution flow.
+        // Default MongoDB connection metadata used when no external config is supplied.
         let databaseSettings = DatabaseSettings.Builder()
             .setConnectionString("mongodb://rootuser:rootpass@127.0.10.21:27017,127.0.10.22:27017,127.0.10.23:27017/?retryWrites=false&replicaSet=rs0&readPreference=primaryPreferred&serverSelectionTimeoutMS=5000&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-256")
             .setLogConnectionString(null)
@@ -54,10 +54,10 @@ export class DefaultApplicationStartup {
             })
             .build();
 
-        // Stores the resolved log settings instance for the current execution flow.
+        // Default logging target.
         let logSettings = LogSettings.Builder().setLogToFileEnable(true).setLogToConsoleEnable(true).setLogPath("./log/Server.log").build();
 
-        // Stores the resolved upload file settings instance for the current execution flow.
+        // Default upload constraints and storage path.
         let uploadFileSettings = UploadFileSettings.Builder()
             .setEnable(true)
             .setMaxSizeUpload(1024 * 1024 * 50)
@@ -65,10 +65,10 @@ export class DefaultApplicationStartup {
             .setMimeTypeAccepts(["image/png"])
             .build();
 
-        // Stores the resolved DDoS settings instance for the current execution flow.
+        // Default request throttling limits.
         let ddosSettings = DdosSettings.Builder().setSocketMaxRequestPerSecondPerIp(50).setSocketMaxRequestPerSecondPerPeer(20).setSocketMaxPendingRequest(100).setSocketMaxRequestSize(1024).setHttpMaxRequestPerSecondPerIp(50).setHttpMaxRequestPerSecondPerPeer(20).setHttpMaxPendingRequest(100).setHttpMaxRequestSize(1024).setMaxUploadPendingRequest(50).setMaxDownloadPendingRequest(50).setIPWhiteList(["127.0.0.1"]).build();
 
-        // Stores the resolved cluster settings instance for the current execution flow.
+        // Single-node cluster defaults so local boot does not require peer discovery.
         let clusterSettings = ClusterSettings.Builder()
             .setInstanceId("node_0")
             .setIsPrimary(true)
@@ -89,24 +89,14 @@ export class DefaultApplicationStartup {
     }
 
     /**
-     * Executes the new server application workflow.
-     * @param applicationSettings Provides the application settings value used by this operation.
-     * @param httpAppSettings Provides the HTTP app settings value used by this operation.
-     * @param socketAppSettings Provides the socket app settings value used by this operation.
-     * @param otherSettings Provides the other settings value used by this operation.
-     * @param databaseSettings Provides the database settings value used by this operation.
-     * @param logSettings Provides the log settings value used by this operation.
-     * @param uploadFileSettings Provides the upload file settings value used by this operation.
-     * @param ddosSettings Provides the DDoS settings value used by this operation.
-     * @param clusterSettings Provides the cluster settings value used by this operation.
+     * Materializes the full `ServerApplication` from the resolved settings bundle.
      */
     protected newServerApplication(applicationSettings: ApplicationSettings, httpAppSettings: HttpAppSettings, socketAppSettings: SocketAppSettings, otherSettings: OtherSettings, databaseSettings: DatabaseSettings, logSettings: LogSettings, uploadFileSettings: UploadFileSettings, ddosSettings: DdosSettings, clusterSettings: ClusterSettings) {
         return ServerApplication.Builder().setApplicationSettings(applicationSettings).setHttpAppSettings(httpAppSettings).setSocketAppSettings(socketAppSettings).setOtherSettings(otherSettings).setDatabaseSettings(databaseSettings).setLogSettings(logSettings).setUploadFileSettings(uploadFileSettings).setDdosSettings(ddosSettings).setClusterSettings(clusterSettings).build();
     }
 
     /**
-     * Returns the GearN server.
-     * @returns Returns the GearN server.
+     * Exposes the runtime coordinator created by the startup pipeline.
      */
     public getGNServer(): GNServer {
         return this.serverApplication.getGNServer();

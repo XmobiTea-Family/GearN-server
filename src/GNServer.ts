@@ -75,79 +75,53 @@ interface CreateIndexesOptions {
  */
 export class GNServer {
     /**
-     * Returns the server version.
-     * @returns Returns the server version.
+     * Returns the persisted server version string used during bootstrap and compatibility checks.
      */
     public static getServerVersion(): string {
         return GN_VERSION;
     }
 
-    // Stores the socket app value used by this instance.
+    // Transport layers injected by `ServerApplication`.
     private socketApp: SocketApp;
-    // Stores the HTTP app value used by this instance.
     private httpApp: HttpApp;
-    // Stores the API middleware value used by this instance.
     private apiMiddleware: ApiMiddleware;
 
-    // Stores the request controller value used by this instance.
+    // Central request dispatcher shared by HTTP and socket transports.
     private requestController: RequestController;
 
-    // Stores the ID type case value used by this instance.
+    // Runtime identity/config flags resolved at startup.
     private idTypeCase: number;
-    // Stores the root username value used by this instance.
     private initRootUsername: string;
-    // Stores the restore root password value used by this instance.
     private restoreRootPassword: string;
-    // Stores the x GearN settings value used by this instance.
     private xGNSettings: xGNSettings;
-    // Stores the x database value used by this instance.
     private xDatabase: xDatabase;
 
-    // Stores the facebook service value used by this instance.
+    // Cross-cutting services used by handlers and scheduled jobs.
     private facebookService: IFacebookService;
-    // Stores the apple service value used by this instance.
     private appleService: IAppleService;
-    // Stores the google service value used by this instance.
     private googleService: IGoogleService;
-    // Stores the google play game service value used by this instance.
     private googlePlayGameService: IGooglePlayGameService;
-    // Stores the game center service value used by this instance.
     private gameCenterService: IGameCenterService;
-    // Stores the timer service value used by this instance.
     private timerService: ITimerService;
-    // Stores the request converter service value used by this instance.
     private requestConverterService: IRequestConverterService;
-    // Stores the analytics service value used by this instance.
     private analyticsService: IAnalyticsService;
-    // Stores the post event callback service value used by this instance.
     private postEventCallbackService: IPostEventCallbackService;
-    // Stores the pre event callback service value used by this instance.
     private preEventCallbackService: IPreEventCallbackService;
-    // Stores the cloud script service dictionary collection used by this instance.
     private cloudScriptServiceDic: Map<string, ICloudScriptService>;
-    // Stores the event callback cloud script service value used by this instance.
     private eventCallbackCloudScriptService: IEventCallbackCloudScriptService;
-    // Stores the cloud script event service value used by this instance.
     private cloudScriptEventService: ICloudScriptEventService;
 
-    // Stores the country IP detail service value used by this instance.
+    // Auxiliary services and per-game service registries.
     private countryIPDetailService: ICountryIPDetailService;
-    // Stores the push notification service value used by this instance.
     private pushNotificationService: IPushNotificationService;
-    // Stores the email service value used by this instance.
     private emailService: IEmailService;
-    // Stores the cache service dictionary collection used by this instance.
     private cacheServiceDic: Map<string, ICacheService>;
-    // Stores the configuration service dictionary collection used by this instance.
     private configServiceDic: Map<string, IConfigService>;
 
-    // Stores the game IDs list used by this instance.
+    // Loaded game ids plus matchmaking/event state tracked in memory.
     private gameIds: string[];
-    // Stores the matchmaking service value used by this instance.
     private matchmakingService: IMatchmakingService;
-    // Stores the waiting server detail dict collection used by this instance.
     private waitingServerDetailDict: Map<string, NodeJS.Timeout>;
-    // Stores the post event callback collection value used by this instance.
     private postEventCallbackCollection: mongodb.Collection<mongodb.Document>;
 
     /**
@@ -287,32 +261,28 @@ export class GNServer {
     }
 
     /**
-     * Sets the socket app.
-     * @param socketApp Provides the socket app value used by this operation.
+     * Injects the socket transport after it has been bootstrapped by `ServerApplication`.
      */
     public setSocketApp(socketApp: SocketApp): void {
         this.socketApp = socketApp;
     }
 
     /**
-     * Sets the HTTP app.
-     * @param httpApp Provides the HTTP app value used by this operation.
+     * Injects the HTTP transport after it has been bootstrapped by `ServerApplication`.
      */
     public setHttpApp(httpApp: HttpApp): void {
         this.httpApp = httpApp;
     }
 
     /**
-     * Sets the API middleware.
-     * @param apiMiddleware Provides the API middleware value used by this operation.
+     * Injects the shared API middleware used by both transports.
      */
     public setApiMiddleware(apiMiddleware: ApiMiddleware) {
         this.apiMiddleware = apiMiddleware;
     }
 
     /**
-     * Returns the API middleware.
-     * @returns Returns the API middleware.
+     * Returns the shared API middleware instance.
      */
     public getApiMiddleware(): ApiMiddleware {
         return this.apiMiddleware;
@@ -343,8 +313,7 @@ export class GNServer {
     }
 
     /**
-     * Adds the custom handler.
-     * @param requestHandler Provides the request handler used by this operation.
+     * Registers a handler under the `RequestType.Custom` namespace.
      * @param onlyAuthenticated Indicates whether only authenticated access is allowed.
      */
     public addCustomHandler(requestHandler: IRequestHandler, onlyAuthenticated: boolean = true): void {
@@ -352,55 +321,42 @@ export class GNServer {
     }
 
     /**
-     * Returns the custom handler.
-     * @param operationCode Provides the operation code value used by this operation.
-     * @returns Returns the custom handler.
+     * Looks up a custom handler by operation code.
      */
     public getCustomHandler(operationCode: string): IRequestHandler {
         return this.requestController.getHandler(RequestType.Custom, operationCode);
     }
 
     /**
-     * Removes the custom handler.
-     * @param operationCode Provides the operation code value used by this operation.
+     * Unregisters a custom handler.
      */
     public removeCustomHandler(operationCode: string): void {
         return this.requestController.removeHandler(RequestType.Custom, operationCode);
     }
 
     /**
-     * Creates the index.
-     * @param collectionName Provides the collection name value used by this operation.
-     * @param index Provides the index value used by this operation.
-     * @param options Provides the options value used by this operation.
+     * Creates an index in the main runtime database.
      */
     public createIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
         this.xDatabase.createIndex(collectionName, index, options);
     }
 
     /**
-     * Executes the log create index workflow.
-     * @param collectionName Provides the collection name value used by this operation.
-     * @param index Provides the index value used by this operation.
-     * @param options Provides the options value used by this operation.
+     * Creates an index in the log database.
      */
     public logCreateIndex(collectionName: string, index: { [k: string]: any }, options?: CreateIndexesOptions) {
         this.xDatabase.logCreateIndex(collectionName, index, options);
     }
 
     /**
-     * Returns the configuration service.
-     * @param gameId Provides the game ID value used by this operation.
-     * @returns Returns the configuration service.
+     * Returns the per-game configuration service currently registered for a game id.
      */
     public getConfigService(gameId: string): IConfigService {
         return this.configServiceDic.get(gameId);
     }
 
     /**
-     * Sets the configuration game.
-     * @param gameId Provides the game ID value used by this operation.
-     * @param configService Provides the configuration service used by this operation.
+     * Registers the per-game configuration service for a game id.
      */
     public setConfigGame(gameId: string, configService: IConfigService) {
         this.configServiceDic.set(gameId, configService);
@@ -415,7 +371,7 @@ export class GNServer {
     }
 
     /**
-     * Returns the ID type case.
+     * Returns the id-format mode applied when entities are created or parsed.
      */
     public getIdTypeCase() {
         return this.idTypeCase;
@@ -430,7 +386,7 @@ export class GNServer {
     }
 
     /**
-     * Returns the restore root password.
+     * Returns the optional emergency root-password reset value loaded at startup.
      */
     public getRestoreRootPassword() {
         return this.restoreRootPassword;
@@ -445,7 +401,7 @@ export class GNServer {
     }
 
     /**
-     * Returns the root username.
+     * Returns the bootstrap root username.
      */
     public getInitRootUsername() {
         return this.initRootUsername;
@@ -606,18 +562,14 @@ export class GNServer {
     }
 
     /**
-     * Returns the cloud script service.
-     * @param gameId Provides the game ID value used by this operation.
-     * @returns Returns the cloud script service.
+     * Returns the per-game CloudScript worker service registered for a game id.
      */
     public getCloudScriptService(gameId: string): ICloudScriptService {
         return this.cloudScriptServiceDic.get(gameId);
     }
 
     /**
-     * Sets the cloud script service.
-     * @param gameId Provides the game ID value used by this operation.
-     * @param cloudScriptService Provides the cloud script service used by this operation.
+     * Registers the per-game CloudScript worker service for a game id.
      */
     public setCloudScriptService(gameId: string, cloudScriptService: ICloudScriptService) {
         return this.cloudScriptServiceDic.set(gameId, cloudScriptService);
@@ -625,8 +577,7 @@ export class GNServer {
 
     /**
      * Broadcasts an event to one user, logs the callback payload, then fans it out through the cluster handler.
-     * @param userId Indicates whether r ID should be used.
-     * @param operationEvent Provides the operation event value used by this operation.
+     * @param userId Target user id.
      */
     public async sendEventTo(userId: string, operationEvent: OperationEvent): Promise<void> {
         await this.eventCallbackCloudScriptService.executeEvent("event_SendEventTo", { userId: userId }, operationEvent);
@@ -656,7 +607,6 @@ export class GNServer {
 
     /**
      * Replays a cluster message locally on the socket layer.
-     * @param data Provides the data value used by this operation.
      */
     private executeSendEventTo(data: {
         // Target user that should receive the event.
@@ -678,8 +628,7 @@ export class GNServer {
 
     /**
      * Broadcasts an event to one room, logs the callback payload, then fans it out through the cluster handler.
-     * @param roomId Provides the room ID value used by this operation.
-     * @param operationEvent Provides the operation event value used by this operation.
+     * @param roomId Target socket room id.
      */
     public async sendEventToRoom(roomId: string, operationEvent: OperationEvent): Promise<void> {
         await this.eventCallbackCloudScriptService.executeEvent("event_SendEventToRoom", { roomId: roomId }, operationEvent);
@@ -709,7 +658,6 @@ export class GNServer {
 
     /**
      * Replays a room broadcast received from the cluster bus on the local node.
-     * @param data Provides the data value used by this operation.
      */
     private executeSendEventToRoom(data: {
         // Target room that should receive the event.
@@ -731,8 +679,7 @@ export class GNServer {
 
     /**
      * Broadcasts an event to multiple users, logs the callback payload, then fans it out through the cluster handler.
-     * @param userIds Indicates whether r IDs should be used.
-     * @param operationEvent Provides the operation event value used by this operation.
+     * @param userIds Target user ids.
      */
     public async sendEventToMoreUser(userIds: string[], operationEvent: OperationEvent): Promise<void> {
         await this.eventCallbackCloudScriptService.executeEvent("event_SendEventToMoreUser", { userIds: userIds }, operationEvent);
@@ -762,7 +709,6 @@ export class GNServer {
 
     /**
      * Replays a multi-user broadcast received from the cluster bus on the local node.
-     * @param data Provides the data value used by this operation.
      */
     private executeSendEventToMoreUser(data: {
         // Target users that should receive the event.
@@ -784,7 +730,6 @@ export class GNServer {
 
     /**
      * Broadcasts an event to every connected player, logs the callback payload, then fans it out through the cluster handler.
-     * @param operationEvent Provides the operation event value used by this operation.
      */
     public async sendEventToAllPlayer(operationEvent: OperationEvent): Promise<void> {
         await this.eventCallbackCloudScriptService.executeEvent("event_SendEventToAllPlayer", {}, operationEvent);
@@ -811,7 +756,6 @@ export class GNServer {
 
     /**
      * Replays a global broadcast received from the cluster bus on the local node.
-     * @param data Provides the data value used by this operation.
      */
     private executeSendEventToAllPlayer(data: {
         // Serialized event payload coming from the cluster bus.
@@ -872,8 +816,6 @@ export class GNServer {
 
     /**
      * Removes a user from a socket room on the local node.
-     * @param userId Indicates whether r ID should be used.
-     * @param roomId Provides the room ID value used by this operation.
      */
     public leaveRoom(userId: string, roomId: string): void {
         return this.socketApp.getSocketAppHandler().leaveRoom(userId, roomId);
@@ -881,8 +823,6 @@ export class GNServer {
 
     /**
      * Returns the socket rooms the given user currently belongs to on this node.
-     * @param userId Indicates whether r ID should be used.
-     * @returns Returns the rooms.
      */
     public async getRooms(userId: string): Promise<string[]> {
         return await this.socketApp.getSocketAppHandler().getRooms(userId);
@@ -1002,7 +942,7 @@ export class GNServer {
 
     /**
      * Handles the matchmaking for game.
-     * @param gameId Provides the game ID value used by this operation.
+     * @param gameId Game id whose queue should be processed in this polling cycle.
      */
     private async handleMatchmakingForGame(gameId: string) {
         // The matchmaking service returns tickets that are ready to transition to the next state.
@@ -1023,9 +963,7 @@ export class GNServer {
     }
 
     /**
-     * Requests the match server detail.
-     * @param gameId Provides the game ID value used by this operation.
-     * @param matchmakingTicketCanMatch Provides the matchmaking ticket can match value used by this operation.
+     * Asks the callback/cloud-script layer to allocate runtime server detail for a pending match.
      */
     private async requestMatchServerDetail(gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch): Promise<void> {
         let matchId = matchmakingTicketCanMatch.matchId;
@@ -1094,8 +1032,7 @@ export class GNServer {
     }
 
     /**
-     * Returns the game IDs.
-     * @returns Returns the game IDs.
+     * Returns the set of game ids currently loaded into memory.
      */
     public getGameIds(): string[] {
         return this.gameIds;
@@ -1103,7 +1040,6 @@ export class GNServer {
 
     /**
      * Returns whether the current runtime is the primary cluster node.
-     * @returns Returns the operation result.
      */
     public isPrimary(): boolean {
         return this.httpApp.getClusterHandler().getIsPrimary();

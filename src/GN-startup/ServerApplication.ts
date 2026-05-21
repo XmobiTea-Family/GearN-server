@@ -49,204 +49,106 @@ import { EventCallbackCloudScriptService, PostEventCallbackService, PreEventCall
 import { GNServerSettingsOptions, LogType, MessageType } from "@xmobitea/gearn-typescript-client-sdk";
 
 abstract class BuilderBase {
-    // Stores the application settings value used by this instance.
+    // Materialized settings copied from startup configuration into the builder/runtime.
     protected applicationSettings: ApplicationSettings;
-    // Stores the HTTP app settings value used by this instance.
     protected httpAppSettings: HttpAppSettings;
-    // Stores the socket app settings value used by this instance.
     protected socketAppSettings: SocketAppSettings;
-    // Stores the database settings value used by this instance.
     protected databaseSettings: DatabaseSettings;
-    // Stores the other settings value used by this instance.
     protected otherSettings: OtherSettings;
-    // Stores the log settings value used by this instance.
     protected logSettings: LogSettings;
-    // Stores the upload file settings value used by this instance.
     protected uploadFileSettings: UploadFileSettings;
-    // Stores the DDoS settings value used by this instance.
     protected ddosSettings: DdosSettings;
-    // Stores the cluster settings value used by this instance.
     protected clusterSettings: ClusterSettings;
 
-    /**
-     * Returns the application settings.
-     * @returns Returns the application settings.
-     */
     public getApplicationSettings(): ApplicationSettings {
         return this.applicationSettings;
     }
 
-    /**
-     * Returns the HTTP app settings.
-     * @returns Returns the HTTP app settings.
-     */
     public getHttpAppSettings(): HttpAppSettings {
         return this.httpAppSettings;
     }
 
-    /**
-     * Returns the socket app settings.
-     * @returns Returns the socket app settings.
-     */
     public getSocketAppSettings(): SocketAppSettings {
         return this.socketAppSettings;
     }
 
-    /**
-     * Returns the database settings.
-     * @returns Returns the database settings.
-     */
     public getDatabaseSettings(): DatabaseSettings {
         return this.databaseSettings;
     }
 
-    /**
-     * Returns the other settings.
-     * @returns Returns the other settings.
-     */
     public getOtherSettings(): OtherSettings {
         return this.otherSettings;
     }
 
-    /**
-     * Returns the log settings.
-     * @returns Returns the log settings.
-     */
     public getLogSettings(): LogSettings {
         return this.logSettings;
     }
 
-    /**
-     * Returns the upload file settings.
-     * @returns Returns the upload file settings.
-     */
     public getUploadFileSettings(): UploadFileSettings {
         return this.uploadFileSettings;
     }
 
-    /**
-     * Returns the DDoS settings.
-     * @returns Returns the DDoS settings.
-     */
     public getDdosSettings(): DdosSettings {
         return this.ddosSettings;
     }
 
-    /**
-     * Returns the cluster settings.
-     * @returns Returns the cluster settings.
-     */
     public getClusterSettings(): ClusterSettings {
         return this.clusterSettings;
     }
 
-    /**
-     * Initializes a new builder base instance.
-     */
     constructor() {}
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
-    /**
-     * Sets the application settings.
-     * @param applicationSettings Provides the application settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setApplicationSettings(applicationSettings: ApplicationSettings): Builder {
         this.applicationSettings = applicationSettings;
         return this;
     }
 
-    /**
-     * Sets the HTTP app settings.
-     * @param httpAppSettings Provides the HTTP app settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setHttpAppSettings(httpAppSettings: HttpAppSettings): Builder {
         this.httpAppSettings = httpAppSettings;
         return this;
     }
 
-    /**
-     * Sets the socket app settings.
-     * @param socketAppSettings Provides the socket app settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setSocketAppSettings(socketAppSettings: SocketAppSettings): Builder {
         this.socketAppSettings = socketAppSettings;
         return this;
     }
 
-    /**
-     * Sets the database settings.
-     * @param databaseSettings Provides the database settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setDatabaseSettings(databaseSettings: DatabaseSettings): Builder {
         this.databaseSettings = databaseSettings;
         return this;
     }
 
-    /**
-     * Sets the other settings.
-     * @param otherSettings Provides the other settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setOtherSettings(otherSettings: OtherSettings): Builder {
         this.otherSettings = otherSettings;
         return this;
     }
 
-    /**
-     * Sets the log settings.
-     * @param logSettings Provides the log settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setLogSettings(logSettings: LogSettings): Builder {
         this.logSettings = logSettings;
         return this;
     }
 
-    /**
-     * Sets the upload file settings.
-     * @param uploadFileSettings Provides the upload file settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setUploadFileSettings(uploadFileSettings: UploadFileSettings): Builder {
         this.uploadFileSettings = uploadFileSettings;
         return this;
     }
 
-    /**
-     * Sets the DDoS settings.
-     * @param ddosSettings Provides the DDoS settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setDdosSettings(ddosSettings: DdosSettings): Builder {
         this.ddosSettings = ddosSettings;
         return this;
     }
 
-    /**
-     * Sets the cluster settings.
-     * @param clusterSettings Provides the cluster settings value used by this operation.
-     * @returns Returns the current builder instance.
-     */
     public setClusterSettings(clusterSettings: ClusterSettings): Builder {
         this.clusterSettings = clusterSettings;
         return this;
     }
 
-    /**
-     * Builds the configured instance.
-     */
     public build() {
         return new ServerApplication(this);
     }
 
-    /**
-     * Initializes a new builder instance.
-     */
     constructor() {
         super();
     }
@@ -256,24 +158,17 @@ class Builder extends BuilderBase implements IBuilder<ServerApplication> {
  * Owns the full startup pipeline after settings have been materialized by `ServerApplicationStartup`.
  */
 export class ServerApplication extends BuilderBase {
-    // Stores the HTTP app value used by this instance.
+    // Transport and middleware objects created during bootstrap.
     private httpApp: HttpApp;
-    // Stores the socket app value used by this instance.
     private socketApp: SocketApp;
-    // Stores the GearN server value used by this instance.
     private gnServer: GNServer;
-    // Stores the API middleware value used by this instance.
     private apiMiddleware: ApiMiddleware;
-    // Stores the anti DDoS middleware value used by this instance.
     private antiDdosMiddleware: AntiDdosMiddleware;
-    // Stores the upload file middleware value used by this instance.
     private uploadFileMiddleware: UploadFileMiddleware;
 
-    // Stores the session ID value used by this instance.
+    // Per-process identifiers used by transports and default secret bootstrap.
     private sessionId: string;
-    // Stores the secretkey value used by this instance.
     private secretkey: string;
-    // Stores the secret ID value used by this instance.
     private secretId: string;
 
     /**
@@ -401,11 +296,10 @@ export class ServerApplication extends BuilderBase {
         this.gnServer.setIdTypeCase(this.getOtherSettings().getIdTypeCase());
         this.gnServer.setRestoreRootPassword(this.getApplicationSettings().getRestoreRootPassword());
         this.gnServer.setInitRootUsername(this.getApplicationSettings().getInitRootUsername());
-        // Stores the report DDoS collection value used in the current execution flow.
+        // System collections used by the anti-DDoS middleware for reporting and bans.
         let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdos");
         this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
-        // Stores the ban DDoS collection value used in the current execution flow.
         let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdos");
         this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
@@ -425,7 +319,7 @@ export class ServerApplication extends BuilderBase {
         // }
 
         let uploadFileInfoCollection = this.gnServer.getDatabase().systemCollection("UploadFileInfo");
-        // Stores the download file session collection value used in the current execution flow.
+        // Upload metadata and download-session metadata are served through the HTTP upload handler.
         let downloadFileSessionCollection = this.gnServer.getDatabase().systemCollection("DownloadFileSession");
         this.httpApp.getUploadFileHandler().setUploadFileInfoCollection(uploadFileInfoCollection);
         this.httpApp.getUploadFileHandler().setDownloadFileSessionCollection(downloadFileSessionCollection);
@@ -2028,7 +1922,6 @@ export class ServerApplication extends BuilderBase {
 
     /**
      * Creates the runtime coordinator and primes its database connections before transports start listening.
-     * @returns Returns the operation result.
      */
     private newGNServer(): GNServer {
         let gnServer = new GNServer();
@@ -2049,7 +1942,6 @@ export class ServerApplication extends BuilderBase {
 
     /**
      * Factory method kept overridable for custom startup implementations.
-     * @returns Returns the operation result.
      */
     private newApiMiddleware(): ApiMiddleware {
         let apiMiddleware = new ApiMiddleware();
@@ -2058,7 +1950,6 @@ export class ServerApplication extends BuilderBase {
 
     /**
      * Factory method kept overridable for custom startup implementations.
-     * @returns Returns the operation result.
      */
     private newAntiDdosMiddleware(): AntiDdosMiddleware {
         let antiDdosMiddleware = new AntiDdosMiddleware();
@@ -2067,7 +1958,6 @@ export class ServerApplication extends BuilderBase {
 
     /**
      * Factory method kept overridable for custom startup implementations.
-     * @returns Returns the operation result.
      */
     private newUploadMiddleware(): UploadFileMiddleware {
         let uploadFileMiddleware = new UploadFileMiddleware();
@@ -2075,24 +1965,21 @@ export class ServerApplication extends BuilderBase {
     }
 
     /**
-     * Returns the GearN server.
-     * @returns Returns the GearN server.
+     * Exposes the runtime coordinator created by this startup pipeline.
      */
     public getGNServer(): GNServer {
         return this.gnServer;
     }
 
     /**
-     * Executes the new HTTP app workflow.
-     * @returns Returns the operation result.
+     * Factory method kept overridable for custom startup implementations.
      */
     private newHttpApp(): HttpApp {
         return new HttpApp();
     }
 
     /**
-     * Executes the new socket app workflow.
-     * @returns Returns the operation result.
+     * Factory method kept overridable for custom startup implementations.
      */
     private newSocketApp(): SocketApp {
         return new SocketApp();
@@ -2100,9 +1987,6 @@ export class ServerApplication extends BuilderBase {
 
     /**
      * Creates the underlying HTTP/HTTPS server used by Express and, when ports match, by Socket.IO as well.
-     * @param app Provides the app value used by this operation.
-     * @param settings Provides the settings value used by this operation.
-     * @returns Returns the server.
      */
     private getServer(app: Express, settings: ApplicationSettings): http.Server {
         if (settings.getUseSSL()) {

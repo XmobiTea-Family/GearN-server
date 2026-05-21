@@ -20,25 +20,21 @@ export class RequestController {
     private requestConverterService: IRequestConverterService;
 
     /**
-     * Sets the request converter service.
-     * @param requestConverterService Provides the request converter service used by this operation.
+     * Injects the converter that maps raw transport requests into typed operation requests.
      */
     public setRequestConverterService(requestConverterService: IRequestConverterService): void {
         this.requestConverterService = requestConverterService;
     }
 
     /**
-     * Returns the request unauthenticated codes.
-     * @returns Returns the request unauthenticated codes.
+     * Returns the operation codes that are explicitly allowed without client authentication.
      */
     public getRequestUnAuthenticatedCodes(): string[] {
         return this.requestUnAuthenticatedCodes;
     }
 
     /**
-     * Adds the handler.
-     * @param requestType Provides the request type value used by this operation.
-     * @param requestHandler Provides the request handler used by this operation.
+     * Registers a handler under one request-type/operation-code slot.
      * @param onlyAuthenticated Indicates whether only authenticated access is allowed.
      */
     public addHandler(requestType: number, requestHandler: IRequestHandler, onlyAuthenticated: boolean = true) {
@@ -57,9 +53,7 @@ export class RequestController {
     }
 
     /**
-     * Removes the handler.
-     * @param requestType Provides the request type value used by this operation.
-     * @param operationCode Provides the operation code value used by this operation.
+     * Unregisters one operation from a request type.
      */
     public removeHandler(requestType: number, operationCode: string) {
         if (this.handlers[requestType] == null) {
@@ -80,10 +74,7 @@ export class RequestController {
     }
 
     /**
-     * Returns the handler.
-     * @param requestType Provides the request type value used by this operation.
-     * @param operationCode Provides the operation code value used by this operation.
-     * @returns Returns the handler.
+     * Looks up the handler registered for a request type and operation code.
      */
     public getHandler(requestType: number, operationCode: string): IRequestHandler {
         if (this.handlers[requestType] == null) {
@@ -97,9 +88,7 @@ export class RequestController {
     }
 
     /**
-     * Returns all handlers.
-     * @param requestType Provides the request type value used by this operation.
-     * @returns Returns all handlers.
+     * Returns every handler registered under the given request type.
      */
     public getAllHandlers(requestType: number): IRequestHandler[] {
         if (this.handlers[requestType] == null) {

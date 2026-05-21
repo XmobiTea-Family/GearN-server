@@ -16,171 +16,95 @@ import { LogSettings } from "./settings/LogSettings";
 import { ClusterSettings } from "./settings/ClusterSettings";
 
 export class HttpApp {
-    // Stores the application settings value used by this instance.
+    // Startup configuration injected before routes are registered.
     private applicationSettings: ApplicationSettings;
-    // Stores the upload file settings value used by this instance.
     private uploadFileSettings: UploadFileSettings;
-    // Stores the app settings value used by this instance.
     private appSettings: HttpAppSettings;
-    // Stores the socket app settings value used by this instance.
     private socketAppSettings: SocketAppSettings;
-    // Stores the cluster settings value used by this instance.
     private clusterSettings: ClusterSettings;
 
-    // Stores the app value used by this instance.
+    // Express objects and route handlers created during HTTP bootstrap.
     private app: Express;
-    // Stores the HTTP app handler value used by this instance.
     private httpAppHandler: HttpAppHandler;
-    // Stores the upload file handler value used by this instance.
     private uploadFileHandler: UploadFileHandler;
-    // Stores the cluster handler value used by this instance.
     private clusterHandler: ClusterHandler;
 
-    // Stores the anti DDoS middleware value used by this instance.
+    // Shared runtime services consumed by HTTP routes.
     private antiDdosMiddleware: AntiDdosMiddleware;
-    // Stores the log settings value used by this instance.
     private logSettings: LogSettings;
-
-    // Stores the API middleware value used by this instance.
     private apiMiddleware: ApiMiddleware;
-    // Stores the upload file middleware value used by this instance.
     private uploadFileMiddleware: UploadFileMiddleware;
-    // Stores the GearN server value used by this instance.
     private gnServer: GNServer;
 
-    // Stores the session ID value used by this instance.
+    // Per-process header name used by the transport/session handshake.
     private sessionId: string;
 
-    /**
-     * Sets the app.
-     * @param app Provides the app value used by this operation.
-     */
     public setApp(app: Express): void {
         this.app = app;
     }
 
-    /**
-     * Returns the app.
-     * @returns Returns the app.
-     */
     public getApp(): Express {
         return this.app;
     }
 
-    /**
-     * Returns the HTTP app handler.
-     * @returns Returns the HTTP app handler.
-     */
     public getHttpAppHandler(): HttpAppHandler {
         return this.httpAppHandler;
     }
 
-    /**
-     * Returns the upload file handler.
-     * @returns Returns the upload file handler.
-     */
     public getUploadFileHandler(): UploadFileHandler {
         return this.uploadFileHandler;
     }
 
-    /**
-     * Returns the cluster handler.
-     * @returns Returns the cluster handler.
-     */
     public getClusterHandler(): ClusterHandler {
         return this.clusterHandler;
     }
 
-    /**
-     * Sets the API middleware.
-     * @param apiMiddleware Provides the API middleware value used by this operation.
-     */
     public setApiMiddleware(apiMiddleware: ApiMiddleware) {
         this.apiMiddleware = apiMiddleware;
     }
 
-    /**
-     * Sets the upload file middleware.
-     * @param uploadFileMiddleware Provides the upload file middleware value used by this operation.
-     */
     public setUploadFileMiddleware(uploadFileMiddleware: UploadFileMiddleware) {
         this.uploadFileMiddleware = uploadFileMiddleware;
     }
 
-    /**
-     * Sets the application settings.
-     * @param applicationSettings Provides the application settings value used by this operation.
-     */
     public setApplicationSettings(applicationSettings: ApplicationSettings): void {
         this.applicationSettings = applicationSettings;
     }
 
-    /**
-     * Sets the app settings.
-     * @param appSettings Provides the app settings value used by this operation.
-     */
     public setAppSettings(appSettings: HttpAppSettings): void {
         this.appSettings = appSettings;
     }
 
-    /**
-     * Sets the socket app settings.
-     * @param socketAppSettings Provides the socket app settings value used by this operation.
-     */
     public setSocketAppSettings(socketAppSettings: SocketAppSettings): void {
         this.socketAppSettings = socketAppSettings;
     }
 
-    /**
-     * Sets the cluster settings.
-     * @param clusterSettings Provides the cluster settings value used by this operation.
-     */
     public setClusterSettings(clusterSettings: ClusterSettings): void {
         this.clusterSettings = clusterSettings;
     }
 
-    /**
-     * Sets the upload file settings.
-     * @param uploadFileSettings Provides the upload file settings value used by this operation.
-     */
     public setUploadFileSettings(uploadFileSettings: UploadFileSettings): void {
         this.uploadFileSettings = uploadFileSettings;
     }
 
-    /**
-     * Sets the GearN server.
-     * @param gnServer Provides the GearN server value used by this operation.
-     */
     public setGNServer(gnServer: GNServer): void {
         this.gnServer = gnServer;
     }
 
-    /**
-     * Sets the session ID.
-     * @param sessionId Provides the session ID value used by this operation.
-     */
     public setSessionId(sessionId: string): void {
         this.sessionId = sessionId;
     }
 
-    /**
-     * Sets the anti DDoS middleware.
-     * @param antiDdosMiddleware Provides the anti DDoS middleware value used by this operation.
-     */
     public setAntiDdosMiddleware(antiDdosMiddleware: AntiDdosMiddleware): void {
         this.antiDdosMiddleware = antiDdosMiddleware;
     }
 
-    /**
-     * Sets the log settings.
-     * @param logSettings Provides the log settings value used by this operation.
-     */
     public setLogSettings(logSettings: LogSettings): void {
         this.logSettings = logSettings;
     }
 
     /**
-     * Runs the current workflow.
+     * Registers the HTTP routes, upload endpoints, cluster endpoints, and health probes.
      */
     public run(): void {
         if (this.appSettings.getTrustProxy()) this.app.enable("trust proxy");
@@ -194,7 +118,7 @@ export class HttpApp {
         this.app.post("/", (req: express.Request, res: express.Response): any => {
             return res.sendStatus(403);
         });
-        // Tracks whether ed headers is allowed.
+        // Add the per-process session header so CORS allows clients to echo it back.
         let allowedHeaders = this.appSettings.getAllowedHeaders();
         allowedHeaders.push(this.sessionId);
 
@@ -216,26 +140,25 @@ export class HttpApp {
         });
 
         this.app.get("/healthcheck", (req: express.Request, res: express.Response): any => {
-            // Stores the this instance value used in the current execution flow.
+            // Current node status plus the latest view of peer nodes in the cluster.
             let thisInstance = this.clusterHandler.getInstanceInfoStatus();
-            // Stores the other instances value used in the current execution flow.
             let otherInstances = this.clusterHandler.getInstanceInfos();
 
-            // Stores the this instance response data value used in the current execution flow.
+            // Response shape for the current node, enriched with ISO timestamps for quick inspection.
             let thisInstanceResponseData: {
-                // Stores the instance ID value used by this contract.
+                // Stable cluster node identifier.
                 instanceId: string;
-                // Indicates whether primary.
+                // Whether this node currently believes it is the primary node.
                 isPrimary: boolean;
-                // Stores the current instance ID primary value used by this contract.
+                // Node id currently recognized as primary.
                 currentInstanceIdPrimary: string;
-                // Stores the current timestamp primary value used by this contract.
+                // Last heartbeat timestamp seen for the current primary.
                 currentTsPrimary: number;
-                // Stores the current timestamp primary to date value used by this contract.
+                // ISO rendering of `currentTsPrimary`.
                 currentTsPrimaryToDate: string;
-                // Stores the timestamp primary value used by this contract.
+                // Local timestamp for when this node became/observed primary.
                 tsPrimary: number;
-                // Stores the timestamp primary to date value used by this contract.
+                // ISO rendering of `tsPrimary`.
                 tsPrimaryToDate: string;
             } = {
                 instanceId: thisInstance.instanceId,
@@ -247,28 +170,27 @@ export class HttpApp {
                 tsPrimaryToDate: new Date(thisInstance.tsPrimary).toISOString(),
             };
 
-            // Stores the other instances response data value used in the current execution flow.
+            // Response shape for peer nodes tracked by the cluster handler.
             let otherInstancesResponseData: {
-                // Stores the instance ID value used by this contract.
+                // Stable cluster node identifier.
                 instanceId: string;
-                // Indicates whether primary.
+                // Whether that peer currently reports itself as primary.
                 isPrimary: boolean;
-                // Stores the current instance ID primary value used by this contract.
+                // Node id currently recognized as primary by that peer.
                 currentInstanceIdPrimary: string;
-                // Stores the current timestamp primary value used by this contract.
+                // Last heartbeat timestamp seen for the current primary.
                 currentTsPrimary: number;
-                // Stores the current timestamp primary to date value used by this contract.
+                // ISO rendering of `currentTsPrimary`.
                 currentTsPrimaryToDate: string;
-                // Stores the timestamp primary value used by this contract.
+                // Peer-local timestamp for when it became/observed primary.
                 tsPrimary: number;
-                // Stores the timestamp primary to date value used by this contract.
+                // ISO rendering of `tsPrimary`.
                 tsPrimaryToDate: string;
-                // Stores the lost ping value used by this contract.
+                // Number of missed heartbeats detected for that peer.
                 lostPing: number;
             }[] = [];
 
             for (let i = 0; i < otherInstances.length; i++) {
-                // Stores the other instance value used in the current execution flow.
                 let otherInstance = otherInstances[i];
 
                 otherInstancesResponseData.push({
@@ -326,9 +248,5 @@ export class HttpApp {
         this.clusterHandler.init();
         this.clusterHandler.run();
     }
-
-    /**
-     * Initializes a new HTTP app instance.
-     */
     constructor() {}
 }

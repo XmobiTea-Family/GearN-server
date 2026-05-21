@@ -360,7 +360,6 @@ import { GetFunctionsRequestHandler as CloudScript_GetFunctionsRequestHandler } 
 export class RequestControllerUtils {
     /**
      * Registers every built-in request handler family into the server request controller.
-     * @param gnServer Provides the GearN server value used by this operation.
      */
     public static addAllHandler(gnServer: GNServer): void {
         let requestController = gnServer.getRequestController();
