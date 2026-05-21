@@ -1,6 +1,7 @@
 /**
  * Projection options for querying CharacterPlayer from MongoDB.
- * Setting a flag to `true` includes the matching field in the result; `false` excludes it.
+ * Setting a flag to `true` includes the matching field in the result.
+ * Omitted or `false` flags are not added to the projection.
  * The goal is to keep the response payload small when callers only need a subset of the document.
  */
 export interface CharacterPlayerFindOptions {
