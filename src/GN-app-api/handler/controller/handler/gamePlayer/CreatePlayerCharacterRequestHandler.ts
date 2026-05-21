@@ -287,7 +287,6 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
                 {
                     _id: undefined,
                     characterId: characterId,
-                    playerCharacters: [],
                     catalogId: request.catalogId,
                     owner: { id: request.userId, type: OwnerType.GamePlayer },
                     removeStatus: { tsRemove: 0 },

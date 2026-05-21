@@ -1,7 +1,6 @@
 import * as mongodb from "mongodb";
 
 import { PlayerBase } from "./PlayerBase";
-import { CharacterItem } from "./CharacterItem";
 import { InventoryItem } from "./InventoryItem";
 import { GroupItem } from "./GroupItem";
 import { FriendItem } from "./FriendItem";
@@ -11,8 +10,6 @@ import { FriendItem } from "./FriendItem";
  * Adds character, inventory, group and friend lists — entities that are characteristic of multi-player gameplay.
  */
 export class GamePlayerBase extends PlayerBase {
-    /** MongoDB field name for the player's owned character list (quick reference only — not the full character entity). */
-    private static readonly _playerCharacters: string = "playerCharacters";
     /** MongoDB field name for the inventory items the player is currently carrying. */
     private static readonly _playerInventories: string = "playerInventories";
     /** MongoDB field name for the groups the player belongs to or is awaiting approval in. */
@@ -20,8 +17,6 @@ export class GamePlayerBase extends PlayerBase {
     /** MongoDB field name for the player's friend list. */
     private static readonly _playerFriends: string = "playerFriends";
 
-    /** Reference array of characters currently owned by the player (each entry is a CharacterItem — id + catalog only). */
-    private playerCharacters: Array<CharacterItem>;
     /** Reference array of inventory items the player owns (id + catalog + class only — no amount/state). */
     private playerInventories: Array<InventoryItem>;
     /** Reference array of groups the player belongs to, each carrying its membership state. */
@@ -45,78 +40,9 @@ export class GamePlayerBase extends PlayerBase {
      * @param result Provides the result value used by this operation.
      */
     private setDocumentGamePlayerBase(result: mongodb.WithId<mongodb.Document>) {
-        this.playerCharacters = result[GamePlayerBase._playerCharacters];
         this.playerInventories = result[GamePlayerBase._playerInventories];
         this.playerGroups = result[GamePlayerBase._playerGroups];
         this.playerFriends = result[GamePlayerBase._playerFriends];
-    }
-
-    /**
-     * Returns all player characters.
-     * @returns Returns all player characters.
-     */
-    public getAllPlayerCharacters(): Array<CharacterItem> {
-        return this.playerCharacters;
-    }
-
-    /**
-     * Returns the player character.
-     * @param characterId Provides the character ID value used by this operation.
-     * @returns Returns the player character.
-     */
-    public getPlayerCharacter(characterId: string): CharacterItem {
-        return this.playerCharacters.find((x) => x.characterId == characterId);
-    }
-
-    /**
-     * Sets the player character.
-     * @param characterId Provides the character ID value used by this operation.
-     * @param catalogId Provides the catalog ID value used by this operation.
-     */
-    public setPlayerCharacter(characterId: string, catalogId: string): void {
-        // Stores the player character item value used in the current execution flow.
-        let playerCharacterItem = this.playerCharacters.find((x) => x.characterId == characterId);
-        if (playerCharacterItem == null) {
-            playerCharacterItem = {
-                catalogId: catalogId,
-                characterId: characterId,
-            };
-
-            this.playerCharacters.push(playerCharacterItem);
-        } else {
-            playerCharacterItem.catalogId = catalogId;
-        }
-
-        this.set(GamePlayerBase._playerCharacters, this.playerCharacters);
-    }
-
-    /**
-     * Removes the player character.
-     * @param characterId Provides the character ID value used by this operation.
-     */
-    public removePlayerCharacter(characterId: string): void {
-        // Stores the player character item value used in the current execution flow.
-        let playerCharacterItem = this.playerCharacters.find((x) => x.characterId == characterId);
-        if (playerCharacterItem != null) {
-            // Stores the index of value used in the current execution flow.
-            let indexOf = this.playerCharacters.indexOf(playerCharacterItem);
-            if (indexOf != -1) {
-                this.playerCharacters.splice(indexOf, 1);
-
-                return this.set(GamePlayerBase._playerCharacters, this.playerCharacters);
-            }
-        }
-
-        throw Error("can not found the characterId to remove");
-    }
-
-    /**
-     * Checks whether player character exists.
-     * @param characterId Provides the character ID value used by this operation.
-     * @returns Returns the operation result.
-     */
-    public hasPlayerCharacter(characterId: string): boolean {
-        return this.playerCharacters.find((x) => x.characterId == characterId) != null;
     }
 
     /**

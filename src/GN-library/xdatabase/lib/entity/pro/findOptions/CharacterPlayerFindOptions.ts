@@ -33,8 +33,6 @@ export interface CharacterPlayerFindOptions {
     playerCurrencies?: boolean;
     /** Whether to include the player statistics map. */
     playerStatistics?: boolean;
-    /** Whether to include the player's owned-character list. */
-    playerCharacters?: boolean;
     /** Whether to include the player's inventory item list. */
     playerInventories?: boolean;
     /** Whether to include the player's group memberships. */

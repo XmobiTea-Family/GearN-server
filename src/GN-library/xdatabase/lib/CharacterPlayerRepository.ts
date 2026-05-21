@@ -14,7 +14,6 @@ import { CurrencyItem } from "./entity/pro/CurrencyItem";
 import { StatisticsItem } from "./entity/pro/StatisticsItem";
 import { DataValueType } from "./entity/pro/type/DataValueType";
 import { AvatarItem } from "./entity/pro/AvatarItem";
-import { CharacterItem } from "./entity/pro/CharacterItem";
 
 export class CharacterPlayerRepository extends AbstractBaseRepository {
     /**
@@ -28,7 +27,6 @@ export class CharacterPlayerRepository extends AbstractBaseRepository {
             characterId: string;
             catalogId: string;
             owner: OwnerItem;
-            playerCharacters: CharacterItem[];
             removeStatus: RemoveStatusItem;
             playerInventories: InventoryItem[];
             playerGroups: GroupItem[];
@@ -549,7 +547,6 @@ export class CharacterPlayerRepository extends AbstractBaseRepository {
         if (findOptions.playerDatas) answer["playerDatas"] = true;
         if (findOptions.playerCurrencies) answer["playerCurrencies"] = true;
         if (findOptions.playerStatistics) answer["playerStatistics"] = true;
-        if (findOptions.playerCharacters) answer["playerCharacters"] = true;
         if (findOptions.playerInventories) answer["playerInventories"] = true;
         if (findOptions.playerGroups) answer["playerGroups"] = true;
         if (findOptions.playerFriends) answer["playerFriends"] = true;
