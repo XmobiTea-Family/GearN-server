@@ -56,7 +56,7 @@ export class xDatetime {
         // Stores the now value used in the current execution flow.
         let now = new Date();
         // Stores the today 0 h value used in the current execution flow.
-        let today0h = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+        let today0h = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
         return this.getMilliseconds(today0h);
     }
