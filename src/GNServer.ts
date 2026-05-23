@@ -924,6 +924,8 @@ export class GNServer {
      * Polls matchmaking queues for every loaded game.
      */
     private handleMatchmaking() {
+        if (!this.isPrimary()) return;
+
         for (let i = 0; i < this.gameIds.length; i++) {
             let gameId = this.gameIds[i];
             this.handleMatchmakingForGame(gameId);

@@ -181,20 +181,9 @@ export class GetMatchRequestHandler extends MultiplayerBaseRequestHandler {
         // Stores the match collection value used in the current execution flow.
         let matchCollection = this.gnServer.getDatabase().systemGameCollection("Match", secretInfo.getGameId());
 
-        // Stores the projection value used in the current execution flow.
-        let projection: any = null;
-        if (!request.returnMember) {
-            projection = {
-                members: false,
-            };
-        }
-
         // find tat ca nhung cai ticket nay
         let result = await matchCollection.findOne(
             { matchId: request.matchId },
-            {
-                projection: projection,
-            },
         );
 
         if (result == null) {
