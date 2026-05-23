@@ -29,14 +29,14 @@ export class ConfigService implements IConfigService {
     public run(): void {
         this.syncAllConfigAsync(true);
 
-        this.intervalId = setInterval(() => {
-            try {
-                this.syncAllConfigAsync(false);
-            } catch (error) {
-                Debug.logError("Sync all config error on " + this.gameId + " with error " + error);
-            } finally {
-            }
-        }, 120000);
+        // this.intervalId = setInterval(() => {
+        //     try {
+        //         this.syncAllConfigAsync(false);
+        //     } catch (error) {
+        //         Debug.logError("Sync all config error on " + this.gameId + " with error " + error);
+        //     } finally {
+        //     }
+        // }, 120000);
     }
 
     public stop(): void {

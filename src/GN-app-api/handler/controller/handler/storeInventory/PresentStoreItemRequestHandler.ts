@@ -17,7 +17,7 @@ import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupS
 import { StoreReceiveType } from "./../../../../../GN-common/constant/enumType/StoreReceiveType";
 import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
-import { Debug } from "../../../../../GN-library/xdebug/lib/xDebug";
+import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
 class PresentStoreItemOperationRequest extends OperationRequest {
     // Stores the store ID value used by this instance.
