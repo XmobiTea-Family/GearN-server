@@ -17,6 +17,7 @@ import { GroupStatus } from "./../../../../../GN-common/constant/enumType/GroupS
 import { StoreReceiveType } from "./../../../../../GN-common/constant/enumType/StoreReceiveType";
 import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { StoreItemType } from "./../../../../../GN-common/constant/enumType/StoreItemType";
+import { Debug } from "../../../../../GN-library/xdebug/lib/xDebug";
 
 class BuyStoreItemOperationRequest extends OperationRequest {
     // Stores the store ID value used by this instance.
@@ -337,701 +338,719 @@ export class BuyStoreItemRequestHandler extends StoreItemBaseRequestHandler {
         // Stores the current milliseconds value used in the current execution flow.
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
-        if (request.type == OwnerType.CharacterPlayer) {
-            // Stores the character player value used in the current execution flow.
-            let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
-                playerCurrencies: true,
-                playerInventories: true,
-            });
+        const session = this.gnServer.getDatabase().startSession();
 
-            if (characterPlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
-                return operationResponse;
-            }
+        try {
+            session.startTransaction();
 
-            // Stores the resolved character player settings instance for the current execution flow.
-            let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
-
-            // Tracks whether set player currency lst should be used.
-            let useSetPlayerCurrencyLst: string[] = [];
-
-            // Stores the enought currency value used in the current execution flow.
-            let enoughtCurrency = true;
-            for (let i = 0; i < allPriceCurrencies.length; i++) {
-                // Stores the price currency value used in the current execution flow.
-                let priceCurrency = allPriceCurrencies[i];
-
-                if (!characterPlayer.hasPlayerCurrency(priceCurrency.key)) {
-                    if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
-
-                    // Stores the player currencies settings item value used in the current execution flow.
-                    let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find((x) => x.key == priceCurrency.key);
-                    if (playerCurrenciesSettingsItem != null) {
-                        characterPlayer.setPlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
-                    } else {
-                        characterPlayer.setPlayerCurrency(priceCurrency.key, 0);
-                    }
-                } else {
-                    if (allStoreCurrencies.find((x) => x.key == priceCurrency.key) != null) {
-                        if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
-                    }
-                }
-
-                // Stores the player currency value used in the current execution flow.
-                let playerCurrency = characterPlayer.getPlayerCurrency(priceCurrency.key);
-
-                priceCurrencyStartValues.push({
-                    key: priceCurrency.key,
-                    value: playerCurrency.value,
-                });
-                priceCurrencyAmountValues.push({
-                    key: priceCurrency.key,
-                    value: -priceCurrency.value,
+            if (request.type == OwnerType.CharacterPlayer) {
+                // Stores the character player value used in the current execution flow.
+                let characterPlayer = await this.gnServer.getDatabase().characterPlayerRepository.loadCharacterPlayerAsync(request.id, secretInfo.getGameId(), {
+                    playerCurrencies: true,
+                    playerInventories: true,
                 });
 
-                if (playerCurrency.value < priceCurrency.value) {
-                    enoughtCurrency = false;
-                    break;
+                if (characterPlayer == null) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
+                    return operationResponse;
                 }
-            }
 
-            if (!enoughtCurrency) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
-                return operationResponse;
-            }
+                // Stores the resolved character player settings instance for the current execution flow.
+                let characterPlayerSettings = this.gnServer.getGNSettings().getCharacterPlayerSettings(secretInfo.getGameId());
 
-            // Stores the GearN info response parameters value used in the current execution flow.
-            let gnInfoResponseParameters = new GNHashtable();
+                // Tracks whether set player currency lst should be used.
+                let useSetPlayerCurrencyLst: string[] = [];
 
-            // Stores the GearN player currencies value used in the current execution flow.
-            let gnPlayerCurrencies = new GNArray();
-            // Stores the GearN player inventories value used in the current execution flow.
-            let gnPlayerInventories = new GNArray();
-
-            let logs: { characterId: string; key: string; amount: number; startValue: number; finalValue: number; tsCreate: number; log: string }[] = [];
-
-            {
+                // Stores the enought currency value used in the current execution flow.
+                let enoughtCurrency = true;
                 for (let i = 0; i < allPriceCurrencies.length; i++) {
                     // Stores the price currency value used in the current execution flow.
                     let priceCurrency = allPriceCurrencies[i];
+
+                    if (!characterPlayer.hasPlayerCurrency(priceCurrency.key)) {
+                        if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
+
+                        // Stores the player currencies settings item value used in the current execution flow.
+                        let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find((x) => x.key == priceCurrency.key);
+                        if (playerCurrenciesSettingsItem != null) {
+                            characterPlayer.setPlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
+                        } else {
+                            characterPlayer.setPlayerCurrency(priceCurrency.key, 0);
+                        }
+                    } else {
+                        if (allStoreCurrencies.find((x) => x.key == priceCurrency.key) != null) {
+                            if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
+                        }
+                    }
 
                     // Stores the player currency value used in the current execution flow.
                     let playerCurrency = characterPlayer.getPlayerCurrency(priceCurrency.key);
 
-                    // Stores the old value value used in the current execution flow.
-                    let oldValue = playerCurrency.value;
-                    // Stores the server value value used in the current execution flow.
-                    let serverValue = playerCurrency.value - priceCurrency.value;
-
-                    if (useSetPlayerCurrencyLst.includes(priceCurrency.key)) {
-                        characterPlayer.setPlayerCurrency(priceCurrency.key, serverValue);
-                    } else {
-                        characterPlayer.changePlayerCurrency(priceCurrency.key, -priceCurrency.value);
-                    }
-
-                    // Stores the GearN player currency value used in the current execution flow.
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(ParameterCode.Key, priceCurrency.key);
-                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
-
-                    gnPlayerCurrencies.add(gnPlayerCurrency);
-
-                    priceCurrencyFinalValues.push({
+                    priceCurrencyStartValues.push({
                         key: priceCurrency.key,
-                        value: serverValue,
-                    });
-
-                    logs.push({
-                        characterId: request.id,
-                        key: priceCurrency.key,
-                        amount: -priceCurrency.value,
-                        startValue: oldValue,
-                        finalValue: serverValue,
-                        tsCreate: currentMilliseconds,
-                        log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
-                    });
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreItems.length; i++) {
-                    // Stores the store item value used in the current execution flow.
-                    let storeItem = allStoreItems[i];
-
-                    // Stores the player item catalog settings item value used in the current execution flow.
-                    let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find((x) => x.catalogId == storeItem.catalogId);
-
-                    if (playerItemCatalogSettingsItem != null) {
-                        // Stores the item class settings item value used in the current execution flow.
-                        let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == storeItem.classId);
-                        if (itemClassSettingsItem != null) {
-                            // Stores the inventory value used in the current execution flow.
-                            let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
-                            characterPlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
-
-                            // Stores the GearN player inventory value used in the current execution flow.
-                            let gnPlayerInventory = new GNHashtable();
-
-                            gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
-                            gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
-                            gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
-
-                            gnPlayerInventories.add(gnPlayerInventory);
-
-                            storeItemFinalValues.push({
-                                catalogId: inventory.getCatalogId(),
-                                classId: inventory.getClassId(),
-                                itemId: inventory.getItemId(),
-                            });
-                        }
-                    }
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreCurrencies.length; i++) {
-                    // Stores the store currency value used in the current execution flow.
-                    let storeCurrency = allStoreCurrencies[i];
-
-                    storeCurrencyAmountValues.push({
-                        key: storeCurrency.key,
-                        value: storeCurrency.value,
-                    });
-
-                    if (!characterPlayer.hasPlayerCurrency(storeCurrency.key)) {
-                        if (!useSetPlayerCurrencyLst.includes(storeCurrency.key)) useSetPlayerCurrencyLst.push(storeCurrency.key);
-
-                        // Stores the player currencies settings item value used in the current execution flow.
-                        let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find((x) => x.key == storeCurrency.key);
-                        if (playerCurrenciesSettingsItem != null) {
-                            characterPlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
-                        } else {
-                            characterPlayer.setPlayerCurrency(storeCurrency.key, 0);
-                        }
-                    }
-
-                    // Stores the player currency value used in the current execution flow.
-                    let playerCurrency = characterPlayer.getPlayerCurrency(storeCurrency.key);
-
-                    storeCurrencyStartValues.push({
-                        key: storeCurrency.key,
                         value: playerCurrency.value,
                     });
-
-                    // Stores the old value value used in the current execution flow.
-                    let oldValue = playerCurrency.value;
-                    // Stores the server value value used in the current execution flow.
-                    let serverValue = playerCurrency.value + storeCurrency.value;
-
-                    if (useSetPlayerCurrencyLst.includes(storeCurrency.key)) {
-                        characterPlayer.setPlayerCurrency(storeCurrency.key, serverValue);
-                    } else {
-                        characterPlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
-                    }
-
-                    // Stores the GearN player currency value used in the current execution flow.
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
-
-                    storeCurrencyFinalValues.push({
-                        key: storeCurrency.key,
-                        value: serverValue,
+                    priceCurrencyAmountValues.push({
+                        key: priceCurrency.key,
+                        value: -priceCurrency.value,
                     });
 
-                    gnPlayerCurrencies.add(gnPlayerCurrency);
-
-                    logs.push({
-                        characterId: request.id,
-                        key: storeCurrency.key,
-                        amount: storeCurrency.value,
-                        startValue: oldValue,
-                        finalValue: serverValue,
-                        tsCreate: currentMilliseconds,
-                        log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
-                    });
-                }
-            }
-
-            this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
-
-            await characterPlayer.saveAsync();
-
-            gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
-            gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
-
-            operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        } else if (request.type == OwnerType.GamePlayer) {
-            // Stores the game player value used in the current execution flow.
-            let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
-                playerCurrencies: true,
-                playerInventories: true,
-            });
-
-            if (gamePlayer == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
-                return operationResponse;
-            }
-
-            // Stores the resolved game player settings instance for the current execution flow.
-            let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
-
-            // Tracks whether set player currency lst should be used.
-            let useSetPlayerCurrencyLst: string[] = [];
-
-            // Stores the enought currency value used in the current execution flow.
-            let enoughtCurrency = true;
-            for (let i = 0; i < allPriceCurrencies.length; i++) {
-                // Stores the price currency value used in the current execution flow.
-                let priceCurrency = allPriceCurrencies[i];
-
-                if (!gamePlayer.hasPlayerCurrency(priceCurrency.key)) {
-                    if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
-
-                    // Stores the player currencies settings item value used in the current execution flow.
-                    let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find((x) => x.key == priceCurrency.key);
-                    if (playerCurrenciesSettingsItem != null) {
-                        gamePlayer.setPlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
-                    } else {
-                        gamePlayer.setPlayerCurrency(priceCurrency.key, 0);
-                    }
-                } else {
-                    if (allStoreCurrencies.find((x) => x.key == priceCurrency.key) != null) {
-                        if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
+                    if (playerCurrency.value < priceCurrency.value) {
+                        enoughtCurrency = false;
+                        break;
                     }
                 }
 
-                // Stores the player currency value used in the current execution flow.
-                let playerCurrency = gamePlayer.getPlayerCurrency(priceCurrency.key);
-
-                priceCurrencyStartValues.push({
-                    key: priceCurrency.key,
-                    value: playerCurrency.value,
-                });
-                priceCurrencyAmountValues.push({
-                    key: priceCurrency.key,
-                    value: -priceCurrency.value,
-                });
-
-                if (playerCurrency.value < priceCurrency.value) {
-                    enoughtCurrency = false;
-                    break;
+                if (!enoughtCurrency) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
+                    return operationResponse;
                 }
-            }
 
-            if (!enoughtCurrency) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
-                return operationResponse;
-            }
+                // Stores the GearN info response parameters value used in the current execution flow.
+                let gnInfoResponseParameters = new GNHashtable();
 
-            // Stores the GearN info response parameters value used in the current execution flow.
-            let gnInfoResponseParameters = new GNHashtable();
+                // Stores the GearN player currencies value used in the current execution flow.
+                let gnPlayerCurrencies = new GNArray();
+                // Stores the GearN player inventories value used in the current execution flow.
+                let gnPlayerInventories = new GNArray();
 
-            // Stores the GearN player currencies value used in the current execution flow.
-            let gnPlayerCurrencies = new GNArray();
-            // Stores the GearN player inventories value used in the current execution flow.
-            let gnPlayerInventories = new GNArray();
+                let logs: { characterId: string; key: string; amount: number; startValue: number; finalValue: number; tsCreate: number; log: string }[] = [];
 
-            let logs: { userId: string; key: string; amount: number; startValue: number; finalValue: number; tsCreate: number; log: string }[] = [];
+                {
+                    for (let i = 0; i < allPriceCurrencies.length; i++) {
+                        // Stores the price currency value used in the current execution flow.
+                        let priceCurrency = allPriceCurrencies[i];
 
-            {
-                // tru tien thang nay nao
+                        // Stores the player currency value used in the current execution flow.
+                        let playerCurrency = characterPlayer.getPlayerCurrency(priceCurrency.key);
+
+                        // Stores the old value value used in the current execution flow.
+                        let oldValue = playerCurrency.value;
+                        // Stores the server value value used in the current execution flow.
+                        let serverValue = playerCurrency.value - priceCurrency.value;
+
+                        if (useSetPlayerCurrencyLst.includes(priceCurrency.key)) {
+                            characterPlayer.setPlayerCurrency(priceCurrency.key, serverValue);
+                        } else {
+                            characterPlayer.changePlayerCurrency(priceCurrency.key, -priceCurrency.value);
+                        }
+
+                        // Stores the GearN player currency value used in the current execution flow.
+                        let gnPlayerCurrency = new GNHashtable();
+
+                        gnPlayerCurrency.add(ParameterCode.Key, priceCurrency.key);
+                        gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+                        gnPlayerCurrencies.add(gnPlayerCurrency);
+
+                        priceCurrencyFinalValues.push({
+                            key: priceCurrency.key,
+                            value: serverValue,
+                        });
+
+                        logs.push({
+                            characterId: request.id,
+                            key: priceCurrency.key,
+                            amount: -priceCurrency.value,
+                            startValue: oldValue,
+                            finalValue: serverValue,
+                            tsCreate: currentMilliseconds,
+                            log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
+                        });
+                    }
+                }
+
+                {
+                    for (let i = 0; i < allStoreItems.length; i++) {
+                        // Stores the store item value used in the current execution flow.
+                        let storeItem = allStoreItems[i];
+
+                        // Stores the player item catalog settings item value used in the current execution flow.
+                        let playerItemCatalogSettingsItem = characterPlayerSettings.playerItemCatalogSettings.find((x) => x.catalogId == storeItem.catalogId);
+
+                        if (playerItemCatalogSettingsItem != null) {
+                            // Stores the item class settings item value used in the current execution flow.
+                            let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == storeItem.classId);
+                            if (itemClassSettingsItem != null) {
+                                // Stores the inventory value used in the current execution flow.
+                                let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId(), session);
+                                characterPlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
+
+                                // Stores the GearN player inventory value used in the current execution flow.
+                                let gnPlayerInventory = new GNHashtable();
+
+                                gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
+                                gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+                                gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
+
+                                gnPlayerInventories.add(gnPlayerInventory);
+
+                                storeItemFinalValues.push({
+                                    catalogId: inventory.getCatalogId(),
+                                    classId: inventory.getClassId(),
+                                    itemId: inventory.getItemId(),
+                                });
+                            }
+                        }
+                    }
+                }
+
+                {
+                    for (let i = 0; i < allStoreCurrencies.length; i++) {
+                        // Stores the store currency value used in the current execution flow.
+                        let storeCurrency = allStoreCurrencies[i];
+
+                        storeCurrencyAmountValues.push({
+                            key: storeCurrency.key,
+                            value: storeCurrency.value,
+                        });
+
+                        if (!characterPlayer.hasPlayerCurrency(storeCurrency.key)) {
+                            if (!useSetPlayerCurrencyLst.includes(storeCurrency.key)) useSetPlayerCurrencyLst.push(storeCurrency.key);
+
+                            // Stores the player currencies settings item value used in the current execution flow.
+                            let playerCurrenciesSettingsItem = characterPlayerSettings.playerCurrenciesSettings.find((x) => x.key == storeCurrency.key);
+                            if (playerCurrenciesSettingsItem != null) {
+                                characterPlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
+                            } else {
+                                characterPlayer.setPlayerCurrency(storeCurrency.key, 0);
+                            }
+                        }
+
+                        // Stores the player currency value used in the current execution flow.
+                        let playerCurrency = characterPlayer.getPlayerCurrency(storeCurrency.key);
+
+                        storeCurrencyStartValues.push({
+                            key: storeCurrency.key,
+                            value: playerCurrency.value,
+                        });
+
+                        // Stores the old value value used in the current execution flow.
+                        let oldValue = playerCurrency.value;
+                        // Stores the server value value used in the current execution flow.
+                        let serverValue = playerCurrency.value + storeCurrency.value;
+
+                        if (useSetPlayerCurrencyLst.includes(storeCurrency.key)) {
+                            characterPlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+                        } else {
+                            characterPlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
+                        }
+
+                        // Stores the GearN player currency value used in the current execution flow.
+                        let gnPlayerCurrency = new GNHashtable();
+
+                        gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+                        gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+                        storeCurrencyFinalValues.push({
+                            key: storeCurrency.key,
+                            value: serverValue,
+                        });
+
+                        gnPlayerCurrencies.add(gnPlayerCurrency);
+
+                        logs.push({
+                            characterId: request.id,
+                            key: storeCurrency.key,
+                            amount: storeCurrency.value,
+                            startValue: oldValue,
+                            finalValue: serverValue,
+                            tsCreate: currentMilliseconds,
+                            log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
+                        });
+                    }
+                }
+
+                this.gnServer.getDatabase().characterPlayerRepository.insertCharacterPlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
+
+                await characterPlayer.saveAsync(session);
+
+                gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
+                gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
+
+                operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+            } else if (request.type == OwnerType.GamePlayer) {
+                // Stores the game player value used in the current execution flow.
+                let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayerAsync(request.id, secretInfo.getGameId(), {
+                    playerCurrencies: true,
+                    playerInventories: true,
+                });
+
+                if (gamePlayer == null) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
+                    return operationResponse;
+                }
+
+                // Stores the resolved game player settings instance for the current execution flow.
+                let gamePlayerSettings = this.gnServer.getGNSettings().getGamePlayerSettings(secretInfo.getGameId());
+
+                // Tracks whether set player currency lst should be used.
+                let useSetPlayerCurrencyLst: string[] = [];
+
+                // Stores the enought currency value used in the current execution flow.
+                let enoughtCurrency = true;
                 for (let i = 0; i < allPriceCurrencies.length; i++) {
                     // Stores the price currency value used in the current execution flow.
                     let priceCurrency = allPriceCurrencies[i];
+
+                    if (!gamePlayer.hasPlayerCurrency(priceCurrency.key)) {
+                        if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
+
+                        // Stores the player currencies settings item value used in the current execution flow.
+                        let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find((x) => x.key == priceCurrency.key);
+                        if (playerCurrenciesSettingsItem != null) {
+                            gamePlayer.setPlayerCurrency(priceCurrency.key, playerCurrenciesSettingsItem.initialValue);
+                        } else {
+                            gamePlayer.setPlayerCurrency(priceCurrency.key, 0);
+                        }
+                    } else {
+                        if (allStoreCurrencies.find((x) => x.key == priceCurrency.key) != null) {
+                            if (!useSetPlayerCurrencyLst.includes(priceCurrency.key)) useSetPlayerCurrencyLst.push(priceCurrency.key);
+                        }
+                    }
 
                     // Stores the player currency value used in the current execution flow.
                     let playerCurrency = gamePlayer.getPlayerCurrency(priceCurrency.key);
 
-                    // Stores the old value value used in the current execution flow.
-                    let oldValue = playerCurrency.value;
-                    // Stores the server value value used in the current execution flow.
-                    let serverValue = playerCurrency.value - priceCurrency.value;
-
-                    if (useSetPlayerCurrencyLst.includes(priceCurrency.key)) {
-                        gamePlayer.setPlayerCurrency(priceCurrency.key, serverValue);
-                    } else {
-                        gamePlayer.changePlayerCurrency(priceCurrency.key, -priceCurrency.value);
-                    }
-
-                    // Stores the GearN player currency value used in the current execution flow.
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(ParameterCode.Key, priceCurrency.key);
-                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
-
-                    gnPlayerCurrencies.add(gnPlayerCurrency);
-
-                    priceCurrencyFinalValues.push({
+                    priceCurrencyStartValues.push({
                         key: priceCurrency.key,
-                        value: serverValue,
-                    });
-
-                    logs.push({
-                        userId: request.id,
-                        key: priceCurrency.key,
-                        amount: -priceCurrency.value,
-                        startValue: oldValue,
-                        finalValue: serverValue,
-                        tsCreate: currentMilliseconds,
-                        log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
-                    });
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreItems.length; i++) {
-                    // Stores the store item value used in the current execution flow.
-                    let storeItem = allStoreItems[i];
-
-                    // Stores the player item catalog settings item value used in the current execution flow.
-                    let playerItemCatalogSettingsItem = gamePlayerSettings.playerItemCatalogSettings.find((x) => x.catalogId == storeItem.catalogId);
-
-                    if (playerItemCatalogSettingsItem != null) {
-                        // Stores the item class settings item value used in the current execution flow.
-                        let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == storeItem.classId);
-                        if (itemClassSettingsItem != null) {
-                            // Stores the inventory value used in the current execution flow.
-                            let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
-                            gamePlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
-
-                            // Stores the GearN player inventory value used in the current execution flow.
-                            let gnPlayerInventory = new GNHashtable();
-
-                            gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
-                            gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
-                            gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
-
-                            gnPlayerInventories.add(gnPlayerInventory);
-
-                            storeItemFinalValues.push({
-                                catalogId: inventory.getCatalogId(),
-                                classId: inventory.getClassId(),
-                                itemId: inventory.getItemId(),
-                            });
-                        }
-                    }
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreCurrencies.length; i++) {
-                    // Stores the store currency value used in the current execution flow.
-                    let storeCurrency = allStoreCurrencies[i];
-
-                    storeCurrencyAmountValues.push({
-                        key: storeCurrency.key,
-                        value: storeCurrency.value,
-                    });
-
-                    if (!gamePlayer.hasPlayerCurrency(storeCurrency.key)) {
-                        if (!useSetPlayerCurrencyLst.includes(storeCurrency.key)) useSetPlayerCurrencyLst.push(storeCurrency.key);
-
-                        // Stores the player currencies settings item value used in the current execution flow.
-                        let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find((x) => x.key == storeCurrency.key);
-                        if (playerCurrenciesSettingsItem != null) {
-                            gamePlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
-                        } else {
-                            gamePlayer.setPlayerCurrency(storeCurrency.key, 0);
-                        }
-                    }
-
-                    // Stores the player currency value used in the current execution flow.
-                    let playerCurrency = gamePlayer.getPlayerCurrency(storeCurrency.key);
-
-                    storeCurrencyStartValues.push({
-                        key: storeCurrency.key,
                         value: playerCurrency.value,
                     });
-
-                    // Stores the old value value used in the current execution flow.
-                    let oldValue = playerCurrency.value;
-                    // Stores the server value value used in the current execution flow.
-                    let serverValue = playerCurrency.value + storeCurrency.value;
-
-                    if (useSetPlayerCurrencyLst.includes(storeCurrency.key)) {
-                        gamePlayer.setPlayerCurrency(storeCurrency.key, serverValue);
-                    } else {
-                        gamePlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
-                    }
-
-                    // Stores the GearN player currency value used in the current execution flow.
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
-
-                    storeCurrencyFinalValues.push({
-                        key: storeCurrency.key,
-                        value: serverValue,
+                    priceCurrencyAmountValues.push({
+                        key: priceCurrency.key,
+                        value: -priceCurrency.value,
                     });
 
-                    gnPlayerCurrencies.add(gnPlayerCurrency);
-
-                    logs.push({
-                        userId: request.id,
-                        key: storeCurrency.key,
-                        amount: storeCurrency.value,
-                        startValue: oldValue,
-                        finalValue: serverValue,
-                        tsCreate: currentMilliseconds,
-                        log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
-                    });
-                }
-            }
-
-            this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
-
-            await gamePlayer.saveAsync();
-
-            gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
-            gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
-
-            operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        } else if (request.type == OwnerType.Group) {
-            // Stores the group value used in the current execution flow.
-            let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.id, secretInfo.getGameId(), {
-                groupCurrencies: true,
-                groupInventories: true,
-            });
-
-            if (group == null) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
-                return operationResponse;
-            }
-
-            // Stores the resolved group settings instance for the current execution flow.
-            let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
-
-            // Tracks whether set group currency lst should be used.
-            let useSetGroupCurrencyLst: string[] = [];
-
-            // Stores the enought currency value used in the current execution flow.
-            let enoughtCurrency = true;
-            for (let i = 0; i < allPriceCurrencies.length; i++) {
-                // Stores the price currency value used in the current execution flow.
-                let priceCurrency = allPriceCurrencies[i];
-
-                if (!group.hasGroupCurrency(priceCurrency.key)) {
-                    if (!useSetGroupCurrencyLst.includes(priceCurrency.key)) useSetGroupCurrencyLst.push(priceCurrency.key);
-
-                    // Stores the group currencies settings item value used in the current execution flow.
-                    let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find((x) => x.key == priceCurrency.key);
-                    if (groupCurrenciesSettingsItem != null) {
-                        group.setGroupCurrency(priceCurrency.key, groupCurrenciesSettingsItem.initialValue);
-                    } else {
-                        group.setGroupCurrency(priceCurrency.key, 0);
-                    }
-                } else {
-                    if (allStoreCurrencies.find((x) => x.key == priceCurrency.key) != null) {
-                        if (!useSetGroupCurrencyLst.includes(priceCurrency.key)) useSetGroupCurrencyLst.push(priceCurrency.key);
+                    if (playerCurrency.value < priceCurrency.value) {
+                        enoughtCurrency = false;
+                        break;
                     }
                 }
 
-                // Stores the group currency value used in the current execution flow.
-                let groupCurrency = group.getGroupCurrency(priceCurrency.key);
-
-                priceCurrencyStartValues.push({
-                    key: priceCurrency.key,
-                    value: groupCurrency.value,
-                });
-                priceCurrencyAmountValues.push({
-                    key: priceCurrency.key,
-                    value: -priceCurrency.value,
-                });
-
-                if (groupCurrency.value < priceCurrency.value) {
-                    enoughtCurrency = false;
-                    break;
+                if (!enoughtCurrency) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
+                    return operationResponse;
                 }
-            }
 
-            if (!enoughtCurrency) {
-                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
-                return operationResponse;
-            }
+                // Stores the GearN info response parameters value used in the current execution flow.
+                let gnInfoResponseParameters = new GNHashtable();
 
-            // Stores the GearN info response parameters value used in the current execution flow.
-            let gnInfoResponseParameters = new GNHashtable();
+                // Stores the GearN player currencies value used in the current execution flow.
+                let gnPlayerCurrencies = new GNArray();
+                // Stores the GearN player inventories value used in the current execution flow.
+                let gnPlayerInventories = new GNArray();
 
-            // Stores the GearN currencies value used in the current execution flow.
-            let gnCurrencies = new GNArray();
-            // Stores the GearN inventories value used in the current execution flow.
-            let gnInventories = new GNArray();
+                let logs: { userId: string; key: string; amount: number; startValue: number; finalValue: number; tsCreate: number; log: string }[] = [];
 
-            let logs: { groupId: string; key: string; amount: number; startValue: number; finalValue: number; tsCreate: number; log: string }[] = [];
+                {
+                    // tru tien thang nay nao
+                    for (let i = 0; i < allPriceCurrencies.length; i++) {
+                        // Stores the price currency value used in the current execution flow.
+                        let priceCurrency = allPriceCurrencies[i];
 
-            {
+                        // Stores the player currency value used in the current execution flow.
+                        let playerCurrency = gamePlayer.getPlayerCurrency(priceCurrency.key);
+
+                        // Stores the old value value used in the current execution flow.
+                        let oldValue = playerCurrency.value;
+                        // Stores the server value value used in the current execution flow.
+                        let serverValue = playerCurrency.value - priceCurrency.value;
+
+                        if (useSetPlayerCurrencyLst.includes(priceCurrency.key)) {
+                            gamePlayer.setPlayerCurrency(priceCurrency.key, serverValue);
+                        } else {
+                            gamePlayer.changePlayerCurrency(priceCurrency.key, -priceCurrency.value);
+                        }
+
+                        // Stores the GearN player currency value used in the current execution flow.
+                        let gnPlayerCurrency = new GNHashtable();
+
+                        gnPlayerCurrency.add(ParameterCode.Key, priceCurrency.key);
+                        gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+                        gnPlayerCurrencies.add(gnPlayerCurrency);
+
+                        priceCurrencyFinalValues.push({
+                            key: priceCurrency.key,
+                            value: serverValue,
+                        });
+
+                        logs.push({
+                            userId: request.id,
+                            key: priceCurrency.key,
+                            amount: -priceCurrency.value,
+                            startValue: oldValue,
+                            finalValue: serverValue,
+                            tsCreate: currentMilliseconds,
+                            log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
+                        });
+                    }
+                }
+
+                {
+                    for (let i = 0; i < allStoreItems.length; i++) {
+                        // Stores the store item value used in the current execution flow.
+                        let storeItem = allStoreItems[i];
+
+                        // Stores the player item catalog settings item value used in the current execution flow.
+                        let playerItemCatalogSettingsItem = gamePlayerSettings.playerItemCatalogSettings.find((x) => x.catalogId == storeItem.catalogId);
+
+                        if (playerItemCatalogSettingsItem != null) {
+                            // Stores the item class settings item value used in the current execution flow.
+                            let itemClassSettingsItem = playerItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == storeItem.classId);
+                            if (itemClassSettingsItem != null) {
+                                // Stores the inventory value used in the current execution flow.
+                                let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, playerItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId(), session);
+                                gamePlayer.setPlayerInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
+
+                                // Stores the GearN player inventory value used in the current execution flow.
+                                let gnPlayerInventory = new GNHashtable();
+
+                                gnPlayerInventory.add(ParameterCode.ItemId, inventory.getItemId());
+                                gnPlayerInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+                                gnPlayerInventory.add(ParameterCode.ClassId, inventory.getClassId());
+
+                                gnPlayerInventories.add(gnPlayerInventory);
+
+                                storeItemFinalValues.push({
+                                    catalogId: inventory.getCatalogId(),
+                                    classId: inventory.getClassId(),
+                                    itemId: inventory.getItemId(),
+                                });
+                            }
+                        }
+                    }
+                }
+
+                {
+                    for (let i = 0; i < allStoreCurrencies.length; i++) {
+                        // Stores the store currency value used in the current execution flow.
+                        let storeCurrency = allStoreCurrencies[i];
+
+                        storeCurrencyAmountValues.push({
+                            key: storeCurrency.key,
+                            value: storeCurrency.value,
+                        });
+
+                        if (!gamePlayer.hasPlayerCurrency(storeCurrency.key)) {
+                            if (!useSetPlayerCurrencyLst.includes(storeCurrency.key)) useSetPlayerCurrencyLst.push(storeCurrency.key);
+
+                            // Stores the player currencies settings item value used in the current execution flow.
+                            let playerCurrenciesSettingsItem = gamePlayerSettings.playerCurrenciesSettings.find((x) => x.key == storeCurrency.key);
+                            if (playerCurrenciesSettingsItem != null) {
+                                gamePlayer.setPlayerCurrency(storeCurrency.key, playerCurrenciesSettingsItem.initialValue);
+                            } else {
+                                gamePlayer.setPlayerCurrency(storeCurrency.key, 0);
+                            }
+                        }
+
+                        // Stores the player currency value used in the current execution flow.
+                        let playerCurrency = gamePlayer.getPlayerCurrency(storeCurrency.key);
+
+                        storeCurrencyStartValues.push({
+                            key: storeCurrency.key,
+                            value: playerCurrency.value,
+                        });
+
+                        // Stores the old value value used in the current execution flow.
+                        let oldValue = playerCurrency.value;
+                        // Stores the server value value used in the current execution flow.
+                        let serverValue = playerCurrency.value + storeCurrency.value;
+
+                        if (useSetPlayerCurrencyLst.includes(storeCurrency.key)) {
+                            gamePlayer.setPlayerCurrency(storeCurrency.key, serverValue);
+                        } else {
+                            gamePlayer.changePlayerCurrency(storeCurrency.key, storeCurrency.value);
+                        }
+
+                        // Stores the GearN player currency value used in the current execution flow.
+                        let gnPlayerCurrency = new GNHashtable();
+
+                        gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+                        gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+                        storeCurrencyFinalValues.push({
+                            key: storeCurrency.key,
+                            value: serverValue,
+                        });
+
+                        gnPlayerCurrencies.add(gnPlayerCurrency);
+
+                        logs.push({
+                            userId: request.id,
+                            key: storeCurrency.key,
+                            amount: storeCurrency.value,
+                            startValue: oldValue,
+                            finalValue: serverValue,
+                            tsCreate: currentMilliseconds,
+                            log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
+                        });
+                    }
+                }
+
+                this.gnServer.getDatabase().gamePlayerRepository.insertGamePlayerCurrencyLogsAsync(logs, secretInfo.getGameId());
+
+                await gamePlayer.saveAsync(session);
+
+                gnInfoResponseParameters.add(ParameterCode.Currencies, gnPlayerCurrencies);
+                gnInfoResponseParameters.add(ParameterCode.Inventories, gnPlayerInventories);
+
+                operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
+            } else if (request.type == OwnerType.Group) {
+                // Stores the group value used in the current execution flow.
+                let group = await this.gnServer.getDatabase().groupRepository.loadGroupAsync(request.id, secretInfo.getGameId(), {
+                    groupCurrencies: true,
+                    groupInventories: true,
+                });
+
+                if (group == null) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.BuyerNotFound);
+                    return operationResponse;
+                }
+
+                // Stores the resolved group settings instance for the current execution flow.
+                let groupSettings = this.gnServer.getGNSettings().getGroupSettings(secretInfo.getGameId());
+
+                // Tracks whether set group currency lst should be used.
+                let useSetGroupCurrencyLst: string[] = [];
+
+                // Stores the enought currency value used in the current execution flow.
+                let enoughtCurrency = true;
                 for (let i = 0; i < allPriceCurrencies.length; i++) {
                     // Stores the price currency value used in the current execution flow.
                     let priceCurrency = allPriceCurrencies[i];
 
+                    if (!group.hasGroupCurrency(priceCurrency.key)) {
+                        if (!useSetGroupCurrencyLst.includes(priceCurrency.key)) useSetGroupCurrencyLst.push(priceCurrency.key);
+
+                        // Stores the group currencies settings item value used in the current execution flow.
+                        let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find((x) => x.key == priceCurrency.key);
+                        if (groupCurrenciesSettingsItem != null) {
+                            group.setGroupCurrency(priceCurrency.key, groupCurrenciesSettingsItem.initialValue);
+                        } else {
+                            group.setGroupCurrency(priceCurrency.key, 0);
+                        }
+                    } else {
+                        if (allStoreCurrencies.find((x) => x.key == priceCurrency.key) != null) {
+                            if (!useSetGroupCurrencyLst.includes(priceCurrency.key)) useSetGroupCurrencyLst.push(priceCurrency.key);
+                        }
+                    }
+
                     // Stores the group currency value used in the current execution flow.
                     let groupCurrency = group.getGroupCurrency(priceCurrency.key);
 
-                    // Stores the old value value used in the current execution flow.
-                    let oldValue = groupCurrency.value;
-                    // Stores the server value value used in the current execution flow.
-                    let serverValue = groupCurrency.value - priceCurrency.value;
-
-                    if (useSetGroupCurrencyLst.includes(priceCurrency.key)) {
-                        group.setGroupCurrency(priceCurrency.key, serverValue);
-                    } else {
-                        group.changeGroupCurrency(priceCurrency.key, -priceCurrency.value);
-                    }
-
-                    // Stores the GearN group currency value used in the current execution flow.
-                    let gnGroupCurrency = new GNHashtable();
-
-                    gnGroupCurrency.add(ParameterCode.Key, priceCurrency.key);
-                    gnGroupCurrency.add(ParameterCode.Value, serverValue);
-
-                    priceCurrencyFinalValues.push({
+                    priceCurrencyStartValues.push({
                         key: priceCurrency.key,
-                        value: serverValue,
-                    });
-
-                    gnCurrencies.add(gnGroupCurrency);
-
-                    logs.push({
-                        groupId: request.id,
-                        key: priceCurrency.key,
-                        amount: -priceCurrency.value,
-                        startValue: oldValue,
-                        finalValue: serverValue,
-                        tsCreate: currentMilliseconds,
-                        log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
-                    });
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreItems.length; i++) {
-                    // Stores the store item value used in the current execution flow.
-                    let storeItem = allStoreItems[i];
-
-                    // Stores the group item catalog settings item value used in the current execution flow.
-                    let groupItemCatalogSettingsItem = groupSettings.groupItemCatalogSettings.find((x) => x.catalogId == storeItem.catalogId);
-
-                    if (groupItemCatalogSettingsItem != null) {
-                        // Stores the item class settings item value used in the current execution flow.
-                        let itemClassSettingsItem = groupItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == storeItem.classId);
-                        if (itemClassSettingsItem != null) {
-                            // Stores the inventory value used in the current execution flow.
-                            let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, groupItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId());
-                            group.setGroupInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
-
-                            // Stores the GearN group inventory value used in the current execution flow.
-                            let gnGroupInventory = new GNHashtable();
-
-                            gnGroupInventory.add(ParameterCode.ItemId, inventory.getItemId());
-                            gnGroupInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
-                            gnGroupInventory.add(ParameterCode.ClassId, inventory.getClassId());
-
-                            gnInventories.add(gnGroupInventory);
-
-                            storeItemFinalValues.push({
-                                catalogId: inventory.getCatalogId(),
-                                classId: inventory.getClassId(),
-                                itemId: inventory.getItemId(),
-                            });
-                        }
-                    }
-                }
-            }
-
-            {
-                for (let i = 0; i < allStoreCurrencies.length; i++) {
-                    // Stores the store currency value used in the current execution flow.
-                    let storeCurrency = allStoreCurrencies[i];
-
-                    storeCurrencyAmountValues.push({
-                        key: storeCurrency.key,
-                        value: storeCurrency.value,
-                    });
-
-                    if (!group.hasGroupCurrency(storeCurrency.key)) {
-                        if (!useSetGroupCurrencyLst.includes(storeCurrency.key)) {
-                            useSetGroupCurrencyLst.push(storeCurrency.key);
-                        }
-
-                        // Stores the group currencies settings item value used in the current execution flow.
-                        let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find((x) => x.key == storeCurrency.key);
-                        if (groupCurrenciesSettingsItem != null) {
-                            group.setGroupCurrency(storeCurrency.key, groupCurrenciesSettingsItem.initialValue);
-                        } else {
-                            group.setGroupCurrency(storeCurrency.key, 0);
-                        }
-                    }
-
-                    // Stores the group currency value used in the current execution flow.
-                    let groupCurrency = group.getGroupCurrency(storeCurrency.key);
-
-                    storeCurrencyStartValues.push({
-                        key: storeCurrency.key,
                         value: groupCurrency.value,
                     });
+                    priceCurrencyAmountValues.push({
+                        key: priceCurrency.key,
+                        value: -priceCurrency.value,
+                    });
 
-                    // Stores the old value value used in the current execution flow.
-                    let oldValue = groupCurrency.value;
-                    // Stores the server value value used in the current execution flow.
-                    let serverValue = groupCurrency.value + storeCurrency.value;
-
-                    if (useSetGroupCurrencyLst.includes(storeCurrency.key)) {
-                        group.setGroupCurrency(storeCurrency.key, serverValue);
-                    } else {
-                        group.changeGroupCurrency(storeCurrency.key, storeCurrency.value);
+                    if (groupCurrency.value < priceCurrency.value) {
+                        enoughtCurrency = false;
+                        break;
                     }
-
-                    // Stores the GearN player currency value used in the current execution flow.
-                    let gnPlayerCurrency = new GNHashtable();
-
-                    gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
-                    gnPlayerCurrency.add(ParameterCode.Value, serverValue);
-
-                    storeCurrencyFinalValues.push({
-                        key: storeCurrency.key,
-                        value: serverValue,
-                    });
-
-                    gnCurrencies.add(gnPlayerCurrency);
-
-                    logs.push({
-                        groupId: request.id,
-                        key: storeCurrency.key,
-                        amount: storeCurrency.value,
-                        startValue: oldValue,
-                        finalValue: serverValue,
-                        tsCreate: currentMilliseconds,
-                        log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
-                    });
                 }
+
+                if (!enoughtCurrency) {
+                    operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.NotEnoughCurrency);
+                    return operationResponse;
+                }
+
+                // Stores the GearN info response parameters value used in the current execution flow.
+                let gnInfoResponseParameters = new GNHashtable();
+
+                // Stores the GearN currencies value used in the current execution flow.
+                let gnCurrencies = new GNArray();
+                // Stores the GearN inventories value used in the current execution flow.
+                let gnInventories = new GNArray();
+
+                let logs: { groupId: string; key: string; amount: number; startValue: number; finalValue: number; tsCreate: number; log: string }[] = [];
+
+                {
+                    for (let i = 0; i < allPriceCurrencies.length; i++) {
+                        // Stores the price currency value used in the current execution flow.
+                        let priceCurrency = allPriceCurrencies[i];
+
+                        // Stores the group currency value used in the current execution flow.
+                        let groupCurrency = group.getGroupCurrency(priceCurrency.key);
+
+                        // Stores the old value value used in the current execution flow.
+                        let oldValue = groupCurrency.value;
+                        // Stores the server value value used in the current execution flow.
+                        let serverValue = groupCurrency.value - priceCurrency.value;
+
+                        if (useSetGroupCurrencyLst.includes(priceCurrency.key)) {
+                            group.setGroupCurrency(priceCurrency.key, serverValue);
+                        } else {
+                            group.changeGroupCurrency(priceCurrency.key, -priceCurrency.value);
+                        }
+
+                        // Stores the GearN group currency value used in the current execution flow.
+                        let gnGroupCurrency = new GNHashtable();
+
+                        gnGroupCurrency.add(ParameterCode.Key, priceCurrency.key);
+                        gnGroupCurrency.add(ParameterCode.Value, serverValue);
+
+                        priceCurrencyFinalValues.push({
+                            key: priceCurrency.key,
+                            value: serverValue,
+                        });
+
+                        gnCurrencies.add(gnGroupCurrency);
+
+                        logs.push({
+                            groupId: request.id,
+                            key: priceCurrency.key,
+                            amount: -priceCurrency.value,
+                            startValue: oldValue,
+                            finalValue: serverValue,
+                            tsCreate: currentMilliseconds,
+                            log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
+                        });
+                    }
+                }
+
+                {
+                    for (let i = 0; i < allStoreItems.length; i++) {
+                        // Stores the store item value used in the current execution flow.
+                        let storeItem = allStoreItems[i];
+
+                        // Stores the group item catalog settings item value used in the current execution flow.
+                        let groupItemCatalogSettingsItem = groupSettings.groupItemCatalogSettings.find((x) => x.catalogId == storeItem.catalogId);
+
+                        if (groupItemCatalogSettingsItem != null) {
+                            // Stores the item class settings item value used in the current execution flow.
+                            let itemClassSettingsItem = groupItemCatalogSettingsItem.itemClassSettings.find((x) => x.classId == storeItem.classId);
+                            if (itemClassSettingsItem != null) {
+                                // Stores the inventory value used in the current execution flow.
+                                let inventory = await this.createItem(storeItem.catalogId, storeItem.classId, storeItem.amount, groupItemCatalogSettingsItem.itemType, request.id, request.type, secretInfo.getGameId(), session);
+                                group.setGroupInventory(inventory.getItemId(), storeItem.catalogId, storeItem.classId);
+
+                                // Stores the GearN group inventory value used in the current execution flow.
+                                let gnGroupInventory = new GNHashtable();
+
+                                gnGroupInventory.add(ParameterCode.ItemId, inventory.getItemId());
+                                gnGroupInventory.add(ParameterCode.CatalogId, inventory.getCatalogId());
+                                gnGroupInventory.add(ParameterCode.ClassId, inventory.getClassId());
+
+                                gnInventories.add(gnGroupInventory);
+
+                                storeItemFinalValues.push({
+                                    catalogId: inventory.getCatalogId(),
+                                    classId: inventory.getClassId(),
+                                    itemId: inventory.getItemId(),
+                                });
+                            }
+                        }
+                    }
+                }
+
+                {
+                    for (let i = 0; i < allStoreCurrencies.length; i++) {
+                        // Stores the store currency value used in the current execution flow.
+                        let storeCurrency = allStoreCurrencies[i];
+
+                        storeCurrencyAmountValues.push({
+                            key: storeCurrency.key,
+                            value: storeCurrency.value,
+                        });
+
+                        if (!group.hasGroupCurrency(storeCurrency.key)) {
+                            if (!useSetGroupCurrencyLst.includes(storeCurrency.key)) {
+                                useSetGroupCurrencyLst.push(storeCurrency.key);
+                            }
+
+                            // Stores the group currencies settings item value used in the current execution flow.
+                            let groupCurrenciesSettingsItem = groupSettings.groupCurrenciesSettings.find((x) => x.key == storeCurrency.key);
+                            if (groupCurrenciesSettingsItem != null) {
+                                group.setGroupCurrency(storeCurrency.key, groupCurrenciesSettingsItem.initialValue);
+                            } else {
+                                group.setGroupCurrency(storeCurrency.key, 0);
+                            }
+                        }
+
+                        // Stores the group currency value used in the current execution flow.
+                        let groupCurrency = group.getGroupCurrency(storeCurrency.key);
+
+                        storeCurrencyStartValues.push({
+                            key: storeCurrency.key,
+                            value: groupCurrency.value,
+                        });
+
+                        // Stores the old value value used in the current execution flow.
+                        let oldValue = groupCurrency.value;
+                        // Stores the server value value used in the current execution flow.
+                        let serverValue = groupCurrency.value + storeCurrency.value;
+
+                        if (useSetGroupCurrencyLst.includes(storeCurrency.key)) {
+                            group.setGroupCurrency(storeCurrency.key, serverValue);
+                        } else {
+                            group.changeGroupCurrency(storeCurrency.key, storeCurrency.value);
+                        }
+
+                        // Stores the GearN player currency value used in the current execution flow.
+                        let gnPlayerCurrency = new GNHashtable();
+
+                        gnPlayerCurrency.add(ParameterCode.Key, storeCurrency.key);
+                        gnPlayerCurrency.add(ParameterCode.Value, serverValue);
+
+                        storeCurrencyFinalValues.push({
+                            key: storeCurrency.key,
+                            value: serverValue,
+                        });
+
+                        gnCurrencies.add(gnPlayerCurrency);
+
+                        logs.push({
+                            groupId: request.id,
+                            key: storeCurrency.key,
+                            amount: storeCurrency.value,
+                            startValue: oldValue,
+                            finalValue: serverValue,
+                            tsCreate: currentMilliseconds,
+                            log: "BuyStoreItem " + storeInventory.getStoreId() + ", log: " + request.log,
+                        });
+                    }
+                }
+
+                this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogsAsync(logs, secretInfo.getGameId());
+
+                await group.saveAsync(session);
+
+                gnInfoResponseParameters.add(ParameterCode.Currencies, gnCurrencies);
+                gnInfoResponseParameters.add(ParameterCode.Inventories, gnInventories);
+
+                operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
             }
 
-            this.gnServer.getDatabase().groupRepository.insertGroupCurrencyLogsAsync(logs, secretInfo.getGameId());
+            this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, StoreReceiveType.Buy, request.log);
 
-            await group.saveAsync();
+            if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) await this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type, session);
 
-            gnInfoResponseParameters.add(ParameterCode.Currencies, gnCurrencies);
-            gnInfoResponseParameters.add(ParameterCode.Inventories, gnInventories);
+            // Stores the in app purchase value used in the current execution flow.
+            let inAppPurchase = storeInventory.getInAppPurchase();
+            if (inAppPurchase.analyticsPrice) {
+                await this.gnServer.getDatabase().systemCollection("StoreAnalytics").insertOne({
+                    tsCreate: currentMilliseconds,
+                    price: inAppPurchase.analyticsPrice,
+                    storeId: storeInventory.getStoreId(),
+                }, {
+                    session: session,
+                });
+            }
 
-            operationResponse.setParameter(ParameterCode.InfoResponseParameters, gnInfoResponseParameters);
-        }
+            await session.commitTransaction();
+        } catch (err) {
+            await session.abortTransaction();
 
-        this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryLogAsync(request.storeId, secretInfo.getGameId(), request.id, request.type, priceCurrencyStartValues, priceCurrencyAmountValues, priceCurrencyFinalValues, storeCurrencyStartValues, storeCurrencyAmountValues, storeCurrencyFinalValues, storeItemFinalValues, null, StoreReceiveType.Buy, request.log);
+            Debug.logError(err);
 
-        if (storeInventory.getStoreItemType() == StoreItemType.NonConsumable) this.gnServer.getDatabase().storeInventoryRepository.insertStoreInventoryUsedAsync(storeInventory.getStoreId(), secretInfo.getGameId(), request.id, request.type);
-
-        // Stores the in app purchase value used in the current execution flow.
-        let inAppPurchase = storeInventory.getInAppPurchase();
-        if (inAppPurchase.analyticsPrice) {
-            this.gnServer.getDatabase().systemCollection("StoreAnalytics").insertOne({
-                tsCreate: currentMilliseconds,
-                price: inAppPurchase.analyticsPrice,
-                storeId: storeInventory.getStoreId(),
-            });
+            throw err;
+        } finally {
+            await session.endSession();
         }
 
         operationResponse.setParameter(ParameterCode.StoreCurrencies, this.generateStoreCurrencies(storeInventory));

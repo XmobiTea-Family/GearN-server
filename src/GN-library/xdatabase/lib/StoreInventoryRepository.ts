@@ -117,8 +117,9 @@ export class StoreInventoryRepository extends AbstractBaseRepository {
      * @param gameId Provides the game ID value used by this operation.
      * @param ownerId Provides the owner ID value used by this operation.
      * @param ownerType Provides the owner type value used by this operation.
+     * @param session Provides the database session value used by this operation.
      */
-    public async insertStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string, ownerType: number) {
+    public async insertStoreInventoryUsedAsync(storeId: string, gameId: string, ownerId: string, ownerType: number, session?: mongodb.ClientSession) {
         // Stores the collection value used in the current execution flow.
         let collection = this.systemGameCollection("StoreInventory.StoreUsed", gameId);
 
@@ -135,6 +136,7 @@ export class StoreInventoryRepository extends AbstractBaseRepository {
             },
             {
                 upsert: true,
+                session: session,
             },
         );
     }
@@ -160,7 +162,7 @@ export class StoreInventoryRepository extends AbstractBaseRepository {
                             id: { $in: ownerIds },
                         },
                     } as any,
-                },
+                }
             );
         }
     }
