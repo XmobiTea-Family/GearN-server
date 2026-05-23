@@ -303,7 +303,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                                 }
                             }
                         } else if (requestRule.type == RuleType.TeamSizeBalance) {
-                            if (!requestRule.allowedDifference) {
+                            if (requestRule.allowedDifference == null) {
                                 return this.newOperationInvalid(operationRequest, "AllowedDifference not found");
                             }
 
