@@ -529,8 +529,6 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
                     });
 
                     if (tagsSetting.index) addKeyLst.push(tagsSetting.key);
-
-                    addKeyLst.push(tagsSetting.key);
                 }
 
                 this.gnServer.getGNSettings().getMasterPlayerSettings().tagsSettings = tagsSettings;
