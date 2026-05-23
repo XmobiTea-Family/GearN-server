@@ -216,7 +216,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
             secretInfoItem.setPermission(permissionAny);
         }
 
-        secretInfoItem.saveAsync();
+        await secretInfoItem.saveAsync();
 
         this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetSecretInfoInformation", {
             gameId: secretInfoItem.getGameId(),
