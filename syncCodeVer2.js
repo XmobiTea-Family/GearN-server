@@ -14,17 +14,17 @@ docs.push(
         childScripts: [
             {
                 eventName: "system_OnEveryMinute",
-                script: "\nsystemHandlers.system_OnEveryMinute = async (log: (message: any) => void) => {\n\n}\n",
+                script: "\nsystemHandlers[\"system_OnEveryMinute\"] = async (log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
             {
                 eventName: "system_OnEveryHour",
-                script: "\nsystemHandlers.system_OnEveryHour = async (log: (message: any) => void) => {\n\n}\n",
+                script: "\nsystemHandler[\"system_OnEveryHour\"] = async (log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
             {
                 eventName: "system_OnEveryDay",
-                script: "\nsystemHandlers.system_OnEveryDay = async (log: (message: any) => void) => {\n\n}\n",
+                script: "\nsystemHandlers[\"system_OnEveryDay\"] = async (log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
         ],
@@ -37,7 +37,7 @@ docs.push(
         childScripts: [
             {
                 eventName: "systemMatchmaking_RequestServerDetail",
-                script: "\nsystemMatchmakingHandlers.systemMatchmaking_RequestServerDetail = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (message: any) => void): Promise<{ success: boolean }> => {\n\t//call matchmaking.confirmServerDetail(gameId, matchmakingTicketCanMatch, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
+                script: "\nsystemMatchmakingHandlers[\"systemMatchmaking_RequestServerDetail\"] = async (gameId: string, matchmakingTicketCanMatch: MatchmakingTicketCanMatch, log: (message: any) => void): Promise<{ success: boolean }> => {\n\t//call matchmaking.confirmServerDetail(gameId, matchmakingTicketCanMatch, { ipV4Address: '127.0.0.1', ports: [{ name: 'GamePort', publicPort: 2202, privatePort: 3000, protocol: 1 }] }); // after setup success a dedicated server;\n\treturn { success: false };\n}\n",
                 hasEdit: false,
             },
         ],
@@ -50,12 +50,12 @@ docs.push(
         childScripts: [
             {
                 eventName: "systemAuthenticate_OnAuthenticateSuccess",
-                script: "\nsystemAuthenticateHandlers.systemAuthenticate_OnAuthenticateSuccess = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                script: "\nsystemAuthenticateHandlers[\"systemAuthenticate_OnAuthenticateSuccess\"] = async (request: { userId: string, ipAddress: string, isNewUser: boolean, authenticationType: string, subData: { [k: string]: any; } }, secretInfo: SecretInfo, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 hasEdit: false,
             },
             {
                 eventName: "systemAuthenticate_VerifyGenericService",
-                script: "\nsystemGenericServiceHandlers.systemAuthenticate_VerifyGenericService = async (serviceName: string, serviceData: { [k: string]: any; }, log: (message: any) => void): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> => {\n\n\treturn { success: false, serviceId: null, };\n}\n",
+                script: "\nsystemGenericServiceHandlers[\"systemAuthenticate_VerifyGenericService\"] = async (serviceName: string, serviceData: { [k: string]: any; }, log: (message: any) => void): Promise<{ success: boolean, serviceId: string, someDatas?: any, errorMessage?: string }> => {\n\n\treturn { success: false, serviceId: null, };\n}\n",
                 hasEdit: false,
             },
         ],
@@ -68,22 +68,22 @@ docs.push(
         childScripts: [
             {
                 eventName: "event_SendEventTo",
-                script: "\neventHandlers.event_SendEventTo = async (request: { userId: string }, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
+                script: "\neventHandlers[\"event_SendEventTo\"] = async (request: { userId: string }, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
             {
                 eventName: "event_SendEventToRoom",
-                script: "\neventHandlers.event_SendEventToRoom = async (request: { roomId: string }, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
+                script: "\neventHandlers[\"event_SendEventToRoom\"] = async (request: { roomId: string }, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
             {
                 eventName: "event_SendEventToMoreUser",
-                script: "\neventHandlers.event_SendEventToMoreUser = async (request: { userIds: string[] }, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
+                script: "\neventHandlers[\"event_SendEventToMoreUser\"] = async (request: { userIds: string[] }, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
             {
                 eventName: "event_SendEventToAllPlayer",
-                script: "\neventHandlers.event_SendEventToAllPlayer = async (request: {}, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
+                script: "\neventHandlers[\"event_SendEventToAllPlayer\"] = async (request: {}, operationEvent: OperationEvent, log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
         ],
@@ -96,12 +96,12 @@ docs.push(
         childScripts: [
             {
                 eventName: "socket_OnSocketConnected",
-                script: "\nsocketHandlers.socket_OnSocketConnected = async (userId: string, socketId: string, log: (message: any) => void) => {\n\n}\n",
+                script: "\nsocketHandlers[\"socket_OnSocketConnected\"] = async (userId: string, socketId: string, log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
             {
                 eventName: "socket_OnSocketDisconnected",
-                script: "\nsocketHandlers.socket_OnSocketDisconnected = async (userId: string, socketId: string, log: (message: any) => void) => {\n\n}\n",
+                script: "\nsocketHandlers[\"socket_OnSocketDisconnected\"] = async (userId: string, socketId: string, log: (message: any) => void) => {\n\n}\n",
                 hasEdit: false,
             },
         ],
@@ -216,13 +216,13 @@ function readAllTsFiles(name) {
                     };
 
                     let script = "\n";
-                    script += "preHandlers." + childScript.eventName + " = async (" + spls2 + ", role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n";
+                    script += "preHandlers[\"" + childScript.eventName + "\"] = async (" + spls2 + ", role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n";
                     script += "\n";
                     script += "\treturn null;\n";
                     script += "}\n";
                     script += "\n";
 
-                    script += "postHandlers." + childScript.eventName + " = async (" + spls2 + ", role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n";
+                    script += "postHandlers[\"" + childScript.eventName + "\"] = async (" + spls2 + ", role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n";
                     script += "\n";
                     script += "\treturn operationResponse;\n";
                     script += "}\n";
