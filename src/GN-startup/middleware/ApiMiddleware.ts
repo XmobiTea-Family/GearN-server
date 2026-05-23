@@ -321,13 +321,15 @@ export class ApiMiddleware {
                 // Stores the data secret permission item value used in the current execution flow.
                 let dataSecretPermissionItem = secretInfoResult.permission as any;
                 // Stores the key layer 0 s value used in the current execution flow.
-                let keyLayer0s = Object.keys(dataSecretPermissionItem); // authenticate, masterPlayer, ...
+                let keyLayer0s = Object.keys(defaultSecretPermissionItem); // authenticate, masterPlayer, ...
 
                 for (let i = 0; i < keyLayer0s.length; i++) {
                     // Stores the key layer 0 value used in the current execution flow.
                     let keyLayer0 = keyLayer0s[i]; // authenticate
                     let thisLayer0Any = dataSecretPermissionItem[keyLayer0]; // { loginByAccount : { seft enable: false } }
                     let defaultThisLayer0Any = defaultSecretPermissionItem[keyLayer0];
+
+                    if (thisLayer0Any == null) continue;
 
                     // Stores the key layer 1 s value used in the current execution flow.
                     let keyLayer1s = Object.keys(thisLayer0Any); // [ loginByAccount, registerAccount]
@@ -340,7 +342,7 @@ export class ApiMiddleware {
                         // Stores the default permission any for layer 1 any value used in the current execution flow.
                         let defaultPermissionAnyForLayer1Any = defaultThisLayer0Any[keyLayer1];
 
-                        if (dataPermissionAnyForLayer1Any != null) {
+                        if (dataPermissionAnyForLayer1Any != null && defaultPermissionAnyForLayer1Any != null) {
                             // Stores the self enable value used in the current execution flow.
                             let selfEnable: boolean = dataPermissionAnyForLayer1Any.selfEnable;
                             // Stores the other self enable value used in the current execution flow.
@@ -355,9 +357,9 @@ export class ApiMiddleware {
                             defaultPermissionAnyForLayer1Any.adminSelfEnable = adminSelfEnable != null && adminSelfEnable;
                             defaultPermissionAnyForLayer1Any.serverSelfEnable = serverSelfEnable != null && serverSelfEnable;
 
-                            if (defaultPermissionAnyForLayer1Any.otherSelfEnable) {
-                                defaultPermissionAnyForLayer1Any.selfEnable = true;
-                            }
+                            // if (defaultPermissionAnyForLayer1Any.otherSelfEnable) {
+                            //     defaultPermissionAnyForLayer1Any.selfEnable = true;
+                            // }
 
                             // if (secretRole == SecretRole.Client) {
                             //     defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
