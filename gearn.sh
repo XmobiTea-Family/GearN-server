@@ -300,7 +300,7 @@ init_create_srcAppApiHandlerDir() {
     GNHashtableDataMember,
     GNArrayDataMember,
     SecretInfo,
-
+    SecretRole,
 } from "@xmobitea/gearn-server";
 import { TestErrorCode } from "./../../common/constant/errorCode/TestErrorCode";
 import { OperationCodeExtensions } from "./../../common/constant/OperationCode.ext";
@@ -338,11 +338,7 @@ export class TestRequestHandler extends RequestHandler {
         return TestOperationRequest;
     }
 
-    public async handle(
-        authInfo: AuthInfo,
-        secretInfo: SecretInfo,
-        operationRequest: OperationRequest
-    ): Promise<OperationResponse> {
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
         if (!request.isValidRequest()) {
@@ -355,10 +351,10 @@ export class TestRequestHandler extends RequestHandler {
             stringValue: request.stringValue,
             gnHashtableValue: request.gnHashtableValue,
             gnArrayValue: request.gnArrayValue,
-        }, secretInfo, operationRequest);
+        }, SecretRole.Client, secretInfo, operationRequest);
     }
 
-    private async execute(request: { booleanValue: boolean, numberValue: number, stringValue: string, gnHashtableValue: GNHashtable, gnArrayValue: GNArray }, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+    private async execute(request: { booleanValue: boolean, numberValue: number, stringValue: string, gnHashtableValue: GNHashtable, gnArrayValue: GNArray }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
         operationResponse.setParameter(
@@ -423,7 +419,7 @@ export class EventCodeExtensions extends EventCode {
     echo 'import { OperationCode } from "@xmobitea/gearn-server";
 
 export class OperationCodeExtensions extends OperationCode {
-    public static readonly Test: number = 500;
+    public static readonly Test: string = "test";
 }' > OperationCode.ext.ts
     echo 'create OperationCode.ext.ts success'
 
@@ -487,7 +483,7 @@ init_create_packageJson() {
     "devDependencies": {
     },
     "dependencies": {
-        "@xmobitea/gearn-server": "*",
+        "@xmobitea/gearn-server": "^2.6.0",
         "typescript": "^5.8.3"
     }
 }' > package.json
@@ -542,7 +538,7 @@ createRequestHandler() {
     if [ -f "$DIR"'/package.json' ]; then
         echo 'creating request handler'
     else
-        echo 'This is not GN server dir, please try cmd: gn.sh -i or gn.sh init'
+        echo 'This is not GN server dir, please try cmd: gearn.sh -i or gearn.sh init'
         echo 'Create requesthandler failure'
         read -p 'Press enter to exit...'
         exit 1
@@ -603,7 +599,7 @@ createRequestHandler() {
         fi
 
         if [ $n == $((OPERATION_COUNT - 2)) ]; then
-            CONTENT_OPERATION+="\tpublic static readonly "$REQUEST_NAME": string = "$REQUEST_NAME";"
+            CONTENT_OPERATION+="\tpublic static readonly "$REQUEST_NAME": string = "\"$REQUEST_NAME\"";"
             CONTENT_OPERATION+="\n"
             CONTENT_OPERATION+="}"
             break
@@ -618,7 +614,7 @@ createRequestHandler() {
 }' > "$DIR_HANDLER_THIS_REQUEST_ERROR_CODE_PATH"
 
     echo 'export class '$REQUEST_NAME'ParameterCode {
-    public static readonly Var1: string = "1";
+    public static readonly Var1: string = "var1";
 }' > "$DIR_HANDLER_THIS_REQUEST_PARAMETER_CODE_PATH"
 
     echo 'import {
@@ -636,7 +632,8 @@ createRequestHandler() {
     StringDataMember,
     GNHashtableDataMember,
     GNArrayDataMember,
-    
+    SecretInfo,
+    SecretRole,
 } from "@xmobitea/gearn-server";
 import { OperationCodeExtensions } from "./../../common/constant/OperationCode.ext";
 import { '$REQUEST_NAME'ErrorCode } from "./../../common/constant/errorCode/'$REQUEST_NAME'ErrorCode";
@@ -662,30 +659,29 @@ export class '$REQUEST_NAME'RequestHandler extends RequestHandler {
         return '$REQUEST_NAME'OperationRequest;
     }
 
-    public async handle(
-        authInfo: AuthInfo,
-        operationRequest: OperationRequest
-    ): Promise<OperationResponse> {
+    public async handle(authInfo: AuthInfo, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         let request = this.requestConverterService.createTOperationRequest(operationRequest, this.getCommonOperationRequest());
 
         if (!request.isValidRequest()) {
             return this.newInvalidRequestParameters(request);
         }
 
-        // let gamePlayer = await this.gnServer.getDatabase().loadGamePlayer(authInfo.getUserId());
+        return this.execute({
+            var1: request.var1,
+        }, SecretRole.Client, secretInfo, operationRequest);
+    }
 
-        let operationResponse = new OperationResponse(
-            request.getOperationCode(),
-            request.getRequestId()
-        );
-
+    private async execute(request: { var1: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
+        let operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
-        operationResponse.setScriptData(
+        operationResponse.setParameter(
             ParameterCode.ErrorCode,
             '$REQUEST_NAME'ErrorCode.Ok
         );
 
-        operationResponse.setScriptData(
+        // let gamePlayer = await this.gnServer.getDatabase().gamePlayerRepository.loadGamePlayer(authInfo.getUserId(), secretInfo.getGameId());
+
+        operationResponse.setParameter(
             '$REQUEST_NAME'ParameterCode.Var1,
             request.var1
         );
