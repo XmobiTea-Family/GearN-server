@@ -129,7 +129,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 
                                 if (requestRule.advancedSettings.expansionType == RuleExpansionType.None) {
                                 } else if (requestRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
-                                    return this.newOperationInvalid(operationRequest, "AdvancedSettings.ExpansionType not found");
+                                    return this.newOperationInvalid(operationRequest, "AdvancedSettings.ExpansionType must be Custom");
                                 } else if (requestRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
                                     if (requestRule.advancedSettings.customExpansions == null) {
                                         return this.newOperationInvalid(operationRequest, "AdvancedSettings.CustomExpansions not found");
@@ -194,7 +194,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
                                 return this.newOperationInvalid(operationRequest, "AttributeSource not found");
                             }
 
-                            if (requestRule.defaultValue == null || typeof requestRule.defaultValue != "object" || ~Array.isArray(requestRule.defaultValue)) {
+                            if (requestRule.defaultValue == null || typeof requestRule.defaultValue != "object" || !Array.isArray(requestRule.defaultValue)) {
                                 return this.newOperationInvalid(operationRequest, "DefaultValue not found");
                             }
 
@@ -250,7 +250,7 @@ export class SetGameInformationRequestHandler extends RequestHandler {
 
                                 if (requestRule.advancedSettings.expansionType == RuleExpansionType.None) {
                                 } else if (requestRule.advancedSettings.expansionType == RuleExpansionType.Linear) {
-                                    return this.newOperationInvalid(operationRequest, "AdvancedSettings.ExpansionType not found");
+                                    return this.newOperationInvalid(operationRequest, "AdvancedSettings.ExpansionType must be Custom");
                                 } else if (requestRule.advancedSettings.expansionType == RuleExpansionType.Custom) {
                                     if (requestRule.advancedSettings.customExpansions == null) {
                                         return this.newOperationInvalid(operationRequest, "AdvancedSettings.CustomExpansions not found");
