@@ -553,11 +553,9 @@ export class SocketAppHandler {
         if (useMsgPack) {
             let socketDataMsgPack = encode(socketData);
 
-            if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-            else this.server.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+            this.emitter.to(userId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
         } else {
-            if (this.emitter != null) this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
-            else this.server.to(userId).emit(Commands.EventCmd_Json, socketData);
+            this.emitter.to(userId).emit(Commands.EventCmd_Json, socketData);
         }
     }
 
@@ -574,11 +572,9 @@ export class SocketAppHandler {
         if (useMsgPack) {
             let socketDataMsgPack = encode(socketData);
 
-            if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-            else this.server.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+            this.emitter.to(roomId).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
         } else {
-            if (this.emitter != null) this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
-            else this.server.to(roomId).emit(Commands.EventCmd_Json, socketData);
+            this.emitter.to(roomId).emit(Commands.EventCmd_Json, socketData);
         }
     }
 
@@ -595,11 +591,9 @@ export class SocketAppHandler {
         if (useMsgPack) {
             let socketDataMsgPack = encode(socketData);
 
-            if (this.emitter != null) this.emitter.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-            else this.server.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+            this.emitter.to(userIds).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
         } else {
-            if (this.emitter != null) this.emitter.to(userIds).emit(Commands.EventCmd_Json, socketData);
-            else this.server.to(userIds).emit(Commands.EventCmd_Json, socketData);
+            this.emitter.to(userIds).emit(Commands.EventCmd_Json, socketData);
         }
     }
 
@@ -615,11 +609,9 @@ export class SocketAppHandler {
         if (useMsgPack) {
             let socketDataMsgPack = encode(socketData);
 
-            if (this.emitter != null) this.emitter.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-            else this.server.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+            this.emitter.emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
         } else {
-            if (this.emitter != null) this.emitter.emit(Commands.EventCmd_Json, socketData);
-            else this.server.emit(Commands.EventCmd_Json, socketData);
+            this.emitter.emit(Commands.EventCmd_Json, socketData);
         }
     }
 
@@ -636,11 +628,9 @@ export class SocketAppHandler {
         if (useMsgPack) {
             let socketDataMsgPack = encode(socketData);
 
-            if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
-            else this.server.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
+            this.emitter.of("/" + namespace).emit(Commands.EventCmd_MsgPack, socketDataMsgPack);
         } else {
-            if (this.emitter != null) this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
-            else this.server.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
+            this.emitter.of("/" + namespace).emit(Commands.EventCmd_Json, socketData);
         }
     }
 

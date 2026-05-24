@@ -116,7 +116,6 @@ init_create_GNConfigDebugJson() {
 
         "socketAppSettings": {
             "enable": true,
-            "useEmitter": false,
             "allowOrigin": "*",
             "credentials": true,
             "allowMethods": ["GET"],

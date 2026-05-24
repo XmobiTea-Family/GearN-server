@@ -220,31 +220,6 @@ export class GNServer {
 
         this.postEventCallbackCollection = this.xDatabase.logRuntimeCollection("EventCallback.PostLog");
 
-        // Cluster messages re-enter the local socket transport through these handlers.
-        this.getHttpApp()
-            .getClusterHandler()
-            .onEvent("sendEventTo", (data) => {
-                thiz.executeSendEventTo(data);
-            });
-
-        this.getHttpApp()
-            .getClusterHandler()
-            .onEvent("sendEventToRoom", (data) => {
-                thiz.executeSendEventToRoom(data);
-            });
-
-        this.getHttpApp()
-            .getClusterHandler()
-            .onEvent("sendEventToMoreUser", (data) => {
-                thiz.executeSendEventToMoreUser(data);
-            });
-
-        this.getHttpApp()
-            .getClusterHandler()
-            .onEvent("sendEventToAllPlayer", (data) => {
-                thiz.executeSendEventToAllPlayer(data);
-            });
-
         this.getHttpApp()
             .getClusterHandler()
             .onEvent("revokeAdminAuthToken", (data) => {
@@ -598,32 +573,7 @@ export class GNServer {
             responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
         });
 
-        this.getHttpApp().getClusterHandler().sendEvent("sendEventTo", {
-            userId: userId,
-            operationEvent: operationEventToData,
-            useMsgPack: true,
-        });
-    }
-
-    /**
-     * Replays a cluster message locally on the socket layer.
-     */
-    private executeSendEventTo(data: {
-        // Target user that should receive the event.
-        userId: string;
-        // Serialized event payload coming from the cluster bus.
-        operationEvent: {
-            // Event code understood by socket clients.
-            eventCode: string;
-            // Event parameters already converted to plain data.
-            parameters: {};
-        };
-        // Preserve the original transport encoding across nodes.
-        useMsgPack: boolean;
-    }) {
-        let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
-
-        return this.socketApp.getSocketAppHandler().sendEventTo(data.userId, operationEvent, data.useMsgPack);
+        this.socketApp.getSocketAppHandler().sendEventTo(userId, operationEvent, true);
     }
 
     /**
@@ -649,32 +599,7 @@ export class GNServer {
             responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
         });
 
-        this.getHttpApp().getClusterHandler().sendEvent("sendEventToRoom", {
-            roomId: roomId,
-            operationEvent: operationEventToData,
-            useMsgPack: true,
-        });
-    }
-
-    /**
-     * Replays a room broadcast received from the cluster bus on the local node.
-     */
-    private executeSendEventToRoom(data: {
-        // Target room that should receive the event.
-        roomId: string;
-        // Serialized event payload coming from the cluster bus.
-        operationEvent: {
-            // Event code understood by socket clients.
-            eventCode: string;
-            // Event parameters already converted to plain data.
-            parameters: {};
-        };
-        // Preserve the original transport encoding across nodes.
-        useMsgPack: boolean;
-    }) {
-        let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
-
-        return this.socketApp.getSocketAppHandler().sendEventToRoom(data.roomId, operationEvent, data.useMsgPack);
+        this.socketApp.getSocketAppHandler().sendEventToRoom(roomId, operationEvent, true);
     }
 
     /**
@@ -700,32 +625,7 @@ export class GNServer {
             responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8") * userIds.length,
         });
 
-        this.getHttpApp().getClusterHandler().sendEvent("sendEventToMoreUser", {
-            userIds: userIds,
-            operationEvent: operationEventToData,
-            useMsgPack: true,
-        });
-    }
-
-    /**
-     * Replays a multi-user broadcast received from the cluster bus on the local node.
-     */
-    private executeSendEventToMoreUser(data: {
-        // Target users that should receive the event.
-        userIds: string[];
-        // Serialized event payload coming from the cluster bus.
-        operationEvent: {
-            // Event code understood by socket clients.
-            eventCode: string;
-            // Event parameters already converted to plain data.
-            parameters: {};
-        };
-        // Preserve the original transport encoding across nodes.
-        useMsgPack: boolean;
-    }) {
-        let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
-
-        return this.socketApp.getSocketAppHandler().sendEventToMoreUser(data.userIds, operationEvent, data.useMsgPack);
+        this.socketApp.getSocketAppHandler().sendEventToMoreUser(userIds, operationEvent, true);
     }
 
     /**
@@ -748,29 +648,7 @@ export class GNServer {
             responseSize: Buffer.byteLength(JSON.stringify(operationEventToData), "utf-8"),
         });
 
-        this.getHttpApp().getClusterHandler().sendEvent("sendEventToAllPlayer", {
-            operationEvent: operationEventToData,
-            useMsgPack: true,
-        });
-    }
-
-    /**
-     * Replays a global broadcast received from the cluster bus on the local node.
-     */
-    private executeSendEventToAllPlayer(data: {
-        // Serialized event payload coming from the cluster bus.
-        operationEvent: {
-            // Event code understood by socket clients.
-            eventCode: string;
-            // Event parameters already converted to plain data.
-            parameters: {};
-        };
-        // Preserve the original transport encoding across nodes.
-        useMsgPack: boolean;
-    }) {
-        let operationEvent = new OperationEvent(data.operationEvent.eventCode, data.operationEvent.parameters != null ? GNHashtable.builder().addAll(data.operationEvent.parameters).build() : null);
-
-        return this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent, data.useMsgPack);
+        this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent, true);
     }
 
     private executeRevokeAdminAuthToken(data: { userId: string }) {
@@ -996,18 +874,38 @@ export class GNServer {
      * @param serverDetail Provides the server detail value used by this operation.
      * @param ticketIds Provides the ticket IDs value used by this operation.
      */
-    public setMatchServerDetail(gameId: string, matchId: string, serverDetail: ServerDetail, ticketIds: string[]) {
+    public async setMatchServerDetail(gameId: string, matchId: string, serverDetail: ServerDetail, ticketIds: string[]) {
         let timeout = this.waitingServerDetailDict.get(matchId);
         if (timeout) {
             clearTimeout(timeout);
             this.waitingServerDetailDict.delete(matchId);
         }
 
-        let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
-        matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail, status: MatchStatus.Matched } });
+        const session = this.getDatabase().startSession();
 
-        let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
-        matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Matched } });
+        try {
+            session.startTransaction();
+
+            let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
+            await matchCollection.updateOne({ matchId: matchId }, { $set: { serverDetail: serverDetail, status: MatchStatus.Matched } }, {
+                session: session,
+            });
+
+            let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
+            await matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Matched } }, {
+                session: session,
+            });
+
+            await session.commitTransaction();
+        } catch (err) {
+            await session.abortTransaction();
+
+            Debug.logError(err);
+
+            throw err;
+        } finally {
+            await session.endSession();
+        }
     }
 
     /**
@@ -1017,7 +915,7 @@ export class GNServer {
      * @param ticketIds Provides the ticket IDs value used by this operation.
      * @param reason Provides the reason value used by this operation.
      */
-    public setMatchServerDetailFailed(gameId: string, matchId: string, ticketIds: string[], reason: string) {
+    public async setMatchServerDetailFailed(gameId: string, matchId: string, ticketIds: string[], reason: string) {
         let timeout = this.waitingServerDetailDict.get(matchId);
         if (timeout) {
             clearTimeout(timeout);
@@ -1026,11 +924,31 @@ export class GNServer {
 
         Debug.logInfo("[GearN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
 
-        let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
-        matchCollection.updateOne({ matchId: matchId }, { $set: { status: MatchStatus.Canceled } });
+        const session = this.getDatabase().startSession();
 
-        let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
-        matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Canceled } });
+        try {
+            session.startTransaction();
+
+            let matchCollection = this.getDatabase().systemGameCollection("Match", gameId);
+            await matchCollection.updateOne({ matchId: matchId }, { $set: { status: MatchStatus.Canceled } }, {
+                session: session,
+            });
+
+            let matchmakingTicketCollection = this.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
+            await matchmakingTicketCollection.updateMany({ ticketId: { $in: ticketIds } }, { $set: { status: MatchmakingTicketStatus.Canceled } }, {
+                session: session,
+            });
+
+            await session.commitTransaction();
+        } catch (err) {
+            await session.abortTransaction();
+
+            Debug.logError(err);
+
+            throw err;
+        } finally {
+            await session.endSession();
+        }
     }
 
     /**
