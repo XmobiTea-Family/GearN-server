@@ -1899,7 +1899,6 @@ export class ServerApplication extends BuilderBase {
                     configService.setConfigCollection(gameId, configCollection);
 
                     this.gnServer.setConfigGame(gameId, configService);
-                    configService.run();
                 }
 
                 {
