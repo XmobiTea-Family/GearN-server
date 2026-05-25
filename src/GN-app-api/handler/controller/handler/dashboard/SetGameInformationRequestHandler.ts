@@ -430,30 +430,6 @@ export class SetGameInformationRequestHandler extends RequestHandler {
             return operationResponse;
         }
 
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetGameInformation", request);
-
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetGameInformation", request, role, secretInfo, operationRequest, operationResponse);
-
-        return operationResponse;
-    }
-
-    /**
-     * Executes the apply settings workflow asynchronously.
-     * @param request Provides the request value used by this operation.
-     */
-    private async applySettings(request: { gameId: string; gameName: string; gameDescription: string; gameIconUrl: string; gameSettings: GameSettingsParam; matchmakingQueueSettings: Array<MatchmakingQueueSettingsParam> }) {
-        // Stores the collection value used in the current execution flow.
-        let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
-
-        // Stores the result value used in the current execution flow.
-        let result = await collection.findOne({ type: "gameSettings", gameId: request.gameId });
-
-        if (result == null) {
-            return;
-        }
-
         // Stores the game item value used in the current execution flow.
         let gameItem = new GameItem(result, collection);
 
@@ -2109,20 +2085,142 @@ export class SetGameInformationRequestHandler extends RequestHandler {
             gameItem.setMatchmakingQueueSettings(matchmakingQueueSettings);
         }
 
-        if (this.gnServer.isPrimary()) await gameItem.saveAsync();
+        await gameItem.saveAsync();
+
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetGameInformation", request, role, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
     }
 
     /**
      * Executes the init workflow.
      */
     protected override init(): void {
-        // Stores the thiz value used in the current execution flow.
-        let thiz = this;
-        this.gnServer
-            .getHttpApp()
-            .getClusterHandler()
-            .onEvent("dashboard_SetGameInformation", (data) => {
-                thiz.applySettings(data);
+        this.startStreamWatch();
+    }
+
+    private startStreamWatch() {
+        let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
+
+        const thiz = this;
+
+        const startWatch = () => {
+            Debug.log("[GearN] [SetGameInformationRequestHandler] stream start on collection: " + collection.collectionName);
+
+            const stream = collection.watch([
+                {
+                    $match: {
+                        operationType: {
+                            $in: [
+                                "update",
+                            ]
+                        },
+                        "fullDocument.type": "gameSettings",
+                    }
+                }
+            ], {
+                fullDocument: "updateLookup"
             });
+
+            stream.on("change", (change) => {
+                if (change.operationType == "update") {
+                    const gameItem = new GameItem(change.fullDocument as any, collection);
+
+                    const gameId = gameItem.getGameId();
+
+                    {
+                        const gameSettings = gameItem.getGameSettings();
+
+                        {
+                            const gamePlayerSettings = gameSettings.gamePlayerSettings;
+
+                            const currentGamePlayerSettings = thiz.gnServer.getGNSettings().getGamePlayerSettings(gameId);
+
+                            currentGamePlayerSettings.playerCurrenciesSettings = gamePlayerSettings.playerCurrenciesSettings;
+                            currentGamePlayerSettings.playerStatisticsSettings = gamePlayerSettings.playerStatisticsSettings;
+                            currentGamePlayerSettings.playerDatasSettings = gamePlayerSettings.playerDatasSettings;
+                            currentGamePlayerSettings.customDatasSettings = gamePlayerSettings.customDatasSettings;
+                            currentGamePlayerSettings.tagsSettings = gamePlayerSettings.tagsSettings;
+
+                            currentGamePlayerSettings.playerCharacterCatalogSettings = gamePlayerSettings.playerCharacterCatalogSettings;
+                            currentGamePlayerSettings.playerGroupCatalogSettings = gamePlayerSettings.playerGroupCatalogSettings;
+                            currentGamePlayerSettings.playerItemCatalogSettings = gamePlayerSettings.playerItemCatalogSettings;
+                            currentGamePlayerSettings.playerFriendCatalogSettings = gamePlayerSettings.playerFriendCatalogSettings;
+
+                        }
+
+                        {
+                            const characterPlayerSettings = gameSettings.characterPlayerSettings;
+
+                            const currentCharacterPlayerSettings = thiz.gnServer.getGNSettings().getCharacterPlayerSettings(gameId);
+
+                            currentCharacterPlayerSettings.playerCurrenciesSettings = characterPlayerSettings.playerCurrenciesSettings;
+                            currentCharacterPlayerSettings.playerStatisticsSettings = characterPlayerSettings.playerStatisticsSettings;
+                            currentCharacterPlayerSettings.playerDatasSettings = characterPlayerSettings.playerDatasSettings;
+                            currentCharacterPlayerSettings.customDatasSettings = characterPlayerSettings.customDatasSettings;
+                            currentCharacterPlayerSettings.tagsSettings = characterPlayerSettings.tagsSettings;
+
+                            currentCharacterPlayerSettings.playerGroupCatalogSettings = characterPlayerSettings.playerGroupCatalogSettings;
+                            currentCharacterPlayerSettings.playerItemCatalogSettings = characterPlayerSettings.playerItemCatalogSettings;
+                            currentCharacterPlayerSettings.playerFriendCatalogSettings = characterPlayerSettings.playerFriendCatalogSettings;
+                        }
+
+                        {
+                            const groupSettings = gameSettings.groupSettings;
+
+                            const currentGroupSettings = thiz.gnServer.getGNSettings().getGroupSettings(gameId);
+
+                            currentGroupSettings.groupCurrenciesSettings = groupSettings.groupCurrenciesSettings;
+                            currentGroupSettings.groupStatisticsSettings = groupSettings.groupStatisticsSettings;
+                            currentGroupSettings.groupDatasSettings = groupSettings.groupDatasSettings;
+                            currentGroupSettings.customDatasSettings = groupSettings.customDatasSettings;
+                            currentGroupSettings.tagsSettings = groupSettings.tagsSettings;
+                            currentGroupSettings.groupItemCatalogSettings = groupSettings.groupItemCatalogSettings;
+                        }
+
+                        {
+                            const inventorySettings = gameSettings.inventorySettings;
+
+                            const currentInventorySettings = thiz.gnServer.getGNSettings().getInventorySettings(gameId);
+
+                            currentInventorySettings.itemStatisticsSettings = inventorySettings.itemStatisticsSettings;
+                            currentInventorySettings.itemDatasSettings = inventorySettings.itemDatasSettings;
+                            currentInventorySettings.customDatasSettings = inventorySettings.customDatasSettings;
+                            currentInventorySettings.tagsSettings = inventorySettings.tagsSettings;
+                        }
+                    }
+
+                    {
+                        // Stores the resolved matchmaking queue settings instance for the current execution flow.
+                        const matchmakingQueueSettings = gameItem.getMatchmakingQueueSettings() ?? [];
+
+                        const currentMatchmakingQueueSettings = thiz.gnServer.getGNSettings().getMatchmakingQueueSettings(gameId);
+                        currentMatchmakingQueueSettings.length = 0;
+
+                        if (matchmakingQueueSettings != null) {
+                            matchmakingQueueSettings.forEach((matchmakingQueueSetting) => {
+                                currentMatchmakingQueueSettings.push(matchmakingQueueSetting);
+                            });
+                        }
+                    }
+
+                    Debug.log("[GearN] [SetGameInformationRequestHandler] stream update game config on " + gameId);
+                }
+            });
+
+            stream.on("error", (err) => {
+                Debug.logError("[GearN] [SetGameInformationRequestHandler] stream error: " + err.message);
+
+                stream.close();
+
+                setTimeout(() => {
+                    startWatch();
+                }, 1000);
+            });
+        };
+
+        startWatch();
     }
 }
