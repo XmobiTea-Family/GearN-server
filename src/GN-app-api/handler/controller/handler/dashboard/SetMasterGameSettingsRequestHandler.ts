@@ -135,20 +135,6 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetMasterGameSettings", request);
-
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, role, secretInfo, operationRequest, operationResponse);
-
-        return operationResponse;
-    }
-
-    /**
-     * Executes the apply settings workflow asynchronously.
-     * @param request Provides the request value used by this operation.
-     */
-    private async applySettings(request: { thirtPartySettings: ThirtPartyParam; masterPlayerSettings: MasterPlayerSettingsParam; emailSettings: EmailSettingsParam; pushNotificationSettings: PushNotificationSettingsParam }) {
         // Stores the collection value used in the current execution flow.
         let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 
@@ -612,20 +598,140 @@ export class SetMasterGameSettingsRequestHandler extends RequestHandler {
             masterGameSettings.setPushNotificationSettings(pushNotificationSettings);
         }
 
-        if (this.gnServer.isPrimary()) masterGameSettings.saveAsync();
+        masterGameSettings.saveAsync();
+
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+
+        await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetMasterGameSettings", request, role, secretInfo, operationRequest, operationResponse);
+
+        return operationResponse;
     }
 
     /**
      * Executes the init workflow.
      */
     protected override init(): void {
-        // Stores the thiz value used in the current execution flow.
-        let thiz = this;
-        this.gnServer
-            .getHttpApp()
-            .getClusterHandler()
-            .onEvent("dashboard_SetMasterGameSettings", (data) => {
-                thiz.applySettings(data);
+        this.startStreamWatch();
+    }
+
+    private startStreamWatch() {
+        let collection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
+
+        const thiz = this;
+
+        const startWatch = () => {
+            Debug.log("[GearN] [SetMasterGameSettingsRequestHandler] stream start on collection: " + collection.collectionName);
+
+            const stream = collection.watch([
+                {
+                    $match: {
+                        operationType: {
+                            $in: [
+                                "update",
+                            ]
+                        },
+                        "fullDocument.type": "masterGameSettings",
+                    }
+                }
+            ], {
+                fullDocument: "updateLookup"
             });
+
+            stream.on("change", (change) => {
+                if (change.operationType == "update") {
+                    // Stores the resolved master game settings instance for the current execution flow.
+                    const masterGameSettings = new MasterGameSettings(change.fullDocument as any, collection);
+
+                    {
+                        const masterPlayerSettings = masterGameSettings.getMasterPlayerSettings();
+
+                        const currentMasterPlayerSettings = thiz.gnServer.getGNSettings().getMasterPlayerSettings();
+
+                        currentMasterPlayerSettings.genericServiceSettings = masterPlayerSettings.genericServiceSettings;
+                        currentMasterPlayerSettings.playerCurrenciesSettings = masterPlayerSettings.playerCurrenciesSettings;
+                        currentMasterPlayerSettings.playerStatisticsSettings = masterPlayerSettings.playerStatisticsSettings;
+                        currentMasterPlayerSettings.playerDatasSettings = masterPlayerSettings.playerDatasSettings;
+                        currentMasterPlayerSettings.customDatasSettings = masterPlayerSettings.customDatasSettings;
+                        currentMasterPlayerSettings.tagsSettings = masterPlayerSettings.tagsSettings;
+                    }
+
+                    {
+                        // Third-party identity and payment integrations are configured from master settings.
+                        const thirtPartySettings = masterGameSettings.getThirtPartySettings();
+
+                        if (thirtPartySettings.appleSettings != null) {
+                            (<AppleService>thiz.gnServer.getAppleService()).init({
+                                appleClientId: thirtPartySettings.appleSettings.appleClientId,
+                                sandboxEnable: thirtPartySettings.appleSettings.sandboxEnable,
+                                issuerId: thirtPartySettings.appleSettings.issuerId,
+                                keyId: thirtPartySettings.appleSettings.keyId,
+                                p8Content: thirtPartySettings.appleSettings.p8Content,
+                            });
+                        }
+
+                        if (thirtPartySettings.googleSettings != null) {
+                            (<GoogleService>thiz.gnServer.getGoogleService()).init({
+                                googleClientId: thirtPartySettings.googleSettings.googleClientId,
+                                packageId: thirtPartySettings.googleSettings.packageId,
+                                publicRSAKey: thirtPartySettings.googleSettings.publicRSAKey,
+                            });
+                        }
+
+                        if (thirtPartySettings.facebookSettings != null) {
+                            (<FacebookService>thiz.gnServer.getFacebookService()).init({
+                                facebookAppId: thirtPartySettings.facebookSettings.facebookAppId,
+                                facebookAppToken: thirtPartySettings.facebookSettings.facebookAppToken,
+                                facebookInappSecret: thirtPartySettings.facebookSettings.facebookInappSecret,
+                            });
+                        }
+
+                        if (thirtPartySettings.googlePlayGameSettings != null) {
+                            (<GooglePlayGameService>thiz.gnServer.getGooglePlayGameService()).init({
+                                applicationId: thirtPartySettings.googlePlayGameSettings.applicationId,
+                                clientId: thirtPartySettings.googlePlayGameSettings.clientId,
+                                clientSecret: thirtPartySettings.googlePlayGameSettings.clientSecret,
+                                redirectUri: thirtPartySettings.googlePlayGameSettings.redirectUri,
+                            });
+                        }
+
+                        if (thirtPartySettings.gameCenterSettings != null) {
+                            (<GameCenterService>thiz.gnServer.getGameCenterService()).init({
+                                bundleId: thirtPartySettings.gameCenterSettings.packageId,
+                            });
+                        }
+                    }
+
+                    {
+                        // EmailService is global because account recovery and operational mail are not game-scoped.
+                        const emailSettings = masterGameSettings.getEmailSettings();
+
+                        (<EmailService>thiz.gnServer.getEmailService()).init(emailSettings.host, emailSettings.port, emailSettings.secure, emailSettings.username, emailSettings.password, emailSettings.sendFrom);
+                        (<EmailService>thiz.gnServer.getEmailService()).run();
+                    }
+
+                    {
+                        // Push credentials are also shared globally and loaded once from master settings.
+                        const pushNotificationSettings = masterGameSettings.getPushNotificationSettings();
+
+                        (<PushNotificationService>thiz.gnServer.getPushNotificationService()).init(pushNotificationSettings.projectId, pushNotificationSettings.clientEmail, pushNotificationSettings.privateKey);
+                        (<PushNotificationService>thiz.gnServer.getPushNotificationService()).run();
+                    }
+
+                    Debug.log("[GearN] [SetMasterGameSettingsRequestHandler] stream update master game config");
+                }
+            });
+
+            stream.on("error", (err) => {
+                Debug.logError("[GearN] [SetMasterGameSettingsRequestHandler] stream error: " + err.message);
+
+                stream.close();
+
+                setTimeout(() => {
+                    startWatch();
+                }, 1000);
+            });
+        };
+
+        startWatch();
     }
 }
