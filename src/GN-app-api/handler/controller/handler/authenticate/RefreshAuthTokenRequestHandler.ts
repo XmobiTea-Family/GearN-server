@@ -126,11 +126,6 @@ export class RefreshAuthTokenRequestHandler extends LoginBaseRequestHandler {
             });
 
             operationResponse.setParameter(ParameterCode.AuthToken, newAuthInfo.getAuthToken());
-
-            // this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAuthToken", {
-            //     userId: request.userId,
-            //     ignoreAuthToken: newAuthInfo.getAuthToken(),
-            // });
         }
 
         masterPlayer.setTsLastLogin(currentMilliseconds);

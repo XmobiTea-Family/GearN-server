@@ -1167,6 +1167,11 @@
                 "hasEdit": false
             },
             {
+                "eventName": "inventory_ChangeAmount",
+                "script": "\npreHandlers[\"inventory_ChangeAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers[\"inventory_ChangeAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "hasEdit": false
+            },
+            {
                 "eventName": "inventory_ChangeItemStatistics",
                 "script": "\npreHandlers[\"inventory_ChangeItemStatistics\"] = async (request: { itemId: string; itemStatistics: Array<ItemStatisticsParam>; log: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers[\"inventory_ChangeItemStatistics\"] = async (request: { itemId: string; itemStatistics: Array<ItemStatisticsParam>; log: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
@@ -1289,11 +1294,6 @@
             {
                 "eventName": "inventory_RemoveTag",
                 "script": "\npreHandlers[\"inventory_RemoveTag\"] = async (request: { itemId: string; tag: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers[\"inventory_RemoveTag\"] = async (request: { itemId: string; tag: string }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
-                "hasEdit": false
-            },
-            {
-                "eventName": "inventory_ChangeAmount",
-                "script": "\npreHandlers[\"inventory_ChangeAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers[\"inventory_ChangeAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

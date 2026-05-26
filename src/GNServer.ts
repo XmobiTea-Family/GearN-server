@@ -193,8 +193,7 @@ export class GNServer {
      * @param onRunSuccess Provides the callback executed after a successful startup.
      */
     public run(onRunSuccess?: OnRunSuccess) {
-        // Capture the instance once because the transport APIs below are callback-driven.
-        let thiz = this;
+        const thiz = this;
 
         this.httpApp.getHttpAppHandler().setOnHttpRequest((request: Request) => {
             return thiz.handleOnRequest(request);
@@ -219,18 +218,6 @@ export class GNServer {
         this.analyticsService = tempAnalyticsService;
 
         this.postEventCallbackCollection = this.xDatabase.logRuntimeCollection("EventCallback.PostLog");
-
-        this.getHttpApp()
-            .getClusterHandler()
-            .onEvent("revokeAdminAuthToken", (data) => {
-                thiz.executeRevokeAdminAuthToken(data);
-            });
-
-        this.getHttpApp()
-            .getClusterHandler()
-            .onEvent("revokeAuthToken", (data) => {
-                thiz.executeRevokeAuthToken(data);
-            });
 
         if (onRunSuccess != null) onRunSuccess();
     }
@@ -649,36 +636,6 @@ export class GNServer {
         });
 
         this.socketApp.getSocketAppHandler().sendEventToAllPlayer(operationEvent, true);
-    }
-
-    private executeRevokeAdminAuthToken(data: { userId: string }) {
-        if (this.isPrimary()) {
-            this.apiMiddleware.removeAllAuthInfosInDb(data.userId);
-        }
-
-        let authInfos = this.apiMiddleware.getAuthInfosByUserIdInMemCache(data.userId);
-
-        for (const authInfo of authInfos) {
-            authInfo.setIsRemove(true);
-
-            this.getApiMiddleware().updateAuthInfo(authInfo, false);
-        }
-    }
-
-    private executeRevokeAuthToken(data: { userId: string; ignoreAuthToken: string }) {
-        if (this.isPrimary()) {
-            this.apiMiddleware.removeAllAuthInfosInDb(data.userId, data.ignoreAuthToken);
-        }
-
-        let authInfos = this.apiMiddleware.getAuthInfosByUserIdInMemCache(data.userId);
-
-        for (const authInfo of authInfos) {
-            if (authInfo.getAuthToken() != data.ignoreAuthToken) {
-                authInfo.setIsRemove(true);
-
-                this.getApiMiddleware().updateAuthInfo(authInfo, false);
-            }
-        }
     }
 
     // public async sendEventToNamespace(namespace: string, operationEvent: OperationEvent): Promise<void> {

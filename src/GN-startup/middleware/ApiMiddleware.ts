@@ -12,6 +12,7 @@ import { SecretInfo, SecretPermissionItem, SecretRole } from "./../../GN-common/
 import { CreateSecretInfoRequestHandler } from "./../../GN-app-api/handler/controller/handler/dashboard/CreateSecretInfoRequestHandler";
 import jwt from "jsonwebtoken";
 import { TokenPayload } from "./../../GN-common/entity/TokenPayload";
+import { DebugSupport } from "./../routes/utils/DebugSupport";
 
 /**
  * Central auth/secret middleware shared by HTTP and socket transports.
@@ -129,6 +130,202 @@ export class ApiMiddleware {
             this.getDAULast30Min();
             this.checkAndRemoveDict();
         }, ApiMiddleware.FIVE_MINUTE_TS);
+    }
+
+    public startStreamWatch() {
+        const thiz = this;
+
+        const startWatchAuthInfo = () => {
+            Debug.log("[GearN] [ApiMiddleware] stream start on collection: " + thiz.authInfoCollection.collectionName);
+
+            const stream = thiz.authInfoCollection.watch([
+                {
+                    $match: {
+                        operationType: {
+                            $in: [
+                                "update",
+                            ]
+                        }
+                    }
+                }
+            ], {
+                fullDocument: "updateLookup"
+            });
+
+            stream.on("change", (change) => {
+                if (change.operationType == "update") {
+                    const authInfoTemp = change.fullDocument;
+                    const userId = authInfoTemp["userId"] as string;
+                    const gnToken = authInfoTemp["gnToken"] as string;
+
+                    const authInfoCurrent = thiz.authInfoDict.get(gnToken);
+
+                    if (authInfoCurrent != null) {
+                        authInfoCurrent.setIsRemove(authInfoTemp["isRemove"]);
+                        authInfoCurrent.setAuthToken(authInfoTemp["authToken"]);
+                        authInfoCurrent.setTsExpire(authInfoTemp["tsExpire"]);
+                        authInfoCurrent.setUserId(authInfoTemp["userId"]);
+                        authInfoCurrent.setOtherDatas(authInfoTemp["otherDatas"]);
+                        authInfoCurrent.setTsCreate(authInfoTemp["tsCreate"]);
+                        authInfoCurrent.setSecretKey(authInfoTemp["secretKey"]);
+                        authInfoCurrent.setTsLastUpdate(authInfoTemp["tsLastUpdate"]);
+
+                        if (authInfoTemp["isRemove"] == true) {
+                            thiz.authInfoDict.delete(gnToken);
+                            Debug.log("[GearN] [ApiMiddleware] stream remove authInfo on gnToken: " + gnToken + ", userId: " + userId);
+                        }
+                        else {
+                            Debug.log("[GearN] [ApiMiddleware] stream update authInfo on gnToken: " + gnToken + ", userId: " + userId);
+                        }
+                    }
+                }
+            });
+
+            stream.on("error", (err) => {
+                Debug.logError("[GearN] [ApiMiddleware] stream error: " + err.message);
+
+                stream.close();
+
+                setTimeout(() => {
+                    startWatchAuthInfo();
+                }, 1000);
+            });
+        };
+
+        const startWatchSecretInfo = () => {
+            Debug.log("[GearN] [ApiMiddleware] stream start on collection: " + thiz.secretInfoCollection.collectionName);
+
+            const stream = thiz.secretInfoCollection.watch([
+                {
+                    $match: {
+                        operationType: {
+                            $in: [
+                                "update",
+                                "insert",
+                            ]
+                        }
+                    }
+                }
+            ], {
+                fullDocument: "updateLookup"
+            });
+
+            stream.on("change", (change) => {
+                if (change.operationType == "update" || change.operationType == "insert") {
+                    // Stores the secret info item value used in the current execution flow.
+                    const secretInfoResult = change.fullDocument;
+
+                    let defaultSecretPermissionItem = CreateSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false) as any;
+
+                    // Stores the data secret permission item value used in the current execution flow.
+                    let dataSecretPermissionItem = secretInfoResult.permission as any;
+                    // Stores the key layer 0 s value used in the current execution flow.
+                    let keyLayer0s = Object.keys(defaultSecretPermissionItem); // authenticate, masterPlayer, ...
+
+                    for (let i = 0; i < keyLayer0s.length; i++) {
+                        // Stores the key layer 0 value used in the current execution flow.
+                        let keyLayer0 = keyLayer0s[i]; // authenticate
+                        let thisLayer0Any = dataSecretPermissionItem[keyLayer0]; // { loginByAccount : { seft enable: false } }
+                        let defaultThisLayer0Any = defaultSecretPermissionItem[keyLayer0];
+
+                        if (thisLayer0Any == null) continue;
+
+                        // Stores the key layer 1 s value used in the current execution flow.
+                        let keyLayer1s = Object.keys(thisLayer0Any); // [ loginByAccount, registerAccount]
+
+                        for (let j = 0; j < keyLayer1s.length; j++) {
+                            // Stores the key layer 1 value used in the current execution flow.
+                            let keyLayer1 = keyLayer1s[j]; // loginByAccount
+
+                            let dataPermissionAnyForLayer1Any = thisLayer0Any[keyLayer1];
+                            // Stores the default permission any for layer 1 any value used in the current execution flow.
+                            let defaultPermissionAnyForLayer1Any = defaultThisLayer0Any[keyLayer1];
+
+                            if (dataPermissionAnyForLayer1Any != null && defaultPermissionAnyForLayer1Any != null) {
+                                // Stores the self enable value used in the current execution flow.
+                                let selfEnable: boolean = dataPermissionAnyForLayer1Any.selfEnable;
+                                // Stores the other self enable value used in the current execution flow.
+                                let otherSelfEnable: boolean = dataPermissionAnyForLayer1Any.otherSelfEnable;
+                                // Stores the admin self enable value used in the current execution flow.
+                                let adminSelfEnable: boolean = dataPermissionAnyForLayer1Any.adminSelfEnable;
+                                // Stores the server self enable value used in the current execution flow.
+                                let serverSelfEnable: boolean = dataPermissionAnyForLayer1Any.serverSelfEnable;
+
+                                defaultPermissionAnyForLayer1Any.selfEnable = selfEnable != null && selfEnable;
+                                defaultPermissionAnyForLayer1Any.otherSelfEnable = otherSelfEnable != null && otherSelfEnable;
+                                defaultPermissionAnyForLayer1Any.adminSelfEnable = adminSelfEnable != null && adminSelfEnable;
+                                defaultPermissionAnyForLayer1Any.serverSelfEnable = serverSelfEnable != null && serverSelfEnable;
+
+                                // if (defaultPermissionAnyForLayer1Any.otherSelfEnable) {
+                                //     defaultPermissionAnyForLayer1Any.selfEnable = true;
+                                // }
+
+                                // if (secretRole == SecretRole.Client) {
+                                //     defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
+                                //     defaultPermissionAnyForLayer1Any.adminSelfEnable = false;
+
+                                //     if (defaultPermissionAnyForLayer1Any.otherSelfEnable) {
+                                //         defaultPermissionAnyForLayer1Any.selfEnable = true;
+                                //     }
+                                // }
+                                // else if (secretRole == SecretRole.Server) {
+                                //     defaultPermissionAnyForLayer1Any.selfEnable = false;
+                                //     defaultPermissionAnyForLayer1Any.otherSelfEnable = false;
+                                //     defaultPermissionAnyForLayer1Any.adminSelfEnable = false;
+                                // }
+                                // else if (secretRole == SecretRole.Admin) {
+                                //     defaultPermissionAnyForLayer1Any.selfEnable = false;
+                                //     defaultPermissionAnyForLayer1Any.otherSelfEnable = false;
+                                //     defaultPermissionAnyForLayer1Any.serverSelfEnable = false;
+                                // }
+                            }
+                        }
+                    }
+
+                    const secretKey = secretInfoResult["secretKey"] as string;
+
+                    const secretInfo = thiz.secretInfoDict.get(secretKey);
+                    if (secretInfo == null) {
+                        const newSecretInfo = SecretInfo.Builder()
+                            .setSecretKey(secretInfoResult["secretKey"])
+                            .setIsRemove(secretInfoResult["isRemove"])
+                            .setTsExpire(secretInfoResult["tsExpire"])
+                            .setGameId(secretInfoResult["gameId"])
+                            .setPermission(defaultSecretPermissionItem)
+                            .setIsOnlyMasterAdmin(secretInfoResult["onlyMasterAdmin"] == true)
+                            .setIsDefault(secretInfoResult["isDefault"] == true)
+                            .setDescription(secretInfoResult["description"])
+                            .build();
+
+                        thiz.secretInfoDict.set(secretKey, newSecretInfo);
+                    }
+                    else {
+                        secretInfo.setIsRemove(secretInfoResult["isRemove"]);
+                        secretInfo.setTsExpire(secretInfoResult["tsExpire"]);
+                        secretInfo.setGameId(secretInfoResult["gameId"]);
+                        secretInfo.setPermission(defaultSecretPermissionItem);
+                        secretInfo.setIsOnlyMasterAdmin(secretInfoResult["onlyMasterAdmin"] == true);
+                        secretInfo.setIsDefault(secretInfoResult["isDefault"] == true);
+                        secretInfo.setDescription(secretInfoResult["description"]);
+                    }
+
+                    Debug.log("[GearN] [ApiMiddleware] stream update secretInfo " + DebugSupport.securitySecretKey(secretKey));
+                }
+            });
+
+            stream.on("error", (err) => {
+                Debug.logError("[GearN] [ApiMiddleware] stream error: " + err.message);
+
+                stream.close();
+
+                setTimeout(() => {
+                    startWatchSecretInfo();
+                }, 1000);
+            });
+        };
+
+        startWatchAuthInfo();
+        startWatchSecretInfo();
     }
 
     /**
@@ -414,9 +611,7 @@ export class ApiMiddleware {
             let authInfoTemp = await this.authInfoCollection.findOne({ gnToken: gnToken });
 
             if (authInfoTemp != null) {
-                // Tracks whether r ID should be used.
-                let userId = authInfoTemp["userId"];
-                authInfo = AuthInfo.Builder().setGNToken(authInfoTemp["gnToken"]).setAuthToken(authInfoTemp["authToken"]).setIsRemove(authInfoTemp["isRemove"]).setTsExpire(authInfoTemp["tsExpire"]).setUserId(userId).setOtherDatas(authInfoTemp["otherDatas"]).setTsCreate(authInfoTemp["tsCreate"]).setSecretKey(authInfoTemp["secretKey"]).build();
+                authInfo = AuthInfo.Builder().setGNToken(authInfoTemp["gnToken"]).setAuthToken(authInfoTemp["authToken"]).setIsRemove(authInfoTemp["isRemove"]).setTsExpire(authInfoTemp["tsExpire"]).setUserId(authInfoTemp["userId"]).setOtherDatas(authInfoTemp["otherDatas"]).setTsCreate(authInfoTemp["tsCreate"]).setSecretKey(authInfoTemp["secretKey"]).build();
 
                 this.authInfoDict.set(gnToken, authInfo);
             }
@@ -425,22 +620,18 @@ export class ApiMiddleware {
         return authInfo;
     }
 
-    /**
-     * Returns the auth infos by user ID in mem cache.
-     * @param userId Indicates whether r ID should be used.
-     * @returns Returns the auth infos by user ID in mem cache.
-     */
-    public getAuthInfosByUserIdInMemCache(userId: string): AuthInfo[] {
-        // Stores the answer value used in the current execution flow.
-        let answer: AuthInfo[] = [];
+    public async removeAllAuthInfosInDb(userId: string, ignoreGnToken?: string): Promise<void> {
+        const filter: Record<string, any> = {
+            userId: userId,
+        };
 
-        for (const authInfo of this.authInfoDict.values()) {
-            if (authInfo != null && authInfo.getUserId() == userId) {
-                answer.push(authInfo);
-            }
+        if (ignoreGnToken) {
+            filter["gnToken"] = {
+                $ne: ignoreGnToken,
+            };
         }
 
-        return answer;
+        await this.authInfoCollection.updateMany(filter, { $set: { isRemove: true, tsLastUpdate: xDatetime.getCurrentMilliseconds() } });
     }
 
     /**
@@ -448,45 +639,13 @@ export class ApiMiddleware {
      * @param secretInfo Provides the secret info value used by this operation.
      * @param withoutSave If yes, no save to db.
      */
-    public async updateSecretInfo(secretInfo: SecretInfo, withoutSave: boolean = false): Promise<void> {
+    public async updateSecretInfo(secretInfo: SecretInfo): Promise<void> {
         // Stores the secret key value used in the current execution flow.
         let secretKey = secretInfo.getSecretKey();
 
         this.secretInfoDict.set(secretKey, secretInfo);
 
-        if (!withoutSave) await this.secretInfoCollection.updateOne({ secretKey: secretKey }, { $set: secretInfo.toDocumentData() }, { upsert: true });
-    }
-
-    /**
-     * Executes the update auth info workflow asynchronously.
-     * @param authInfo Provides the auth info value used by this operation.
-     * @param withoutSave If yes, no save to db.
-     */
-    public async updateAuthInfo(authInfo: AuthInfo, withoutSave: boolean = false): Promise<void> {
-        // Stores the GearN token value used in the current execution flow.
-        let gnToken = authInfo.getGNToken();
-
-        this.authInfoDict.set(gnToken, authInfo);
-
-        if (!withoutSave) await this.authInfoCollection.updateOne({ gnToken: gnToken }, { $set: authInfo.toDocumentData() });
-    }
-
-    public async removeAllAuthInfosInDb(userId: string, ignoreAuthToken?: string): Promise<void> {
-        const filter: Record<string, any> = {
-            userId: userId,
-        };
-
-        if (ignoreAuthToken) {
-            filter["authToken"] = {
-                $ne: ignoreAuthToken,
-            };
-        }
-
-        await this.authInfoCollection.updateMany(filter, {
-            $set: {
-                isRemove: true,
-            },
-        });
+        await this.secretInfoCollection.updateOne({ secretKey: secretKey }, { $set: secretInfo.toDocumentData() }, { upsert: true });
     }
 
     /**

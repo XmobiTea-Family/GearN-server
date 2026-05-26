@@ -334,6 +334,7 @@ export class AuthInfo extends BuilderBase {
             isRemove: this.remove,
             tsExpire: this.tsExpire,
             otherDatas: this.otherDatas,
+            tsLastUpdate: this.tsLastUpdate,
             tsCreate: this.tsCreate,
             secretKey: this.secretKey,
         };

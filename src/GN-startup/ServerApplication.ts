@@ -300,6 +300,8 @@ export class ServerApplication extends BuilderBase {
         let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdos");
         this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
+        this.apiMiddleware.startStreamWatch();
+
         let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdos");
         this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
