@@ -1209,11 +1209,6 @@ export class ServerApplication extends BuilderBase {
                 }
 
                 {
-                    await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                        capped: true,
-                        size: 5120000,
-                        max: 100000,
-                    });
 
                     // Stores the matchmaking ticket collection value used in the current execution flow.
                     let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
@@ -1541,11 +1536,6 @@ export class ServerApplication extends BuilderBase {
                 Debug.log("create some indexes on ReceiptIAP for gameId " + gameId + " success.");
 
                 {
-                    await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                        capped: true,
-                        size: 5120000,
-                        max: 100000,
-                    });
 
                     // Stores the matchmaking ticket collection value used in the current execution flow.
                     let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);

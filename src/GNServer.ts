@@ -175,6 +175,10 @@ export class GNServer {
             if (currentDate.getUTCSeconds() % 10 == 0) thiz.handleMatchmaking();
         });
 
+        this.timerService.subscriberEveryHour(() => {
+            thiz.handleRemoveOldMatchmakingTickets();
+        });
+
         this.timerService.subscriberEveryMinute(() => {
             let currentDate = xDatetime.getCurrentDate();
             if (currentDate.getUTCMinutes() % 10 == 0) thiz.handleRemoveCacheInvalidData();
@@ -767,6 +771,15 @@ export class GNServer {
         }
     }
 
+    private handleRemoveOldMatchmakingTickets() {
+        if (!this.isPrimary()) return;
+
+        for (let i = 0; i < this.gameIds.length; i++) {
+            let gameId = this.gameIds[i];
+            this.handleRemoveOldMatchmakingTicketsForGame(gameId);
+        }
+    }
+
     /**
      * Periodically evicts expired cache entries for every loaded game.
      */
@@ -797,6 +810,10 @@ export class GNServer {
                 }
             }
         }
+    }
+
+    private async handleRemoveOldMatchmakingTicketsForGame(gameId: string) {
+        await this.matchmakingService.handleDeleteOld(gameId);
     }
 
     /**

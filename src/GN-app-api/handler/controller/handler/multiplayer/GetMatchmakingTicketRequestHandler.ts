@@ -213,7 +213,7 @@ export class GetMatchmakingTicketRequestHandler extends MultiplayerBaseRequestHa
         gnMatchmakingTicket.add(ParameterCode.QueueName, matchmakingTicket.getQueueName());
         gnMatchmakingTicket.add(ParameterCode.Status, matchmakingTicket.getStatus());
 
-        if (matchmakingTicket.getStatus() == MatchmakingTicketStatus.Matched) {
+        if (matchmakingTicket.getStatus() == MatchmakingTicketStatus.Matched || matchmakingTicket.getStatus() == MatchmakingTicketStatus.WaitingForServer) {
             gnMatchmakingTicket.add(ParameterCode.MatchId, matchmakingTicket.getMatchId());
         }
 
