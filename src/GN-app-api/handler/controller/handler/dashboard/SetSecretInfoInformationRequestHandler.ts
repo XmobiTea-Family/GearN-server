@@ -12,6 +12,7 @@ import { RequestHandler } from "./../base/RequestHandler";
 
 import { SecretInfoItem } from "./../../../../../GN-library/xdatabase/lib/entity/pro/masterAdmin/SecretInfoItem";
 import { PermissionParam } from "./model/PermissionParam";
+import { Debug } from "../../../../../GN-library/xdebug/lib/xDebug";
 
 class SetSecretInfoInformationOperationRequest extends OperationRequest {
     // Stores the secret key value used by this instance.
@@ -227,6 +228,17 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
             description: secretInfoItem.getDescription(),
         });
 
+        let newSecretInfo = SecretInfo.Builder()
+            .setGameId(secretInfoItem.getGameId())
+            .setIsRemove(secretInfoItem.getRemove())
+            .setPermission(secretInfoItem.getPermission())
+            .setSecretKey(secretInfoItem.getSecretKey())
+            .setTsExpire(secretInfoItem.getTsExpire())
+            .setDescription(secretInfoItem.getDescription())
+            .build();
+
+        this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo, false);
+
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetSecretInfoInformation", request, role, secretInfo, operationRequest, operationResponse);
@@ -234,24 +246,66 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
         return operationResponse;
     }
 
-    private applySettings(secretInfo: { gameId: string; isRemove: boolean; permission: SecretPermissionItem; secretKey: string; tsExpire: number; description: string }): void {
-        // Stores the new secret info value used in the current execution flow.
-        let newSecretInfo = SecretInfo.Builder().setGameId(secretInfo.gameId).setIsRemove(secretInfo.isRemove).setPermission(secretInfo.permission).setSecretKey(secretInfo.secretKey).setTsExpire(secretInfo.tsExpire).setDescription(secretInfo.description).build();
-
-        this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo, !this.gnServer.isPrimary());
-    }
-
     /**
      * Executes the init workflow.
      */
-    protected init(): void {
-        // Stores the thiz value used in the current execution flow.
-        let thiz = this;
-        this.gnServer
-            .getHttpApp()
-            .getClusterHandler()
-            .onEvent("dashboard_SetSecretInfoInformation", (data) => {
-                thiz.applySettings(data);
+    protected override init(): void {
+        this.startStreamWatch();
+    }
+
+    private startStreamWatch() {
+        let collection = this.gnServer.getDatabase().systemCollection("SecretInfo");
+
+        const thiz = this;
+
+        const startWatch = () => {
+            Debug.log("[GearN] [SetSecretInfoInformationRequestHandler] stream start on collection: " + collection.collectionName);
+
+            const stream = collection.watch([
+                {
+                    $match: {
+                        operationType: {
+                            $in: [
+                                "update",
+                            ]
+                        }
+                    }
+                }
+            ], {
+                fullDocument: "updateLookup"
             });
+
+            stream.on("change", (change) => {
+                if (change.operationType == "update") {
+                    // Stores the secret info item value used in the current execution flow.
+                    const secretInfoItem = new SecretInfoItem(change.fullDocument as any, collection);
+
+                    let newSecretInfo = SecretInfo.Builder()
+                        .setGameId(secretInfoItem.getGameId())
+                        .setIsRemove(secretInfoItem.getRemove())
+                        .setPermission(secretInfoItem.getPermission())
+                        .setSecretKey(secretInfoItem.getSecretKey())
+                        .setTsExpire(secretInfoItem.getTsExpire())
+                        .setDescription(secretInfoItem.getDescription())
+                        .build();
+
+                    this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo, true);
+
+                    Debug.log("[GearN] [SetSecretInfoInformationRequestHandler] stream update game config on " + secretInfoItem.getGameId());
+                }
+            });
+
+            stream.on("error", (err) => {
+                Debug.logError("[GearN] [SetSecretInfoInformationRequestHandler] stream error: " + err.message);
+
+                stream.close();
+
+                setTimeout(() => {
+                    startWatch();
+                }, 1000);
+            });
+        };
+
+        startWatch();
     }
 }

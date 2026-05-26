@@ -1292,8 +1292,8 @@
                 "hasEdit": false
             },
             {
-                "eventName": "inventory_SetAmount",
-                "script": "\npreHandlers[\"inventory_SetAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers[\"inventory_SetAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
+                "eventName": "inventory_ChangeAmount",
+                "script": "\npreHandlers[\"inventory_ChangeAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n\n\treturn null;\n}\n\npostHandlers[\"inventory_ChangeAmount\"] = async (request: { itemId: string; amount: number }, role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n\n\treturn operationResponse;\n}\n",
                 "hasEdit": false
             },
             {

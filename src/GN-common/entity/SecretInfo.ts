@@ -827,7 +827,7 @@ export interface SecretPermissionItem {
         getRemoveStatus: InventoryPermissionRules;
 
         // Stores the set amount value used by this contract.
-        setAmount: InventoryPermissionRules;
+        changeAmount: InventoryPermissionRules;
         // Stores the set owner value used by this contract.
         setOwner: InventoryPermissionRules;
 

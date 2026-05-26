@@ -127,7 +127,7 @@ export class Inventory extends DataObjectBase {
      * Sets the amount.
      * @param amount Provides the amount value used by this operation.
      */
-    public setAmount(amount: number): void {
+    public changeAmount(amount: number): void {
         this.amount = amount;
 
         this.set(Inventory._amount, this.amount);

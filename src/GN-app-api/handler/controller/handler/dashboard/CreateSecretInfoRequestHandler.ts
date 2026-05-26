@@ -534,7 +534,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getOwner: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
                 getRemoveStatus: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
 
-                setAmount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
+                changeAmount: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
                 setOwner: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
 
                 setRemoveStatus: { selfEnable: selfEnable, otherSelfEnable: otherSelfEnable, adminSelfEnable: adminSelfEnable, serverSelfEnable: serverSelfEnable },
@@ -1025,7 +1025,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getOwner: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
                 getRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
 
-                setAmount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
+                changeAmount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
                 setOwner: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
 
                 setRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: true },
@@ -1516,7 +1516,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getOwner: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
                 getRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
 
-                setAmount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
+                changeAmount: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
                 setOwner: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
 
                 setRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: true, serverSelfEnable: false },
@@ -2008,7 +2008,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
                 getOwner: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false },
                 getRemoveStatus: { selfEnable: true, otherSelfEnable: true, adminSelfEnable: false, serverSelfEnable: false },
 
-                setAmount: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
+                changeAmount: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
                 setOwner: { selfEnable: true, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },
 
                 setRemoveStatus: { selfEnable: false, otherSelfEnable: false, adminSelfEnable: false, serverSelfEnable: false },

@@ -291,7 +291,7 @@ import { GetItemTypeRequestHandler as Inventory_GetItemTypeRequestHandler } from
 import { GetAmountRequestHandler as Inventory_GetAmountRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/GetAmountRequestHandler";
 import { GetOwnerRequestHandler as Inventory_GetOwnerRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/GetOwnerRequestHandler";
 import { GetRemoveStatusRequestHandler as Inventory_GetRemoveStatusRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/GetRemoveStatusRequestHandler";
-import { SetAmountRequestHandler as Inventory_SetAmountRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/SetAmountRequestHandler";
+import { ChangeAmountRequestHandler as Inventory_ChangeAmountRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/ChangeAmountRequestHandler";
 import { SetOwnerRequestHandler as Inventory_SetOwnerRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/SetOwnerRequestHandler";
 import { SetRemoveStatusRequestHandler as Inventory_SetRemoveStatusRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/SetRemoveStatusRequestHandler";
 import { GetItemsWithDisplayNameRequestHandler as Inventory_GetItemsWithDisplayNameRequestHandler } from "./GN-app-api/handler/controller/handler/inventory/GetItemsWithDisplayNameRequestHandler";
@@ -689,7 +689,7 @@ export class RequestControllerUtils {
             requestController.addHandler(requestTypeValue, new Inventory_GetAmountRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new Inventory_GetOwnerRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new Inventory_GetRemoveStatusRequestHandler(gnServer), true);
-            requestController.addHandler(requestTypeValue, new Inventory_SetAmountRequestHandler(gnServer), true);
+            requestController.addHandler(requestTypeValue, new Inventory_ChangeAmountRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new Inventory_SetOwnerRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new Inventory_SetRemoveStatusRequestHandler(gnServer), true);
             requestController.addHandler(requestTypeValue, new Inventory_GetItemsWithDisplayNameRequestHandler(gnServer), true);
