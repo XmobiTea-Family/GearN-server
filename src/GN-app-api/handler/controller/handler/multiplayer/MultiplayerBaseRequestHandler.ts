@@ -162,17 +162,28 @@ export abstract class MultiplayerBaseRequestHandler extends RequestHandler {
                     let regionSelectionRule = <RegionSelectionRule>matchmakingRules;
 
                     // Stores the value value used in the current execution flow.
-                    let value = {
-                        region: "",
-                        ping: 0,
-                    };
+                    let value: {
+                        region: string;
+                        ping: number;
+                    } = null;
 
                     // Stores the temp value value used in the current execution flow.
                     let tempValue = attribute == null ? null : attribute.getGNHashtable(regionSelectionRule.attributePath, null);
 
                     if (tempValue != null) {
-                        value.region = tempValue.getString("region", "");
-                        value.ping = tempValue.getNumber("ping", 0);
+                        let region = tempValue.getString("region", null);
+                        let ping = tempValue.getNumber("ping", null);
+
+                        if (typeof region == "string") {
+                            region = region.trim();
+                        }
+
+                        if (region != null && region.length != 0 && typeof ping == "number" && Number.isFinite(ping)) {
+                            value = {
+                                region: region,
+                                ping: ping,
+                            };
+                        }
                     }
 
                     answer[matchmakingRules.name] = value;

@@ -723,7 +723,7 @@ export class MatchmakingService implements IMatchmakingService {
                     ping: number;
                 } = matchmakingTicket.getMembers()[0].attributeForQueue[regionSelectionRules.name] as any;
 
-                if (valueToCompair == null) return false;
+                if (!this.isRegionSelectionValueValid(valueToCompair)) return false;
 
                 // Stores the next value to compair value used in the current execution flow.
                 let nextValueToCompair: {
@@ -733,9 +733,9 @@ export class MatchmakingService implements IMatchmakingService {
                     ping: number;
                 } = nextMatchmakingTicket.getMembers()[0].attributeForQueue[regionSelectionRules.name] as any;
 
-                if (nextValueToCompair == null) return false;
+                if (!this.isRegionSelectionValueValid(nextValueToCompair)) return false;
 
-                if (valueToCompair.region != nextValueToCompair.region) return false;
+                if (valueToCompair.region.trim() != nextValueToCompair.region.trim()) return false;
 
                 // Stores the maximum latency value used in the current execution flow.
                 let maximumLatency = regionSelectionRules.max;
@@ -773,6 +773,13 @@ export class MatchmakingService implements IMatchmakingService {
         }
 
         return true;
+    }
+
+    /**
+     * Rejects placeholder or malformed region-selection payloads before region and latency checks run.
+     */
+    private isRegionSelectionValueValid(value: { region: string; ping: number }): boolean {
+        return value != null && typeof value.region == "string" && value.region.trim().length != 0 && typeof value.ping == "number" && Number.isFinite(value.ping);
     }
 
     /**
