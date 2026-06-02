@@ -1594,11 +1594,11 @@ export class ServerApplication extends BuilderBase {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("System.AuthInfo", {
-                capped: true,
-                size: 51200000000,
-                max: 100000000,
-            });
+            // await this.gnServer.getDatabase().createCollection("System.AuthInfo", {
+            //     capped: true,
+            //     size: 51200000000,
+            //     max: 100000000,
+            // });
 
             // Stores the auth info collection value used in the current execution flow.
             let authInfoCollection = this.gnServer.getDatabase().systemCollection("AuthInfo");

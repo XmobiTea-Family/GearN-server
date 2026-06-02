@@ -406,7 +406,7 @@ export class ApiMiddleware {
 
         payload.gnToken = payload.gnToken ?? "gn.a_" + StringUtility.generateRandomString(10, 0);
 
-        let tsExpire = this.expiredToken == -1 ? -1 : currentMilliseconds + this.expiredToken;
+        let tsExpire = currentMilliseconds + (this.expiredToken == -1 ? xDatetime.ONE_YEAR_MILLISECOND : this.expiredToken);
 
         let authToken = jwt.sign(payload, this.privateKeyToken, {
             expiresIn: this.expiredToken == -1 ? "1y" : this.expiredToken / 1000,
@@ -458,7 +458,7 @@ export class ApiMiddleware {
 
         payload.gnToken = payload.gnToken ?? "gn.c_" + StringUtility.generateRandomString(10, 0);
 
-        let tsExpire = (currentMilliseconds + expiredAfterMs) / 1000;
+        let tsExpire = currentMilliseconds + expiredAfterMs;
 
         let authToken = jwt.sign(payload, this.privateKeyToken, {
             expiresIn: expiredAfterMs / 1000,
