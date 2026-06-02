@@ -161,7 +161,7 @@ export class ApiMiddleware {
                     const authInfoCurrent = thiz.authInfoDict.get(gnToken);
 
                     if (authInfoCurrent != null) {
-                        authInfoCurrent.setIsRemove(authInfoTemp["isRemove"]);
+                        authInfoCurrent.setRemove(authInfoTemp["isRemove"]);
                         authInfoCurrent.setAuthToken(authInfoTemp["authToken"]);
                         authInfoCurrent.setTsExpire(authInfoTemp["tsExpire"]);
                         authInfoCurrent.setUserId(authInfoTemp["userId"]);
@@ -288,7 +288,7 @@ export class ApiMiddleware {
                     if (secretInfo == null) {
                         const newSecretInfo = SecretInfo.Builder()
                             .setSecretKey(secretInfoResult["secretKey"])
-                            .setIsRemove(secretInfoResult["isRemove"])
+                            .setRemove(secretInfoResult["isRemove"])
                             .setTsExpire(secretInfoResult["tsExpire"])
                             .setGameId(secretInfoResult["gameId"])
                             .setPermission(defaultSecretPermissionItem)
@@ -300,7 +300,7 @@ export class ApiMiddleware {
                         thiz.secretInfoDict.set(secretKey, newSecretInfo);
                     }
                     else {
-                        secretInfo.setIsRemove(secretInfoResult["isRemove"]);
+                        secretInfo.setRemove(secretInfoResult["isRemove"]);
                         secretInfo.setTsExpire(secretInfoResult["tsExpire"]);
                         secretInfo.setGameId(secretInfoResult["gameId"]);
                         secretInfo.setPermission(defaultSecretPermissionItem);
@@ -413,7 +413,7 @@ export class ApiMiddleware {
             algorithm: "HS512",
         });
 
-        let authInfo = AuthInfo.Builder().setGNToken(payload.gnToken).setAuthToken(authToken).setUserId(payload.userId).setIsRemove(false).setTsExpire(tsExpire).setTsLastUpdate(currentMilliseconds).setTsCreate(currentMilliseconds).setSecretKey(payload.secretKey).build();
+        let authInfo = AuthInfo.Builder().setGNToken(payload.gnToken).setAuthToken(authToken).setUserId(payload.userId).setRemove(false).setTsExpire(tsExpire).setTsLastUpdate(currentMilliseconds).setTsCreate(currentMilliseconds).setSecretKey(payload.secretKey).build();
 
         this.authInfoDict.set(payload.gnToken, authInfo);
 
@@ -439,7 +439,7 @@ export class ApiMiddleware {
             algorithm: "HS512",
         });
 
-        let authInfo = AuthInfo.Builder().setGNToken(payload.gnToken).setAuthToken(authToken).setUserId(payload.userId).setIsRemove(false).setTsExpire(tsExpire).setTsLastUpdate(currentMilliseconds).setTsCreate(currentMilliseconds).setSecretKey(payload.secretKey).build();
+        let authInfo = AuthInfo.Builder().setGNToken(payload.gnToken).setAuthToken(authToken).setUserId(payload.userId).setRemove(false).setTsExpire(tsExpire).setTsLastUpdate(currentMilliseconds).setTsCreate(currentMilliseconds).setSecretKey(payload.secretKey).build();
 
         this.authInfoDict.set(payload.gnToken, authInfo);
 
@@ -465,7 +465,7 @@ export class ApiMiddleware {
             algorithm: "HS512",
         });
 
-        let authInfo = AuthInfo.Builder().setGNToken(payload.gnToken).setAuthToken(authToken).setUserId(payload.userId).setIsRemove(false).setTsExpire(tsExpire).setTsLastUpdate(currentMilliseconds).setTsCreate(currentMilliseconds).setSecretKey(payload.secretKey).build();
+        let authInfo = AuthInfo.Builder().setGNToken(payload.gnToken).setAuthToken(authToken).setUserId(payload.userId).setRemove(false).setTsExpire(tsExpire).setTsLastUpdate(currentMilliseconds).setTsCreate(currentMilliseconds).setSecretKey(payload.secretKey).build();
 
         this.authInfoDict.set(payload.gnToken, authInfo);
 
@@ -582,7 +582,7 @@ export class ApiMiddleware {
 
                 secretInfo = SecretInfo.Builder()
                     .setSecretKey(secretInfoResult["secretKey"])
-                    .setIsRemove(secretInfoResult["isRemove"])
+                    .setRemove(secretInfoResult["isRemove"])
                     .setTsExpire(secretInfoResult["tsExpire"])
                     .setGameId(secretInfoResult["gameId"])
                     .setPermission(defaultSecretPermissionItem)
@@ -611,7 +611,7 @@ export class ApiMiddleware {
             let authInfoTemp = await this.authInfoCollection.findOne({ gnToken: gnToken });
 
             if (authInfoTemp != null) {
-                authInfo = AuthInfo.Builder().setGNToken(authInfoTemp["gnToken"]).setAuthToken(authInfoTemp["authToken"]).setIsRemove(authInfoTemp["isRemove"]).setTsExpire(authInfoTemp["tsExpire"]).setUserId(authInfoTemp["userId"]).setOtherDatas(authInfoTemp["otherDatas"]).setTsCreate(authInfoTemp["tsCreate"]).setSecretKey(authInfoTemp["secretKey"]).build();
+                authInfo = AuthInfo.Builder().setGNToken(authInfoTemp["gnToken"]).setAuthToken(authInfoTemp["authToken"]).setRemove(authInfoTemp["isRemove"]).setTsExpire(authInfoTemp["tsExpire"]).setUserId(authInfoTemp["userId"]).setOtherDatas(authInfoTemp["otherDatas"]).setTsCreate(authInfoTemp["tsCreate"]).setSecretKey(authInfoTemp["secretKey"]).build();
 
                 this.authInfoDict.set(gnToken, authInfo);
             }
@@ -840,7 +840,7 @@ export class ApiMiddleware {
                 secretInfoAny.getTsExpire = secretInfo.getTsExpire;
                 secretInfoAny.isRemove = secretInfo.isRemove;
                 secretInfoAny.setGameId = secretInfo.setGameId;
-                secretInfoAny.setIsRemove = secretInfo.setIsRemove;
+                secretInfoAny.setRemove = secretInfo.setRemove;
                 secretInfoAny.setPermission = secretInfo.setPermission;
                 secretInfoAny.setSecretKey = secretInfo.setSecretKey;
                 secretInfoAny.setTsExpire = secretInfo.setTsExpire;
@@ -944,7 +944,7 @@ export class ApiMiddleware {
                 secretInfoAny.getTsExpire = secretInfo.getTsExpire;
                 secretInfoAny.isRemove = secretInfo.isRemove;
                 secretInfoAny.setGameId = secretInfo.setGameId;
-                secretInfoAny.setIsRemove = secretInfo.setIsRemove;
+                secretInfoAny.setRemove = secretInfo.setRemove;
                 secretInfoAny.setPermission = secretInfo.setPermission;
                 secretInfoAny.setSecretKey = secretInfo.setSecretKey;
                 secretInfoAny.setTsExpire = secretInfo.setTsExpire;

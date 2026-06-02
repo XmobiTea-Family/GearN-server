@@ -96,7 +96,7 @@ abstract class BuilderBase {
         return this.clusterSettings;
     }
 
-    constructor() {}
+    constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
@@ -640,7 +640,7 @@ export class ServerApplication extends BuilderBase {
 
                 let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                 this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -668,7 +668,7 @@ export class ServerApplication extends BuilderBase {
 
                     let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                     this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -692,7 +692,7 @@ export class ServerApplication extends BuilderBase {
 
                     let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                     this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -709,7 +709,7 @@ export class ServerApplication extends BuilderBase {
                 let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
                 let secretKey = StringUtility.generateRandomString(32, 0);
 
-                let newSecretInfo = SecretInfo.Builder().setGameId("").setIsRemove(false).setPermission(permission).setSecretKey(secretKey).setTsExpire(-1).setDescription("default root admin secret info").setIsDefault(true).setIsOnlyMasterAdmin(true).build();
+                let newSecretInfo = SecretInfo.Builder().setGameId("").setRemove(false).setPermission(permission).setSecretKey(secretKey).setTsExpire(-1).setDescription("default root admin secret info").setIsDefault(true).setIsOnlyMasterAdmin(true).build();
 
                 await this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 

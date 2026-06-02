@@ -136,7 +136,7 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
         let secretInfoItem = new SecretInfoItem(result, collection);
 
         // Stores the new secret info value used in the current execution flow.
-        let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+        let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
         this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 

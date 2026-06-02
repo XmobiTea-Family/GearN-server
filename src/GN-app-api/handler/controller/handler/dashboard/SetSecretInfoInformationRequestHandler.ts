@@ -229,7 +229,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
 
         let newSecretInfo = SecretInfo.Builder()
             .setGameId(secretInfoItem.getGameId())
-            .setIsRemove(secretInfoItem.getRemove())
+            .setRemove(secretInfoItem.getRemove())
             .setPermission(secretInfoItem.getPermission())
             .setSecretKey(secretInfoItem.getSecretKey())
             .setTsExpire(secretInfoItem.getTsExpire())
