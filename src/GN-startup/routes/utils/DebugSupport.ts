@@ -121,7 +121,12 @@ export class DebugSupport {
 
                     answer[key] = arrayAnswer;
                 } else {
-                    answer[key] = this.securityParameters(value as Record<string, unknown>);
+                    if (key == "permissionParam") {
+                        answer[key] = "...";
+                    }
+                    else {
+                        answer[key] = this.securityParameters(value as Record<string, unknown>);
+                    }
                 }
             } else {
                 answer[key] = value;
