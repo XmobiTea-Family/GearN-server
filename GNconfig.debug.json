@@ -26,7 +26,6 @@
         },
         "socketAppSettings": {
             "enable": true,
-            "useEmitter": false,
             "allowOrigin": "*",
             "credentials": true,
             "allowMethods": ["GET"],

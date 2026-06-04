@@ -358,11 +358,6 @@ export class CreateGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                capped: true,
-                size: 5120000,
-                max: 100000,
-            });
 
             // Stores the matchmaking ticket collection value used in the current execution flow.
             let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);

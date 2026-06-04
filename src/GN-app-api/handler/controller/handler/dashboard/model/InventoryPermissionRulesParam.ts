@@ -116,8 +116,8 @@ export class InventoryPermissionRulesParam {
     public getRemoveStatus?: PermissionRulesParam;
 
     // Stores the set amount value used by this instance.
-    @GNHashtableDataMember({ code: ParameterCode.SetAmount, isOptional: true })
-    public setAmount?: PermissionRulesParam;
+    @GNHashtableDataMember({ code: ParameterCode.ChangeAmount, isOptional: true })
+    public changeAmount?: PermissionRulesParam;
 
     // Stores the set owner value used by this instance.
     @GNHashtableDataMember({ code: ParameterCode.SetOwner, isOptional: true })

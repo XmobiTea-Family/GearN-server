@@ -212,12 +212,13 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
             return operationResponse;
         }
 
+        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
+
         if (role == SecretRole.Client) {
             // Stores the player ban value used in the current execution flow.
             let playerBan = masterPlayer.getPlayerBan();
 
             if (playerBan.tsExpire != 0) {
-                let currentMilliseconds = xDatetime.getCurrentMilliseconds();
                 if (playerBan.tsExpire == -1 || playerBan.tsExpire > currentMilliseconds) {
                     operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.PlayerBan);
                     operationResponse.setDebugMessage("MasterPlayer is banned, reason " + playerBan.reason);
@@ -230,7 +231,9 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
         masterPlayer.setPlayerBan(request.tsExpire, request.reason);
         await masterPlayer.saveAsync();
 
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("masterPlayer_SetPlayerBan", request);
+        if (request.tsExpire == -1 || request.tsExpire > currentMilliseconds) {
+            await this.gnServer.getApiMiddleware().removeAllAuthInfosInDb(request.userId);
+        }
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
@@ -239,39 +242,4 @@ export class SetPlayerBanRequestHandler extends MasterPlayerBaseRequestHandler {
         return operationResponse;
     }
 
-    /**
-     * Sets the player ban.
-     * @param data Provides the data value used by this operation.
-     */
-    private setPlayerBan(data: { userId: string; tsExpire: number; reason: string }) {
-        // Stores the current milliseconds value used in the current execution flow.
-        let currentMilliseconds = xDatetime.getCurrentMilliseconds();
-
-        if (data.tsExpire == -1 || data.tsExpire > currentMilliseconds) {
-            // Stores the auth infos value used in the current execution flow.
-            let authInfos = this.gnServer.getApiMiddleware().getAuthInfosByUserIdInMemCache(data.userId);
-
-            for (const authInfo of authInfos) {
-                authInfo.setIsRemove(true);
-                authInfo.setTsLastUpdate(currentMilliseconds);
-                authInfo.setTsExpire(currentMilliseconds);
-
-                this.gnServer.getApiMiddleware().updateAuthInfo(authInfo);
-            }
-        }
-    }
-
-    /**
-     * Executes the init workflow.
-     */
-    protected override init(): void {
-        // Stores the thiz value used in the current execution flow.
-        let thiz = this;
-        this.gnServer
-            .getHttpApp()
-            .getClusterHandler()
-            .onEvent("masterPlayer_SetPlayerBan", (data) => {
-                thiz.setPlayerBan(data);
-            });
-    }
 }

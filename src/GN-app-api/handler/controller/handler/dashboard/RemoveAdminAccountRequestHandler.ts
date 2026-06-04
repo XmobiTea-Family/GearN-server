@@ -109,11 +109,9 @@ export class RemoveAdminAccountRequestHandler extends RequestHandler {
             userId: request.userId,
         });
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        await this.gnServer.getApiMiddleware().removeAllAuthInfosInDb(request.userId);
 
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAdminAuthToken", {
-            userId: request.userId,
-        });
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_RemoveAdminAccount", request, role, secretInfo, operationRequest, operationResponse);
 

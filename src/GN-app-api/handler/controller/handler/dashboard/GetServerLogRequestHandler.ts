@@ -10,11 +10,10 @@ import { ErrorCode } from "./../../../../../GN-common/constant/errorCode/ErrorCo
 import { SecretInfo, SecretRole } from "./../../../../../GN-common/entity/SecretInfo";
 import { RequestHandler } from "./../base/RequestHandler";
 
-import { GNArray, GNHashtable } from "./../../../../../GN-common/common/GNData";
+import { GNArray } from "./../../../../../GN-common/common/GNData";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 import { NumberDataMember } from "./../../../../../GN-common/entity/DataMember";
 import fs from "fs";
-import readline from "readline";
 
 class GetServerLogOperationRequest extends OperationRequest {
     // Stores the skip value used by this instance.
@@ -36,6 +35,8 @@ class GetServerLogOperationRequest extends OperationRequest {
 }
 
 export class GetServerLogRequestHandler extends RequestHandler {
+    private static readonly READ_LOG_CHUNK_SIZE_IN_BYTES: number = 64 * 1024;
+
     /**
      * Returns the code.
      */
@@ -89,44 +90,31 @@ export class GetServerLogRequestHandler extends RequestHandler {
         operationResponse = new OperationResponse(operationRequest.getOperationCode(), operationRequest.getRequestId());
         operationResponse.setReturnCode(ReturnCode.Ok);
 
-        // Stores the logs value used in the current execution flow.
-        let logs: string[] = [];
-        // Stores the file stream value used in the current execution flow.
-        let fileStream = fs.createReadStream(Debug.getLogPath());
-
-        // Stores the rl value used in the current execution flow.
-        let rl = readline.createInterface({
-            input: fileStream,
-            crlfDelay: Infinity,
-        });
-
-        for await (const line of rl) {
-            logs.push(line);
+        // Read only the tail section needed for paging so large logs do not get loaded into memory.
+        let logPath = Debug.getLogPath();
+        if (!logPath || !fs.existsSync(logPath)) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+            return operationResponse;
         }
-
-        rl.close();
 
         // Stores the GearN logs value used in the current execution flow.
         let gnLogs = new GNArray();
+        try {
+            let skip = request.skip ?? 0;
+            let limit = request.limit ?? 50;
+            let logs = await this.readRecentLogLinesNewestFirst(logPath, skip + limit);
 
-        // Stores the remain skip value used in the current execution flow.
-        let remainSkip = request.skip;
-        // Stores the remain limit value used in the current execution flow.
-        let remainLimit = request.limit;
-
-        for (let i = logs.length - 1; i >= 0; i--) {
-            if (remainSkip > 0) {
-                remainSkip--;
-            } else {
-                remainLimit--;
-                if (remainLimit > -1) {
-                    // Stores the log value used in the current execution flow.
-                    let log = logs[i];
-                    gnLogs.add(log);
-                } else {
-                    break;
-                }
+            for (let i = skip; i < logs.length && i < skip + limit; i++) {
+                gnLogs.add(logs[i]);
             }
+        } catch (err) {
+            let error = err as NodeJS.ErrnoException;
+            if (error?.code == "ENOENT") {
+                operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.FileNotFound);
+                return operationResponse;
+            }
+
+            return this.newOperationInternalServerError(operationRequest, error?.message ?? String(err));
         }
 
         operationResponse.setParameter(ParameterCode.Results, gnLogs);
@@ -136,5 +124,57 @@ export class GetServerLogRequestHandler extends RequestHandler {
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_GetServerLog", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
+    }
+
+    /**
+     * Reads the newest lines from the end of the log file without loading the whole file into memory.
+     * @param logPath Provides the log file path used by this operation.
+     * @param lineCount Provides the number of newest lines to read.
+     * @returns Resolves with the newest lines ordered from newest to oldest.
+     */
+    private async readRecentLogLinesNewestFirst(logPath: string, lineCount: number): Promise<string[]> {
+        if (lineCount <= 0) {
+            return [];
+        }
+
+        let fileHandle = await fs.promises.open(logPath, "r");
+
+        try {
+            let fileStat = await fileHandle.stat();
+            let position = fileStat.size;
+            let remainingHead = "";
+            let recentLines: string[] = [];
+            let isFirstChunk = true;
+
+            while (position > 0 && recentLines.length < lineCount) {
+                let readSize = Math.min(GetServerLogRequestHandler.READ_LOG_CHUNK_SIZE_IN_BYTES, position);
+                position -= readSize;
+
+                let buffer = Buffer.alloc(readSize);
+                let { bytesRead } = await fileHandle.read(buffer, 0, readSize, position);
+                let chunkText = buffer.toString("utf8", 0, bytesRead);
+                let lines = (chunkText + remainingHead).split(/\r?\n/);
+
+                remainingHead = lines.shift() ?? "";
+
+                if (isFirstChunk && lines.length > 0 && lines[lines.length - 1] === "") {
+                    lines.pop();
+                }
+
+                for (let i = lines.length - 1; i >= 0 && recentLines.length < lineCount; i--) {
+                    recentLines.push(lines[i]);
+                }
+
+                isFirstChunk = false;
+            }
+
+            if (recentLines.length < lineCount && remainingHead.length > 0) {
+                recentLines.push(remainingHead);
+            }
+
+            return recentLines;
+        } finally {
+            await fileHandle.close();
+        }
     }
 }

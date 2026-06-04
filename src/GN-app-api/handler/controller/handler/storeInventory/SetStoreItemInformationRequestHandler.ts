@@ -331,10 +331,10 @@ export class SetStoreItemInformationRequestHandler extends StoreItemBaseRequestH
             }
 
             storeInventory.setInAppPurchase({
-                appleAppStoreId: appleAppStoreId,
-                facebookStoreId: facebookStoreId,
-                googlePlayStoreId: googlePlayStoreId,
-                analyticsPrice: request.inAppPurchase.analyticsPrice,
+                appleAppStoreId: appleAppStoreId != null ? appleAppStoreId : inAppPurchase.appleAppStoreId,
+                facebookStoreId: facebookStoreId != null ? facebookStoreId : inAppPurchase.facebookStoreId,
+                googlePlayStoreId: googlePlayStoreId != null ? googlePlayStoreId : inAppPurchase.googlePlayStoreId,
+                analyticsPrice: request.inAppPurchase.analyticsPrice != null ? request.inAppPurchase.analyticsPrice : inAppPurchase.analyticsPrice,
             });
         }
 

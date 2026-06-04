@@ -185,71 +185,17 @@ export class SetContentDataRequestHandler extends RequestHandler {
 
         if (!request.label) request.label = "origin";
 
-        // Stores the configs value used in the current execution flow.
-        let configs: { key: string; data: {} }[] = [];
-
         for (let i = 0; i < request.configs.length; i++) {
             // Stores the configuration value used in the current execution flow.
             let config = request.configs[i];
 
-            configs.push({
-                key: config.key,
-                data: config.data != null ? config.data.toData() : null,
-            });
+            (<ConfigService>configGame).setConfigAsync(config.key, request.label, config.data?.toData() ?? null);
         }
-
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("content_SetContentData", {
-            configs: configs,
-            label: request.label,
-            gameId: secretInfo.getGameId(),
-        });
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("content_SetContentData", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
-    }
-
-    /**
-     * Executes the apply settings workflow.
-     * @param request Provides the request value used by this operation.
-     */
-    private applySettings(request: { configs: Array<{ key: string; data: {} }>; label: string; gameId: string }) {
-        // Stores the configuration game value used in the current execution flow.
-        let configGame = this.gnServer.getConfigService(request.gameId);
-        if (!configGame) {
-            return;
-        }
-
-        if (this.gnServer.isPrimary()) {
-            for (let i = 0; i < request.configs.length; i++) {
-                // Stores the configuration value used in the current execution flow.
-                let config = request.configs[i];
-
-                (<ConfigService>configGame).setConfigAsync(config.key, request.label, config.data, true);
-            }
-        } else {
-            for (let i = 0; i < request.configs.length; i++) {
-                // Stores the configuration value used in the current execution flow.
-                let config = request.configs[i];
-
-                (<ConfigService>configGame).setConfigAsync(config.key, request.label, config.data, false);
-            }
-        }
-    }
-
-    /**
-     * Executes the init workflow.
-     */
-    protected init(): void {
-        // Stores the thiz value used in the current execution flow.
-        let thiz = this;
-        this.gnServer
-            .getHttpApp()
-            .getClusterHandler()
-            .onEvent("content_SetContentData", (data) => {
-                thiz.applySettings(data);
-            });
     }
 }

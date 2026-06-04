@@ -297,7 +297,7 @@ export class CreatePlayerCharacterRequestHandler extends GamePlayerBaseRequestHa
                     playerCurrencies: {},
                     playerStatistics: {},
                     playerDatas: {},
-                    ipAddressCreate: "",
+                    ipAddressCreate: request.ipAddress,
                     countryCode: countryCode,
                     tsLastLogin: currentMilliseconds,
                     segments: [],

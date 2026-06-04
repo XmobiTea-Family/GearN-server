@@ -133,7 +133,7 @@ abstract class BuilderBase {
      * @param remove Provides the remove value used by this operation.
      * @returns Returns the current builder instance.
      */
-    public setIsRemove(remove: boolean): Builder {
+    public setRemove(remove: boolean): Builder {
         this.remove = remove;
         return this as Builder;
     }
@@ -334,6 +334,7 @@ export class AuthInfo extends BuilderBase {
             isRemove: this.remove,
             tsExpire: this.tsExpire,
             otherDatas: this.otherDatas,
+            tsLastUpdate: this.tsLastUpdate,
             tsCreate: this.tsCreate,
             secretKey: this.secretKey,
         };

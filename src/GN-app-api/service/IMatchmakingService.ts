@@ -75,4 +75,6 @@ export interface IMatchmakingService {
      * @returns Resolves with the operation result.
      */
     handle(gameId: string): Promise<MatchmakingTicketCanMatch[]>;
+
+    handleDeleteOld(gameId: string): Promise<void>;
 }

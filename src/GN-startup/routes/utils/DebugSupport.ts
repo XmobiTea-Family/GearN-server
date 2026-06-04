@@ -83,7 +83,7 @@ export class DebugSupport {
         return answer;
     }
 
-    private static securitySecretKey(secretKey: string): string {
+    public static securitySecretKey(secretKey: string): string {
         if (!secretKey) return null;
 
         return secretKey.slice(0, 6) + "*".repeat(secretKey.length - 12) + secretKey.slice(secretKey.length - 6);

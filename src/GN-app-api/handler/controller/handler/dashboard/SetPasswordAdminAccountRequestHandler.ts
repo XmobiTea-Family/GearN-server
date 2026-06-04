@@ -110,13 +110,11 @@ export class SetPasswordAdminAccountRequestHandler extends RequestHandler {
         // Stores the master admin player value used in the current execution flow.
         let masterAdminPlayer = new MasterAdminPlayer(result, collection);
         masterAdminPlayer.setPassword(await bcrypt.hash(request.password, 10));
-        masterAdminPlayer.saveAsync();
+        await masterAdminPlayer.saveAsync();
+
+        await this.gnServer.getApiMiddleware().removeAllAuthInfosInDb(request.userId);
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
-
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAdminAuthToken", {
-            userId: request.userId,
-        });
 
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetPasswordAdminAccount", request, role, secretInfo, operationRequest, operationResponse);
 

@@ -96,7 +96,7 @@ abstract class BuilderBase {
         return this.clusterSettings;
     }
 
-    constructor() {}
+    constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
@@ -300,6 +300,8 @@ export class ServerApplication extends BuilderBase {
         let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdos");
         this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
+        this.apiMiddleware.startStreamWatch();
+
         let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdos");
         this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
@@ -393,6 +395,11 @@ export class ServerApplication extends BuilderBase {
         (<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
         (<PreEventCallbackService>this.gnServer.getPreEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 
+        server.on("error", (err) => {
+            Debug.logError("[GearN] Server stopped cause " + err.message);
+            process.exit(1);
+        });
+
         // Start listening only after every runtime dependency has been initialized and the bootstrap data is ready.
         server.listen(port, "0.0.0.0", () => {
             let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
@@ -404,6 +411,11 @@ export class ServerApplication extends BuilderBase {
             Debug.log("[GearN] Server Application running on 0.0.0.0 the port " + port + " with sessionId: " + this.sessionId);
 
             if (useOtherSocketServer) {
+                socketServer.on("error", (err) => {
+                    Debug.logError("[GearN] Socket Server stopped cause " + err.message);
+                    process.exit(1);
+                });
+
                 socketServer.listen(socketPort, "0.0.0.0", () => {
                     Debug.log("[GearN] Socket Server running on 0.0.0.0 the port " + socketPort);
                 });
@@ -638,7 +650,7 @@ export class ServerApplication extends BuilderBase {
 
                 let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                 this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -666,7 +678,7 @@ export class ServerApplication extends BuilderBase {
 
                     let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                     this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -690,7 +702,7 @@ export class ServerApplication extends BuilderBase {
 
                     let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                     this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -707,7 +719,7 @@ export class ServerApplication extends BuilderBase {
                 let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
                 let secretKey = StringUtility.generateRandomString(32, 0);
 
-                let newSecretInfo = SecretInfo.Builder().setGameId("").setIsRemove(false).setPermission(permission).setSecretKey(secretKey).setTsExpire(-1).setDescription("default root admin secret info").setIsDefault(true).setIsOnlyMasterAdmin(true).build();
+                let newSecretInfo = SecretInfo.Builder().setGameId("").setRemove(false).setPermission(permission).setSecretKey(secretKey).setTsExpire(-1).setDescription("default root admin secret info").setIsDefault(true).setIsOnlyMasterAdmin(true).build();
 
                 await this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -1207,11 +1219,6 @@ export class ServerApplication extends BuilderBase {
                 }
 
                 {
-                    await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                        capped: true,
-                        size: 5120000,
-                        max: 100000,
-                    });
 
                     // Stores the matchmaking ticket collection value used in the current execution flow.
                     let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
@@ -1539,11 +1546,6 @@ export class ServerApplication extends BuilderBase {
                 Debug.log("create some indexes on ReceiptIAP for gameId " + gameId + " success.");
 
                 {
-                    await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                        capped: true,
-                        size: 5120000,
-                        max: 100000,
-                    });
 
                     // Stores the matchmaking ticket collection value used in the current execution flow.
                     let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
@@ -1602,11 +1604,11 @@ export class ServerApplication extends BuilderBase {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("System.AuthInfo", {
-                capped: true,
-                size: 51200000000,
-                max: 100000000,
-            });
+            // await this.gnServer.getDatabase().createCollection("System.AuthInfo", {
+            //     capped: true,
+            //     size: 51200000000,
+            //     max: 100000000,
+            // });
 
             // Stores the auth info collection value used in the current execution flow.
             let authInfoCollection = this.gnServer.getDatabase().systemCollection("AuthInfo");

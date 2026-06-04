@@ -125,16 +125,16 @@ export class MatchmakingQueueSettingsParam {
     public queueName: string;
 
     // Stores the match size value used by this instance.
-    @GNHashtableDataMember({ code: ParameterCode.MatchSize })
-    public matchSize: SizeParam;
+    @GNHashtableDataMember({ code: ParameterCode.MatchSize, isOptional: true })
+    public matchSize?: SizeParam;
 
     // Stores the ticket size value used by this instance.
-    @GNHashtableDataMember({ code: ParameterCode.TicketSize })
-    public ticketSize: SizeParam;
+    @GNHashtableDataMember({ code: ParameterCode.TicketSize, isOptional: true })
+    public ticketSize?: SizeParam;
 
     // Stores the server allocation value used by this instance.
-    @GNHashtableDataMember({ code: ParameterCode.ServerAllocation })
-    public serverAllocation: ServerAllocationParam;
+    @GNHashtableDataMember({ code: ParameterCode.ServerAllocation, isOptional: true })
+    public serverAllocation?: ServerAllocationParam;
 
     // Stores the teams value used by this instance.
     @GNArrayDataMember({ code: ParameterCode.Teams, isOptional: true, elementCls: TeamParam })

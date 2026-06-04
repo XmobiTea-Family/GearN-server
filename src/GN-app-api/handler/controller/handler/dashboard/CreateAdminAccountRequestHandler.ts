@@ -113,6 +113,14 @@ export class CreateAdminAccountRequestHandler extends RequestHandler {
         }
 
         // Stores the result value used in the current execution flow.
+        let resultSecretInfo = await collection.findOne({ type: "secretInfo", secretKey: request.secretKey });
+
+        if (resultSecretInfo == null) {
+            operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.SecretInfoNotFound);
+            return operationResponse;
+        }
+
+        // Stores the result value used in the current execution flow.
         let result = {
             type: "account",
             userId: StringUtility.generateRandomString(10, 0),

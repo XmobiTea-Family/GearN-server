@@ -8,11 +8,14 @@ import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { DifferenceRule, MatchTotalRule, RegionSelectionRule, RuleExpansionType, RuleType, SetIntersectionRule, StringRule, TeamDifferenceRule, TeamSizeBalanceRule, xMatchmakingQueueSettings, RuleStringCompairType, TeamTicketSizeSimilarityRule } from "./../../GN-library/xsettings/lib/entity/xMatchmakingQueueSettings";
 import { GNServer } from "./../../GNServer";
 import { IMatchmakingService, MatchmakingTicketCanMatch } from "./IMatchmakingService";
+import * as mongodb from "mongodb";
 
 /**
  * Evaluates waiting matchmaking tickets against queue rules and materializes match documents.
  */
 export class MatchmakingService implements IMatchmakingService {
+    private static readonly MATCHMAKING_TICKET_RETENTION_IN_SECONDS: number = 7 * 24 * 60 * 60;
+
     // Runtime access to queue settings, collections, and other shared services.
     private gnServer: GNServer;
 
@@ -24,6 +27,20 @@ export class MatchmakingService implements IMatchmakingService {
         this.gnServer = gnServer;
     }
 
+    public async handleDeleteOld(gameId: string): Promise<void> {
+        try {
+            const matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
+
+            await matchmakingTicketCollection.deleteMany({
+                _id: {
+                    $lt: mongodb.ObjectId.createFromTime(Math.floor(xDatetime.getCurrentMilliseconds() / 1000 - MatchmakingService.MATCHMAKING_TICKET_RETENTION_IN_SECONDS)),
+                },
+            });
+        } catch (err) {
+            Debug.logException(err);
+        }
+    }
+
     /**
      * Loads waiting tickets for one game, tries to build valid matches, and persists successful results.
      * @param gameId Provides the game ID value used by this operation.
@@ -31,7 +48,7 @@ export class MatchmakingService implements IMatchmakingService {
      */
     public async handle(gameId: string): Promise<MatchmakingTicketCanMatch[]> {
         try {
-            let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
+            const matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
 
             // Load active tickets so expiration is applied even when no valid match candidate exists.
             let results = await matchmakingTicketCollection.find({ status: { $in: [MatchmakingTicketStatus.WaitingForMatch, MatchmakingTicketStatus.WaitingForMembers] } });
@@ -706,7 +723,7 @@ export class MatchmakingService implements IMatchmakingService {
                     ping: number;
                 } = matchmakingTicket.getMembers()[0].attributeForQueue[regionSelectionRules.name] as any;
 
-                if (valueToCompair == null) return false;
+                if (!this.isRegionSelectionValueValid(valueToCompair)) return false;
 
                 // Stores the next value to compair value used in the current execution flow.
                 let nextValueToCompair: {
@@ -716,9 +733,9 @@ export class MatchmakingService implements IMatchmakingService {
                     ping: number;
                 } = nextMatchmakingTicket.getMembers()[0].attributeForQueue[regionSelectionRules.name] as any;
 
-                if (nextValueToCompair == null) return false;
+                if (!this.isRegionSelectionValueValid(nextValueToCompair)) return false;
 
-                if (valueToCompair.region != nextValueToCompair.region) return false;
+                if (valueToCompair.region.trim() != nextValueToCompair.region.trim()) return false;
 
                 // Stores the maximum latency value used in the current execution flow.
                 let maximumLatency = regionSelectionRules.max;
@@ -756,6 +773,13 @@ export class MatchmakingService implements IMatchmakingService {
         }
 
         return true;
+    }
+
+    /**
+     * Rejects placeholder or malformed region-selection payloads before region and latency checks run.
+     */
+    private isRegionSelectionValueValid(value: { region: string; ping: number }): boolean {
+        return value != null && typeof value.region == "string" && value.region.trim().length != 0 && typeof value.ping == "number" && Number.isFinite(value.ping);
     }
 
     /**
@@ -988,43 +1012,63 @@ export class MatchmakingService implements IMatchmakingService {
             let totalMatchSuccess = 0;
             let totalMatchSuccessTimeInSeconds = 0;
 
-            for (let j = 0; j < matchmakingTicketCanMatch.matchmakingTicketTeams.length; j++) {
-                let matchmakingTicketTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[j];
+            const session = this.gnServer.getDatabase().startSession();
 
-                for (let k = 0; k < matchmakingTicketTeam.tickets.length; k++) {
-                    let ticketId = matchmakingTicketTeam.tickets[k].ticketId;
-                    let matchmakingTicket = matchmakingTickets.find((x) => x.getTicketId() == ticketId);
+            try {
+                session.startTransaction();
 
-                    if (!matchmakingTicketCanMatch.ticketIds.includes(ticketId)) matchmakingTicketCanMatch.ticketIds.push(ticketId);
+                for (let j = 0; j < matchmakingTicketCanMatch.matchmakingTicketTeams.length; j++) {
+                    let matchmakingTicketTeam = matchmakingTicketCanMatch.matchmakingTicketTeams[j];
 
-                    matchmakingTicket.setMatchId(matchmakingTicketCanMatch.matchId);
+                    for (let k = 0; k < matchmakingTicketTeam.tickets.length; k++) {
+                        let ticketId = matchmakingTicketTeam.tickets[k].ticketId;
+                        let matchmakingTicket = matchmakingTickets.find((x) => x.getTicketId() == ticketId);
 
-                    matchmakingTicket.setStatus(matchmakingTicketCanMatch.status);
+                        if (!matchmakingTicketCanMatch.ticketIds.includes(ticketId)) matchmakingTicketCanMatch.ticketIds.push(ticketId);
 
-                    await matchmakingTicket.saveAsync();
+                        matchmakingTicket.setMatchId(matchmakingTicketCanMatch.matchId);
 
-                    let members = matchmakingTicket.getMembers();
+                        matchmakingTicket.setStatus(matchmakingTicketCanMatch.status);
 
-                    for (let u = 0; u < members.length; u++) {
-                        let member = members[u];
+                        await matchmakingTicket.saveAsync(session);
 
-                        matchResult.members.push({
-                            teamId: matchmakingTicketTeam.teamId,
-                            userId: member.userId,
-                            attribute: member.attribute,
-                        });
+                        let members = matchmakingTicket.getMembers();
+
+                        for (let u = 0; u < members.length; u++) {
+                            let member = members[u];
+
+                            matchResult.members.push({
+                                teamId: matchmakingTicketTeam.teamId,
+                                userId: member.userId,
+                                attribute: member.attribute,
+                            });
+                        }
+
+                        totalMatchSuccess += 1;
+                        totalMatchSuccessTimeInSeconds += (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
                     }
-
-                    totalMatchSuccess += 1;
-                    totalMatchSuccessTimeInSeconds += (currentMilliseconds - matchmakingTicket.getTsCreate()) / 1000;
                 }
+
+                if (totalMatchSuccess != 0) matchResult.timeToMatchInSeconds = totalMatchSuccessTimeInSeconds / totalMatchSuccess;
+
+                matchResult.ticketIds = matchmakingTicketCanMatch.ticketIds;
+
+                await matchCollection.insertOne(matchResult, {
+                    session: session
+                });
+
+                await session.commitTransaction();
+            } catch (err) {
+                await session.abortTransaction();
+
+                Debug.logError(err);
+
+                throw err;
+            } finally {
+                await session.endSession();
             }
 
-            if (totalMatchSuccess != 0) matchResult.timeToMatchInSeconds = totalMatchSuccessTimeInSeconds / totalMatchSuccess;
 
-            matchResult.ticketIds = matchmakingTicketCanMatch.ticketIds;
-
-            await matchCollection.insertOne(matchResult);
         }
     }
 

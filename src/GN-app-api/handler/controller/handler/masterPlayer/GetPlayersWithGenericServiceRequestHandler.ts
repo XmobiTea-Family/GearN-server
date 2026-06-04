@@ -195,22 +195,29 @@ export class GetPlayersWithGenericServiceRequestHandler extends MasterPlayerBase
         // Stores the GearN results value used in the current execution flow.
         let gnResults = new GNArray();
 
-        // Stores the master players value used in the current execution flow.
-        let masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersWithGenericServiceAsync(request.serviceName, request.genericIds, masterPlayerFindOptions);
+        // Stores the resolved master player settings instance for the current execution flow.
+        let masterPlayerSettings = this.gnServer.getGNSettings().getMasterPlayerSettings();
 
-        for (let i = 0; i < masterPlayers.length; i++) {
-            // Stores the master player value used in the current execution flow.
-            let masterPlayer = masterPlayers[i];
+        let genericServiceSettingsItem = masterPlayerSettings.genericServiceSettings.find((x) => x.serviceName == request.serviceName);
 
-            // Stores the GearN result value used in the current execution flow.
-            let gnResult = new GNHashtable();
+        if (genericServiceSettingsItem != null) {
+            // Stores the master players value used in the current execution flow.
+            let masterPlayers = await this.gnServer.getDatabase().masterPlayerRepository.loadMasterPlayersWithGenericServiceAsync(request.serviceName, request.genericIds, masterPlayerFindOptions);
 
-            gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
-            gnResult.add(ParameterCode.ServiceId, masterPlayer.getExternal().genericService.genericServices.get(request.serviceName).serviceId);
+            for (let i = 0; i < masterPlayers.length; i++) {
+                // Stores the master player value used in the current execution flow.
+                let masterPlayer = masterPlayers[i];
 
-            gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+                // Stores the GearN result value used in the current execution flow.
+                let gnResult = new GNHashtable();
 
-            gnResults.add(gnResult);
+                gnResult.add(ParameterCode.UserId, masterPlayer.getUserId());
+                gnResult.add(ParameterCode.ServiceId, masterPlayer.getExternal().genericService.genericServices.get(request.serviceName).serviceId);
+
+                gnResult.add(ParameterCode.InfoResponseParameters, this.generateInfoResponseParameters(masterPlayer, request.infoRequestParam));
+
+                gnResults.add(gnResult);
+            }
         }
 
         operationResponse.setParameter(ParameterCode.Results, gnResults);
