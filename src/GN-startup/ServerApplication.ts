@@ -395,6 +395,11 @@ export class ServerApplication extends BuilderBase {
         (<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
         (<PreEventCallbackService>this.gnServer.getPreEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 
+        server.on("error", (err) => {
+            Debug.logError("[GearN] Server stopped cause " + err.message);
+            process.exit(1);
+        });
+
         // Start listening only after every runtime dependency has been initialized and the bootstrap data is ready.
         server.listen(port, "0.0.0.0", () => {
             let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
@@ -406,6 +411,11 @@ export class ServerApplication extends BuilderBase {
             Debug.log("[GearN] Server Application running on 0.0.0.0 the port " + port + " with sessionId: " + this.sessionId);
 
             if (useOtherSocketServer) {
+                socketServer.on("error", (err) => {
+                    Debug.logError("[GearN] Socket Server stopped cause " + err.message);
+                    process.exit(1);
+                });
+
                 socketServer.listen(socketPort, "0.0.0.0", () => {
                     Debug.log("[GearN] Socket Server running on 0.0.0.0 the port " + socketPort);
                 });
