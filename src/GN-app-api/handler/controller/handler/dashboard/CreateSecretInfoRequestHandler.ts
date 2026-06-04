@@ -116,7 +116,11 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
         }
 
         // Stores the permission value used in the current execution flow.
-        let permission = request.permissionParam ?? CreateSecretInfoRequestHandler.generateRecommendPlayerPermission();
+        let permission = request.permissionParam ? CreateSecretInfoRequestHandler.generateDefaultPermission(false, false, false, false) : CreateSecretInfoRequestHandler.generateRecommendPlayerPermission();
+
+        if (request.permissionParam != null) {
+            this.generatePermission(request.permissionParam, permission);
+        }
 
         result = {
             type: "secretInfo",
@@ -147,6 +151,151 @@ export class CreateSecretInfoRequestHandler extends RequestHandler {
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_CreateSecretInfo", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
+    }
+
+    private generatePermission(permissionParam: PermissionParam, permission: SecretPermissionItem) {
+        {
+            let authenticate = permissionParam.authenticate;
+
+            if (authenticate != null) {
+                if (permission.authenticate == null) permission.authenticate = {} as any;
+
+                for (const key of Object.keys(authenticate)) {
+                    const value = (authenticate as any)[key];
+                    if (value) (permission.authenticate as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const characterPlayer = permissionParam.characterPlayer;
+
+            if (characterPlayer != null) {
+                if (permission.characterPlayer == null) permission.characterPlayer = {} as any;
+
+                for (const key of Object.keys(characterPlayer)) {
+                    const value = (characterPlayer as any)[key];
+                    if (value) (permission.characterPlayer as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const cloudScript = permissionParam.cloudScript;
+
+            if (cloudScript != null) {
+                if (permission.cloudScript == null) permission.cloudScript = {} as any;
+
+                for (const key of Object.keys(cloudScript)) {
+                    const value = (cloudScript as any)[key];
+                    if (value) (permission.cloudScript as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const content = permissionParam.content;
+
+            if (content != null) {
+                if (permission.content == null) permission.content = {} as any;
+
+                for (const key of Object.keys(content)) {
+                    const value = (content as any)[key];
+                    if (value) (permission.content as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const dashboard = permissionParam.dashboard;
+
+            if (dashboard != null) {
+                if (permission.dashboard == null) permission.dashboard = {} as any;
+
+                for (const key of Object.keys(dashboard)) {
+                    const value = (dashboard as any)[key];
+                    if (value) (permission.dashboard as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const gamePlayer = permissionParam.gamePlayer;
+
+            if (gamePlayer != null) {
+                if (permission.gamePlayer == null) permission.gamePlayer = {} as any;
+
+                for (const key of Object.keys(gamePlayer)) {
+                    const value = (gamePlayer as any)[key];
+                    if (value) (permission.gamePlayer as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const group = permissionParam.group;
+
+            if (group != null) {
+                if (permission.group == null) permission.group = {} as any;
+
+                for (const key of Object.keys(group)) {
+                    const value = (group as any)[key];
+                    if (value) (permission.group as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const inventory = permissionParam.inventory;
+
+            if (inventory != null) {
+                if (permission.inventory == null) permission.inventory = {} as any;
+
+                for (const key of Object.keys(inventory)) {
+                    const value = (inventory as any)[key];
+                    if (value) (permission.inventory as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const masterPlayer = permissionParam.masterPlayer;
+
+            if (masterPlayer != null) {
+                if (permission.masterPlayer == null) permission.masterPlayer = {} as any;
+
+                for (const key of Object.keys(masterPlayer)) {
+                    const value = (masterPlayer as any)[key];
+                    if (value) (permission.masterPlayer as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const multiplayer = permissionParam.multiplayer;
+
+            if (multiplayer != null) {
+                if (permission.multiplayer == null) permission.multiplayer = {} as any;
+
+                for (const key of Object.keys(multiplayer)) {
+                    const value = (multiplayer as any)[key];
+                    if (value) (permission.multiplayer as any)[key] = value;
+                }
+            }
+        }
+
+        {
+            const storeInventory = permissionParam.storeInventory;
+
+            if (storeInventory != null) {
+                if (permission.storeInventory == null) permission.storeInventory = {} as any;
+
+                for (const key of Object.keys(storeInventory)) {
+                    const value = (storeInventory as any)[key];
+                    if (value) (permission.storeInventory as any)[key] = value;
+                }
+            }
+        }
     }
 
     /**
