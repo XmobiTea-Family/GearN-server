@@ -1,6 +1,6 @@
 {
     "name": "@xmobitea/gearn-server",
-    "version": "2.6.0",
+    "version": "2.6.1",
     "description": "GearN Server by XmobiTea (Pro)",
     "types": "dist/index.d.ts",
     "main": "dist/index.js",
