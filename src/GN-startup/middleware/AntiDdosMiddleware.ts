@@ -230,7 +230,7 @@ export class AntiDdosMiddleware {
      */
     private getReturnCodeForRequestSizeHttp(req: express.Request): number {
         let url = req.url;
-        if (url == "/dashboard/client/setSecretInfoInformation" || url == "/dashboard/client/setMasterGameSettings" || url == "/dashboard/client/createSecretInfo" || url == "/dashboard/client/setGameInformation" || url == "/dashboard/client/setEventCallbackCloudScript" || url == "/content/admin/setContentData" || url == "/cloudscript/admin/addFunction") {
+        if (url == "/dashboard/client/setSecretInfoInformation" || url == "/dashboard/client/setMasterGameSettings" || url == "/dashboard/client/createSecretInfo" || url == "/dashboard/client/setGameInformation" || url == "/dashboard/client/setEventCallbackCloudScript" || url == "/content/admin/setContentData" || url == "/cloudScript/admin/addFunction") {
             return ReturnCode.Ok;
         }
 
