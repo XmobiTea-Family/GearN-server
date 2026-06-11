@@ -1247,6 +1247,7 @@ export class SecretInfo extends BuilderBase {
 
         if (this.isDefault) doc["isDefault"] = true;
         if (this.onlyMasterAdmin) doc["onlyMasterAdmin"] = true;
+        else if (this.onlyMasterAdmin === false) doc["onlyMasterAdmin"] = false;
 
         return doc;
     }
