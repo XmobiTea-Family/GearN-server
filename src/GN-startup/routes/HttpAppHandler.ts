@@ -323,22 +323,16 @@ export class HttpAppHandler {
                 express.raw({ type: Commands.APPLICATION_MSGPACK, limit: "10mb" }),
                 (req, res, next) => {
                     if (req.header(Commands.CONTENT_TYPE) === Commands.APPLICATION_MSGPACK) {
-                        // Stores the buffer value used in the current execution flow.
-                        let buffer: Buffer[] = [];
-
-                        req.on("data", (chunk) => buffer.push(chunk));
-                        req.on("end", () => {
-                            try {
-                                // Stores the raw value used in the current execution flow.
-                                const raw = Buffer.concat(buffer);
-                                req.body = decode(raw);
-                                return next();
-                            } catch (err) {
-                                return next(err);
+                        try {
+                            if (!Buffer.isBuffer(req.body)) {
+                                return next(new Error("Invalid MsgPack body: expected Buffer"));
                             }
-                        });
 
-                        return;
+                            req.body = decode(req.body);
+                            return next();
+                        } catch (err) {
+                            return next(err);
+                        }
                     }
 
                     return next();
