@@ -54,6 +54,21 @@ handlers.hello = (args, context, log) => {
     assert.equal(result.success, true, result.errorMessage);
 });
 
+test("CloudScript function policy accepts top-level enum declarations", () => {
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
+enum RewardType {
+    Coin = 1,
+    Gem = 2,
+}
+
+handlers.hello = (args, context, log) => {
+    return RewardType.Coin;
+}
+`);
+
+    assert.equal(result.success, true, result.errorMessage);
+});
+
 test("CloudScript function policy accepts a top-level init call", () => {
     const result = CloudScriptSecurityValidator.validateFunctionScript(`
 const state = { ready: false };

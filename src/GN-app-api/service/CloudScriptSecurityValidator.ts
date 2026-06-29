@@ -245,7 +245,7 @@ export class CloudScriptSecurityValidator {
         for (let i = 0; i < sourceFile.statements.length; i++) {
             let statement = sourceFile.statements[i];
 
-            if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) {
+            if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) {
                 continue;
             }
 

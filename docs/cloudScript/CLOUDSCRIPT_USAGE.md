@@ -150,7 +150,7 @@ Kết luận: script hợp lệ không phải file TypeScript hoàn chỉnh. Nó
 ## 3. Rule bắt buộc
 
 - Luôn đăng ký function theo dạng `handlers["functionName"] = async (args, context, log) => { ... }` hoặc `handlers.functionName = (args, context, log) => { ... }`.
-- Top-level có thể khai báo helper bằng `function`, `class`, `type`, `interface`, hoặc `const`; `class` được phép dùng `extends` và `static`.
+- Top-level có thể khai báo helper bằng `function`, `class`, `enum`, `type`, `interface`, hoặc `const`; `class` được phép dùng `extends` và `static`.
 - Nếu cần khởi tạo state dùng chung, có thể gọi top-level đúng dạng `init();`; các top-level function call khác vẫn bị chặn bởi security policy.
 - Event callback qua `setEventCallbackCloudScript` dùng registry theo `eventName`: request operation được phép đăng ký `preHandlers.eventName`, `postHandlers.eventName`, hoặc cả hai; system/event/socket callback chỉ đăng ký đúng một handler tương ứng.
 - Không dùng trực tiếp chuỗi `GNNetwork` trong submitted script.
