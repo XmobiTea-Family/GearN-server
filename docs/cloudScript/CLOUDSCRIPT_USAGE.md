@@ -258,8 +258,11 @@ Template inject sẵn các symbol này:
 - `CloudScriptModels`
 - `GNServerSettingsOptions`
 - `GNServerSettings`
+- `MessageType`
 - `PermissionDataItem`
 - `FriendStatus`
+- `MatchmakingMemberStatus`
+- `MatchmakingTicketStatus`
 - `GoogleLoginType`
 - `GroupStatus`
 - `GNDebug`

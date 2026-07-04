@@ -524,10 +524,14 @@ export class CloudScriptService implements ICloudScriptService {
                 this.cloudScriptWorkerFailedDict.delete(version);
 
                 setTimeout(() => {
-                    if (!this.cloudScriptWorkerDict.has(version) && cloudScriptWorker) {
+                    if (this.cloudScriptWorkerDict.get(version) !== cloudScriptWorker && cloudScriptWorker) {
                         cloudScriptWorker.kill("SIGKILL");
                     }
                 }, 20000);
+            }
+        } else {
+            if (!this.cloudScriptWorkerDict.has(version)) {
+                await this.loadCloudScriptFunctionWorker(version, cloudFunction.fullScript);
             }
         }
     }
@@ -597,10 +601,14 @@ export class CloudScriptService implements ICloudScriptService {
                 this.cloudScriptWorkerFailedDict.delete(version);
 
                 setTimeout(() => {
-                    if (!this.cloudScriptWorkerDict.has(version) && cloudScriptWorker) {
+                    if (this.cloudScriptWorkerDict.get(version) !== cloudScriptWorker && cloudScriptWorker) {
                         cloudScriptWorker.kill("SIGKILL");
                     }
                 }, 20000);
+            }
+        } else {
+            if (!this.cloudScriptWorkerDict.has(version)) {
+                await this.loadCloudScriptFunctionWorker(version, cloudFunction.fullScript);
             }
         }
 
