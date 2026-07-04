@@ -8,6 +8,8 @@ import * as mongodb from "mongodb";
 import { Debug } from "./../../GN-library/xdebug/lib/xDebug";
 import { Commands } from "./../../GN-common/constant/Commands";
 import { RequestRole } from "./../../GN-common/constant/enumType/RequestRole";
+import { RequestType } from "./../../GN-common/constant/enumType/RequestType";
+import { EnumUtility } from "./../../GN-common/helper/EnumUtility";
 
 interface MaxRequestItem {
     // Cache key used to track one peer bucket.
@@ -18,7 +20,7 @@ interface MaxRequestItem {
     tsLastUpdate: number;
 }
 
-enum RequestType {
+enum TransportRequestType {
     HTTP = 0,
     SOCKET = 1,
 }
@@ -40,6 +42,14 @@ export class AntiDdosMiddleware {
     private static readonly K_MULTIPLE_WHITE_LIST: number = 100;
     // Blacklisted IPs are heavily penalized instead of being fully bypassed.
     private static readonly K_MULTIPLE_BLACK_LIST: number = 5;
+
+    private static readonly REQUEST_ROLE_ADMIN_NUM: string = RequestRole.Admin.toString();
+    private static readonly REQUEST_ROLE_SERVER_NUM: string = RequestRole.Server.toString();
+    private static readonly REQUEST_ROLE_CLIENT_NUM: string = RequestRole.Client.toString();
+
+    private static readonly REQUEST_ROLE_ADMIN_STR: string = "admin";
+    private static readonly REQUEST_ROLE_SERVER_STR: string = "server";
+    private static readonly REQUEST_ROLE_CLIENT_STR: string = "client";
 
     // Rolling request counters keyed by transport and identity dimension.
     private socketRequestPerIPDic: { [k: string]: MaxRequestItem };
@@ -245,10 +255,8 @@ export class AntiDdosMiddleware {
             if (this.ipWhiteLst.includes(ip)) httpMaxRequestSize = httpMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
             else {
                 // Stores the role value used in the current execution flow.
-                let role = Number.parseInt(req.params.role);
-                if (!Number.isNaN(role)) {
-                    if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxRequestSize = httpMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
-                }
+                let role = this.getRequestRole(req);
+                if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxRequestSize = httpMaxRequestSize * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
             }
 
             // Stores the content length value used in the current execution flow.
@@ -257,7 +265,7 @@ export class AntiDdosMiddleware {
                 this.reportDdosCollection.insertOne({
                     returnCode: ReturnCode.MaxSizeRequestReject,
                     contentLength: contentLength,
-                    type: RequestType.HTTP,
+                    type: TransportRequestType.HTTP,
                     tsCreate: xDatetime.getCurrentMilliseconds(),
                 });
 
@@ -365,7 +373,7 @@ export class AntiDdosMiddleware {
                 returnCode: ReturnCode.MaxRequestReject,
                 ip: ip,
                 count: socketRequestPerIPItem.count,
-                type: RequestType.SOCKET,
+                type: TransportRequestType.SOCKET,
                 tsCreate: currentMilliseconds,
             });
 
@@ -425,7 +433,7 @@ export class AntiDdosMiddleware {
                     returnCode: ReturnCode.MaxRequestReject,
                     peer: id,
                     count: socketRequestPerPeerItem.count,
-                    type: RequestType.SOCKET,
+                    type: TransportRequestType.SOCKET,
                     tsCreate: currentMilliseconds,
                 });
 
@@ -525,10 +533,8 @@ export class AntiDdosMiddleware {
         else if (this.ipWhiteLst.includes(ip)) httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
         else {
             // Stores the role value used in the current execution flow.
-            let role = Number.parseInt(req.params.role);
-            if (!Number.isNaN(role)) {
-                if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
-            }
+            let role = this.getRequestRole(req);
+            if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxRequestPerSecondPerIp = httpMaxRequestPerSecondPerIp * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
         }
 
         if (httpRequestPerIPItem.count > httpMaxRequestPerSecondPerIp) {
@@ -536,7 +542,7 @@ export class AntiDdosMiddleware {
                 returnCode: ReturnCode.MaxRequestReject,
                 ip: ip,
                 count: httpRequestPerIPItem.count,
-                type: RequestType.HTTP,
+                type: TransportRequestType.HTTP,
                 tsCreate: currentMilliseconds,
             });
 
@@ -642,10 +648,8 @@ export class AntiDdosMiddleware {
             else if (this.ipWhiteLst.includes(ip)) httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
             else {
                 // Stores the role value used in the current execution flow.
-                let role = Number.parseInt(req.params.role);
-                if (!Number.isNaN(role)) {
-                    if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
-                }
+                let role = this.getRequestRole(req);
+                if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxRequestPerSecondPerPeer = httpMaxRequestPerSecondPerPeer * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
             }
 
             httpRequestPerPeerItem.count++;
@@ -654,7 +658,7 @@ export class AntiDdosMiddleware {
                     returnCode: ReturnCode.MaxRequestReject,
                     peer: id,
                     count: httpRequestPerPeerItem.count,
-                    type: RequestType.HTTP,
+                    type: TransportRequestType.HTTP,
                     tsCreate: currentMilliseconds,
                 });
 
@@ -717,17 +721,15 @@ export class AntiDdosMiddleware {
         else if (this.ipWhiteLst.includes(ip)) httpMaxPendingRequest = httpMaxPendingRequest * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
         else {
             // Stores the role value used in the current execution flow.
-            let role = Number.parseInt(req.params.role);
-            if (!Number.isNaN(role)) {
-                if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxPendingRequest = httpMaxPendingRequest * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
-            }
+            let role = this.getRequestRole(req);
+            if (role == RequestRole.Admin || role == RequestRole.Server) httpMaxPendingRequest = httpMaxPendingRequest * AntiDdosMiddleware.K_MULTIPLE_ADMIN;
         }
 
-        if (this.currentHttpRequestCount > httpMaxPendingRequest) {
+        if (this.currentHttpRequestCount >= httpMaxPendingRequest) {
             this.reportDdosCollection.insertOne({
                 returnCode: ReturnCode.MaxRequestReject,
                 currentHttpRequestCount: this.currentHttpRequestCount,
-                type: RequestType.HTTP,
+                type: TransportRequestType.HTTP,
                 tsCreate: xDatetime.getCurrentMilliseconds(),
             });
 
@@ -762,11 +764,11 @@ export class AntiDdosMiddleware {
         if (this.ipBlackLst.includes(ip)) maxUploadPendingRequest = maxUploadPendingRequest / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
         else if (this.ipWhiteLst.includes(ip)) maxUploadPendingRequest = maxUploadPendingRequest * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
-        if (this.currentHttpUploadRequestCount > maxUploadPendingRequest) {
+        if (this.currentHttpUploadRequestCount >= maxUploadPendingRequest) {
             this.reportDdosCollection.insertOne({
                 returnCode: ReturnCode.MaxRequestReject,
                 currentHttpUploadRequestCount: this.currentHttpUploadRequestCount,
-                type: RequestType.HTTP,
+                type: TransportRequestType.HTTP,
                 tsCreate: xDatetime.getCurrentMilliseconds(),
             });
 
@@ -793,11 +795,11 @@ export class AntiDdosMiddleware {
      * @param next Provides the next value used by this operation.
      */
     public addPendingRequestViaSocket(socket: Socket, data: any, next: Function) {
-        if (this.currentSocketRequestCount > this.socketMaxPendingRequest) {
+        if (this.currentSocketRequestCount >= this.socketMaxPendingRequest) {
             this.reportDdosCollection.insertOne({
                 returnCode: ReturnCode.MaxRequestReject,
                 currentSocketRequestCount: this.currentSocketRequestCount,
-                type: RequestType.SOCKET,
+                type: TransportRequestType.SOCKET,
                 tsCreate: xDatetime.getCurrentMilliseconds(),
             });
 
@@ -832,11 +834,11 @@ export class AntiDdosMiddleware {
         if (this.ipBlackLst.includes(ip)) maxDownloadPendingRequest = maxDownloadPendingRequest / AntiDdosMiddleware.K_MULTIPLE_BLACK_LIST;
         else if (this.ipWhiteLst.includes(ip)) maxDownloadPendingRequest = maxDownloadPendingRequest * AntiDdosMiddleware.K_MULTIPLE_WHITE_LIST;
 
-        if (this.currentHttpDownloadRequestCount > maxDownloadPendingRequest) {
+        if (this.currentHttpDownloadRequestCount >= maxDownloadPendingRequest) {
             this.reportDdosCollection.insertOne({
                 returnCode: ReturnCode.MaxRequestReject,
                 currentHttpDownloadRequestCount: this.currentHttpDownloadRequestCount,
-                type: RequestType.HTTP,
+                type: TransportRequestType.HTTP,
                 tsCreate: xDatetime.getCurrentMilliseconds(),
             });
 
@@ -883,6 +885,12 @@ export class AntiDdosMiddleware {
 
         this.ipBlackLst.length = 0;
         this.ipWhiteLst.length = 0;
+        if (this.defaultIPWhiteLst) {
+            for (let j = 0; j < this.defaultIPWhiteLst.length; j++) {
+                let defaultIP = this.defaultIPWhiteLst[j];
+                if (!this.ipWhiteLst.includes(defaultIP)) this.ipWhiteLst.push(defaultIP);
+            }
+        }
 
         try {
             let banDdosResults = await this.banDdosCollection
@@ -892,6 +900,7 @@ export class AntiDdosMiddleware {
                         projection: {
                             ip: true,
                             type: true,
+                            tsExpire: true,
                         },
                     },
                 )
@@ -907,13 +916,6 @@ export class AntiDdosMiddleware {
                         this.ipBlackLst.push(ip);
                     } else if (banDdosResult.type == BanType.WHITE_LIST) {
                         this.ipWhiteLst.push(ip);
-
-                        if (this.defaultIPWhiteLst) {
-                            for (let j = 0; j < this.defaultIPWhiteLst.length; j++) {
-                                let defaultIP = this.defaultIPWhiteLst[j];
-                                if (!this.ipWhiteLst.includes(defaultIP)) this.ipWhiteLst.push(defaultIP);
-                            }
-                        }
                     }
                 }
             }
@@ -1048,6 +1050,33 @@ export class AntiDdosMiddleware {
         } catch (err) {
             Debug.logException(err);
         }
+    }
+
+    /**
+     * Parses the request role before the final API route has populated `req.params`.
+     */
+    private getRequestRole(req: express.Request): RequestRole {
+        let role = this.parseRequestRoleValue(req.params?.role);
+        if (role != null) return role;
+
+        const roleInUrl = req.url?.split("/")[2];
+        role = this.parseRequestRoleValue(roleInUrl);
+
+        return role;
+    }
+
+    /**
+     * Parses one path segment into a request role.
+     */
+    private parseRequestRoleValue(roleValue: string): RequestRole {
+        if (!roleValue) return null;
+
+        let normalizedRoleValue = roleValue.toLowerCase();
+        if (normalizedRoleValue == AntiDdosMiddleware.REQUEST_ROLE_ADMIN_STR || normalizedRoleValue == AntiDdosMiddleware.REQUEST_ROLE_ADMIN_NUM) return RequestRole.Admin;
+        if (normalizedRoleValue == AntiDdosMiddleware.REQUEST_ROLE_SERVER_STR || normalizedRoleValue == AntiDdosMiddleware.REQUEST_ROLE_SERVER_NUM) return RequestRole.Server;
+        if (normalizedRoleValue == AntiDdosMiddleware.REQUEST_ROLE_CLIENT_STR || normalizedRoleValue == AntiDdosMiddleware.REQUEST_ROLE_CLIENT_NUM) return RequestRole.Client;
+
+        return null;
     }
 
     /**

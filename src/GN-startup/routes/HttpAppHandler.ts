@@ -250,14 +250,28 @@ export class HttpAppHandler {
                 wrap((req, res, next) => {
                     return this.antiDdosMiddleware.addPendingRequestViaJson(req, res, next);
                 }),
+                wrap((req, res, next) => {
+                    let cleaned = false;
+
+                    const cleanup = () => {
+                        if (cleaned) return;
+                        cleaned = true;
+
+                        this.antiDdosMiddleware.removePendingRequest(req, res);
+                    };
+
+                    res.on("finish", cleanup);
+                    res.on("close", cleanup);
+
+                    return next();
+                }),
+
                 this.apiJsonRouter,
             );
 
             this.apiJsonRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<express.Response> => {
                 // Stores the operation response value used in the current execution flow.
                 let operationResponse = await this.onHttpRequest(req);
-
-                this.antiDdosMiddleware.removePendingRequest(req, res);
 
                 if (operationResponse != null) {
                     // Stores the HTTP data value used in the current execution flow.
@@ -340,14 +354,27 @@ export class HttpAppHandler {
                 wrap((req, res, next) => {
                     return this.antiDdosMiddleware.addPendingRequestViaMsgPack(req, res, next);
                 }),
+                wrap((req, res, next) => {
+                    let cleaned = false;
+
+                    const cleanup = () => {
+                        if (cleaned) return;
+                        cleaned = true;
+
+                        this.antiDdosMiddleware.removePendingRequest(req, res);
+                    };
+
+                    res.on("finish", cleanup);
+                    res.on("close", cleanup);
+
+                    return next();
+                }),
                 this.apiMsgPackRouter,
             );
 
             this.apiMsgPackRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<express.Response> => {
                 // Stores the operation response value used in the current execution flow.
                 let operationResponse = await this.onHttpRequest(req);
-
-                this.antiDdosMiddleware.removePendingRequest(req, res);
 
                 if (operationResponse != null) {
                     // Stores the HTTP data value used in the current execution flow.
