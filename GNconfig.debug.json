@@ -9,8 +9,8 @@
             "certFilePath": "",
             "expiredTokenInMs": 172800000,
             "privateKeyToken": "privateKeyDefault",
-            "initRootUsername": "gearadmin",
-            "initRootPassword": "gearpassword",
+            "initRootUsername": "gearnadmin",
+            "initRootPassword": "gearnpassword",
             "restoreRootPassword": ""
         },
         "httpAppSettings": {

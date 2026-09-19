@@ -95,6 +95,9 @@ export class MasterAdminPermissionRulesParam {
     @GNHashtableDataMember({ code: ParameterCode.GetBackupStatisticsLeaderboardVersion, isOptional: true })
     public getBackupStatisticsLeaderboardVersion?: PermissionRulesParam;
 
+    @GNHashtableDataMember({ code: ParameterCode.GetServerGameData, isOptional: true })
+    public getServerGameData?: PermissionRulesParam;
+
     // Stores the delete in database value used by this instance.
     @GNHashtableDataMember({ code: ParameterCode.DeleteInDatabase, isOptional: true })
     public deleteInDatabase?: PermissionRulesParam;

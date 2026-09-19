@@ -27,9 +27,9 @@ https://github.com/expressjs/multer
 License: ISC  
 https://github.com/msgpack/msgpack-javascript
 
-6. @sendgrid/mail | Twilio SendGrid   
-License: MIT  
-https://github.com/sendgrid/sendgrid-nodejs
+6. nodemailer | Andris Reinman   <andris@reinman.eu> (https://emailengine.app)
+License: Copyright (c) 2011-2023 Andris Reinman 
+https://github.com/nodemailer/nodemailer
 
 7. @socket.io/mongo-adapter | darrachequesne   
 License: MIT  
@@ -85,11 +85,11 @@ DevDependencies:
 ----------------
 These are used only during development/build and not included in final distribution.
 
-- typescript@^5.7.2 — Apache-2.0 — https://github.com/microsoft/TypeScript | Microsoft Corp.
-- webpack@^5.97.1 — MIT — https://github.com/webpack/webpack | Tobias Koppers @sokra
+- typescript@^5.8.3 — Apache-2.0 — https://github.com/microsoft/TypeScript | Microsoft Corp.
+- webpack@^5.106.2 — MIT — https://github.com/webpack/webpack | Tobias Koppers @sokra
 - webpack-cli@^5.1.4 — MIT — https://github.com/webpack/webpack-cli | webpack
-- terser-webpack-plugin@^5.3.10 — MIT — https://github.com/webpack-contrib/terser-webpack-plugin | webpack Contrib Team
-- ts-loader@^9.5.1 — MIT — https://github.com/TypeStrong/ts-loader | John Reilly <johnny_reilly@hotmail.com> (https://johnnyreilly.com)
+- terser-webpack-plugin@^5.5.0 — MIT — https://github.com/webpack-contrib/terser-webpack-plugin | webpack Contrib Team
+- ts-loader@^9.5.7 — MIT — https://github.com/TypeStrong/ts-loader | John Reilly <johnny_reilly@hotmail.com> (https://johnnyreilly.com)
 - webpack-node-externals@^3.0.0 — MIT — https://github.com/liady/webpack-node-externals | Liad Yosef (https://github.com/liady)
 
 ---
