@@ -352,7 +352,7 @@ var secretPermissionItem = {
         getOwner: {},
         getRemoveStatus: {},
 
-        setAmount: {},
+        changeAmount: {},
         setOwner: {},
 
         setRemoveStatus: {},

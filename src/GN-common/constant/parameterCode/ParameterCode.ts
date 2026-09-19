@@ -374,7 +374,7 @@ export class ParameterCode {
     public static readonly GetClassId: string = "getClassId";
     public static readonly GetItemType: string = "getItemType";
     public static readonly GetAmount: string = "getAmount";
-    public static readonly SetAmount: string = "setAmount";
+    public static readonly ChangeAmount: string = "changeAmount";
     public static readonly GetItemsWithDisplayName: string = "getItemsWithDisplayName";
 
     public static readonly BuyStoreItem: string = "buyStoreItem";

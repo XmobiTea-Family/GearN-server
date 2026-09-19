@@ -127,11 +127,9 @@ export class ChangePasswordAdminAccountRequestHandler extends RequestHandler {
         masterAdminPlayer.setPassword(await bcrypt.hash(request.password, 10));
         await masterAdminPlayer.saveAsync();
 
-        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
+        await this.gnServer.getApiMiddleware().removeAllAuthInfosInDb(request.userId);
 
-        this.gnServer.getHttpApp().getClusterHandler().sendEvent("revokeAdminAuthToken", {
-            userId: request.userId,
-        });
+        operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_ChangePasswordAdminAccount", request, role, secretInfo, operationRequest, operationResponse);
 

@@ -102,7 +102,6 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
             };
         let socketAppSettings = SocketAppSettings.Builder()
             .setEnable(gnSocketAppSettings["enable"] ?? true)
-            .setUseEmitter(gnSocketAppSettings["useEmitter"] ?? false)
             .setOrigins(gnSocketAppSettings["allowOrigin"] ?? "*")
             .addMethods(gnSocketAppSettings["allowMethods"] ?? ["GET"])
             .setCredentials(gnSocketAppSettings["credentials"] ?? true)

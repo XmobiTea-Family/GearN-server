@@ -3,6 +3,7 @@ import { RequestRole } from "./../constant/enumType/RequestRole";
 import { RequestType } from "./../constant/enumType/RequestType";
 import { ReturnCode } from "./../constant/ReturnCode";
 import { InvalidMemberType } from "./../constant/enumType/InvalidMemberType";
+import { ErrorCode } from "./../constant/errorCode/ErrorCode";
 
 class CodeHelperBase {
     // Stores the unknown code value used by this instance.
@@ -32,6 +33,8 @@ class CodeHelperBase {
 export class CodeHelper {
     // Stores the return code helper value used by this instance.
     private static returnCodeHelper: CodeHelperBase;
+    // Stores the error code helper value used by this instance.
+    private static errorCodeHelper: CodeHelperBase;
     // Stores the request type helper value used by this instance.
     private static requestTypeHelper: CodeHelperBase;
     // Stores the request role helper value used by this instance.
@@ -47,6 +50,15 @@ export class CodeHelper {
      */
     public static getReturnCodeName(returnCode: number): string {
         return CodeHelper.returnCodeHelper.getCodeName(returnCode);
+    }
+
+    /**
+     * Returns the error code name.
+     * @param errorCode Provides the error code value used by this operation.
+     * @returns Returns the error code name.
+     */
+    public static getErrorCodeName(errorCode: number): string {
+        return CodeHelper.errorCodeHelper.getCodeName(errorCode);
     }
 
     /**
@@ -85,6 +97,7 @@ export class CodeHelper {
      */
     static init(): void {
         this.setReturnCodeDic();
+        this.setErrorCodeDic();
         this.setRequestTypeDic();
         this.setRequestRoleDic();
         this.setSecretRoleDic();
@@ -112,6 +125,30 @@ export class CodeHelper {
 
         for (let i = 0; i < keys.length; i++) {
             this.returnCodeHelper.codeDict.set(values[i], keys[i]);
+        }
+    }
+
+    /**
+     * Sets the error code dictionary.
+     */
+    private static setErrorCodeDic(): void {
+        this.errorCodeHelper = new CodeHelperBase(new Map());
+
+        this.addErrorCodeDic(ErrorCode);
+    }
+
+    /**
+     * Adds the error code dictionary.
+     * @param errorCode Provides the error code value used by this operation.
+     */
+    public static addErrorCodeDic(errorCode: any): void {
+        // Stores the keys value used in the current execution flow.
+        let keys = Object.keys(errorCode) as Array<string>;
+        // Stores the values value used in the current execution flow.
+        let values = Object.values(errorCode) as Array<number>;
+
+        for (let i = 0; i < keys.length; i++) {
+            this.errorCodeHelper.codeDict.set(values[i], keys[i]);
         }
     }
 

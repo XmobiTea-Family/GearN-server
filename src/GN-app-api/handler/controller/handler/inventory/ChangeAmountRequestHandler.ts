@@ -18,7 +18,7 @@ import { OwnerType } from "./../../../../../GN-common/constant/enumType/OwnerTyp
 import { ItemType } from "./../../../../../GN-common/constant/enumType/ItemType";
 import { Debug } from "./../../../../../GN-library/xdebug/lib/xDebug";
 
-class SetAmountOperationRequest extends OperationRequest {
+class ChangeAmountOperationRequest extends OperationRequest {
     // Stores the item ID value used by this instance.
     @StringDataMember({ code: ParameterCode.ItemId, minLength: 12, maxLength: 12, mustNonNull: true })
     public itemId: string;
@@ -37,7 +37,7 @@ class SetAmountOperationRequest extends OperationRequest {
     }
 }
 
-class ServerSetAmountOperationRequest extends SetAmountOperationRequest {
+class ServerChangeAmountOperationRequest extends ChangeAmountOperationRequest {
     /**
      * Checks whether valid request.
      */
@@ -48,7 +48,7 @@ class ServerSetAmountOperationRequest extends SetAmountOperationRequest {
     }
 }
 
-class AdminSetAmountOperationRequest extends ServerSetAmountOperationRequest {
+class AdminChangeAmountOperationRequest extends ServerChangeAmountOperationRequest {
     /**
      * Checks whether valid request.
      */
@@ -59,19 +59,19 @@ class AdminSetAmountOperationRequest extends ServerSetAmountOperationRequest {
     }
 }
 
-export class SetAmountRequestHandler extends ItemBaseRequestHandler {
+export class ChangeAmountRequestHandler extends ItemBaseRequestHandler {
     /**
      * Returns the code.
      */
     public override getCode() {
-        return OperationCode.SetAmount;
+        return OperationCode.ChangeAmount;
     }
 
     /**
      * Returns the common operation request.
      */
     public override getCommonOperationRequest() {
-        return SetAmountOperationRequest;
+        return ChangeAmountOperationRequest;
     }
 
     /**
@@ -90,7 +90,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
         }
 
         // Tracks whether method is allowed.
-        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.setAmount);
+        let allowMethod = await this.isAllowMethod(authInfo.getUserId(), request.itemId, secretInfo.getGameId(), secretInfo.getPermission().inventory.changeAmount);
 
         if (!allowMethod) {
             return this.newOperationNotAllowError(request);
@@ -115,13 +115,13 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
      */
     public async serverHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         // Stores the request value used in the current execution flow.
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerSetAmountOperationRequest);
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, ServerChangeAmountOperationRequest);
 
         if (!request.isValidRequest()) {
             return this.newInvalidRequestParameters(request);
         }
 
-        if (!secretInfo.getPermission().inventory.setAmount.serverSelfEnable) {
+        if (!secretInfo.getPermission().inventory.changeAmount.serverSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
@@ -144,13 +144,13 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
      */
     public async adminHandle(secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         // Stores the request value used in the current execution flow.
-        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminSetAmountOperationRequest);
+        let request = this.requestConverterService.createTOperationRequest(operationRequest, AdminChangeAmountOperationRequest);
 
         if (!request.isValidRequest()) {
             return this.newInvalidRequestParameters(request);
         }
 
-        if (!secretInfo.getPermission().inventory.setAmount.adminSelfEnable) {
+        if (!secretInfo.getPermission().inventory.changeAmount.adminSelfEnable) {
             return this.newOperationNotAllowError(request);
         }
 
@@ -174,7 +174,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
      */
     private async execute(request: { itemId: string; amount: number }, role: SecretRole, secretInfo: SecretInfo, operationRequest: OperationRequest): Promise<OperationResponse> {
         // Stores the operation response value used in the current execution flow.
-        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_SetAmount", request, role, secretInfo, operationRequest);
+        let operationResponse = await this.gnServer.getPreEventCallbackService().onEvent("inventory_ChangeAmount", request, role, secretInfo, operationRequest);
         if (operationResponse != null) {
             return operationResponse;
         }
@@ -216,7 +216,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
             return operationResponse;
         }
 
-        inventory.setAmount(inventory.getAmount() + request.amount);
+        inventory.changeAmount(inventory.getAmount() + request.amount);
 
         const session = this.gnServer.getDatabase().startSession();
 
@@ -288,7 +288,7 @@ export class SetAmountRequestHandler extends ItemBaseRequestHandler {
 
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
-        await this.gnServer.getPostEventCallbackService().onEvent("inventory_SetAmount", request, role, secretInfo, operationRequest, operationResponse);
+        await this.gnServer.getPostEventCallbackService().onEvent("inventory_ChangeAmount", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
     }

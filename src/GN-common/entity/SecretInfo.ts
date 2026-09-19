@@ -827,7 +827,7 @@ export interface SecretPermissionItem {
         getRemoveStatus: InventoryPermissionRules;
 
         // Stores the set amount value used by this contract.
-        setAmount: InventoryPermissionRules;
+        changeAmount: InventoryPermissionRules;
         // Stores the set owner value used by this contract.
         setOwner: InventoryPermissionRules;
 
@@ -1078,7 +1078,7 @@ abstract class BuilderBase {
      * @param remove Provides the remove value used by this operation.
      * @returns Returns the current builder instance.
      */
-    public setIsRemove(remove: boolean): Builder {
+    public setRemove(remove: boolean): Builder {
         this.remove = remove;
         return this as Builder;
     }
@@ -1133,7 +1133,7 @@ abstract class BuilderBase {
     /**
      * Initializes a new builder base instance.
      */
-    constructor() {}
+    constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<SecretInfo> {
@@ -1247,6 +1247,7 @@ export class SecretInfo extends BuilderBase {
 
         if (this.isDefault) doc["isDefault"] = true;
         if (this.onlyMasterAdmin) doc["onlyMasterAdmin"] = true;
+        else if (this.onlyMasterAdmin === false) doc["onlyMasterAdmin"] = false;
 
         return doc;
     }

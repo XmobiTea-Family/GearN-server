@@ -76,9 +76,7 @@ export class SocketApp {
         });
 
         this.socketAppHandler = new SocketAppHandler();
-        if (this.appSettings.getUseEmitter()) {
-            this.socketAppHandler.setEmitter(this.emitter);
-        }
+        this.socketAppHandler.setEmitter(this.emitter);
 
         this.socketAppHandler.setServer(this.io);
         this.socketAppHandler.setApiMiddleware(this.apiMiddleware);
@@ -99,7 +97,7 @@ export class SocketApp {
     public setEmitter(adapterEventCollection: mongodb.Collection<mongodb.Document>) {
         this.emitter = new Emitter(adapterEventCollection);
 
-        if (this.appSettings.getUseEmitter() && this.socketAppHandler != null) {
+        if (this.socketAppHandler != null) {
             this.socketAppHandler.setEmitter(this.emitter);
         }
 

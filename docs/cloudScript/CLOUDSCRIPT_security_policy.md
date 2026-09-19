@@ -87,6 +87,7 @@ Lưu ý: các pattern dưới đây là Node.js built-in module và global runti
 Ở top-level của submitted script, chỉ cho phép:
 
 - `FunctionDeclaration`
+- `EnumDeclaration`
 - `VariableStatement` với `const`
 - `ExpressionStatement` để đăng ký handler vào đúng registry
 - `TypeAliasDeclaration`

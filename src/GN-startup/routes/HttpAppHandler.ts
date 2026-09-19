@@ -250,14 +250,28 @@ export class HttpAppHandler {
                 wrap((req, res, next) => {
                     return this.antiDdosMiddleware.addPendingRequestViaJson(req, res, next);
                 }),
+                wrap((req, res, next) => {
+                    let cleaned = false;
+
+                    const cleanup = () => {
+                        if (cleaned) return;
+                        cleaned = true;
+
+                        this.antiDdosMiddleware.removePendingRequest(req, res);
+                    };
+
+                    res.on("finish", cleanup);
+                    res.on("close", cleanup);
+
+                    return next();
+                }),
+
                 this.apiJsonRouter,
             );
 
             this.apiJsonRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<express.Response> => {
                 // Stores the operation response value used in the current execution flow.
                 let operationResponse = await this.onHttpRequest(req);
-
-                this.antiDdosMiddleware.removePendingRequest(req, res);
 
                 if (operationResponse != null) {
                     // Stores the HTTP data value used in the current execution flow.
@@ -323,22 +337,16 @@ export class HttpAppHandler {
                 express.raw({ type: Commands.APPLICATION_MSGPACK, limit: "10mb" }),
                 (req, res, next) => {
                     if (req.header(Commands.CONTENT_TYPE) === Commands.APPLICATION_MSGPACK) {
-                        // Stores the buffer value used in the current execution flow.
-                        let buffer: Buffer[] = [];
-
-                        req.on("data", (chunk) => buffer.push(chunk));
-                        req.on("end", () => {
-                            try {
-                                // Stores the raw value used in the current execution flow.
-                                const raw = Buffer.concat(buffer);
-                                req.body = decode(raw);
-                                return next();
-                            } catch (err) {
-                                return next(err);
+                        try {
+                            if (!Buffer.isBuffer(req.body)) {
+                                return next(new Error("Invalid MsgPack body: expected Buffer"));
                             }
-                        });
 
-                        return;
+                            req.body = decode(req.body);
+                            return next();
+                        } catch (err) {
+                            return next(err);
+                        }
                     }
 
                     return next();
@@ -346,14 +354,27 @@ export class HttpAppHandler {
                 wrap((req, res, next) => {
                     return this.antiDdosMiddleware.addPendingRequestViaMsgPack(req, res, next);
                 }),
+                wrap((req, res, next) => {
+                    let cleaned = false;
+
+                    const cleanup = () => {
+                        if (cleaned) return;
+                        cleaned = true;
+
+                        this.antiDdosMiddleware.removePendingRequest(req, res);
+                    };
+
+                    res.on("finish", cleanup);
+                    res.on("close", cleanup);
+
+                    return next();
+                }),
                 this.apiMsgPackRouter,
             );
 
             this.apiMsgPackRouter.post("/:requestType/:role/:operationCode", async (req: express.Request, res: express.Response): Promise<express.Response> => {
                 // Stores the operation response value used in the current execution flow.
                 let operationResponse = await this.onHttpRequest(req);
-
-                this.antiDdosMiddleware.removePendingRequest(req, res);
 
                 if (operationResponse != null) {
                     // Stores the HTTP data value used in the current execution flow.

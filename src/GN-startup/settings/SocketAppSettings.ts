@@ -5,8 +5,6 @@ type MethodType = "GET" | "HEAD" | "PUT" | "PATCH" | "POST" | "DELETE" | "UPDATE
 abstract class BuilderBase {
     // Indicates whether the feature is enabled.
     protected enable: boolean;
-    // Indicates whether emitter should be used.
-    protected useEmitter: boolean;
     // Stores the origin value used by this instance.
     protected origin: string;
     // Stores the methods list used by this instance.
@@ -32,14 +30,6 @@ abstract class BuilderBase {
      */
     public getEnable(): boolean {
         return this.enable;
-    }
-
-    /**
-     * Returns whether emitter should be used.
-     * @returns Returns whether emitter should be used.
-     */
-    public getUseEmitter(): boolean {
-        return this.useEmitter;
     }
 
     /**
@@ -227,16 +217,6 @@ class Builder extends BuilderBase implements IBuilder<SocketAppSettings> {
     }
 
     /**
-     * Sets whether emitter should be used.
-     * @param useEmitter Indicates whether emitter should be used.
-     * @returns Returns the current builder instance.
-     */
-    public setUseEmitter(useEmitter: boolean): Builder {
-        this.useEmitter = useEmitter;
-        return this;
-    }
-
-    /**
      * Sets whether send and receive debug is enabled.
      * @param enableSendAndReceiveDebug Indicates whether send and receive debug is enabled.
      * @returns Returns the current builder instance.
@@ -273,7 +253,6 @@ class Builder extends BuilderBase implements IBuilder<SocketAppSettings> {
         super();
 
         this.enable = false;
-        this.useEmitter = false;
         this.origin = "";
         this.methods = [];
         this.allowedHeaders = [];
@@ -306,7 +285,6 @@ export class SocketAppSettings extends BuilderBase {
         this.origin = builder.getOrigin();
         this.methods = builder.getMethods();
         this.enable = builder.getEnable();
-        this.useEmitter = builder.getUseEmitter();
         this.allowedHeaders = builder.getAllowedHeaders();
         this.credentials = builder.getCredentials();
         this.enableSendAndReceiveDebug = builder.getEnableSendAndReceiveDebug();

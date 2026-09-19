@@ -83,7 +83,7 @@ export class DebugSupport {
         return answer;
     }
 
-    private static securitySecretKey(secretKey: string): string {
+    public static securitySecretKey(secretKey: string): string {
         if (!secretKey) return null;
 
         return secretKey.slice(0, 6) + "*".repeat(secretKey.length - 12) + secretKey.slice(secretKey.length - 6);
@@ -121,7 +121,12 @@ export class DebugSupport {
 
                     answer[key] = arrayAnswer;
                 } else {
-                    answer[key] = this.securityParameters(value as Record<string, unknown>);
+                    if (key == "permissionParam") {
+                        answer[key] = "...";
+                    }
+                    else {
+                        answer[key] = this.securityParameters(value as Record<string, unknown>);
+                    }
                 }
             } else {
                 answer[key] = value;

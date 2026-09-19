@@ -17,6 +17,7 @@ import { xDatetime } from "./../../../../../GN-library/xdatetime/lib/xDatetime";
 import { Inventory } from "./../../../../../GN-library/xdatabase/lib/entity/pro/Inventory";
 import { StringUtility } from "./../../../../../GN-common/helper/StringUtility";
 import { DataValueType } from "./../../../../../GN-library/xdatabase/lib/entity/pro/type/DataValueType";
+import * as mongodb from "mongodb";
 
 export abstract class StoreItemBaseRequestHandler extends RequestHandler {
     /**
@@ -39,7 +40,7 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
      * @param gameId Provides the game ID value used by this operation.
      * @returns Resolves with the operation result.
      */
-    protected async createItem(catalogId: string, classId: string, amount: number, itemType: number, id: string, type: number, gameId: string): Promise<Inventory> {
+    protected async createItem(catalogId: string, classId: string, amount: number, itemType: number, id: string, type: number, gameId: string, session?: mongodb.ClientSession): Promise<Inventory> {
         // Stores the current milliseconds value used in the current execution flow.
         let currentMilliseconds = xDatetime.getCurrentMilliseconds();
 
@@ -68,6 +69,7 @@ export abstract class StoreItemBaseRequestHandler extends RequestHandler {
                 tags: {},
             },
             gameId,
+            session,
         );
         return inventory;
     }

@@ -171,7 +171,7 @@ export class CreateGameRequestHandler extends RequestHandler {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
                 capped: true,
                 size: 5120000000,
-                max: 100000000,
+                max: 12000000,
             });
 
             // Stores the currency log collection value used in the current execution flow.
@@ -184,7 +184,7 @@ export class CreateGameRequestHandler extends RequestHandler {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
                 capped: true,
                 size: 5120000000,
-                max: 100000000,
+                max: 12000000,
             });
 
             // Stores the statistics log collection value used in the current execution flow.
@@ -212,7 +212,7 @@ export class CreateGameRequestHandler extends RequestHandler {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
                 capped: true,
                 size: 5120000000,
-                max: 100000000,
+                max: 12000000,
             });
 
             // Stores the currency log collection value used in the current execution flow.
@@ -225,7 +225,7 @@ export class CreateGameRequestHandler extends RequestHandler {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
                 capped: true,
                 size: 5120000000,
-                max: 100000000,
+                max: 12000000,
             });
 
             // Stores the statistics log collection value used in the current execution flow.
@@ -252,8 +252,8 @@ export class CreateGameRequestHandler extends RequestHandler {
         {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.CurrencyLog", {
                 capped: true,
-                size: 5120000000,
-                max: 100000000,
+                size: 512000000,
+                max: 1200000,
             });
 
             // Stores the currency log collection value used in the current execution flow.
@@ -265,8 +265,8 @@ export class CreateGameRequestHandler extends RequestHandler {
         {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.StatisticsLog", {
                 capped: true,
-                size: 5120000000,
-                max: 100000000,
+                size: 512000000,
+                max: 1200000,
             });
 
             // Stores the statistics log collection value used in the current execution flow.
@@ -305,8 +305,8 @@ export class CreateGameRequestHandler extends RequestHandler {
         {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
                 capped: true,
-                size: 5120000000,
-                max: 100000000,
+                size: 512000000,
+                max: 1200000,
             });
 
             // Stores the statistics log collection value used in the current execution flow.
@@ -334,7 +334,7 @@ export class CreateGameRequestHandler extends RequestHandler {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
                 capped: true,
                 size: 5120000000,
-                max: 100000000,
+                max: 12000000,
             });
 
             // Stores the store inventory log collection value used in the current execution flow.
@@ -358,11 +358,6 @@ export class CreateGameRequestHandler extends RequestHandler {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                capped: true,
-                size: 5120000,
-                max: 100000,
-            });
 
             // Stores the matchmaking ticket collection value used in the current execution flow.
             let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
@@ -376,8 +371,8 @@ export class CreateGameRequestHandler extends RequestHandler {
         {
             await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CloudScript.Log", {
                 capped: true,
-                size: 5120000,
-                max: 100000,
+                size: 512000000,
+                max: 300,
             });
 
             // Stores the cloud script function log collection value used in the current execution flow.

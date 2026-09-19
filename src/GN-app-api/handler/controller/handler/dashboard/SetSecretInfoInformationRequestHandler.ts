@@ -216,7 +216,7 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
             secretInfoItem.setPermission(permissionAny);
         }
 
-        secretInfoItem.saveAsync();
+        await secretInfoItem.saveAsync();
 
         this.gnServer.getHttpApp().getClusterHandler().sendEvent("dashboard_SetSecretInfoInformation", {
             gameId: secretInfoItem.getGameId(),
@@ -227,31 +227,21 @@ export class SetSecretInfoInformationRequestHandler extends RequestHandler {
             description: secretInfoItem.getDescription(),
         });
 
+        let newSecretInfo = SecretInfo.Builder()
+            .setGameId(secretInfoItem.getGameId())
+            .setRemove(secretInfoItem.getRemove())
+            .setPermission(secretInfoItem.getPermission())
+            .setSecretKey(secretInfoItem.getSecretKey())
+            .setTsExpire(secretInfoItem.getTsExpire())
+            .setDescription(secretInfoItem.getDescription())
+            .build();
+
+        this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
+
         operationResponse.setParameter(ParameterCode.ErrorCode, ErrorCode.Ok);
 
         await this.gnServer.getPostEventCallbackService().onEvent("dashboard_SetSecretInfoInformation", request, role, secretInfo, operationRequest, operationResponse);
 
         return operationResponse;
-    }
-
-    private applySettings(secretInfo: { gameId: string; isRemove: boolean; permission: SecretPermissionItem; secretKey: string; tsExpire: number; description: string }): void {
-        // Stores the new secret info value used in the current execution flow.
-        let newSecretInfo = SecretInfo.Builder().setGameId(secretInfo.gameId).setIsRemove(secretInfo.isRemove).setPermission(secretInfo.permission).setSecretKey(secretInfo.secretKey).setTsExpire(secretInfo.tsExpire).setDescription(secretInfo.description).build();
-
-        this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo, !this.gnServer.isPrimary());
-    }
-
-    /**
-     * Executes the init workflow.
-     */
-    protected init(): void {
-        // Stores the thiz value used in the current execution flow.
-        let thiz = this;
-        this.gnServer
-            .getHttpApp()
-            .getClusterHandler()
-            .onEvent("dashboard_SetSecretInfoInformation", (data) => {
-                thiz.applySettings(data);
-            });
     }
 }

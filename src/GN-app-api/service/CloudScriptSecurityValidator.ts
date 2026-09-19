@@ -245,7 +245,7 @@ export class CloudScriptSecurityValidator {
         for (let i = 0; i < sourceFile.statements.length; i++) {
             let statement = sourceFile.statements[i];
 
-            if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) {
+            if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) {
                 continue;
             }
 
@@ -281,15 +281,19 @@ export class CloudScriptSecurityValidator {
 
             if (ts.isExpressionStatement(statement)) {
                 let registration = this.parseHandlerRegistration(statement.expression);
-                if (registration == null) {
-                    return {
-                        message: "CloudScript security policy violation: only handler registration is allowed at top-level",
-                        node: statement.expression,
-                    };
+                if (registration != null) {
+                    context.registrations.push(registration);
+                    continue;
                 }
 
-                context.registrations.push(registration);
-                continue;
+                if (this.isAllowedTopLevelInitCall(statement.expression)) {
+                    continue;
+                }
+
+                return {
+                    message: "CloudScript security policy violation: only handler registration or init() call is allowed at top-level",
+                    node: statement.expression,
+                };
             }
 
             return {
@@ -333,6 +337,16 @@ export class CloudScriptSecurityValidator {
         }
 
         return ts.isCallExpression(currentExpression) || ts.isNewExpression(currentExpression) || ts.isAwaitExpression(currentExpression);
+    }
+
+    private static isAllowedTopLevelInitCall(expression: ts.Expression): boolean {
+        let unwrappedExpression = this.unwrapExpression(expression);
+        if (!ts.isCallExpression(unwrappedExpression)) {
+            return false;
+        }
+
+        let callTarget = this.unwrapExpression(unwrappedExpression.expression);
+        return ts.isIdentifier(callTarget) && callTarget.text === "init" && unwrappedExpression.arguments.length === 0;
     }
 
     private static parseHandlerRegistration(expression: ts.Expression): HandlerRegistration {

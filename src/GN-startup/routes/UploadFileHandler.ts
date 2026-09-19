@@ -205,14 +205,27 @@ export class UploadFileHandler {
                 return this.antiDdosMiddleware.addPendingUploadRequest(req, res, next);
             }),
             wrap((req, res, next) => {
+                let cleaned = false;
+
+                const cleanup = () => {
+                    if (cleaned) return;
+                    cleaned = true;
+
+                    this.antiDdosMiddleware.removePendingUploadRequest(req, res);
+                };
+
+                res.on("finish", cleanup);
+                res.on("close", cleanup);
+
+                return next();
+            }),
+            wrap((req, res, next) => {
                 return this.uploadFileMiddleware.checkFileUploadInvalid(req, res, next);
             }),
             wrap((req, res, next) => {
                 return this.uploadFileMiddleware.handleUpload().single(Commands.File)(req, res, next as NextFunction);
             }),
             async (req: express.Request, res: express.Response): Promise<express.Response> => {
-                this.antiDdosMiddleware.removePendingUploadRequest(req, res);
-
                 // Stores the file value used in the current execution flow.
                 let file = req.file;
                 if (!file) {

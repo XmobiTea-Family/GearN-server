@@ -54,6 +54,56 @@ handlers.hello = (args, context, log) => {
     assert.equal(result.success, true, result.errorMessage);
 });
 
+test("CloudScript function policy accepts top-level enum declarations", () => {
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
+enum RewardType {
+    Coin = 1,
+    Gem = 2,
+}
+
+handlers.hello = (args, context, log) => {
+    return RewardType.Coin;
+}
+`);
+
+    assert.equal(result.success, true, result.errorMessage);
+});
+
+test("CloudScript function policy accepts a top-level init call", () => {
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
+const state = { ready: false };
+
+function init() {
+    state.ready = true;
+}
+
+init();
+
+handlers.hello = (args, context, log) => {
+    return state.ready;
+}
+`);
+
+    assert.equal(result.success, true, result.errorMessage);
+});
+
+test("CloudScript function policy keeps top-level init call argument-free", () => {
+    const result = CloudScriptSecurityValidator.validateFunctionScript(`
+function init(value: string) {
+    return value;
+}
+
+init("bad");
+
+handlers.hello = (args, context, log) => {
+    return "hello world";
+}
+`);
+
+    assert.equal(result.success, false);
+    assert.match(result.errorMessage ?? "", /only handler registration or init\(\) call is allowed at top-level/);
+});
+
 test("CloudScript event callback policy accepts pre and post registrations for request events", () => {
     const result = CloudScriptSecurityValidator.validateEventCallbackScript(
         "authenticate_LoginByAccount",
@@ -109,7 +159,7 @@ console.log("bad");
 `);
 
     assert.equal(result.success, false);
-    assert.match(result.errorMessage ?? "", /line 5, column 1/);
+    assert.match(result.errorMessage ?? "", /Line 5, Column 1/);
     assert.match(result.errorMessage ?? "", /Source: console\.log\("bad"\);/);
 });
 
@@ -121,6 +171,6 @@ handlers["hello"] = (args, context, log) => {
 `);
 
     assert.equal(result.success, false);
-    assert.match(result.errorMessage ?? "", /line 3, column 9/);
+    assert.match(result.errorMessage ?? "", /Line 3, Column 12/);
     assert.match(result.errorMessage ?? "", /Source: return GNNetwork;/);
 });

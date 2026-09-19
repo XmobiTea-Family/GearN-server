@@ -96,7 +96,7 @@ abstract class BuilderBase {
         return this.clusterSettings;
     }
 
-    constructor() {}
+    constructor() { }
 }
 
 class Builder extends BuilderBase implements IBuilder<ServerApplication> {
@@ -300,6 +300,8 @@ export class ServerApplication extends BuilderBase {
         let reportDdosCollection = this.gnServer.getDatabase().systemCollection("ReportDdos");
         this.antiDdosMiddleware.setReportDdosCollection(reportDdosCollection);
 
+        this.apiMiddleware.startStreamWatch();
+
         let banDdosCollection = this.gnServer.getDatabase().systemCollection("BanDdos");
         this.antiDdosMiddleware.setBanDdosCollection(banDdosCollection);
 
@@ -344,7 +346,7 @@ export class ServerApplication extends BuilderBase {
             useHttp: true,
 
             defaultTimeoutInSeconds: this.getOtherSettings().getCloudScriptExecuteTimeoutInMs() / 1000 + 5,
-            messageType: MessageType.MsgPack,
+            messageType: this.getHttpAppSettings().getEnablePostViaMsgPack() ? MessageType.MsgPack : MessageType.Json,
 
             sendRate: 2000,
             reconnectDelay: 5000,
@@ -393,6 +395,11 @@ export class ServerApplication extends BuilderBase {
         (<PostEventCallbackService>this.gnServer.getPostEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
         (<PreEventCallbackService>this.gnServer.getPreEventCallbackService()).setCloudScriptService(this.gnServer.getEventCallbackCloudScriptService());
 
+        server.on("error", (err) => {
+            Debug.logError("[GearN] Server stopped cause " + err.message);
+            process.exit(1);
+        });
+
         // Start listening only after every runtime dependency has been initialized and the bootstrap data is ready.
         server.listen(port, "0.0.0.0", () => {
             let bannerPath = __dirname + "/./GN-startup/cloudScript/banner.txt";
@@ -404,6 +411,11 @@ export class ServerApplication extends BuilderBase {
             Debug.log("[GearN] Server Application running on 0.0.0.0 the port " + port + " with sessionId: " + this.sessionId);
 
             if (useOtherSocketServer) {
+                socketServer.on("error", (err) => {
+                    Debug.logError("[GearN] Socket Server stopped cause " + err.message);
+                    process.exit(1);
+                });
+
                 socketServer.listen(socketPort, "0.0.0.0", () => {
                     Debug.log("[GearN] Socket Server running on 0.0.0.0 the port " + socketPort);
                 });
@@ -638,11 +650,40 @@ export class ServerApplication extends BuilderBase {
 
                 let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                 this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
                 Debug.log("create SecretInfo Permission for sub admin success.");
+            }
+
+            {
+                // Seed player-level secret keys for the built-in `dev` and `live` game ids used by the repo.
+                let permission = CreateSecretInfoRequestHandler.generateRecommendServerPermission();
+
+                {
+                    let result = {
+                        type: "secretInfo",
+                        secretKey: "server_" + StringUtility.generateRandomString(25, 0),
+                        gameId: "",
+                        permission: permission,
+                        creatorId: userId,
+                        remove: false,
+                        tsExpire: -1,
+                        description: "default recommend server secret info",
+                        tsCreate: currentMilliseconds,
+                    } as any;
+
+                    await masterAdminCollection.insertOne(result);
+
+                    let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
+
+                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+
+                    this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
+
+                    Debug.log("create SecretInfo Permission for server success.");
+                }
             }
 
             {
@@ -653,12 +694,12 @@ export class ServerApplication extends BuilderBase {
                     let result = {
                         type: "secretInfo",
                         secretKey: "game_" + StringUtility.generateRandomString(27, 0),
-                        gameId: "dev",
+                        gameId: "",
                         permission: permission,
                         creatorId: userId,
                         remove: false,
                         tsExpire: -1,
-                        description: "default recommend player secret info for gameId dev",
+                        description: "default recommend player secret info",
                         tsCreate: currentMilliseconds,
                     } as any;
 
@@ -666,35 +707,11 @@ export class ServerApplication extends BuilderBase {
 
                     let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
 
-                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
+                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
 
                     this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
-                    Debug.log("create SecretInfo Permission for player gameId dev success.");
-                }
-
-                {
-                    let result = {
-                        type: "secretInfo",
-                        secretKey: "game_" + StringUtility.generateRandomString(27, 0),
-                        gameId: "live",
-                        permission: permission,
-                        creatorId: userId,
-                        remove: false,
-                        tsExpire: -1,
-                        description: "default recommend player secret info for gameId live",
-                        tsCreate: currentMilliseconds,
-                    } as any;
-
-                    await masterAdminCollection.insertOne(result);
-
-                    let secretInfoItem = new SecretInfoItem(result, masterAdminCollection);
-
-                    let newSecretInfo = SecretInfo.Builder().setGameId(secretInfoItem.getGameId()).setIsRemove(secretInfoItem.getRemove()).setPermission(secretInfoItem.getPermission()).setSecretKey(secretInfoItem.getSecretKey()).setTsExpire(secretInfoItem.getTsExpire()).setDescription(secretInfoItem.getDescription()).build();
-
-                    this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
-
-                    Debug.log("create SecretInfo Permission for player gameId live success.");
+                    Debug.log("create SecretInfo Permission for player success.");
                 }
             }
 
@@ -702,12 +719,168 @@ export class ServerApplication extends BuilderBase {
             let rootUsername = this.applicationSettings.getInitRootUsername() ?? "gearnadmin";
             let rootPassword = this.applicationSettings.getInitRootPassword() ?? "gearnpassword";
 
+            // Create the only cloud-script secret separately so the first root account can log in immediately.
+            {
+                let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
+
+                {
+                    permission.cloudScript.addFunction = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.cloudScript.editFunction = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.setMasterGameSettings = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.createAdminAccount = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.removeAdminAccount = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.setPasswordAdminAccount = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.setSecretKeyAdminAccount = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.setGameInformation = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.createGame = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.changePasswordAdminAccount = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.getAdminAccountList = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.getGameInformation = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.getGameList = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.getMasterGameSettings = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.getSecretInfoInformation = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.getSecretInfoList = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.createSecretInfo = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.setSecretInfoInformation = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.getEventCallbackCloudScript = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+
+                    permission.dashboard.setEventCallbackCloudScript = {
+                        selfEnable: false,
+                        adminSelfEnable: false,
+                        otherSelfEnable: false,
+                        serverSelfEnable: false,
+                    };
+                }
+
+                let secretKey = StringUtility.generateRandomString(32, 0);
+
+                let newSecretInfo = SecretInfo.Builder().setGameId("").setRemove(false).setPermission(permission).setSecretKey(secretKey).setTsExpire(-1).setDescription("default root cloud script secret info").setIsDefault(true).setIsOnlyMasterAdmin(false).build();
+
+                await this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
+
+                Debug.log("create SecretInfo Permission for root cloud script success.");
+            }
+
             // Create the only master-admin secret separately so the first root account can log in immediately.
             {
                 let permission = CreateSecretInfoRequestHandler.generateDefaultPermission(true, true, true, true);
+
                 let secretKey = StringUtility.generateRandomString(32, 0);
 
-                let newSecretInfo = SecretInfo.Builder().setGameId("").setIsRemove(false).setPermission(permission).setSecretKey(secretKey).setTsExpire(-1).setDescription("default root admin secret info").setIsDefault(true).setIsOnlyMasterAdmin(true).build();
+                let newSecretInfo = SecretInfo.Builder().setGameId("").setRemove(false).setPermission(permission).setSecretKey(secretKey).setTsExpire(-1).setDescription("default root admin secret info").setIsDefault(true).setIsOnlyMasterAdmin(true).build();
 
                 await this.gnServer.getApiMiddleware().updateSecretInfo(newSecretInfo);
 
@@ -828,7 +1001,7 @@ export class ServerApplication extends BuilderBase {
                 await this.gnServer.getDatabase().logCreateCollection("Runtime.MasterPlayer.CurrencyLog", {
                     capped: true,
                     size: 5120000000,
-                    max: 100000000,
+                    max: 12000000,
                 });
 
                 // Stores the currency log collection value used in the current execution flow.
@@ -843,7 +1016,7 @@ export class ServerApplication extends BuilderBase {
                 await this.gnServer.getDatabase().logCreateCollection("Runtime.MasterPlayer.StatisticsLog", {
                     capped: true,
                     size: 5120000000,
-                    max: 100000000,
+                    max: 12000000,
                 });
 
                 // Stores the statistics log collection value used in the current execution flow.
@@ -981,7 +1154,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the currency log collection value used in the current execution flow.
@@ -996,7 +1169,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1031,7 +1204,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the currency log collection value used in the current execution flow.
@@ -1046,7 +1219,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1079,8 +1252,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.CurrencyLog", {
                         capped: true,
-                        size: 5120000000,
-                        max: 100000000,
+                        size: 512000000,
+                        max: 1200000,
                     });
 
                     // Stores the currency log collection value used in the current execution flow.
@@ -1094,8 +1267,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.StatisticsLog", {
                         capped: true,
-                        size: 5120000000,
-                        max: 100000000,
+                        size: 512000000,
+                        max: 1200000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1142,8 +1315,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
                         capped: true,
-                        size: 5120000000,
-                        max: 100000000,
+                        size: 512000000,
+                        max: 1200000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1177,7 +1350,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the store inventory log collection value used in the current execution flow.
@@ -1207,11 +1380,6 @@ export class ServerApplication extends BuilderBase {
                 }
 
                 {
-                    await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                        capped: true,
-                        size: 5120000,
-                        max: 100000,
-                    });
 
                     // Stores the matchmaking ticket collection value used in the current execution flow.
                     let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
@@ -1227,8 +1395,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CloudScript.Log", {
                         capped: true,
-                        size: 5120000,
-                        max: 100000,
+                        size: 512000000,
+                        max: 300,
                     });
 
                     // Stores the cloud script function log collection value used in the current execution flow.
@@ -1339,7 +1507,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.CurrencyLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the currency log collection value used in the current execution flow.
@@ -1352,7 +1520,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".GamePlayer.StatisticsLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1383,7 +1551,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.CurrencyLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the currency log collection value used in the current execution flow.
@@ -1396,7 +1564,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CharacterPlayer.StatisticsLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1425,8 +1593,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.CurrencyLog", {
                         capped: true,
-                        size: 5120000000,
-                        max: 100000000,
+                        size: 512000000,
+                        max: 1200000,
                     });
 
                     // Stores the currency log collection value used in the current execution flow.
@@ -1438,8 +1606,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Group.StatisticsLog", {
                         capped: true,
-                        size: 5120000000,
-                        max: 100000000,
+                        size: 512000000,
+                        max: 1200000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1480,8 +1648,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".Inventory.StatisticsLog", {
                         capped: true,
-                        size: 5120000000,
-                        max: 100000000,
+                        size: 512000000,
+                        max: 1200000,
                     });
 
                     // Stores the statistics log collection value used in the current execution flow.
@@ -1511,7 +1679,7 @@ export class ServerApplication extends BuilderBase {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".StoreInventory.StoreLog", {
                         capped: true,
                         size: 5120000000,
-                        max: 100000000,
+                        max: 12000000,
                     });
 
                     // Stores the store inventory log collection value used in the current execution flow.
@@ -1539,11 +1707,6 @@ export class ServerApplication extends BuilderBase {
                 Debug.log("create some indexes on ReceiptIAP for gameId " + gameId + " success.");
 
                 {
-                    await this.gnServer.getDatabase().createCollection("Runtime." + gameId + ".MatchmakingTicket", {
-                        capped: true,
-                        size: 5120000,
-                        max: 100000,
-                    });
 
                     // Stores the matchmaking ticket collection value used in the current execution flow.
                     let matchmakingTicketCollection = this.gnServer.getDatabase().runtimeGameCollection("MatchmakingTicket", gameId);
@@ -1559,8 +1722,8 @@ export class ServerApplication extends BuilderBase {
                 {
                     await this.gnServer.getDatabase().logCreateCollection("Runtime." + gameId + ".CloudScript.Log", {
                         capped: true,
-                        size: 5120000,
-                        max: 100000,
+                        size: 512000000,
+                        max: 300,
                     });
 
                     // Stores the cloud script function log collection value used in the current execution flow.
@@ -1602,11 +1765,11 @@ export class ServerApplication extends BuilderBase {
         }
 
         {
-            await this.gnServer.getDatabase().createCollection("System.AuthInfo", {
-                capped: true,
-                size: 51200000000,
-                max: 100000000,
-            });
+            // await this.gnServer.getDatabase().createCollection("System.AuthInfo", {
+            //     capped: true,
+            //     size: 51200000000,
+            //     max: 100000000,
+            // });
 
             // Stores the auth info collection value used in the current execution flow.
             let authInfoCollection = this.gnServer.getDatabase().systemCollection("AuthInfo");
@@ -1659,7 +1822,7 @@ export class ServerApplication extends BuilderBase {
         {
             await this.gnServer.getDatabase().logCreateCollection("Runtime.EventCallback.PostLog", {
                 capped: true,
-                size: 512000000,
+                size: 2048000000,
                 max: 100000,
             });
 

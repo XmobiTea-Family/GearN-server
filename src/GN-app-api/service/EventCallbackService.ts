@@ -535,6 +535,12 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
 
             if (!this.cloudScriptFunctionDict.has(cloudScriptFunction.type)) {
                 this.cloudScriptFunctionDict.set(cloudScriptFunction.type, cloudScriptFunction);
+
+                if (cloudScriptFunction.version == "FIRSTVER") {
+                    Debug.log("[GearN] [EventCallback] skip cloudScript " + cloudScriptFunction.type + "_" + cloudScriptFunction.version + " because it is the default placeholder version");
+                    continue;
+                }
+
                 await this.loadCloudScriptFunctionWorker(cloudScriptFunction.type, cloudScriptFunction.version, cloudScriptFunction.fullScript);
             }
         }

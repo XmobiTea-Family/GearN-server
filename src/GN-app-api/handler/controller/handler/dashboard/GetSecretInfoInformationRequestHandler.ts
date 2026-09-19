@@ -4171,7 +4171,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
 
             {
                 // Stores the permission rules value used in the current execution flow.
-                let permissionRules = inventory.setAmount;
+                let permissionRules = inventory.changeAmount;
                 // Stores the GearN permission rules value used in the current execution flow.
                 let gnPermissionRules = new GNHashtable();
 
@@ -4180,7 +4180,7 @@ export class GetSecretInfoInformationRequestHandler extends RequestHandler {
                 gnPermissionRules.add(ParameterCode.ServerSelfEnable, permissionRules.serverSelfEnable);
                 gnPermissionRules.add(ParameterCode.AdminSelfEnable, permissionRules.adminSelfEnable);
 
-                gnInventory.add(ParameterCode.SetAmount, gnPermissionRules);
+                gnInventory.add(ParameterCode.ChangeAmount, gnPermissionRules);
             }
 
             {
