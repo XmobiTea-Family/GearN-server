@@ -7,7 +7,7 @@ export class OperationResponse {
     // Stores the operation code value used by this instance.
     private operationCode: string;
     // Stores the response ID value used by this instance.
-    private responseId: number;
+    private responseId: string;
     // Stores the return code value used by this instance.
     private returnCode: number;
     // Stores the debug message value used by this instance.
@@ -23,7 +23,7 @@ export class OperationResponse {
      * @param operationCode Provides the operation code value used by this operation.
      * @param responseId Provides the response ID value used by this operation.
      */
-    constructor(operationCode: string, responseId: number) {
+    constructor(operationCode: string, responseId: string) {
         this.operationCode = operationCode;
         this.responseId = responseId;
         this.parameters = new GNHashtable();
@@ -58,7 +58,7 @@ export class OperationResponse {
      * Returns the response ID.
      * @returns Returns the response ID.
      */
-    public getResponseId(): number {
+    public getResponseId(): string {
         return this.responseId;
     }
 

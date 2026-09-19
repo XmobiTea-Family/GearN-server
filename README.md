@@ -45,9 +45,12 @@ This repository is both:
 
 - HTTP JSON route: `POST /api/rJson/:requestType/:role/:operationCode`
 - HTTP MsgPack route: `POST /api/rMsgPack/:requestType/:role/:operationCode`
+- HTTP request context headers: `Auth-Token`, `Secret-Key`, and `Game-Id`
 - Health endpoints: `GET /ping`, `POST /ping`, `GET /healthcheck`
 - Socket auth event: `Commands.RequestAuthTokenCmd`
 - Socket request events: `Commands.RequestCmd_Json` and `Commands.RequestCmd_MsgPack`
+
+The Unity client SDK exposes `overrideGameId` after `overrideSecretKey` on its HTTP/socket and domain API wrappers. 
 
 ## Project Docs For AI
 

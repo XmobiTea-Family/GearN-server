@@ -67,7 +67,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
                 allowOrigin: "*",
                 credentials: true,
                 allowMethods: ["GET", "POST"],
-                allowHeaders: ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"],
+                allowHeaders: ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Request-Id", "Content-Length", "User-Agent", "X-Real-IP"],
                 enableSendAndReceiveDebug: true,
                 enablePostViaMsgPack: true,
                 enablePostViaJson: true,
@@ -78,7 +78,7 @@ export class ServerApplicationStartup extends DefaultApplicationStartup {
             .setOrigins(gnHttpAppSettings["allowOrigin"] ?? "*")
             .addMethods(gnHttpAppSettings["allowMethods"] ?? ["GET", "POST"])
             .setCredentials(gnHttpAppSettings["credentials"] ?? true)
-            .addAllowedHeaders(gnHttpAppSettings["allowHeaders"] ?? ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"])
+            .addAllowedHeaders(gnHttpAppSettings["allowHeaders"] ?? ["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Request-Id", "Content-Length", "User-Agent", "X-Real-IP"])
             .setEnableSendAndReceiveDebug(gnHttpAppSettings["enableSendAndReceiveDebug"] ?? true)
             .setEnablePostViaMsgPack(gnHttpAppSettings["enablePostViaMsgPack"] ?? true)
             .setEnablePostViaJson(gnHttpAppSettings["enablePostViaJson"] ?? true)

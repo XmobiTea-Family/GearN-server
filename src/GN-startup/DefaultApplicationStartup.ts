@@ -35,10 +35,10 @@ export class DefaultApplicationStartup {
             .build();
 
         // Default HTTP transport behavior for a permissive local environment.
-        let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigins("*").addMethods(["GET", "POST"]).setCredentials(true).addAllowedHeaders(["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Content-Length", "User-Agent", "X-Real-IP"]).setEnableSendAndReceiveDebug(true).setEnablePostViaJson(true).setEnablePostViaMsgPack(true).setTrustProxy(true).build();
+        let httpAppSettings = HttpAppSettings.Builder().setEnable(true).setOrigins("*").addMethods(["GET", "POST"]).setCredentials(true).addAllowedHeaders(["Auth-Token", "Content-Type", "Secret-Key", "Game-Id", "Request-Id", "Content-Length", "User-Agent", "X-Real-IP"]).setEnableSendAndReceiveDebug(true).setEnablePostViaJson(true).setEnablePostViaMsgPack(true).setTrustProxy(true).build();
 
         // Default Socket.IO transport behavior.
-        let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setOrigins("*").addMethods([]).setCredentials(true).addAllowedHeaders([]).setEnableSendAndReceiveDebug(true).setEnablePostViaJson(true).setEnablePostViaMsgPack(true).setPingInterval(50000).setPingTimeout(5000).build();
+        let socketAppSettings = SocketAppSettings.Builder().setEnable(true).setOrigins("*").addMethods([]).setCredentials(true).addAllowedHeaders(["Auth-Token", "Secret-Key", "Game-Id", "Request-Id"]).setEnableSendAndReceiveDebug(true).setEnablePostViaJson(true).setEnablePostViaMsgPack(true).setPingInterval(50000).setPingTimeout(5000).build();
 
         // Misc runtime settings that are shared outside a single transport.
         let otherSettings = OtherSettings.Builder().setHeaderIP("X-Real-IP").setIdTypeCase(0).setIPApiUrl("http://127.0.0.1:2555/json").build();

@@ -16,6 +16,7 @@ declare global {
             authInfo: AuthInfo;
             secretInfo: SecretInfo;
             xip: string;
+            rid: string;
             fileName: string;
         }
     }

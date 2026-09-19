@@ -453,7 +453,7 @@ export class ServerApplication extends BuilderBase {
     }
 
     /**
-     * Ensures required system collections exist and seeds a fresh installation when no version document is found.
+     * Ensures required collections exist and seeds a fresh installation when no version document is found.
      */
     private async setupDatabase(): Promise<void> {
         Debug.log("setupDatabase");
@@ -475,6 +475,15 @@ export class ServerApplication extends BuilderBase {
      */
     private async setupNewGNDatabase() {
         Debug.log("The GearN Server is installing some new information on Database...");
+
+        {
+            let idempotencyCollection = this.gnServer.getDatabase().runtimeCollection("Idempotency");
+
+            await idempotencyCollection.createIndex({ key: 1 }, { background: true, unique: true, name: "key_1" });
+            await idempotencyCollection.createIndex({ createdTTL: 1 }, { background: true, expireAfterSeconds: 900, name: "createdTTL_1" });
+
+            Debug.log("create indexes for Runtime.Idempotency success.");
+        }
 
         let masterAdminCollection = this.gnServer.getDatabase().systemCollection("MasterAdmin");
 

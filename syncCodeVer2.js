@@ -216,13 +216,13 @@ function readAllTsFiles(name) {
                     };
 
                     let script = "\n";
-                    script += "preHandlers[\"" + childScript.eventName + "\"] = async (" + spls2 + ", role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n";
+                    script += "preHandlers[\"" + childScript.eventName + "\"] = async (" + spls2 + ", role: SecretRole, gameId: string, customTags: GNHashtable, operationRequest: OperationRequest, log: (message: any) => void) => {\n";
                     script += "\n";
                     script += "\treturn null;\n";
                     script += "}\n";
                     script += "\n";
 
-                    script += "postHandlers[\"" + childScript.eventName + "\"] = async (" + spls2 + ", role: SecretRole, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n";
+                    script += "postHandlers[\"" + childScript.eventName + "\"] = async (" + spls2 + ", role: SecretRole, gameId: string, customTags: GNHashtable, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => {\n";
                     script += "\n";
                     script += "\treturn operationResponse;\n";
                     script += "}\n";

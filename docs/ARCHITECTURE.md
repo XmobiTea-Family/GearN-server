@@ -63,11 +63,13 @@ Contains internal infrastructure primitives:
 ### HTTP
 
 1. `HttpAppHandler` exposes `/api/rJson/...` and `/api/rMsgPack/...`.
-2. `ApiMiddleware` resolves IP, verifies auth token, and attaches custom request data.
+2. `ApiMiddleware` resolves IP, verifies `Auth-Token`, resolves `Secret-Key`, and attaches auth and secret context to the Express request.
 3. `AntiDdosMiddleware` applies rate limiting, payload checks, and pending-request tracking.
 4. The route builds a `Request` object with request type, role, operation code, IP, parameters, auth info, and secret info.
 5. `GNServer` forwards the `Request` to `RequestController`.
 6. `RequestController` selects the correct handler and execution method based on `RequestRole`.
+
+For a global secret (a `SecretInfo` without its own game ID), `ApiMiddleware` reads the optional `Game-Id` header and validates it against the configured game list. If the header is absent, the server uses `dev`. A game-scoped secret keeps the game ID stored in that secret; `Game-Id` does not replace it.
 
 ### Socket
 
@@ -75,6 +77,22 @@ Contains internal infrastructure primitives:
 2. Socket auth is updated through `Commands.RequestAuthTokenCmd`.
 3. JSON or MsgPack request payloads are decoded into the same logical `Request` model.
 4. `GNServer` uses the same `RequestController` path as HTTP.
+
+Socket auth/secret context is stored on `socket.data`, rather than resolved from HTTP headers on every operation. Although the Unity SDK API now accepts `overrideGameId` for socket-facing wrappers, its current socket emitters do not serialize that value and this server does not read a per-operation game ID. Treat per-request game switching as HTTP-only until both sides implement the socket protocol change.
+
+## Unity Client Request Overrides
+
+The Unity client SDK exposes the following common optional arguments:
+
+```csharp
+// Callback form
+api.method(requestData, onResponse, overrideAuthToken, overrideSecretKey, overrideGameId, customTags, timeout);
+
+// Async form
+await api.methodAsync(requestData, overrideAuthToken, overrideSecretKey, overrideGameId, customTags, timeout);
+```
+
+When an override is `null`, the SDK falls back to its current authentication state or `GNServerSettings`. `overrideSecretKey` and `overrideGameId` should be changed together so the selected secret and game context remain consistent.
 
 ## Handler Registration Model
 

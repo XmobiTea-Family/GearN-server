@@ -49,6 +49,11 @@ export class Commands {
     public static readonly RequestGameIdCmd: string = "Game-Id";
 
     /**
+     * Transport header used to request a unique request id from the backend.
+     */
+    public static readonly RequestRequestIdCmd: string = "Request-Id";
+
+    /**
      * Socket command name for MessagePack operation requests.
      */
     public static readonly RequestCmd_MsgPack: string = "rMsgPack";

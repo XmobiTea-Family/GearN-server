@@ -15,7 +15,7 @@ export class OperationRequest {
     // Stores the operation code value used by this instance.
     private operationCode: string;
     // Stores the request ID value used by this instance.
-    private requestId: number;
+    private requestId: string;
     // Stores the parameters value used by this instance.
     private parameters: GNHashtable;
 
@@ -39,7 +39,7 @@ export class OperationRequest {
      * Returns the request ID.
      * @returns Returns the request ID.
      */
-    public getRequestId(): number {
+    public getRequestId(): string {
         return this.requestId;
     }
 
@@ -56,7 +56,7 @@ export class OperationRequest {
      * @param requestId Provides the request ID value used by this operation.
      * @returns Returns the current operation request instance.
      */
-    public setRequestId(requestId: number): OperationRequest {
+    public setRequestId(requestId: string): OperationRequest {
         this.requestId = requestId;
         return this;
     }

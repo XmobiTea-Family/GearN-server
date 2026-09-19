@@ -52,7 +52,7 @@ export class DebugSupport {
         return answer;
     }
 
-    public static flatAndSecurityFinalData(finalData: { returnCode: number; responseId?: number; parameters?: Record<string, unknown>; invalidRequestParameters?: (string | number)[][]; debugMessage?: string }): Record<string, unknown> {
+    public static flatAndSecurityFinalData(finalData: { returnCode: number; responseId?: string; parameters?: Record<string, unknown>; invalidRequestParameters?: (string | number)[][]; debugMessage?: string }): Record<string, unknown> {
         const answer: Record<string, unknown> = {};
 
         answer.returnCode = CodeHelper.getReturnCodeName(finalData.returnCode);

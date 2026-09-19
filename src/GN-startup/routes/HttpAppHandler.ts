@@ -235,6 +235,9 @@ export class HttpAppHandler {
                     return this.apiMiddleware.getIP(req, res, next);
                 }),
                 wrap((req, res, next) => {
+                    return this.apiMiddleware.getRequestId(req, res, next);
+                }),
+                wrap((req, res, next) => {
                     return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaJson(req, res, next);
                 }),
                 wrap((req, res, next) => {
@@ -321,6 +324,9 @@ export class HttpAppHandler {
                 "/" + Commands.RequestCmd_MsgPack,
                 wrap((req, res, next) => {
                     return this.apiMiddleware.getIP(req, res, next);
+                }),
+                wrap((req, res, next) => {
+                    return this.apiMiddleware.getRequestId(req, res, next);
                 }),
                 wrap((req, res, next) => {
                     return this.antiDdosMiddleware.checkMaxRequestPerSecondPerIpViaMsgPack(req, res, next);
@@ -453,7 +459,7 @@ export class HttpAppHandler {
         let ip = req.xip;
         // Stores the request value used in the current execution flow.
         let request = new Request(operationCodeStr, requestType, role);
-        request.setRequestId(0);
+        request.setRequestId(req.rid);
         request.setIP(ip);
         request.setParameters(!parameters ? {} : parameters);
         request.setAuthenticate(req.authInfo);

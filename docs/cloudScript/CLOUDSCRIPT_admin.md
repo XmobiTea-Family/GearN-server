@@ -41,8 +41,8 @@ Ngoài ra còn có:
 <!-- prettier-ignore -->
 | Hàm gốc | Code trong cloudScript như thế nào |
 | --- | --- |
-| `send(requestType: RequestType, role: RequestRole, request: OperationRequest, onResponse: Action1<OperationResponse>, overrideAuthToken: string, overrideSecretKey: string, customTags: GNHashtable): void` | `admin.send(requestType, role, request, onResponse, overrideAuthToken, overrideSecretKey, customTags)` |
-| `sendAsync(requestType: RequestType, role: RequestRole, request: OperationRequest, overrideAuthToken: string, overrideSecretKey: string, customTags: GNHashtable): Promise<OperationResponse>` | `admin.sendAsync(requestType, role, request, overrideAuthToken, overrideSecretKey, customTags)` |
+| `send(requestType: RequestType, role: RequestRole, request: OperationRequest, onResponse: Action1<OperationResponse>, overrideAuthToken: string, overrideSecretKey: string, overrideGameId: string, customTags: GNHashtable): void` | `admin.send(requestType, role, request, onResponse, overrideAuthToken, overrideSecretKey, overrideGameId, customTags)` |
+| `sendAsync(requestType: RequestType, role: RequestRole, request: OperationRequest, overrideAuthToken: string, overrideSecretKey: string, overrideGameId: string, customTags: GNHashtable): Promise<OperationResponse>` | `admin.sendAsync(requestType, role, request, overrideAuthToken, overrideSecretKey, overrideGameId, customTags)` |
 
 ## 3. Khi nào dùng `admin`
 
@@ -66,11 +66,13 @@ Không nên dùng `admin` khi:
 const response = await admin.<domain>.<method>Async(requestData);
 
 // Full signature (optional params hiếm khi cần)
-const response = await admin.<domain>.<method>Async(requestData, overrideAuthToken?, overrideSecretKey?, customTags?, timeout?);
+const response = await admin.<domain>.<method>Async(requestData, overrideAuthToken?, overrideSecretKey?, overrideGameId?, customTags?, timeout?);
 ```
 
 Rule:
 
+- `overrideGameId` nằm ngay sau `overrideSecretKey`; khi đổi game context, truyền cả secret key và game ID khớp nhau.
+- Nếu `overrideGameId` là `null`/`undefined`, SDK dùng `gameId` từ `GNServerSettings`.
 - Trong đa số case bạn chỉ cần truyền `requestData`.
 - Chỉ truyền optional params khi thật sự cần override context hoặc tracing.
 - Luôn check `response.hasReturnCodeError()` trước, rồi kiểm tra `response.errorCode === ErrorCode.Ok`.

@@ -51,6 +51,16 @@ If a config value behaves unexpectedly, inspect the mapping logic in `src/GN-sta
 - Main type-check: `npx tsc -p tsconfig.json --noEmit`
 - Cloud script type-check: `npx tsc -p src/GN-startup/cloudScript/tsconfig.json --noEmit`
 
+## Unity SDK Compatibility
+
+The current uncommitted Unity SDK update adds `overrideGameId` immediately after `overrideSecretKey` to the low-level HTTP/socket methods and every generated domain API wrapper. When reviewing examples or integration code, use this order:
+
+```text
+requestData, onResponse?, overrideAuthToken?, overrideSecretKey?, overrideGameId?, customTags?, timeout?
+```
+
+Existing positional calls that pass `customTags` or `timeout` must insert the new argument position (usually `null`) or switch to named arguments.
+
 ## Verified Build Status
 
 Verified on `2026-03-21`:

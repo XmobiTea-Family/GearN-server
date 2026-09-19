@@ -95,6 +95,9 @@ export class UploadFileHandler {
                 return this.apiMiddleware.getIP(req, res, next);
             }),
             wrap((req, res, next) => {
+                return this.apiMiddleware.getRequestId(req, res, next);
+            }),
+            wrap((req, res, next) => {
                 return this.antiDdosMiddleware.checkMaxUploadRequestPerSecondPerIp(req, res, next);
             }),
             wrap((req, res, next) => {
@@ -112,6 +115,9 @@ export class UploadFileHandler {
             "/download",
             wrap((req, res, next) => {
                 return this.apiMiddleware.getIP(req, res, next);
+            }),
+            wrap((req, res, next) => {
+                return this.apiMiddleware.getRequestId(req, res, next);
             }),
             wrap((req, res, next) => {
                 return this.antiDdosMiddleware.checkMaxUploadRequestPerSecondPerIp(req, res, next);

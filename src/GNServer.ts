@@ -12,6 +12,10 @@ import { IRequestHandler } from "./GN-app-api/handler/controller/handler/base/IR
 // import { AuthInfo } from "./GN-common/entity/AuthInfo";
 import { OperationResponse } from "./GN-common/entity/operationResponse/OperationResponse";
 import { Request } from "./GN-common/entity/operationRequest/base/Request";
+import { OperationHelper } from "./GN-common/entity/operationHelper/OperationHelper";
+import { ReturnCode } from "./GN-common/constant/ReturnCode";
+import { InvalidMember } from "./GN-common/entity/InvalidMember";
+import { createHash } from "crypto";
 
 import { AppleService } from "./GN-app-api/service/AppleService";
 import { TimerService } from "./GN-app-api/service/TimerService";
@@ -36,6 +40,7 @@ import { ICacheService } from "./GN-app-api/service/ICacheService";
 import { IConfigService } from "./GN-app-api/service/IConfigService";
 
 import { RequestType } from "./GN-common/constant/enumType/RequestType";
+import { RequestRole } from "./GN-common/constant/enumType/RequestRole";
 import { xGNSettings } from "./GN-library/xsettings/lib/xGNSettings";
 import { IPostEventCallbackService, IPreEventCallbackService } from "./GN-app-api/service/IEventCallbackService";
 import { EventCallbackCloudScriptService, IEventCallbackCloudScriptService, PostEventCallbackService, PreEventCallbackService } from "./GN-app-api/service/EventCallbackService";
@@ -60,6 +65,8 @@ import { RequestControllerUtils } from "./RequestControllerUtils";
 import { AuthInfo } from "./GN-common/entity/AuthInfo";
 import { SecretInfo } from "./GN-common/entity/SecretInfo";
 import { GroupStatus } from "./GN-common/constant/enumType/GroupStatus";
+import { error } from "console";
+import { Md5Generate } from "./GN-common/helper/Md5Generate";
 
 interface CreateIndexesOptions {
     // Create the index as unique.
@@ -70,10 +77,41 @@ interface CreateIndexesOptions {
     expireAfterSeconds?: number;
 }
 
+interface IdempotencyDocument extends mongodb.Document {
+    key: string;
+    userId: string | null;
+    gameId: string | null;
+    operationRequest: {
+        operationCode: string;
+        requestType: number;
+        role: number;
+        requestId: string;
+        parameters: { [k: string]: any };
+    };
+    tsCreate: number;
+    instanceHandle: {
+        instanceId: string;
+        isPrimary: boolean;
+    };
+    operationResponse?: {
+        operationCode: string;
+        responseId: string;
+        returnCode: number;
+        parameters: { [k: string]: any } | null;
+        debugMessage: string | null;
+        invalidMembers: InvalidMember[] | null;
+    };
+    tsLastUpdate?: number;
+    status: "pending" | "completed";
+    createdTTL: Date;
+}
+
 /**
  * Runtime coordinator that connects transports, request dispatch, cross-cutting services, and scheduled jobs.
  */
 export class GNServer {
+    private static readonly IDEMPOTENCY_WAIT_TIMEOUT_IN_MS: number = 10000;
+
     /**
      * Returns the persisted server version string used during bootstrap and compatibility checks.
      */
@@ -124,6 +162,9 @@ export class GNServer {
     private waitingServerDetailDict: Map<string, NodeJS.Timeout>;
     private postEventCallbackCollection: mongodb.Collection<mongodb.Document>;
 
+    private idempotencyCollection: mongodb.Collection<IdempotencyDocument>;
+    private idempotencyWaitingResponseDict: Map<string, Set<(status: "pending" | "completed", operationResponse: OperationResponse) => void>>;
+
     /**
      * Initializes a new GearN server instance.
      */
@@ -159,6 +200,7 @@ export class GNServer {
         this.matchmakingService = new MatchmakingService();
         (this.matchmakingService as MatchmakingService).setGNServer(this);
         this.waitingServerDetailDict = new Map();
+        this.idempotencyWaitingResponseDict = new Map();
 
         this.cloudScriptServiceDic = new Map();
         this.eventCallbackCloudScriptService = new EventCallbackCloudScriptService();
@@ -198,6 +240,9 @@ export class GNServer {
      */
     public run(onRunSuccess?: OnRunSuccess) {
         const thiz = this;
+
+        this.idempotencyCollection = this.xDatabase.runtimeCollection<IdempotencyDocument>("Idempotency");
+        this.startIdempotencyStreamWatch();
 
         this.httpApp.getHttpAppHandler().setOnHttpRequest((request: Request) => {
             return thiz.handleOnRequest(request);
@@ -755,8 +800,336 @@ export class GNServer {
      * @param request Provides the request value used by this operation.
      * @returns Resolves with the operation result.
      */
-    private handleOnRequest(request: Request): Promise<OperationResponse> {
+    private async handleOnRequest(request: Request): Promise<OperationResponse> {
+        let requestId = request.getRequestId();
+        if (requestId) {
+            let operationCode = request.getOperationCode();
+            let role = request.getRole();
+            let requestType = request.getRequestType();
+            let authInfo = request.getAuthInfo();
+            let secretInfo = request.getSecretInfo();
+            let userId = authInfo?.getUserId() ?? null;
+            let gameId = secretInfo?.getGameId() ?? null;
+            let secretKey = secretInfo?.getSecretKey() ?? authInfo?.getSecretKey() ?? null;
+            let callerScope: string;
+
+            if (userId != null) {
+                callerScope = "user:" + userId;
+            }
+            else if ((role == RequestRole.Admin || role == RequestRole.Server) && secretKey != null) {
+                callerScope = "secret:" + createHash("sha256").update(secretKey).digest("hex");
+            }
+
+            let key = Md5Generate.getMd5(role + '_' + requestType + '_' + operationCode + '_' + requestId + '_' + callerScope + '_' + gameId);
+
+            let executionHandleRequest = async () => {
+                try {
+                    let operationResponse = await this.requestController.handleRequest(request);
+                    if (operationResponse != null) {
+                        this.resolveIdempotencyWaitingResponses(key, "completed", operationResponse);
+
+                        let retrialSaveCount = 3;
+                        while (retrialSaveCount > 0) {
+                            try {
+                                await this.idempotencyCollection.updateOne(
+                                    { key: key },
+                                    {
+                                        $set: {
+                                            operationResponse: {
+                                                operationCode: operationResponse.getOperationCode(),
+                                                responseId: operationResponse.getResponseId(),
+                                                returnCode: operationResponse.getReturnCode(),
+                                                parameters: operationResponse.getParameters()?.toData() ?? null,
+                                                debugMessage: operationResponse.getDebugMessage(),
+                                                invalidMembers: operationResponse.getInvalidMembers(),
+                                            },
+                                            status: "completed",
+                                            tsLastUpdate: xDatetime.getCurrentMilliseconds(),
+                                        },
+                                    }
+                                );
+
+                                break;
+                            }
+                            catch (error) {
+                                if (retrialSaveCount == 0) {
+                                    Debug.logError("[GearN] [Idempotency] save completed error: " + error.message);
+
+                                    this.idempotencyCollection.deleteOne({ key: key });
+                                }
+                            }
+
+                            retrialSaveCount -= 1;
+                        }
+                    }
+                    else {
+                        this.resolveIdempotencyWaitingResponses(key, "completed", operationResponse);
+
+                        await this.idempotencyCollection.updateOne(
+                            { key: key },
+                            {
+                                $set: {
+                                    operationResponse: null,
+                                    status: "completed",
+                                    tsLastUpdate: xDatetime.getCurrentMilliseconds(),
+                                },
+                            }
+                        );
+                    }
+                }
+                catch (err) {
+                    let operationResponse = {
+                        operationCode: request.getOperationCode(),
+                        responseId: request.getRequestId(),
+                        returnCode: ReturnCode.InternalServerError,
+                        parameters: null,
+                        debugMessage: err.toString(),
+                        invalidMembers: null,
+                    } as any;
+
+                    this.resolveIdempotencyWaitingResponses(key, "completed", this.fromIdempotencyOperationResponse(operationResponse));
+
+                    await this.idempotencyCollection.updateOne(
+                        { key: key },
+                        {
+                            $set: {
+                                operationResponse: operationResponse,
+                                status: "completed",
+                                tsLastUpdate: xDatetime.getCurrentMilliseconds(),
+                            },
+                        },
+                    );
+                }
+            };
+
+            const oldAnswer = await this.idempotencyCollection.findOne(
+                { key: key },
+                {
+                    projection: { operationResponse: true, status: true, instanceHandle: true },
+                },
+            );
+
+            let instanceInfo = this.httpApp.getClusterHandler().getInstanceInfoStatus();
+
+            if (oldAnswer != null) {
+                if (oldAnswer.status == "completed") {
+                    return this.fromIdempotencyOperationResponse(oldAnswer.operationResponse);
+                }
+                else if (oldAnswer.status == "pending") {
+                    if (oldAnswer.instanceHandle.instanceId == instanceInfo.instanceId) {
+                        let callbacks = this.idempotencyWaitingResponseDict.get(key);
+                        if (callbacks == null || callbacks.size == 0) {
+                            executionHandleRequest();
+                        }
+                    }
+
+                    return await this.waitAnswerFromIdempotencyOperation(key, request);
+                }
+            }
+
+            this.idempotencyCollection.insertOne(
+                {
+                    key: key,
+                    userId: userId,
+                    gameId: gameId,
+                    operationRequest: {
+                        operationCode: operationCode,
+                        requestType: requestType,
+                        role: role,
+                        requestId: requestId,
+                        parameters: request.getParameters(),
+                    },
+                    tsCreate: xDatetime.getCurrentMilliseconds(),
+                    instanceHandle: {
+                        instanceId: instanceInfo.instanceId,
+                        isPrimary: instanceInfo.isPrimary,
+                    },
+                    createdTTL: new Date(),
+                    status: "pending",
+                }
+            ).then((insertResult) => {
+                executionHandleRequest();
+            }).catch(async (err) => {
+
+                if ((err as { code?: number })?.code == 11000) {
+                    this.idempotencyCollection.findOne(
+                        { key: key },
+                        {
+                            projection: { operationResponse: true, status: true, },
+                            readPreference: "primary",
+                        },
+                    ).then((existingAnswer) => {
+                        if (existingAnswer?.status == "completed") {
+                            this.resolveIdempotencyWaitingResponses(key, existingAnswer.status, this.fromIdempotencyOperationResponse(existingAnswer.operationResponse));
+                        }
+                    }).catch((readError) => {
+                        let error = readError instanceof Error ? readError : new Error(String(readError));
+                        Debug.logError("[GearN] [Idempotency] Failed to find existing idempotency response for key " + key + ": " + error.message);
+                    });
+
+                    return;
+                }
+
+                let error = err instanceof Error ? err : new Error(String(err));
+                Debug.logError("[GearN] [Idempotency] Unexpected error occurred: " + error.message);
+
+                this.resolveIdempotencyWaitingResponses(
+                    key,
+                    "completed",
+                    OperationHelper.newOperationResponseInternalServerError(request.getOperationCode(), request.getRequestId(), "Unable to claim the idempotency request."),
+                );
+            });
+
+            return await this.waitAnswerFromIdempotencyOperation(key, request);
+        }
+
         return this.requestController.handleRequest(request);
+    }
+
+    private async waitAnswerFromIdempotencyOperation(key: string, request: Request): Promise<OperationResponse> {
+        let callbacks = this.idempotencyWaitingResponseDict.get(key);
+        if (callbacks == null) {
+            callbacks = new Set();
+            this.idempotencyWaitingResponseDict.set(key, callbacks);
+        }
+
+        return await (new Promise((resolve, reject) => {
+            let completedCall = false;
+
+            let callback = (status: "pending" | "completed", operationResponse: OperationResponse) => {
+                if (completedCall) return;
+                completedCall = true;
+
+                if (timeout != null) {
+                    clearTimeout(timeout);
+                    timeout = null;
+                }
+
+                resolve(operationResponse);
+            };
+
+            let timeout = setTimeout(() => {
+                if (completedCall) return;
+                completedCall = true;
+
+                callbacks.delete(callback);
+                if (callbacks.size == 0) {
+                    this.idempotencyWaitingResponseDict.delete(key);
+                }
+
+                if (!this.streamConnected) {
+                    this.idempotencyCollection.findOne(
+                        { key: key },
+                        {
+                            projection: { operationResponse: true, status: true, },
+                            readPreference: "primary",
+                        },
+                    ).then(async (oldAnswer) => {
+                        if (oldAnswer.status == "pending") {
+                            resolve(OperationHelper.newOperationResponse(request.getOperationCode(), request.getRequestId()).setReturnCode(ReturnCode.OperationTimeout));
+                        }
+                        else if (oldAnswer.status == "completed") {
+                            resolve(this.fromIdempotencyOperationResponse(oldAnswer.operationResponse));
+                        }
+                    }).catch((err) => {
+                        resolve(OperationHelper.newOperationResponse(request.getOperationCode(), request.getRequestId()).setReturnCode(ReturnCode.OperationTimeout));
+                    });
+
+                    return;
+                }
+
+                resolve(OperationHelper.newOperationResponse(request.getOperationCode(), request.getRequestId()).setReturnCode(ReturnCode.OperationTimeout));
+            }, GNServer.IDEMPOTENCY_WAIT_TIMEOUT_IN_MS);
+
+            callbacks.add(callback);
+        }));
+    }
+
+    private fromIdempotencyOperationResponse(data: {
+        operationCode: string;
+        responseId: string;
+        returnCode: number;
+        parameters: { [k: string]: any } | null;
+        debugMessage: string | null;
+        invalidMembers: InvalidMember[] | null;
+    }): OperationResponse {
+        if (data == null) return null;
+
+        let operationResponse = new OperationResponse(data.operationCode, data.responseId);
+        operationResponse.setReturnCode(data.returnCode);
+
+        operationResponse.setParameters(data.parameters == null ? null : GNHashtable.builder().addAll(data.parameters).build());
+
+        if (data.debugMessage != null) operationResponse.setDebugMessage(data.debugMessage);
+        if (data.invalidMembers != null) operationResponse.setInvalidMembers(data.invalidMembers);
+
+        return operationResponse;
+    }
+
+    private resolveIdempotencyWaitingResponses(key: string, status: "pending" | "completed", operationResponse: OperationResponse): void {
+        let callbacks = this.idempotencyWaitingResponseDict.get(key);
+        if (callbacks == null) return;
+
+        this.idempotencyWaitingResponseDict.delete(key);
+        callbacks.forEach((callback) => callback(status, operationResponse));
+    }
+
+    private streamConnected: boolean = false;
+
+    private startIdempotencyStreamWatch(): void {
+        const startWatch = () => {
+            try {
+                Debug.log("[GearN] [Idempotency] stream start on collection: " + this.idempotencyCollection.collectionName);
+
+                let stream = this.idempotencyCollection.watch(
+                    [
+                        {
+                            $match: {
+                                operationType: "update",
+                                "updateDescription.updatedFields.status": { $ne: "pending" },
+                            },
+                        },
+                    ],
+                    {
+                        fullDocument: "updateLookup",
+                    },
+                );
+
+                this.streamConnected = true;
+
+                stream.on("change", (change) => {
+                    if (change.operationType != "update") return;
+
+                    let document = change.fullDocument as IdempotencyDocument;
+                    let key = document.key;
+
+                    const operationResponse = this.fromIdempotencyOperationResponse(document.operationResponse);
+                    this.resolveIdempotencyWaitingResponses(key, document.status, operationResponse);
+                });
+
+                stream.once("error", (err) => {
+                    this.streamConnected = false;
+
+                    Debug.logError("[GearN] [Idempotency] stream error: " + err.message);
+
+                    void stream
+                        .close()
+                        .catch((closeError) => {
+                            Debug.logError("[GearN] [Idempotency] stream close error: " + closeError.message);
+                        })
+                        .finally(() => {
+                            setTimeout(startWatch, 1000);
+                        });
+                });
+            } catch (err) {
+                let error = err instanceof Error ? err : new Error(String(err));
+                Debug.logError("[GearN] [Idempotency] stream catch error: " + error.message);
+                setTimeout(startWatch, 1000);
+                this.streamConnected = false;
+            }
+        };
+
+        startWatch();
     }
 
     /**
@@ -874,7 +1247,7 @@ export class GNServer {
         } catch (err) {
             await session.abortTransaction();
 
-            Debug.logError(err);
+            Debug.logError("[GearN] [Matchmaking] Failed to set match server detail for " + matchId + " on " + gameId + ": " + err.message);
 
             throw err;
         } finally {
@@ -896,7 +1269,7 @@ export class GNServer {
             this.waitingServerDetailDict.delete(matchId);
         }
 
-        Debug.logInfo("[GearN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
+        Debug.logError("[GearN] [Matchmaking] request match server detail for " + matchId + " failed on " + gameId + ", with reason " + reason);
 
         const session = this.getDatabase().startSession();
 
@@ -917,7 +1290,7 @@ export class GNServer {
         } catch (err) {
             await session.abortTransaction();
 
-            Debug.logError(err);
+            Debug.logError("[GearN] [Matchmaking] Failed to set match server detail for " + matchId + " on " + gameId + ": " + err.message);
 
             throw err;
         } finally {

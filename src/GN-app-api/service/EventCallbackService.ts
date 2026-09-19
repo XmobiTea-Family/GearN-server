@@ -53,6 +53,8 @@ interface CloudScriptRequestPre {
     request: { [k: string]: any };
     // Stores the role value used by this contract.
     role: number;
+    // Stores the gameId value used by this contract.
+    gameId: string;
     // Stores the custom tags value used by this contract.
     customTags: { [k: string]: any };
     // Stores the operation request value used by this contract.
@@ -60,7 +62,7 @@ interface CloudScriptRequestPre {
         // Stores the operation code value used by this contract.
         operationCode: string;
         // Stores the request ID value used by this contract.
-        requestId: number;
+        requestId: string;
         // Stores the parameters value used by this contract.
         parameters: {};
     };
@@ -77,6 +79,8 @@ interface CloudScriptRequestPost {
     request: { [k: string]: any };
     // Stores the role value used by this contract.
     role: number;
+    // Stores the gameId value used by this contract.
+    gameId: string;
     // Stores the custom tags value used by this contract.
     customTags: { [k: string]: any };
     // Stores the operation request value used by this contract.
@@ -84,7 +88,7 @@ interface CloudScriptRequestPost {
         // Stores the operation code value used by this contract.
         operationCode: string;
         // Stores the request ID value used by this contract.
-        requestId: number;
+        requestId: string;
         // Stores the parameters value used by this contract.
         parameters: {};
     };
@@ -138,7 +142,7 @@ interface CloudScriptRequestSystemAuthenticate {
         // Stores the operation code value used by this contract.
         operationCode: string;
         // Stores the request ID value used by this contract.
-        requestId: number;
+        requestId: string;
         // Stores the parameters value used by this contract.
         parameters: {};
     };
@@ -811,6 +815,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
             request: request,
             customTags: operationRequest.getParameters()?.getGNHashtable(ParameterCode.CustomTags)?.toData() ?? null,
             role: role,
+            gameId: secretInfo.getGameId(),
         };
 
         cloudScriptWorker.send(cloudScriptRequest);
@@ -1100,6 +1105,7 @@ export class EventCallbackCloudScriptService implements IEventCallbackCloudScrip
             request: request,
             customTags: operationRequest.getParameters()?.getGNHashtable(ParameterCode.CustomTags)?.toData() ?? null,
             role: role,
+            gameId: secretInfo.getGameId(),
         };
 
         cloudScriptWorker.send(cloudScriptRequest);

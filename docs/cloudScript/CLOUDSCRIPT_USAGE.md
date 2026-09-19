@@ -491,6 +491,7 @@ const addResponse = await GNNetwork.cloudScript.admin.addFunctionAsync(
     addRequest,
     undefined, // overrideAuthToken
     secretKey, // overrideSecretKey
+    undefined, // overrideGameId; dùng gameId trong GNServerSettings
 );
 
 if (addResponse.hasReturnCodeError()) {

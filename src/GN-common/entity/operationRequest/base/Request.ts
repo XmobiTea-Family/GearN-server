@@ -9,7 +9,7 @@ export class Request {
     // Stores the role value used by this instance.
     private role: number;
     // Stores the request ID value used by this instance.
-    private requestId: number = -1;
+    private requestId: string = null;
     // Stores the auth info value used by this instance.
     private authInfo: AuthInfo = null;
     // Stores the secret info value used by this instance.
@@ -35,7 +35,7 @@ export class Request {
      * Sets the request ID.
      * @param requestId Provides the request ID value used by this operation.
      */
-    public setRequestId(requestId: number) {
+    public setRequestId(requestId: string) {
         this.requestId = requestId;
     }
 
@@ -99,7 +99,7 @@ export class Request {
      * Returns the request ID.
      * @returns Returns the request ID.
      */
-    public getRequestId(): number {
+    public getRequestId(): string {
         return this.requestId;
     }
 

@@ -139,6 +139,8 @@ flowchart LR
 
 This means account-level changes should usually start from `MasterPlayer`, while gameplay changes should usually start from `GamePlayer` or `CharacterPlayer`.
 
+The request's game context is resolved before domain dispatch from its `SecretInfo`. For HTTP requests using a global secret, the client can select that context with the `Game-Id` header (exposed as `overrideGameId` by the Unity SDK). This affects every per-game domain, not only `GamePlayer`.
+
 ### Ownership Layers
 
 - `Inventory` is owned by some other domain object.

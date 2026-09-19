@@ -734,6 +734,14 @@ export class ApiMiddleware {
         return next();
     }
 
+    public async getRequestId(req: express.Request, res: express.Response, next: Function) {
+        let rid: string = req.header(Commands.RequestRequestIdCmd);
+
+        req.rid = rid;
+
+        return next();
+    }
+
     /**
      * Resolves request auth state for HTTP, validates the active secret, and returns the final gate result.
      * @param req Provides the req value used by this operation.

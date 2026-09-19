@@ -427,7 +427,7 @@ export class SocketAppHandler {
         if (requestType == null || role == null) return null;
 
         let params = requestData.length > 3 ? (requestData[3] as {}) : {};
-        let requestId = requestData.length > 4 ? (requestData[4] as number) : -1;
+        let requestId = requestData.length > 4 ? (requestData[4] as string) : null;
 
         let request = new Request(operationCodeStr, requestType, role);
         request.setIP(socket.data.IPAddress);
@@ -495,7 +495,7 @@ export class SocketAppHandler {
 
         let finalData: {
             returnCode: number;
-            responseId: number;
+            responseId: string;
             parameters?: Record<string, unknown>;
             invalidRequestParameters?: (string | number)[][];
             debugMessage?: string;

@@ -25,7 +25,7 @@ export class OperationHelper {
         // Stores the debug message value used by this contract.
         debugMessage: string;
         // Stores the response ID value used by this contract.
-        responseId: number;
+        responseId: string;
     } {
         return {
             returnCode: operationResponse.getReturnCode(),
@@ -164,7 +164,7 @@ export class OperationHelper {
      * @param responseId Provides the response ID value used by this operation.
      * @returns Returns the operation result.
      */
-    public static newOperationResponse(operationCode: string, responseId: number): OperationResponse {
+    public static newOperationResponse(operationCode: string, responseId: string): OperationResponse {
         return new OperationResponse(operationCode, responseId);
     }
 
@@ -175,7 +175,7 @@ export class OperationHelper {
      * @param debugMessage Provides the debug message value used by this operation.
      * @returns Returns the operation result.
      */
-    public static newOperationResponseInvalid(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+    public static newOperationResponseInvalid(operationCode: string, responseId: string, debugMessage?: string): OperationResponse {
         // Stores the operation invalid value used in the current execution flow.
         let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
@@ -193,7 +193,7 @@ export class OperationHelper {
      * @param debugMessage Provides the debug message value used by this operation.
      * @returns Returns the operation result.
      */
-    public static newOperationResponseInvalidRequestParameters(operationCode: string, responseId: number, invalidMembers: InvalidMember[], debugMessage?: string): OperationResponse {
+    public static newOperationResponseInvalidRequestParameters(operationCode: string, responseId: string, invalidMembers: InvalidMember[], debugMessage?: string): OperationResponse {
         // Stores the operation invalid value used in the current execution flow.
         let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
@@ -212,7 +212,7 @@ export class OperationHelper {
      * @param debugMessage Provides the debug message value used by this operation.
      * @returns Returns the operation result.
      */
-    public static newOperationResponseInternalServerError(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+    public static newOperationResponseInternalServerError(operationCode: string, responseId: string, debugMessage?: string): OperationResponse {
         // Stores the operation invalid value used in the current execution flow.
         let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
@@ -229,7 +229,7 @@ export class OperationHelper {
      * @param debugMessage Provides the debug message value used by this operation.
      * @returns Returns the operation result.
      */
-    public static newOperationResponseNotAuthorized(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+    public static newOperationResponseNotAuthorized(operationCode: string, responseId: string, debugMessage?: string): OperationResponse {
         // Stores the operation invalid value used in the current execution flow.
         let operationInvalid = this.newOperationResponse(operationCode, responseId);
 
@@ -246,7 +246,7 @@ export class OperationHelper {
      * @param debugMessage Provides the debug message value used by this operation.
      * @returns Returns the operation result.
      */
-    public static newOperationResponseNotAllowError(operationCode: string, responseId: number, debugMessage?: string): OperationResponse {
+    public static newOperationResponseNotAllowError(operationCode: string, responseId: string, debugMessage?: string): OperationResponse {
         // Stores the operation invalid value used in the current execution flow.
         let operationInvalid = this.newOperationResponse(operationCode, responseId);
 

@@ -117,6 +117,8 @@ interface CloudScriptRequestPre {
     request: { [k: string]: any };
     // Stores the role value used by this contract.
     role: SecretRole;
+    // Stores the gameId value used by this contract.
+    gameId: string;
     // Stores the custom tags value used by this contract.
     customTags: { [k: string]: any };
     // Stores the operation request value used by this contract.
@@ -124,7 +126,7 @@ interface CloudScriptRequestPre {
         // Stores the operation code value used by this contract.
         operationCode: string;
         // Stores the request ID value used by this contract.
-        requestId: number;
+        requestId: string;
         // Stores the parameters value used by this contract.
         parameters: {};
     };
@@ -141,6 +143,8 @@ interface CloudScriptRequestPost {
     request: { [k: string]: any };
     // Stores the role value used by this contract.
     role: SecretRole;
+    // Stores the gameId value used by this contract.
+    gameId: string;
     // Stores the custom tags value used by this contract.
     customTags: { [k: string]: any };
     // Stores the operation request value used by this contract.
@@ -148,7 +152,7 @@ interface CloudScriptRequestPost {
         // Stores the operation code value used by this contract.
         operationCode: string;
         // Stores the request ID value used by this contract.
-        requestId: number;
+        requestId: string;
         // Stores the parameters value used by this contract.
         parameters: {};
     };
@@ -202,7 +206,7 @@ interface CloudScriptRequestSystemAuthenticate {
         // Stores the operation code value used by this contract.
         operationCode: string;
         // Stores the request ID value used by this contract.
-        requestId: number;
+        requestId: string;
         // Stores the parameters value used by this contract.
         parameters: {};
     };
@@ -283,6 +287,8 @@ interface FunctionRequestPre {
     request: { [k: string]: any };
     // Stores the role value used by this contract.
     role: SecretRole;
+    // Stores the gameId value used by this contract.
+    gameId: string;
     // Stores the custom tags value used by this contract.
     customTags: GNHashtable;
     // Stores the operation request value used by this contract.
@@ -296,6 +302,8 @@ interface FunctionRequestPost {
     request: { [k: string]: any };
     // Stores the role value used by this contract.
     role: SecretRole;
+    // Stores the gameId value used by this contract.
+    gameId: string;
     // Stores the custom tags value used by this contract.
     customTags: GNHashtable;
     // Stores the operation request value used by this contract.
@@ -446,6 +454,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
                 customTags: request.customTags == null ? null : GNHashtable.builder().addAll(request.customTags).build(),
                 request: request.request,
                 role: request.role,
+                gameId: request.gameId,
                 /**
                  * Executes the log workflow.
                  * @param log Provides the log value used by this operation.
@@ -479,6 +488,7 @@ process?.on("message", async (request: CloudScriptRequest) => {
                 customTags: request.customTags == null ? null : GNHashtable.builder().addAll(request.customTags).build(),
                 request: request.request,
                 role: request.role,
+                gameId: request.gameId,
                 /**
                  * Executes the log workflow.
                  * @param log Provides the log value used by this operation.
@@ -908,7 +918,7 @@ async function ___handlePreFunction(name: string, request: FunctionRequestPre): 
 
     try {
         // Stores the result value used in the current execution flow.
-        let result = await handler(request.request, request.role, request.customTags, request.operationRequest, request.log);
+        let result = await handler(request.request, request.role, request.gameId, request.customTags, request.operationRequest, request.log);
 
         if (result)
             answer.result = {
@@ -955,7 +965,7 @@ async function ___handlePostFunction(name: string, request: FunctionRequestPost)
 
     try {
         // Stores the result value used in the current execution flow.
-        let result = await handler(request.request, request.role, request.customTags, request.operationRequest, request.operationResponse, request.log);
+        let result = await handler(request.request, request.role, request.gameId, request.customTags, request.operationRequest, request.operationResponse, request.log);
 
         if (result) {
             answer.result = {
@@ -1013,10 +1023,10 @@ process.env.gnServerSettingsOptions = "";
 process.env.gnAuthToken = "";
 
 // Stores the pre handlers value used by this module.
-const preHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, log: (message: any) => void) => Promise<OperationResponse | null>> = {};
+const preHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, gameId: string, customTags: { [k: string]: any }, operationRequest: OperationRequest, log: (message: any) => void) => Promise<OperationResponse | null>> = {};
 
 // Stores the post handlers value used by this module.
-const postHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => Promise<OperationResponse>> = {};
+const postHandlers: Record<string, (request: { [k: string]: any }, role: SecretRole, gameId: string, customTags: { [k: string]: any }, operationRequest: OperationRequest, operationResponse: OperationResponse, log: (message: any) => void) => Promise<OperationResponse>> = {};
 
 // Stores the system handlers value used by this module.
 const systemHandlers: Record<string, (log: (message: any) => void) => Promise<void>> = {};
